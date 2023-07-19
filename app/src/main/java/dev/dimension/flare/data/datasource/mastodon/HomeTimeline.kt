@@ -26,7 +26,7 @@ import java.io.IOException
 
 
 @OptIn(ExperimentalPagingApi::class)
-class HomeTimelineRemoteMediator(
+internal class HomeTimelineRemoteMediator(
     private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
@@ -78,7 +78,7 @@ class HomeTimelineRemoteMediator(
 
 @OptIn(ExperimentalPagingApi::class)
 @Composable
-fun homeTimelineDataSource(
+internal fun homeTimelineDataSource(
     account: UiAccount.Mastodon,
     pageSize: Int = 20,
     pagingKey: String = "home",

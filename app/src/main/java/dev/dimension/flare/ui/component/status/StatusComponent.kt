@@ -33,17 +33,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import kotlin.math.ceil
 import kotlin.math.sqrt
 
 @Composable
-fun MastodonStatusComponent(
+internal fun MastodonStatusComponent(
     data: UiStatus.Mastodon,
     state: MastodonStatusState,
     event: StatusEvent,
@@ -82,7 +84,7 @@ data class MastodonStatusState(
 )
 
 @Composable
-fun StatusCardComponent(
+private fun StatusCardComponent(
     data: UiStatus.Mastodon,
     event: StatusEvent,
     modifier: Modifier = Modifier,
@@ -108,7 +110,7 @@ fun StatusCardComponent(
 
 
 @Composable
-fun StatusFooterComponent(
+private fun StatusFooterComponent(
     data: UiStatus,
     event: StatusEvent,
     modifier: Modifier = Modifier,
@@ -162,7 +164,7 @@ fun StatusFooterComponent(
 }
 
 @Composable
-fun StatusMediaComponent(
+private fun StatusMediaComponent(
     data: UiStatus.Mastodon,
     event: StatusEvent,
     modifier: Modifier = Modifier,
@@ -234,6 +236,7 @@ fun MediaItem(
                 model = media.url,
                 contentDescription = media.description,
                 placeholder = rememberVectorPainter(image = Icons.TwoTone.Image),
+                contentScale = ContentScale.Crop,
                 modifier = modifier,
             )
         }
@@ -243,6 +246,7 @@ fun MediaItem(
                 model = media.thumbnailUrl,
                 contentDescription = media.description,
                 placeholder = rememberVectorPainter(image = Icons.TwoTone.Image),
+                contentScale = ContentScale.Crop,
                 modifier = modifier,
             )
         }
@@ -253,7 +257,7 @@ fun MediaItem(
 }
 
 @Composable
-fun StatusContentComponent(
+private fun StatusContentComponent(
     data: UiStatus.Mastodon,
     state: MastodonStatusState,
     event: StatusEvent,
@@ -278,8 +282,9 @@ fun StatusContentComponent(
         }
         AnimatedVisibility(visible = state.expanded || data.contentWarningText.isNullOrEmpty()) {
             Column {
-                Text(
-                    text = data.content,
+                HtmlText(
+                    element = data.contentToken,
+                    layoutDirection = data.contentDirection,
                 )
                 if (data.poll != null) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -294,7 +299,7 @@ fun StatusContentComponent(
 }
 
 @Composable
-fun StatusPollComponent(
+private fun StatusPollComponent(
     data: UiStatus.Mastodon.Poll,
     event: StatusEvent,
     modifier: Modifier = Modifier,
@@ -317,13 +322,13 @@ fun StatusPollComponent(
             )
         }
         Text(
-            text = data.expiresAt.toString(),
+            text = data.humanizedExpiresAt,
         )
     }
 }
 
 @Composable
-fun StatusHeaderComponent(
+private fun StatusHeaderComponent(
     data: UiStatus.Mastodon,
     event: StatusEvent,
     modifier: Modifier = Modifier,
@@ -344,15 +349,16 @@ fun StatusHeaderComponent(
             modifier = Modifier
                 .weight(1f),
         ) {
-            Text(
-                text = data.user.name,
+            HtmlText(
+                element = data.user.nameElement,
+                layoutDirection = data.user.contentDirection,
                 modifier = Modifier
                     .clickable {
                         event.onUserClick(data.user.userKey)
                     }
             )
             Text(
-                text = data.user.handle,
+                text = data.user.displayHandle,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .clickable {
@@ -366,13 +372,13 @@ fun StatusHeaderComponent(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = data.createdAt.toString(),
+            text = data.humanizedTime,
         )
     }
 }
 
 @Composable
-fun VisibilityIcon(
+private fun VisibilityIcon(
     visibility: UiStatus.Mastodon.Visibility,
     modifier: Modifier = Modifier,
 ) {
@@ -412,6 +418,7 @@ fun AvatarComponent(
         model = data,
         contentDescription = null,
         placeholder = rememberVectorPainter(image = Icons.Default.AccountCircle),
+        contentScale = ContentScale.Crop,
         modifier = modifier
             .size(44.dp)
             .clip(CircleShape)

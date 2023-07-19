@@ -1,10 +1,12 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
 import dev.dimension.flare.data.network.mastodon.api.model.MediaType
+import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
@@ -16,14 +18,17 @@ import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
+import org.jsoup.nodes.Node
 
-fun DbPagingTimelineWithStatus.toUi(): UiStatus {
+internal fun DbPagingTimelineWithStatus.toUi(): UiStatus {
     return when (val status = status.status.data.content) {
         is StatusContent.Mastodon -> status.data.toUi()
     }
 }
 
-fun Status.toUi(): UiStatus.Mastodon {
+internal fun Status.toUi(): UiStatus.Mastodon {
     requireNotNull(account) { "account is null" }
     val user = account.toUi()
     return UiStatus.Mastodon(
@@ -32,21 +37,23 @@ fun Status.toUi(): UiStatus.Mastodon {
             host = user.userKey.host,
         ),
         sensitive = sensitive ?: false,
-        poll = UiStatus.Mastodon.Poll(
-            id = poll?.id ?: "",
-            options = poll?.options?.map { option ->
-                UiStatus.Mastodon.PollOption(
-                    title = option.title.orEmpty(),
-                    votesCount = option.votesCount ?: 0,
-                    percentage = option.votesCount?.toFloat()?.div(poll.votesCount ?: 1) ?: 0f,
-                )
-            }?.toPersistentList() ?: persistentListOf(),
-            expiresAt = poll?.expiresAt ?: Instant.DISTANT_PAST,
-            expired = poll?.expired ?: false,
-            multiple = poll?.multiple ?: false,
-            voted = poll?.voted ?: false,
-            ownVotes = poll?.ownVotes?.toPersistentList() ?: persistentListOf(),
-        ),
+        poll = poll?.let {
+            UiStatus.Mastodon.Poll(
+                id = poll.id ?: "",
+                options = poll.options?.map { option ->
+                    UiStatus.Mastodon.PollOption(
+                        title = option.title.orEmpty(),
+                        votesCount = option.votesCount ?: 0,
+                        percentage = option.votesCount?.toFloat()?.div(poll.votesCount ?: 1) ?: 0f,
+                    )
+                }?.toPersistentList() ?: persistentListOf(),
+                expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
+                expired = poll.expired ?: false,
+                multiple = poll.multiple ?: false,
+                voted = poll.voted ?: false,
+                ownVotes = poll.ownVotes?.toPersistentList() ?: persistentListOf(),
+            )
+        },
         card = card?.url?.let { url ->
             UiCard(
                 url = url,
@@ -63,6 +70,7 @@ fun Status.toUi(): UiStatus.Mastodon {
         createdAt = createdAt
             ?: throw IllegalArgumentException("mastodon Status.createdAt should not be null"),
         content = content.orEmpty(),
+        contentToken = parseContent(this),
         contentWarningText = spoilerText,
         user = user,
         matrices = UiStatus.Mastodon.Matrices(
@@ -89,6 +97,57 @@ fun Status.toUi(): UiStatus.Mastodon {
         ),
     )
 }
+
+private fun parseContent(status: Status): Element {
+    val emoji = status.emojis.orEmpty()
+    val mentions = status.mentions.orEmpty()
+//    val tags = status.tags.orEmpty()
+    var content = status.content.orEmpty()
+    emoji.forEach {
+        content = content.replace(
+            ":${it.shortcode}:",
+            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>"
+        )
+    }
+    val body = Jsoup.parse(content).body()
+    body.childNodes().forEach {
+        replaceMentionAndHashtag(mentions, it)
+    }
+    return body
+}
+
+private fun replaceMentionAndHashtag(mentions: List<Mention>, node: Node) {
+    if (mentions.any { it.url == node.attr("href") }) {
+        val mention = mentions.firstOrNull { it.url == node.attr("href") }
+        val id = mention?.id
+        val acct = mention?.acct
+        val url = mention?.url
+        if (id != null && acct != null) {
+            val host = if (acct.contains("@")) {
+                acct.substring(acct.indexOf("@") + 1)
+            } else {
+                requireNotNull(url) { "mastodon Account.url should not be null" }
+                Url(url).host
+            }
+            node.attr(
+                "href",
+                AppDeepLink.User(MicroBlogKey(id, host))
+            )
+        }
+    } else if (node is Element && node.normalName() == "a" && node.hasText() && node.text()
+            .startsWith('#')
+    ) {
+        node.attr(
+            "href",
+            AppDeepLink.Mastodon.Hashtag(node.text().trimStart('#'))
+        )
+    } else if (node.hasAttr("class") && node.attr("class") == "invisible") {
+        node.remove()
+    } else {
+        node.childNodes().forEach { replaceMentionAndHashtag(mentions, it) }
+    }
+}
+
 
 private fun Attachment.toUi(): UiMedia? {
     return when (type) {
@@ -138,5 +197,18 @@ private fun Account.toUi(): UiUser.Mastodon {
         name = displayName.orEmpty(),
         handle = username.orEmpty(),
         avatarUrl = avatar.orEmpty(),
+        nameElement = parseContent(this)
     )
+}
+
+fun parseContent(status: Account): Element {
+    val emoji = status.emojis.orEmpty()
+    var content = status.displayName.orEmpty()
+    emoji.forEach {
+        content = content.replace(
+            ":${it.shortcode}:",
+            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>"
+        )
+    }
+    return Jsoup.parse(content).body()
 }

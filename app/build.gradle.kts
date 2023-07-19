@@ -72,11 +72,12 @@ dependencies {
     ksp(libs.koject.processor.app)
     implementation(libs.ktorfit.lib)
     ksp(libs.ktorfit.ksp)
-    implementation(libs.coil.compose)
+    implementation(libs.bundles.coil)
     implementation(libs.bundles.ktor)
     implementation(libs.twitter.parser)
     implementation(libs.material.icons.extended)
     implementation(libs.molecule.runtime)
+    implementation(libs.jsoup)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

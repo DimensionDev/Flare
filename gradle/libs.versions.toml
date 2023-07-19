@@ -21,6 +21,7 @@ ktorfit = "1.4.3"
 ktor = "2.3.2"
 twitter-parser = "0.2.9"
 molecule = "0.11.0"
+jsoup = "1.16.1"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -58,6 +59,8 @@ koject-android-viewmodel = { group = "com.moriatsushi.koject", name = "koject-an
 koject-compose-core = { group = "com.moriatsushi.koject", name = "koject-compose-core", version.ref = "koject" }
 
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
+apng = "com.github.penfeizhou.android.animation:apng:2.25.0"
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
@@ -67,6 +70,7 @@ ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serializatio
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 
 twitter-parser = { group = "moe.tlaster", name = "twitter-parser", version.ref = "twitter-parser" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
 molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", version.ref = "molecule" }
 
@@ -77,6 +81,7 @@ navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json"]
 koject = ["koject-core", "koject-android-core", "koject-android-activity", "koject-android-fragment", "koject-android-viewmodel", "koject-compose-core"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
+coil = ["coil-compose", "coil-gif", "apng"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

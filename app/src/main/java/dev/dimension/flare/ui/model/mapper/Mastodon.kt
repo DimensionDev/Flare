@@ -235,11 +235,31 @@ private fun Account.toUi(): UiUser.Mastodon {
         name = displayName.orEmpty(),
         handle = username.orEmpty(),
         avatarUrl = avatar.orEmpty(),
-        nameElement = parseContent(this)
+        nameElement = parseContent(this),
+        bannerUrl = header,
+        description = note,
+        descriptionElement = parseNote(this),
+        matrices = UiUser.Mastodon.Matrices(
+            fansCount = followersCount ?: 0,
+            followsCount = followingCount ?: 0,
+            statusesCount = statusesCount ?: 0,
+        ),
     )
 }
 
-fun parseContent(status: Account): Element {
+private fun parseNote(account: Account): Element? {
+    val emoji = account.emojis.orEmpty()
+    var content = account.note.orEmpty()
+    emoji.forEach {
+        content = content.replace(
+            ":${it.shortcode}:",
+            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>"
+        )
+    }
+    return Jsoup.parse(content).body()
+}
+
+private fun parseContent(status: Account): Element {
     val emoji = status.emojis.orEmpty()
     var content = status.displayName.orEmpty().ifEmpty { status.username.orEmpty() }
     emoji.forEach {

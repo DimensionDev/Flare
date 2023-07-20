@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.BrowserLoginDeepLinksChannel
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
@@ -26,6 +27,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.launch
+
+@Composable
+@Preview(showBackground = true)
+fun LoginScreenPreview() {
+    LoginScreen(toHome = {})
+}
 
 @Composable
 internal fun LoginScreen(

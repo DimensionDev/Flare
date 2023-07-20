@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -63,9 +64,18 @@ private val items = listOf(
     Screen.Notification,
 )
 
+@Composable
+@Preview(showBackground = true)
+fun HomeScreenPreview() {
+    HomeScreen(toCompose = {})
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    toCompose: () -> Unit,
+) {
     val state by producePresenter {
         HomePresenter()
     }
@@ -87,7 +97,7 @@ fun HomeScreen() {
                 ) {
                     FloatingActionButton(
                         onClick = {
-//                            navController.navigate("Compose")
+                            toCompose.invoke()
                         },
                     ) {
                         Icon(

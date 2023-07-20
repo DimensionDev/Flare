@@ -16,13 +16,31 @@ sealed interface UiUser {
         override val name: String,
         override val handle: String,
         override val avatarUrl: String,
+        val bannerUrl: String?,
         val nameElement: Element,
+        val description: String?,
+        val descriptionElement: Element?,
+        val matrices: Matrices,
     ) : UiUser {
         val displayHandle = "@$handle@${userKey.host}"
-        val contentDirection = if (Bidi(name, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
+        val nameDirection = if (Bidi(name, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
             LayoutDirection.Ltr
         } else {
             LayoutDirection.Rtl
         }
+
+        val descriptionDirection = description?.let {
+            if (Bidi(it, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
+                LayoutDirection.Ltr
+            } else {
+                LayoutDirection.Rtl
+            }
+        }
+
+        data class Matrices(
+            val fansCount: Long,
+            val followsCount: Long,
+            val statusesCount: Long,
+        )
     }
 }

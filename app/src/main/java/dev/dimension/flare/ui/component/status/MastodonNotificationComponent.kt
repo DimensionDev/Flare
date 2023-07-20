@@ -178,7 +178,7 @@ private fun MastodonFollowRequestNotificationComponent(
             ) {
                 HtmlText(
                     element = data.user.nameElement,
-                    layoutDirection = data.user.contentDirection,
+                    layoutDirection = data.user.nameDirection,
                     modifier = Modifier
                         .clickable {
                             event.onUserClick(data.user.userKey)
@@ -310,7 +310,7 @@ private fun MastodonFollowNotificationComponent(
             ) {
                 HtmlText(
                     element = data.user.nameElement,
-                    layoutDirection = data.user.contentDirection,
+                    layoutDirection = data.user.nameDirection,
                     modifier = Modifier
                         .clickable {
                             event.onUserClick(data.user.userKey)

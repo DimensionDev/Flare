@@ -4,10 +4,12 @@ package dev.dimension.flare.ui.component
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -36,7 +38,7 @@ import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
-import coil.compose.AsyncImage
+import androidx.compose.ui.unit.dp
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
@@ -66,24 +68,26 @@ fun HtmlText(
     CompositionLocalProvider(
         LocalLayoutDirection provides layoutDirection
     ) {
-        RenderContent(
-            modifier = modifier,
-            element = element,
-            maxLines = maxLines,
-            textStyle = textStyle,
-            linkStyle = linkStyle,
-            color = color,
-            fontSize = fontSize,
-            fontStyle = fontStyle,
-            fontWeight = fontWeight,
-            fontFamily = fontFamily,
-            letterSpacing = letterSpacing,
-            textDecoration = textDecoration,
-            textAlign = textAlign,
-            lineHeight = lineHeight,
-            overflow = overflow,
-            softWrap = softWrap,
-        )
+        ProvideTextStyle(value = textStyle) {
+            RenderContent(
+                modifier = modifier,
+                element = element,
+                maxLines = maxLines,
+                textStyle = textStyle,
+                linkStyle = linkStyle,
+                color = color,
+                fontSize = fontSize,
+                fontStyle = fontStyle,
+                fontWeight = fontWeight,
+                fontFamily = fontFamily,
+                letterSpacing = letterSpacing,
+                textDecoration = textDecoration,
+                textAlign = textAlign,
+                lineHeight = lineHeight,
+                overflow = overflow,
+                softWrap = softWrap,
+            )
+        }
     }
 }
 
@@ -161,9 +165,11 @@ private fun RenderContent(
                         placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
                     ),
                 ) { target ->
-                    AsyncImage(
+                    NetworkImage(
                         model = target,
                         contentDescription = null,
+                        modifier = Modifier
+                            .size(LocalTextStyle.current.fontSize.value.dp)
                     )
                 },
             ),

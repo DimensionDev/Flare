@@ -3,16 +3,18 @@ package dev.dimension.flare.ui.component.status
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
@@ -21,9 +23,8 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.material.icons.twotone.Image
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,18 +32,67 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import com.google.accompanist.placeholder.material3.placeholder
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
-import kotlin.math.ceil
-import kotlin.math.sqrt
+import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.theme.MediumAlpha
+
+@Composable
+internal fun StatusPlaceholder(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .placeholder(true)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column {
+                Text(
+                    text = "Placeholder",
+                    modifier = Modifier
+                        .placeholder(true)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "username@Placeholder",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .alpha(MediumAlpha)
+                        .placeholder(true)
+
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget ultricies ultrices, nisl nisl aliquet nisl, nec aliquam nisl nisl nec.",
+            modifier = Modifier
+                .placeholder(true)
+        )
+    }
+}
 
 @Composable
 internal fun MastodonStatusComponent(
@@ -55,6 +105,14 @@ internal fun MastodonStatusComponent(
     Column(
         modifier = modifier,
     ) {
+        if (data.reblogStatus != null) {
+            StatusRetweetHeaderComponent(
+                icon = Icons.Default.SyncAlt,
+                user = data.user,
+                text = "retweeted",
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
         StatusHeaderComponent(
             data = actualData,
             event = event,
@@ -79,6 +137,42 @@ internal fun MastodonStatusComponent(
     }
 }
 
+@Composable
+internal fun StatusRetweetHeaderComponent(
+    icon: ImageVector,
+    user: UiUser.Mastodon?,
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .alpha(MediumAlpha),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = rememberVectorPainter(image = icon),
+            contentDescription = null,
+            modifier = Modifier
+                .size(16.dp),
+        )
+        if (user != null) {
+            Spacer(modifier = Modifier.width(8.dp))
+            HtmlText(
+                element = user.nameElement,
+                layoutDirection = LocalLayoutDirection.current,
+                textStyle = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.alignByBaseline()
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.alignByBaseline()
+        )
+    }
+}
+
 data class MastodonStatusState(
     val expanded: Boolean = false,
 )
@@ -89,20 +183,39 @@ private fun StatusCardComponent(
     event: StatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     if (data.card != null) {
         Column(
-            modifier = modifier,
+            modifier = modifier
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            if (data.card.media != null) {
-                MediaItem(
-                    media = data.card.media,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            Text(text = data.card.title)
-            if (data.card.description != null) {
-                Text(text = data.card.description)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        uriHandler.openUri(data.card.url)
+                    },
+            ) {
+                if (data.card.media != null) {
+                    MediaItem(
+                        media = data.card.media,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                ) {
+                    Text(text = data.card.title)
+                    if (data.card.description != null) {
+                        Text(
+                            text = data.card.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier
+                                .alpha(MediumAlpha)
+                        )
+                    }
+                }
             }
         }
     }
@@ -111,53 +224,80 @@ private fun StatusCardComponent(
 
 @Composable
 private fun StatusFooterComponent(
-    data: UiStatus,
+    data: UiStatus.Mastodon,
     event: StatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .alpha(MediumAlpha)
+            .padding(vertical = 4.dp)
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        IconButton(
-            onClick = {
-                event.onReplyClick(data.statusKey)
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Default.Reply,
-                contentDescription = null,
-            )
-        }
-        IconButton(
-            onClick = {
-                event.onReblogClick(data.statusKey)
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Default.SyncAlt,
-                contentDescription = null,
-            )
-        }
-        IconButton(
-            onClick = {
-                event.onLikeClick(data.statusKey)
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = null,
-            )
-        }
-        IconButton(
-            onClick = {
-                event.onMoreClick(data.statusKey)
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoreHoriz,
-                contentDescription = null,
+        StatusActionButton(
+            icon = Icons.Default.Reply,
+            text = data.matrices.humanizedReplyCount,
+            modifier = Modifier
+                .weight(1f)
+                .clickable {
+                    event.onReplyClick(data.statusKey)
+                }
+        )
+        StatusActionButton(
+            icon = Icons.Default.SyncAlt,
+            text = data.matrices.humanizedReblogCount,
+            modifier = Modifier
+                .weight(1f)
+                .clickable {
+                    event.onReblogClick(data.statusKey)
+                }
+        )
+        StatusActionButton(
+            icon = Icons.Default.Favorite,
+            text = data.matrices.humanizedFavouriteCount,
+            modifier = Modifier
+                .weight(1f)
+                .clickable {
+                    event.onLikeClick(data.statusKey)
+                }
+        )
+        Icon(
+            imageVector = Icons.Default.MoreHoriz,
+            contentDescription = null,
+            modifier = Modifier
+                .padding(4.dp)
+                .size(16.dp)
+                .clickable {
+                    event.onMoreClick(data.statusKey)
+                },
+        )
+    }
+}
+
+@Composable
+private fun StatusActionButton(
+    icon: ImageVector,
+    text: String?,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+) {
+    Row(
+        modifier = modifier
+            .padding(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            modifier = Modifier
+                .size(16.dp),
+        )
+        if (!text.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodySmall,
             )
         }
     }
@@ -174,50 +314,18 @@ private fun StatusMediaComponent(
             modifier = modifier
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Layout(
-                modifier = Modifier,
+            AdaptiveGrid(
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium),
                 content = {
                     data.media.forEach { media ->
                         MediaItem(
                             media = media,
                             modifier = Modifier
-                                .size(100.dp)
                                 .clickable {
                                     event.onMediaClick(media)
                                 },
                         )
-                    }
-                },
-                measurePolicy = { measurables, constraints ->
-                    val columns = ceil(sqrt(measurables.size.toDouble())).toInt()
-                    val rows = ceil(measurables.size.toDouble() / columns)
-                    val itemSize = constraints.maxWidth / columns
-                    val itemConstraints = constraints.copy(
-                        minWidth = itemSize,
-                        maxWidth = itemSize,
-                        minHeight = itemSize,
-                        maxHeight = itemSize,
-                    )
-                    val placeables = measurables.map {
-                        it.measure(itemConstraints)
-                    }
-                    layout(
-                        width = constraints.maxWidth,
-                        height = (rows * itemSize).toInt(),
-                    ) {
-                        var row = 0
-                        var column = 0
-                        placeables.forEach { placeable ->
-                            placeable.place(
-                                x = column * itemSize,
-                                y = row * itemSize,
-                            )
-                            column++
-                            if (column == columns) {
-                                column = 0
-                                row++
-                            }
-                        }
                     }
                 }
             )
@@ -232,22 +340,18 @@ fun MediaItem(
 ) {
     when (media) {
         is UiMedia.Image -> {
-            AsyncImage(
+            NetworkImage(
                 model = media.url,
                 contentDescription = media.description,
-                placeholder = rememberVectorPainter(image = Icons.TwoTone.Image),
-                contentScale = ContentScale.Crop,
-                modifier = modifier,
+                modifier = modifier.aspectRatio(media.aspectRatio),
             )
         }
 
         is UiMedia.Video -> {
-            AsyncImage(
+            NetworkImage(
                 model = media.thumbnailUrl,
                 contentDescription = media.description,
-                placeholder = rememberVectorPainter(image = Icons.TwoTone.Image),
-                contentScale = ContentScale.Crop,
-                modifier = modifier,
+                modifier = modifier.aspectRatio(media.aspectRatio),
             )
         }
 
@@ -282,10 +386,12 @@ private fun StatusContentComponent(
         }
         AnimatedVisibility(visible = state.expanded || data.contentWarningText.isNullOrEmpty()) {
             Column {
-                HtmlText(
-                    element = data.contentToken,
-                    layoutDirection = data.contentDirection,
-                )
+                if (data.content.isNotEmpty() && data.content.isNotBlank()) {
+                    HtmlText(
+                        element = data.contentToken,
+                        layoutDirection = data.contentDirection,
+                    )
+                }
                 if (data.poll != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusPollComponent(
@@ -306,20 +412,33 @@ private fun StatusPollComponent(
 ) {
     Column(
         modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         data.options.forEach { option ->
-            Row {
-                Text(
-                    text = option.title,
-                )
-                Text(
-                    text = option.votesCount.toString(),
+            Column {
+                Row {
+                    Box {
+                        Text(
+                            text = option.humanizedPercentage,
+                        )
+                        Text(
+                            text = "100%",
+                            modifier = Modifier.alpha(0f),
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = option.title,
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                LinearProgressIndicator(
+                    progress = option.percentage,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(CircleShape)
                 )
             }
-            LinearProgressIndicator(
-                progress = option.percentage,
-                modifier = Modifier.fillMaxWidth(),
-            )
         }
         Text(
             text = data.humanizedExpiresAt,
@@ -361,6 +480,7 @@ private fun StatusHeaderComponent(
                 text = data.user.displayHandle,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
+                    .alpha(MediumAlpha)
                     .clickable {
                         event.onUserClick(data.user.userKey)
                     }
@@ -368,11 +488,16 @@ private fun StatusHeaderComponent(
         }
         VisibilityIcon(
             visibility = data.visibility,
-            modifier = Modifier.size(14.dp)
+            modifier = Modifier
+                .size(14.dp)
+                .alpha(MediumAlpha)
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = data.humanizedTime,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+                .alpha(MediumAlpha)
         )
     }
 }
@@ -414,11 +539,9 @@ fun AvatarComponent(
     data: String,
     modifier: Modifier = Modifier,
 ) {
-    AsyncImage(
+    NetworkImage(
         model = data,
         contentDescription = null,
-        placeholder = rememberVectorPainter(image = Icons.Default.AccountCircle),
-        contentScale = ContentScale.Crop,
         modifier = modifier
             .size(44.dp)
             .clip(CircleShape)
@@ -436,4 +559,36 @@ interface StatusEvent {
     fun onMediaClick(media: UiMedia)
     fun onShowMoreClick(statusKey: MicroBlogKey)
     fun onMoreClick(statusKey: MicroBlogKey)
+}
+
+object EmptyStatusEvent : StatusEvent {
+    override fun onUserClick(userKey: MicroBlogKey) {
+    }
+
+    override fun onStatusClick(statusKey: MicroBlogKey) {
+    }
+
+    override fun onStatusLongClick(statusKey: MicroBlogKey) {
+    }
+
+    override fun onReplyClick(statusKey: MicroBlogKey) {
+    }
+
+    override fun onReblogClick(statusKey: MicroBlogKey) {
+    }
+
+    override fun onLikeClick(statusKey: MicroBlogKey) {
+    }
+
+    override fun onBookmarkClick(statusKey: MicroBlogKey) {
+    }
+
+    override fun onMediaClick(media: UiMedia) {
+    }
+
+    override fun onShowMoreClick(statusKey: MicroBlogKey) {
+    }
+
+    override fun onMoreClick(statusKey: MicroBlogKey) {
+    }
 }

@@ -2,11 +2,14 @@ package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
 import dev.dimension.flare.data.network.mastodon.api.model.MediaType
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
+import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
@@ -25,6 +28,28 @@ import org.jsoup.nodes.Node
 internal fun DbPagingTimelineWithStatus.toUi(): UiStatus {
     return when (val status = status.status.data.content) {
         is StatusContent.Mastodon -> status.data.toUi()
+        is StatusContent.MastodonNotification -> status.data.toUi()
+    }
+}
+
+private fun Notification.toUi(): UiStatus {
+    requireNotNull(account) { "account is null" }
+    val user = account.toUi()
+    return UiStatus.MastodonNotification(
+        statusKey = MicroBlogKey(
+            id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
+            host = user.userKey.host,
+        ),
+        user = user,
+        createdAt = createdAt ?: Instant.DISTANT_PAST,
+        status = status?.toUi(),
+        type = type ?: throw IllegalArgumentException("mastodon Notification.type should not be null"),
+    )
+}
+
+internal fun DbUser.toUi(): UiUser {
+    return when (val user = content) {
+        is UserContent.Mastodon -> user.data.toUi()
     }
 }
 
@@ -44,7 +69,10 @@ internal fun Status.toUi(): UiStatus.Mastodon {
                     UiStatus.Mastodon.PollOption(
                         title = option.title.orEmpty(),
                         votesCount = option.votesCount ?: 0,
-                        percentage = option.votesCount?.toFloat()?.div(poll.votesCount ?: 1) ?: 0f,
+                        percentage = option.votesCount?.toFloat()?.div(
+                            if (poll.multiple == true) poll.votersCount ?: 1 else poll.votesCount
+                                ?: 1
+                        )?.takeUnless { it.isNaN() } ?: 0f,
                     )
                 }?.toPersistentList() ?: persistentListOf(),
                 expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
@@ -59,12 +87,16 @@ internal fun Status.toUi(): UiStatus.Mastodon {
                 url = url,
                 title = card.title.orEmpty(),
                 description = card.description?.takeIf { it.isNotEmpty() && it.isNotBlank() },
-                media = UiMedia.Image(
-                    url = card.image.orEmpty(),
-                    previewUrl = card.image.orEmpty(),
-                    description = card.description,
-                    aspectRatio = card.width?.toFloat()?.div(card.height ?: 1) ?: 1f,
-                ),
+                media = card.image?.let {
+                    UiMedia.Image(
+                        url = card.image,
+                        previewUrl = card.image,
+                        description = card.description,
+                        aspectRatio = card.width?.toFloat()?.div(card.height ?: 1)
+                            ?.coerceAtLeast(0f)
+                            ?.takeUnless { it.isNaN() } ?: 1f,
+                    )
+                },
             )
         },
         createdAt = createdAt
@@ -155,21 +187,27 @@ private fun Attachment.toUi(): UiMedia? {
             url = url.orEmpty(),
             previewUrl = previewURL.orEmpty(),
             description = description,
-            aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1) ?: 1f,
+            aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
+                ?.coerceAtLeast(0f)
+                ?.takeUnless { it.isNaN() } ?: 1f,
         )
 
         MediaType.gifv -> UiMedia.Gif(
             url = url.orEmpty(),
             previewUrl = previewURL.orEmpty(),
             description = description,
-            aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1) ?: 1f,
+            aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
+                ?.coerceAtLeast(0f)
+                ?.takeUnless { it.isNaN() } ?: 1f,
         )
 
         MediaType.video -> UiMedia.Video(
             url = url.orEmpty(),
             thumbnailUrl = previewURL.orEmpty(),
             description = description,
-            aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1) ?: 1f,
+            aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
+                ?.coerceAtLeast(0f)
+                ?.takeUnless { it.isNaN() } ?: 1f,
         )
 
         MediaType.audio -> UiMedia.Audio(
@@ -203,7 +241,7 @@ private fun Account.toUi(): UiUser.Mastodon {
 
 fun parseContent(status: Account): Element {
     val emoji = status.emojis.orEmpty()
-    var content = status.displayName.orEmpty()
+    var content = status.displayName.orEmpty().ifEmpty { status.username.orEmpty() }
     emoji.forEach {
         content = content.replace(
             ":${it.shortcode}:",

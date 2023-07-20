@@ -4,6 +4,7 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -26,6 +27,10 @@ sealed interface StatusContent {
     @Serializable
     @SerialName("mastodon")
     data class Mastodon(val data: Status) : StatusContent
+
+    @Serializable
+    @SerialName("mastodon-notification")
+    data class MastodonNotification(val data: Notification) : StatusContent
 }
 
 data class DbStatusWithUser(

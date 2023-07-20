@@ -10,7 +10,9 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
+import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -38,6 +40,92 @@ suspend fun save(
         }
         pagingTimelineDao().insertAll(data.map { it.timeline })
     }
+}
+
+context(CacheDatabase, List<Notification>)
+suspend fun saveNotification(
+    accountKey: MicroBlogKey,
+    pagingKey: String,
+) {
+    val data = toDb(accountKey, pagingKey)
+    withTransaction {
+        (data.map { it.status.status.user } + data.flatMap { it.status.references }
+            .map { it.status.user }).let {
+            userDao().insertAll(it)
+        }
+        (data.map { it.status.status.data } + data.flatMap { it.status.references }
+            .map { it.status.data }).let {
+            statusDao().insertAll(it)
+        }
+        data.flatMap { it.status.references }.map { it.reference }.let {
+            statusReferenceDao().insertAll(it)
+        }
+        pagingTimelineDao().insertAll(data.map { it.timeline })
+    }
+}
+
+fun List<Notification>.toDb(
+    accountKey: MicroBlogKey,
+    pagingKey: String,
+): List<DbPagingTimelineWithStatus> {
+    return this.map {
+        it.toDbPagingTimeline(accountKey, pagingKey)
+    }
+}
+
+private fun Notification.toDbPagingTimeline(
+    accountKey: MicroBlogKey,
+    pagingKey: String
+): DbPagingTimelineWithStatus {
+    val status = this.toDbStatusWithReference()
+    val user = this.account?.toDbUser() ?: throw IllegalStateException("account is null")
+    val sortId = this.createdAt?.toEpochMilliseconds() ?: 0
+    return DbPagingTimelineWithStatus(
+        timeline = DbPagingTimeline(
+            _id = UUID.randomUUID().toString(),
+            accountKey = accountKey,
+            statusKey = MicroBlogKey(
+                this.id ?: throw IllegalStateException("id is null"),
+                user.userKey.host,
+            ),
+            pagingKey = pagingKey,
+            sortId = sortId
+        ),
+        status = status,
+    )
+}
+
+private fun Notification.toDbStatusWithReference(): DbStatusWithReference {
+    val status = this.toDbStatusWithUser()
+    val retweet = this.status?.toDbStatusWithUser()
+    return DbStatusWithReference(
+        status = status,
+        references = listOfNotNull(
+            retweet?.toDbStatusReference(status.data.statusKey, ReferenceType.MastodonNotification),
+        ),
+    )
+}
+
+private fun Notification.toDbStatusWithUser(): DbStatusWithUser {
+    val user = this.account?.toDbUser() ?: throw IllegalStateException("account is null")
+    val status = this.toDbStatus()
+    return DbStatusWithUser(
+        data = status,
+        user = user,
+    )
+}
+
+private fun Notification.toDbStatus(): DbStatus {
+    val user = this.account?.toDbUser() ?: throw IllegalStateException("account is null")
+    return DbStatus(
+        statusKey = MicroBlogKey(
+            this.id ?: throw IllegalStateException("id is null"),
+            user.userKey.host,
+        ),
+        platformType = PlatformType.Mastodon,
+        userKey = user.userKey,
+        content = StatusContent.MastodonNotification(this),
+    )
 }
 
 fun List<Status>.toDbPagingTimeline(

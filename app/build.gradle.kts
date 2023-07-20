@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.material.icons.extended)
     implementation(libs.molecule.runtime)
     implementation(libs.jsoup)
+    implementation(libs.bundles.accompanist)
+    implementation(libs.store)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

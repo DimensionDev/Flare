@@ -22,6 +22,9 @@ ktor = "2.3.2"
 twitter-parser = "0.2.9"
 molecule = "0.11.0"
 jsoup = "1.16.1"
+accompanist = "0.30.1"
+store = "5.0.0-beta01"
+kotlinx-atomicfu = "0.21.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -46,9 +49,11 @@ room-paging = { group = "androidx.room", name = "room-paging", version.ref = "ro
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 paging-compose = "androidx.paging:paging-compose:3.2.0-rc01"
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+kotlinx-atomicfu = { group = "org.jetbrains.kotlinx", name = "atomicfu", version.ref = "kotlinx-atomicfu" }
 
 koject-core = { group = "com.moriatsushi.koject", name = "koject-core", version.ref = "koject" }
 koject-processor-app = { group = "com.moriatsushi.koject", name = "koject-processor-app", version.ref = "koject" }
@@ -74,14 +79,19 @@ jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
 molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", version.ref = "molecule" }
 
+accompanist-placeholder-material3 = { group = "com.google.accompanist", name = "accompanist-placeholder-material3", version.ref = "accompanist" }
+
+store = { group = "org.mobilenativefoundation.store", name = "store5", version.ref = "store" }
+
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]
 paging = ["paging-runtime", "paging-compose"]
 navigation = ["navigation-compose"]
-kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json"]
+kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-atomicfu"]
 koject = ["koject-core", "koject-android-core", "koject-android-activity", "koject-android-fragment", "koject-android-viewmodel", "koject-compose-core"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
 coil = ["coil-compose", "coil-gif", "apng"]
+accompanist = ["accompanist-placeholder-material3"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

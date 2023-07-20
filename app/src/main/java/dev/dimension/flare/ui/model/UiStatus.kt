@@ -1,8 +1,10 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.ui.unit.LayoutDirection
+import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
+import dev.dimension.flare.ui.humanizer.humanizePercentage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.Instant
 import org.jsoup.nodes.Element
@@ -10,6 +12,16 @@ import java.text.Bidi
 
 internal sealed interface UiStatus {
     val statusKey: MicroBlogKey
+
+    data class MastodonNotification(
+        override val statusKey: MicroBlogKey,
+        val user: UiUser.Mastodon,
+        val createdAt: Instant,
+        val status: Mastodon?,
+        val type: NotificationTypes,
+    ): UiStatus {
+        val humanizedTime = createdAt.humanize()
+    }
 
     data class Mastodon(
         override val statusKey: MicroBlogKey,
@@ -57,7 +69,9 @@ internal sealed interface UiStatus {
             val title: String,
             val votesCount: Long,
             val percentage: Float,
-        )
+        ) {
+            val humanizedPercentage = percentage.humanizePercentage()
+        }
 
         enum class Visibility {
             Public,
@@ -70,12 +84,17 @@ internal sealed interface UiStatus {
             val replyCount: Long,
             val reblogCount: Long,
             val favouriteCount: Long,
-        )
+        ) {
+            val humanizedReplyCount = if (replyCount > 0) replyCount.toString() else null
+            val humanizedReblogCount = if (reblogCount > 0) reblogCount.toString() else null
+            val humanizedFavouriteCount = if (favouriteCount > 0) favouriteCount.toString() else null
+        }
     }
 }
 
 internal val UiStatus.itemKey: String get() = statusKey.toString()
 internal val UiStatus.itemType: String get() = when (this) {
     is UiStatus.Mastodon -> "mastodon"
+    is UiStatus.MastodonNotification -> "mastodon_notification_$type"
 }
 

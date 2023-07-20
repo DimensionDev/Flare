@@ -39,4 +39,7 @@ enum class NotificationTypes {
 
   @SerialName("status")
   status,
+
+  @SerialName("update")
+  update,
 }

@@ -42,3 +42,21 @@ internal fun <T, R> UiState<T>.composeFlatMap(transform: @Composable (T) -> UiSt
     is UiState.Error -> UiState.Error(throwable)
     is UiState.Loading -> UiState.Loading()
 }
+
+internal fun <T> UiState<T>.onSuccess(action: (T) -> Unit): UiState<T> = apply {
+    if (this is UiState.Success) {
+        action(data)
+    }
+}
+
+internal fun <T> UiState<T>.onError(action: (Throwable) -> Unit): UiState<T> = apply {
+    if (this is UiState.Error) {
+        action(throwable)
+    }
+}
+
+internal fun <T> UiState<T>.onLoading(action: () -> Unit): UiState<T> = apply {
+    if (this is UiState.Loading) {
+        action()
+    }
+}

@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,10 +20,11 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.common.BrowserLoginDeepLinksChannel
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
-import dev.dimension.flare.data.repository.addMastodonAccountUseCase
-import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.data.repository.UiApplication
+import dev.dimension.flare.data.repository.addMastodonApplicationUseCase
+import dev.dimension.flare.data.repository.findApplicationUseCase
+import dev.dimension.flare.data.repository.setPendingOAuthUseCase
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.launch
@@ -31,17 +32,14 @@ import kotlinx.coroutines.launch
 @Composable
 @Preview(showBackground = true)
 fun LoginScreenPreview() {
-    LoginScreen(toHome = {})
+    LoginScreen()
 }
 
 @Composable
-internal fun LoginScreen(
-    toHome: () -> Unit,
-) {
+internal fun LoginScreen() {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
         LoginPresenter(
-            toHome = toHome,
             launchUrl = {
                 uriHandler.openUri(it)
             },
@@ -56,7 +54,7 @@ internal fun LoginScreen(
                 horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                TextField(
+                OutlinedTextField(
                     value = state.host,
                     onValueChange = state::setHost,
                     label = {
@@ -98,26 +96,35 @@ private suspend fun mastodonLoginUseCase(
         website = "https://github.com/TwidereProject/TwidereX-Android",
         redirect_uri = AppDeepLink.Callback.Mastodon,
     )
-    val application = service.createApplication()
+
+    val application = findApplicationUseCase(host)?.let {
+        if (it is UiApplication.Mastodon) {
+            it.application
+        } else {
+            null
+        }
+    } ?: service.createApplication().also {
+        addMastodonApplicationUseCase(host, it)
+    }
+    setPendingOAuthUseCase(host, true)
     val target = service.getWebOAuthUrl(application)
     launchOAuth(target)
-    val code = BrowserLoginDeepLinksChannel.waitOne().substringAfter("code=")
-    require(code.isNotEmpty()) { "Invalid code" }
-    val accessTokenResponse = service.getAccessToken(code, application)
-    requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
-    val user = service.verifyCredentials(accessToken = accessTokenResponse.accessToken)
-    val id = user.id
-    requireNotNull(id) { "Invalid user id" }
-    addMastodonAccountUseCase(
-        instance = host,
-        accessToken = accessTokenResponse.accessToken,
-        accountKey = MicroBlogKey(id, host),
-    )
+//    val code = BrowserLoginDeepLinksChannel.waitOne().substringAfter("code=")
+//    require(code.isNotEmpty()) { "Invalid code" }
+//    val accessTokenResponse = service.getAccessToken(code, application)
+//    requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
+//    val user = service.verifyCredentials(accessToken = accessTokenResponse.accessToken)
+//    val id = user.id
+//    requireNotNull(id) { "Invalid user id" }
+//    addMastodonAccountUseCase(
+//        instance = host,
+//        accessToken = accessTokenResponse.accessToken,
+//        accountKey = MicroBlogKey(id, host),
+//    )
 }
 
 @Composable
 private fun LoginPresenter(
-    toHome: () -> Unit,
     launchUrl: (String) -> Unit,
 ) = run {
     var host by remember { mutableStateOf(TextFieldValue()) }
@@ -143,8 +150,6 @@ private fun LoginPresenter(
                     )
                 }.onFailure {
                     error = it.message
-                }.onSuccess {
-                    toHome()
                 }
                 loading = false
             }

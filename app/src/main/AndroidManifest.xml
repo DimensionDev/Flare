@@ -13,13 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Flare"
         android:enableOnBackInvokedCallback="true"
-        tools:targetApi="31"
+        tools:targetApi="tiramisu"
         android:name=".App">
         <activity
-            android:launchMode="singleTop"
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Flare">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

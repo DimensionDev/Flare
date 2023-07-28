@@ -18,7 +18,6 @@ import dev.dimension.flare.data.repository.UiAccount.Companion.toUi
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.UiState
-import dev.dimension.flare.ui.collectAsUiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 import kotlinx.coroutines.flow.map
@@ -33,13 +32,24 @@ import org.mobilenativefoundation.store.store5.StoreReadResponse
 @Composable
 internal fun activeAccountPresenter(
     appDatabase: AppDatabase = rememberInject(),
-): State<UiState<UiAccount?>> {
+): State<UiState<UiAccount>> {
     return remember(appDatabase) {
         appDatabase.accountDao()
             .getActiveAccount()
-            .map { it?.toUi() }
-    }.collectAsUiState()
+            .map {
+                it?.toUi()
+            }
+            .map {
+                if (it == null) {
+                    UiState.Error(NoActiveAccountException)
+                } else {
+                    UiState.Success(it)
+                } as UiState<UiAccount>
+            }
+    }.collectAsState(initial = UiState.Loading())
 }
+
+internal object NoActiveAccountException : Throwable("No active account")
 
 @Composable
 internal fun mastodonUserDataPresenter(

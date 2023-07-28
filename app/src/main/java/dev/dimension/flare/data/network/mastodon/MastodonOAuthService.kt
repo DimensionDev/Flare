@@ -30,9 +30,7 @@ class MastodonOAuthService(
     )
 
     fun getWebOAuthUrl(response: CreateApplicationResponse) =
-        "$baseUrl/oauth/authorize?client_id=${response.clientID}&response_type=code&redirect_uri=${response.redirectURI.let {
-            it.encodeURLParameter()
-        }}&scope=${
+        "$baseUrl/oauth/authorize?client_id=${response.clientID}&response_type=code&redirect_uri=${response.redirectURI.encodeURLParameter()}&scope=${
             scopes.joinToString(
             " "
         ) { it.name }.encodeURLParameter()

@@ -1,7 +1,5 @@
 package dev.dimension.flare
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -13,16 +11,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import dev.dimension.flare.common.BrowserLoginDeepLinksChannel
 import dev.dimension.flare.ui.initialRoute
 import dev.dimension.flare.ui.main
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,27 +26,6 @@ class MainActivity : ComponentActivity() {
             Content()
         }
     }
-
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        intent?.data?.let {
-            onDeeplink(it)
-        }
-    }
-
-
-    private fun onDeeplink(it: Uri) {
-        if (BrowserLoginDeepLinksChannel.canHandle(it.toString())) {
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                    BrowserLoginDeepLinksChannel.send(it.toString())
-                }
-            }
-        } else {
-        }
-    }
-
 }
 @Composable
 fun Content(

@@ -99,15 +99,17 @@ class MastodonService(
     suspend fun userTimeline(
         user_id: String,
         count: Int,
-        since_id: String?,
-        max_id: String?,
-        exclude_replies: Boolean
+        min_id: String? = null,
+        since_id: String? = null,
+        max_id: String? = null,
+        exclude_replies: Boolean? = null,
     ): List<Status> = timelineResources.userTimeline(
         user_id = user_id,
         max_id = max_id,
         since_id = since_id,
         limit = count,
         exclude_replies = exclude_replies,
+        min_id = min_id,
     )
 
     suspend fun favorites(

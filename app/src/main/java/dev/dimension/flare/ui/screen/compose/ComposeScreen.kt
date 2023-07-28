@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Poll
 import androidx.compose.material.icons.filled.Send
@@ -81,6 +82,9 @@ fun ComposeScreen(
                         }
                         IconButton(onClick = { /*TODO*/ }) {
                             Icon(imageVector = Icons.Default.Poll, contentDescription = null)
+                        }
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(imageVector = Icons.Default.EmojiEmotions, contentDescription = null)
                         }
                     }
                 }

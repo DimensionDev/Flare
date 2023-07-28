@@ -11,8 +11,11 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -51,17 +54,25 @@ import dev.dimension.flare.data.repository.mastodonUserDataPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.composeFlatMap
+import dev.dimension.flare.ui.flatMap
+import dev.dimension.flare.ui.screen.profile.ProfileScreen
 import dev.dimension.flare.ui.theme.FlareTheme
 
-sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
+sealed class Screen(
+    val route: String,
+    val title: String,
+    val icon: ImageVector,
+    val showAppbar: Boolean = true
+) {
     object HomeTimeline : Screen("HomeTimeline", "Home", Icons.Default.Home)
     object Notification : Screen("Notification", "Notification", Icons.Default.Notifications)
+    object Me : Screen("Me", "Me", Icons.Default.AccountCircle, showAppbar = false)
 }
 
 private val items = listOf(
     Screen.HomeTimeline,
     Screen.Notification,
+    Screen.Me,
 )
 
 @Composable
@@ -110,7 +121,7 @@ fun HomeScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        currentScreen?.title?.let {
+                        currentScreen?.let {
                             AnimatedContent(
                                 targetState = it,
                                 label = "Title",
@@ -118,7 +129,7 @@ fun HomeScreen(
                                     slideInVertically { it } togetherWith slideOutVertically { -it }
                                 }
                             ) {
-                                Text(text = it)
+                                Text(text = it.title)
                             }
                         }
                     },
@@ -182,7 +193,9 @@ fun HomeScreen(
             NavHost(
                 navController = navController,
                 startDestination = "HomeTimeline",
-                modifier = Modifier.padding(it),
+                modifier = Modifier
+                    .padding(it)
+                    .consumeWindowInsets(WindowInsets.systemBars),
                 enterTransition = {
                     fadeIn() + slideInHorizontally { it / 4 }
                 },
@@ -190,11 +203,21 @@ fun HomeScreen(
                     fadeOut() + slideOutHorizontally { -it / 4 }
                 }
             ) {
-                composable("HomeTimeline") {
+                composable(Screen.HomeTimeline.route) {
                     HomeTimelineScreen()
                 }
-                composable("Notification") {
+                composable(Screen.Notification.route) {
                     NotificationScreen()
+                }
+                composable(Screen.Me.route) {
+                    when (val data = state.user) {
+                        is UiState.Error -> Unit
+                        is UiState.Loading -> Unit
+                        is UiState.Success -> ProfileScreen(
+                            userKey = data.data.userKey,
+                            showTopBar = false,
+                        )
+                    }
                 }
             }
         }
@@ -205,14 +228,12 @@ fun HomeScreen(
 @Composable
 private fun HomePresenter() = run {
     val account by activeAccountPresenter()
-    val user = account.composeFlatMap {
+    val user = account.flatMap {
         when (it) {
             is UiAccount.Mastodon -> {
                 val state by mastodonUserDataPresenter(account = it)
                 state
             }
-
-            null -> UiState.Error(Throwable("Account is null"))
         }
     }
     object {

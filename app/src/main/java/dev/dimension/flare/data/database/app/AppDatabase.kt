@@ -9,12 +9,15 @@ import com.moriatsushi.koject.Provides
 import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.data.database.Converters
 import dev.dimension.flare.data.database.app.dao.AccountDao
+import dev.dimension.flare.data.database.app.dao.ApplicationDao
 import dev.dimension.flare.data.database.app.model.DbAccount
+import dev.dimension.flare.data.database.app.model.DbApplication
 
-@Database(entities = [DbAccount::class], version = 1)
+@Database(entities = [DbAccount::class, DbApplication::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
+    abstract fun applicationDao(): ApplicationDao
 }
 
 @Singleton

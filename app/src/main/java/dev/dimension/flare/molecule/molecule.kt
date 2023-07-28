@@ -17,7 +17,7 @@ private class PresenterHolder<T>(
     body: @Composable () -> T
 ) : ViewModel() {
     private val scope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
-    val state = scope.launchMolecule(RecompositionClock.ContextClock, body)
+    val state = scope.launchMolecule(RecompositionClock.Immediate, body)
 }
 
 /**

@@ -7,6 +7,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
 import dev.dimension.flare.common.AppDeepLink
@@ -14,6 +15,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.screen.compose.ComposeScreen
 import dev.dimension.flare.ui.screen.home.HomeScreen
 import dev.dimension.flare.ui.screen.login.LoginScreen
+import dev.dimension.flare.ui.screen.login.MastodonCallbackScreen
 import dev.dimension.flare.ui.screen.profile.ProfileScreen
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 
@@ -33,11 +35,7 @@ internal fun main() {
     }
 
     composable("Login") {
-        LoginScreen(
-            toHome = {
-                navigate("Home", navOptions { popUpTo("Login") { inclusive = true } })
-            },
-        )
+        LoginScreen()
     }
 
     composable("Home") {
@@ -73,6 +71,24 @@ internal fun main() {
             onBack = {
                 navigateUp()
             }
+        )
+    }
+
+    composable(
+        "MastodonCallback?code={code}",
+        deepLinks = listOf(
+            navDeepLink {
+                uriPattern = "${AppDeepLink.Callback.Mastodon}?code={code}"
+            }
+        ),
+        arguments = listOf(navArgument("code") { nullable = true })
+    ) {
+        val code = it.arguments?.getString("code")
+        MastodonCallbackScreen(
+            code = code,
+            toHome = {
+                navigate("Home", navOptions { popUpTo("MastodonCallback?code={code}") { inclusive = true } })
+            },
         )
     }
 }

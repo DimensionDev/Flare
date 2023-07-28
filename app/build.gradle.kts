@@ -31,6 +31,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -80,6 +81,7 @@ dependencies {
     implementation(libs.jsoup)
     implementation(libs.bundles.accompanist)
     implementation(libs.store)
+    implementation(libs.nestedScrollView)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

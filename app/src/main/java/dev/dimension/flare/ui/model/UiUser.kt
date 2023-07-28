@@ -10,6 +10,7 @@ sealed interface UiUser {
     val name: String
     val handle: String
     val avatarUrl: String
+    val nameElement: Element
 
     data class Mastodon(
         override val userKey: MicroBlogKey,
@@ -17,7 +18,7 @@ sealed interface UiUser {
         override val handle: String,
         override val avatarUrl: String,
         val bannerUrl: String?,
-        val nameElement: Element,
+        override val nameElement: Element,
         val description: String?,
         val descriptionElement: Element?,
         val matrices: Matrices,

@@ -48,8 +48,8 @@ private const val ID_IMAGE = "image"
 @Composable
 fun HtmlText(
     element: Element,
-    layoutDirection: LayoutDirection,
     modifier: Modifier = Modifier,
+    layoutDirection: LayoutDirection = LocalLayoutDirection.current,
     maxLines: Int = Int.MAX_VALUE,
     color: Color = Color.Unspecified,
     fontSize: TextUnit = TextUnit.Unspecified,

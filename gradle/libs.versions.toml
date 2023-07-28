@@ -1,5 +1,5 @@
 [versions]
-agp = "8.2.0-alpha13"
+agp = "8.2.0-alpha14"
 kotlin = "1.8.22"
 core-ktx = "1.10.1"
 junit = "4.13.2"
@@ -82,6 +82,8 @@ molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", ver
 accompanist-placeholder-material3 = { group = "com.google.accompanist", name = "accompanist-placeholder-material3", version.ref = "accompanist" }
 
 store = { group = "org.mobilenativefoundation.store", name = "store5", version.ref = "store" }
+
+nestedScrollView = "com.github.Tlaster:NestedScrollView:1.0.1"
 
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]

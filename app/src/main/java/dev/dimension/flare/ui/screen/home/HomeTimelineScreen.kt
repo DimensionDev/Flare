@@ -15,7 +15,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.status.EmptyStatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.composeFlatMap
+import dev.dimension.flare.ui.flatMap
 
 @Composable
 internal fun HomeTimelineScreen() {
@@ -38,10 +38,9 @@ internal fun HomeTimelineScreen() {
 @Composable
 private fun HomeTimelinePresenter() = run {
     val account by activeAccountPresenter()
-    val listState = account.composeFlatMap {
+    val listState = account.flatMap {
         when (it) {
             is UiAccount.Mastodon -> UiState.Success(homeTimelineDataSource(account = it).collectAsLazyPagingItems())
-            null -> UiState.Error(Throwable("Account is null"))
         }
     }
     object {

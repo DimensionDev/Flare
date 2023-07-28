@@ -23,7 +23,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.status.EmptyStatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.composeFlatMap
+import dev.dimension.flare.ui.flatMap
 
 @Composable
 fun NotificationScreen() {
@@ -88,7 +88,7 @@ private fun NotificationPresenter() = run {
     var type by remember { mutableStateOf(NotificationType.All) }
 
     val account by activeAccountPresenter()
-    val listState = account.composeFlatMap {
+    val listState = account.flatMap {
         when (it) {
             is UiAccount.Mastodon -> UiState.Success(
                 when (type) {
@@ -97,7 +97,6 @@ private fun NotificationPresenter() = run {
                 }.collectAsLazyPagingItems()
             )
 
-            null -> UiState.Error(Throwable("Account is null"))
         }
     }
     object {

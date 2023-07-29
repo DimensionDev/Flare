@@ -1,11 +1,14 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.foundation.clickable
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,18 +16,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.moriatsushi.koject.compose.rememberInject
+import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.mastodon.mentionTimelineDataSource
 import dev.dimension.flare.data.datasource.mastodon.notificationTimelineDataSource
 import dev.dimension.flare.data.repository.UiAccount
 import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
-import dev.dimension.flare.ui.component.status.EmptyStatusEvent
+import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen() {
     val state by producePresenter {
@@ -35,38 +42,21 @@ fun NotificationScreen() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
-            Row {
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            state.onNotificationTypeChanged(NotificationType.All)
-                        },
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = state.notificationType == NotificationType.All,
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+            ) {
+                NotificationType.values().forEachIndexed { index, notificationType ->
+                    SegmentedButton(
+                        selected = state.notificationType == notificationType,
                         onClick = {
-                            state.onNotificationTypeChanged(NotificationType.All)
-                        }
-                    )
-                    Text(text = "All")
-                }
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            state.onNotificationTypeChanged(NotificationType.Mention)
+                            state.onNotificationTypeChanged(notificationType)
                         },
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = state.notificationType == NotificationType.Mention,
-                        onClick = {
-                            state.onNotificationTypeChanged(NotificationType.Mention)
-                        }
-                    )
-                    Text(text = "Mention")
+                        shape = SegmentedButtonDefaults.shape(position = index, count = NotificationType.values().size),
+                    ) {
+                        Text(text = stringResource(id = notificationType.title))
+                    }
                 }
             }
         }
@@ -78,13 +68,15 @@ fun NotificationScreen() {
     }
 }
 
-enum class NotificationType {
-    All,
-    Mention,
+enum class NotificationType(@StringRes val title: Int) {
+    All(title = R.string.notification_tab_all_title),
+    Mention(title = R.string.notification_tab_mentions_title),
 }
 
 @Composable
-private fun NotificationPresenter() = run {
+private fun NotificationPresenter(
+    defaultEvent: DefaultMastodonStatusEvent = rememberInject(),
+) = run {
     var type by remember { mutableStateOf(NotificationType.All) }
 
     val account by activeAccountPresenter()
@@ -102,7 +94,7 @@ private fun NotificationPresenter() = run {
     object {
         val notificationType = type
         val listState = listState
-        val eventHandler = EmptyStatusEvent
+        val eventHandler = defaultEvent
         fun onNotificationTypeChanged(value: NotificationType) {
             type = value
         }

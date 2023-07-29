@@ -7,11 +7,11 @@ androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 lifecycle-runtime-ktx = "2.6.1"
 activity-compose = "1.7.2"
-compose-bom = "2023.06.01"
+compose-bom = "2023.07.00-alpha02"
 ksp = "1.8.22-1.0.11"
 room = "2.5.2"
-paging = "3.1.1"
-navigation = "2.7.0-beta02"
+paging = "3.2.0"
+navigation = "2.7.0-rc01"
 kotlinx-datetime = "0.4.0"
 kotlinx-collections-immutable = "0.3.5"
 kotlinx-serialization-json = "1.5.1"
@@ -22,9 +22,10 @@ ktor = "2.3.2"
 twitter-parser = "0.2.9"
 molecule = "0.11.0"
 jsoup = "1.16.1"
-accompanist = "0.30.1"
+accompanist = "0.31.6-rc"
 store = "5.0.0-beta01"
 kotlinx-atomicfu = "0.21.0"
+compose-destinations = "1.9.50"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -33,8 +34,9 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-bom = { group = "dev.chrisbanes.compose", name = "compose-bom", version.ref = "compose-bom" }
 ui = { group = "androidx.compose.ui", name = "ui" }
+ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
@@ -47,7 +49,7 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
-paging-compose = "androidx.paging:paging-compose:3.2.0-rc01"
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
@@ -79,11 +81,15 @@ jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
 molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", version.ref = "molecule" }
 
-accompanist-placeholder-material3 = { group = "com.google.accompanist", name = "accompanist-placeholder-material3", version.ref = "accompanist" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
 store = { group = "org.mobilenativefoundation.store", name = "store5", version.ref = "store" }
 
 nestedScrollView = "com.github.Tlaster:NestedScrollView:1.0.1"
+
+compose-destinations = { group = "io.github.raamcosta.compose-destinations", name = "core", version.ref = "compose-destinations" }
+compose-destinations-animations-core = { group = "io.github.raamcosta.compose-destinations", name = "animations-core", version.ref = "compose-destinations" }
+compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destinations" }
 
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]
@@ -93,7 +99,8 @@ kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json"
 koject = ["koject-core", "koject-android-core", "koject-android-activity", "koject-android-fragment", "koject-android-viewmodel", "koject-compose-core"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
 coil = ["coil-compose", "coil-gif", "apng"]
-accompanist = ["accompanist-placeholder-material3"]
+accompanist = ["accompanist-permissions"]
+compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

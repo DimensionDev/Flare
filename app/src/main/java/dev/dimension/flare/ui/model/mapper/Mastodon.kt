@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
@@ -10,13 +11,16 @@ import dev.dimension.flare.data.network.mastodon.api.model.Attachment
 import dev.dimension.flare.data.network.mastodon.api.model.MediaType
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.Notification
+import dev.dimension.flare.data.network.mastodon.api.model.RelationshipResponse
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -163,7 +167,7 @@ private fun replaceMentionAndHashtag(mentions: List<Mention>, node: Node) {
             }
             node.attr(
                 "href",
-                AppDeepLink.User(MicroBlogKey(id, host))
+                ProfileRouteDestination(userKey = MicroBlogKey(id, host)).deeplink()
             )
         }
     } else if (node is Element && node.normalName() == "a" && node.hasText() && node.text()
@@ -244,6 +248,7 @@ private fun Account.toUi(): UiUser.Mastodon {
             followsCount = followingCount ?: 0,
             statusesCount = statusesCount ?: 0,
         ),
+        locked = locked ?: false,
     )
 }
 
@@ -269,4 +274,15 @@ private fun parseContent(status: Account): Element {
         )
     }
     return Jsoup.parse(content).body()
+}
+
+internal fun RelationshipResponse.toUi(): UiRelation.Mastodon {
+    return UiRelation.Mastodon(
+        following = following ?: false,
+        isFans = followedBy ?: false,
+        blocking = blocking ?: false,
+        muting = muting ?: false,
+        requested = requested ?: false,
+        domainBlocking = domainBlocking ?: false,
+    )
 }

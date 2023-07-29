@@ -1,10 +1,10 @@
 package dev.dimension.flare.common
 
-import dev.dimension.flare.model.MicroBlogKey
+import com.ramcosta.composedestinations.spec.Direction
 
 const val AppSchema = "flare"
 
-class AppDeepLink {
+object AppDeepLink {
     object Callback {
         const val Mastodon = "$AppSchema://Callback/SignIn/Mastodon"
         const val Twitter = "$AppSchema://Callback/SignIn/Twitter"
@@ -16,8 +16,8 @@ class AppDeepLink {
             operator fun invoke(keyword: String) = "$AppSchema://Mastodon/Hashtag/${java.net.URLEncoder.encode(keyword, "UTF-8")}"
         }
     }
-    object User {
-        const val route = "$AppSchema://User/{userKey}"
-        operator fun invoke(userKey: MicroBlogKey) = "$AppSchema://User/$userKey"
-    }
+}
+
+fun Direction.deeplink(): String {
+    return "$AppSchema://${this.route}"
 }

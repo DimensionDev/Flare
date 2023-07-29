@@ -1,10 +1,18 @@
 package dev.dimension.flare.ui.screen.profile
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,29 +20,42 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.moriatsushi.koject.compose.rememberInject
+import com.ramcosta.composedestinations.annotation.DeepLink
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.data.datasource.mastodon.userTimelineDataSource
 import dev.dimension.flare.data.repository.UiAccount
 import dev.dimension.flare.data.repository.activeAccountPresenter
@@ -44,22 +65,43 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.status.EmptyStatusEvent
-import dev.dimension.flare.ui.component.status.StatusEvent
+import dev.dimension.flare.ui.component.placeholder.placeholder
+import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.FlareTheme
 import org.jsoup.nodes.Element
 import kotlin.math.max
 
+@Composable
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://${FULL_ROUTE_PLACEHOLDER}",
+        )
+    ]
+)
+fun ProfileRoute(
+    userKey: MicroBlogKey,
+    navigator: DestinationsNavigator,
+) {
+    ProfileScreen(
+        userKey = userKey,
+        onBack = {
+            navigator.navigateUp()
+        }
+    )
+}
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    userKey: MicroBlogKey?,
+    userKey: MicroBlogKey,
+    onBack: () -> Unit = {},
     showTopBar: Boolean = true,
 ) {
     val state by producePresenter {
@@ -86,22 +128,70 @@ fun ProfileScreen(
                             }
                         }
                     }
-                    TopAppBar(
-                        title = {
-                            state.onSuccess {
-                                it.user.onSuccess {
+                    Box {
+                        Column(
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    alpha = titleAlpha
+                                },
+                        ) {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .windowInsetsTopHeight(WindowInsets.statusBars)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                            3.dp
+                                        )
+                                    ),
+                            )
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(64.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                            3.dp
+                                        )
+                                    ),
+                            )
+                        }
+                        TopAppBar(
+                            title = {
+                                state.userState.onSuccess {
                                     HtmlText(
                                         element = it.nameElement,
+                                        modifier = Modifier.graphicsLayer {
+                                            alpha = titleAlpha
+                                        }
                                     )
                                 }
-                            }
-                        },
-                        modifier = Modifier
-                            .graphicsLayer {
-                                alpha = titleAlpha
                             },
-                        scrollBehavior = scrollBehavior,
-                    )
+                            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                containerColor = Color.Transparent,
+                            ),
+                            modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+                            scrollBehavior = scrollBehavior,
+                            navigationIcon = {
+                                IconButton(onClick = onBack) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowBack,
+                                        contentDescription = null,
+                                    )
+                                }
+                            },
+                            actions = {
+                                state.userState.onSuccess {
+                                    IconButton(onClick = { /*TODO*/ }) {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
             }
         ) {
@@ -109,25 +199,16 @@ fun ProfileScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 state = listState,
             ) {
-                when (val data = state) {
-                    is UiState.Error -> {
-
-                    }
-
-                    is UiState.Loading -> {
-
-                    }
-
-                    is UiState.Success -> {
-                        item {
-                            ProfileHeader(data.data.user)
-                        }
-                        with(data.data.listState) {
-                            status(
-                                event = data.data.eventHandler,
-                            )
-                        }
-                    }
+                item {
+                    ProfileHeader(
+                        state.userState,
+                        state.relationState,
+                    )
+                }
+                with(state.listState) {
+                    status(
+                        event = state.eventHandler,
+                    )
                 }
             }
         }
@@ -137,22 +218,40 @@ fun ProfileScreen(
 @Composable
 private fun ProfileHeader(
     userState: UiState<UiUser>,
+    relationState: UiState<UiRelation>,
     modifier: Modifier = Modifier,
 ) {
-    when (userState) {
-        is UiState.Loading -> {
-            ProfileHeaderLoading(modifier)
+    AnimatedContent(
+        targetState = userState,
+        modifier = Modifier.animateContentSize(),
+        label = "ProfileHeader",
+        transitionSpec = {
+            fadeIn() togetherWith fadeOut()
+        },
+        contentKey = {
+            when (it) {
+                is UiState.Loading -> "Loading"
+                is UiState.Error -> "Error"
+                is UiState.Success -> "Success"
+            }
         }
+    ) { state ->
+        when (state) {
+            is UiState.Loading -> {
+                ProfileHeaderLoading(modifier)
+            }
 
-        is UiState.Error -> {
-            ProfileHeaderError(modifier)
-        }
+            is UiState.Error -> {
+                ProfileHeaderError(modifier)
+            }
 
-        is UiState.Success -> {
-            ProfileHeaderSuccess(
-                user = userState.data,
-                modifier = modifier,
-            )
+            is UiState.Success -> {
+                ProfileHeaderSuccess(
+                    user = state.data,
+                    relationState = relationState,
+                    modifier = modifier,
+                )
+            }
         }
     }
 }
@@ -160,12 +259,14 @@ private fun ProfileHeader(
 @Composable
 private fun ProfileHeaderSuccess(
     user: UiUser,
+    relationState: UiState<UiRelation>,
     modifier: Modifier = Modifier,
 ) {
     when (user) {
         is UiUser.Mastodon -> {
             MastodonProfileHeader(
                 user = user,
+                relationState = relationState,
                 modifier = modifier,
             )
         }
@@ -173,12 +274,13 @@ private fun ProfileHeaderSuccess(
 }
 
 @Composable
-private fun CommonProfileHeader(
+internal fun CommonProfileHeader(
     bannerUrl: String?,
     avatarUrl: String?,
     displayName: Element,
     handle: String,
     headerTrailing: @Composable () -> Unit,
+    handleTrailing: @Composable RowScope.() -> Unit,
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -189,7 +291,9 @@ private fun CommonProfileHeader(
         ProfileHeaderConstants.BannerHeight.dp + statusBarHeight
     }
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+            .padding(bottom = 8.dp),
     ) {
         bannerUrl?.let {
             NetworkImage(
@@ -235,12 +339,21 @@ private fun CommonProfileHeader(
                         element = displayName,
                         textStyle = MaterialTheme.typography.titleMedium,
                     )
-                    Text(
-                        text = handle,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = handle,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        handleTrailing.invoke(this)
+                    }
                 }
-                Box {
+                Box(
+                    modifier = Modifier
+                        .padding(top = actualBannerHeight)
+                ) {
                     headerTrailing()
                 }
             }
@@ -258,37 +371,6 @@ private object ProfileHeaderConstants {
 }
 
 @Composable
-private fun MastodonProfileHeader(
-    user: UiUser.Mastodon,
-    modifier: Modifier = Modifier,
-) {
-    CommonProfileHeader(
-        bannerUrl = user.bannerUrl,
-        avatarUrl = user.avatarUrl,
-        displayName = user.nameElement,
-        handle = user.displayHandle,
-        headerTrailing = {
-        },
-        content = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                user.descriptionElement?.let {
-                    HtmlText(
-                        element = it,
-                        layoutDirection = user.descriptionDirection ?: LocalLayoutDirection.current,
-                    )
-                }
-            }
-        },
-        modifier = modifier,
-    )
-}
-
-@Composable
 private fun ProfileHeaderError(
     modifier: Modifier = Modifier,
 ) {
@@ -299,23 +381,82 @@ private fun ProfileHeaderError(
 private fun ProfileHeaderLoading(
     modifier: Modifier = Modifier,
 ) {
-
+    val statusBarHeight = with(LocalDensity.current) {
+        WindowInsets.statusBars.getTop(this).toDp()
+    }
+    val actualBannerHeight = remember(statusBarHeight) {
+        ProfileHeaderConstants.BannerHeight.dp + statusBarHeight
+    }
+    Box(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+            .padding(bottom = 8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(actualBannerHeight)
+                .placeholder(true)
+        )
+        // avatar
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                        )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(ProfileHeaderConstants.AvatarSize.dp)
+                            .clip(CircleShape)
+                            .placeholder(true)
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = actualBannerHeight)
+                ) {
+                    Text(
+                        text = "Loading user",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.placeholder(true)
+                    )
+                    Text(
+                        text = "Loading",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.placeholder(true)
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
 private fun ProfilePresenter(
-    userKey: MicroBlogKey?,
-): UiState<ProfileState> {
-    if (userKey == null) {
-        return UiState.Error(ProfileNotFoundException)
-    }
+    userKey: MicroBlogKey,
+    defaultEvent: DefaultMastodonStatusEvent = rememberInject(),
+) = run {
     val account by activeAccountPresenter()
     val userState = account.flatMap {
         when (it) {
-            is UiAccount.Mastodon -> MastodonProfilePresenter(
-                userKey = userKey,
-                account = it,
-            )
+            is UiAccount.Mastodon -> {
+                val state by mastodonUserDataPresenter(account = it, accountKey = userKey)
+                state
+
+            }
         }
     }
 
@@ -329,29 +470,18 @@ private fun ProfilePresenter(
             )
         }
     }
-
-    return UiState.Success(
-        ProfileState(
-            user = userState,
-            listState = listState,
-            eventHandler = EmptyStatusEvent,
-        )
-    )
-}
-
-object ProfileNotFoundException : Throwable("Profile not found")
-
-private data class ProfileState(
-    val user: UiState<UiUser>,
-    val listState: UiState<LazyPagingItems<UiStatus>>,
-    val eventHandler: StatusEvent,
-)
-
-@Composable
-private fun MastodonProfilePresenter(
-    userKey: MicroBlogKey,
-    account: UiAccount.Mastodon,
-): UiState<UiUser> {
-    val state by mastodonUserDataPresenter(account = account, accountKey = userKey)
-    return state
+    val relationState = account.flatMap {
+        when (it) {
+            is UiAccount.Mastodon -> mastodonUserRelationPresenter(
+                account = it,
+                accountKey = userKey,
+            )
+        }
+    }
+    object {
+        val userState = userState
+        val listState = listState
+        val eventHandler = defaultEvent
+        val relationState = relationState
+    }
 }

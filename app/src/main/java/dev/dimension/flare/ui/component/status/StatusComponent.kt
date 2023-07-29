@@ -1,7 +1,12 @@
 package dev.dimension.flare.ui.component.status
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,13 +28,17 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,15 +48,20 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.placeholder.material3.placeholder
+import com.moriatsushi.koject.Provides
+import com.moriatsushi.koject.Singleton
+import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
+
 
 @Composable
 internal fun StatusPlaceholder(
@@ -98,7 +112,7 @@ internal fun StatusPlaceholder(
 internal fun MastodonStatusComponent(
     data: UiStatus.Mastodon,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     val actualData = data.reblogStatus ?: data
@@ -180,7 +194,7 @@ data class MastodonStatusState(
 @Composable
 private fun StatusCardComponent(
     data: UiStatus.Mastodon,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -225,53 +239,53 @@ private fun StatusCardComponent(
 @Composable
 private fun StatusFooterComponent(
     data: UiStatus.Mastodon,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
-            .alpha(MediumAlpha)
             .padding(vertical = 4.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        StatusActionButton(
-            icon = Icons.Default.Reply,
-            text = data.matrices.humanizedReplyCount,
-            modifier = Modifier
-                .weight(1f)
-                .clickable {
+        CompositionLocalProvider(
+            LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
+        ) {
+            StatusActionButton(
+                icon = Icons.Default.Reply,
+                text = data.matrices.humanizedReplyCount,
+                modifier = Modifier
+                    .weight(1f),
+                onClicked = {
                     event.onReplyClick(data.statusKey)
                 }
-        )
-        StatusActionButton(
-            icon = Icons.Default.SyncAlt,
-            text = data.matrices.humanizedReblogCount,
-            modifier = Modifier
-                .weight(1f)
-                .clickable {
+            )
+            StatusActionButton(
+                icon = Icons.Default.SyncAlt,
+                text = data.matrices.humanizedReblogCount,
+                modifier = Modifier
+                    .weight(1f),
+                onClicked = {
                     event.onReblogClick(data.statusKey)
                 }
-        )
-        StatusActionButton(
-            icon = Icons.Default.Favorite,
-            text = data.matrices.humanizedFavouriteCount,
-            modifier = Modifier
-                .weight(1f)
-                .clickable {
+            )
+            StatusActionButton(
+                icon = Icons.Default.Favorite,
+                text = data.matrices.humanizedFavouriteCount,
+                modifier = Modifier
+                    .weight(1f),
+                onClicked = {
                     event.onLikeClick(data.statusKey)
                 }
-        )
-        Icon(
-            imageVector = Icons.Default.MoreHoriz,
-            contentDescription = null,
-            modifier = Modifier
-                .padding(4.dp)
-                .size(16.dp)
-                .clickable {
+            )
+            StatusActionButton(
+                icon = Icons.Default.MoreHoriz,
+                text = null,
+                onClicked = {
                     event.onMoreClick(data.statusKey)
-                },
-        )
+                }
+            )
+        }
     }
 }
 
@@ -279,11 +293,18 @@ private fun StatusFooterComponent(
 private fun StatusActionButton(
     icon: ImageVector,
     text: String?,
+    onClicked: () -> Unit,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     Row(
         modifier = modifier
+            .clickable(
+                indication = null,
+                interactionSource = interactionSource,
+                onClick = onClicked,
+            )
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -291,6 +312,13 @@ private fun StatusActionButton(
             imageVector = icon,
             contentDescription = contentDescription,
             modifier = Modifier
+                .indication(
+                    interactionSource = interactionSource,
+                    indication = rememberRipple(
+                        bounded = false,
+                        radius = 20.dp,
+                    ),
+                )
                 .size(16.dp),
         )
         if (!text.isNullOrEmpty()) {
@@ -306,7 +334,7 @@ private fun StatusActionButton(
 @Composable
 private fun StatusMediaComponent(
     data: UiStatus.Mastodon,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     if (data.media.isNotEmpty()) {
@@ -364,7 +392,7 @@ fun MediaItem(
 private fun StatusContentComponent(
     data: UiStatus.Mastodon,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -390,6 +418,7 @@ private fun StatusContentComponent(
                     HtmlText(
                         element = data.contentToken,
                         layoutDirection = data.contentDirection,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 if (data.poll != null) {
@@ -407,7 +436,7 @@ private fun StatusContentComponent(
 @Composable
 private fun StatusPollComponent(
     data: UiStatus.Mastodon.Poll,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -449,7 +478,7 @@ private fun StatusPollComponent(
 @Composable
 private fun StatusHeaderComponent(
     data: UiStatus.Mastodon,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -459,6 +488,7 @@ private fun StatusHeaderComponent(
         AvatarComponent(
             data = data.user.avatarUrl,
             modifier = Modifier
+                .clip(CircleShape)
                 .clickable {
                     event.onUserClick(data.user.userKey)
                 }
@@ -472,7 +502,10 @@ private fun StatusHeaderComponent(
                 element = data.user.nameElement,
                 layoutDirection = data.user.nameDirection,
                 modifier = Modifier
-                    .clickable {
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {
                         event.onUserClick(data.user.userKey)
                     }
             )
@@ -481,7 +514,10 @@ private fun StatusHeaderComponent(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .alpha(MediumAlpha)
-                    .clickable {
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {
                         event.onUserClick(data.user.userKey)
                     }
             )
@@ -548,7 +584,7 @@ fun AvatarComponent(
     )
 }
 
-interface StatusEvent {
+interface MastodonStatusEvent {
     fun onUserClick(userKey: MicroBlogKey)
     fun onStatusClick(statusKey: MicroBlogKey)
     fun onStatusLongClick(statusKey: MicroBlogKey)
@@ -561,8 +597,15 @@ interface StatusEvent {
     fun onMoreClick(statusKey: MicroBlogKey)
 }
 
-object EmptyStatusEvent : StatusEvent {
+@Provides
+@Singleton
+class DefaultMastodonStatusEvent(
+    private val context: Context,
+) : MastodonStatusEvent {
     override fun onUserClick(userKey: MicroBlogKey) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ProfileRouteDestination(userKey).deeplink()))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     override fun onStatusClick(statusKey: MicroBlogKey) {

@@ -16,6 +16,7 @@
         tools:targetApi="tiramisu"
         android:name=".App">
         <activity
+            android:launchMode="singleTop"
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Flare">

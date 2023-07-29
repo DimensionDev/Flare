@@ -29,7 +29,7 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 internal fun MastodonNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     when (data.type) {
@@ -97,7 +97,7 @@ internal fun MastodonNotificationComponent(
 private fun MastodonUpdateNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -123,7 +123,7 @@ private fun MastodonUpdateNotificationComponent(
 private fun MastodonStatusNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -149,7 +149,7 @@ private fun MastodonStatusNotificationComponent(
 private fun MastodonFollowRequestNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -203,7 +203,7 @@ private fun MastodonFollowRequestNotificationComponent(
 private fun MastodonPollNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -229,7 +229,7 @@ private fun MastodonPollNotificationComponent(
 private fun MastodonRetweetNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -255,7 +255,7 @@ private fun MastodonRetweetNotificationComponent(
 private fun MastodonFavouriteNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -281,7 +281,7 @@ private fun MastodonFavouriteNotificationComponent(
 private fun MastodonFollowNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
-    event: StatusEvent,
+    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(

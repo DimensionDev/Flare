@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
@@ -24,7 +24,7 @@ import dev.dimension.flare.ui.theme.DisabledAlpha
 
 context(LazyListScope, UiState<LazyPagingItems<UiStatus>>)
 internal fun status(
-    event: StatusEvent,
+    event: MastodonStatusEvent,
 ) {
     onSuccess { lazyPagingItems ->
         if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
@@ -34,7 +34,7 @@ internal fun status(
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier.alpha(DisabledAlpha)
                     )
                 }
@@ -75,7 +75,7 @@ internal fun status(
                     }
                     // draw divider
                     if (it != lazyPagingItems.itemCount - 1) {
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.alpha(DisabledAlpha)
                         )
                     }
@@ -90,7 +90,7 @@ internal fun status(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.alpha(DisabledAlpha)
                 )
             }

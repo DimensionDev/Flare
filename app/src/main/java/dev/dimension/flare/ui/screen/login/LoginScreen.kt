@@ -17,8 +17,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import com.ramcosta.composedestinations.annotation.Destination
+import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.repository.UiApplication
@@ -32,6 +35,12 @@ import kotlinx.coroutines.launch
 @Composable
 @Preview(showBackground = true)
 fun LoginScreenPreview() {
+    LoginScreen()
+}
+
+@Destination
+@Composable
+fun LoginRoute() {
     LoginScreen()
 }
 
@@ -58,14 +67,14 @@ internal fun LoginScreen() {
                     value = state.host,
                     onValueChange = state::setHost,
                     label = {
-                        Text("Host")
+                        Text(stringResource(id = R.string.login_hint))
                     },
                     enabled = !state.loading,
                 )
                 Button(
                     onClick = state::login,
                 ) {
-                    Text("Login")
+                    Text(stringResource(id = R.string.login_button))
                 }
                 if (state.error != null) {
                     Text(state.error!!)

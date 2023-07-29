@@ -1,16 +1,10 @@
 package dev.dimension.flare.ui.screen.home
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
@@ -22,6 +16,8 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -39,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -47,26 +44,30 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.placeholder.material3.placeholder
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.UiAccount
 import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.data.repository.mastodonUserDataPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.flatMap
+import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
+import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.profile.ProfileScreen
 import dev.dimension.flare.ui.theme.FlareTheme
 
 sealed class Screen(
     val route: String,
-    val title: String,
+    @StringRes val title: Int,
     val icon: ImageVector,
-    val showAppbar: Boolean = true
 ) {
-    object HomeTimeline : Screen("HomeTimeline", "Home", Icons.Default.Home)
-    object Notification : Screen("Notification", "Notification", Icons.Default.Notifications)
-    object Me : Screen("Me", "Me", Icons.Default.AccountCircle, showAppbar = false)
+    object HomeTimeline : Screen("HomeTimeline", R.string.home_tab_home_title, Icons.Default.Home)
+    object Notification : Screen("Notification", R.string.home_tab_notifications_title, Icons.Default.Notifications)
+    object Me : Screen("Me", R.string.home_tab_me_title, Icons.Default.AccountCircle)
 }
 
 private val items = listOf(
@@ -78,7 +79,25 @@ private val items = listOf(
 @Composable
 @Preview(showBackground = true)
 fun HomeScreenPreview() {
-    HomeScreen(toCompose = {})
+    HomeScreen(
+        toCompose = {},
+        toSettings = {},
+    )
+}
+
+@Destination
+@Composable
+fun HomeRoute(
+    navigator: DestinationsNavigator,
+) {
+    HomeScreen(
+        toCompose = {
+            navigator.navigate(ComposeRouteDestination)
+        },
+        toSettings = {
+            navigator.navigate(SettingsRouteDestination)
+        }
+    )
 }
 
 
@@ -86,6 +105,7 @@ fun HomeScreenPreview() {
 @Composable
 fun HomeScreen(
     toCompose: () -> Unit,
+    toSettings: () -> Unit,
 ) {
     val state by producePresenter {
         HomePresenter()
@@ -125,11 +145,11 @@ fun HomeScreen(
                             AnimatedContent(
                                 targetState = it,
                                 label = "Title",
-                                transitionSpec = {
-                                    slideInVertically { it } togetherWith slideOutVertically { -it }
-                                }
+//                                transitionSpec = {
+//                                    slideInVertically { it } togetherWith slideOutVertically { -it }
+//                                }
                             ) {
-                                Text(text = it.title)
+                                Text(text = stringResource(id = it.title))
                             }
                         }
                     },
@@ -140,7 +160,6 @@ fun HomeScreen(
                             is UiState.Loading -> {
                                 IconButton(
                                     onClick = {
-
                                     },
                                 ) {
                                     Icon(
@@ -167,6 +186,39 @@ fun HomeScreen(
                             }
                         }
                     },
+                    actions = {
+                        currentScreen?.let {
+                            AnimatedContent(targetState = it, label = "Actions") {
+                                when (it) {
+                                    Screen.HomeTimeline -> {
+                                        IconButton(
+                                            onClick = {
+
+                                            },
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Search,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    }
+                                    Screen.Me -> {
+                                        IconButton(
+                                            onClick = {
+                                                toSettings.invoke()
+                                            },
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Settings,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    }
+                                    Screen.Notification -> Unit
+                                }
+                            }
+                        }
+                    }
                 )
             },
             bottomBar = {
@@ -174,7 +226,7 @@ fun HomeScreen(
                     items.forEach { screen ->
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = null) },
-                            label = { Text(screen.title) },
+                            label = { Text(stringResource(id = screen.title)) },
                             selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                             onClick = {
                                 navController.navigate(screen.route) {
@@ -192,16 +244,10 @@ fun HomeScreen(
         ) {
             NavHost(
                 navController = navController,
-                startDestination = "HomeTimeline",
+                startDestination = Screen.HomeTimeline.route,
                 modifier = Modifier
                     .padding(it)
                     .consumeWindowInsets(WindowInsets.systemBars),
-                enterTransition = {
-                    fadeIn() + slideInHorizontally { it / 4 }
-                },
-                exitTransition = {
-                    fadeOut() + slideOutHorizontally { -it / 4 }
-                }
             ) {
                 composable(Screen.HomeTimeline.route) {
                     HomeTimelineScreen()

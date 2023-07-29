@@ -8,12 +8,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.data.datasource.mastodon.homeTimelineDataSource
 import dev.dimension.flare.data.repository.UiAccount
 import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
-import dev.dimension.flare.ui.component.status.EmptyStatusEvent
+import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
 
@@ -36,7 +37,9 @@ internal fun HomeTimelineScreen() {
 
 
 @Composable
-private fun HomeTimelinePresenter() = run {
+private fun HomeTimelinePresenter(
+    defaultEvent: DefaultMastodonStatusEvent = rememberInject(),
+) = run {
     val account by activeAccountPresenter()
     val listState = account.flatMap {
         when (it) {
@@ -45,6 +48,6 @@ private fun HomeTimelinePresenter() = run {
     }
     object {
         val listState = listState
-        val eventHandler = EmptyStatusEvent
+        val eventHandler = defaultEvent
     }
 }

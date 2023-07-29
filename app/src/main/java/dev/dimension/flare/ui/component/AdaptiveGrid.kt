@@ -36,7 +36,7 @@ fun AdaptiveGrid(
 
             } else {
                 val space = spacing.toPx().toInt()
-                val columns = ceil(sqrt(measurables.size.toDouble())).toInt()
+                val columns = ceil(sqrt(measurables.size.toDouble())).toInt().coerceAtLeast(1)
                 val rows = ceil(measurables.size.toDouble() / columns)
                 val itemSize = constraints.maxWidth / columns - space
                 val itemConstraints = constraints.copy(

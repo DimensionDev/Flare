@@ -1,3 +1,27 @@
-<resources>
-    <string name="app_name">Flare</string>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" translatable="false">Flare</string>
+
+    <string name="login_title">Login</string>
+    <string name="login_hint">Enter your instance URL</string>
+    <string name="login_button">Login</string>
+
+    <string name="home_tab_home_title">Home</string>
+    <string name="home_tab_notifications_title">Notifications</string>
+    <string name="home_tab_me_title">Me</string>
+
+    <string name="notification_tab_all_title">All</string>
+    <string name="notification_tab_mentions_title">Mentions</string>
+
+    <string name="profile_header_following_count">%1$s Following</string>
+    <string name="profile_header_fans_count">%1$s Followers</string>
+    <string name="profile_header_toots_count">%1$s Toots</string>
+
+    <string name="profile_header_button_follow">Follow</string>
+    <string name="profile_header_button_following">Following</string>
+    <string name="profile_header_button_requested">Requested</string>
+
+    <string name="compose_title">Compose</string>
+    <string name="compose_hint">What\'s happening?</string>
+
+    <string name="settings_title">Settings</string>
 </resources>

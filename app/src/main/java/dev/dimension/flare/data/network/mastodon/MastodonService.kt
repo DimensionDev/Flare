@@ -113,7 +113,6 @@ class MastodonService(
     )
 
     suspend fun favorites(
-        user_id: String,
         count: Int,
         since_id: String?,
         max_id: String?
@@ -306,24 +305,16 @@ class MastodonService(
 
     suspend fun emojis(): List<Emoji> = mastodonResources.emojis()
 
-    suspend fun lists(
-        userId: String?,
-        screenName: String?,
-        reverse: Boolean
-    ) = listsResources.lists()
+    suspend fun lists() = listsResources.lists()
 
     suspend fun createList(
         name: String,
-        mode: String?,
-        description: String?,
         repliesPolicy: String?
     ) = listsResources.createList(PostList(name, repliesPolicy))
 
     suspend fun updateList(
         listId: String,
         name: String?,
-        mode: String?,
-        description: String?,
         repliesPolicy: String?
     ) = listsResources.updateList(listId, PostList(name, repliesPolicy))
 
@@ -345,7 +336,6 @@ class MastodonService(
     suspend fun addMember(
         listId: String,
         userId: String,
-        screenName: String
     ) {
         // FIXME: 2021/7/12 API exception 'Record not found' should be 'You need to follow this user first'
         listsResources.addMember(listId, PostAccounts(listOf(userId)))
@@ -354,12 +344,11 @@ class MastodonService(
     suspend fun removeMember(
         listId: String,
         userId: String,
-        screenName: String
     ) {
         listsResources.removeMember(listId, PostAccounts(listOf(userId)))
     }
 
-    suspend fun trends(locationId: String, limit: Int?) = trendsResources.trends(limit)
+    suspend fun trends(limit: Int?) = trendsResources.trends(limit)
 
     suspend fun localTimeline(
         count: Int,

@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
-import com.google.accompanist.placeholder.material3.placeholder
+import dev.dimension.flare.ui.component.placeholder.placeholder
 
 @Composable
 fun NetworkImage(

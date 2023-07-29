@@ -22,6 +22,7 @@ sealed interface UiUser {
         val description: String?,
         val descriptionElement: Element?,
         val matrices: Matrices,
+        val locked: Boolean,
     ) : UiUser {
         val displayHandle = "@$handle@${userKey.host}"
         val nameDirection = if (Bidi(name, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
@@ -45,3 +46,4 @@ sealed interface UiUser {
         )
     }
 }
+

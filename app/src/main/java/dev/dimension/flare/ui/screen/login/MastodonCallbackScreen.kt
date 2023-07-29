@@ -17,6 +17,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.ramcosta.composedestinations.annotation.DeepLink
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.popUpTo
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.repository.UiApplication
@@ -26,6 +30,8 @@ import dev.dimension.flare.data.repository.setPendingOAuthUseCase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
+import dev.dimension.flare.ui.screen.destinations.MastodonCallbackRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 
 @Preview
@@ -34,6 +40,30 @@ fun MastodonCallbackScreenPreview() {
     MastodonCallbackScreen(
         code = "code",
         toHome = {},
+    )
+}
+
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "${AppDeepLink.Callback.Mastodon}?code={code}"
+        )
+    ]
+)
+@Composable
+fun MastodonCallbackRoute(
+    code: String?,
+    navigator: DestinationsNavigator,
+) {
+    MastodonCallbackScreen(
+        code = code,
+        toHome = {
+            navigator.navigate(HomeRouteDestination) {
+                popUpTo(MastodonCallbackRouteDestination) {
+                    inclusive = true
+                }
+            }
+        },
     )
 }
 

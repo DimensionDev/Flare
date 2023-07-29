@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
+    implementation(libs.ui.util)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
@@ -82,6 +83,8 @@ dependencies {
     implementation(libs.bundles.accompanist)
     implementation(libs.store)
     implementation(libs.nestedScrollView)
+    implementation(libs.bundles.compose.destinations)
+    ksp(libs.compose.destinations.ksp)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

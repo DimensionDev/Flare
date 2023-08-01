@@ -28,11 +28,14 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -67,13 +70,13 @@ fun ComposeRoute(
 object ComposeTransitions : DestinationStyle.Animated {
     override fun AnimatedContentTransitionScope<NavBackStackEntry>.enterTransition(): EnterTransition? {
         return slideIntoContainer(
-            AnimatedContentTransitionScope.SlideDirection.Up,
+            AnimatedContentTransitionScope.SlideDirection.Up
         ) + fadeIn()
     }
 
     override fun AnimatedContentTransitionScope<NavBackStackEntry>.exitTransition(): ExitTransition? {
         return slideOutOfContainer(
-            AnimatedContentTransitionScope.SlideDirection.Up,
+            AnimatedContentTransitionScope.SlideDirection.Up
         ) + fadeOut()
     }
 
@@ -94,12 +97,18 @@ object ComposeTransitions : DestinationStyle.Animated {
 @Composable
 fun ComposeScreen(
     onBack: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by producePresenter {
-        ComposePresenter()
+        composePresenter()
+    }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
     }
     FlareTheme {
         Scaffold(
+            modifier = modifier,
             topBar = {
                 TopAppBar(
                     title = {
@@ -121,12 +130,12 @@ fun ComposeScreen(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    tonalElevation = 3.dp,
+                    tonalElevation = 3.dp
                 ) {
                     Row(
                         modifier = Modifier
                             .navigationBarsPadding()
-                            .imePadding(),
+                            .imePadding()
                     ) {
                         IconButton(onClick = { /*TODO*/ }) {
                             Icon(imageVector = Icons.Default.Image, contentDescription = null)
@@ -152,27 +161,30 @@ fun ComposeScreen(
                 TextField(
                     value = state.text,
                     onValueChange = state::onTextChange,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .focusRequester(
+                            focusRequester = focusRequester
+                        ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
                     ),
                     placeholder = {
                         Text(text = stringResource(id = R.string.compose_hint))
-                    },
+                    }
                 )
-
             }
         }
     }
 }
 
 @Composable
-private fun ComposePresenter() = run {
+private fun composePresenter() = run {
     var text by remember { mutableStateOf(TextFieldValue("")) }
     object {
         val text = text

@@ -10,16 +10,22 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 @Entity(
     tableName = "status",
+    indices = [
+        androidx.room.Index(value = ["statusKey", "accountKey"], unique = true)
+    ]
 )
 data class DbStatus(
     @PrimaryKey
+    val id: String = UUID.randomUUID().toString(),
     val statusKey: MicroBlogKey,
+    val accountKey: MicroBlogKey,
     val userKey: MicroBlogKey,
     val platformType: PlatformType,
-    val content: StatusContent,
+    val content: StatusContent
 )
 
 @Serializable
@@ -37,7 +43,7 @@ data class DbStatusWithUser(
     @Embedded
     val data: DbStatus,
     @Relation(parentColumn = "userKey", entityColumn = "userKey")
-    val user: DbUser,
+    val user: DbUser
 )
 
 data class DbStatusReferenceWithStatus(
@@ -59,8 +65,5 @@ data class DbStatusWithReference(
         entityColumn = "statusKey",
         entity = DbStatusReference::class
     )
-    val references: List<DbStatusReferenceWithStatus>,
+    val references: List<DbStatusReferenceWithStatus>
 )
-
-
-

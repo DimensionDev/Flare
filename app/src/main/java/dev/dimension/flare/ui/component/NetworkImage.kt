@@ -28,7 +28,7 @@ fun NetworkImage(
     contentScale: ContentScale = ContentScale.Crop,
     alpha: Float = DefaultAlpha,
     colorFilter: ColorFilter? = null,
-    filterQuality: FilterQuality = DrawScope.DefaultFilterQuality,
+    filterQuality: FilterQuality = DrawScope.DefaultFilterQuality
 ) {
     val painter = rememberAsyncImagePainter(model = model, filterQuality = filterQuality)
     Box(modifier) {
@@ -45,11 +45,11 @@ fun NetworkImage(
         AnimatedVisibility(
             visible = when (painter.state) {
                 is AsyncImagePainter.State.Empty,
-                is AsyncImagePainter.State.Success,
+                is AsyncImagePainter.State.Success
                 -> false
 
                 is AsyncImagePainter.State.Loading,
-                is AsyncImagePainter.State.Error,
+                is AsyncImagePainter.State.Error
                 -> true
             }
         ) {

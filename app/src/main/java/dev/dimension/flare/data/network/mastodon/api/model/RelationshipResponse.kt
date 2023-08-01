@@ -5,32 +5,32 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RelationshipResponse(
-  val id: String? = null,
-  val following: Boolean? = null,
+    val id: String? = null,
+    val following: Boolean? = null,
 
-  @SerialName("showing_reblogs")
-  val showingReblogs: Boolean? = null,
+    @SerialName("showing_reblogs")
+    val showingReblogs: Boolean? = null,
 
-  val notifying: Boolean? = null,
+    val notifying: Boolean? = null,
 
-  @SerialName("followed_by")
-  val followedBy: Boolean? = null,
+    @SerialName("followed_by")
+    val followedBy: Boolean? = null,
 
-  val blocking: Boolean? = null,
+    val blocking: Boolean? = null,
 
-  @SerialName("blocked_by")
-  val blockedBy: Boolean? = null,
+    @SerialName("blocked_by")
+    val blockedBy: Boolean? = null,
 
-  val muting: Boolean? = null,
+    val muting: Boolean? = null,
 
-  @SerialName("muting_notifications")
-  val mutingNotifications: Boolean? = null,
+    @SerialName("muting_notifications")
+    val mutingNotifications: Boolean? = null,
 
-  val requested: Boolean? = null,
+    val requested: Boolean? = null,
 
-  @SerialName("domain_blocking")
-  val domainBlocking: Boolean? = null,
+    @SerialName("domain_blocking")
+    val domainBlocking: Boolean? = null,
 
-  val endorsed: Boolean? = null,
-  val note: String? = null
+    val endorsed: Boolean? = null,
+    val note: String? = null
 )

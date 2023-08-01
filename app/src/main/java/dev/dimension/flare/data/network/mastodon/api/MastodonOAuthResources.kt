@@ -16,12 +16,12 @@ interface MastodonOAuthResources {
         @Field("client_name") client_name: String,
         @Field("redirect_uris") redirect_uris: String,
         @Field("scopes") scopes: String,
-        @Field("website") website: String?,
+        @Field("website") website: String?
     ): CreateApplicationResponse
 
     @GET("/api/v1/accounts/verify_credentials")
     suspend fun verifyCredentials(
-        @Header("Authorization") accessToken: String,
+        @Header("Authorization") accessToken: String
     ): Account
 
     @POST("/oauth/token")
@@ -32,6 +32,6 @@ interface MastodonOAuthResources {
         @Field("redirect_uri") redirect_uri: String,
         @Field("scope") scope: String,
         @Field("code") code: String,
-        @Field("grant_type") grant_type: String,
+        @Field("grant_type") grant_type: String
     ): RequestTokenResponse
 }

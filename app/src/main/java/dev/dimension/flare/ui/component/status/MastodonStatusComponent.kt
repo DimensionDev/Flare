@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -53,6 +54,10 @@ import com.moriatsushi.koject.Provides
 import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.repository.app.UiAccount
+import dev.dimension.flare.data.repository.app.getAccountUseCase
+import dev.dimension.flare.data.repository.cache.updateStatusUseCase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -64,11 +69,12 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun StatusPlaceholder(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -76,7 +82,7 @@ internal fun StatusPlaceholder(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
@@ -116,40 +122,40 @@ internal fun MastodonStatusComponent(
     data: UiStatus.Mastodon,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val actualData = data.reblogStatus ?: data
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         if (data.reblogStatus != null) {
             StatusRetweetHeaderComponent(
                 icon = Icons.Default.SyncAlt,
                 user = data.user,
-                text = stringResource(id = R.string.mastodon_item_reblogged_status),
+                text = stringResource(id = R.string.mastodon_item_reblogged_status)
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
         StatusHeaderComponent(
             data = actualData,
-            event = event,
+            event = event
         )
         StatusContentComponent(
             data = actualData,
             event = event,
-            state = state,
+            state = state
         )
         StatusMediaComponent(
             data = actualData,
-            event = event,
+            event = event
         )
         StatusCardComponent(
             data = actualData,
-            event = event,
+            event = event
         )
         StatusFooterComponent(
-            data = actualData,
-            event = event,
+            data = data,
+            event = event
         )
     }
 }
@@ -159,18 +165,18 @@ internal fun StatusRetweetHeaderComponent(
     icon: ImageVector,
     user: UiUser.Mastodon?,
     text: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .alpha(MediumAlpha),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = rememberVectorPainter(image = icon),
             contentDescription = null,
             modifier = Modifier
-                .size(16.dp),
+                .size(16.dp)
         )
         if (user != null) {
             Spacer(modifier = Modifier.width(8.dp))
@@ -191,14 +197,14 @@ internal fun StatusRetweetHeaderComponent(
 }
 
 data class MastodonStatusState(
-    val expanded: Boolean = false,
+    val expanded: Boolean = false
 )
 
 @Composable
 private fun StatusCardComponent(
     data: UiStatus.Mastodon,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val uriHandler = LocalUriHandler.current
     if (data.card != null) {
@@ -211,12 +217,12 @@ private fun StatusCardComponent(
                     .fillMaxWidth()
                     .clickable {
                         uriHandler.openUri(data.card.url)
-                    },
+                    }
             ) {
                 if (data.card.media != null) {
                     MediaItem(
                         media = data.card.media,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 Column(
@@ -238,54 +244,64 @@ private fun StatusCardComponent(
     }
 }
 
-
 @Composable
 private fun StatusFooterComponent(
     data: UiStatus.Mastodon,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
+    val actualData = data.reblogStatus ?: data
     Row(
         modifier = modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         CompositionLocalProvider(
-            LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
+            LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha)
         ) {
             StatusActionButton(
                 icon = Icons.Default.Reply,
-                text = data.matrices.humanizedReplyCount,
+                text = actualData.matrices.humanizedReplyCount,
                 modifier = Modifier
                     .weight(1f),
                 onClicked = {
-                    event.onReplyClick(data.statusKey)
+                    event.onReplyClick(actualData)
                 }
             )
             StatusActionButton(
                 icon = Icons.Default.SyncAlt,
-                text = data.matrices.humanizedReblogCount,
+                text = actualData.matrices.humanizedReblogCount,
                 modifier = Modifier
                     .weight(1f),
                 onClicked = {
-                    event.onReblogClick(data.statusKey)
+                    event.onReblogClick(actualData)
+                },
+                color = if (actualData.reaction.reblogged) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    LocalContentColor.current
                 }
             )
             StatusActionButton(
                 icon = Icons.Default.Favorite,
-                text = data.matrices.humanizedFavouriteCount,
+                text = actualData.matrices.humanizedFavouriteCount,
                 modifier = Modifier
                     .weight(1f),
                 onClicked = {
-                    event.onLikeClick(data.statusKey)
+                    event.onLikeClick(actualData)
+                },
+                color = if (actualData.reaction.liked) {
+                    Color.Red
+                } else {
+                    LocalContentColor.current
                 }
             )
             StatusActionButton(
                 icon = Icons.Default.MoreHoriz,
                 text = null,
                 onClicked = {
-                    event.onMoreClick(data.statusKey)
+                    event.onMoreClick(data)
                 }
             )
         }
@@ -298,7 +314,8 @@ private fun StatusActionButton(
     text: String?,
     onClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    contentDescription: String? = null,
+    color: Color = LocalContentColor.current,
+    contentDescription: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Row(
@@ -306,10 +323,10 @@ private fun StatusActionButton(
             .clickable(
                 indication = null,
                 interactionSource = interactionSource,
-                onClick = onClicked,
+                onClick = onClicked
             )
             .padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
@@ -319,16 +336,18 @@ private fun StatusActionButton(
                     interactionSource = interactionSource,
                     indication = rememberRipple(
                         bounded = false,
-                        radius = 20.dp,
-                    ),
+                        radius = 20.dp
+                    )
                 )
                 .size(16.dp),
+            tint = color
         )
         if (!text.isNullOrEmpty()) {
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
+                color = color
             )
         }
     }
@@ -338,7 +357,7 @@ private fun StatusActionButton(
 private fun StatusMediaComponent(
     data: UiStatus.Mastodon,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     if (data.media.isNotEmpty()) {
         Column(
@@ -355,7 +374,7 @@ private fun StatusMediaComponent(
                             modifier = Modifier
                                 .clickable {
                                     event.onMediaClick(media)
-                                },
+                                }
                         )
                     }
                 }
@@ -367,14 +386,14 @@ private fun StatusMediaComponent(
 @Composable
 fun MediaItem(
     media: UiMedia,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     when (media) {
         is UiMedia.Image -> {
             NetworkImage(
                 model = media.url,
                 contentDescription = media.description,
-                modifier = modifier.aspectRatio(media.aspectRatio),
+                modifier = modifier.aspectRatio(media.aspectRatio)
             )
         }
 
@@ -382,7 +401,7 @@ fun MediaItem(
             NetworkImage(
                 model = media.thumbnailUrl,
                 contentDescription = media.description,
-                modifier = modifier.aspectRatio(media.aspectRatio),
+                modifier = modifier.aspectRatio(media.aspectRatio)
             )
         }
 
@@ -396,23 +415,23 @@ private fun StatusContentComponent(
     data: UiStatus.Mastodon,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         if (!data.contentWarningText.isNullOrEmpty()) {
             Text(
-                text = data.contentWarningText,
+                text = data.contentWarningText
             )
             TextButton(
                 onClick = {
-                    event.onShowMoreClick(data.statusKey)
-                },
+                    event.onShowMoreClick(data)
+                }
             ) {
                 Text(
                     text = stringResource(
-                        if (state.expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
+                        if (state.expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more
                     )
                 )
             }
@@ -423,14 +442,14 @@ private fun StatusContentComponent(
                     HtmlText(
                         element = data.contentToken,
                         layoutDirection = data.contentDirection,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 if (data.poll != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusPollComponent(
                         data = data.poll,
-                        event = event,
+                        event = event
                     )
                 }
             }
@@ -442,27 +461,27 @@ private fun StatusContentComponent(
 private fun StatusPollComponent(
     data: UiStatus.Mastodon.Poll,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         data.options.forEach { option ->
             Column {
                 Row {
                     Box {
                         Text(
-                            text = option.humanizedPercentage,
+                            text = option.humanizedPercentage
                         )
                         Text(
                             text = "100%",
-                            modifier = Modifier.alpha(0f),
+                            modifier = Modifier.alpha(0f)
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = option.title,
+                        text = option.title
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -475,7 +494,7 @@ private fun StatusPollComponent(
             }
         }
         Text(
-            text = data.humanizedExpiresAt,
+            text = data.humanizedExpiresAt
         )
     }
 }
@@ -484,11 +503,11 @@ private fun StatusPollComponent(
 private fun StatusHeaderComponent(
     data: UiStatus.Mastodon,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         AvatarComponent(
             data = data.user.avatarUrl,
@@ -501,7 +520,7 @@ private fun StatusHeaderComponent(
         Spacer(modifier = Modifier.width(8.dp))
         Column(
             modifier = Modifier
-                .weight(1f),
+                .weight(1f)
         ) {
             HtmlText(
                 element = data.user.nameElement,
@@ -509,7 +528,7 @@ private fun StatusHeaderComponent(
                 modifier = Modifier
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
+                        indication = null
                     ) {
                         event.onUserClick(data.user.userKey)
                     }
@@ -521,7 +540,7 @@ private fun StatusHeaderComponent(
                     .alpha(MediumAlpha)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
+                        indication = null
                     ) {
                         event.onUserClick(data.user.userKey)
                     }
@@ -546,52 +565,53 @@ private fun StatusHeaderComponent(
 @Composable
 private fun VisibilityIcon(
     visibility: UiStatus.Mastodon.Visibility,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     when (visibility) {
         UiStatus.Mastodon.Visibility.Public -> Icon(
             imageVector = Icons.Default.Public,
             contentDescription = null,
-            modifier = modifier,
+            modifier = modifier
         )
 
         UiStatus.Mastodon.Visibility.Unlisted -> Icon(
             imageVector = Icons.Default.LockOpen,
             contentDescription = null,
-            modifier = modifier,
+            modifier = modifier
         )
 
         UiStatus.Mastodon.Visibility.Private -> Icon(
             imageVector = Icons.Default.Lock,
             contentDescription = null,
-            modifier = modifier,
+            modifier = modifier
         )
 
         UiStatus.Mastodon.Visibility.Direct -> Icon(
             imageVector = Icons.Default.MailOutline,
             contentDescription = null,
-            modifier = modifier,
+            modifier = modifier
         )
     }
 }
 
-interface MastodonStatusEvent {
+internal interface MastodonStatusEvent {
     fun onUserClick(userKey: MicroBlogKey)
-    fun onStatusClick(statusKey: MicroBlogKey)
-    fun onStatusLongClick(statusKey: MicroBlogKey)
-    fun onReplyClick(statusKey: MicroBlogKey)
-    fun onReblogClick(statusKey: MicroBlogKey)
-    fun onLikeClick(statusKey: MicroBlogKey)
-    fun onBookmarkClick(statusKey: MicroBlogKey)
+    fun onStatusClick(status: UiStatus.Mastodon)
+    fun onStatusLongClick(status: UiStatus.Mastodon)
+    fun onReplyClick(status: UiStatus.Mastodon)
+    fun onReblogClick(status: UiStatus.Mastodon)
+    fun onLikeClick(status: UiStatus.Mastodon)
+    fun onBookmarkClick(status: UiStatus.Mastodon)
     fun onMediaClick(media: UiMedia)
-    fun onShowMoreClick(statusKey: MicroBlogKey)
-    fun onMoreClick(statusKey: MicroBlogKey)
+    fun onShowMoreClick(status: UiStatus.Mastodon)
+    fun onMoreClick(status: UiStatus.Mastodon)
 }
 
 @Provides
 @Singleton
-class DefaultMastodonStatusEvent(
+internal class DefaultMastodonStatusEvent(
     private val context: Context,
+    private val scope: CoroutineScope
 ) : MastodonStatusEvent {
     override fun onUserClick(userKey: MicroBlogKey) {
         val intent =
@@ -600,30 +620,120 @@ class DefaultMastodonStatusEvent(
         context.startActivity(intent)
     }
 
-    override fun onStatusClick(statusKey: MicroBlogKey) {
+    override fun onStatusClick(status: UiStatus.Mastodon) {
     }
 
-    override fun onStatusLongClick(statusKey: MicroBlogKey) {
+    override fun onStatusLongClick(status: UiStatus.Mastodon) {
     }
 
-    override fun onReplyClick(statusKey: MicroBlogKey) {
+    override fun onReplyClick(status: UiStatus.Mastodon) {
     }
 
-    override fun onReblogClick(statusKey: MicroBlogKey) {
+    override fun onReblogClick(status: UiStatus.Mastodon) {
+        scope.launch {
+            val account = getAccountUseCase(status.accountKey) ?: return@launch
+            if (account !is UiAccount.Mastodon) return@launch
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = status.statusKey,
+                accountKey = status.accountKey,
+                update = {
+                    it.copy(
+                        data = it.data.copy(
+                            reblogged = !status.reaction.reblogged,
+                            reblogsCount = if (status.reaction.reblogged) {
+                                it.data.reblogsCount?.minus(1)
+                            } else {
+                                it.data.reblogsCount?.plus(1)
+                            }
+                        )
+                    )
+                }
+            )
+
+            runCatching {
+                if (status.reaction.reblogged) {
+                    account.service.unRetweet(status.statusKey.id)
+                } else {
+                    account.service.retweet(status.statusKey.id)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = status.statusKey,
+                    accountKey = status.accountKey,
+                    update = {
+                        it.copy(
+                            data = it.data.copy(
+                                reblogged = status.reaction.reblogged,
+                                reblogsCount = if (status.reaction.reblogged) {
+                                    it.data.reblogsCount?.minus(1)
+                                } else {
+                                    it.data.reblogsCount?.plus(1)
+                                }
+                            )
+                        )
+                    }
+                )
+            }
+        }
     }
 
-    override fun onLikeClick(statusKey: MicroBlogKey) {
+    override fun onLikeClick(status: UiStatus.Mastodon) {
+        scope.launch {
+            val account = getAccountUseCase(status.accountKey) ?: return@launch
+            if (account !is UiAccount.Mastodon) return@launch
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = status.statusKey,
+                accountKey = status.accountKey,
+                update = {
+                    it.copy(
+                        data = it.data.copy(
+                            favourited = !status.reaction.liked,
+                            favouritesCount = if (status.reaction.liked) {
+                                it.data.favouritesCount?.minus(1)
+                            } else {
+                                it.data.favouritesCount?.plus(1)
+                            }
+                        )
+                    )
+                }
+            )
+
+            runCatching {
+                if (status.reaction.liked) {
+                    account.service.unlike(status.statusKey.id)
+                } else {
+                    account.service.like(status.statusKey.id)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = status.statusKey,
+                    accountKey = status.accountKey,
+                    update = {
+                        it.copy(
+                            data = it.data.copy(
+                                favourited = status.reaction.liked,
+                                favouritesCount = if (status.reaction.liked) {
+                                    it.data.favouritesCount?.minus(1)
+                                } else {
+                                    it.data.favouritesCount?.plus(1)
+                                }
+                            )
+                        )
+                    }
+                )
+            }
+        }
     }
 
-    override fun onBookmarkClick(statusKey: MicroBlogKey) {
+    override fun onBookmarkClick(status: UiStatus.Mastodon) {
     }
 
     override fun onMediaClick(media: UiMedia) {
     }
 
-    override fun onShowMoreClick(statusKey: MicroBlogKey) {
+    override fun onShowMoreClick(status: UiStatus.Mastodon) {
     }
 
-    override fun onMoreClick(statusKey: MicroBlogKey) {
+    override fun onMoreClick(status: UiStatus.Mastodon) {
     }
 }

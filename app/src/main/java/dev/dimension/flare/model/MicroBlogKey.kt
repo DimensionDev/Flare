@@ -2,7 +2,7 @@ package dev.dimension.flare.model
 
 data class MicroBlogKey(
     val id: String,
-    val host: String,
+    val host: String
 ) {
     override fun hashCode(): Int {
         return this.id.hashCode() * 31 + host.hashCode()
@@ -79,5 +79,3 @@ data class MicroBlogKey(
         }
     }
 }
-
-

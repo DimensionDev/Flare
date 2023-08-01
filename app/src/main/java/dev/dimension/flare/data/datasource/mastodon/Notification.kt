@@ -16,7 +16,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveNotification
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
-import dev.dimension.flare.data.repository.UiAccount
+import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
@@ -24,17 +24,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-
 @OptIn(ExperimentalPagingApi::class)
 internal class NotificationRemoteMediator(
     private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
+    private val pagingKey: String
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun initialize(): InitializeAction {
-        return InitializeAction.SKIP_INITIAL_REFRESH
-    }
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>
@@ -79,7 +75,6 @@ internal class NotificationRemoteMediator(
     }
 }
 
-
 @OptIn(ExperimentalPagingApi::class)
 @Composable
 internal fun notificationTimelineDataSource(
@@ -87,10 +82,10 @@ internal fun notificationTimelineDataSource(
     pageSize: Int = 20,
     pagingKey: String = "notification",
     accountKey: MicroBlogKey = account.accountKey,
-    database: CacheDatabase = rememberInject(),
+    database: CacheDatabase = rememberInject()
 ): Flow<PagingData<UiStatus>> {
     return remember(
-        accountKey,
+        accountKey
     ) {
         Pager(
             config = PagingConfig(pageSize = pageSize),

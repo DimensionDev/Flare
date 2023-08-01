@@ -8,14 +8,13 @@ import java.text.Bidi
 
 sealed interface UiUser {
     val userKey: MicroBlogKey
-    val name: String
     val handle: String
     val avatarUrl: String
     val nameElement: Element
 
     data class Mastodon(
         override val userKey: MicroBlogKey,
-        override val name: String,
+        val name: String,
         val handleInternal: String,
         override val avatarUrl: String,
         val bannerUrl: String?,
@@ -23,27 +22,31 @@ sealed interface UiUser {
         val description: String?,
         val descriptionElement: Element?,
         val matrices: Matrices,
-        val locked: Boolean,
+        val locked: Boolean
     ) : UiUser {
         override val handle = "@$handleInternal@${userKey.host}"
-        val nameDirection = if (Bidi(name, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
-            LayoutDirection.Ltr
-        } else {
-            LayoutDirection.Rtl
-        }
-
-        val descriptionDirection = description?.let {
-            if (Bidi(it, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
+        val nameDirection by lazy {
+            if (Bidi(name, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
                 LayoutDirection.Ltr
             } else {
                 LayoutDirection.Rtl
             }
         }
 
+        val descriptionDirection by lazy {
+            description?.let {
+                if (Bidi(it, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
+                    LayoutDirection.Ltr
+                } else {
+                    LayoutDirection.Rtl
+                }
+            }
+        }
+
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
-            val statusesCount: Long,
+            val statusesCount: Long
         ) {
             val fansCountHumanized = fansCount.humanize()
             val followsCountHumanized = followsCount.humanize()
@@ -51,4 +54,3 @@ sealed interface UiUser {
         }
     }
 }
-

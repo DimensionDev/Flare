@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity.navController = navController
             }
             Content(
-                navController = navController,
+                navController = navController
             )
         }
     }
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Content(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController = rememberNavController()
 ) {
     DestinationsNavHost(
         navGraph = NavGraphs.root,
@@ -81,8 +81,8 @@ fun Content(
                         AnimatedContentTransitionScope.SlideDirection.Right,
                         targetOffset = { it / 4 }
                     ) + fadeOut()
-                },
+                }
             )
-        ),
+        )
     )
 }

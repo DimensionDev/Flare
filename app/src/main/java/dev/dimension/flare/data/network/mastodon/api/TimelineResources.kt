@@ -16,7 +16,7 @@ interface TimelineResources {
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
-        @Query("local") local: Boolean? = null,
+        @Query("local") local: Boolean? = null
     ): List<Status>
 
     @GET("/api/v1/timelines/public")
@@ -27,7 +27,7 @@ interface TimelineResources {
         @Query("limit") limit: Int? = null,
         @Query("local") local: Boolean? = null,
         @Query("remote") remote: Boolean? = null,
-        @Query("only_media") only_media: Boolean? = null,
+        @Query("only_media") only_media: Boolean? = null
     ): List<Status>
 
     @GET("/api/v1/accounts/{id}/statuses")
@@ -38,7 +38,7 @@ interface TimelineResources {
         @Query("min_id") min_id: String? = null,
         @Query("exclude_replies") exclude_replies: Boolean? = null,
         @Query("limit") limit: Int? = null,
-        @Query("pinned") pinned: Boolean? = null,
+        @Query("pinned") pinned: Boolean? = null
     ): List<Status>
 
     @GET("/api/v1/favourites")
@@ -47,7 +47,7 @@ interface TimelineResources {
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
         @Query("exclude_replies") exclude_replies: Boolean? = null,
-        @Query("limit") limit: Int? = null,
+        @Query("limit") limit: Int? = null
     ): Response<List<Status>>
 
     @GET("/api/v1/notifications")
@@ -57,7 +57,7 @@ interface TimelineResources {
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
         @Query("exclude_types[]") exclude_types: List<NotificationTypes>? = null,
-        @Query("account_id") account_id: String? = null,
+        @Query("account_id") account_id: String? = null
     ): List<Notification>
 
     @GET("/api/v1/statuses/{id}/context")
@@ -71,7 +71,7 @@ interface TimelineResources {
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
         @Query("local") local: Boolean? = null,
-        @Query("only_media") only_media: Boolean? = null,
+        @Query("only_media") only_media: Boolean? = null
     ): List<Status>
 
     @GET("/api/v1//timelines/list/{id}")
@@ -80,6 +80,6 @@ interface TimelineResources {
         @Query("max_id") max_id: String? = null,
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
-        @Query("limit") limit: Int? = null,
+        @Query("limit") limit: Int? = null
     ): List<Status>
 }

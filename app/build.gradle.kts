@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ktorfit)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -85,6 +86,7 @@ dependencies {
     implementation(libs.nestedScrollView)
     implementation(libs.bundles.compose.destinations)
     ksp(libs.compose.destinations.ksp)
+    lintChecks(libs.compose.lint.checks)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

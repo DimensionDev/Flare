@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component
 
-
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -63,7 +62,7 @@ fun HtmlText(
     overflow: TextOverflow = TextOverflow.Ellipsis,
     softWrap: Boolean = true,
     textStyle: TextStyle = LocalTextStyle.current,
-    linkStyle: TextStyle = textStyle.copy(MaterialTheme.colorScheme.primary),
+    linkStyle: TextStyle = textStyle.copy(MaterialTheme.colorScheme.primary)
 ) {
     CompositionLocalProvider(
         LocalLayoutDirection provides layoutDirection
@@ -85,7 +84,7 @@ fun HtmlText(
                 textAlign = textAlign,
                 lineHeight = lineHeight,
                 overflow = overflow,
-                softWrap = softWrap,
+                softWrap = softWrap
             )
         }
     }
@@ -109,14 +108,14 @@ private fun RenderContent(
     textAlign: TextAlign? = null,
     lineHeight: TextUnit = TextUnit.Unspecified,
     overflow: TextOverflow = TextOverflow.Clip,
-    softWrap: Boolean = true,
+    softWrap: Boolean = true
 ) {
     val uriHandler = LocalUriHandler.current
     val value = remember(element, textStyle, linkStyle) {
         buildContentAnnotatedString(
             element = element,
             textStyle = textStyle,
-            linkStyle = linkStyle,
+            linkStyle = linkStyle
         )
     }
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -162,8 +161,8 @@ private fun RenderContent(
                     Placeholder(
                         width = LocalTextStyle.current.fontSize,
                         height = LocalTextStyle.current.fontSize,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-                    ),
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                    )
                 ) { target ->
                     NetworkImage(
                         model = target,
@@ -171,8 +170,8 @@ private fun RenderContent(
                         modifier = Modifier
                             .size(LocalTextStyle.current.fontSize.value.dp)
                     )
-                },
-            ),
+                }
+            )
         )
     }
 }
@@ -181,11 +180,11 @@ private fun RenderContent(
 fun buildContentAnnotatedString(
     element: Element,
     textStyle: TextStyle,
-    linkStyle: TextStyle,
+    linkStyle: TextStyle
 ): AnnotatedString {
     val styleData = StyleData(
         textStyle = textStyle,
-        linkStyle = linkStyle,
+        linkStyle = linkStyle
     )
     return buildAnnotatedString {
         element.childNodes().forEach {
@@ -194,10 +193,9 @@ fun buildContentAnnotatedString(
     }
 }
 
-
 data class StyleData(
     val textStyle: TextStyle,
-    val linkStyle: TextStyle,
+    val linkStyle: TextStyle
 )
 
 private fun AnnotatedString.Builder.renderNode(
@@ -217,7 +215,7 @@ private fun AnnotatedString.Builder.renderNode(
 
 private fun AnnotatedString.Builder.renderText(text: String, textStyle: TextStyle) {
     pushStyle(
-        textStyle.toSpanStyle(),
+        textStyle.toSpanStyle()
     )
     append(text)
     pop()
@@ -249,7 +247,7 @@ private fun AnnotatedString.Builder.renderElement(
 }
 
 private fun AnnotatedString.Builder.renderEmoji(
-    element: Element,
+    element: Element
 ) {
     val target = element.attr("target")
     appendInlineContent(ID_IMAGE, target)
@@ -265,7 +263,7 @@ private fun AnnotatedString.Builder.renderLink(
         element.childNodes().forEach {
             renderNode(
                 node = it,
-                styleData = styleData.copy(textStyle = styleData.linkStyle),
+                styleData = styleData.copy(textStyle = styleData.linkStyle)
             )
         }
     }

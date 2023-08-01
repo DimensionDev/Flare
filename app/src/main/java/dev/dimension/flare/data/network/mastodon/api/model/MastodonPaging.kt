@@ -5,7 +5,7 @@ import de.jensklingenberg.ktorfit.Response
 class MastodonPaging<T>(
     data: List<T>,
     val next: String? = null,
-    val prev: String? = null,
+    val prev: String? = null
 ) : List<T> by data {
     companion object {
         fun <T> from(response: Response<List<T>>): MastodonPaging<T> {
@@ -15,9 +15,8 @@ class MastodonPaging<T>(
             return MastodonPaging(
                 data = response.body() ?: emptyList(),
                 next = next,
-                prev = prev,
+                prev = prev
             )
         }
     }
 }
-

@@ -27,13 +27,13 @@ import dev.dimension.flare.ui.theme.FlareTheme
 @Destination
 @Composable
 fun SettingsRoute(
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator
 ) {
     SettingsScreen(
         onBack = navigator::navigateUp,
         toAccounts = {
             navigator.navigate(AccountsRouteDestination)
-        },
+        }
     )
 }
 
@@ -41,7 +41,7 @@ fun SettingsRoute(
 @Composable
 internal fun SettingsScreen(
     onBack: () -> Unit,
-    toAccounts: () -> Unit,
+    toAccounts: () -> Unit
 ) {
     FlareTheme {
         Scaffold(
@@ -54,14 +54,14 @@ internal fun SettingsScreen(
                         IconButton(onClick = onBack) {
                             Icon(Icons.Default.ArrowBack, contentDescription = null)
                         }
-                    },
+                    }
                 )
-            },
+            }
         ) {
             Column(
                 modifier = Modifier
                     .padding(it)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
             ) {
                 ListItem(
                     headlineContent = {
@@ -70,7 +70,7 @@ internal fun SettingsScreen(
                     leadingContent = {
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
-                            contentDescription = null,
+                            contentDescription = null
                         )
                     },
                     modifier = Modifier.clickable {
@@ -83,6 +83,7 @@ internal fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsPresenter() = run {
-
+private fun settingsPresenter() = run {
+    object {
+    }
 }

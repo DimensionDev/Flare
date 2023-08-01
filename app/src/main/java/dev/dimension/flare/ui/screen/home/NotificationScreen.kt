@@ -23,8 +23,8 @@ import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.mastodon.mentionTimelineDataSource
 import dev.dimension.flare.data.datasource.mastodon.notificationTimelineDataSource
-import dev.dimension.flare.data.repository.UiAccount
-import dev.dimension.flare.data.repository.activeAccountPresenter
+import dev.dimension.flare.data.repository.app.UiAccount
+import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
@@ -33,19 +33,21 @@ import dev.dimension.flare.ui.flatMap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen() {
+fun NotificationScreen(
+    modifier: Modifier = Modifier
+) {
     val state by producePresenter {
-        NotificationPresenter()
+        notificationPresenter()
     }
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
             ) {
                 NotificationType.values().forEachIndexed { index, notificationType ->
                     SegmentedButton(
@@ -53,7 +55,7 @@ fun NotificationScreen() {
                         onClick = {
                             state.onNotificationTypeChanged(notificationType)
                         },
-                        shape = SegmentedButtonDefaults.shape(position = index, count = NotificationType.values().size),
+                        shape = SegmentedButtonDefaults.shape(position = index, count = NotificationType.values().size)
                     ) {
                         Text(text = stringResource(id = notificationType.title))
                     }
@@ -70,12 +72,12 @@ fun NotificationScreen() {
 
 enum class NotificationType(@StringRes val title: Int) {
     All(title = R.string.notification_tab_all_title),
-    Mention(title = R.string.notification_tab_mentions_title),
+    Mention(title = R.string.notification_tab_mentions_title)
 }
 
 @Composable
-private fun NotificationPresenter(
-    defaultEvent: DefaultMastodonStatusEvent = rememberInject(),
+private fun notificationPresenter(
+    defaultEvent: DefaultMastodonStatusEvent = rememberInject()
 ) = run {
     var type by remember { mutableStateOf(NotificationType.All) }
 
@@ -88,7 +90,6 @@ private fun NotificationPresenter(
                     NotificationType.Mention -> mentionTimelineDataSource(account = it)
                 }.collectAsLazyPagingItems()
             )
-
         }
     }
     object {

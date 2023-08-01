@@ -26,7 +26,7 @@ class OAuthAuthorization(
     private val consumerSecret: String,
     private val accessToken: String? = null,
     private val accessSecret: String? = null,
-    private val random: Random = Random.Default,
+    private val random: Random = Random.Default
 ) : Authorization {
 
     override val hasAuthorization: Boolean = true
@@ -48,7 +48,7 @@ class OAuthAuthorization(
             OAUTH_SIGNATURE_METHOD to OAUTH_SIGNATURE_METHOD_VALUE,
             OAUTH_TIMESTAMP to timestamp,
             OAUTH_ACCESS_TOKEN to accessToken.orEmpty(),
-            OAUTH_VERSION to OAUTH_VERSION_VALUE,
+            OAUTH_VERSION to OAUTH_VERSION_VALUE
         ).forEach {
             if (it.value.isEmpty()) return@forEach
             builder.parameters.append(it.key, it.value)
@@ -63,11 +63,11 @@ class OAuthAuthorization(
             .sortedBy { it.key }
             .joinToString(separator = "&") {
                 "${it.key}=${
-                    when {
-                        it.value.isEmpty() -> ""
-                        it.value.size == 1 -> it.value.first()
-                        else -> it.value.toString()
-                    }.encodeOAuth()
+                when {
+                    it.value.isEmpty() -> ""
+                    it.value.size == 1 -> it.value.first()
+                    else -> it.value.toString()
+                }.encodeOAuth()
                 }"
             }
 
@@ -89,7 +89,7 @@ class OAuthAuthorization(
             OAUTH_SIGNATURE_METHOD to OAUTH_SIGNATURE_METHOD_VALUE,
             OAUTH_TIMESTAMP to timestamp,
             OAUTH_ACCESS_TOKEN to accessToken.orEmpty(),
-            OAUTH_VERSION to OAUTH_VERSION_VALUE,
+            OAUTH_VERSION to OAUTH_VERSION_VALUE
         ).mapNotNull {
             if (it.value.isEmpty()) {
                 null

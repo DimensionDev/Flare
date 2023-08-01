@@ -5,14 +5,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Emoji(
-  val shortcode: String? = null,
-  val url: String? = null,
+    val shortcode: String? = null,
+    val url: String? = null,
 
-  @SerialName("static_url")
-  val staticURL: String? = null,
+    @SerialName("static_url")
+    val staticURL: String? = null,
 
-  @SerialName("visible_in_picker")
-  val visibleInPicker: Boolean? = null,
+    @SerialName("visible_in_picker")
+    val visibleInPicker: Boolean? = null,
 
-  val category: String? = null
+    val category: String? = null
 )

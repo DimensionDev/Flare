@@ -5,18 +5,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class MediaType {
-  @SerialName("unknown")
-  unknown,
+    @SerialName("unknown")
+    Unknown,
 
-  @SerialName("image")
-  image,
+    @SerialName("image")
+    Image,
 
-  @SerialName("gifv")
-  gifv,
+    @SerialName("gifv")
+    GifV,
 
-  @SerialName("video")
-  video,
+    @SerialName("video")
+    Video,
 
-  @SerialName("audio")
-  audio,
+    @SerialName("audio")
+    Audio
 }

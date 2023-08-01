@@ -12,11 +12,11 @@ class MastodonOAuthService(
     private val website: String? = null,
     private val redirect_uri: String = "urn:ietf:wg:oauth:2.0:oob",
     private val scopes: List<MastodonAuthScope> = listOf(
-        MastodonAuthScope.read,
-        MastodonAuthScope.write,
-        MastodonAuthScope.follow,
-        MastodonAuthScope.push,
-    ),
+        MastodonAuthScope.Read,
+        MastodonAuthScope.Write,
+        MastodonAuthScope.Follow,
+        MastodonAuthScope.Push
+    )
 ) {
     private val resources: MastodonOAuthResources by lazy {
         ktorfit(baseUrl).create()
@@ -25,15 +25,15 @@ class MastodonOAuthService(
     suspend fun createApplication() = resources.createApplication(
         client_name = client_name,
         redirect_uris = redirect_uri,
-        scopes = scopes.joinToString(" ") { it.name },
-        website = website,
+        scopes = scopes.joinToString(" ") { it.value },
+        website = website
     )
 
     fun getWebOAuthUrl(response: CreateApplicationResponse) =
         "$baseUrl/oauth/authorize?client_id=${response.clientID}&response_type=code&redirect_uri=${response.redirectURI.encodeURLParameter()}&scope=${
-            scopes.joinToString(
+        scopes.joinToString(
             " "
-        ) { it.name }.encodeURLParameter()
+        ) { it.value }.encodeURLParameter()
         }"
 
     suspend fun getAccessToken(code: String, response: CreateApplicationResponse) =
@@ -41,9 +41,9 @@ class MastodonOAuthService(
             client_id = response.clientID,
             client_secret = response.clientSecret,
             redirect_uri = response.redirectURI,
-            scope = scopes.joinToString(" ") { it.name },
+            scope = scopes.joinToString(" ") { it.value },
             code = code,
-            grant_type = "authorization_code",
+            grant_type = "authorization_code"
         )
 
     suspend fun verifyCredentials(accessToken: String) =

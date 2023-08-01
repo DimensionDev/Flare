@@ -24,10 +24,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
-import dev.dimension.flare.data.repository.UiApplication
-import dev.dimension.flare.data.repository.addMastodonApplicationUseCase
-import dev.dimension.flare.data.repository.findApplicationUseCase
-import dev.dimension.flare.data.repository.setPendingOAuthUseCase
+import dev.dimension.flare.data.repository.app.UiApplication
+import dev.dimension.flare.data.repository.app.addMastodonApplicationUseCase
+import dev.dimension.flare.data.repository.app.findApplicationUseCase
+import dev.dimension.flare.data.repository.app.setPendingOAuthUseCase
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.launch
@@ -48,10 +48,10 @@ fun LoginRoute() {
 internal fun LoginScreen() {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
-        LoginPresenter(
+        loginPresenter(
             launchUrl = {
                 uriHandler.openUri(it)
-            },
+            }
         )
     }
     FlareTheme {
@@ -61,7 +61,7 @@ internal fun LoginScreen() {
                     .fillMaxSize()
                     .padding(it),
                 horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Center
             ) {
                 OutlinedTextField(
                     value = state.host,
@@ -69,10 +69,10 @@ internal fun LoginScreen() {
                     label = {
                         Text(stringResource(id = R.string.login_hint))
                     },
-                    enabled = !state.loading,
+                    enabled = !state.loading
                 )
                 Button(
-                    onClick = state::login,
+                    onClick = state::login
                 ) {
                     Text(stringResource(id = R.string.login_button))
                 }
@@ -86,7 +86,7 @@ internal fun LoginScreen() {
 
 private suspend fun mastodonLoginUseCase(
     domain: String,
-    launchOAuth: (String) -> Unit,
+    launchOAuth: (String) -> Unit
 ) {
     val baseUrl = if (domain.startsWith("http://", ignoreCase = true) || domain.startsWith(
             "https://",
@@ -103,7 +103,7 @@ private suspend fun mastodonLoginUseCase(
         baseUrl = baseUrl.toString(),
         client_name = "Flare",
         website = "https://github.com/TwidereProject/TwidereX-Android",
-        redirect_uri = AppDeepLink.Callback.Mastodon,
+        redirect_uri = AppDeepLink.Callback.Mastodon
     )
 
     val application = findApplicationUseCase(host)?.let {
@@ -133,8 +133,8 @@ private suspend fun mastodonLoginUseCase(
 }
 
 @Composable
-private fun LoginPresenter(
-    launchUrl: (String) -> Unit,
+private fun loginPresenter(
+    launchUrl: (String) -> Unit
 ) = run {
     var host by remember { mutableStateOf(TextFieldValue()) }
     var loading by remember { mutableStateOf(false) }
@@ -155,7 +155,7 @@ private fun LoginPresenter(
                 runCatching {
                     mastodonLoginUseCase(
                         domain = host.text,
-                        launchOAuth = launchUrl,
+                        launchOAuth = launchUrl
                     )
                 }.onFailure {
                     error = it.message

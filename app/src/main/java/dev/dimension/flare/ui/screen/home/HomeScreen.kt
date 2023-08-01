@@ -47,8 +47,8 @@ import androidx.navigation.compose.rememberNavController
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.accountDataPresenter
-import dev.dimension.flare.data.repository.activeAccountPresenter
+import dev.dimension.flare.data.repository.app.accountDataPresenter
+import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.NetworkImage
@@ -62,7 +62,7 @@ import dev.dimension.flare.ui.theme.FlareTheme
 sealed class Screen(
     val route: String,
     @StringRes val title: Int,
-    val icon: ImageVector,
+    val icon: ImageVector
 ) {
     object HomeTimeline : Screen("HomeTimeline", R.string.home_tab_home_title, Icons.Default.Home)
     object Notification : Screen("Notification", R.string.home_tab_notifications_title, Icons.Default.Notifications)
@@ -72,7 +72,7 @@ sealed class Screen(
 private val items = listOf(
     Screen.HomeTimeline,
     Screen.Notification,
-    Screen.Me,
+    Screen.Me
 )
 
 @Composable
@@ -80,14 +80,14 @@ private val items = listOf(
 fun HomeScreenPreview() {
     HomeScreen(
         toCompose = {},
-        toSettings = {},
+        toSettings = {}
     )
 }
 
 @Destination
 @Composable
 fun HomeRoute(
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator
 ) {
     HomeScreen(
         toCompose = {
@@ -99,15 +99,15 @@ fun HomeRoute(
     )
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     toCompose: () -> Unit,
     toSettings: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val state by producePresenter {
-        HomePresenter()
+        homePresenter()
     }
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -118,21 +118,21 @@ fun HomeScreen(
     }
     FlareTheme {
         Scaffold(
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             floatingActionButton = {
                 AnimatedVisibility(
                     currentScreen == Screen.HomeTimeline,
                     enter = scaleIn(),
-                    exit = scaleOut(),
+                    exit = scaleOut()
                 ) {
                     FloatingActionButton(
                         onClick = {
                             toCompose.invoke()
-                        },
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = null,
+                            contentDescription = null
                         )
                     }
                 }
@@ -143,7 +143,7 @@ fun HomeScreen(
                         currentScreen?.let {
                             AnimatedContent(
                                 targetState = it,
-                                label = "Title",
+                                label = "Title"
 //                                transitionSpec = {
 //                                    slideInVertically { it } togetherWith slideOutVertically { -it }
 //                                }
@@ -159,12 +159,12 @@ fun HomeScreen(
                             is UiState.Loading -> {
                                 IconButton(
                                     onClick = {
-                                    },
+                                    }
                                 ) {
                                     Icon(
                                         Icons.Default.AccountCircle,
                                         contentDescription = null,
-                                        modifier = Modifier.placeholder(true, shape = CircleShape),
+                                        modifier = Modifier.placeholder(true, shape = CircleShape)
                                     )
                                 }
                             }
@@ -192,12 +192,11 @@ fun HomeScreen(
                                     Screen.HomeTimeline -> {
                                         IconButton(
                                             onClick = {
-
-                                            },
+                                            }
                                         ) {
                                             Icon(
                                                 Icons.Default.Search,
-                                                contentDescription = null,
+                                                contentDescription = null
                                             )
                                         }
                                     }
@@ -205,11 +204,11 @@ fun HomeScreen(
                                         IconButton(
                                             onClick = {
                                                 toSettings.invoke()
-                                            },
+                                            }
                                         ) {
                                             Icon(
                                                 Icons.Default.Settings,
-                                                contentDescription = null,
+                                                contentDescription = null
                                             )
                                         }
                                     }
@@ -246,7 +245,7 @@ fun HomeScreen(
                 startDestination = Screen.HomeTimeline.route,
                 modifier = Modifier
                     .padding(it)
-                    .consumeWindowInsets(WindowInsets.systemBars),
+                    .consumeWindowInsets(WindowInsets.systemBars)
             ) {
                 composable(Screen.HomeTimeline.route) {
                     HomeTimelineScreen()
@@ -255,12 +254,11 @@ fun HomeScreen(
                     NotificationScreen()
                 }
                 composable(Screen.Me.route) {
-                    when (val data = state.user) {
+                    when (state.user) {
                         is UiState.Error -> Unit
                         is UiState.Loading -> Unit
                         is UiState.Success -> ProfileScreen(
-                            userKey = data.data.userKey,
-                            showTopBar = false,
+                            showTopBar = false
                         )
                     }
                 }
@@ -269,9 +267,8 @@ fun HomeScreen(
     }
 }
 
-
 @Composable
-private fun HomePresenter() = run {
+private fun homePresenter() = run {
     val account by activeAccountPresenter()
     val user = account.flatMap {
         accountDataPresenter(account = it)

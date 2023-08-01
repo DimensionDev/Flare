@@ -23,10 +23,10 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
-import dev.dimension.flare.data.repository.UiApplication
-import dev.dimension.flare.data.repository.addMastodonAccountUseCase
-import dev.dimension.flare.data.repository.getPendingOAuthUseCase
-import dev.dimension.flare.data.repository.setPendingOAuthUseCase
+import dev.dimension.flare.data.repository.app.UiApplication
+import dev.dimension.flare.data.repository.app.addMastodonAccountUseCase
+import dev.dimension.flare.data.repository.app.getPendingOAuthUseCase
+import dev.dimension.flare.data.repository.app.setPendingOAuthUseCase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
@@ -39,7 +39,7 @@ import dev.dimension.flare.ui.theme.FlareTheme
 fun MastodonCallbackScreenPreview() {
     MastodonCallbackScreen(
         code = "code",
-        toHome = {},
+        toHome = {}
     )
 }
 
@@ -53,7 +53,7 @@ fun MastodonCallbackScreenPreview() {
 @Composable
 fun MastodonCallbackRoute(
     code: String?,
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator
 ) {
     MastodonCallbackScreen(
         code = code,
@@ -63,19 +63,19 @@ fun MastodonCallbackRoute(
                     inclusive = true
                 }
             }
-        },
+        }
     )
 }
 
 @Composable
 internal fun MastodonCallbackScreen(
     code: String?,
-    toHome: () -> Unit,
+    toHome: () -> Unit
 ) {
     val state by producePresenter {
-        MastodonCallbackPresenter(
+        mastodonCallbackPresenter(
             code = code,
-            toHome = toHome,
+            toHome = toHome
         )
     }
     FlareTheme {
@@ -85,7 +85,7 @@ internal fun MastodonCallbackScreen(
                     .fillMaxSize()
                     .padding(it),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Center
             ) {
                 when (val data = state) {
                     is UiState.Error -> {
@@ -102,9 +102,9 @@ internal fun MastodonCallbackScreen(
 }
 
 @Composable
-private fun MastodonCallbackPresenter(
+private fun mastodonCallbackPresenter(
     code: String?,
-    toHome: () -> Unit,
+    toHome: () -> Unit
 ): UiState<Nothing> {
     if (code == null) {
         return UiState.Error(Exception("No code"))
@@ -139,7 +139,7 @@ private fun MastodonCallbackPresenter(
 
 private suspend fun tryPendingOAuth(
     application: UiApplication.Mastodon,
-    code: String,
+    code: String
 ) {
     val host = application.host
     val baseUrl = Uri.parse("https://$host/")
@@ -147,7 +147,7 @@ private suspend fun tryPendingOAuth(
         baseUrl = baseUrl.toString(),
         client_name = "Flare",
         website = "https://github.com/TwidereProject/TwidereX-Android",
-        redirect_uri = AppDeepLink.Callback.Mastodon,
+        redirect_uri = AppDeepLink.Callback.Mastodon
     )
     val accessTokenResponse = service.getAccessToken(code, application.application)
     requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
@@ -157,6 +157,6 @@ private suspend fun tryPendingOAuth(
     addMastodonAccountUseCase(
         instance = host,
         accessToken = accessTokenResponse.accessToken,
-        accountKey = MicroBlogKey(id, host),
+        accountKey = MicroBlogKey(id, host)
     )
 }

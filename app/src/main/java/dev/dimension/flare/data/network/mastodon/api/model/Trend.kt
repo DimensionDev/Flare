@@ -5,20 +5,20 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Trend(
-  @SerialName("history")
-  val history: List<TrendHistory>? = null,
-  @SerialName("name")
-  val name: String? = null,
-  @SerialName("url")
-  val url: String? = null
+    @SerialName("history")
+    val history: List<TrendHistory>? = null,
+    @SerialName("name")
+    val name: String? = null,
+    @SerialName("url")
+    val url: String? = null
 )
 
 @Serializable
 data class TrendHistory(
-  @SerialName("accounts")
-  val accounts: String? = null,
-  @SerialName("day")
-  val day: String? = null,
-  @SerialName("uses")
-  val uses: String? = null
+    @SerialName("accounts")
+    val accounts: String? = null,
+    @SerialName("day")
+    val day: String? = null,
+    @SerialName("uses")
+    val uses: String? = null
 )

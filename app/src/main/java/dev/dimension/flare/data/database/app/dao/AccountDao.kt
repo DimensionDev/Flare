@@ -24,6 +24,9 @@ interface AccountDao {
     @Query("UPDATE DbAccount SET lastActive = :lastActive WHERE account_key = :accountKey")
     suspend fun setActiveAccount(accountKey: MicroBlogKey, lastActive: Long)
 
+    @Query("SELECT * FROM DbAccount WHERE account_key = :accountKey")
+    suspend fun getAccount(accountKey: MicroBlogKey): DbAccount?
+
     @Delete
     suspend fun deleteAccount(account: DbAccount)
 }

@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component.placeholder
 
-
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.MutableTransitionState
@@ -44,7 +43,7 @@ public object PlaceholderDefaults {
     public val fadeAnimationSpec: InfiniteRepeatableSpec<Float> by lazy {
         infiniteRepeatable(
             animation = tween(delayMillis = 200, durationMillis = 600),
-            repeatMode = RepeatMode.Reverse,
+            repeatMode = RepeatMode.Reverse
         )
     }
 
@@ -93,7 +92,7 @@ public fun Modifier.placeholder(
     shape: Shape = RectangleShape,
     highlight: PlaceholderHighlight? = null,
     placeholderFadeTransitionSpec: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> = { spring() },
-    contentFadeTransitionSpec: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> = { spring() },
+    contentFadeTransitionSpec: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> = { spring() }
 ): Modifier = composed(
     inspectorInfo = debugInspectorInfo {
         name = "placeholder"
@@ -136,7 +135,7 @@ public fun Modifier.placeholder(
         highlightProgress = infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
-            animationSpec = animationSpec,
+            animationSpec = animationSpec
         ).value
     }
 
@@ -170,7 +169,7 @@ public fun Modifier.placeholder(
                         progress = highlightProgress,
                         lastOutline = lastOutline.value,
                         lastLayoutDirection = lastLayoutDirection.value,
-                        lastSize = lastSize.value,
+                        lastSize = lastSize.value
                     )
                 }
             } else if (placeholderAlpha >= 0.99f) {
@@ -182,7 +181,7 @@ public fun Modifier.placeholder(
                     progress = highlightProgress,
                     lastOutline = lastOutline.value,
                     lastLayoutDirection = lastLayoutDirection.value,
-                    lastSize = lastSize.value,
+                    lastSize = lastSize.value
                 )
             }
 
@@ -200,7 +199,7 @@ private fun DrawScope.drawPlaceholder(
     progress: Float,
     lastOutline: Outline?,
     lastLayoutDirection: LayoutDirection?,
-    lastSize: Size?,
+    lastSize: Size?
 ): Outline? {
     // shortcut to avoid Outline calculation and allocation
     if (shape === RectangleShape) {
@@ -210,7 +209,7 @@ private fun DrawScope.drawPlaceholder(
         if (highlight != null) {
             drawRect(
                 brush = highlight.brush(progress, size),
-                alpha = highlight.alpha(progress),
+                alpha = highlight.alpha(progress)
             )
         }
         // We didn't create an outline so return null
@@ -229,7 +228,7 @@ private fun DrawScope.drawPlaceholder(
         drawOutline(
             outline = outline,
             brush = highlight.brush(progress, size),
-            alpha = highlight.alpha(progress),
+            alpha = highlight.alpha(progress)
         )
     }
 
@@ -239,7 +238,7 @@ private fun DrawScope.drawPlaceholder(
 
 private inline fun DrawScope.withLayer(
     paint: Paint,
-    drawBlock: DrawScope.() -> Unit,
+    drawBlock: DrawScope.() -> Unit
 ) = drawIntoCanvas { canvas ->
     canvas.saveLayer(size.toRect(), paint)
     drawBlock()

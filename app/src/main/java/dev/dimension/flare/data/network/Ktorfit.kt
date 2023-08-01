@@ -13,31 +13,32 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 internal fun ktorfit(
     baseUrl: String,
-    authorization: Authorization? = null,
+    authorization: Authorization? = null
 ) = de.jensklingenberg.ktorfit.ktorfit {
     baseUrl(baseUrl)
-    httpClient(HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            json(JSON)
-        }
-        if (authorization != null) {
-            install(AuthorizationPlugin) {
-                this.authorization = authorization
+    httpClient(
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(JSON)
             }
-        }
-
-        engine {
-            val loggingInterceptor = HttpLoggingInterceptor()
-            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-            addInterceptor(loggingInterceptor)
-        }
+            if (authorization != null) {
+                install(AuthorizationPlugin) {
+                    this.authorization = authorization
+                }
+            }
+            engine {
+                val loggingInterceptor = HttpLoggingInterceptor()
+                loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+                addInterceptor(loggingInterceptor)
+            }
 //        install(Logging) {
 //            logger = Logger.ANDROID
 //            level = LogLevel.ALL
 //        }
-    })
+        }
+    )
     converterFactories(
         FlowConverterFactory(),
-        CallConverterFactory(),
+        CallConverterFactory()
     )
 }

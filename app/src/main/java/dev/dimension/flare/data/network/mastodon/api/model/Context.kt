@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Context(
-  val ancestors: List<Status>? = null,
-  val descendants: List<Status>? = null,
+    val ancestors: List<Status>? = null,
+    val descendants: List<Status>? = null
 )

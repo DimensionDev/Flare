@@ -11,8 +11,7 @@ import com.moriatsushi.koject.android.application
 import com.moriatsushi.koject.start
 import dev.dimension.flare.common.AnimatedPngDecoder
 
-
-class App: Application(), ImageLoaderFactory {
+class App : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         Koject.start {

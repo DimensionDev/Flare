@@ -17,7 +17,7 @@ interface PagingTimelineDao {
     @Query("SELECT * FROM paging_timeline WHERE pagingKey == :pagingKey AND accountKey == :accountKey ORDER BY sortId DESC")
     fun getPagingSource(
         pagingKey: String,
-        accountKey: MicroBlogKey,
+        accountKey: MicroBlogKey
     ): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

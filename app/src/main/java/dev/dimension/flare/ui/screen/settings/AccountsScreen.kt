@@ -22,11 +22,11 @@ import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.UiAccount
-import dev.dimension.flare.data.repository.accountDataPresenter
-import dev.dimension.flare.data.repository.activeAccountPresenter
-import dev.dimension.flare.data.repository.allAccountsPresenter
-import dev.dimension.flare.data.repository.setActiveAccountUseCase
+import dev.dimension.flare.data.repository.app.UiAccount
+import dev.dimension.flare.data.repository.app.accountDataPresenter
+import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.repository.app.allAccountsPresenter
+import dev.dimension.flare.data.repository.app.setActiveAccountUseCase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
@@ -44,13 +44,13 @@ import kotlinx.coroutines.launch
 @Composable
 @Destination
 fun AccountsRoute(
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator
 ) {
     AccountsScreen(
         onBack = navigator::navigateUp,
         toLogin = {
             navigator.navigate(LoginRouteDestination)
-        },
+        }
     )
 }
 
@@ -58,10 +58,10 @@ fun AccountsRoute(
 @Composable
 internal fun AccountsScreen(
     onBack: () -> Unit,
-    toLogin: () -> Unit,
+    toLogin: () -> Unit
 ) {
     val state by producePresenter {
-        AccountsPresenter()
+        accountsPresenter()
     }
     FlareTheme {
         Scaffold(
@@ -88,7 +88,7 @@ internal fun AccountsScreen(
             }
         ) {
             LazyColumn(
-                contentPadding = it,
+                contentPadding = it
             ) {
                 when (val accountState = state.accounts) {
                     // TODO: show error
@@ -121,7 +121,7 @@ private fun AccountItem(
     userState: UiState<UiUser>,
     activeAccount: UiState<UiAccount>,
     onClick: (MicroBlogKey) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     when (userState) {
         // TODO: show error
@@ -148,7 +148,7 @@ private fun AccountItem(
                             selected = it.accountKey == userState.data.userKey,
                             onClick = {
                                 onClick.invoke(userState.data.userKey)
-                            },
+                            }
                         )
                     }
                 },
@@ -162,7 +162,7 @@ private fun AccountItem(
 
 @Composable
 private fun AccountItemLoadingPlaceholder(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     ListItem(
         headlineContent = {
@@ -179,7 +179,7 @@ private fun AccountItemLoadingPlaceholder(
 }
 
 @Composable
-private fun AccountsPresenter() = run {
+private fun accountsPresenter() = run {
     val scope = rememberCoroutineScope()
     val accounts by allAccountsPresenter()
     val activeAccount by activeAccountPresenter()
@@ -199,4 +199,3 @@ private fun AccountsPresenter() = run {
         }
     }
 }
-

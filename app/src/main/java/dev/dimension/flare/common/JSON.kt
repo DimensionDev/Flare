@@ -3,7 +3,6 @@ package dev.dimension.flare.common
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-
 private val json = Json {
     ignoreUnknownKeys = true
     isLenient = true

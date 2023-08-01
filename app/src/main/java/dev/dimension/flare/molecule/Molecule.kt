@@ -1,6 +1,5 @@
 package dev.dimension.flare.molecule
 
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -11,7 +10,6 @@ import app.cash.molecule.AndroidUiDispatcher
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import kotlinx.coroutines.CoroutineScope
-
 
 private class PresenterHolder<T>(
     body: @Composable () -> T
@@ -29,11 +27,18 @@ private class PresenterHolder<T>(
 @Composable
 fun <T> producePresenter(
     key: String? = null,
-    body: @Composable () -> T,
+    body: @Composable () -> T
 ): State<T> {
-    val holder = viewModel(key = key) {
-        PresenterHolder<T>(body)
-    }
-    return holder.state.collectAsState()
+    return createPresenter(body, key)
 }
 
+@Composable
+private fun <T> createPresenter(
+    body: @Composable () -> T,
+    key: String? = null,
+    holder: PresenterHolder<T> = viewModel(key = key) {
+        PresenterHolder<T>(body)
+    }
+): State<T> {
+    return holder.state.collectAsState()
+}

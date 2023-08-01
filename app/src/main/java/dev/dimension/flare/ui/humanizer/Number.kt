@@ -5,11 +5,9 @@ import java.math.RoundingMode
 import kotlin.math.max
 import kotlin.math.pow
 
-
 fun Float.humanizePercentage(): String {
     return "${BigDecimal(this.times(100).toDouble()).setScale(0, RoundingMode.HALF_UP)}%"
 }
-
 
 fun Long.humanize(digitPosition: Int = 1): String {
     return when {

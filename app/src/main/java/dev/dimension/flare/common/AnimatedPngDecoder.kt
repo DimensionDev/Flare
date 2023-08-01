@@ -9,7 +9,6 @@ import coil.request.Options
 import com.github.penfeizhou.animation.apng.APNGDrawable
 import com.github.penfeizhou.animation.apng.decode.APNGParser
 
-
 internal class AnimatedPngDecoder(private val source: ImageSource) : Decoder {
     override suspend fun decode(): DecodeResult {
         return DecodeResult(

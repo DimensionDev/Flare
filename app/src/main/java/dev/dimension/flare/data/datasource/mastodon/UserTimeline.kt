@@ -16,7 +16,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.save
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
-import dev.dimension.flare.data.repository.UiAccount
+import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
@@ -24,18 +24,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-
 @OptIn(ExperimentalPagingApi::class)
 internal class UserTimelineRemoteMediator(
     private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
-    private val pagingKey: String,
+    private val pagingKey: String
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun initialize(): InitializeAction {
-        return InitializeAction.SKIP_INITIAL_REFRESH
-    }
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>
@@ -82,19 +78,18 @@ internal class UserTimelineRemoteMediator(
     }
 }
 
-
 @OptIn(ExperimentalPagingApi::class)
 @Composable
 internal fun userTimelineDataSource(
     account: UiAccount.Mastodon,
     userKey: MicroBlogKey = account.accountKey,
     pageSize: Int = 20,
-    pagingKey: String = "user_${userKey}",
-    database: CacheDatabase = rememberInject(),
+    pagingKey: String = "user_$userKey",
+    database: CacheDatabase = rememberInject()
 ): Flow<PagingData<UiStatus>> {
     return remember(
         account.accountKey,
-        userKey,
+        userKey
     ) {
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -103,7 +98,7 @@ internal fun userTimelineDataSource(
                 database,
                 account.accountKey,
                 userKey,
-                pagingKey,
+                pagingKey
             )
         ) {
             database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)

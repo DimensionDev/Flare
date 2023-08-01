@@ -16,7 +16,7 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.activeAccountPresenter
+import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
@@ -29,7 +29,7 @@ import kotlinx.coroutines.delay
 @Destination
 @Composable
 fun SplashRoute(
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator
 ) {
     SplashScreen(
         toHome = {
@@ -45,15 +45,14 @@ fun SplashRoute(
                     inclusive = true
                 }
             }
-        },
+        }
     )
 }
-
 
 @Composable
 internal fun SplashScreen(
     toHome: () -> Unit,
-    toLogin: () -> Unit,
+    toLogin: () -> Unit
 ) {
     producePresenter {
         SplashPresenter(
@@ -67,11 +66,11 @@ internal fun SplashScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = null,
+                    contentDescription = null
                 )
             }
         }
@@ -81,7 +80,7 @@ internal fun SplashScreen(
 @Composable
 private fun SplashPresenter(
     toHome: () -> Unit,
-    toLogin: () -> Unit,
+    toLogin: () -> Unit
 ) {
     val accountState by activeAccountPresenter()
     LaunchedEffect(accountState) {

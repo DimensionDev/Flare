@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PostReport(
 
-  @SerialName("account_id")
-  val accountId: String,
+    @SerialName("account_id")
+    val accountId: String,
 
-  @SerialName("status_ids")
-  val statusIds: List<String>? = null,
+    @SerialName("status_ids")
+    val statusIds: List<String>? = null,
 
-  val comment: String? = null,
+    val comment: String? = null
 
 )

@@ -5,19 +5,19 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PostStatus(
-  val status: String? = null,
+    val status: String? = null,
 
-  @SerialName("in_reply_to_id")
-  val inReplyToID: String? = null,
+    @SerialName("in_reply_to_id")
+    val inReplyToID: String? = null,
 
-  @SerialName("media_ids")
-  val mediaIDS: List<String>? = null,
+    @SerialName("media_ids")
+    val mediaIDS: List<String>? = null,
 
-  val sensitive: Boolean? = null,
+    val sensitive: Boolean? = null,
 
-  @SerialName("spoiler_text")
-  val spoilerText: String? = null,
+    @SerialName("spoiler_text")
+    val spoilerText: String? = null,
 
-  val visibility: Visibility? = null,
-  val poll: PostPoll? = null
+    val visibility: Visibility? = null,
+    val poll: PostPoll? = null
 )

@@ -33,10 +33,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.util.toByteArray
 import io.ktor.utils.io.ByteReadChannel
 
-
 class MastodonService(
     private val baseUrl: String,
-    private val accessToken: String,
+    private val accessToken: String
 ) {
     private val timelineResources: TimelineResources by lazy {
         ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
@@ -78,21 +77,21 @@ class MastodonService(
         count: Int,
         since_id: String? = null,
         max_id: String? = null,
-        min_id: String? = null,
+        min_id: String? = null
     ) = timelineResources.homeTimeline(max_id = max_id, since_id = since_id, min_id = min_id, limit = count)
 
     suspend fun mentionsTimeline(
         count: Int,
         since_id: String? = null,
         max_id: String? = null,
-        min_id: String? = null,
+        min_id: String? = null
     ): List<Notification> {
         return timelineResources.notification(
             max_id = max_id,
             since_id = since_id,
             limit = count,
             min_id = min_id,
-            exclude_types = NotificationTypes.values().filter { it != NotificationTypes.mention }
+            exclude_types = NotificationTypes.values().filter { it != NotificationTypes.Mention }
         )
     }
 
@@ -102,14 +101,14 @@ class MastodonService(
         min_id: String? = null,
         since_id: String? = null,
         max_id: String? = null,
-        exclude_replies: Boolean? = null,
+        exclude_replies: Boolean? = null
     ): List<Status> = timelineResources.userTimeline(
         user_id = user_id,
         max_id = max_id,
         since_id = since_id,
         limit = count,
         exclude_replies = exclude_replies,
-        min_id = min_id,
+        min_id = min_id
     )
 
     suspend fun favorites(
@@ -120,7 +119,7 @@ class MastodonService(
         val response = timelineResources.favoritesList(
             max_id = max_id,
             since_id = since_id,
-            limit = count,
+            limit = count
         )
         return MastodonPaging.from(response)
     }
@@ -134,7 +133,7 @@ class MastodonService(
         listId = list_id,
         max_id = max_id,
         since_id = since_id,
-        limit = count,
+        limit = count
     )
 
     suspend fun lookupUser(id: String): Account {
@@ -155,14 +154,14 @@ class MastodonService(
 
     suspend fun followers(user_id: String, nextPage: String?) = accountResources.followers(
         user_id,
-        max_id = nextPage,
+        max_id = nextPage
     ).let {
         MastodonPaging.from(it)
     }
 
     suspend fun following(user_id: String, nextPage: String?) = accountResources.following(
         user_id,
-        max_id = nextPage,
+        max_id = nextPage
     ).let {
         MastodonPaging.from(it)
     }
@@ -192,7 +191,7 @@ class MastodonService(
         count: Int,
         since_id: String? = null,
         max_id: String? = null,
-        min_id: String? = null,
+        min_id: String? = null
     ): List<Notification> {
         return timelineResources.notification(
             max_id = max_id,
@@ -209,13 +208,13 @@ class MastodonService(
     suspend fun searchHashTag(
         query: String,
         offset: Int,
-        count: Int,
+        count: Int
     ): List<Hashtag> {
         return searchResources.searchV2(
             query = query,
-            type = SearchType.hashtags,
+            type = SearchType.HashTags.value,
             offset = offset,
-            limit = count,
+            limit = count
         ).hashtags ?: emptyList()
     }
 
@@ -225,7 +224,7 @@ class MastodonService(
         nextPage: String?
     ) = searchResources.searchV2(
         query = query,
-        type = SearchType.statuses,
+        type = SearchType.Statuses.value,
         max_id = nextPage,
         limit = count
     )
@@ -238,10 +237,10 @@ class MastodonService(
     ): List<Account> {
         return searchResources.searchV2(
             query = query,
-            type = SearchType.accounts,
+            type = SearchType.Accounts.value,
             limit = count,
             offset = (page ?: 0) * count,
-            following = following,
+            following = following
         ).accounts ?: emptyList()
     }
 
@@ -249,12 +248,12 @@ class MastodonService(
         query: String,
         count: Int? = null,
         since_id: String? = null,
-        max_id: String? = null,
+        max_id: String? = null
     ): List<Status> = timelineResources.hashtagTimeline(
         hashtag = query,
         limit = count,
         since_id = since_id,
-        max_id = max_id,
+        max_id = max_id
     )
 
     suspend fun like(id: String): Status {
@@ -288,8 +287,8 @@ class MastodonService(
                 "file",
                 data,
                 io.ktor.http.Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=${name}")
-                },
+                    append(HttpHeaders.ContentDisposition, "filename=$name")
+                }
             )
         }
         return statusResources.upload(multipart)
@@ -335,7 +334,7 @@ class MastodonService(
 
     suspend fun addMember(
         listId: String,
-        userId: String,
+        userId: String
     ) {
         // FIXME: 2021/7/12 API exception 'Record not found' should be 'You need to follow this user first'
         listsResources.addMember(listId, PostAccounts(listOf(userId)))
@@ -343,7 +342,7 @@ class MastodonService(
 
     suspend fun removeMember(
         listId: String,
-        userId: String,
+        userId: String
     ) {
         listsResources.removeMember(listId, PostAccounts(listOf(userId)))
     }
@@ -373,7 +372,7 @@ class MastodonService(
             max_id = max_id,
             limit = count,
             local = false,
-            remote = false,
+            remote = false
         )
     }
 }

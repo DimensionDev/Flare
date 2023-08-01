@@ -1,7 +1,5 @@
 package dev.dimension.flare.ui.screen.home
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -35,8 +33,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.mastodon.homeTimelineDataSource
-import dev.dimension.flare.data.repository.UiAccount
-import dev.dimension.flare.data.repository.activeAccountPresenter
+import dev.dimension.flare.data.repository.app.UiAccount
+import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
@@ -48,11 +46,10 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 internal fun HomeTimelineScreen() {
     val state by producePresenter {
-        HomeTimelinePresenter()
+        homeTimelinePresenter()
     }
     val lazyListState = rememberLazyListState()
 
@@ -69,11 +66,11 @@ internal fun HomeTimelineScreen() {
 
     val scope = rememberCoroutineScope()
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             state = lazyListState,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             with(state.listState) {
                 status(
@@ -86,7 +83,7 @@ internal fun HomeTimelineScreen() {
                 state.showNewToots,
                 enter = slideInVertically { -it },
                 exit = slideOutVertically { -it },
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier.align(Alignment.TopCenter)
             ) {
                 FilledTonalButton(
                     onClick = {
@@ -109,10 +106,9 @@ internal fun HomeTimelineScreen() {
     }
 }
 
-
 @Composable
-private fun HomeTimelinePresenter(
-    defaultEvent: DefaultMastodonStatusEvent = rememberInject(),
+private fun homeTimelinePresenter(
+    defaultEvent: DefaultMastodonStatusEvent = rememberInject()
 ) = run {
     val account by activeAccountPresenter()
     val listState = account.flatMap {

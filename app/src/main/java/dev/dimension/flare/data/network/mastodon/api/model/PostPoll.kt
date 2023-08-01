@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PostPoll(
-  val options: List<String>? = null,
+    val options: List<String>? = null,
 
-  @SerialName("expires_in")
-  val expiresIn: Long? = null,
+    @SerialName("expires_in")
+    val expiresIn: Long? = null,
 
-  val multiple: Boolean? = null
+    val multiple: Boolean? = null
 )

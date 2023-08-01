@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.repository
+package dev.dimension.flare.data.repository.app
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -15,7 +15,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.network.mastodon.MastodonService
-import dev.dimension.flare.data.repository.UiAccount.Companion.toUi
+import dev.dimension.flare.data.repository.app.UiAccount.Companion.toUi
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.UiState
@@ -32,9 +32,16 @@ import org.mobilenativefoundation.store.store5.StoreBuilder
 import org.mobilenativefoundation.store.store5.StoreReadRequest
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 
+internal suspend fun getAccountUseCase(
+    accountKey: MicroBlogKey,
+    appDatabase: AppDatabase = inject()
+): UiAccount? {
+    return appDatabase.accountDao().getAccount(accountKey)?.toUi()
+}
+
 @Composable
 internal fun activeAccountPresenter(
-    appDatabase: AppDatabase = rememberInject(),
+    appDatabase: AppDatabase = rememberInject()
 ): State<UiState<UiAccount>> {
     return remember(appDatabase) {
         appDatabase.accountDao()
@@ -54,7 +61,7 @@ internal fun activeAccountPresenter(
 
 @Composable
 internal fun allAccountsPresenter(
-    appDatabase: AppDatabase = rememberInject(),
+    appDatabase: AppDatabase = rememberInject()
 ): State<UiState<ImmutableList<UiAccount>>> {
     return remember(appDatabase) {
         appDatabase.accountDao()
@@ -76,7 +83,7 @@ internal object NoActiveAccountException : Throwable("No active account")
 internal fun mastodonUserDataPresenter(
     account: UiAccount.Mastodon,
     userId: String = account.accountKey.id,
-    cacheDatabase: CacheDatabase = inject(),
+    cacheDatabase: CacheDatabase = inject()
 ): State<UiState<UiUser>> {
     return remember(account.accountKey, userId) {
         StoreBuilder
@@ -88,9 +95,9 @@ internal fun mastodonUserDataPresenter(
                     reader = {
                         cacheDatabase.userDao().getUser(it)
                     },
-                    writer = { key, user ->
+                    writer = { _, user ->
                         cacheDatabase.userDao().insertAll(listOf(user))
-                    },
+                    }
                 )
             ).build()
             .stream(StoreReadRequest.cached(MicroBlogKey(userId, account.accountKey.host), refresh = true))
@@ -116,10 +123,10 @@ internal suspend fun addMastodonAccountUseCase(
         account_key = accountKey,
         credential_json = UiAccount.Mastodon.Credential(
             instance = instance,
-            accessToken = accessToken,
+            accessToken = accessToken
         ).encodeJson(),
         platform_type = PlatformType.Mastodon,
-        lastActive = Clock.System.now().toEpochMilliseconds(),
+        lastActive = Clock.System.now().toEpochMilliseconds()
     )
     appDatabase.accountDao().addAccount(account)
 }
@@ -139,7 +146,6 @@ internal fun accountDataPresenter(account: UiAccount): UiState<UiUser> {
     return state
 }
 
-
 sealed interface UiAccount {
     val accountKey: MicroBlogKey
 
@@ -150,13 +156,13 @@ sealed interface UiAccount {
         @Serializable
         data class Credential(
             val instance: String,
-            val accessToken: String,
+            val accessToken: String
         )
 
         val service by lazy {
             MastodonService(
                 baseUrl = "https://${credential.instance}/",
-                accessToken = credential.accessToken,
+                accessToken = credential.accessToken
             )
         }
     }
@@ -167,7 +173,7 @@ sealed interface UiAccount {
                 val credential = credential_json.decodeJson<Mastodon.Credential>()
                 Mastodon(
                     credential = credential,
-                    accountKey = account_key,
+                    accountKey = account_key
                 )
             }
 

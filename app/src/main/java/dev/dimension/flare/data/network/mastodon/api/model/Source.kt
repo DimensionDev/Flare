@@ -6,12 +6,12 @@ import kotlinx.serialization.json.JsonArray
 
 @Serializable
 data class Source(
-  val privacy: String? = null,
-  val sensitive: Boolean? = null,
-  val language: String? = null,
-  val note: String? = null,
-  val fields: JsonArray? = null,
+    val privacy: String? = null,
+    val sensitive: Boolean? = null,
+    val language: String? = null,
+    val note: String? = null,
+    val fields: JsonArray? = null,
 
-  @SerialName("follow_requests_count")
-  val followRequestsCount: Long? = null
+    @SerialName("follow_requests_count")
+    val followRequestsCount: Long? = null
 )

@@ -9,7 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Entity(
-    tableName = "user",
+    tableName = "user"
 )
 data class DbUser(
     @PrimaryKey
@@ -17,7 +17,7 @@ data class DbUser(
     val platformType: PlatformType,
     val name: String,
     val handle: String,
-    val content: UserContent,
+    val content: UserContent
 )
 
 @Serializable
@@ -26,4 +26,3 @@ sealed interface UserContent {
     @SerialName("Mastodon")
     data class Mastodon(val data: Account) : UserContent
 }
-

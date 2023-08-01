@@ -10,16 +10,44 @@ import kotlinx.datetime.Instant
 import org.jsoup.nodes.Element
 import java.text.Bidi
 
-internal sealed interface UiStatus {
-    val statusKey: MicroBlogKey
+internal sealed class UiStatus {
+    abstract val statusKey: MicroBlogKey
+    abstract val accountKey: MicroBlogKey
+
+    val itemKey by lazy {
+        statusKey.toString()
+    }
+
+    val itemType: String by lazy {
+        when (this) {
+            is Mastodon -> buildString {
+                append("mastodon")
+                if (reblogStatus != null) append("_reblog")
+                with(reblogStatus ?: this@UiStatus) {
+                    if (media.isNotEmpty()) append("_media")
+                    if (poll != null) append("_poll")
+                    if (card != null) append("_card")
+                }
+            }
+
+            is MastodonNotification -> buildString {
+                append("mastodon_notification")
+                append("_${type.name.lowercase()}")
+                if (status != null) {
+                    append(status.itemType)
+                }
+            }
+        }
+    }
 
     data class MastodonNotification(
         override val statusKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
         val user: UiUser.Mastodon,
         val createdAt: Instant,
         val status: Mastodon?,
-        val type: NotificationTypes,
-    ) : UiStatus {
+        val type: NotificationTypes
+    ) : UiStatus() {
         val humanizedTime by lazy {
             createdAt.humanize()
         }
@@ -27,6 +55,7 @@ internal sealed interface UiStatus {
 
     data class Mastodon(
         override val statusKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
         val user: UiUser.Mastodon,
         val content: String,
         val contentToken: Element,
@@ -39,8 +68,8 @@ internal sealed interface UiStatus {
         val card: UiCard?,
         val reaction: Reaction,
         val sensitive: Boolean,
-        val reblogStatus: Mastodon?,
-    ) : UiStatus {
+        val reblogStatus: Mastodon?
+    ) : UiStatus() {
 
         val humanizedTime by lazy {
             createdAt.humanize()
@@ -56,7 +85,7 @@ internal sealed interface UiStatus {
         data class Reaction(
             val liked: Boolean,
             val reblogged: Boolean,
-            val bookmarked: Boolean,
+            val bookmarked: Boolean
         )
 
         data class Poll(
@@ -66,7 +95,7 @@ internal sealed interface UiStatus {
             val expired: Boolean,
             val multiple: Boolean,
             val voted: Boolean,
-            val ownVotes: ImmutableList<Int>,
+            val ownVotes: ImmutableList<Int>
         ) {
             val humanizedExpiresAt by lazy { expiresAt.humanize() }
         }
@@ -74,7 +103,7 @@ internal sealed interface UiStatus {
         data class PollOption(
             val title: String,
             val votesCount: Long,
-            val percentage: Float,
+            val percentage: Float
         ) {
             val humanizedPercentage by lazy { percentage.humanizePercentage() }
         }
@@ -83,13 +112,13 @@ internal sealed interface UiStatus {
             Public,
             Unlisted,
             Private,
-            Direct,
+            Direct
         }
 
         data class Matrices(
             val replyCount: Long,
             val reblogCount: Long,
-            val favouriteCount: Long,
+            val favouriteCount: Long
         ) {
             val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
             val humanizedReblogCount by lazy { if (reblogCount > 0) reblogCount.toString() else null }
@@ -97,24 +126,3 @@ internal sealed interface UiStatus {
         }
     }
 }
-
-internal val UiStatus.itemKey: String get() = statusKey.toString()
-internal val UiStatus.itemType: String
-    get() = when (this) {
-        is UiStatus.Mastodon -> buildString {
-            append("mastodon")
-            if (reblogStatus != null) append("_reblog")
-            with(reblogStatus ?: this@UiStatus) {
-                if (media.isNotEmpty()) append("_media")
-                if (poll != null) append("_poll")
-                if (card != null) append("_card")
-            }
-        }
-
-        is UiStatus.MastodonNotification -> buildString {
-            append("mastodon_notification")
-            append("_${type.name.lowercase()}")
-            if (status != null) append(status.itemType)
-        }
-    }
-

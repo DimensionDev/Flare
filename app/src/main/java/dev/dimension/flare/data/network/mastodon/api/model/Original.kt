@@ -5,14 +5,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Original(
-  val width: Long? = null,
-  val height: Long? = null,
+    val width: Long? = null,
+    val height: Long? = null,
 
-  @SerialName("frame_rate")
-  val frameRate: String? = null,
+    @SerialName("frame_rate")
+    val frameRate: String? = null,
 
-  val duration: Double? = null,
-  val bitrate: Long? = null,
-  val size: String? = null,
-  val aspect: Double? = null
+    val duration: Double? = null,
+    val bitrate: Long? = null,
+    val size: String? = null,
+    val aspect: Double? = null
 )

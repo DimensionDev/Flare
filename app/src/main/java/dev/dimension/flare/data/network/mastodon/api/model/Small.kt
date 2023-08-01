@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Small(
-  val width: Long? = null,
-  val height: Long? = null,
-  val size: String? = null,
-  val aspect: Double? = null
+    val width: Long? = null,
+    val height: Long? = null,
+    val size: String? = null,
+    val aspect: Double? = null
 )

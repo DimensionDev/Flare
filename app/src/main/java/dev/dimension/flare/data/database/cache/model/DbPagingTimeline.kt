@@ -14,7 +14,7 @@ import dev.dimension.flare.model.MicroBlogKey
             value = ["accountKey", "statusKey", "pagingKey"],
             unique = true
         )
-    ],
+    ]
 )
 data class DbPagingTimeline(
     @PrimaryKey
@@ -22,7 +22,7 @@ data class DbPagingTimeline(
     val accountKey: MicroBlogKey,
     val pagingKey: String,
     val statusKey: MicroBlogKey,
-    val sortId: Long,
+    val sortId: Long
 )
 
 data class DbPagingTimelineWithStatus(
@@ -32,8 +32,7 @@ data class DbPagingTimelineWithStatus(
     @Relation(
         parentColumn = "statusKey",
         entityColumn = "statusKey",
-        entity = DbStatus::class,
+        entity = DbStatus::class
     )
-    val status: DbStatusWithReference,
+    val status: DbStatusWithReference
 )
-

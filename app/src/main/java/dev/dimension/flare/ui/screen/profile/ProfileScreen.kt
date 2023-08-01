@@ -57,9 +57,9 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.data.datasource.mastodon.userTimelineDataSource
-import dev.dimension.flare.data.repository.UiAccount
-import dev.dimension.flare.data.repository.activeAccountPresenter
-import dev.dimension.flare.data.repository.mastodonUserDataPresenter
+import dev.dimension.flare.data.repository.app.UiAccount
+import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.repository.app.mastodonUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
@@ -81,13 +81,13 @@ import kotlin.math.max
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "flare://${FULL_ROUTE_PLACEHOLDER}",
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
         )
     ]
 )
 fun ProfileRoute(
     userKey: MicroBlogKey,
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator
 ) {
     ProfileScreen(
         userKey = userKey,
@@ -101,18 +101,20 @@ fun ProfileRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    userKey: MicroBlogKey,
+    modifier: Modifier = Modifier,
+    // null means current user
+    userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
-    showTopBar: Boolean = true,
+    showTopBar: Boolean = true
 ) {
     val state by producePresenter(key = userKey.toString()) {
-        ProfilePresenter(userKey)
+        profilePresenter(userKey)
     }
     val listState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     FlareTheme {
         Scaffold(
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             contentWindowInsets = ScaffoldDefaults
                 .contentWindowInsets.exclude(WindowInsets.statusBars),
             topBar = {
@@ -124,7 +126,7 @@ fun ProfileScreen(
                             } else {
                                 max(
                                     0f,
-                                    (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.toFloat()),
+                                    (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.toFloat())
                                 )
                             }
                         }
@@ -134,7 +136,7 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .graphicsLayer {
                                     alpha = titleAlpha
-                                },
+                                }
                         ) {
                             Spacer(
                                 modifier = Modifier
@@ -144,7 +146,7 @@ fun ProfileScreen(
                                         color = MaterialTheme.colorScheme.surfaceColorAtElevation(
                                             3.dp
                                         )
-                                    ),
+                                    )
                             )
                             Spacer(
                                 modifier = Modifier
@@ -154,7 +156,7 @@ fun ProfileScreen(
                                         color = MaterialTheme.colorScheme.surfaceColorAtElevation(
                                             3.dp
                                         )
-                                    ),
+                                    )
                             )
                         }
                         TopAppBar(
@@ -169,7 +171,7 @@ fun ProfileScreen(
                                 }
                             },
                             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = Color.Transparent,
+                                containerColor = Color.Transparent
                             ),
                             modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
                             scrollBehavior = scrollBehavior,
@@ -177,7 +179,7 @@ fun ProfileScreen(
                                 IconButton(onClick = onBack) {
                                     Icon(
                                         imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = null,
+                                        contentDescription = null
                                     )
                                 }
                             },
@@ -186,7 +188,7 @@ fun ProfileScreen(
                                     IconButton(onClick = { /*TODO*/ }) {
                                         Icon(
                                             imageVector = Icons.Default.MoreVert,
-                                            contentDescription = null,
+                                            contentDescription = null
                                         )
                                     }
                                 }
@@ -198,17 +200,17 @@ fun ProfileScreen(
         ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                state = listState,
+                state = listState
             ) {
                 item {
                     ProfileHeader(
                         state.userState,
-                        state.relationState,
+                        state.relationState
                     )
                 }
                 with(state.listState) {
                     status(
-                        event = state.eventHandler,
+                        event = state.eventHandler
                     )
                 }
             }
@@ -220,11 +222,11 @@ fun ProfileScreen(
 private fun ProfileHeader(
     userState: UiState<UiUser>,
     relationState: UiState<UiRelation>,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     AnimatedContent(
         targetState = userState,
-        modifier = Modifier.animateContentSize(),
+        modifier = modifier.animateContentSize(),
         label = "ProfileHeader",
         transitionSpec = {
             fadeIn() togetherWith fadeOut()
@@ -239,18 +241,17 @@ private fun ProfileHeader(
     ) { state ->
         when (state) {
             is UiState.Loading -> {
-                ProfileHeaderLoading(modifier)
+                ProfileHeaderLoading()
             }
 
             is UiState.Error -> {
-                ProfileHeaderError(modifier)
+                ProfileHeaderError()
             }
 
             is UiState.Success -> {
                 ProfileHeaderSuccess(
                     user = state.data,
-                    relationState = relationState,
-                    modifier = modifier,
+                    relationState = relationState
                 )
             }
         }
@@ -261,14 +262,14 @@ private fun ProfileHeader(
 private fun ProfileHeaderSuccess(
     user: UiUser,
     relationState: UiState<UiRelation>,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     when (user) {
         is UiUser.Mastodon -> {
             MastodonProfileHeader(
                 user = user,
                 relationState = relationState,
-                modifier = modifier,
+                modifier = modifier
             )
         }
     }
@@ -283,7 +284,7 @@ internal fun CommonProfileHeader(
     headerTrailing: @Composable () -> Unit,
     handleTrailing: @Composable RowScope.() -> Unit,
     content: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val statusBarHeight = with(LocalDensity.current) {
         WindowInsets.statusBars.getTop(this).toDp()
@@ -294,7 +295,7 @@ internal fun CommonProfileHeader(
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(bottom = 8.dp),
+            .padding(bottom = 8.dp)
     ) {
         bannerUrl?.let {
             NetworkImage(
@@ -309,18 +310,18 @@ internal fun CommonProfileHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .padding(
-                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2)
                         )
                 ) {
                     AvatarComponent(data = avatarUrl, size = ProfileHeaderConstants.AvatarSize.dp)
@@ -332,15 +333,15 @@ internal fun CommonProfileHeader(
                 ) {
                     HtmlText(
                         element = displayName,
-                        textStyle = MaterialTheme.typography.titleMedium,
+                        textStyle = MaterialTheme.typography.titleMedium
                     )
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = handle,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodySmall
                         )
                         handleTrailing.invoke(this)
                     }
@@ -367,14 +368,13 @@ private object ProfileHeaderConstants {
 
 @Composable
 private fun ProfileHeaderError(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-
 }
 
 @Composable
 private fun ProfileHeaderLoading(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val statusBarHeight = with(LocalDensity.current) {
         WindowInsets.statusBars.getTop(this).toDp()
@@ -385,7 +385,7 @@ private fun ProfileHeaderLoading(
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(bottom = 8.dp),
+            .padding(bottom = 8.dp)
     ) {
         Box(
             modifier = Modifier
@@ -397,18 +397,18 @@ private fun ProfileHeaderLoading(
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .padding(
-                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2)
                         )
                 ) {
                     Box(
@@ -440,17 +440,19 @@ private fun ProfileHeaderLoading(
 }
 
 @Composable
-private fun ProfilePresenter(
-    userKey: MicroBlogKey,
-    defaultEvent: DefaultMastodonStatusEvent = rememberInject(),
+private fun profilePresenter(
+    userKey: MicroBlogKey?,
+    defaultEvent: DefaultMastodonStatusEvent = rememberInject()
 ) = run {
     val account by activeAccountPresenter()
     val userState = account.flatMap {
         when (it) {
             is UiAccount.Mastodon -> {
-                val state by mastodonUserDataPresenter(account = it, userId = userKey.id)
+                val state by mastodonUserDataPresenter(
+                    account = it,
+                    userId = userKey?.id ?: it.accountKey.id
+                )
                 state
-
             }
         }
     }
@@ -460,7 +462,7 @@ private fun ProfilePresenter(
             is UiAccount.Mastodon -> UiState.Success(
                 userTimelineDataSource(
                     account = it,
-                    userKey = userKey
+                    userKey = userKey ?: it.accountKey
                 ).collectAsLazyPagingItems()
             )
         }
@@ -469,7 +471,7 @@ private fun ProfilePresenter(
         when (it) {
             is UiAccount.Mastodon -> mastodonUserRelationPresenter(
                 account = it,
-                accountKey = userKey,
+                accountKey = userKey ?: it.accountKey
             )
         }
     }

@@ -33,30 +33,30 @@ internal fun MastodonNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     when (data.type) {
-        NotificationTypes.follow -> MastodonFollowNotificationComponent(
+        NotificationTypes.Follow -> MastodonFollowNotificationComponent(
             data = data,
             state = state,
             event = event,
             modifier = modifier
         )
 
-        NotificationTypes.favourite -> MastodonFavouriteNotificationComponent(
+        NotificationTypes.Favourite -> MastodonFavouriteNotificationComponent(
             data = data,
             state = state,
             event = event,
             modifier = modifier
         )
 
-        NotificationTypes.reblog -> MastodonRetweetNotificationComponent(
+        NotificationTypes.Reblog -> MastodonRetweetNotificationComponent(
             data = data,
             state = state,
             event = event,
             modifier = modifier
         )
-        NotificationTypes.mention -> {
+        NotificationTypes.Mention -> {
             if (data.status != null) {
                 MastodonStatusComponent(
                     data = data.status,
@@ -69,25 +69,25 @@ internal fun MastodonNotificationComponent(
             }
         }
 
-        NotificationTypes.poll -> MastodonPollNotificationComponent(
+        NotificationTypes.Poll -> MastodonPollNotificationComponent(
             data = data,
             state = state,
             event = event,
             modifier = modifier
         )
-        NotificationTypes.follow_request -> MastodonFollowRequestNotificationComponent(
+        NotificationTypes.FollowRequest -> MastodonFollowRequestNotificationComponent(
             data = data,
             state = state,
             event = event,
             modifier = modifier
         )
-        NotificationTypes.status -> MastodonStatusNotificationComponent(
+        NotificationTypes.Status -> MastodonStatusNotificationComponent(
             data = data,
             state = state,
             event = event,
             modifier = modifier
         )
-        NotificationTypes.update -> MastodonUpdateNotificationComponent(
+        NotificationTypes.Update -> MastodonUpdateNotificationComponent(
             data = data,
             state = state,
             event = event,
@@ -101,22 +101,22 @@ private fun MastodonUpdateNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.Edit,
             user = data.user,
-            text = stringResource(id = R.string.mastodon_notification_item_updated_status),
+            text = stringResource(id = R.string.mastodon_notification_item_updated_status)
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
                 state = state,
-                event = event,
+                event = event
             )
         }
     }
@@ -127,22 +127,22 @@ private fun MastodonStatusNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.Add,
             user = data.user,
-            text = stringResource(id = R.string.mastodon_notification_item_posted_status),
+            text = stringResource(id = R.string.mastodon_notification_item_posted_status)
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
                 state = state,
-                event = event,
+                event = event
             )
         }
     }
@@ -153,19 +153,19 @@ private fun MastodonFollowRequestNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.mastodon_notification_item_requested_follow),
+            text = stringResource(id = R.string.mastodon_notification_item_requested_follow)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             AvatarComponent(
                 data = data.user.avatarUrl,
@@ -177,7 +177,7 @@ private fun MastodonFollowRequestNotificationComponent(
             Spacer(modifier = Modifier.width(8.dp))
             Column(
                 modifier = Modifier
-                    .weight(1f),
+                    .weight(1f)
             ) {
                 HtmlText(
                     element = data.user.nameElement,
@@ -207,22 +207,22 @@ private fun MastodonPollNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.Poll,
             user = null,
-            text = stringResource(id = R.string.mastodon_notification_item_poll_ended),
+            text = stringResource(id = R.string.mastodon_notification_item_poll_ended)
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
                 state = state,
-                event = event,
+                event = event
             )
         }
     }
@@ -233,22 +233,22 @@ private fun MastodonRetweetNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.SyncAlt,
             user = data.user,
-            text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status),
+            text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status)
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
                 state = state,
-                event = event,
+                event = event
             )
         }
     }
@@ -259,22 +259,22 @@ private fun MastodonFavouriteNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.Favorite,
             user = data.user,
-            text = stringResource(id = R.string.mastodon_notification_item_favourited_your_status),
+            text = stringResource(id = R.string.mastodon_notification_item_favourited_your_status)
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
                 state = state,
-                event = event,
+                event = event
             )
         }
     }
@@ -285,19 +285,19 @@ private fun MastodonFollowNotificationComponent(
     data: UiStatus.MastodonNotification,
     state: MastodonStatusState,
     event: MastodonStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.mastodon_notification_item_followed_you),
+            text = stringResource(id = R.string.mastodon_notification_item_followed_you)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             AvatarComponent(
                 data = data.user.avatarUrl,
@@ -309,7 +309,7 @@ private fun MastodonFollowNotificationComponent(
             Spacer(modifier = Modifier.width(8.dp))
             Column(
                 modifier = Modifier
-                    .weight(1f),
+                    .weight(1f)
             ) {
                 HtmlText(
                     element = data.user.nameElement,

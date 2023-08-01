@@ -54,10 +54,10 @@ public interface PlaceholderHighlight {
  */
 public fun PlaceholderHighlight.Companion.fade(
     highlightColor: Color,
-    animationSpec: InfiniteRepeatableSpec<Float> = PlaceholderDefaults.fadeAnimationSpec,
+    animationSpec: InfiniteRepeatableSpec<Float> = PlaceholderDefaults.fadeAnimationSpec
 ): PlaceholderHighlight = Fade(
     highlightColor = highlightColor,
-    animationSpec = animationSpec,
+    animationSpec = animationSpec
 )
 
 /**
@@ -77,16 +77,16 @@ public fun PlaceholderHighlight.Companion.fade(
 public fun PlaceholderHighlight.Companion.shimmer(
     highlightColor: Color,
     animationSpec: InfiniteRepeatableSpec<Float> = PlaceholderDefaults.shimmerAnimationSpec,
-    @FloatRange(from = 0.0, to = 1.0) progressForMaxAlpha: Float = 0.6f,
+    @FloatRange(from = 0.0, to = 1.0) progressForMaxAlpha: Float = 0.6f
 ): PlaceholderHighlight = Shimmer(
     highlightColor = highlightColor,
     animationSpec = animationSpec,
-    progressForMaxAlpha = progressForMaxAlpha,
+    progressForMaxAlpha = progressForMaxAlpha
 )
 
 private data class Fade(
     private val highlightColor: Color,
-    override val animationSpec: InfiniteRepeatableSpec<Float>,
+    override val animationSpec: InfiniteRepeatableSpec<Float>
 ) : PlaceholderHighlight {
     private val brush = SolidColor(highlightColor)
 
@@ -97,19 +97,19 @@ private data class Fade(
 private data class Shimmer(
     private val highlightColor: Color,
     override val animationSpec: InfiniteRepeatableSpec<Float>,
-    private val progressForMaxAlpha: Float = 0.6f,
+    private val progressForMaxAlpha: Float = 0.6f
 ) : PlaceholderHighlight {
     override fun brush(
         progress: Float,
-        size: Size,
+        size: Size
     ): Brush = Brush.radialGradient(
         colors = listOf(
             highlightColor.copy(alpha = 0f),
             highlightColor,
-            highlightColor.copy(alpha = 0f),
+            highlightColor.copy(alpha = 0f)
         ),
         center = Offset(x = 0f, y = 0f),
-        radius = (max(size.width, size.height) * progress * 2).coerceAtLeast(0.01f),
+        radius = (max(size.width, size.height) * progress * 2).coerceAtLeast(0.01f)
     )
 
     override fun alpha(progress: Float): Float = when {
@@ -131,5 +131,3 @@ private data class Shimmer(
         }
     }
 }
-
-

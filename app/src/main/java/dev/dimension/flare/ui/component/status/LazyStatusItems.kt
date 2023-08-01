@@ -15,8 +15,6 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.itemKey
-import dev.dimension.flare.ui.model.itemType
 import dev.dimension.flare.ui.onError
 import dev.dimension.flare.ui.onLoading
 import dev.dimension.flare.ui.onSuccess
@@ -24,11 +22,15 @@ import dev.dimension.flare.ui.theme.DisabledAlpha
 
 context(LazyListScope, UiState<LazyPagingItems<UiStatus>>)
 internal fun status(
-    event: MastodonStatusEvent,
+    event: MastodonStatusEvent
 ) {
     onSuccess { lazyPagingItems ->
-        if (lazyPagingItems.loadState.refresh == LoadState.Loading ||
-            lazyPagingItems.loadState.prepend == LoadState.Loading && lazyPagingItems.itemCount == 0) {
+        if ((
+            lazyPagingItems.loadState.refresh == LoadState.Loading ||
+                lazyPagingItems.loadState.prepend == LoadState.Loading
+            ) &&
+            lazyPagingItems.itemCount == 0
+        ) {
             items(10) {
                 Column {
                     StatusPlaceholder(
@@ -72,7 +74,6 @@ internal fun status(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
-
                     }
                     // draw divider
                     if (it != lazyPagingItems.itemCount - 1) {
@@ -98,6 +99,5 @@ internal fun status(
         }
     }
     onError {
-
     }
 }

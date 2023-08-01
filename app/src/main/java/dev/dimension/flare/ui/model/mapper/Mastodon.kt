@@ -21,7 +21,6 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
-import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
@@ -30,40 +29,56 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 
 internal fun DbPagingTimelineWithStatus.toUi(): UiStatus {
+    val host = this.status.status.data.statusKey.host
     return when (val status = status.status.data.content) {
-        is StatusContent.Mastodon -> status.data.toUi()
-        is StatusContent.MastodonNotification -> status.data.toUi()
+        is StatusContent.Mastodon -> status.data.toUi(
+            host = host,
+            accountKey = timeline.accountKey
+        )
+
+        is StatusContent.MastodonNotification -> status.data.toUi(
+            host = host,
+            accountKey = timeline.accountKey
+        )
     }
 }
 
-private fun Notification.toUi(): UiStatus {
+private fun Notification.toUi(
+    host: String,
+    accountKey: MicroBlogKey
+): UiStatus {
     requireNotNull(account) { "account is null" }
-    val user = account.toUi()
+    val user = account.toUi(host)
     return UiStatus.MastodonNotification(
         statusKey = MicroBlogKey(
             id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
-            host = user.userKey.host,
+            host = user.userKey.host
         ),
         user = user,
         createdAt = createdAt ?: Instant.DISTANT_PAST,
-        status = status?.toUi(),
-        type = type ?: throw IllegalArgumentException("mastodon Notification.type should not be null"),
+        status = status?.toUi(host, accountKey),
+        type = type
+            ?: throw IllegalArgumentException("mastodon Notification.type should not be null"),
+        accountKey = accountKey
     )
 }
 
 internal fun DbUser.toUi(): UiUser {
     return when (val user = content) {
-        is UserContent.Mastodon -> user.data.toUi()
+        is UserContent.Mastodon -> user.data.toUi(host = userKey.host)
     }
 }
 
-internal fun Status.toUi(): UiStatus.Mastodon {
+internal fun Status.toUi(
+    host: String,
+    accountKey: MicroBlogKey
+): UiStatus.Mastodon {
     requireNotNull(account) { "account is null" }
-    val user = account.toUi()
+    val user = account.toUi(host)
     return UiStatus.Mastodon(
         statusKey = MicroBlogKey(
             id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
-            host = user.userKey.host,
+            host = user.userKey.host
         ),
         sensitive = sensitive ?: false,
         poll = poll?.let {
@@ -74,16 +89,20 @@ internal fun Status.toUi(): UiStatus.Mastodon {
                         title = option.title.orEmpty(),
                         votesCount = option.votesCount ?: 0,
                         percentage = option.votesCount?.toFloat()?.div(
-                            if (poll.multiple == true) poll.votersCount ?: 1 else poll.votesCount
-                                ?: 1
-                        )?.takeUnless { it.isNaN() } ?: 0f,
+                            if (poll.multiple == true) {
+                                poll.votersCount ?: 1
+                            } else {
+                                poll.votesCount
+                                    ?: 1
+                            }
+                        )?.takeUnless { it.isNaN() } ?: 0f
                     )
                 }?.toPersistentList() ?: persistentListOf(),
                 expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
                 expired = poll.expired ?: false,
                 multiple = poll.multiple ?: false,
                 voted = poll.voted ?: false,
-                ownVotes = poll.ownVotes?.toPersistentList() ?: persistentListOf(),
+                ownVotes = poll.ownVotes?.toPersistentList() ?: persistentListOf()
             )
         },
         card = card?.url?.let { url ->
@@ -98,23 +117,23 @@ internal fun Status.toUi(): UiStatus.Mastodon {
                         description = card.description,
                         aspectRatio = card.width?.toFloat()?.div(card.height ?: 1)
                             ?.coerceAtLeast(0f)
-                            ?.takeUnless { it.isNaN() } ?: 1f,
+                            ?.takeUnless { it.isNaN() } ?: 1f
                     )
-                },
+                }
             )
         },
         createdAt = createdAt
             ?: throw IllegalArgumentException("mastodon Status.createdAt should not be null"),
         content = content.orEmpty(),
-        contentToken = parseContent(this),
+        contentToken = parseContent(this, user.userKey.host),
         contentWarningText = spoilerText,
         user = user,
         matrices = UiStatus.Mastodon.Matrices(
             replyCount = repliesCount ?: 0,
             reblogCount = reblogsCount ?: 0,
-            favouriteCount = favouritesCount ?: 0,
+            favouriteCount = favouritesCount ?: 0
         ),
-        reblogStatus = reblog?.toUi(),
+        reblogStatus = reblog?.toUi(host, accountKey),
         visibility = visibility?.let { visibility ->
             when (visibility) {
                 Visibility.Public -> UiStatus.Mastodon.Visibility.Public
@@ -129,12 +148,16 @@ internal fun Status.toUi(): UiStatus.Mastodon {
         reaction = UiStatus.Mastodon.Reaction(
             liked = favourited ?: false,
             reblogged = reblogged ?: false,
-            bookmarked = bookmarked ?: false,
+            bookmarked = bookmarked ?: false
         ),
+        accountKey = accountKey
     )
 }
 
-private fun parseContent(status: Status): Element {
+private fun parseContent(
+    status: Status,
+    host: String
+): Element {
     val emoji = status.emojis.orEmpty()
     val mentions = status.mentions.orEmpty()
 //    val tags = status.tags.orEmpty()
@@ -147,31 +170,27 @@ private fun parseContent(status: Status): Element {
     }
     val body = Jsoup.parse(content).body()
     body.childNodes().forEach {
-        replaceMentionAndHashtag(mentions, it)
+        replaceMentionAndHashtag(mentions, it, host)
     }
     return body
 }
 
-private fun replaceMentionAndHashtag(mentions: List<Mention>, node: Node) {
+private fun replaceMentionAndHashtag(
+    mentions: List<Mention>,
+    node: Node,
+    host: String
+) {
     if (mentions.any { it.url == node.attr("href") }) {
         val mention = mentions.firstOrNull { it.url == node.attr("href") }
         val id = mention?.id
-        val acct = mention?.acct
-        val url = mention?.url
-        if (id != null && acct != null) {
-            val host = if (acct.contains("@")) {
-                acct.substring(acct.indexOf("@") + 1)
-            } else {
-                requireNotNull(url) { "mastodon Account.url should not be null" }
-                Url(url).host
-            }
+        if (id != null) {
             node.attr(
                 "href",
                 ProfileRouteDestination(userKey = MicroBlogKey(id, host)).deeplink()
             )
         }
     } else if (node is Element && node.normalName() == "a" && node.hasText() && node.text()
-            .startsWith('#')
+        .startsWith('#')
     ) {
         node.attr(
             "href",
@@ -180,61 +199,55 @@ private fun replaceMentionAndHashtag(mentions: List<Mention>, node: Node) {
     } else if (node.hasAttr("class") && node.attr("class") == "invisible") {
         node.remove()
     } else {
-        node.childNodes().forEach { replaceMentionAndHashtag(mentions, it) }
+        node.childNodes().forEach { replaceMentionAndHashtag(mentions, it, host) }
     }
 }
 
-
 private fun Attachment.toUi(): UiMedia? {
     return when (type) {
-        MediaType.image -> UiMedia.Image(
+        MediaType.Image -> UiMedia.Image(
             url = url.orEmpty(),
             previewUrl = previewURL.orEmpty(),
             description = description,
             aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
                 ?.coerceAtLeast(0f)
-                ?.takeUnless { it.isNaN() } ?: 1f,
+                ?.takeUnless { it.isNaN() } ?: 1f
         )
 
-        MediaType.gifv -> UiMedia.Gif(
+        MediaType.GifV -> UiMedia.Gif(
             url = url.orEmpty(),
             previewUrl = previewURL.orEmpty(),
             description = description,
             aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
                 ?.coerceAtLeast(0f)
-                ?.takeUnless { it.isNaN() } ?: 1f,
+                ?.takeUnless { it.isNaN() } ?: 1f
         )
 
-        MediaType.video -> UiMedia.Video(
+        MediaType.Video -> UiMedia.Video(
             url = url.orEmpty(),
             thumbnailUrl = previewURL.orEmpty(),
             description = description,
             aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
                 ?.coerceAtLeast(0f)
-                ?.takeUnless { it.isNaN() } ?: 1f,
+                ?.takeUnless { it.isNaN() } ?: 1f
         )
 
-        MediaType.audio -> UiMedia.Audio(
+        MediaType.Audio -> UiMedia.Audio(
             url = url.orEmpty(),
-            description = description,
+            description = description
         )
 
         else -> null
     }
 }
 
-private fun Account.toUi(): UiUser.Mastodon {
-    requireNotNull(acct) { "mastodon Account.acct should not be null" }
-    val host = if (acct.contains("@")) {
-        acct.substring(acct.indexOf("@") + 1)
-    } else {
-        requireNotNull(url) { "mastodon Account.url should not be null" }
-        Url(url).host
-    }
+private fun Account.toUi(
+    host: String
+): UiUser.Mastodon {
     return UiUser.Mastodon(
         userKey = MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
-            host = host,
+            host = host
         ),
         name = displayName.orEmpty(),
         handleInternal = username.orEmpty(),
@@ -246,9 +259,9 @@ private fun Account.toUi(): UiUser.Mastodon {
         matrices = UiUser.Mastodon.Matrices(
             fansCount = followersCount ?: 0,
             followsCount = followingCount ?: 0,
-            statusesCount = statusesCount ?: 0,
+            statusesCount = statusesCount ?: 0
         ),
-        locked = locked ?: false,
+        locked = locked ?: false
     )
 }
 
@@ -283,6 +296,6 @@ internal fun RelationshipResponse.toUi(): UiRelation.Mastodon {
         blocking = blocking ?: false,
         muting = muting ?: false,
         requested = requested ?: false,
-        domainBlocking = domainBlocking ?: false,
+        domainBlocking = domainBlocking ?: false
     )
 }

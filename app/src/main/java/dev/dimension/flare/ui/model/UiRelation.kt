@@ -7,6 +7,6 @@ sealed interface UiRelation {
         val blocking: Boolean,
         val muting: Boolean,
         val requested: Boolean,
-        val domainBlocking: Boolean,
+        val domainBlocking: Boolean
     ) : UiRelation
 }

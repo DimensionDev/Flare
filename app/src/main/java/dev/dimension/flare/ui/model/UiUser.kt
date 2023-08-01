@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.ui.unit.LayoutDirection
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.humanizer.humanize
 import org.jsoup.nodes.Element
 import java.text.Bidi
 
@@ -15,7 +16,7 @@ sealed interface UiUser {
     data class Mastodon(
         override val userKey: MicroBlogKey,
         override val name: String,
-        override val handle: String,
+        val handleInternal: String,
         override val avatarUrl: String,
         val bannerUrl: String?,
         override val nameElement: Element,
@@ -24,7 +25,7 @@ sealed interface UiUser {
         val matrices: Matrices,
         val locked: Boolean,
     ) : UiUser {
-        val displayHandle = "@$handle@${userKey.host}"
+        override val handle = "@$handleInternal@${userKey.host}"
         val nameDirection = if (Bidi(name, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
             LayoutDirection.Ltr
         } else {
@@ -43,7 +44,11 @@ sealed interface UiUser {
             val fansCount: Long,
             val followsCount: Long,
             val statusesCount: Long,
-        )
+        ) {
+            val fansCountHumanized = fansCount.humanize()
+            val followsCountHumanized = followsCount.humanize()
+            val statusesCountHumanized = statusesCount.humanize()
+        }
     }
 }
 

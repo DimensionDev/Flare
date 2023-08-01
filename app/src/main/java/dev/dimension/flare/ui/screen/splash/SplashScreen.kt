@@ -21,6 +21,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.LoginRouteDestination
+import dev.dimension.flare.ui.screen.destinations.SplashRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.delay
 
@@ -33,14 +34,14 @@ fun SplashRoute(
     SplashScreen(
         toHome = {
             navigator.navigate(HomeRouteDestination) {
-                popUpTo(LoginRouteDestination) {
+                popUpTo(SplashRouteDestination) {
                     inclusive = true
                 }
             }
         },
         toLogin = {
             navigator.navigate(LoginRouteDestination) {
-                popUpTo(HomeRouteDestination) {
+                popUpTo(SplashRouteDestination) {
                     inclusive = true
                 }
             }

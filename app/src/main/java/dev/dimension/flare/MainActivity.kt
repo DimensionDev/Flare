@@ -45,6 +45,7 @@ class MainActivity : ComponentActivity() {
 //        navController.handleDeepLink(intent)
     }
 }
+
 @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun Content(
@@ -59,22 +60,26 @@ fun Content(
             rootDefaultAnimations = RootNavGraphDefaultAnimations(
                 enterTransition = {
                     slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Left
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        initialOffset = { it / 4 }
                     ) + fadeIn()
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Left
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        targetOffset = { it / 4 }
                     ) + fadeOut()
                 },
                 popEnterTransition = {
                     slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Right
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        initialOffset = { it / 4 }
                     ) + fadeIn()
                 },
                 popExitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Right
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        targetOffset = { it / 4 }
                     ) + fadeOut()
                 },
             )

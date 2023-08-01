@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.cash.molecule.AndroidUiDispatcher
-import app.cash.molecule.RecompositionClock
+import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import kotlinx.coroutines.CoroutineScope
 
@@ -17,7 +17,7 @@ private class PresenterHolder<T>(
     body: @Composable () -> T
 ) : ViewModel() {
     private val scope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
-    val state = scope.launchMolecule(RecompositionClock.Immediate, body)
+    val state = scope.launchMolecule(RecompositionMode.Immediate, body)
 }
 
 /**
@@ -28,9 +28,10 @@ private class PresenterHolder<T>(
  */
 @Composable
 fun <T> producePresenter(
+    key: String? = null,
     body: @Composable () -> T,
 ): State<T> {
-    val holder = viewModel {
+    val holder = viewModel(key = key) {
         PresenterHolder<T>(body)
     }
     return holder.state.collectAsState()

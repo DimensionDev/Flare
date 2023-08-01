@@ -27,7 +27,8 @@ internal fun status(
     event: MastodonStatusEvent,
 ) {
     onSuccess { lazyPagingItems ->
-        if (lazyPagingItems.loadState.refresh == LoadState.Loading) {
+        if (lazyPagingItems.loadState.refresh == LoadState.Loading ||
+            lazyPagingItems.loadState.prepend == LoadState.Loading && lazyPagingItems.itemCount == 0) {
             items(10) {
                 Column {
                     StatusPlaceholder(

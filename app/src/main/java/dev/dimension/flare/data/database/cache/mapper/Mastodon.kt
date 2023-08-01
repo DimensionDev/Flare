@@ -17,7 +17,6 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
-import io.ktor.http.Url
 import java.util.UUID
 
 context(CacheDatabase, List<Status>)
@@ -77,8 +76,8 @@ private fun Notification.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String
 ): DbPagingTimelineWithStatus {
-    val status = this.toDbStatusWithReference()
-    val user = this.account?.toDbUser() ?: throw IllegalStateException("account is null")
+    val status = this.toDbStatusWithReference(accountKey.host)
+    val user = this.account?.toDbUser(accountKey.host) ?: throw IllegalStateException("account is null")
     val sortId = this.createdAt?.toEpochMilliseconds() ?: 0
     return DbPagingTimelineWithStatus(
         timeline = DbPagingTimeline(
@@ -95,9 +94,11 @@ private fun Notification.toDbPagingTimeline(
     )
 }
 
-private fun Notification.toDbStatusWithReference(): DbStatusWithReference {
-    val status = this.toDbStatusWithUser()
-    val retweet = this.status?.toDbStatusWithUser()
+private fun Notification.toDbStatusWithReference(
+    host: String,
+): DbStatusWithReference {
+    val status = this.toDbStatusWithUser(host)
+    val retweet = this.status?.toDbStatusWithUser(host)
     return DbStatusWithReference(
         status = status,
         references = listOfNotNull(
@@ -106,17 +107,19 @@ private fun Notification.toDbStatusWithReference(): DbStatusWithReference {
     )
 }
 
-private fun Notification.toDbStatusWithUser(): DbStatusWithUser {
-    val user = this.account?.toDbUser() ?: throw IllegalStateException("account is null")
-    val status = this.toDbStatus()
+private fun Notification.toDbStatusWithUser(host: String): DbStatusWithUser {
+    val user = this.account?.toDbUser(host) ?: throw IllegalStateException("account is null")
+    val status = this.toDbStatus(host)
     return DbStatusWithUser(
         data = status,
         user = user,
     )
 }
 
-private fun Notification.toDbStatus(): DbStatus {
-    val user = this.account?.toDbUser() ?: throw IllegalStateException("account is null")
+private fun Notification.toDbStatus(
+    host: String
+): DbStatus {
+    val user = this.account?.toDbUser(host) ?: throw IllegalStateException("account is null")
     return DbStatus(
         statusKey = MicroBlogKey(
             this.id ?: throw IllegalStateException("id is null"),
@@ -141,7 +144,7 @@ fun Status.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
 ): DbPagingTimelineWithStatus {
-    val status = this.toDbStatusWithReference()
+    val status = this.toDbStatusWithReference(accountKey.host)
     val sortId = this.createdAt?.toEpochMilliseconds() ?: 0
     return DbPagingTimelineWithStatus(
         timeline = DbPagingTimeline(
@@ -155,9 +158,11 @@ fun Status.toDbPagingTimeline(
     )
 }
 
-fun Status.toDbStatusWithReference(): DbStatusWithReference {
-    val status = this.toDbStatusWithUser()
-    val retweet = this.reblog?.toDbStatusWithUser()
+fun Status.toDbStatusWithReference(
+    host: String,
+): DbStatusWithReference {
+    val status = this.toDbStatusWithUser(host)
+    val retweet = this.reblog?.toDbStatusWithUser(host)
     return DbStatusWithReference(
         status = status,
         references = listOfNotNull(
@@ -181,8 +186,10 @@ fun DbStatusWithUser.toDbStatusReference(
     )
 }
 
-private fun Status.toDbStatusWithUser(): DbStatusWithUser {
-    val user = account?.toDbUser()
+private fun Status.toDbStatusWithUser(
+    host: String,
+): DbStatusWithUser {
+    val user = account?.toDbUser(host)
         ?: throw IllegalArgumentException("mastodon Status.user should not be null")
     val status = DbStatus(
         statusKey = MicroBlogKey(
@@ -199,14 +206,9 @@ private fun Status.toDbStatusWithUser(): DbStatusWithUser {
     )
 }
 
-fun Account.toDbUser(): DbUser {
-    requireNotNull(acct) { "mastodon Account.acct should not be null" }
-    val host = if (acct.contains("@")) {
-        acct.substring(acct.indexOf("@") + 1)
-    } else {
-        requireNotNull(url) { "mastodon Account.url should not be null" }
-        Url(url).host
-    }
+fun Account.toDbUser(
+    host: String,
+): DbUser {
     return DbUser(
         userKey = MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),

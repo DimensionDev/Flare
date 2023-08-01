@@ -32,6 +32,9 @@ internal class MentionRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+    override suspend fun initialize(): InitializeAction {
+        return InitializeAction.SKIP_INITIAL_REFRESH
+    }
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>

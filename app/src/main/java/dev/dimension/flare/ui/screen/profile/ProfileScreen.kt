@@ -63,6 +63,7 @@ import dev.dimension.flare.data.repository.mastodonUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder.placeholder
@@ -104,7 +105,7 @@ fun ProfileScreen(
     onBack: () -> Unit = {},
     showTopBar: Boolean = true,
 ) {
-    val state by producePresenter {
+    val state by producePresenter(key = userKey.toString()) {
         ProfilePresenter(userKey)
     }
     val listState = rememberLazyListState()
@@ -322,13 +323,7 @@ internal fun CommonProfileHeader(
                             top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
                         )
                 ) {
-                    NetworkImage(
-                        model = avatarUrl,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(ProfileHeaderConstants.AvatarSize.dp)
-                            .clip(CircleShape),
-                    )
+                    AvatarComponent(data = avatarUrl, size = ProfileHeaderConstants.AvatarSize.dp)
                 }
                 Column(
                     modifier = Modifier
@@ -453,7 +448,7 @@ private fun ProfilePresenter(
     val userState = account.flatMap {
         when (it) {
             is UiAccount.Mastodon -> {
-                val state by mastodonUserDataPresenter(account = it, accountKey = userKey)
+                val state by mastodonUserDataPresenter(account = it, userId = userKey.id)
                 state
 
             }

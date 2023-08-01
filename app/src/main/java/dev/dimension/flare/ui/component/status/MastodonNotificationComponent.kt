@@ -19,8 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.R
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.theme.MediumAlpha
@@ -106,7 +109,7 @@ private fun MastodonUpdateNotificationComponent(
         StatusRetweetHeaderComponent(
             icon = Icons.Default.Edit,
             user = data.user,
-            text = "just edit a status",
+            text = stringResource(id = R.string.mastodon_notification_item_updated_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
@@ -132,7 +135,7 @@ private fun MastodonStatusNotificationComponent(
         StatusRetweetHeaderComponent(
             icon = Icons.Default.Add,
             user = data.user,
-            text = "just posted a status",
+            text = stringResource(id = R.string.mastodon_notification_item_posted_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
@@ -158,7 +161,7 @@ private fun MastodonFollowRequestNotificationComponent(
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = "requested to follow you",
+            text = stringResource(id = R.string.mastodon_notification_item_requested_follow),
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -185,7 +188,7 @@ private fun MastodonFollowRequestNotificationComponent(
                         }
                 )
                 Text(
-                    text = data.user.displayHandle,
+                    text = data.user.handle,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .alpha(MediumAlpha)
@@ -212,7 +215,7 @@ private fun MastodonPollNotificationComponent(
         StatusRetweetHeaderComponent(
             icon = Icons.Default.Poll,
             user = null,
-            text = "poll ended",
+            text = stringResource(id = R.string.mastodon_notification_item_poll_ended),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
@@ -238,7 +241,7 @@ private fun MastodonRetweetNotificationComponent(
         StatusRetweetHeaderComponent(
             icon = Icons.Default.SyncAlt,
             user = data.user,
-            text = "boosted your status",
+            text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
@@ -264,7 +267,7 @@ private fun MastodonFavouriteNotificationComponent(
         StatusRetweetHeaderComponent(
             icon = Icons.Default.Favorite,
             user = data.user,
-            text = "liked your status",
+            text = stringResource(id = R.string.mastodon_notification_item_favourited_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.status != null) {
@@ -290,7 +293,7 @@ private fun MastodonFollowNotificationComponent(
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = "followed you",
+            text = stringResource(id = R.string.mastodon_notification_item_followed_you),
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -317,7 +320,7 @@ private fun MastodonFollowNotificationComponent(
                         }
                 )
                 Text(
-                    text = data.user.displayHandle,
+                    text = data.user.handle,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .alpha(MediumAlpha)

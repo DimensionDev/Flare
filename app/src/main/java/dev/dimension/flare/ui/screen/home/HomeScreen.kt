@@ -47,9 +47,8 @@ import androidx.navigation.compose.rememberNavController
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.UiAccount
+import dev.dimension.flare.data.repository.accountDataPresenter
 import dev.dimension.flare.data.repository.activeAccountPresenter
-import dev.dimension.flare.data.repository.mastodonUserDataPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.NetworkImage
@@ -275,12 +274,7 @@ fun HomeScreen(
 private fun HomePresenter() = run {
     val account by activeAccountPresenter()
     val user = account.flatMap {
-        when (it) {
-            is UiAccount.Mastodon -> {
-                val state by mastodonUserDataPresenter(account = it)
-                state
-            }
-        }
+        accountDataPresenter(account = it)
     }
     object {
         val user = user

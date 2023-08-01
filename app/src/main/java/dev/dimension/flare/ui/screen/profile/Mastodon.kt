@@ -43,7 +43,7 @@ internal fun MastodonProfileHeader(
         bannerUrl = user.bannerUrl,
         avatarUrl = user.avatarUrl,
         displayName = user.nameElement,
-        handle = user.displayHandle,
+        handle = user.handle,
         handleTrailing = {
             if (user.locked) {
                 Icon(
@@ -107,21 +107,21 @@ internal fun MastodonProfileHeader(
                     Text(
                         text = stringResource(
                             R.string.profile_header_toots_count,
-                            user.matrices.statusesCount
+                            user.matrices.statusesCountHumanized
                         ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
                         text = stringResource(
                             R.string.profile_header_following_count,
-                            user.matrices.followsCount
+                            user.matrices.followsCountHumanized
                         ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
                         text = stringResource(
                             R.string.profile_header_fans_count,
-                            user.matrices.fansCount
+                            user.matrices.fansCountHumanized
                         ),
                         style = MaterialTheme.typography.bodySmall,
                     )

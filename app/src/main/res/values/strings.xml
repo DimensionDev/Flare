@@ -24,4 +24,17 @@
     <string name="compose_hint">What\'s happening?</string>
 
     <string name="settings_title">Settings</string>
+
+    <string name="mastodon_notification_item_followed_you">followed you</string>
+    <string name="mastodon_notification_item_favourited_your_status">favourited your status</string>
+    <string name="mastodon_notification_item_reblogged_your_status">reblogged your status</string>
+    <string name="mastodon_notification_item_poll_ended">A poll you were participating in has ended</string>
+    <string name="mastodon_notification_item_requested_follow">request to follow you</string>
+    <string name="mastodon_notification_item_posted_status">just posted a status</string>
+    <string name="mastodon_notification_item_updated_status">updated a status</string>
+    <string name="mastodon_item_reblogged_status">boosted a status</string>
+    <string name="mastodon_item_show_more">Show more</string>
+    <string name="mastodon_item_show_less">Show less</string>
+
+    <string name="settings_accounts_title">Accounts</string>
 </resources>

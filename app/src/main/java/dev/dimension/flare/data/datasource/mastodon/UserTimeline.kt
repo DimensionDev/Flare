@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.datasource.mastodon
 
-import dev.dimension.flare.data.database.cache.mapper.save
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.paging.ExperimentalPagingApi
@@ -14,6 +13,7 @@ import androidx.paging.map
 import coil.network.HttpException
 import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.save
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.repository.UiAccount
@@ -33,6 +33,9 @@ internal class UserTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val pagingKey: String,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+    override suspend fun initialize(): InitializeAction {
+        return InitializeAction.SKIP_INITIAL_REFRESH
+    }
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>
@@ -87,23 +90,23 @@ internal fun userTimelineDataSource(
     userKey: MicroBlogKey = account.accountKey,
     pageSize: Int = 20,
     pagingKey: String = "user_${userKey}",
-    accountKey: MicroBlogKey = account.accountKey,
     database: CacheDatabase = rememberInject(),
 ): Flow<PagingData<UiStatus>> {
     return remember(
-        accountKey,
+        account.accountKey,
+        userKey,
     ) {
         Pager(
             config = PagingConfig(pageSize = pageSize),
             remoteMediator = UserTimelineRemoteMediator(
                 account.service,
                 database,
-                accountKey,
+                account.accountKey,
                 userKey,
                 pagingKey,
             )
         ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, accountKey)
+            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
         }.flow.map {
             it.map {
                 it.toUi()

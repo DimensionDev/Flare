@@ -47,12 +47,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.koject.Provides
 import com.moriatsushi.koject.Singleton
+import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AdaptiveGrid
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder.placeholder
@@ -123,7 +126,7 @@ internal fun MastodonStatusComponent(
             StatusRetweetHeaderComponent(
                 icon = Icons.Default.SyncAlt,
                 user = data.user,
-                text = "retweeted",
+                text = stringResource(id = R.string.mastodon_item_reblogged_status),
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -408,7 +411,9 @@ private fun StatusContentComponent(
                 },
             ) {
                 Text(
-                    text = if (state.expanded) "Show less" else "Show more",
+                    text = stringResource(
+                        if (state.expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
+                    )
                 )
             }
         }
@@ -510,7 +515,7 @@ private fun StatusHeaderComponent(
                     }
             )
             Text(
-                text = data.user.displayHandle,
+                text = data.user.handle,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .alpha(MediumAlpha)
@@ -570,20 +575,6 @@ private fun VisibilityIcon(
     }
 }
 
-@Composable
-fun AvatarComponent(
-    data: String,
-    modifier: Modifier = Modifier,
-) {
-    NetworkImage(
-        model = data,
-        contentDescription = null,
-        modifier = modifier
-            .size(44.dp)
-            .clip(CircleShape)
-    )
-}
-
 interface MastodonStatusEvent {
     fun onUserClick(userKey: MicroBlogKey)
     fun onStatusClick(statusKey: MicroBlogKey)
@@ -603,7 +594,8 @@ class DefaultMastodonStatusEvent(
     private val context: Context,
 ) : MastodonStatusEvent {
     override fun onUserClick(userKey: MicroBlogKey) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ProfileRouteDestination(userKey).deeplink()))
+        val intent =
+            Intent(Intent.ACTION_VIEW, Uri.parse(ProfileRouteDestination(userKey).deeplink()))
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     }

@@ -237,7 +237,7 @@ private fun Account.toUi(): UiUser.Mastodon {
             host = host,
         ),
         name = displayName.orEmpty(),
-        handle = username.orEmpty(),
+        handleInternal = username.orEmpty(),
         avatarUrl = avatar.orEmpty(),
         nameElement = parseContent(this),
         bannerUrl = header,

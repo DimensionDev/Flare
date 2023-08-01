@@ -3,6 +3,7 @@ package dev.dimension.flare.data.repository
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.moriatsushi.koject.compose.rememberInject
 import com.moriatsushi.koject.inject
@@ -20,6 +21,8 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
@@ -49,19 +52,37 @@ internal fun activeAccountPresenter(
     }.collectAsState(initial = UiState.Loading())
 }
 
+@Composable
+internal fun allAccountsPresenter(
+    appDatabase: AppDatabase = rememberInject(),
+): State<UiState<ImmutableList<UiAccount>>> {
+    return remember(appDatabase) {
+        appDatabase.accountDao()
+            .getAllAccounts()
+            .map {
+                it.map { dbAccount ->
+                    dbAccount.toUi()
+                }
+            }
+            .map {
+                UiState.Success(it.toImmutableList())
+            }
+    }.collectAsState(initial = UiState.Loading())
+}
+
 internal object NoActiveAccountException : Throwable("No active account")
 
 @Composable
 internal fun mastodonUserDataPresenter(
     account: UiAccount.Mastodon,
-    accountKey: MicroBlogKey = account.accountKey,
+    userId: String = account.accountKey.id,
     cacheDatabase: CacheDatabase = inject(),
 ): State<UiState<UiUser>> {
-    return remember(accountKey) {
+    return remember(account.accountKey, userId) {
         StoreBuilder
             .from<MicroBlogKey, DbUser, DbUser>(
                 fetcher = Fetcher.of {
-                    account.service.lookupUser(it.id).toDbUser()
+                    account.service.lookupUser(it.id).toDbUser(it.host)
                 },
                 sourceOfTruth = SourceOfTruth.of(
                     reader = {
@@ -72,7 +93,7 @@ internal fun mastodonUserDataPresenter(
                     },
                 )
             ).build()
-            .stream(StoreReadRequest.cached(accountKey, refresh = true))
+            .stream(StoreReadRequest.cached(MicroBlogKey(userId, account.accountKey.host), refresh = true))
             .map {
                 when (it) {
                     is StoreReadResponse.Data -> UiState.Success(it.value.toUi())
@@ -102,6 +123,22 @@ internal suspend fun addMastodonAccountUseCase(
     )
     appDatabase.accountDao().addAccount(account)
 }
+
+internal suspend fun setActiveAccountUseCase(
+    accountKey: MicroBlogKey,
+    appDatabase: AppDatabase = inject()
+) {
+    appDatabase.accountDao().setActiveAccount(accountKey, Clock.System.now().toEpochMilliseconds())
+}
+
+@Composable
+internal fun accountDataPresenter(account: UiAccount): UiState<UiUser> {
+    val state by when (account) {
+        is UiAccount.Mastodon -> mastodonUserDataPresenter(account = account)
+    }
+    return state
+}
+
 
 sealed interface UiAccount {
     val accountKey: MicroBlogKey

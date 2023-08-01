@@ -19,8 +19,10 @@ internal sealed interface UiStatus {
         val createdAt: Instant,
         val status: Mastodon?,
         val type: NotificationTypes,
-    ): UiStatus {
-        val humanizedTime = createdAt.humanize()
+    ) : UiStatus {
+        val humanizedTime by lazy {
+            createdAt.humanize()
+        }
     }
 
     data class Mastodon(
@@ -38,13 +40,17 @@ internal sealed interface UiStatus {
         val reaction: Reaction,
         val sensitive: Boolean,
         val reblogStatus: Mastodon?,
-    ): UiStatus {
+    ) : UiStatus {
 
-        val humanizedTime = createdAt.humanize()
-        val contentDirection = if (Bidi(content, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
-            LayoutDirection.Ltr
-        } else {
-            LayoutDirection.Rtl
+        val humanizedTime by lazy {
+            createdAt.humanize()
+        }
+        val contentDirection by lazy {
+            if (Bidi(content, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
+                LayoutDirection.Ltr
+            } else {
+                LayoutDirection.Rtl
+            }
         }
 
         data class Reaction(
@@ -62,7 +68,7 @@ internal sealed interface UiStatus {
             val voted: Boolean,
             val ownVotes: ImmutableList<Int>,
         ) {
-            val humanizedExpiresAt = expiresAt.humanize()
+            val humanizedExpiresAt by lazy { expiresAt.humanize() }
         }
 
         data class PollOption(
@@ -70,7 +76,7 @@ internal sealed interface UiStatus {
             val votesCount: Long,
             val percentage: Float,
         ) {
-            val humanizedPercentage = percentage.humanizePercentage()
+            val humanizedPercentage by lazy { percentage.humanizePercentage() }
         }
 
         enum class Visibility {
@@ -85,16 +91,30 @@ internal sealed interface UiStatus {
             val reblogCount: Long,
             val favouriteCount: Long,
         ) {
-            val humanizedReplyCount = if (replyCount > 0) replyCount.toString() else null
-            val humanizedReblogCount = if (reblogCount > 0) reblogCount.toString() else null
-            val humanizedFavouriteCount = if (favouriteCount > 0) favouriteCount.toString() else null
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
+            val humanizedReblogCount by lazy { if (reblogCount > 0) reblogCount.toString() else null }
+            val humanizedFavouriteCount by lazy { if (favouriteCount > 0) favouriteCount.toString() else null }
         }
     }
 }
 
 internal val UiStatus.itemKey: String get() = statusKey.toString()
-internal val UiStatus.itemType: String get() = when (this) {
-    is UiStatus.Mastodon -> "mastodon"
-    is UiStatus.MastodonNotification -> "mastodon_notification_$type"
-}
+internal val UiStatus.itemType: String
+    get() = when (this) {
+        is UiStatus.Mastodon -> buildString {
+            append("mastodon")
+            if (reblogStatus != null) append("_reblog")
+            with(reblogStatus ?: this@UiStatus) {
+                if (media.isNotEmpty()) append("_media")
+                if (poll != null) append("_poll")
+                if (card != null) append("_card")
+            }
+        }
+
+        is UiStatus.MastodonNotification -> buildString {
+            append("mastodon_notification")
+            append("_${type.name.lowercase()}")
+            if (status != null) append(status.itemType)
+        }
+    }
 

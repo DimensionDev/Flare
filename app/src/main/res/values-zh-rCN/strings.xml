@@ -23,4 +23,18 @@
     <string name="profile_header_button_requested">已申请</string>
 
     <string name="settings_title">设置</string>
+
+
+    <string name="mastodon_notification_item_followed_you">关注了你</string>
+    <string name="mastodon_notification_item_favourited_your_status">喜欢了你的嘟文</string>
+    <string name="mastodon_notification_item_reblogged_your_status">转嘟了你的嘟文</string>
+    <string name="mastodon_notification_item_poll_ended">你参与的一个投票已经结束</string>
+    <string name="mastodon_notification_item_requested_follow">申请关注你</string>
+    <string name="mastodon_notification_item_posted_status">刚刚发布了一条嘟文</string>
+    <string name="mastodon_notification_item_updated_status">更新了一条嘟文</string>
+    <string name="mastodon_item_reblogged_status">转嘟了</string>
+    <string name="mastodon_item_show_more">显示更多</string>
+    <string name="mastodon_item_show_less">显示更少</string>
+
+    <string name="settings_accounts_title">账号</string>
 </resources>

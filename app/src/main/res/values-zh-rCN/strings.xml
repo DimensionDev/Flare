@@ -8,6 +8,8 @@
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
 
+    <string name="home_timeline_new_toots">有新嘟文</string>
+
     <string name="notification_tab_all_title">全部</string>
     <string name="notification_tab_mentions_title">提及</string>
 

@@ -9,6 +9,8 @@
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Me</string>
 
+    <string name="home_timeline_new_toots">New toots</string>
+
     <string name="notification_tab_all_title">All</string>
     <string name="notification_tab_mentions_title">Mentions</string>
 

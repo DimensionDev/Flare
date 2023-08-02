@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -114,7 +115,8 @@ internal fun MastodonLoginScreen() {
                             .fillMaxWidth()
                             .focusRequester(
                                 focusRequester = focusRequester
-                            )
+                            ),
+                        lineLimits = TextFieldLineLimits.SingleLine
                     )
                     Button(
                         onClick = state::login,

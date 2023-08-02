@@ -563,32 +563,32 @@ private fun StatusHeaderComponent(
 }
 
 @Composable
-private fun VisibilityIcon(
+internal fun VisibilityIcon(
     visibility: UiStatus.Mastodon.Visibility,
     modifier: Modifier = Modifier
 ) {
     when (visibility) {
         UiStatus.Mastodon.Visibility.Public -> Icon(
             imageVector = Icons.Default.Public,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.mastodon_visibility_public),
             modifier = modifier
         )
 
         UiStatus.Mastodon.Visibility.Unlisted -> Icon(
             imageVector = Icons.Default.LockOpen,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
             modifier = modifier
         )
 
         UiStatus.Mastodon.Visibility.Private -> Icon(
             imageVector = Icons.Default.Lock,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.mastodon_visibility_private),
             modifier = modifier
         )
 
         UiStatus.Mastodon.Visibility.Direct -> Icon(
             imageVector = Icons.Default.MailOutline,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
             modifier = modifier
         )
     }

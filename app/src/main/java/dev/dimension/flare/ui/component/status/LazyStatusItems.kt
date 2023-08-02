@@ -8,9 +8,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoodBad
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
@@ -47,6 +52,33 @@ internal fun status(
                     Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider(
                         modifier = Modifier.alpha(DisabledAlpha)
+                    )
+                }
+            }
+        } else if ((
+            lazyPagingItems.loadState.refresh is LoadState.Error ||
+                lazyPagingItems.loadState.prepend is LoadState.Error
+            ) &&
+            lazyPagingItems.itemCount == 0
+        ) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillParentMaxSize()
+                        .clickable {
+                            lazyPagingItems.retry()
+                        },
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoodBad,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(
+                        text = stringResource(id = R.string.status_loadmore_error_retry),
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
             }

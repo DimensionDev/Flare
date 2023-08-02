@@ -3,6 +3,7 @@ package dev.dimension.flare.data.database
 import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.MicroBlogKey
@@ -46,6 +47,16 @@ class Converters {
 
     @TypeConverter
     fun toStatusContent(value: String?): StatusContent? {
+        return value?.decodeJson()
+    }
+
+    @TypeConverter
+    fun fromEmojiContent(value: EmojiContent?): String? {
+        return value?.encodeJson()
+    }
+
+    @TypeConverter
+    fun toEmojiContent(value: String?): EmojiContent? {
         return value?.decodeJson()
     }
 }

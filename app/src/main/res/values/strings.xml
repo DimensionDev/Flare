@@ -22,6 +22,21 @@
 
     <string name="compose_title">Compose</string>
     <string name="compose_hint">What\'s happening?</string>
+    <string name="compose_poll_option_hint">Option %1$s</string>
+    <string name="compose_add_option">Add option</string>
+    <string name="compose_poll_single_choice">Single choice</string>
+    <string name="compose_poll_multiple_choice">Multiple choice</string>
+    <string name="compose_poll_set_expiration_date">Set expiration date</string>
+    <string name="compose_poll_expiration_at">Expiration at: %1$s</string>
+    <string name="compose_poll_expiration_5_minutes">5 minutes</string>
+    <string name="compose_poll_expiration_30_minutes">30 minutes</string>
+    <string name="compose_poll_expiration_1_hour">1 hour</string>
+    <string name="compose_poll_expiration_6_hours">6 hours</string>
+    <string name="compose_poll_expiration_12_hours">12 hours</string>
+    <string name="compose_poll_expiration_1_day">1 day</string>
+    <string name="compose_poll_expiration_3_days">3 days</string>
+    <string name="compose_poll_expiration_7_days">7 days</string>
+    <string name="compose_content_warning_hint">Content warning</string>
 
     <string name="settings_title">Settings</string>
 
@@ -35,6 +50,15 @@
     <string name="mastodon_item_reblogged_status">boosted a status</string>
     <string name="mastodon_item_show_more">Show more</string>
     <string name="mastodon_item_show_less">Show less</string>
+
+    <string name="mastodon_visibility_public">Public</string>
+    <string name="mastodon_visibility_unlisted">Unlisted</string>
+    <string name="mastodon_visibility_private">Private</string>
+    <string name="mastodon_visibility_direct">Direct</string>
+    <string name="mastodon_visibility_public_description">Anyone can see and boost this toot</string>
+    <string name="mastodon_visibility_unlisted_description">Anyone can see this toot, but it won\'t appear on the public timeline</string>
+    <string name="mastodon_visibility_private_description">Only followers can see this toot</string>
+    <string name="mastodon_visibility_direct_description">Only mentioned users can see this toot</string>
 
     <string name="settings_accounts_title">Accounts</string>
 

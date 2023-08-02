@@ -17,10 +17,25 @@
 
     <string name="compose_title">发嘟文</string>
     <string name="compose_hint">发生什么事了？</string>
+    <string name="compose_poll_option_hint">选项 %1$s</string>
+    <string name="compose_add_option">添加选项</string>
+    <string name="compose_poll_single_choice">单选</string>
+    <string name="compose_poll_multiple_choice">多选</string>
+    <string name="compose_poll_set_expiration_date">设置截止日期</string>
 
     <string name="profile_header_button_follow">关注</string>
     <string name="profile_header_button_following">正在关注</string>
     <string name="profile_header_button_requested">已申请</string>
+    <string name="compose_poll_expiration_at">截止日期：%1$s</string>
+    <string name="compose_poll_expiration_5_minutes">5 分钟后</string>
+    <string name="compose_poll_expiration_30_minutes">30 分钟后</string>
+    <string name="compose_poll_expiration_1_hour">1 小时后</string>
+    <string name="compose_poll_expiration_6_hours">6 小时后</string>
+    <string name="compose_poll_expiration_12_hours">12 小时后</string>
+    <string name="compose_poll_expiration_1_day">1 天后</string>
+    <string name="compose_poll_expiration_3_days">3 天后</string>
+    <string name="compose_poll_expiration_7_days">7 天后</string>
+    <string name="compose_content_warning_hint">内容警告</string>
 
     <string name="settings_title">设置</string>
 
@@ -34,6 +49,15 @@
     <string name="mastodon_item_reblogged_status">转嘟了</string>
     <string name="mastodon_item_show_more">显示更多</string>
     <string name="mastodon_item_show_less">显示更少</string>
+
+    <string name="mastodon_visibility_public">公开</string>
+    <string name="mastodon_visibility_unlisted">不公开</string>
+    <string name="mastodon_visibility_private">仅关注可见</string>
+    <string name="mastodon_visibility_direct">仅提到的人</string>
+    <string name="mastodon_visibility_public_description">任何人都可以看到这条嘟文</string>
+    <string name="mastodon_visibility_unlisted_description">任何人都可以看到这条嘟文，但不会出现在公共时间线上</string>
+    <string name="mastodon_visibility_private_description">只有关注你的人可以看到这条嘟文</string>
+    <string name="mastodon_visibility_direct_description">只有提到的人可以看到这条嘟文</string>
 
     <string name="settings_accounts_title">账号</string>
 

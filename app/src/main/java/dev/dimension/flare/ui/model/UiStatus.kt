@@ -112,7 +112,7 @@ internal sealed class UiStatus {
             Public,
             Unlisted,
             Private,
-            Direct
+            Direct;
         }
 
         data class Matrices(
@@ -125,4 +125,18 @@ internal sealed class UiStatus {
             val humanizedFavouriteCount by lazy { if (favouriteCount > 0) favouriteCount.toString() else null }
         }
     }
+}
+
+internal val UiStatus.Mastodon.Visibility.localName: Int get() = when (this) {
+    UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public
+    UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted
+    UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private
+    UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct
+}
+
+internal val UiStatus.Mastodon.Visibility.localDescription: Int get() = when (this) {
+    UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public_description
+    UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted_description
+    UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private_description
+    UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct_description
 }

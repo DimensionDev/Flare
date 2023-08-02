@@ -2,6 +2,7 @@ package dev.dimension.flare.data.database.cache.mapper
 
 import androidx.room.withTransaction
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
@@ -12,6 +13,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
+import dev.dimension.flare.data.network.mastodon.api.model.Emoji
 import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.model.MicroBlogKey
@@ -232,5 +234,14 @@ fun Account.toDbUser(
         handle = username
             ?: throw IllegalArgumentException("mastodon Account.username should not be null"),
         content = dev.dimension.flare.data.database.cache.model.UserContent.Mastodon(this)
+    )
+}
+
+fun List<Emoji>.toDb(
+    host: String
+): DbEmoji {
+    return DbEmoji(
+        host = host,
+        content = dev.dimension.flare.data.database.cache.model.EmojiContent.Mastodon(this)
     )
 }

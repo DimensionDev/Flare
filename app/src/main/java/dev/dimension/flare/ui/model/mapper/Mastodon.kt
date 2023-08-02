@@ -2,8 +2,10 @@ package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
@@ -16,6 +18,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
@@ -298,4 +301,17 @@ internal fun RelationshipResponse.toUi(): UiRelation.Mastodon {
         requested = requested ?: false,
         domainBlocking = domainBlocking ?: false
     )
+}
+
+internal fun DbEmoji.toUi(): List<UiEmoji> {
+    return when (content) {
+        is EmojiContent.Mastodon -> {
+            content.data.filter { it.visibleInPicker == true }.map {
+                UiEmoji(
+                    shortcode = it.shortcode.orEmpty(),
+                    url = it.url.orEmpty()
+                )
+            }
+        }
+    }
 }

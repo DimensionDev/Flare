@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,17 +13,19 @@ import androidx.compose.foundation.text2.input.TextEditFilter
 import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
@@ -41,8 +44,8 @@ fun TextField2(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
     onTextLayout: Density.(TextLayoutResult) -> Unit = {},
-    interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(Color.Black),
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
     codepointTransformation: CodepointTransformation? = null,
 
@@ -57,13 +60,26 @@ fun TextField2(
     isError: Boolean = false,
     colors: TextFieldColors = TextFieldDefaults.colors()
 ) {
+    // If color is not provided via the text style, use content color as a default
+    val textColor = textStyle.color.takeOrElse {
+        with(colors) {
+            val focused by interactionSource.collectIsFocusedAsState()
+            when {
+                !enabled -> disabledTextColor
+                isError -> errorTextColor
+                focused -> focusedTextColor
+                else -> unfocusedTextColor
+            }
+        }
+    }
+    val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
     BasicTextField2(
         state = state,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
         filter = filter,
-        textStyle = textStyle,
+        textStyle = mergedTextStyle,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         lineLimits = lineLimits,
@@ -88,7 +104,7 @@ fun TextField2(
                 singleLine = lineLimits == TextFieldLineLimits.SingleLine,
                 enabled = enabled,
                 isError = isError,
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 colors = colors
             )
         }
@@ -108,8 +124,8 @@ fun OutlinedTextField2(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
     onTextLayout: Density.(TextLayoutResult) -> Unit = {},
-    interactionSource: MutableInteractionSource? = null,
-    cursorBrush: Brush = SolidColor(Color.Black),
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
     codepointTransformation: CodepointTransformation? = null,
 
@@ -124,13 +140,26 @@ fun OutlinedTextField2(
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
+    // If color is not provided via the text style, use content color as a default
+    val textColor = textStyle.color.takeOrElse {
+        with(colors) {
+            val focused by interactionSource.collectIsFocusedAsState()
+            when {
+                !enabled -> disabledTextColor
+                isError -> errorTextColor
+                focused -> focusedTextColor
+                else -> unfocusedTextColor
+            }
+        }
+    }
+    val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
     BasicTextField2(
         state = state,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
         filter = filter,
-        textStyle = textStyle,
+        textStyle = mergedTextStyle,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         lineLimits = lineLimits,
@@ -154,13 +183,13 @@ fun OutlinedTextField2(
                 singleLine = lineLimits == TextFieldLineLimits.SingleLine,
                 enabled = enabled,
                 isError = isError,
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 colors = colors,
                 container = {
                     OutlinedTextFieldDefaults.ContainerBox(
                         enabled,
                         isError,
-                        interactionSource = remember { MutableInteractionSource() },
+                        interactionSource = interactionSource,
                         colors,
                         shape
                     )

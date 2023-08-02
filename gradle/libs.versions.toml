@@ -29,6 +29,7 @@ compose-destinations = "1.9.51"
 okhttp3 = "4.11.0"
 compose-lint-checks = "1.2.0"
 ktlint = "11.5.0"
+androidx-credentials = "1.2.0-beta02"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -99,6 +100,8 @@ compose-destinations-animations-core = { group = "io.github.raamcosta.compose-de
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destinations" }
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
+
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "androidx-credentials" }
 
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]

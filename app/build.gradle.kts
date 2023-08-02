@@ -87,6 +87,7 @@ dependencies {
     implementation(libs.bundles.compose.destinations)
     ksp(libs.compose.destinations.ksp)
     lintChecks(libs.compose.lint.checks)
+    implementation(libs.androidx.credentials)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

@@ -631,8 +631,7 @@ internal class DefaultMastodonStatusEvent(
 
     override fun onReblogClick(status: UiStatus.Mastodon) {
         scope.launch {
-            val account = getAccountUseCase(status.accountKey) ?: return@launch
-            if (account !is UiAccount.Mastodon) return@launch
+            val account = getAccountUseCase<UiAccount.Mastodon>(status.accountKey) ?: return@launch
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,
@@ -679,8 +678,7 @@ internal class DefaultMastodonStatusEvent(
 
     override fun onLikeClick(status: UiStatus.Mastodon) {
         scope.launch {
-            val account = getAccountUseCase(status.accountKey) ?: return@launch
-            if (account !is UiAccount.Mastodon) return@launch
+            val account = getAccountUseCase<UiAccount.Mastodon>(status.accountKey) ?: return@launch
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,

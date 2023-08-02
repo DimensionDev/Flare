@@ -20,7 +20,7 @@ import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.LoginRouteDestination
+import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SplashRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.delay
@@ -40,7 +40,7 @@ fun SplashRoute(
             }
         },
         toLogin = {
-            navigator.navigate(LoginRouteDestination) {
+            navigator.navigate(ServiceSelectRouteDestination) {
                 popUpTo(SplashRouteDestination) {
                     inclusive = true
                 }

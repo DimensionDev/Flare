@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -36,7 +37,7 @@ import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.onSuccess
-import dev.dimension.flare.ui.screen.destinations.LoginRouteDestination
+import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
@@ -49,7 +50,7 @@ fun AccountsRoute(
     AccountsScreen(
         onBack = navigator::navigateUp,
         toLogin = {
-            navigator.navigate(LoginRouteDestination)
+            navigator.navigate(ServiceSelectRouteDestination)
         }
     )
 }
@@ -170,7 +171,7 @@ private fun AccountItemLoadingPlaceholder(
         },
         modifier = modifier,
         leadingContent = {
-            AvatarComponent(data = null, modifier = Modifier.placeholder(true))
+            AvatarComponent(data = null, modifier = Modifier.placeholder(true, shape = CircleShape))
         },
         supportingContent = {
             Text(text = "Loading...", modifier = Modifier.placeholder(true))

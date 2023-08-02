@@ -82,7 +82,7 @@ dependencies {
     implementation(libs.molecule.runtime)
     implementation(libs.jsoup)
     implementation(libs.bundles.accompanist)
-    implementation(libs.store)
+    implementation(libs.bundles.store)
     implementation(libs.nestedScrollView)
     implementation(libs.bundles.compose.destinations)
     ksp(libs.compose.destinations.ksp)

@@ -37,8 +37,7 @@ internal class NotificationRemoteMediator(
     ): MediatorResult {
         return try {
             val response = when (loadType) {
-                LoadType.REFRESH -> service.notificationTimeline(count = state.config.pageSize)
-                LoadType.PREPEND -> {
+                LoadType.REFRESH, LoadType.PREPEND -> {
                     val firstItem = state.firstItemOrNull()
                     service.notificationTimeline(
                         count = state.config.pageSize,

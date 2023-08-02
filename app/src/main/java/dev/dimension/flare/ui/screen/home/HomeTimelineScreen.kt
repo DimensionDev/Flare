@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -13,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
@@ -37,6 +38,7 @@ import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
@@ -46,6 +48,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeTimelineScreen() {
     val state by producePresenter {
@@ -65,45 +68,49 @@ internal fun HomeTimelineScreen() {
     }
 
     val scope = rememberCoroutineScope()
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        LazyColumn(
-            state = lazyListState,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            with(state.listState) {
-                status(
-                    event = state.eventHandler
-                )
-            }
-        }
-        state.listState.onSuccess {
-            AnimatedVisibility(
-                state.showNewToots,
-                enter = slideInVertically { -it },
-                exit = slideOutVertically { -it },
-                modifier = Modifier.align(Alignment.TopCenter)
+    RefreshContainer(
+        modifier = Modifier
+            .fillMaxSize(),
+        onRefresh = state::refresh,
+        refreshing = state.refreshing,
+        content = {
+            LazyColumn(
+                state = lazyListState,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilledTonalButton(
-                    onClick = {
-                        state.onNewTootsShown()
-                        scope.launch {
-                            lazyListState.animateScrollToItem(0)
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowUpward,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                with(state.listState) {
+                    status(
+                        event = state.eventHandler
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = stringResource(id = R.string.home_timeline_new_toots))
+                }
+            }
+            state.listState.onSuccess {
+                AnimatedVisibility(
+                    state.showNewToots,
+                    enter = slideInVertically { -it },
+                    exit = slideOutVertically { -it },
+                    modifier = Modifier.align(Alignment.TopCenter)
+                ) {
+                    FilledTonalButton(
+                        onClick = {
+                            state.onNewTootsShown()
+                            scope.launch {
+                                lazyListState.animateScrollToItem(0)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowUpward,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = stringResource(id = R.string.home_timeline_new_toots))
+                    }
                 }
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -117,6 +124,8 @@ private fun homeTimelinePresenter(
         }
     }
     var showNewToots by remember { mutableStateOf(false) }
+    val refreshing =
+        listState is UiState.Loading || listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
     if (listState is UiState.Success && listState.data.itemCount > 0) {
         LaunchedEffect(Unit) {
             snapshotFlow { listState.data.peek(0)?.statusKey }
@@ -129,11 +138,18 @@ private fun homeTimelinePresenter(
         }
     }
     object {
+        val refreshing = refreshing
         val listState = listState
         val eventHandler = defaultEvent
         val showNewToots = showNewToots
         fun onNewTootsShown() {
             showNewToots = false
+        }
+
+        fun refresh() {
+            listState.onSuccess {
+                it.refresh()
+            }
         }
     }
 }

@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import com.ramcosta.composedestinations.annotation.DeepLink
@@ -59,13 +60,14 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.data.datasource.mastodon.userTimelineDataSource
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
-import dev.dimension.flare.data.repository.app.mastodonUserDataPresenter
+import dev.dimension.flare.data.repository.cache.mastodonUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
 import dev.dimension.flare.ui.component.status.status
@@ -74,6 +76,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.FlareTheme
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jsoup.nodes.Element
 import kotlin.math.max
 
@@ -198,22 +201,28 @@ fun ProfileScreen(
                 }
             }
         ) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                state = listState
-            ) {
-                item {
-                    ProfileHeader(
-                        state.userState,
-                        state.relationState
-                    )
+            RefreshContainer(
+                refreshing = state.refreshing,
+                onRefresh = state::refresh,
+                content = {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        state = listState
+                    ) {
+                        item {
+                            ProfileHeader(
+                                state.userState,
+                                state.relationState
+                            )
+                        }
+                        with(state.listState) {
+                            status(
+                                event = state.eventHandler
+                            )
+                        }
+                    }
                 }
-                with(state.listState) {
-                    status(
-                        event = state.eventHandler
-                    )
-                }
-            }
+            )
         }
     }
 }
@@ -315,7 +324,7 @@ internal fun CommonProfileHeader(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Box(
@@ -402,7 +411,7 @@ private fun ProfileHeaderLoading(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Box(
@@ -475,10 +484,20 @@ private fun profilePresenter(
             )
         }
     }
+
+    val refreshing = userState is UiState.Loading ||
+        listState is UiState.Loading ||
+        listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
     object {
+        val refreshing = refreshing
         val userState = userState
         val listState = listState
         val eventHandler = defaultEvent
         val relationState = relationState
+        fun refresh() {
+            listState.onSuccess {
+                it.refresh()
+            }
+        }
     }
 }

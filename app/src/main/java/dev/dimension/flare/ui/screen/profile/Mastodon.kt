@@ -31,6 +31,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -90,7 +91,7 @@ internal fun MastodonProfileHeader(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = screenHorizontalPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 user.descriptionElement?.let {

@@ -40,8 +40,7 @@ internal class HomeTimelineRemoteMediator(
     ): MediatorResult {
         return try {
             val response = when (loadType) {
-                LoadType.REFRESH -> service.homeTimeline(count = state.config.pageSize)
-                LoadType.PREPEND -> {
+                LoadType.REFRESH, LoadType.PREPEND -> {
                     val firstItem = state.firstItemOrNull()
                     service.homeTimeline(
                         count = state.config.pageSize,

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="login_title">登录</string>
-    <string name="login_hint">请输入实例主机名称</string>
     <string name="login_button">登录</string>
 
     <string name="home_tab_home_title">首页</string>
@@ -18,14 +16,13 @@
     <string name="profile_header_toots_count">%1$s 嘟文</string>
 
     <string name="compose_title">发嘟文</string>
-    <string name="compose_hint">发生什么事了</string>
+    <string name="compose_hint">发生什么事了？</string>
 
     <string name="profile_header_button_follow">关注</string>
     <string name="profile_header_button_following">正在关注</string>
     <string name="profile_header_button_requested">已申请</string>
 
     <string name="settings_title">设置</string>
-
 
     <string name="mastodon_notification_item_followed_you">关注了你</string>
     <string name="mastodon_notification_item_favourited_your_status">喜欢了你的嘟文</string>
@@ -39,4 +36,17 @@
     <string name="mastodon_item_show_less">显示更少</string>
 
     <string name="settings_accounts_title">账号</string>
+
+    <string name="status_loadmore_end">没有更多嘟文了</string>
+    <string name="status_loadmore_error">加载失败</string>
+    <string name="status_loadmore_error_retry">重试</string>
+
+    <string name="service_select_welcome_title">欢迎使用 Flare</string>
+    <string name="service_select_welcome_message">Flare 是一个 Android 平台社交客户端。\n请先选择一个服务来开始。</string>
+
+    <string name="mastodon_login_title">登录到 Mastodon</string>
+    <string name="mastodon_login_message">请在下面输入实例主机名称。</string>
+    <string name="mastodon_login_hint">实例主机名称，比如 mastodon.social</string>
+
+    <string name="mastodon_login_verify_message">请稍等，正在验证您的凭据。</string>
 </resources>

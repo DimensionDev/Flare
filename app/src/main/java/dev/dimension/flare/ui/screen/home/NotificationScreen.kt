@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
@@ -27,9 +28,12 @@ import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
+import dev.dimension.flare.ui.onSuccess
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,35 +43,45 @@ fun NotificationScreen(
     val state by producePresenter {
         notificationPresenter()
     }
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item {
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
+    RefreshContainer(
+        modifier = modifier,
+        refreshing = state.refreshing,
+        onRefresh = state::refresh,
+        content = {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                NotificationType.values().forEachIndexed { index, notificationType ->
-                    SegmentedButton(
-                        selected = state.notificationType == notificationType,
-                        onClick = {
-                            state.onNotificationTypeChanged(notificationType)
-                        },
-                        shape = SegmentedButtonDefaults.shape(position = index, count = NotificationType.values().size)
+                item {
+                    SingleChoiceSegmentedButtonRow(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = screenHorizontalPadding)
                     ) {
-                        Text(text = stringResource(id = notificationType.title))
+                        NotificationType.values().forEachIndexed { index, notificationType ->
+                            SegmentedButton(
+                                selected = state.notificationType == notificationType,
+                                onClick = {
+                                    state.onNotificationTypeChanged(notificationType)
+                                },
+                                shape = SegmentedButtonDefaults.shape(
+                                    position = index,
+                                    count = NotificationType.values().size
+                                )
+                            ) {
+                                Text(text = stringResource(id = notificationType.title))
+                            }
+                        }
                     }
+                }
+                with(state.listState) {
+                    status(
+                        event = state.eventHandler
+                    )
                 }
             }
         }
-        with(state.listState) {
-            status(
-                event = state.eventHandler
-            )
-        }
-    }
+    )
 }
 
 enum class NotificationType(@StringRes val title: Int) {
@@ -92,12 +106,21 @@ private fun notificationPresenter(
             )
         }
     }
+    val refreshing =
+        listState is UiState.Loading || listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
     object {
+        val refreshing = refreshing
         val notificationType = type
         val listState = listState
         val eventHandler = defaultEvent
         fun onNotificationTypeChanged(value: NotificationType) {
             type = value
+        }
+
+        fun refresh() {
+            listState.onSuccess {
+                it.refresh()
+            }
         }
     }
 }

@@ -37,8 +37,7 @@ internal class MentionRemoteMediator(
     ): MediatorResult {
         return try {
             val response = when (loadType) {
-                LoadType.REFRESH -> service.mentionsTimeline(count = state.config.pageSize)
-                LoadType.PREPEND -> {
+                LoadType.REFRESH, LoadType.PREPEND -> {
                     val firstItem = state.firstItemOrNull()
                     service.mentionsTimeline(
                         count = state.config.pageSize,

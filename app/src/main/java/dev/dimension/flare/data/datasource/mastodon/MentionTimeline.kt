@@ -15,6 +15,7 @@ import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveNotification
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.network.mastodon.MastodonException
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
@@ -69,6 +70,8 @@ internal class MentionRemoteMediator(
         } catch (e: IOException) {
             MediatorResult.Error(e)
         } catch (e: HttpException) {
+            MediatorResult.Error(e)
+        } catch (e: MastodonException) {
             MediatorResult.Error(e)
         }
     }

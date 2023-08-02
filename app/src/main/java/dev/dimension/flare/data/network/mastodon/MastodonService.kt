@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.mastodon
 
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.authorization.BearerAuthorization
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
@@ -28,7 +29,12 @@ import dev.dimension.flare.data.network.mastodon.api.model.RelationshipResponse
 import dev.dimension.flare.data.network.mastodon.api.model.SearchType
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.UploadResponse
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.engine.okhttp.OkHttpConfig
+import io.ktor.client.plugins.HttpResponseValidator
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.forms.formData
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.util.toByteArray
 import io.ktor.utils.io.ByteReadChannel
@@ -37,40 +43,55 @@ class MastodonService(
     private val baseUrl: String,
     private val accessToken: String
 ) {
+    private val clientConfig: HttpClientConfig<OkHttpConfig>.() -> Unit by lazy {
+        {
+            expectSuccess = true
+            HttpResponseValidator {
+                handleResponseExceptionWithRequest { exception, request ->
+                    if (exception is ResponseException) {
+                        exception.response.bodyAsText().decodeJson<MastodonException>()
+                            .takeIf { it.error != null }?.let {
+                                throw it
+                            }
+                    }
+                }
+            }
+        }
+    }
     private val timelineResources: TimelineResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     private val lookupResources: LookupResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     private val friendshipResources: FriendshipResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     private val accountResources: AccountResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     private val searchResources: SearchResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     private val statusResources: StatusResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     private val listsResources: ListsResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     private val trendsResources: TrendsResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     private val mastodonResources: MastodonResources by lazy {
-        ktorfit(baseUrl, BearerAuthorization(accessToken)).create()
+        ktorfit(baseUrl, BearerAuthorization(accessToken), clientConfig).create()
     }
 
     suspend fun homeTimeline(
@@ -78,7 +99,12 @@ class MastodonService(
         since_id: String? = null,
         max_id: String? = null,
         min_id: String? = null
-    ) = timelineResources.homeTimeline(max_id = max_id, since_id = since_id, min_id = min_id, limit = count)
+    ) = timelineResources.homeTimeline(
+        max_id = max_id,
+        since_id = since_id,
+        min_id = min_id,
+        limit = count
+    )
 
     suspend fun mentionsTimeline(
         count: Int,

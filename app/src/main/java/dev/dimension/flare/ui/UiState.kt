@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import dev.dimension.flare.common.CacheableState
+import dev.dimension.flare.common.LoadState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -50,5 +52,17 @@ internal inline fun <T> UiState<T>.onError(action: (Throwable) -> Unit): UiState
 internal inline fun <T> UiState<T>.onLoading(action: () -> Unit): UiState<T> = apply {
     if (this is UiState.Loading) {
         action()
+    }
+}
+
+internal fun <T> CacheableState<T>.toUi(): UiState<T> {
+    return data?.let {
+        UiState.Success(it)
+    } ?: run {
+        when (val state = refreshState) {
+            is LoadState.Error -> UiState.Error(state.error)
+            LoadState.Loading -> UiState.Loading()
+            LoadState.Success -> UiState.Error(IllegalStateException("Data is null"))
+        }
     }
 }

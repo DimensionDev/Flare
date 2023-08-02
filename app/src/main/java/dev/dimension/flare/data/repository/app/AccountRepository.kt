@@ -3,7 +3,6 @@ package dev.dimension.flare.data.repository.app
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.moriatsushi.koject.compose.rememberInject
 import com.moriatsushi.koject.inject
@@ -18,6 +17,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.toUi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
@@ -102,10 +102,9 @@ internal suspend fun setActiveAccountUseCase(
 
 @Composable
 internal fun accountDataPresenter(account: UiAccount): UiState<UiUser> {
-    val state by when (account) {
-        is UiAccount.Mastodon -> mastodonUserDataPresenter(account = account)
+    return when (account) {
+        is UiAccount.Mastodon -> mastodonUserDataPresenter(account = account).toUi()
     }
-    return state
 }
 
 sealed interface UiAccount {

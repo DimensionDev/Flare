@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -72,11 +73,13 @@ import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
+import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.toUi
 import org.jsoup.nodes.Element
 import kotlin.math.max
 
@@ -202,6 +205,7 @@ fun ProfileScreen(
             }
         ) {
             RefreshContainer(
+                modifier = Modifier.fillMaxSize(),
                 refreshing = state.refreshing,
                 onRefresh = state::refresh,
                 content = {
@@ -454,14 +458,13 @@ private fun profilePresenter(
     defaultEvent: DefaultMastodonStatusEvent = rememberInject()
 ) = run {
     val account by activeAccountPresenter()
-    val userState = account.flatMap {
+    val userState = account.map {
         when (it) {
             is UiAccount.Mastodon -> {
-                val state by mastodonUserDataPresenter(
+                mastodonUserDataPresenter(
                     account = it,
                     userId = userKey?.id ?: it.accountKey.id
                 )
-                state
             }
         }
     }
@@ -486,15 +489,19 @@ private fun profilePresenter(
     }
 
     val refreshing = userState is UiState.Loading ||
+        userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
         listState is UiState.Loading ||
         listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
     object {
         val refreshing = refreshing
-        val userState = userState
+        val userState = userState.flatMap { it.toUi() }
         val listState = listState
         val eventHandler = defaultEvent
         val relationState = relationState
         fun refresh() {
+            userState.onSuccess {
+                it.refresh()
+            }
             listState.onSuccess {
                 it.refresh()
             }

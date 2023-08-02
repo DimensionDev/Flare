@@ -23,7 +23,6 @@ twitter-parser = "0.2.9"
 molecule = "1.1.0"
 jsoup = "1.16.1"
 accompanist = "0.31.6-rc"
-store = "5.0.0-beta02"
 kotlinx-atomicfu = "0.21.0"
 compose-destinations = "1.9.51"
 okhttp3 = "4.11.0"
@@ -90,9 +89,6 @@ molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", ver
 
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
-store = { group = "org.mobilenativefoundation.store", name = "store5", version.ref = "store" }
-store-cache = { module = "org.mobilenativefoundation.store:cache5", version.ref = "store" }
-
 nestedScrollView = "com.github.Tlaster:NestedScrollView:1.0.1"
 
 compose-destinations = { group = "io.github.raamcosta.compose-destinations", name = "core", version.ref = "compose-destinations" }
@@ -113,7 +109,6 @@ ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "k
 coil = ["coil-compose", "coil-gif", "apng"]
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
-store = ["store", "store-cache"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

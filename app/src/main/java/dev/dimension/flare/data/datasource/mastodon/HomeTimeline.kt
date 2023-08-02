@@ -15,6 +15,7 @@ import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.save
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.network.mastodon.MastodonException
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
@@ -34,6 +35,7 @@ internal class HomeTimelineRemoteMediator(
     override suspend fun initialize(): InitializeAction {
         return InitializeAction.SKIP_INITIAL_REFRESH
     }
+
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>
@@ -72,6 +74,8 @@ internal class HomeTimelineRemoteMediator(
         } catch (e: IOException) {
             MediatorResult.Error(e)
         } catch (e: HttpException) {
+            MediatorResult.Error(e)
+        } catch (e: MastodonException) {
             MediatorResult.Error(e)
         }
     }

@@ -99,6 +99,8 @@ compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-c
 
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "androidx-credentials" }
 
+zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.1" }
+
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]
 paging = ["paging-runtime", "paging-compose"]

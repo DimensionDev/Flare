@@ -67,6 +67,7 @@ import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.screen.destinations.MediaRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination
 import dev.dimension.flare.ui.screen.destinations.StatusRouteDestination
@@ -747,6 +748,15 @@ internal class DefaultMastodonStatusEvent(
     }
 
     override fun onMediaClick(media: UiMedia) {
+        if (media is UiMedia.Image) {
+            val intent =
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(MediaRouteDestination(media.url).deeplink())
+                )
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
     }
 
     override fun onShowMoreClick(status: UiStatus.Mastodon) {

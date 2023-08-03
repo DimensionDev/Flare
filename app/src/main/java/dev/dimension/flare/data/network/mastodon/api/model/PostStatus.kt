@@ -19,5 +19,9 @@ data class PostStatus(
     val spoilerText: String? = null,
 
     val visibility: Visibility? = null,
-    val poll: PostPoll? = null
+    val poll: PostPoll? = null,
+    @SerialName("scheduled_at")
+    val scheduledAt: String? = null,
+    @SerialName("language")
+    val language: String? = null
 )

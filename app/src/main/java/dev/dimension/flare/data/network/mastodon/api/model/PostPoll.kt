@@ -10,5 +10,7 @@ data class PostPoll(
     @SerialName("expires_in")
     val expiresIn: Long? = null,
 
-    val multiple: Boolean? = null
+    val multiple: Boolean? = null,
+    @SerialName("hide_totals")
+    val hideTotals: Boolean? = null
 )

@@ -33,11 +33,12 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttpConfig
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
-import io.ktor.util.toByteArray
-import io.ktor.utils.io.ByteReadChannel
+import java.io.InputStream
 
 class MastodonService(
     private val baseUrl: String,
@@ -306,22 +307,28 @@ class MastodonService(
         return statusResources.delete(id)
     }
 
-    suspend fun upload(channel: ByteReadChannel, name: String): UploadResponse {
-        val data = channel.toByteArray()
-        val multipart = formData {
-            append(
-                "file",
-                data,
-                io.ktor.http.Headers.build {
-                    append(HttpHeaders.ContentDisposition, "filename=$name")
-                }
-            )
-        }
+    suspend fun upload(channel: InputStream, name: String): UploadResponse {
+        val data = channel.readBytes()
+        val multipart = MultiPartFormDataContent(
+            formData {
+                append(
+                    "file",
+                    data,
+                    Headers.build {
+                        append(HttpHeaders.ContentDisposition, "filename=$name")
+                    }
+                )
+            }
+        )
+
         return statusResources.upload(multipart)
     }
 
-    suspend fun compose(data: PostStatus): Status {
-        return statusResources.post(data)
+    suspend fun compose(
+        idempotencyKey: String,
+        data: PostStatus
+    ): Status {
+        return statusResources.post(idempotencyKey, data)
     }
 
     suspend fun vote(id: String, choice: List<Int>): Poll {

@@ -36,6 +36,13 @@
     <string name="compose_poll_expiration_3_days">3 天后</string>
     <string name="compose_poll_expiration_7_days">7 天后</string>
     <string name="compose_content_warning_hint">内容警告</string>
+    <string name="compose_media_sensitive">将媒体标记为敏感内容</string>
+    <string name="compose_notification_title">正在发送</string>
+    <string name="compose_notification_text">请稍等，正在发送您的嘟文。</string>
+    <string name="compose_notification_error_title">发送失败</string>
+    <string name="compose_notification_error_text">嘟文发送失败，请重试。</string>
+    <string name="compose_notification_success_title">发送成功</string>
+    <string name="compose_notification_success_text">嘟文已发送。</string>
 
     <string name="settings_title">设置</string>
 
@@ -73,4 +80,7 @@
     <string name="mastodon_login_hint">实例主机名称，比如 mastodon.social</string>
 
     <string name="mastodon_login_verify_message">请稍等，正在验证您的凭据。</string>
+
+    <string name="notification_channel_compose_name">发送</string>
+    <string name="notification_channel_compose_description">用于通知嘟文发送的状态</string>
 </resources>

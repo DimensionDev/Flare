@@ -1,9 +1,11 @@
 package dev.dimension.flare.ui.screen.compose
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresPermission
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -14,6 +16,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +51,7 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Poll
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -88,10 +92,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavBackStackEntry
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.moriatsushi.koject.compose.rememberInject
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.data.repository.ComposeData
+import dev.dimension.flare.data.repository.ComposeUseCase
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.data.repository.cache.mastodonEmojiProvider
@@ -163,7 +173,8 @@ object ComposeTransitions : DestinationStyle.Animated {
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
-    ExperimentalLayoutApi::class
+    ExperimentalLayoutApi::class,
+    ExperimentalPermissionsApi::class
 )
 @Composable
 fun ComposeScreen(
@@ -190,6 +201,15 @@ fun ComposeScreen(
             focusRequester.requestFocus()
         }
     }
+    val permissionState = rememberPermissionState(
+        Manifest.permission.POST_NOTIFICATIONS,
+        onPermissionResult = {
+            if (it) {
+                state.send()
+                onBack.invoke()
+            }
+        }
+    )
 
     FlareTheme {
         Scaffold(
@@ -207,8 +227,12 @@ fun ComposeScreen(
                     actions = {
                         IconButton(
                             onClick = {
-                                state.send()
-                                onBack.invoke()
+                                if (permissionState.status.isGranted) {
+                                    state.send()
+                                    onBack.invoke()
+                                } else {
+                                    permissionState.launchPermissionRequest()
+                                }
                             },
                             enabled = state.canSend
                         ) {
@@ -442,6 +466,27 @@ fun ComposeScreen(
                             }
                         }
                     }
+                    val sensitiveInteractionSource = remember { MutableInteractionSource() }
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = screenHorizontalPadding)
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = sensitiveInteractionSource,
+                                indication = null
+                            ) {
+                                state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
+                            },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = state.mediaState.isMediaSensitive,
+                            onCheckedChange = { state.mediaState.setMediaSensitive(it) },
+                            interactionSource = sensitiveInteractionSource
+                        )
+                        Text(text = stringResource(id = R.string.compose_media_sensitive))
+                    }
                 }
                 if (state.pollState.enabled) {
                     Column(
@@ -586,7 +631,9 @@ private fun PollOption(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun composePresenter() = run {
+private fun composePresenter(
+    composeUseCase: ComposeUseCase = rememberInject()
+) = run {
     val account by activeAccountPresenter()
     val emojiState = account.flatMap {
         emojiPresenter(it).emojiState
@@ -626,7 +673,33 @@ private fun composePresenter() = run {
             }
         }
 
+        @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
+            account.onSuccess {
+                val data = when (it) {
+                    is UiAccount.Mastodon -> ComposeData.Mastodon(
+                        content = textFieldState.text.toString(),
+                        medias = mediaState.medias,
+                        poll = if (pollState.enabled) {
+                            ComposeData.Mastodon.Poll(
+                                multiple = !pollState.pollSingleChoice,
+                                expiresIn = pollState.expiredAt.duration.inWholeSeconds,
+                                options = pollState.options.map { option ->
+                                    option.text.toString()
+                                }
+                            )
+                        } else {
+                            null
+                        },
+                        sensitive = mediaState.isMediaSensitive,
+                        spoilerText = contentWarningState.textFieldState.text.toString(),
+                        visibility = visibilityState.visibility,
+                        inReplyToID = null,
+                        account = it
+                    )
+                }
+                composeUseCase(data)
+            }
         }
     }
 }
@@ -692,15 +765,26 @@ private fun mediaPresenter() = run {
     var medias by remember {
         mutableStateOf(listOf<Uri>())
     }
+    var isMediaSensitive by remember {
+        mutableStateOf(false)
+    }
 
     object {
         val medias = medias.toImmutableList()
+        val isMediaSensitive = isMediaSensitive
         fun addMedia(uris: List<Uri>) {
             medias = (medias + uris).distinct().takeLast(4)
         }
 
         fun removeMedia(uri: Uri) {
             medias = medias.filterNot { it == uri }
+            if (medias.isEmpty()) {
+                isMediaSensitive = false
+            }
+        }
+
+        fun setMediaSensitive(value: Boolean) {
+            isMediaSensitive = value
         }
     }
 }
@@ -736,6 +820,11 @@ private fun pollPresenter() = run {
         val showExpirationMenu = showExpirationMenu
         fun togglePoll() {
             enabled = !enabled
+            if (!enabled) {
+                options = listOf(TextFieldState(), TextFieldState())
+                pollSingleChoice = true
+                expiredAt = PollExpiration.Minutes5
+            }
         }
 
         fun addPollOption() {

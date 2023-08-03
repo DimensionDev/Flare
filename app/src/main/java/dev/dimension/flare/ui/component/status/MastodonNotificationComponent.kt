@@ -31,28 +31,24 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 @Composable
 internal fun MastodonNotificationComponent(
     data: UiStatus.MastodonNotification,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
     when (data.type) {
         NotificationTypes.Follow -> MastodonFollowNotificationComponent(
             data = data,
-            state = state,
             event = event,
             modifier = modifier
         )
 
         NotificationTypes.Favourite -> MastodonFavouriteNotificationComponent(
             data = data,
-            state = state,
             event = event,
             modifier = modifier
         )
 
         NotificationTypes.Reblog -> MastodonRetweetNotificationComponent(
             data = data,
-            state = state,
             event = event,
             modifier = modifier
         )
@@ -60,7 +56,6 @@ internal fun MastodonNotificationComponent(
             if (data.status != null) {
                 MastodonStatusComponent(
                     data = data.status,
-                    state = state,
                     event = event,
                     modifier = modifier
                 )
@@ -71,25 +66,21 @@ internal fun MastodonNotificationComponent(
 
         NotificationTypes.Poll -> MastodonPollNotificationComponent(
             data = data,
-            state = state,
             event = event,
             modifier = modifier
         )
         NotificationTypes.FollowRequest -> MastodonFollowRequestNotificationComponent(
             data = data,
-            state = state,
             event = event,
             modifier = modifier
         )
         NotificationTypes.Status -> MastodonStatusNotificationComponent(
             data = data,
-            state = state,
             event = event,
             modifier = modifier
         )
         NotificationTypes.Update -> MastodonUpdateNotificationComponent(
             data = data,
-            state = state,
             event = event,
             modifier = modifier
         )
@@ -99,7 +90,6 @@ internal fun MastodonNotificationComponent(
 @Composable
 private fun MastodonUpdateNotificationComponent(
     data: UiStatus.MastodonNotification,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
@@ -115,7 +105,6 @@ private fun MastodonUpdateNotificationComponent(
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
-                state = state,
                 event = event
             )
         }
@@ -125,7 +114,6 @@ private fun MastodonUpdateNotificationComponent(
 @Composable
 private fun MastodonStatusNotificationComponent(
     data: UiStatus.MastodonNotification,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
@@ -141,7 +129,6 @@ private fun MastodonStatusNotificationComponent(
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
-                state = state,
                 event = event
             )
         }
@@ -151,7 +138,6 @@ private fun MastodonStatusNotificationComponent(
 @Composable
 private fun MastodonFollowRequestNotificationComponent(
     data: UiStatus.MastodonNotification,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
@@ -205,7 +191,6 @@ private fun MastodonFollowRequestNotificationComponent(
 @Composable
 private fun MastodonPollNotificationComponent(
     data: UiStatus.MastodonNotification,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
@@ -221,7 +206,6 @@ private fun MastodonPollNotificationComponent(
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
-                state = state,
                 event = event
             )
         }
@@ -231,7 +215,6 @@ private fun MastodonPollNotificationComponent(
 @Composable
 private fun MastodonRetweetNotificationComponent(
     data: UiStatus.MastodonNotification,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
@@ -247,7 +230,6 @@ private fun MastodonRetweetNotificationComponent(
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
-                state = state,
                 event = event
             )
         }
@@ -257,7 +239,6 @@ private fun MastodonRetweetNotificationComponent(
 @Composable
 private fun MastodonFavouriteNotificationComponent(
     data: UiStatus.MastodonNotification,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
@@ -273,7 +254,6 @@ private fun MastodonFavouriteNotificationComponent(
         if (data.status != null) {
             MastodonStatusComponent(
                 data = data.status,
-                state = state,
                 event = event
             )
         }
@@ -283,7 +263,6 @@ private fun MastodonFavouriteNotificationComponent(
 @Composable
 private fun MastodonFollowNotificationComponent(
     data: UiStatus.MastodonNotification,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {

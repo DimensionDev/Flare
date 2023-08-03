@@ -95,14 +95,12 @@ internal fun status(
                     when (val item = lazyPagingItems[it]) {
                         is UiStatus.Mastodon -> MastodonStatusComponent(
                             data = item,
-                            state = MastodonStatusState(),
                             event = event,
                             modifier = Modifier.padding(horizontal = screenHorizontalPadding)
                         )
 
                         is UiStatus.MastodonNotification -> MastodonNotificationComponent(
                             data = item,
-                            state = MastodonStatusState(),
                             event = event,
                             modifier = Modifier.padding(horizontal = screenHorizontalPadding)
                         )

@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MailOutline
@@ -38,7 +39,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -123,7 +128,6 @@ internal fun StatusPlaceholder(
 @Composable
 internal fun MastodonStatusComponent(
     data: UiStatus.Mastodon,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
@@ -149,8 +153,7 @@ internal fun MastodonStatusComponent(
         )
         StatusContentComponent(
             data = actualData,
-            event = event,
-            state = state
+            event = event
         )
         StatusMediaComponent(
             data = actualData,
@@ -202,10 +205,6 @@ internal fun StatusRetweetHeaderComponent(
         )
     }
 }
-
-data class MastodonStatusState(
-    val expanded: Boolean = false
-)
 
 @Composable
 private fun StatusCardComponent(
@@ -291,7 +290,11 @@ private fun StatusFooterComponent(
                 }
             )
             StatusActionButton(
-                icon = Icons.Default.Favorite,
+                icon = if (actualData.reaction.liked) {
+                    Icons.Default.Favorite
+                } else {
+                    Icons.Default.FavoriteBorder
+                },
                 text = actualData.matrices.humanizedFavouriteCount,
                 modifier = Modifier
                     .weight(1f),
@@ -420,10 +423,13 @@ fun MediaItem(
 @Composable
 private fun StatusContentComponent(
     data: UiStatus.Mastodon,
-    state: MastodonStatusState,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier
 ) {
+    // TODO: not a best way to handle this
+    var expanded by rememberSaveable {
+        mutableStateOf(false)
+    }
     Column(
         modifier = modifier
     ) {
@@ -433,17 +439,17 @@ private fun StatusContentComponent(
             )
             TextButton(
                 onClick = {
-                    event.onShowMoreClick(data)
+                    expanded = !expanded
                 }
             ) {
                 Text(
                     text = stringResource(
-                        if (state.expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more
+                        if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more
                     )
                 )
             }
         }
-        AnimatedVisibility(visible = state.expanded || data.contentWarningText.isNullOrEmpty()) {
+        AnimatedVisibility(visible = expanded || data.contentWarningText.isNullOrEmpty()) {
             Column {
                 if (data.content.isNotEmpty() && data.content.isNotBlank()) {
                     HtmlText(

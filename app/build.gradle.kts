@@ -1,3 +1,4 @@
+import java.util.Properties
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidApplication)
@@ -16,8 +17,8 @@ android {
         applicationId = "dev.dimension.flare"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: 1
+        versionName = System.getenv("BUILD_VERSION")?.toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -25,14 +26,39 @@ android {
         }
     }
 
+    val file = rootProject.file("signing.properties")
+    val hasSigningProps = file.exists()
+
+    signingConfigs {
+        if (hasSigningProps) {
+            create("flare") {
+                val signingProp = Properties()
+                signingProp.load(file.inputStream())
+                storeFile = rootProject.file(signingProp.getProperty("storeFile"))
+                storePassword = signingProp.getProperty("storePassword")
+                keyAlias = signingProp.getProperty("keyAlias")
+                keyPassword = signingProp.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            if (hasSigningProps) {
+                signingConfig = signingConfigs.getByName("flare")
+            }
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            if (hasSigningProps) {
+                signingConfig = signingConfigs.getByName("flare")
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
     }
     compileOptions {

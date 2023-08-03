@@ -68,7 +68,6 @@ jobs:
       - name: Draft a new release
         uses: softprops/action-gh-release@v1
         with:
-          draft: true
           files: |
             **/*.apk
             **/*.aab

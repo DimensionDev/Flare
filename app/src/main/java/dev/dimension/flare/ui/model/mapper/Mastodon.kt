@@ -247,13 +247,17 @@ private fun Attachment.toUi(): UiMedia? {
 private fun Account.toUi(
     host: String
 ): UiUser.Mastodon {
+    val remoteHost = if (acct != null && acct.contains('@')) {
+        acct.substring(acct.indexOf('@') + 1)
+    } else {
+        host
+    }
     return UiUser.Mastodon(
         userKey = MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
             host = host
         ),
         name = displayName.orEmpty(),
-        handleInternal = username.orEmpty(),
         avatarUrl = avatar.orEmpty(),
         nameElement = parseContent(this),
         bannerUrl = header,
@@ -264,7 +268,9 @@ private fun Account.toUi(
             followsCount = followingCount ?: 0,
             statusesCount = statusesCount ?: 0
         ),
-        locked = locked ?: false
+        locked = locked ?: false,
+        handleInternal = username.orEmpty(),
+        remoteHost = remoteHost
     )
 }
 

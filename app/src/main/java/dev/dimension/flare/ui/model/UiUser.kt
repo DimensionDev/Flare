@@ -16,6 +16,7 @@ sealed interface UiUser {
         override val userKey: MicroBlogKey,
         val name: String,
         val handleInternal: String,
+        val remoteHost: String,
         override val avatarUrl: String,
         val bannerUrl: String?,
         override val nameElement: Element,
@@ -24,7 +25,7 @@ sealed interface UiUser {
         val matrices: Matrices,
         val locked: Boolean
     ) : UiUser {
-        override val handle = "@$handleInternal@${userKey.host}"
+        override val handle = "@$handleInternal@$remoteHost"
         val nameDirection by lazy {
             if (Bidi(name, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
                 LayoutDirection.Ltr

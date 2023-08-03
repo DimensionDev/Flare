@@ -23,6 +23,12 @@ interface PagingTimelineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)
 
+    @Query("SELECT EXISTS(SELECT * FROM paging_timeline WHERE pagingKey == :pagingKey AND accountKey == :accountKey)")
+    suspend fun exists(
+        pagingKey: String,
+        accountKey: MicroBlogKey
+    ): Boolean
+
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
 }

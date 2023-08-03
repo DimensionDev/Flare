@@ -68,6 +68,8 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
+import dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination
+import dev.dimension.flare.ui.screen.destinations.StatusRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -126,7 +128,11 @@ internal fun MastodonStatusComponent(
 ) {
     val actualData = data.reblogStatus ?: data
     Column(
-        modifier = modifier
+        modifier = Modifier
+            .clickable {
+                event.onStatusClick(data)
+            }
+            .then(modifier)
     ) {
         if (data.reblogStatus != null) {
             StatusRetweetHeaderComponent(
@@ -621,12 +627,26 @@ internal class DefaultMastodonStatusEvent(
     }
 
     override fun onStatusClick(status: UiStatus.Mastodon) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(StatusRouteDestination(status.statusKey).deeplink())
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     override fun onStatusLongClick(status: UiStatus.Mastodon) {
     }
 
     override fun onReplyClick(status: UiStatus.Mastodon) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(ReplyRouteDestination(status.statusKey).deeplink())
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     override fun onReblogClick(status: UiStatus.Mastodon) {

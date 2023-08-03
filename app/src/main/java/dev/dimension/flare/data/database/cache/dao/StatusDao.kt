@@ -8,6 +8,7 @@ import androidx.room.Query
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface StatusDao {
@@ -16,6 +17,10 @@ interface StatusDao {
 
     @Query("SELECT * FROM status WHERE statusKey = :statusKey AND accountKey = :accountKey")
     suspend fun getStatus(statusKey: MicroBlogKey, accountKey: MicroBlogKey): DbStatus?
+
+    // status flow
+    @Query("SELECT * FROM status WHERE statusKey = :statusKey AND accountKey = :accountKey")
+    fun getStatusFlow(statusKey: MicroBlogKey, accountKey: MicroBlogKey): Flow<DbStatus?>
 
     @Query("UPDATE status SET content = :content WHERE statusKey = :statusKey AND accountKey = :accountKey")
     suspend fun updateStatus(statusKey: MicroBlogKey, accountKey: MicroBlogKey, content: StatusContent)

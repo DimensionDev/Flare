@@ -87,4 +87,6 @@
 
     <string name="notification_channel_compose_name">Compose</string>
     <string name="notification_channel_compose_description">Notifications about toots being sent</string>
+
+    <string name="status_title">Toot detail</string>
 </resources>

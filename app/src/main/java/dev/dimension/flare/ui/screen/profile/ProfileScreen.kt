@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.profile
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -103,7 +102,6 @@ fun ProfileRoute(
     )
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -208,6 +206,7 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxSize(),
                 refreshing = state.refreshing,
                 onRefresh = state::refresh,
+                indicatorPadding = it,
                 content = {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),

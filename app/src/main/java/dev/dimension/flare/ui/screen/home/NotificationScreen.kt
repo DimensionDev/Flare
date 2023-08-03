@@ -2,9 +2,11 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -43,12 +45,15 @@ fun NotificationScreen(
     val state by producePresenter {
         notificationPresenter()
     }
+    val listState = rememberLazyListState()
     RefreshContainer(
+        indicatorPadding = PaddingValues(top = 48.dp),
         modifier = modifier,
         refreshing = state.refreshing,
         onRefresh = state::refresh,
         content = {
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -107,7 +112,8 @@ private fun notificationPresenter(
         }
     }
     val refreshing =
-        listState is UiState.Loading || listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
+        listState is UiState.Loading ||
+            listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
     object {
         val refreshing = refreshing
         val notificationType = type

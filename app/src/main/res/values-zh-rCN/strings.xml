@@ -83,4 +83,7 @@
 
     <string name="notification_channel_compose_name">发送</string>
     <string name="notification_channel_compose_description">用于通知嘟文发送的状态</string>
+
+
+    <string name="status_title">嘟文详情</string>
 </resources>

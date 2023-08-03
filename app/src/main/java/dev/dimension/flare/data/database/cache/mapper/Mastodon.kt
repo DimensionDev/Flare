@@ -24,9 +24,10 @@ import java.util.UUID
 context(CacheDatabase, List<Status>)
 suspend fun save(
     accountKey: MicroBlogKey,
-    pagingKey: String
+    pagingKey: String,
+    sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0 }
 ) {
-    val data = toDbPagingTimeline(accountKey, pagingKey)
+    val data = toDbPagingTimeline(accountKey, pagingKey, sortIdProvider)
     withTransaction {
         (
             data.map { it.status.status.user } + data.flatMap { it.status.references }
@@ -146,19 +147,21 @@ private fun Notification.toDbStatus(
 
 fun List<Status>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
-    pagingKey: String
+    pagingKey: String,
+    sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0 }
 ): List<DbPagingTimelineWithStatus> {
     return this.map {
-        it.toDbPagingTimeline(accountKey, pagingKey)
+        it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider)
     }
 }
 
 fun Status.toDbPagingTimeline(
     accountKey: MicroBlogKey,
-    pagingKey: String
+    pagingKey: String,
+    sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0 }
 ): DbPagingTimelineWithStatus {
     val status = this.toDbStatusWithReference(accountKey)
-    val sortId = this.createdAt?.toEpochMilliseconds() ?: 0
+    val sortId = sortIdProvider(this)
     return DbPagingTimelineWithStatus(
         timeline = DbPagingTimeline(
             _id = UUID.randomUUID().toString(),

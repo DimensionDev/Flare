@@ -92,25 +92,32 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavBackStackEntry
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.moriatsushi.koject.compose.rememberInject
+import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.data.datasource.mastodon.statusOnlyDataSource
 import dev.dimension.flare.data.repository.ComposeData
 import dev.dimension.flare.data.repository.ComposeUseCase
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.data.repository.cache.mastodonEmojiProvider
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
+import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.component.status.VisibilityIcon
 import dev.dimension.flare.ui.flatMap
+import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.localDescription
@@ -141,6 +148,26 @@ fun ComposeRoute(
         onBack = {
             navigator.navigateUp()
         }
+    )
+}
+
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
+        )
+    ]
+)
+@Composable
+fun ReplyRoute(
+    navigator: DestinationsNavigator,
+    replyTo: MicroBlogKey
+) {
+    ComposeScreen(
+        onBack = {
+            navigator.navigateUp()
+        },
+        replyTo = replyTo
     )
 }
 
@@ -179,10 +206,11 @@ object ComposeTransitions : DestinationStyle.Animated {
 @Composable
 fun ComposeScreen(
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    replyTo: MicroBlogKey? = null
 ) {
     val state by producePresenter {
-        composePresenter()
+        composePresenter(replyTo)
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -585,6 +613,23 @@ fun ComposeScreen(
                         }
                     }
                 }
+
+                state.replyState?.let { replyState ->
+                    replyState.onSuccess { state ->
+                        if (state.listState.itemCount > 0) {
+                            val item = state.listState[0]
+                            if (item != null) {
+                                UiStatusQuoted(
+                                    status = item,
+                                    onMediaClick = {},
+                                    modifier = Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -632,6 +677,7 @@ private fun PollOption(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun composePresenter(
+    replyTo: MicroBlogKey?,
     composeUseCase: ComposeUseCase = rememberInject()
 ) = run {
     val account by activeAccountPresenter()
@@ -648,6 +694,29 @@ private fun composePresenter(
     val mediaState = mediaPresenter()
     val visibilityState = visibilityPresenter()
     val contentWarningState = contentWarningPresenter()
+    val replyState = replyTo?.let { replyTo ->
+        account.map {
+            replyPresenter(it, replyTo)
+        }
+    }
+
+    replyState?.onSuccess {
+        LaunchedEffect(it.listState.itemCount) {
+            if (it.listState.itemCount == 1 && textFieldState.text.isEmpty()) {
+                when (val item = it.listState[0]) {
+                    is UiStatus.Mastodon -> {
+                        textFieldState.edit {
+                            append("${item.user.handle} ")
+                        }
+                    }
+
+                    is UiStatus.MastodonNotification -> Unit
+                    null -> Unit
+                }
+            }
+        }
+    }
+
     val canSend = remember(text) {
         text.isNotBlank() && text.isNotEmpty()
     }
@@ -667,6 +736,7 @@ private fun composePresenter(
         val visibilityState = visibilityState
         val contentWarningState = contentWarningState
         val emojiState = emojiState
+        val replyState = replyState
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
                 append(" :${emoji.shortcode}: ")
@@ -694,13 +764,27 @@ private fun composePresenter(
                         sensitive = mediaState.isMediaSensitive,
                         spoilerText = contentWarningState.textFieldState.text.toString(),
                         visibility = visibilityState.visibility,
-                        inReplyToID = null,
+                        inReplyToID = replyTo?.id,
                         account = it
                     )
                 }
                 composeUseCase(data)
             }
         }
+    }
+}
+
+@Composable
+private fun replyPresenter(
+    account: UiAccount,
+    replyTo: MicroBlogKey
+) = run {
+    val listState = when (account) {
+        is UiAccount.Mastodon -> statusOnlyDataSource(account, replyTo).collectAsLazyPagingItems()
+    }
+
+    object {
+        val listState = listState
     }
 }
 

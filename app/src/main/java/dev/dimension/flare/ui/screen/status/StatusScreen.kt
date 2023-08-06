@@ -33,7 +33,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.RefreshContainer
-import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
+import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.onSuccess
@@ -93,9 +93,9 @@ internal fun StatusScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         with(state.listState) {
-                            status(
-                                event = state.eventHandler
-                            )
+                            with(state.statusEvent) {
+                                status()
+                            }
                         }
                     }
                 }
@@ -107,22 +107,26 @@ internal fun StatusScreen(
 @Composable
 private fun statusPresenter(
     statusKey: MicroBlogKey,
-    defaultEvent: DefaultMastodonStatusEvent = rememberInject()
+    statusEvent: StatusEvent = rememberInject()
 ) = run {
     val accountState by activeAccountPresenter()
     val listState = accountState.map {
         when (it) {
             is UiAccount.Mastodon -> statusDataSource(it, statusKey).collectAsLazyPagingItems()
+            is UiAccount.Misskey -> dev.dimension.flare.data.datasource.misskey.statusDataSource(
+                it,
+                statusKey
+            ).collectAsLazyPagingItems()
         }
     }
 
     val refreshing =
         listState is UiState.Loading ||
-            listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
     object {
         val listState = listState
         val refreshing = refreshing
-        val eventHandler = defaultEvent
+        val statusEvent = statusEvent
         fun refresh() {
             listState.onSuccess {
                 it.refresh()

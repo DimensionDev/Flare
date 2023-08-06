@@ -7,14 +7,13 @@ const val AppSchema = "flare"
 object AppDeepLink {
     object Callback {
         const val Mastodon = "$AppSchema://Callback/SignIn/Mastodon"
+        const val Misskey = "$AppSchema://Callback/SignIn/Misskey"
         const val Twitter = "$AppSchema://Callback/SignIn/Twitter"
     }
 
-    object Mastodon {
-        object Hashtag {
-            const val route = "$AppSchema://Mastodon/Hashtag/{keyword}"
-            operator fun invoke(keyword: String) = "$AppSchema://Mastodon/Hashtag/${java.net.URLEncoder.encode(keyword, "UTF-8")}"
-        }
+    object Search {
+        const val route = "$AppSchema://Search/{keyword}"
+        operator fun invoke(keyword: String) = "$AppSchema://Search/${java.net.URLEncoder.encode(keyword, "UTF-8")}"
     }
 }
 

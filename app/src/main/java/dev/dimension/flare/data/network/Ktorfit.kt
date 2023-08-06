@@ -16,11 +16,13 @@ import okhttp3.logging.HttpLoggingInterceptor
 internal fun ktorfit(
     baseUrl: String,
     authorization: Authorization? = null,
-    block: HttpClientConfig<OkHttpConfig>.() -> Unit = {}
+    config: HttpClientConfig<OkHttpConfig>.() -> Unit = {}
 ) = de.jensklingenberg.ktorfit.ktorfit {
     baseUrl(baseUrl)
     httpClient(
         HttpClient(OkHttp) {
+            config.invoke(this)
+
             install(ContentNegotiation) {
                 json(JSON)
             }
@@ -38,7 +40,6 @@ internal fun ktorfit(
 //            logger = Logger.ANDROID
 //            level = LogLevel.ALL
 //        }
-            block.invoke(this)
         }
     )
     converterFactories(

@@ -23,8 +23,16 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import com.moriatsushi.koject.Provides
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.component.status.mastodon.MastodonNotificationComponent
+import dev.dimension.flare.ui.component.status.mastodon.MastodonStatusComponent
+import dev.dimension.flare.ui.component.status.mastodon.MastodonStatusEvent
+import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
+import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
+import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
+import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.onError
 import dev.dimension.flare.ui.onLoading
@@ -32,10 +40,8 @@ import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-context(LazyListScope, UiState<LazyPagingItems<UiStatus>>)
-internal fun status(
-    event: MastodonStatusEvent
-) {
+context(LazyListScope, UiState<LazyPagingItems<UiStatus>>, StatusEvent)
+internal fun status() {
     onSuccess { lazyPagingItems ->
         if ((
             lazyPagingItems.loadState.refresh == LoadState.Loading ||
@@ -95,13 +101,13 @@ internal fun status(
                     when (val item = lazyPagingItems[it]) {
                         is UiStatus.Mastodon -> MastodonStatusComponent(
                             data = item,
-                            event = event,
+                            event = mastodonStatusEvent,
                             modifier = Modifier.padding(horizontal = screenHorizontalPadding)
                         )
 
                         is UiStatus.MastodonNotification -> MastodonNotificationComponent(
                             data = item,
-                            event = event,
+                            event = mastodonStatusEvent,
                             modifier = Modifier.padding(horizontal = screenHorizontalPadding)
                         )
 
@@ -111,6 +117,18 @@ internal fun status(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
+
+                        is UiStatus.Misskey -> MisskeyStatusComponent(
+                            data = item,
+                            event = misskeyStatusEvent,
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                        )
+
+                        is UiStatus.MisskeyNotification -> MisskeyNotificationComponent(
+                            data = item,
+                            event = misskeyStatusEvent,
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                        )
                     }
                     // draw divider
                     if (it != lazyPagingItems.itemCount - 1) {
@@ -188,3 +206,9 @@ internal fun status(
     onError {
     }
 }
+
+@Provides
+internal data class StatusEvent(
+    val mastodonStatusEvent: MastodonStatusEvent,
+    val misskeyStatusEvent: MisskeyStatusEvent,
+)

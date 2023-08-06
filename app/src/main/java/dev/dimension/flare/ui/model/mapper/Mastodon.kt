@@ -3,11 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.database.cache.model.DbEmoji
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.EmojiContent
-import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
 import dev.dimension.flare.data.network.mastodon.api.model.MediaType
@@ -31,27 +27,12 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 
-internal fun DbPagingTimelineWithStatus.toUi(): UiStatus {
-    val host = this.status.status.data.statusKey.host
-    return when (val status = status.status.data.content) {
-        is StatusContent.Mastodon -> status.data.toUi(
-            host = host,
-            accountKey = timeline.accountKey
-        )
 
-        is StatusContent.MastodonNotification -> status.data.toUi(
-            host = host,
-            accountKey = timeline.accountKey
-        )
-    }
-}
-
-private fun Notification.toUi(
-    host: String,
+internal fun Notification.toUi(
     accountKey: MicroBlogKey
 ): UiStatus {
     requireNotNull(account) { "account is null" }
-    val user = account.toUi(host)
+    val user = account.toUi(accountKey.host)
     return UiStatus.MastodonNotification(
         statusKey = MicroBlogKey(
             id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
@@ -59,25 +40,18 @@ private fun Notification.toUi(
         ),
         user = user,
         createdAt = createdAt ?: Instant.DISTANT_PAST,
-        status = status?.toUi(host, accountKey),
+        status = status?.toUi(accountKey),
         type = type
             ?: throw IllegalArgumentException("mastodon Notification.type should not be null"),
         accountKey = accountKey
     )
 }
 
-internal fun DbUser.toUi(): UiUser {
-    return when (val user = content) {
-        is UserContent.Mastodon -> user.data.toUi(host = userKey.host)
-    }
-}
-
 internal fun Status.toUi(
-    host: String,
     accountKey: MicroBlogKey
 ): UiStatus.Mastodon {
     requireNotNull(account) { "account is null" }
-    val user = account.toUi(host)
+    val user = account.toUi(accountKey.host)
     return UiStatus.Mastodon(
         statusKey = MicroBlogKey(
             id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
@@ -136,7 +110,7 @@ internal fun Status.toUi(
             reblogCount = reblogsCount ?: 0,
             favouriteCount = favouritesCount ?: 0
         ),
-        reblogStatus = reblog?.toUi(host, accountKey),
+        reblogStatus = reblog?.toUi(accountKey),
         visibility = visibility?.let { visibility ->
             when (visibility) {
                 Visibility.Public -> UiStatus.Mastodon.Visibility.Public
@@ -197,7 +171,7 @@ private fun replaceMentionAndHashtag(
     ) {
         node.attr(
             "href",
-            AppDeepLink.Mastodon.Hashtag(node.text().trimStart('#'))
+            AppDeepLink.Search(node.text().trimStart('#'))
         )
     } else if (node.hasAttr("class") && node.attr("class") == "invisible") {
         node.remove()
@@ -244,7 +218,7 @@ private fun Attachment.toUi(): UiMedia? {
     }
 }
 
-private fun Account.toUi(
+internal fun Account.toUi(
     host: String
 ): UiUser.Mastodon {
     val remoteHost = if (acct != null && acct.contains('@')) {

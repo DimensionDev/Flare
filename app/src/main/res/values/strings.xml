@@ -83,6 +83,10 @@
     <string name="mastodon_login_message">Please enter your instance URL below.</string>
     <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>
 
+    <string name="misskey_login_title">Login to Misskey</string>
+    <string name="misskey_login_message">Please enter your instance URL below.</string>
+    <string name="misskey_login_hint">Instance URL, e.g. misskey.io</string>
+
     <string name="mastodon_login_verify_message">Please wait while we verify your credentials.</string>
 
     <string name="notification_channel_compose_name">Compose</string>

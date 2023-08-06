@@ -31,4 +31,10 @@ interface PagingTimelineDao {
 
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
+
+    @Query("DELETE FROM paging_timeline WHERE pagingKey == :pagingKey AND accountKey == :accountKey")
+    suspend fun delete(
+        pagingKey: String,
+        accountKey: MicroBlogKey
+    )
 }

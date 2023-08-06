@@ -31,6 +31,21 @@ suspend fun addMastodonApplicationUseCase(
     )
 }
 
+suspend fun addMisskeyApplicationUseCase(
+    host: String,
+    session: String,
+    appDatabase: AppDatabase = inject()
+) {
+    appDatabase.applicationDao().addApplication(
+        DbApplication(
+            host = host,
+            credential_json = session,
+            platform_type = PlatformType.Misskey,
+            hasPendingOAuth = false
+        )
+    )
+}
+
 suspend fun setPendingOAuthUseCase(
     host: String,
     pendingOAuth: Boolean,
@@ -60,6 +75,11 @@ sealed interface UiApplication {
         val application: CreateApplicationResponse
     ) : UiApplication
 
+    data class Misskey(
+        override val host: String,
+        val session: String
+    ) : UiApplication
+
     companion object {
         fun DbApplication.toUi(): UiApplication {
             return when (platform_type) {
@@ -68,7 +88,10 @@ sealed interface UiApplication {
                     application = credential_json.decodeJson()
                 )
 
-                PlatformType.Misskey -> TODO()
+                PlatformType.Misskey -> Misskey(
+                    host = host,
+                    session = credential_json
+                )
             }
         }
     }

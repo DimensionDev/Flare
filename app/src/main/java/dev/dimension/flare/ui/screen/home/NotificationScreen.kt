@@ -26,12 +26,13 @@ import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.mastodon.mentionTimelineDataSource
 import dev.dimension.flare.data.datasource.mastodon.notificationTimelineDataSource
+import dev.dimension.flare.data.datasource.misskey.notificationDataSource
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.RefreshContainer
-import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
+import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
 import dev.dimension.flare.ui.onSuccess
@@ -80,9 +81,9 @@ fun NotificationScreen(
                     }
                 }
                 with(state.listState) {
-                    status(
-                        event = state.eventHandler
-                    )
+                    with (state.statusEvent) {
+                        status()
+                    }
                 }
             }
         }
@@ -96,7 +97,7 @@ enum class NotificationType(@StringRes val title: Int) {
 
 @Composable
 private fun notificationPresenter(
-    defaultEvent: DefaultMastodonStatusEvent = rememberInject()
+    statusEvent: StatusEvent = rememberInject()
 ) = run {
     var type by remember { mutableStateOf(NotificationType.All) }
 
@@ -109,6 +110,13 @@ private fun notificationPresenter(
                     NotificationType.Mention -> mentionTimelineDataSource(account = it)
                 }.collectAsLazyPagingItems()
             )
+
+            is UiAccount.Misskey -> UiState.Success(
+                when (type) {
+                    NotificationType.All -> notificationDataSource(account = it)
+                    NotificationType.Mention -> dev.dimension.flare.data.datasource.misskey.mentionTimelineDataSource(account = it)
+                }.collectAsLazyPagingItems()
+            )
         }
     }
     val refreshing =
@@ -118,7 +126,7 @@ private fun notificationPresenter(
         val refreshing = refreshing
         val notificationType = type
         val listState = listState
-        val eventHandler = defaultEvent
+        val statusEvent = statusEvent
         fun onNotificationTypeChanged(value: NotificationType) {
             type = value
         }

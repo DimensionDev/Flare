@@ -34,6 +34,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.screen.destinations.MastodonLoginRouteDestination
+import dev.dimension.flare.ui.screen.destinations.MisskeyLoginRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
@@ -51,7 +52,7 @@ fun ServiceSelectRoute(
 //            navigator.navigate(PasskeyLoginRouteDestination)
         },
         toMisskey = {
-//            navigator.navigate(MisskeyLoginRouteDestination)
+            navigator.navigate(MisskeyLoginRouteDestination)
         }
     )
 }
@@ -125,7 +126,7 @@ fun ServiceSelectScreen(
                         }
                         FilledTonalButton(
                             onClick = toMisskey,
-                            enabled = false,
+                            enabled = state.loading.not(),
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {

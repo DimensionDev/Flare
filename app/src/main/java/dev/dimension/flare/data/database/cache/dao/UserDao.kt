@@ -13,6 +13,9 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(user: List<DbUser>)
 
+    @Query("SELECT * FROM user WHERE userKey IN (:userKeys)")
+    suspend fun findByKeys(userKeys: List<MicroBlogKey>): List<DbUser>
+
     @Query("SELECT * FROM user WHERE userKey = :userKey")
     fun getUser(userKey: MicroBlogKey): Flow<DbUser?>
 }

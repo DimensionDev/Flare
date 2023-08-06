@@ -61,6 +61,7 @@ import dev.dimension.flare.data.datasource.mastodon.userTimelineDataSource
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.data.repository.cache.mastodonUserDataPresenter
+import dev.dimension.flare.data.repository.cache.misskeyUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
@@ -69,7 +70,7 @@ import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.placeholder.placeholder
-import dev.dimension.flare.ui.component.status.DefaultMastodonStatusEvent
+import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
 import dev.dimension.flare.ui.map
@@ -219,9 +220,9 @@ fun ProfileScreen(
                             )
                         }
                         with(state.listState) {
-                            status(
-                                event = state.eventHandler
-                            )
+                            with (state.statusEvent) {
+                                status()
+                            }
                         }
                     }
                 }
@@ -454,7 +455,7 @@ private fun ProfileHeaderLoading(
 @Composable
 private fun profilePresenter(
     userKey: MicroBlogKey?,
-    defaultEvent: DefaultMastodonStatusEvent = rememberInject()
+    statusEvent: StatusEvent = rememberInject()
 ) = run {
     val account by activeAccountPresenter()
     val userState = account.map {
@@ -465,6 +466,11 @@ private fun profilePresenter(
                     userId = userKey?.id ?: it.accountKey.id
                 )
             }
+
+            is UiAccount.Misskey -> misskeyUserDataPresenter(
+                account = it,
+                userId = userKey?.id ?: it.accountKey.id
+            )
         }
     }
 
@@ -472,6 +478,13 @@ private fun profilePresenter(
         when (it) {
             is UiAccount.Mastodon -> UiState.Success(
                 userTimelineDataSource(
+                    account = it,
+                    userKey = userKey ?: it.accountKey
+                ).collectAsLazyPagingItems()
+            )
+
+            is UiAccount.Misskey -> UiState.Success(
+                dev.dimension.flare.data.datasource.misskey.userTimelineDataSource(
                     account = it,
                     userKey = userKey ?: it.accountKey
                 ).collectAsLazyPagingItems()
@@ -495,7 +508,7 @@ private fun profilePresenter(
         val refreshing = refreshing
         val userState = userState.flatMap { it.toUi() }
         val listState = listState
-        val eventHandler = defaultEvent
+        val statusEvent = statusEvent
         val relationState = relationState
         fun refresh() {
             userState.onSuccess {

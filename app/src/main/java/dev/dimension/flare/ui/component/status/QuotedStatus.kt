@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.status.mastodon.MediaItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.theme.MediumAlpha
@@ -46,6 +47,19 @@ internal fun UiStatusQuoted(
             )
         }
         is UiStatus.MastodonNotification -> Unit
+        is UiStatus.Misskey -> QuotedStatus(
+            avatarUrl = status.user.avatarUrl,
+            nameElement = status.user.nameElement,
+            handle = status.user.handle,
+            contentElement = status.contentToken,
+            contentLayoutDirection = status.contentDirection,
+            medias = status.media,
+            createdAt = status.humanizedTime,
+            onMediaClick = onMediaClick,
+            modifier = modifier,
+        )
+
+        is UiStatus.MisskeyNotification -> Unit
     }
 }
 

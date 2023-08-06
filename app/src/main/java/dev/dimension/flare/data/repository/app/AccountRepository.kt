@@ -13,6 +13,7 @@ import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.repository.app.UiAccount.Companion.toUi
 import dev.dimension.flare.data.repository.cache.mastodonUserDataPresenter
+import dev.dimension.flare.data.repository.cache.misskeyUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.UiState
@@ -93,6 +94,24 @@ internal suspend fun addMastodonAccountUseCase(
     appDatabase.accountDao().addAccount(account)
 }
 
+internal suspend fun addMisskeyAccountUseCase(
+    host: String,
+    token: String,
+    accountKey: MicroBlogKey,
+    appDatabase: AppDatabase = inject()
+) {
+    val account = DbAccount(
+        account_key = accountKey,
+        credential_json = UiAccount.Misskey.Credential(
+            host = host,
+            accessToken = token
+        ).encodeJson(),
+        platform_type = PlatformType.Misskey,
+        lastActive = Clock.System.now().toEpochMilliseconds()
+    )
+    appDatabase.accountDao().addAccount(account)
+}
+
 internal suspend fun setActiveAccountUseCase(
     accountKey: MicroBlogKey,
     appDatabase: AppDatabase = inject()
@@ -104,6 +123,7 @@ internal suspend fun setActiveAccountUseCase(
 internal fun accountDataPresenter(account: UiAccount): UiState<UiUser> {
     return when (account) {
         is UiAccount.Mastodon -> mastodonUserDataPresenter(account = account).toUi()
+        is UiAccount.Misskey -> misskeyUserDataPresenter(account = account).toUi()
     }
 }
 
@@ -128,6 +148,24 @@ sealed interface UiAccount {
         }
     }
 
+    data class Misskey(
+        val credential: Credential,
+        override val accountKey: MicroBlogKey
+    ) : UiAccount {
+        @Serializable
+        data class Credential(
+            val host: String,
+            val accessToken: String
+        )
+
+        val service by lazy {
+            dev.dimension.flare.data.network.misskey.MisskeyService(
+                baseUrl = "https://${credential.host}/api/",
+                token = credential.accessToken
+            )
+        }
+    }
+
     companion object {
         fun DbAccount.toUi(): UiAccount = when (platform_type) {
             PlatformType.Mastodon -> {
@@ -138,7 +176,13 @@ sealed interface UiAccount {
                 )
             }
 
-            PlatformType.Misskey -> TODO()
+            PlatformType.Misskey -> {
+                val credential = credential_json.decodeJson<Misskey.Credential>()
+                Misskey(
+                    credential = credential,
+                    accountKey = account_key
+                )
+            }
         }
     }
 }

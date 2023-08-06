@@ -115,7 +115,8 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
-import dev.dimension.flare.ui.component.status.VisibilityIcon
+import dev.dimension.flare.ui.component.status.mastodon.VisibilityIcon
+import dev.dimension.flare.ui.component.status.misskey.VisibilityIcon
 import dev.dimension.flare.ui.flatMap
 import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.model.UiEmoji

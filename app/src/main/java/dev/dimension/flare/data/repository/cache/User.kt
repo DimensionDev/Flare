@@ -34,3 +34,30 @@ internal fun mastodonUserDataPresenter(
         )
     }.collectAsState()
 }
+
+@Composable
+internal fun misskeyUserDataPresenter(
+    account: UiAccount.Misskey,
+    userId: String = account.accountKey.id,
+    cacheDatabase: CacheDatabase = inject(),
+    misskeyEmojiCache: MisskeyEmojiCache = inject()
+): CacheableState<UiUser> {
+    return remember(account.accountKey, userId) {
+        val userKey = MicroBlogKey(userId, account.accountKey.host)
+        Cacheable(
+            fetchSource = {
+                val emojis = misskeyEmojiCache.getEmojis(account)
+                val user = account
+                    .service
+                    .findUserById(userId)
+                    ?.toDbUser(account.accountKey.host, emojis)
+                    ?: throw Exception("User not found")
+                cacheDatabase.userDao().insertAll(listOf(user))
+            },
+            cacheSource = {
+                cacheDatabase.userDao().getUser(userKey)
+                    .mapNotNull { it?.toUi() }
+            }
+        )
+    }.collectAsState()
+}

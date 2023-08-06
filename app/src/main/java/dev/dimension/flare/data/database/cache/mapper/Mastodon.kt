@@ -30,8 +30,8 @@ suspend fun save(
     val data = toDbPagingTimeline(accountKey, pagingKey, sortIdProvider)
     withTransaction {
         (
-            data.map { it.status.status.user } + data.flatMap { it.status.references }
-                .map { it.status.user }
+            data.mapNotNull { it.status.status.user } + data.flatMap { it.status.references }
+                .mapNotNull { it.status.user }
             ).let {
             userDao().insertAll(it)
         }
@@ -56,8 +56,8 @@ suspend fun saveNotification(
     val data = toDb(accountKey, pagingKey)
     withTransaction {
         (
-            data.map { it.status.status.user } + data.flatMap { it.status.references }
-                .map { it.status.user }
+            data.mapNotNull { it.status.status.user } + data.flatMap { it.status.references }
+                .mapNotNull { it.status.user }
             ).let {
             userDao().insertAll(it)
         }

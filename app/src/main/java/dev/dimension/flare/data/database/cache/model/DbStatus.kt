@@ -8,9 +8,9 @@ import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import java.util.UUID
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.util.UUID
 
 @Entity(
     tableName = "status",
@@ -23,7 +23,7 @@ data class DbStatus(
     val id: String = UUID.randomUUID().toString(),
     val statusKey: MicroBlogKey,
     val accountKey: MicroBlogKey,
-    val userKey: MicroBlogKey,
+    val userKey: MicroBlogKey?,
     val platformType: PlatformType,
     val content: StatusContent
 )
@@ -37,13 +37,27 @@ sealed interface StatusContent {
     @Serializable
     @SerialName("mastodon-notification")
     data class MastodonNotification(val data: Notification) : StatusContent
+
+    @Serializable
+    @SerialName("misskey")
+    data class Misskey(
+        val data: dev.dimension.flare.data.network.misskey.api.model.Note,
+        val emojis: List<dev.dimension.flare.data.network.misskey.api.model.EmojiSimple>,
+    ) : StatusContent
+
+    @Serializable
+    @SerialName("misskey-notification")
+    data class MisskeyNotification(
+        val data: dev.dimension.flare.data.network.misskey.api.model.Notification,
+        val emojis: List<dev.dimension.flare.data.network.misskey.api.model.EmojiSimple>,
+    ) : StatusContent
 }
 
 data class DbStatusWithUser(
     @Embedded
     val data: DbStatus,
     @Relation(parentColumn = "userKey", entityColumn = "userKey")
-    val user: DbUser
+    val user: DbUser?
 )
 
 data class DbStatusReferenceWithStatus(

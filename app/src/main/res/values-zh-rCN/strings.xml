@@ -79,6 +79,11 @@
     <string name="mastodon_login_message">请在下面输入实例主机名称。</string>
     <string name="mastodon_login_hint">实例主机名称，比如 mastodon.social</string>
 
+
+    <string name="misskey_login_title">登录到 Misskey</string>
+    <string name="misskey_login_message">请在下面输入实例主机名称。</string>
+    <string name="misskey_login_hint">实例主机名称，比如 misskey.io</string>
+
     <string name="mastodon_login_verify_message">请稍等，正在验证您的凭据。</string>
 
     <string name="notification_channel_compose_name">发送</string>

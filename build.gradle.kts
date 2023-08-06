@@ -16,7 +16,7 @@ allprojects {
             jvmTarget = "17"
 //            allWarningsAsErrors = true
             freeCompilerArgs = freeCompilerArgs + listOf(
-                "-Xcontext-receivers",
+                "-Xcontext-receivers"
             )
         }
     }

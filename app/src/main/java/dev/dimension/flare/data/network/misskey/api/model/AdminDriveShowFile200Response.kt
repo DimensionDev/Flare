@@ -27,51 +27,51 @@ import kotlinx.serialization.Serializable
 
 data class AdminDriveShowFile200Response(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String?,
+    @SerialName(value = "userId") val userId: kotlin.String? = null,
 
     /* The local host is represented with `null`. */
-    @SerialName(value = "userHost") @Required val userHost: kotlin.String?,
+    @SerialName(value = "userHost") val userHost: kotlin.String? = null,
 
-    @SerialName(value = "md5") @Required val md5: kotlin.String,
+    @SerialName(value = "md5") val md5: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "type") @Required val type: kotlin.String,
+    @SerialName(value = "type") val type: kotlin.String,
 
-    @SerialName(value = "size") @Required val propertySize: kotlin.Double,
+    @SerialName(value = "size") val propertySize: kotlin.Double,
 
-    @SerialName(value = "comment") @Required val comment: kotlin.String?,
+    @SerialName(value = "comment") val comment: kotlin.String? = null,
 
-    @SerialName(value = "blurhash") @Required val blurhash: kotlin.String?,
+    @SerialName(value = "blurhash") val blurhash: kotlin.String? = null,
 
-    @SerialName(value = "properties") @Required val properties: kotlin.String,
+    @SerialName(value = "properties") val properties: kotlin.String,
 
-    @SerialName(value = "storedInternal") @Required val storedInternal: kotlin.Boolean?,
+    @SerialName(value = "storedInternal") val storedInternal: kotlin.Boolean? = null,
 
-    @SerialName(value = "url") @Required val url: kotlin.String?,
+    @SerialName(value = "url") val url: kotlin.String? = null,
 
-    @SerialName(value = "thumbnailUrl") @Required val thumbnailUrl: kotlin.String?,
+    @SerialName(value = "thumbnailUrl") val thumbnailUrl: kotlin.String? = null,
 
-    @SerialName(value = "webpublicUrl") @Required val webpublicUrl: kotlin.String?,
+    @SerialName(value = "webpublicUrl") val webpublicUrl: kotlin.String? = null,
 
-    @SerialName(value = "accessKey") @Required val accessKey: kotlin.String?,
+    @SerialName(value = "accessKey") val accessKey: kotlin.String? = null,
 
-    @SerialName(value = "thumbnailAccessKey") @Required val thumbnailAccessKey: kotlin.String?,
+    @SerialName(value = "thumbnailAccessKey") val thumbnailAccessKey: kotlin.String? = null,
 
-    @SerialName(value = "webpublicAccessKey") @Required val webpublicAccessKey: kotlin.String?,
+    @SerialName(value = "webpublicAccessKey") val webpublicAccessKey: kotlin.String? = null,
 
-    @SerialName(value = "uri") @Required val uri: kotlin.String?,
+    @SerialName(value = "uri") val uri: kotlin.String? = null,
 
-    @SerialName(value = "src") @Required val src: kotlin.String?,
+    @SerialName(value = "src") val src: kotlin.String? = null,
 
-    @SerialName(value = "folderId") @Required val folderId: kotlin.String?,
+    @SerialName(value = "folderId") val folderId: kotlin.String? = null,
 
-    @SerialName(value = "isSensitive") @Required val isSensitive: kotlin.Boolean,
+    @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean,
 
-    @SerialName(value = "isLink") @Required val isLink: kotlin.Boolean
+    @SerialName(value = "isLink") val isLink: kotlin.Boolean
 
 )

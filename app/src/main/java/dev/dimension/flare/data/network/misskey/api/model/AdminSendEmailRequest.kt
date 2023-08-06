@@ -26,10 +26,10 @@ import kotlinx.serialization.Serializable
 
 data class AdminSendEmailRequest(
 
-    @SerialName(value = "to") @Required val to: kotlin.String,
+    @SerialName(value = "to") val to: kotlin.String,
 
-    @SerialName(value = "subject") @Required val subject: kotlin.String,
+    @SerialName(value = "subject") val subject: kotlin.String,
 
-    @SerialName(value = "text") @Required val text: kotlin.String
+    @SerialName(value = "text") val text: kotlin.String
 
 )

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
@@ -96,7 +97,7 @@ internal fun MisskeyStatusComponent(
             data = actualData,
             event = event
         )
-        if (data.media.isNotEmpty()) {
+        if (actualData.media.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusMediaComponent(
                 data = actualData.media,
@@ -112,10 +113,10 @@ internal fun MisskeyStatusComponent(
             UiStatusQuoted(
                 status = actualData.quote,
                 onMediaClick = event::onMediaClick,
-                modifier = modifier,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
-        if (data.reaction.emojiReactions.isNotEmpty()) {
+        if (actualData.reaction.emojiReactions.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusReactionComponent(
                 data = actualData,
@@ -198,7 +199,9 @@ private fun StatusReactionComponent(
         modifier = modifier,
     ) {
         items(data.reaction.emojiReactions) { reaction ->
-            Card {
+            Card(
+                shape = RoundedCornerShape(100),
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -376,7 +379,7 @@ private fun VisibilityIcon(
 internal interface MisskeyStatusEvent {
     fun onStatusClick(data: UiStatus.Misskey)
     fun onUserClick(userKey: MicroBlogKey)
-    fun onMediaClick(uiMedia: UiMedia)
+    fun onMediaClick(media: UiMedia)
     fun onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.Misskey.EmojiReaction)
     fun onReplyClick(data: UiStatus.Misskey)
     fun onReblogClick(data: UiStatus.Misskey)

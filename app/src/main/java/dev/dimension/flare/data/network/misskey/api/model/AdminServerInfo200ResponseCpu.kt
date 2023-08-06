@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class AdminServerInfo200ResponseCpu(
 
-    @SerialName(value = "model") @Required val model: kotlin.String,
+    @SerialName(value = "model") val model: kotlin.String,
 
-    @SerialName(value = "cores") @Required val cores: kotlin.Double
+    @SerialName(value = "cores") val cores: kotlin.Double
 
 )

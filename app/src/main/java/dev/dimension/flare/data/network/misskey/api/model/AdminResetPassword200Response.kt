@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class AdminResetPassword200Response(
 
-    @SerialName(value = "password") @Required val password: kotlin.String
+    @SerialName(value = "password") val password: kotlin.String
 
 )

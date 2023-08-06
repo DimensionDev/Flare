@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class FederationFollowersRequest(
 
-    @SerialName(value = "host") @Required val host: kotlin.String,
+    @SerialName(value = "host") val host: kotlin.String,
 
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
 

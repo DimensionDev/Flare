@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class TestRequest(
 
-    @SerialName(value = "required") @Required val required: kotlin.Boolean,
+    @SerialName(value = "required") val required: kotlin.Boolean,
 
     @SerialName(value = "string") val string: kotlin.String? = null,
 

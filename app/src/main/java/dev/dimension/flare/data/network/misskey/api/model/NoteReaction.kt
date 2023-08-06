@@ -26,12 +26,12 @@ import kotlinx.serialization.Serializable
 
 data class NoteReaction(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "user") @Required val user: UserLite,
+    @SerialName(value = "user") val user: UserLite,
 
-    @SerialName(value = "type") @Required val type: kotlin.String
+    @SerialName(value = "type") val type: kotlin.String
 
 )

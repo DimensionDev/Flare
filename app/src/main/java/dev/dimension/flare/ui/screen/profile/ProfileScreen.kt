@@ -60,7 +60,9 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.data.datasource.mastodon.userTimelineDataSource
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.repository.cache.mastodonUserDataByNameAndHostPresenter
 import dev.dimension.flare.data.repository.cache.mastodonUserDataPresenter
+import dev.dimension.flare.data.repository.cache.misskeyUserDataByNamePresenter
 import dev.dimension.flare.data.repository.cache.misskeyUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -71,17 +73,162 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.StatusEvent
+import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
 import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.onError
+import dev.dimension.flare.ui.onLoading
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.toUi
-import org.jsoup.nodes.Element
 import kotlin.math.max
+import org.jsoup.nodes.Element
+
+@Composable
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
+        )
+    ]
+)
+fun ProfileWithUserNameAndHostRoute(
+    userName: String,
+    host: String,
+    navigator: DestinationsNavigator,
+) {
+    val state by producePresenter(key = "acct_$userName@$host") {
+        profileWithUserNameAndHostPresenter(
+            userName = userName,
+            host = host
+        )
+    }
+    state.userState.onSuccess {
+        ProfileScreen(
+            userKey = it.userKey,
+            onBack = {
+                navigator.navigateUp()
+            }
+        )
+    }.onLoading {
+        ProfileLoadingScreen(
+            onBack = {
+                navigator.navigateUp()
+            }
+        )
+    }.onError {
+        ProfileErrorScreen(
+            onBack = {
+                navigator.navigateUp()
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProfileErrorScreen(onBack: () -> Unit) {
+    FlareTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(text = "Error")
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                )
+            }
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Error")
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProfileLoadingScreen(onBack: () -> Unit) {
+    FlareTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(text = "Loading...")
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                )
+            }
+        ) {
+            LazyColumn(
+                contentPadding = it,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item {
+                    ProfileHeaderLoading()
+                }
+                items(5) {
+                    StatusPlaceholder(
+                        modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun profileWithUserNameAndHostPresenter(
+    userName: String,
+    host: String,
+) = run {
+    val account by activeAccountPresenter()
+    val userState = account.flatMap {
+        when (it) {
+            is UiAccount.Mastodon -> {
+                mastodonUserDataByNameAndHostPresenter(
+                    account = it,
+                    name = userName,
+                    host = host
+                )
+            }
+
+            is UiAccount.Misskey -> misskeyUserDataByNamePresenter(
+                account = it,
+                name = userName,
+                host = host
+            )
+        }.toUi()
+    }
+
+    object {
+        val userState = userState
+    }
+}
 
 @Composable
 @Destination(
@@ -220,7 +367,7 @@ fun ProfileScreen(
                             )
                         }
                         with(state.listState) {
-                            with (state.statusEvent) {
+                            with(state.statusEvent) {
                                 status()
                             }
                         }
@@ -280,6 +427,14 @@ private fun ProfileHeaderSuccess(
     when (user) {
         is UiUser.Mastodon -> {
             MastodonProfileHeader(
+                user = user,
+                relationState = relationState,
+                modifier = modifier
+            )
+        }
+
+        is UiUser.Misskey -> {
+            MisskeyProfileHeader(
                 user = user,
                 relationState = relationState,
                 modifier = modifier
@@ -495,15 +650,20 @@ private fun profilePresenter(
         when (it) {
             is UiAccount.Mastodon -> mastodonUserRelationPresenter(
                 account = it,
-                accountKey = userKey ?: it.accountKey
+                userKey = userKey ?: it.accountKey
+            )
+
+            is UiAccount.Misskey -> misskeyUserRelationPresenter(
+                account = it,
+                userKey = userKey ?: it.accountKey
             )
         }
     }
 
     val refreshing = userState is UiState.Loading ||
-        userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
-        listState is UiState.Loading ||
-        listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
+            userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
+            listState is UiState.Loading ||
+            listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
     object {
         val refreshing = refreshing
         val userState = userState.flatMap { it.toUi() }

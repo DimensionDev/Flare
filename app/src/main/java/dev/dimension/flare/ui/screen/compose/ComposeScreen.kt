@@ -109,6 +109,7 @@ import dev.dimension.flare.data.repository.ComposeUseCase
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.data.repository.cache.mastodonEmojiProvider
+import dev.dimension.flare.data.repository.cache.misskeyEmojiProvider
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
@@ -116,7 +117,6 @@ import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.component.status.mastodon.VisibilityIcon
-import dev.dimension.flare.ui.component.status.misskey.VisibilityIcon
 import dev.dimension.flare.ui.flatMap
 import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.model.UiEmoji
@@ -710,9 +710,12 @@ private fun composePresenter(
                             append("${item.user.handle} ")
                         }
                     }
-
-                    is UiStatus.MastodonNotification -> Unit
-                    null -> Unit
+                    is UiStatus.Misskey -> {
+                        textFieldState.edit {
+                            append("${item.user.handle} ")
+                        }
+                    }
+                    is UiStatus.MastodonNotification, is UiStatus.MisskeyNotification, null -> Unit
                 }
             }
         }
@@ -768,6 +771,10 @@ private fun composePresenter(
                         inReplyToID = replyTo?.id,
                         account = it
                     )
+
+                    is UiAccount.Misskey -> ComposeData.MissKey(
+                        account = it,
+                    )
                 }
                 composeUseCase(data)
             }
@@ -781,8 +788,12 @@ private fun replyPresenter(
     replyTo: MicroBlogKey
 ) = run {
     val listState = when (account) {
-        is UiAccount.Mastodon -> statusOnlyDataSource(account, replyTo).collectAsLazyPagingItems()
-    }
+        is UiAccount.Mastodon -> statusOnlyDataSource(account, replyTo)
+        is UiAccount.Misskey -> dev.dimension.flare.data.datasource.misskey.statusOnlyDataSource(
+            account = account,
+            statusKey = replyTo
+        )
+    }.collectAsLazyPagingItems()
 
     object {
         val listState = listState
@@ -795,6 +806,7 @@ private fun emojiPresenter(
 ) = run {
     val emojiState = when (account) {
         is UiAccount.Mastodon -> mastodonEmojiProvider(account = account).toUi()
+        is UiAccount.Misskey -> misskeyEmojiProvider(account = account).toUi()
     }
     object {
         val emojiState = emojiState

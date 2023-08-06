@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class NotesPollsVoteRequest(
 
-    @SerialName(value = "noteId") @Required val noteId: kotlin.String,
+    @SerialName(value = "noteId") val noteId: kotlin.String,
 
-    @SerialName(value = "choice") @Required val choice: kotlin.Int
+    @SerialName(value = "choice") val choice: kotlin.Int
 
 )

@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class NotesTranslateRequest(
 
-    @SerialName(value = "noteId") @Required val noteId: kotlin.String,
+    @SerialName(value = "noteId") val noteId: kotlin.String,
 
-    @SerialName(value = "targetLang") @Required val targetLang: kotlin.String
+    @SerialName(value = "targetLang") val targetLang: kotlin.String
 
 )

@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class DriveFoldersDeleteRequest(
 
-    @SerialName(value = "folderId") @Required val folderId: kotlin.String
+    @SerialName(value = "folderId") val folderId: kotlin.String
 
 )

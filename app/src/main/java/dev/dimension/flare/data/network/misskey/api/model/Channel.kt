@@ -26,29 +26,29 @@ import kotlinx.serialization.Serializable
 
 data class Channel(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "lastNotedAt") @Required val lastNotedAt: kotlin.String?,
+    @SerialName(value = "lastNotedAt") val lastNotedAt: kotlin.String? = null,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "description") @Required val description: kotlin.String?,
+    @SerialName(value = "description") val description: kotlin.String? = null,
 
-    @SerialName(value = "bannerUrl") @Required val bannerUrl: kotlin.String?,
+    @SerialName(value = "bannerUrl") val bannerUrl: kotlin.String? = null,
 
-    @SerialName(value = "isArchived") @Required val isArchived: kotlin.Boolean,
+    @SerialName(value = "isArchived") val isArchived: kotlin.Boolean,
 
-    @SerialName(value = "notesCount") @Required val notesCount: kotlin.Double,
+    @SerialName(value = "notesCount") val notesCount: kotlin.Double,
 
-    @SerialName(value = "usersCount") @Required val usersCount: kotlin.Double,
+    @SerialName(value = "usersCount") val usersCount: kotlin.Double,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String?,
+    @SerialName(value = "userId") val userId: kotlin.String? = null,
 
-    @SerialName(value = "pinnedNoteIds") @Required val pinnedNoteIds: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "pinnedNoteIds") val pinnedNoteIds: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "color") @Required val color: kotlin.String,
+    @SerialName(value = "color") val color: kotlin.String,
 
     @SerialName(value = "isFollowing") val isFollowing: kotlin.Boolean? = null,
 

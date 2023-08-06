@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class AdminFederationDeleteAllFilesRequest(
 
-    @SerialName(value = "host") @Required val host: kotlin.String
+    @SerialName(value = "host") val host: kotlin.String
 
 )

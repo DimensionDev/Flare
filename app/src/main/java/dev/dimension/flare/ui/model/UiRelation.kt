@@ -9,4 +9,14 @@ sealed interface UiRelation {
         val requested: Boolean,
         val domainBlocking: Boolean
     ) : UiRelation
+
+    data class Misskey(
+        val following: Boolean,
+        val isFans: Boolean,
+        val blocking: Boolean,
+        val blocked: Boolean,
+        val muted: Boolean,
+        val hasPendingFollowRequestFromYou: Boolean,
+        val hasPendingFollowRequestToYou: Boolean
+    ) : UiRelation
 }

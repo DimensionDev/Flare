@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class FlashDeleteRequest(
 
-    @SerialName(value = "flashId") @Required val flashId: kotlin.String
+    @SerialName(value = "flashId") val flashId: kotlin.String
 
 )

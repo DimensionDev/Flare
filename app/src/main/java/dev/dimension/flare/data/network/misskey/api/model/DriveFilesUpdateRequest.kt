@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class DriveFilesUpdateRequest(
 
-    @SerialName(value = "fileId") @Required val fileId: kotlin.String,
+    @SerialName(value = "fileId") val fileId: kotlin.String,
 
     @SerialName(value = "folderId") val folderId: kotlin.String? = null,
 

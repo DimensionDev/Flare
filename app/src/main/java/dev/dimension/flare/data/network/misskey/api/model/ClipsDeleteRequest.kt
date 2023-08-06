@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class ClipsDeleteRequest(
 
-    @SerialName(value = "clipId") @Required val clipId: kotlin.String
+    @SerialName(value = "clipId") val clipId: kotlin.String
 
 )

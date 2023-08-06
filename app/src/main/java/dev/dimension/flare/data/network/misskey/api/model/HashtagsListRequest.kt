@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class HashtagsListRequest(
 
-    @SerialName(value = "sort") @Required val sort: HashtagsListRequest.Sort,
+    @SerialName(value = "sort") val sort: HashtagsListRequest.Sort,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 

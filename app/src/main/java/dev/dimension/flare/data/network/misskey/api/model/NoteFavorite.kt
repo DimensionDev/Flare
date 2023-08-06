@@ -26,12 +26,12 @@ import kotlinx.serialization.Serializable
 
 data class NoteFavorite(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "note") @Required val note: Note,
+    @SerialName(value = "note") val note: Note,
 
-    @SerialName(value = "noteId") @Required val noteId: kotlin.String
+    @SerialName(value = "noteId") val noteId: kotlin.String
 
 )

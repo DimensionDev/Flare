@@ -27,20 +27,20 @@ import kotlinx.serialization.Serializable
 
 data class UserLite(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String?,
+    @SerialName(value = "name") val name: kotlin.String? = null,
 
-    @SerialName(value = "username") @Required val username: kotlin.String,
+    @SerialName(value = "username") val username: kotlin.String,
 
     /* The local host is represented with `null`. */
-    @SerialName(value = "host") @Required val host: kotlin.String?,
+    @SerialName(value = "host") val host: kotlin.String? = null,
 
-    @SerialName(value = "avatarUrl") @Required val avatarUrl: kotlin.String?,
+    @SerialName(value = "avatarUrl") val avatarUrl: kotlin.String? = null,
 
-    @SerialName(value = "avatarBlurhash") @Required val avatarBlurhash: kotlin.String?,
+    @SerialName(value = "avatarBlurhash") val avatarBlurhash: kotlin.String? = null,
 
-    @SerialName(value = "onlineStatus") @Required val onlineStatus: UserLite.OnlineStatus?,
+    @SerialName(value = "onlineStatus") val onlineStatus: UserLite.OnlineStatus? = null,
 
     @SerialName(value = "isAdmin") val isAdmin: kotlin.Boolean? = false,
 

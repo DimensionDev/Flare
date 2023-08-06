@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class IGalleryLikes200ResponseInner(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "post") @Required val post: GalleryPost
+    @SerialName(value = "post") val post: GalleryPost
 
 )

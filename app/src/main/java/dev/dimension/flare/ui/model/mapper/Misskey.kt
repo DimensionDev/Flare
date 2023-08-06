@@ -10,10 +10,12 @@ import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.screen.destinations.MisskeyProfileRouteDestination
+import dev.dimension.flare.ui.screen.destinations.ProfileWithUserNameAndHostRouteDestination
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
@@ -48,7 +50,8 @@ internal fun Notification.toUi(
         createdAt = createdAt.toInstant(),
         note = note?.toUi(accountKey, emojis),
         type = type,
-        accountKey = accountKey
+        accountKey = accountKey,
+        achievement = achievement,
     )
 }
 
@@ -92,7 +95,7 @@ internal fun Note.toUi(
             replyCount = repliesCount.toLong(),
             renoteCount = renoteCount.toLong(),
         ),
-        renote = if (text == null && files?.isNotEmpty() == true && cw == null) {
+        renote = if (text.isNullOrEmpty()) {
             renote?.toUi(accountKey, emojis)
         } else {
             null
@@ -113,13 +116,13 @@ internal fun Note.toUi(
         }?.toPersistentList() ?: persistentListOf(),
         reaction = UiStatus.Misskey.Reaction(
             myReaction = myReaction,
-            emojiReactions = reactionEmojis?.map { emoji ->
+            emojiReactions = reactions.map { emoji ->
                 UiStatus.Misskey.EmojiReaction(
                     name = emoji.key,
                     count = emoji.value,
-                    url = emojis.find { it.name == emoji.key }?.url.orEmpty()
+                    url = reactionEmojis?.get(emoji.key.trim(':')).orEmpty()
                 )
-            }.orEmpty().toPersistentList()
+            }.toPersistentList()
         ),
         accountKey = accountKey
     )
@@ -188,6 +191,15 @@ internal fun UserLite.toUi(
         remoteHost = remoteHost,
         isCat = isCat ?: false,
         isBot = isBot ?: false,
+        relation = UiRelation.Misskey(
+            following = false,
+            isFans = false,
+            blocking = false,
+            blocked = false,
+            muted = false,
+            hasPendingFollowRequestFromYou = false,
+            hasPendingFollowRequestToYou = false,
+        )
     )
 }
 
@@ -236,6 +248,15 @@ internal fun User.toUi(
         remoteHost = remoteHost,
         isCat = isCat ?: false,
         isBot = isBot ?: false,
+        relation = UiRelation.Misskey(
+            following = isFollowing ?: false,
+            isFans = isFollowed ?: false,
+            blocking = isBlocking ?: false,
+            blocked = isBlocked ?: false,
+            muted = isMuted ?: false,
+            hasPendingFollowRequestFromYou = hasPendingFollowRequestFromYou ?: false,
+            hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false,
+        )
     )
 }
 
@@ -290,9 +311,9 @@ private fun Token.toElement(
             val trimmed = value.trimStart('@')
             if (trimmed.contains('@')) {
                 val (username, host) = trimmed.split('@')
-                attr("href", MisskeyProfileRouteDestination(username, host).deeplink())
+                attr("href", ProfileWithUserNameAndHostRouteDestination(username, host).deeplink())
             } else {
-                attr("href", MisskeyProfileRouteDestination(value, accountHost).deeplink())
+                attr("href", ProfileWithUserNameAndHostRouteDestination(value, accountHost).deeplink())
             }
             text(value)
         }
@@ -313,4 +334,12 @@ private fun parseName(
         element.appendChild(it.toElement(accountHost, emojis))
     }
     return element
+}
+
+
+internal fun EmojiSimple.toUi(): UiEmoji {
+    return UiEmoji(
+        shortcode = name,
+        url = url,
+    )
 }

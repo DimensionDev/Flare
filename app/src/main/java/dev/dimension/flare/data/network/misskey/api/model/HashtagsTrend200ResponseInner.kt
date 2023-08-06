@@ -26,10 +26,10 @@ import kotlinx.serialization.Serializable
 
 data class HashtagsTrend200ResponseInner(
 
-    @SerialName(value = "tag") @Required val tag: kotlin.String,
+    @SerialName(value = "tag") val tag: kotlin.String,
 
-    @SerialName(value = "chart") @Required val chart: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "chart") val chart: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "usersCount") @Required val usersCount: kotlin.Double
+    @SerialName(value = "usersCount") val usersCount: kotlin.Double
 
 )

@@ -26,9 +26,9 @@ import kotlinx.serialization.Serializable
 
 data class ChartsUserDriveRequest(
 
-    @SerialName(value = "span") @Required val span: ChartsUserDriveRequest.Span,
+    @SerialName(value = "span") val span: ChartsUserDriveRequest.Span,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 30,
 

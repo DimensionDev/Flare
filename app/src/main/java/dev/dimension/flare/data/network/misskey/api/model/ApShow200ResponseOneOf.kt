@@ -26,9 +26,9 @@ import kotlinx.serialization.Serializable
 
 data class ApShow200ResponseOneOf(
 
-    @SerialName(value = "type") @Required val type: ApShow200ResponseOneOf.Type,
+    @SerialName(value = "type") val type: ApShow200ResponseOneOf.Type,
 
-    @SerialName(value = "object") @Required val `object`: UserDetailedNotMe
+    @SerialName(value = "object") val `object`: UserDetailedNotMe
 
 ) {
 

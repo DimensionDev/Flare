@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class UsersListsUpdateRequest(
 
-    @SerialName(value = "listId") @Required val listId: kotlin.String,
+    @SerialName(value = "listId") val listId: kotlin.String,
 
     @SerialName(value = "name") val name: kotlin.String? = null,
 

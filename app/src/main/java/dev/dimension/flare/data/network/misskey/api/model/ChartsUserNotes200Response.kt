@@ -26,18 +26,18 @@ import kotlinx.serialization.Serializable
 
 data class ChartsUserNotes200Response(
 
-    @SerialName(value = "total") @Required val total: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "total") val total: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "inc") @Required val inc: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "inc") val inc: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "dec") @Required val dec: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "dec") val dec: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "diffs.normal") @Required val diffsNormal: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "diffs.normal") val diffsNormal: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "diffs.reply") @Required val diffsReply: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "diffs.reply") val diffsReply: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "diffs.renote") @Required val diffsRenote: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "diffs.renote") val diffsRenote: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "diffs.withFile") @Required val diffsWithFile: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "diffs.withFile") val diffsWithFile: kotlin.collections.List<kotlin.Double>
 
 )

@@ -140,18 +140,18 @@ internal fun MastodonProfileHeader(
 @Composable
 internal fun mastodonUserRelationPresenter(
     account: UiAccount.Mastodon,
-    accountKey: MicroBlogKey
+    userKey: MicroBlogKey
 ): UiState<UiRelation> {
-    if (account.accountKey == accountKey) {
+    if (account.accountKey == userKey) {
         return UiState.Error(IllegalStateException("Cannot show relation of self"))
     }
     val state by produceState<UiState<UiRelation>>(
-        key1 = accountKey,
+        key1 = userKey,
         key2 = account.accountKey,
         initialValue = UiState.Loading()
     ) {
         runCatching {
-            account.service.showRelationship(accountKey.id)
+            account.service.showRelationship(userKey.id)
         }.onSuccess {
             val item = it.firstOrNull()
             value = if (item != null) {

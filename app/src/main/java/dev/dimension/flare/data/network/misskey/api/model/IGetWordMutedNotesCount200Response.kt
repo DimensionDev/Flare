@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class IGetWordMutedNotesCount200Response(
 
-    @SerialName(value = "count") @Required val count: kotlin.Double
+    @SerialName(value = "count") val count: kotlin.Double
 
 )

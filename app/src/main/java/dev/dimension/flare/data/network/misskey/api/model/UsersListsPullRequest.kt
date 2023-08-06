@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class UsersListsPullRequest(
 
-    @SerialName(value = "listId") @Required val listId: kotlin.String,
+    @SerialName(value = "listId") val listId: kotlin.String,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String
+    @SerialName(value = "userId") val userId: kotlin.String
 
 )

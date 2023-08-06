@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class UsersClipsRequest(
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 

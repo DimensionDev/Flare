@@ -64,13 +64,13 @@ internal class StatusDetailRemoteMediator(
             val result = if (statusOnly) {
                 val current = account.service.lookupStatus(
                     statusKey.id
-                ).body()
+                )
                 listOf(current)
             } else {
                 val current = if (loadType == LoadType.REFRESH) {
                     account.service.lookupStatus(
                         statusKey.id
-                    ).body()
+                    )
                 } else {
                     null
                 }
@@ -82,7 +82,7 @@ internal class StatusDetailRemoteMediator(
                     statusKey.id,
                     count = state.config.pageSize,
                     until_id = lastItem.status.status.data.statusKey.id
-                ).body().orEmpty()
+                ).orEmpty()
                 listOfNotNull(current?.reply, current) + children
 //                context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
             }.filterNotNull()

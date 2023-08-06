@@ -26,13 +26,13 @@ import kotlinx.serialization.Serializable
 
 data class DriveFolder(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "parentId") @Required val parentId: kotlin.String?,
+    @SerialName(value = "parentId") val parentId: kotlin.String? = null,
 
     @SerialName(value = "foldersCount") val foldersCount: kotlin.Double? = null,
 

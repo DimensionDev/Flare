@@ -26,79 +26,79 @@ import kotlinx.serialization.Serializable
 
 data class Meta200Response(
 
-    @SerialName(value = "maintainerName") @Required val maintainerName: kotlin.String?,
+    @SerialName(value = "maintainerName") val maintainerName: kotlin.String? = null,
 
-    @SerialName(value = "maintainerEmail") @Required val maintainerEmail: kotlin.String?,
+    @SerialName(value = "maintainerEmail") val maintainerEmail: kotlin.String? = null,
 
-    @SerialName(value = "version") @Required val version: kotlin.String,
+    @SerialName(value = "version") val version: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "uri") @Required val uri: kotlin.String,
+    @SerialName(value = "uri") val uri: kotlin.String,
 
-    @SerialName(value = "description") @Required val description: kotlin.String?,
+    @SerialName(value = "description") val description: kotlin.String? = null,
 
-    @SerialName(value = "langs") @Required val langs: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "langs") val langs: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "tosUrl") @Required val tosUrl: kotlin.String?,
+    @SerialName(value = "tosUrl") val tosUrl: kotlin.String? = null,
 
-    @SerialName(value = "repositoryUrl") @Required val repositoryUrl: kotlin.String = "https://github.com/misskey-dev/misskey",
+    @SerialName(value = "repositoryUrl") val repositoryUrl: kotlin.String = "https://github.com/misskey-dev/misskey",
 
-    @SerialName(value = "feedbackUrl") @Required val feedbackUrl: kotlin.String = "https://github.com/misskey-dev/misskey/issues/new",
+    @SerialName(value = "feedbackUrl") val feedbackUrl: kotlin.String = "https://github.com/misskey-dev/misskey/issues/new",
 
-    @SerialName(value = "defaultDarkTheme") @Required val defaultDarkTheme: kotlin.String?,
+    @SerialName(value = "defaultDarkTheme") val defaultDarkTheme: kotlin.String? = null,
 
-    @SerialName(value = "defaultLightTheme") @Required val defaultLightTheme: kotlin.String?,
+    @SerialName(value = "defaultLightTheme") val defaultLightTheme: kotlin.String? = null,
 
-    @SerialName(value = "disableRegistration") @Required val disableRegistration: kotlin.Boolean,
+    @SerialName(value = "disableRegistration") val disableRegistration: kotlin.Boolean,
 
-    @SerialName(value = "cacheRemoteFiles") @Required val cacheRemoteFiles: kotlin.Boolean,
+    @SerialName(value = "cacheRemoteFiles") val cacheRemoteFiles: kotlin.Boolean,
 
-    @SerialName(value = "cacheRemoteSensitiveFiles") @Required val cacheRemoteSensitiveFiles: kotlin.Boolean,
+    @SerialName(value = "cacheRemoteSensitiveFiles") val cacheRemoteSensitiveFiles: kotlin.Boolean,
 
-    @SerialName(value = "emailRequiredForSignup") @Required val emailRequiredForSignup: kotlin.Boolean,
+    @SerialName(value = "emailRequiredForSignup") val emailRequiredForSignup: kotlin.Boolean,
 
-    @SerialName(value = "enableHcaptcha") @Required val enableHcaptcha: kotlin.Boolean,
+    @SerialName(value = "enableHcaptcha") val enableHcaptcha: kotlin.Boolean,
 
-    @SerialName(value = "hcaptchaSiteKey") @Required val hcaptchaSiteKey: kotlin.String?,
+    @SerialName(value = "hcaptchaSiteKey") val hcaptchaSiteKey: kotlin.String? = null,
 
-    @SerialName(value = "enableRecaptcha") @Required val enableRecaptcha: kotlin.Boolean,
+    @SerialName(value = "enableRecaptcha") val enableRecaptcha: kotlin.Boolean,
 
-    @SerialName(value = "recaptchaSiteKey") @Required val recaptchaSiteKey: kotlin.String?,
+    @SerialName(value = "recaptchaSiteKey") val recaptchaSiteKey: kotlin.String? = null,
 
-    @SerialName(value = "enableTurnstile") @Required val enableTurnstile: kotlin.Boolean,
+    @SerialName(value = "enableTurnstile") val enableTurnstile: kotlin.Boolean,
 
-    @SerialName(value = "turnstileSiteKey") @Required val turnstileSiteKey: kotlin.String?,
+    @SerialName(value = "turnstileSiteKey") val turnstileSiteKey: kotlin.String? = null,
 
-    @SerialName(value = "swPublickey") @Required val swPublickey: kotlin.String?,
+    @SerialName(value = "swPublickey") val swPublickey: kotlin.String? = null,
 
-    @SerialName(value = "mascotImageUrl") @Required val mascotImageUrl: kotlin.String = "/assets/ai.png",
+    @SerialName(value = "mascotImageUrl") val mascotImageUrl: kotlin.String = "/assets/ai.png",
 
-    @SerialName(value = "bannerUrl") @Required val bannerUrl: kotlin.String,
+    @SerialName(value = "bannerUrl") val bannerUrl: kotlin.String,
 
-    @SerialName(value = "serverErrorImageUrl") @Required val serverErrorImageUrl: kotlin.String?,
+    @SerialName(value = "serverErrorImageUrl") val serverErrorImageUrl: kotlin.String? = null,
 
-    @SerialName(value = "infoImageUrl") @Required val infoImageUrl: kotlin.String?,
+    @SerialName(value = "infoImageUrl") val infoImageUrl: kotlin.String? = null,
 
-    @SerialName(value = "notFoundImageUrl") @Required val notFoundImageUrl: kotlin.String?,
+    @SerialName(value = "notFoundImageUrl") val notFoundImageUrl: kotlin.String? = null,
 
-    @SerialName(value = "iconUrl") @Required val iconUrl: kotlin.String?,
+    @SerialName(value = "iconUrl") val iconUrl: kotlin.String? = null,
 
-    @SerialName(value = "maxNoteTextLength") @Required val maxNoteTextLength: kotlin.Double,
+    @SerialName(value = "maxNoteTextLength") val maxNoteTextLength: kotlin.Double,
 
-    @SerialName(value = "ads") @Required val ads: kotlin.collections.List<Meta200ResponseAdsInner>,
+    @SerialName(value = "ads") val ads: kotlin.collections.List<Meta200ResponseAdsInner>,
 
-    @SerialName(value = "requireSetup") @Required val requireSetup: kotlin.Boolean,
+    @SerialName(value = "requireSetup") val requireSetup: kotlin.Boolean,
 
-    @SerialName(value = "enableEmail") @Required val enableEmail: kotlin.Boolean,
+    @SerialName(value = "enableEmail") val enableEmail: kotlin.Boolean,
 
-    @SerialName(value = "enableServiceWorker") @Required val enableServiceWorker: kotlin.Boolean,
+    @SerialName(value = "enableServiceWorker") val enableServiceWorker: kotlin.Boolean,
 
-    @SerialName(value = "translatorAvailable") @Required val translatorAvailable: kotlin.Boolean,
+    @SerialName(value = "translatorAvailable") val translatorAvailable: kotlin.Boolean,
 
-    @SerialName(value = "proxyAccountName") @Required val proxyAccountName: kotlin.String?,
+    @SerialName(value = "proxyAccountName") val proxyAccountName: kotlin.String? = null,
 
-    @SerialName(value = "mediaProxy") @Required val mediaProxy: kotlin.String,
+    @SerialName(value = "mediaProxy") val mediaProxy: kotlin.String,
 
     @SerialName(value = "features") val features: Meta200ResponseFeatures? = null
 

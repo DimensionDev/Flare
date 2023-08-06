@@ -167,6 +167,10 @@ class MastodonService(
         return lookupResources.lookupUser(id)
     }
 
+    suspend fun lookupUserByAcct(acct: String): Account? {
+        return lookupResources.lookupUserByAcct(acct)
+    }
+
     suspend fun lookupStatus(id: String): Status {
         return lookupResources.lookupStatus(id)
     }

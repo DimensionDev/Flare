@@ -26,25 +26,25 @@ import kotlinx.serialization.Serializable
 
 data class AdminAnnouncementsList200ResponseInner(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "updatedAt") @Required val updatedAt: kotlin.String?,
+    @SerialName(value = "updatedAt") val updatedAt: kotlin.String? = null,
 
-    @SerialName(value = "text") @Required val text: kotlin.String,
+    @SerialName(value = "text") val text: kotlin.String,
 
-    @SerialName(value = "title") @Required val title: kotlin.String,
+    @SerialName(value = "title") val title: kotlin.String,
 
-    @SerialName(value = "imageUrl") @Required val imageUrl: kotlin.String?,
+    @SerialName(value = "imageUrl") val imageUrl: kotlin.String? = null,
 
-    @SerialName(value = "displayOrder") @Required val displayOrder: kotlin.Double,
+    @SerialName(value = "displayOrder") val displayOrder: kotlin.Double,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String?,
+    @SerialName(value = "userId") val userId: kotlin.String? = null,
 
-    @SerialName(value = "reads") @Required val reads: kotlin.Double,
+    @SerialName(value = "reads") val reads: kotlin.Double,
 
-    @SerialName(value = "closeDuration") @Required val closeDuration: kotlin.Double,
+    @SerialName(value = "closeDuration") val closeDuration: kotlin.Double,
 
     @SerialName(value = "user") val user: UserLite? = null
 

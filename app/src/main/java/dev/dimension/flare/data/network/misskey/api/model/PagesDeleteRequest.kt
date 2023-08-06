@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class PagesDeleteRequest(
 
-    @SerialName(value = "pageId") @Required val pageId: kotlin.String
+    @SerialName(value = "pageId") val pageId: kotlin.String
 
 )

@@ -177,13 +177,14 @@ internal fun status() {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 HorizontalDivider()
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = stringResource(R.string.status_loadmore_end)
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                 }

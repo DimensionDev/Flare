@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class AdminServerInfo200ResponseFs(
 
-    @SerialName(value = "total") @Required val total: kotlin.Double,
+    @SerialName(value = "total") val total: kotlin.Double,
 
-    @SerialName(value = "used") @Required val used: kotlin.Double
+    @SerialName(value = "used") val used: kotlin.Double
 
 )

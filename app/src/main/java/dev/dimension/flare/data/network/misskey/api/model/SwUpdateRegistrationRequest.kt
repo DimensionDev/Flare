@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class SwUpdateRegistrationRequest(
 
-    @SerialName(value = "endpoint") @Required val endpoint: kotlin.String,
+    @SerialName(value = "endpoint") val endpoint: kotlin.String,
 
     @SerialName(value = "sendReadMessage") val sendReadMessage: kotlin.Boolean? = null
 

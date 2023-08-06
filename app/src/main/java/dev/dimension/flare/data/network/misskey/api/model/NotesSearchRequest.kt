@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
 
 data class NotesSearchRequest(
 
-    @SerialName(value = "query") @Required val query: kotlin.String,
+    @SerialName(value = "query") val query: kotlin.String,
 
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
 

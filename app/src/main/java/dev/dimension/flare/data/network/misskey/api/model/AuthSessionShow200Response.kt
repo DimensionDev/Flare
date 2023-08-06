@@ -26,10 +26,10 @@ import kotlinx.serialization.Serializable
 
 data class AuthSessionShow200Response(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "app") @Required val app: App,
+    @SerialName(value = "app") val app: App,
 
-    @SerialName(value = "token") @Required val token: kotlin.String
+    @SerialName(value = "token") val token: kotlin.String
 
 )

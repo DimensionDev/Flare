@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class NotesCreateRequestPoll(
 
-    @SerialName(value = "choices") @Required val choices: kotlin.collections.Set<kotlin.String>,
+    @SerialName(value = "choices") val choices: kotlin.collections.Set<kotlin.String>,
 
     @SerialName(value = "multiple") val multiple: kotlin.Boolean? = null,
 

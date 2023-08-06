@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class AdminEmojiCopyRequest(
 
-    @SerialName(value = "emojiId") @Required val emojiId: kotlin.String
+    @SerialName(value = "emojiId") val emojiId: kotlin.String
 
 )

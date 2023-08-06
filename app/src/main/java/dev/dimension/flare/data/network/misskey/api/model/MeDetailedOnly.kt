@@ -26,53 +26,53 @@ import kotlinx.serialization.Serializable
 
 data class MeDetailedOnly(
 
-    @SerialName(value = "avatarId") @Required val avatarId: kotlin.String?,
+    @SerialName(value = "avatarId") val avatarId: kotlin.String? = null,
 
-    @SerialName(value = "bannerId") @Required val bannerId: kotlin.String?,
+    @SerialName(value = "bannerId") val bannerId: kotlin.String? = null,
 
-    @SerialName(value = "injectFeaturedNote") @Required val injectFeaturedNote: kotlin.Boolean?,
+    @SerialName(value = "injectFeaturedNote") val injectFeaturedNote: kotlin.Boolean? = null,
 
-    @SerialName(value = "receiveAnnouncementEmail") @Required val receiveAnnouncementEmail: kotlin.Boolean?,
+    @SerialName(value = "receiveAnnouncementEmail") val receiveAnnouncementEmail: kotlin.Boolean? = null,
 
-    @SerialName(value = "alwaysMarkNsfw") @Required val alwaysMarkNsfw: kotlin.Boolean?,
+    @SerialName(value = "alwaysMarkNsfw") val alwaysMarkNsfw: kotlin.Boolean? = null,
 
-    @SerialName(value = "autoSensitive") @Required val autoSensitive: kotlin.Boolean?,
+    @SerialName(value = "autoSensitive") val autoSensitive: kotlin.Boolean? = null,
 
-    @SerialName(value = "carefulBot") @Required val carefulBot: kotlin.Boolean?,
+    @SerialName(value = "carefulBot") val carefulBot: kotlin.Boolean? = null,
 
-    @SerialName(value = "autoAcceptFollowed") @Required val autoAcceptFollowed: kotlin.Boolean?,
+    @SerialName(value = "autoAcceptFollowed") val autoAcceptFollowed: kotlin.Boolean? = null,
 
-    @SerialName(value = "noCrawle") @Required val noCrawle: kotlin.Boolean,
+    @SerialName(value = "noCrawle") val noCrawle: kotlin.Boolean,
 
-    @SerialName(value = "preventAiLearning") @Required val preventAiLearning: kotlin.Boolean,
+    @SerialName(value = "preventAiLearning") val preventAiLearning: kotlin.Boolean,
 
-    @SerialName(value = "isExplorable") @Required val isExplorable: kotlin.Boolean,
+    @SerialName(value = "isExplorable") val isExplorable: kotlin.Boolean,
 
-    @SerialName(value = "isDeleted") @Required val isDeleted: kotlin.Boolean,
+    @SerialName(value = "isDeleted") val isDeleted: kotlin.Boolean,
 
-    @SerialName(value = "twoFactorBackupCodes") @Required val twoFactorBackupCodes: MeDetailedOnly.TwoFactorBackupCodes,
+    @SerialName(value = "twoFactorBackupCodes") val twoFactorBackupCodes: MeDetailedOnly.TwoFactorBackupCodes,
 
-    @SerialName(value = "hideOnlineStatus") @Required val hideOnlineStatus: kotlin.Boolean,
+    @SerialName(value = "hideOnlineStatus") val hideOnlineStatus: kotlin.Boolean,
 
-    @SerialName(value = "hasUnreadSpecifiedNotes") @Required val hasUnreadSpecifiedNotes: kotlin.Boolean,
+    @SerialName(value = "hasUnreadSpecifiedNotes") val hasUnreadSpecifiedNotes: kotlin.Boolean,
 
-    @SerialName(value = "hasUnreadMentions") @Required val hasUnreadMentions: kotlin.Boolean,
+    @SerialName(value = "hasUnreadMentions") val hasUnreadMentions: kotlin.Boolean,
 
-    @SerialName(value = "hasUnreadAnnouncement") @Required val hasUnreadAnnouncement: kotlin.Boolean,
+    @SerialName(value = "hasUnreadAnnouncement") val hasUnreadAnnouncement: kotlin.Boolean,
 
-    @SerialName(value = "hasUnreadAntenna") @Required val hasUnreadAntenna: kotlin.Boolean,
+    @SerialName(value = "hasUnreadAntenna") val hasUnreadAntenna: kotlin.Boolean,
 
-    @SerialName(value = "hasUnreadNotification") @Required val hasUnreadNotification: kotlin.Boolean,
+    @SerialName(value = "hasUnreadNotification") val hasUnreadNotification: kotlin.Boolean,
 
-    @SerialName(value = "hasPendingReceivedFollowRequest") @Required val hasPendingReceivedFollowRequest: kotlin.Boolean,
+    @SerialName(value = "hasPendingReceivedFollowRequest") val hasPendingReceivedFollowRequest: kotlin.Boolean,
 
-    @SerialName(value = "mutedWords") @Required val mutedWords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
+    @SerialName(value = "mutedWords") val mutedWords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
 
-    @SerialName(value = "mutedInstances") @Required val mutedInstances: kotlin.collections.List<kotlin.String>?,
+    @SerialName(value = "mutedInstances") val mutedInstances: kotlin.collections.List<kotlin.String>? = null,
 
-    @SerialName(value = "mutingNotificationTypes") @Required val mutingNotificationTypes: kotlin.collections.List<kotlin.String>?,
+    @SerialName(value = "mutingNotificationTypes") val mutingNotificationTypes: kotlin.collections.List<kotlin.String>? = null,
 
-    @SerialName(value = "emailNotificationTypes") @Required val emailNotificationTypes: kotlin.collections.List<kotlin.String>?,
+    @SerialName(value = "emailNotificationTypes") val emailNotificationTypes: kotlin.collections.List<kotlin.String>? = null,
 
     @SerialName(value = "email") val email: kotlin.String? = null,
 

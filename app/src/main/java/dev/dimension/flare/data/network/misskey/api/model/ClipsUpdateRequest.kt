@@ -26,9 +26,9 @@ import kotlinx.serialization.Serializable
 
 data class ClipsUpdateRequest(
 
-    @SerialName(value = "clipId") @Required val clipId: kotlin.String,
+    @SerialName(value = "clipId") val clipId: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
     @SerialName(value = "isPublic") val isPublic: kotlin.Boolean? = null,
 

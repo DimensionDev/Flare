@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class NotesReactionsRequest(
 
-    @SerialName(value = "noteId") @Required val noteId: kotlin.String,
+    @SerialName(value = "noteId") val noteId: kotlin.String,
 
     @SerialName(value = "type") val type: kotlin.String? = null,
 

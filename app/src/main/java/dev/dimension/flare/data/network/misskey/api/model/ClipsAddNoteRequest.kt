@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class ClipsAddNoteRequest(
 
-    @SerialName(value = "clipId") @Required val clipId: kotlin.String,
+    @SerialName(value = "clipId") val clipId: kotlin.String,
 
-    @SerialName(value = "noteId") @Required val noteId: kotlin.String
+    @SerialName(value = "noteId") val noteId: kotlin.String
 
 )

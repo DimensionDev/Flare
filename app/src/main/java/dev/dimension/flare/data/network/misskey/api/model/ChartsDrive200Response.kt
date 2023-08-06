@@ -26,20 +26,20 @@ import kotlinx.serialization.Serializable
 
 data class ChartsDrive200Response(
 
-    @SerialName(value = "local.incCount") @Required val localIncCount: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "local.incCount") val localIncCount: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "local.incSize") @Required val localIncSize: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "local.incSize") val localIncSize: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "local.decCount") @Required val localDecCount: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "local.decCount") val localDecCount: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "local.decSize") @Required val localDecSize: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "local.decSize") val localDecSize: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.incCount") @Required val remoteIncCount: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "remote.incCount") val remoteIncCount: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.incSize") @Required val remoteIncSize: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "remote.incSize") val remoteIncSize: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.decCount") @Required val remoteDecCount: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "remote.decCount") val remoteDecCount: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.decSize") @Required val remoteDecSize: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "remote.decSize") val remoteDecSize: kotlin.collections.List<kotlin.Double>
 
 )

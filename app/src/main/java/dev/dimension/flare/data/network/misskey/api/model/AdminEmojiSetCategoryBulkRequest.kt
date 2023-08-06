@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
 
 data class AdminEmojiSetCategoryBulkRequest(
 
-    @SerialName(value = "ids") @Required val ids: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "ids") val ids: kotlin.collections.List<kotlin.String>,
 
     /* Use `null` to reset the category. */
     @SerialName(value = "category") val category: kotlin.String? = null

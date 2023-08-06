@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class IWebhooksShowRequest(
 
-    @SerialName(value = "webhookId") @Required val webhookId: kotlin.String
+    @SerialName(value = "webhookId") val webhookId: kotlin.String
 
 )

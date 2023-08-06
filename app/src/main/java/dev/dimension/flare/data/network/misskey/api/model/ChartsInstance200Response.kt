@@ -26,52 +26,52 @@ import kotlinx.serialization.Serializable
 
 data class ChartsInstance200Response(
 
-    @SerialName(value = "requests.failed") @Required val requestsFailed: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "requests.failed") val requestsFailed: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "requests.succeeded") @Required val requestsSucceeded: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "requests.succeeded") val requestsSucceeded: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "requests.received") @Required val requestsReceived: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "requests.received") val requestsReceived: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "notes.total") @Required val notesTotal: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "notes.total") val notesTotal: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "notes.inc") @Required val notesInc: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "notes.inc") val notesInc: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "notes.dec") @Required val notesDec: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "notes.dec") val notesDec: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "notes.diffs.normal") @Required val notesDiffsNormal: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "notes.diffs.normal") val notesDiffsNormal: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "notes.diffs.reply") @Required val notesDiffsReply: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "notes.diffs.reply") val notesDiffsReply: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "notes.diffs.renote") @Required val notesDiffsRenote: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "notes.diffs.renote") val notesDiffsRenote: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "notes.diffs.withFile") @Required val notesDiffsWithFile: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "notes.diffs.withFile") val notesDiffsWithFile: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "users.total") @Required val usersTotal: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "users.total") val usersTotal: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "users.inc") @Required val usersInc: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "users.inc") val usersInc: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "users.dec") @Required val usersDec: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "users.dec") val usersDec: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "following.total") @Required val followingTotal: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "following.total") val followingTotal: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "following.inc") @Required val followingInc: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "following.inc") val followingInc: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "following.dec") @Required val followingDec: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "following.dec") val followingDec: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "followers.total") @Required val followersTotal: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "followers.total") val followersTotal: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "followers.inc") @Required val followersInc: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "followers.inc") val followersInc: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "followers.dec") @Required val followersDec: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "followers.dec") val followersDec: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "drive.totalFiles") @Required val driveTotalFiles: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "drive.totalFiles") val driveTotalFiles: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "drive.incFiles") @Required val driveIncFiles: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "drive.incFiles") val driveIncFiles: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "drive.decFiles") @Required val driveDecFiles: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "drive.decFiles") val driveDecFiles: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "drive.incUsage") @Required val driveIncUsage: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "drive.incUsage") val driveIncUsage: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "drive.decUsage") @Required val driveDecUsage: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "drive.decUsage") val driveDecUsage: kotlin.collections.List<kotlin.Double>
 
 )

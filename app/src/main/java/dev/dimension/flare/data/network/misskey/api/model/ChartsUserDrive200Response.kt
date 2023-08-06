@@ -26,16 +26,16 @@ import kotlinx.serialization.Serializable
 
 data class ChartsUserDrive200Response(
 
-    @SerialName(value = "totalCount") @Required val totalCount: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "totalCount") val totalCount: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "totalSize") @Required val totalSize: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "totalSize") val totalSize: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "incCount") @Required val incCount: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "incCount") val incCount: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "incSize") @Required val incSize: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "incSize") val incSize: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "decCount") @Required val decCount: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "decCount") val decCount: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "decSize") @Required val decSize: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "decSize") val decSize: kotlin.collections.List<kotlin.Double>
 
 )

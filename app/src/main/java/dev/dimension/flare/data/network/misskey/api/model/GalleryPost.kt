@@ -27,21 +27,21 @@ import kotlinx.serialization.Serializable
 
 data class GalleryPost(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "updatedAt") @Required val updatedAt: kotlin.String,
+    @SerialName(value = "updatedAt") val updatedAt: kotlin.String,
 
-    @SerialName(value = "title") @Required val title: kotlin.String,
+    @SerialName(value = "title") val title: kotlin.String,
 
-    @SerialName(value = "description") @Required val description: kotlin.String?,
+    @SerialName(value = "description") val description: kotlin.String? = null,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
-    @SerialName(value = "user") @Required val user: UserLite,
+    @SerialName(value = "user") val user: UserLite,
 
-    @SerialName(value = "isSensitive") @Required val isSensitive: kotlin.Boolean,
+    @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean,
 
     @SerialName(value = "fileIds") val fileIds: kotlin.collections.List<kotlin.String>? = null,
 

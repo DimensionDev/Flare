@@ -26,46 +26,46 @@ import kotlinx.serialization.Serializable
 
 data class FederationShowInstance200Response(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "firstRetrievedAt") @Required val firstRetrievedAt: kotlin.String,
+    @SerialName(value = "firstRetrievedAt") val firstRetrievedAt: kotlin.String,
 
-    @SerialName(value = "host") @Required val host: kotlin.String,
+    @SerialName(value = "host") val host: kotlin.String,
 
-    @SerialName(value = "usersCount") @Required val usersCount: kotlin.Double,
+    @SerialName(value = "usersCount") val usersCount: kotlin.Double,
 
-    @SerialName(value = "notesCount") @Required val notesCount: kotlin.Double,
+    @SerialName(value = "notesCount") val notesCount: kotlin.Double,
 
-    @SerialName(value = "followingCount") @Required val followingCount: kotlin.Double,
+    @SerialName(value = "followingCount") val followingCount: kotlin.Double,
 
-    @SerialName(value = "followersCount") @Required val followersCount: kotlin.Double,
+    @SerialName(value = "followersCount") val followersCount: kotlin.Double,
 
-    @SerialName(value = "isNotResponding") @Required val isNotResponding: kotlin.Boolean,
+    @SerialName(value = "isNotResponding") val isNotResponding: kotlin.Boolean,
 
-    @SerialName(value = "isSuspended") @Required val isSuspended: kotlin.Boolean,
+    @SerialName(value = "isSuspended") val isSuspended: kotlin.Boolean,
 
-    @SerialName(value = "isBlocked") @Required val isBlocked: kotlin.Boolean,
+    @SerialName(value = "isBlocked") val isBlocked: kotlin.Boolean,
 
-    @SerialName(value = "softwareName") @Required val softwareName: kotlin.String?,
+    @SerialName(value = "softwareName") val softwareName: kotlin.String? = null,
 
-    @SerialName(value = "softwareVersion") @Required val softwareVersion: kotlin.String?,
+    @SerialName(value = "softwareVersion") val softwareVersion: kotlin.String? = null,
 
-    @SerialName(value = "openRegistrations") @Required val openRegistrations: kotlin.Boolean?,
+    @SerialName(value = "openRegistrations") val openRegistrations: kotlin.Boolean? = null,
 
-    @SerialName(value = "name") @Required val name: kotlin.String?,
+    @SerialName(value = "name") val name: kotlin.String? = null,
 
-    @SerialName(value = "description") @Required val description: kotlin.String?,
+    @SerialName(value = "description") val description: kotlin.String? = null,
 
-    @SerialName(value = "maintainerName") @Required val maintainerName: kotlin.String?,
+    @SerialName(value = "maintainerName") val maintainerName: kotlin.String? = null,
 
-    @SerialName(value = "maintainerEmail") @Required val maintainerEmail: kotlin.String?,
+    @SerialName(value = "maintainerEmail") val maintainerEmail: kotlin.String? = null,
 
-    @SerialName(value = "iconUrl") @Required val iconUrl: kotlin.String?,
+    @SerialName(value = "iconUrl") val iconUrl: kotlin.String? = null,
 
-    @SerialName(value = "faviconUrl") @Required val faviconUrl: kotlin.String?,
+    @SerialName(value = "faviconUrl") val faviconUrl: kotlin.String? = null,
 
-    @SerialName(value = "themeColor") @Required val themeColor: kotlin.String?,
+    @SerialName(value = "themeColor") val themeColor: kotlin.String? = null,
 
-    @SerialName(value = "infoUpdatedAt") @Required val infoUpdatedAt: kotlin.String?
+    @SerialName(value = "infoUpdatedAt") val infoUpdatedAt: kotlin.String?
 
 )

@@ -17,6 +17,7 @@ data class DbUser(
     val platformType: PlatformType,
     val name: String,
     val handle: String,
+    val host: String,
     val content: UserContent
 )
 

@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class UsernameAvailableRequest(
 
-    @SerialName(value = "username") @Required val username: kotlin.String
+    @SerialName(value = "username") val username: kotlin.String
 
 )

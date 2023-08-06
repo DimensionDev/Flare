@@ -26,33 +26,33 @@ import kotlinx.serialization.Serializable
 
 data class DriveFile(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "type") @Required val type: kotlin.String,
+    @SerialName(value = "type") val type: kotlin.String,
 
-    @SerialName(value = "md5") @Required val md5: kotlin.String,
+    @SerialName(value = "md5") val md5: kotlin.String,
 
-    @SerialName(value = "size") @Required val propertySize: kotlin.Double,
+    @SerialName(value = "size") val propertySize: kotlin.Double,
 
-    @SerialName(value = "isSensitive") @Required val isSensitive: kotlin.Boolean,
+    @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean,
 
-    @SerialName(value = "blurhash") @Required val blurhash: kotlin.String?,
+    @SerialName(value = "blurhash") val blurhash: kotlin.String? = null,
 
-    @SerialName(value = "properties") @Required val properties: DriveFileProperties,
+    @SerialName(value = "properties") val properties: DriveFileProperties,
 
-    @SerialName(value = "url") @Required val url: kotlin.String?,
+    @SerialName(value = "url") val url: kotlin.String? = null,
 
-    @SerialName(value = "thumbnailUrl") @Required val thumbnailUrl: kotlin.String?,
+    @SerialName(value = "thumbnailUrl") val thumbnailUrl: kotlin.String? = null,
 
-    @SerialName(value = "comment") @Required val comment: kotlin.String?,
+    @SerialName(value = "comment") val comment: kotlin.String? = null,
 
-    @SerialName(value = "folderId") @Required val folderId: kotlin.String?,
+    @SerialName(value = "folderId") val folderId: kotlin.String? = null,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String?,
+    @SerialName(value = "userId") val userId: kotlin.String? = null,
 
     @SerialName(value = "folder") val folder: DriveFolder? = null,
 

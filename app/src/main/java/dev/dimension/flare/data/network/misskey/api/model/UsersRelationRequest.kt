@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class UsersRelationRequest(
 
-    @SerialName(value = "userId") @Required val userId: List<String>
+    @SerialName(value = "userId") val userId: List<String>
 
 )

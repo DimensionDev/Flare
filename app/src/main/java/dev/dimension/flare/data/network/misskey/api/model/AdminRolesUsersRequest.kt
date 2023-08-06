@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class AdminRolesUsersRequest(
 
-    @SerialName(value = "roleId") @Required val roleId: kotlin.String,
+    @SerialName(value = "roleId") val roleId: kotlin.String,
 
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
 

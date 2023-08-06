@@ -26,11 +26,11 @@ import kotlinx.serialization.Serializable
 
 data class SwRegisterRequest(
 
-    @SerialName(value = "endpoint") @Required val endpoint: kotlin.String,
+    @SerialName(value = "endpoint") val endpoint: kotlin.String,
 
-    @SerialName(value = "auth") @Required val auth: kotlin.String,
+    @SerialName(value = "auth") val auth: kotlin.String,
 
-    @SerialName(value = "publickey") @Required val publickey: kotlin.String,
+    @SerialName(value = "publickey") val publickey: kotlin.String,
 
     @SerialName(value = "sendReadMessage") val sendReadMessage: kotlin.Boolean? = false
 

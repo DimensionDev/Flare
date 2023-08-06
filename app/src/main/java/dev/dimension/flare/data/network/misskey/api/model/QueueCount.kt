@@ -26,14 +26,14 @@ import kotlinx.serialization.Serializable
 
 data class QueueCount(
 
-    @SerialName(value = "waiting") @Required val waiting: kotlin.Double,
+    @SerialName(value = "waiting") val waiting: kotlin.Double,
 
-    @SerialName(value = "active") @Required val active: kotlin.Double,
+    @SerialName(value = "active") val active: kotlin.Double,
 
-    @SerialName(value = "completed") @Required val completed: kotlin.Double,
+    @SerialName(value = "completed") val completed: kotlin.Double,
 
-    @SerialName(value = "failed") @Required val failed: kotlin.Double,
+    @SerialName(value = "failed") val failed: kotlin.Double,
 
-    @SerialName(value = "delayed") @Required val delayed: kotlin.Double
+    @SerialName(value = "delayed") val delayed: kotlin.Double
 
 )

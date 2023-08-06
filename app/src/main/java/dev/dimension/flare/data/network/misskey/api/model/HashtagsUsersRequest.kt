@@ -26,9 +26,9 @@ import kotlinx.serialization.Serializable
 
 data class HashtagsUsersRequest(
 
-    @SerialName(value = "tag") @Required val tag: kotlin.String,
+    @SerialName(value = "tag") val tag: kotlin.String,
 
-    @SerialName(value = "sort") @Required val sort: HashtagsUsersRequest.Sort,
+    @SerialName(value = "sort") val sort: HashtagsUsersRequest.Sort,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 

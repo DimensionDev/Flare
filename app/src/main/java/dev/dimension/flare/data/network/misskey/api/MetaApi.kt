@@ -83,7 +83,7 @@ interface MetaApi {
      * @param body * @return [Emojis200Response]
      */
     @POST("emojis")
-    suspend fun emojis(@Body body: kotlin.Any): Response<Emojis200Response>
+    suspend fun emojis(): Response<Emojis200Response>
 
     /**
      * endpoint

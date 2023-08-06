@@ -26,33 +26,33 @@ import kotlinx.serialization.Serializable
 
 data class Antenna(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "keywords") @Required val keywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
+    @SerialName(value = "keywords") val keywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
 
-    @SerialName(value = "excludeKeywords") @Required val excludeKeywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
+    @SerialName(value = "excludeKeywords") val excludeKeywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
 
-    @SerialName(value = "src") @Required val src: Antenna.Src,
+    @SerialName(value = "src") val src: Antenna.Src,
 
-    @SerialName(value = "userListId") @Required val userListId: kotlin.String?,
+    @SerialName(value = "userListId") val userListId: kotlin.String? = null,
 
-    @SerialName(value = "users") @Required val users: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "users") val users: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "caseSensitive") @Required val caseSensitive: kotlin.Boolean = false,
+    @SerialName(value = "caseSensitive") val caseSensitive: kotlin.Boolean = false,
 
-    @SerialName(value = "notify") @Required val notify: kotlin.Boolean,
+    @SerialName(value = "notify") val notify: kotlin.Boolean,
 
-    @SerialName(value = "withReplies") @Required val withReplies: kotlin.Boolean = false,
+    @SerialName(value = "withReplies") val withReplies: kotlin.Boolean = false,
 
-    @SerialName(value = "withFile") @Required val withFile: kotlin.Boolean,
+    @SerialName(value = "withFile") val withFile: kotlin.Boolean,
 
-    @SerialName(value = "isActive") @Required val isActive: kotlin.Boolean,
+    @SerialName(value = "isActive") val isActive: kotlin.Boolean,
 
-    @SerialName(value = "hasUnreadNote") @Required val hasUnreadNote: kotlin.Boolean = false
+    @SerialName(value = "hasUnreadNote") val hasUnreadNote: kotlin.Boolean = false
 
 ) {
 

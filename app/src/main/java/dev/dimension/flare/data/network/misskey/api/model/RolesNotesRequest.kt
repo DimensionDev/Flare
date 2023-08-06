@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class RolesNotesRequest(
 
-    @SerialName(value = "roleId") @Required val roleId: kotlin.String,
+    @SerialName(value = "roleId") val roleId: kotlin.String,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 

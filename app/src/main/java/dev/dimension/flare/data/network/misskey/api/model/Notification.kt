@@ -26,11 +26,11 @@ import kotlinx.serialization.Serializable
 
 data class Notification(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "type") @Required val type: Notification.Type,
+    @SerialName(value = "type") val type: Notification.Type,
 
     @SerialName(value = "user") val user: UserLite? = null,
 
@@ -48,8 +48,8 @@ data class Notification(
 
     @SerialName(value = "header") val header: kotlin.String? = null,
 
-    @SerialName(value = "icon") val icon: kotlin.String? = null
-
+    @SerialName(value = "icon") val icon: kotlin.String? = null,
+    val achievement: String? = null
 ) {
 
     /**

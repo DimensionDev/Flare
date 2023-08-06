@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class AdminRelaysAddRequest(
 
-    @SerialName(value = "inbox") @Required val inbox: kotlin.String
+    @SerialName(value = "inbox") val inbox: kotlin.String
 
 )

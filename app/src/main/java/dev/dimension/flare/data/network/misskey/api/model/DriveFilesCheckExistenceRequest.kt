@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class DriveFilesCheckExistenceRequest(
 
-    @SerialName(value = "md5") @Required val md5: kotlin.String
+    @SerialName(value = "md5") val md5: kotlin.String
 
 )

@@ -26,11 +26,11 @@ import kotlinx.serialization.Serializable
 
 data class GalleryPostsUpdateRequest(
 
-    @SerialName(value = "postId") @Required val postId: kotlin.String,
+    @SerialName(value = "postId") val postId: kotlin.String,
 
-    @SerialName(value = "title") @Required val title: kotlin.String,
+    @SerialName(value = "title") val title: kotlin.String,
 
-    @SerialName(value = "fileIds") @Required val fileIds: kotlin.collections.Set<kotlin.String>,
+    @SerialName(value = "fileIds") val fileIds: kotlin.collections.Set<kotlin.String>,
 
     @SerialName(value = "description") val description: kotlin.String? = null,
 

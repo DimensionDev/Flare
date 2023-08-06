@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class NotesChildrenRequest(
 
-    @SerialName(value = "noteId") @Required val noteId: kotlin.String,
+    @SerialName(value = "noteId") val noteId: kotlin.String,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 

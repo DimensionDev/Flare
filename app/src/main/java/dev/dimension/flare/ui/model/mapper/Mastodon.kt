@@ -293,5 +293,15 @@ internal fun DbEmoji.toUi(): List<UiEmoji> {
                 )
             }
         }
+
+        is EmojiContent.Misskey -> {
+            content.data.map {
+                UiEmoji(
+                    shortcode = it.name,
+                    url = it.url
+                )
+            }
+        }
+
     }
 }

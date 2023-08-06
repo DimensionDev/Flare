@@ -26,22 +26,22 @@ import kotlinx.serialization.Serializable
 
 data class UsersRelation200ResponseOneOf(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "isFollowing") @Required val isFollowing: kotlin.Boolean,
+    @SerialName(value = "isFollowing") val isFollowing: kotlin.Boolean,
 
-    @SerialName(value = "hasPendingFollowRequestFromYou") @Required val hasPendingFollowRequestFromYou: kotlin.Boolean,
+    @SerialName(value = "hasPendingFollowRequestFromYou") val hasPendingFollowRequestFromYou: kotlin.Boolean,
 
-    @SerialName(value = "hasPendingFollowRequestToYou") @Required val hasPendingFollowRequestToYou: kotlin.Boolean,
+    @SerialName(value = "hasPendingFollowRequestToYou") val hasPendingFollowRequestToYou: kotlin.Boolean,
 
-    @SerialName(value = "isFollowed") @Required val isFollowed: kotlin.Boolean,
+    @SerialName(value = "isFollowed") val isFollowed: kotlin.Boolean,
 
-    @SerialName(value = "isBlocking") @Required val isBlocking: kotlin.Boolean,
+    @SerialName(value = "isBlocking") val isBlocking: kotlin.Boolean,
 
-    @SerialName(value = "isBlocked") @Required val isBlocked: kotlin.Boolean,
+    @SerialName(value = "isBlocked") val isBlocked: kotlin.Boolean,
 
-    @SerialName(value = "isMuted") @Required val isMuted: kotlin.Boolean,
+    @SerialName(value = "isMuted") val isMuted: kotlin.Boolean,
 
-    @SerialName(value = "isRenoteMuted") @Required val isRenoteMuted: kotlin.Boolean
+    @SerialName(value = "isRenoteMuted") val isRenoteMuted: kotlin.Boolean
 
 )

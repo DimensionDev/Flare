@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class IClaimAchievementRequest(
 
-    @SerialName(value = "name") @Required val name: IClaimAchievementRequest.Name
+    @SerialName(value = "name") val name: IClaimAchievementRequest.Name
 
 ) {
 

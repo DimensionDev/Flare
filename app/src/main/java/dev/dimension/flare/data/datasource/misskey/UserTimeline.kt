@@ -60,7 +60,7 @@ internal class UserTimelineRemoteMediator(
                         until_id = lastItem.status.status.data.statusKey.id
                     )
                 }
-            }.body() ?: return MediatorResult.Success(
+            } ?: return MediatorResult.Success(
                 endOfPaginationReached = true
             )
             val emojis = emojiCache.getEmojis(account = account)

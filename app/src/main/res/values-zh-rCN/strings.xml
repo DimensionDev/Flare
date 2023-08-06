@@ -14,6 +14,7 @@
     <string name="profile_header_following_count">%1$s 关注</string>
     <string name="profile_header_fans_count">%1$s 粉丝</string>
     <string name="profile_header_toots_count">%1$s 嘟文</string>
+    <string name="profile_misskey_header_status_count">%1$s 帖子</string>
 
     <string name="compose_title">发嘟文</string>
     <string name="compose_hint">发生什么事了？</string>
@@ -56,6 +57,17 @@
     <string name="mastodon_item_reblogged_status">转嘟了</string>
     <string name="mastodon_item_show_more">显示更多</string>
     <string name="mastodon_item_show_less">显示更少</string>
+
+
+    <string name="misskey_notification_item_mentioned_you">提及了你</string>
+    <string name="misskey_notification_item_replied_to_you">回复了你</string>
+    <string name="misskey_notification_item_reposted_your_status">转了你的帖子</string>
+    <string name="misskey_notification_item_quoted_your_status">引用了你的帖子</string>
+    <string name="misskey_notification_item_reacted_to_your_status">对你的帖子做出了反应</string>
+    <string name="misskey_notification_item_poll_ended">你参与的一个投票已经结束</string>
+    <string name="misskey_notification_item_follow_request_accepted">接受了你的关注请求</string>
+    <string name="misskey_notification_item_achievement_earned">成就已解锁：</string>
+    <string name="misskey_notification_item_app">App</string>
 
     <string name="mastodon_visibility_public">公开</string>
     <string name="mastodon_visibility_unlisted">不公开</string>

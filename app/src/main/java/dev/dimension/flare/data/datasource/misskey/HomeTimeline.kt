@@ -30,9 +30,6 @@ internal class HomeTimelineRemoteMediator(
     private val pagingKey: String,
     private val emojiCache: MisskeyEmojiCache,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun initialize(): InitializeAction {
-        return InitializeAction.SKIP_INITIAL_REFRESH
-    }
 
     override suspend fun load(
         loadType: LoadType,
@@ -60,7 +57,7 @@ internal class HomeTimelineRemoteMediator(
                         until_id = lastItem.status.status.data.statusKey.id
                     )
                 }
-            }.body() ?: return MediatorResult.Success(
+            } ?: return MediatorResult.Success(
                 endOfPaginationReached = true
             )
             val emojis = emojiCache.getEmojis(account = account)

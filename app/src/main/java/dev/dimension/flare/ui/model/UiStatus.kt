@@ -235,7 +235,8 @@ internal sealed class UiStatus {
         val user: UiUser.Misskey?,
         val createdAt: Instant,
         val note: Misskey?,
-        val type: Notification.Type
+        val type: Notification.Type,
+        val achievement: String?,
     ) : UiStatus() {
         val humanizedTime by lazy {
             createdAt.humanize()

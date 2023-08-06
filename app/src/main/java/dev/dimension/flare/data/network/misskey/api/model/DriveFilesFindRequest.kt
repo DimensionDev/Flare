@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class DriveFilesFindRequest(
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
     @SerialName(value = "folderId") val folderId: kotlin.String? = null
 

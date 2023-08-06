@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class UsersListsDeleteRequest(
 
-    @SerialName(value = "listId") @Required val listId: kotlin.String
+    @SerialName(value = "listId") val listId: kotlin.String
 
 )

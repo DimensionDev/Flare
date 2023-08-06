@@ -26,9 +26,9 @@ import kotlinx.serialization.Serializable
 
 data class ChartsInstanceRequest(
 
-    @SerialName(value = "span") @Required val span: ChartsInstanceRequest.Span,
+    @SerialName(value = "span") val span: ChartsInstanceRequest.Span,
 
-    @SerialName(value = "host") @Required val host: kotlin.String,
+    @SerialName(value = "host") val host: kotlin.String,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 30,
 

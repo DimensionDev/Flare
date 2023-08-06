@@ -26,31 +26,31 @@ import kotlinx.serialization.Serializable
 
 data class AdminRolesCreateRequest(
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "description") @Required val description: kotlin.String,
+    @SerialName(value = "description") val description: kotlin.String,
 
-    @SerialName(value = "color") @Required val color: kotlin.String?,
+    @SerialName(value = "color") val color: kotlin.String? = null,
 
-    @SerialName(value = "iconUrl") @Required val iconUrl: kotlin.String?,
+    @SerialName(value = "iconUrl") val iconUrl: kotlin.String? = null,
 
-    @SerialName(value = "target") @Required val target: AdminRolesCreateRequest.Target,
+    @SerialName(value = "target") val target: AdminRolesCreateRequest.Target,
 
-    @SerialName(value = "condFormula") @Required val condFormula: kotlin.String,
+    @SerialName(value = "condFormula") val condFormula: kotlin.String,
 
-    @SerialName(value = "isPublic") @Required val isPublic: kotlin.Boolean,
+    @SerialName(value = "isPublic") val isPublic: kotlin.Boolean,
 
-    @SerialName(value = "isModerator") @Required val isModerator: kotlin.Boolean,
+    @SerialName(value = "isModerator") val isModerator: kotlin.Boolean,
 
-    @SerialName(value = "isAdministrator") @Required val isAdministrator: kotlin.Boolean,
+    @SerialName(value = "isAdministrator") val isAdministrator: kotlin.Boolean,
 
-    @SerialName(value = "asBadge") @Required val asBadge: kotlin.Boolean,
+    @SerialName(value = "asBadge") val asBadge: kotlin.Boolean,
 
-    @SerialName(value = "canEditMembersByModerator") @Required val canEditMembersByModerator: kotlin.Boolean,
+    @SerialName(value = "canEditMembersByModerator") val canEditMembersByModerator: kotlin.Boolean,
 
-    @SerialName(value = "displayOrder") @Required val displayOrder: kotlin.Double,
+    @SerialName(value = "displayOrder") val displayOrder: kotlin.Double,
 
-    @SerialName(value = "policies") @Required val policies: kotlin.String,
+    @SerialName(value = "policies") val policies: kotlin.String,
 
     @SerialName(value = "isExplorable") val isExplorable: kotlin.Boolean? = false
 

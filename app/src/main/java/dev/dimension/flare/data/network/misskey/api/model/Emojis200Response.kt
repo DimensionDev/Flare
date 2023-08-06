@@ -27,6 +27,6 @@ import kotlinx.serialization.Serializable
 
 data class Emojis200Response(
 
-    @SerialName(value = "emojis") @Required val emojis: kotlin.collections.List<@Contextual EmojiSimple>
+    @SerialName(value = "emojis") val emojis: kotlin.collections.List<@Contextual EmojiSimple>
 
 )

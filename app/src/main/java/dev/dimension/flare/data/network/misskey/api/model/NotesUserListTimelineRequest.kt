@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
 
 data class NotesUserListTimelineRequest(
 
-    @SerialName(value = "listId") @Required val listId: kotlin.String,
+    @SerialName(value = "listId") val listId: kotlin.String,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 

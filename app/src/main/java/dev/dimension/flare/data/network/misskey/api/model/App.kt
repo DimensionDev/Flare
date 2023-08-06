@@ -26,13 +26,13 @@ import kotlinx.serialization.Serializable
 
 data class App(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "callbackUrl") @Required val callbackUrl: kotlin.String?,
+    @SerialName(value = "callbackUrl") val callbackUrl: kotlin.String? = null,
 
-    @SerialName(value = "permission") @Required val permission: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "permission") val permission: kotlin.collections.List<kotlin.String>,
 
     @SerialName(value = "secret") val secret: kotlin.String? = null,
 

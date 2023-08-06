@@ -26,20 +26,20 @@ import kotlinx.serialization.Serializable
 
 data class InviteCode(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "code") @Required val code: kotlin.String,
+    @SerialName(value = "code") val code: kotlin.String,
 
-    @SerialName(value = "expiresAt") @Required val expiresAt: kotlin.String?,
+    @SerialName(value = "expiresAt") val expiresAt: kotlin.String? = null,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "createdBy") @Required val createdBy: UserLite,
+    @SerialName(value = "createdBy") val createdBy: UserLite,
 
-    @SerialName(value = "usedBy") @Required val usedBy: UserLite,
+    @SerialName(value = "usedBy") val usedBy: UserLite,
 
-    @SerialName(value = "usedAt") @Required val usedAt: kotlin.String?,
+    @SerialName(value = "usedAt") val usedAt: kotlin.String? = null,
 
-    @SerialName(value = "used") @Required val used: kotlin.Boolean
+    @SerialName(value = "used") val used: kotlin.Boolean
 
 )

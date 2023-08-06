@@ -26,12 +26,12 @@ import kotlinx.serialization.Serializable
 
 data class ChartsUserPv200Response(
 
-    @SerialName(value = "upv.user") @Required val upvUser: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "upv.user") val upvUser: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "pv.user") @Required val pvUser: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "pv.user") val pvUser: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "upv.visitor") @Required val upvVisitor: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "upv.visitor") val upvVisitor: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "pv.visitor") @Required val pvVisitor: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "pv.visitor") val pvVisitor: kotlin.collections.List<kotlin.Double>
 
 )

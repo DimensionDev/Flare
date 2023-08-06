@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class ChartsActiveUsersRequest(
 
-    @SerialName(value = "span") @Required val span: ChartsActiveUsersRequest.Span,
+    @SerialName(value = "span") val span: ChartsActiveUsersRequest.Span,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 30,
 

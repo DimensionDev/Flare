@@ -26,25 +26,25 @@ import kotlinx.serialization.Serializable
 
 data class AntennasUpdateRequest(
 
-    @SerialName(value = "antennaId") @Required val antennaId: kotlin.String,
+    @SerialName(value = "antennaId") val antennaId: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "src") @Required val src: AntennasUpdateRequest.Src,
+    @SerialName(value = "src") val src: AntennasUpdateRequest.Src,
 
-    @SerialName(value = "keywords") @Required val keywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
+    @SerialName(value = "keywords") val keywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
 
-    @SerialName(value = "excludeKeywords") @Required val excludeKeywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
+    @SerialName(value = "excludeKeywords") val excludeKeywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
 
-    @SerialName(value = "users") @Required val users: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "users") val users: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "caseSensitive") @Required val caseSensitive: kotlin.Boolean,
+    @SerialName(value = "caseSensitive") val caseSensitive: kotlin.Boolean,
 
-    @SerialName(value = "withReplies") @Required val withReplies: kotlin.Boolean,
+    @SerialName(value = "withReplies") val withReplies: kotlin.Boolean,
 
-    @SerialName(value = "withFile") @Required val withFile: kotlin.Boolean,
+    @SerialName(value = "withFile") val withFile: kotlin.Boolean,
 
-    @SerialName(value = "notify") @Required val notify: kotlin.Boolean,
+    @SerialName(value = "notify") val notify: kotlin.Boolean,
 
     @SerialName(value = "userListId") val userListId: kotlin.String? = null
 

@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class UsersSearchRequest(
 
-    @SerialName(value = "query") @Required val query: kotlin.String,
+    @SerialName(value = "query") val query: kotlin.String,
 
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
 

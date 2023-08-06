@@ -26,17 +26,17 @@ import kotlinx.serialization.Serializable
 
 data class IWebhooksUpdateRequest(
 
-    @SerialName(value = "webhookId") @Required val webhookId: kotlin.String,
+    @SerialName(value = "webhookId") val webhookId: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "url") @Required val url: kotlin.String,
+    @SerialName(value = "url") val url: kotlin.String,
 
-    @SerialName(value = "secret") @Required val secret: kotlin.String,
+    @SerialName(value = "secret") val secret: kotlin.String,
 
-    @SerialName(value = "on") @Required val on: kotlin.collections.List<IWebhooksUpdateRequest.On>,
+    @SerialName(value = "on") val on: kotlin.collections.List<IWebhooksUpdateRequest.On>,
 
-    @SerialName(value = "active") @Required val active: kotlin.Boolean
+    @SerialName(value = "active") val active: kotlin.Boolean
 
 ) {
 

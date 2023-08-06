@@ -27,27 +27,27 @@ import kotlinx.serialization.Serializable
 
 data class Note(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "text") @Required val text: kotlin.String?,
+    @SerialName(value = "text") val text: kotlin.String? = null,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
-    @SerialName(value = "user") @Required val user: UserLite,
+    @SerialName(value = "user") val user: UserLite,
 
-    @SerialName(value = "visibility") @Required val visibility: Visibility,
+    @SerialName(value = "visibility") val visibility: Visibility,
 
-    @SerialName(value = "reactionAcceptance") @Required val reactionAcceptance: kotlin.String?,
+    @SerialName(value = "reactionAcceptance") val reactionAcceptance: kotlin.String? = null,
 
-    @SerialName(value = "reactions") @Required val reactions: Map<kotlin.String, kotlin.String>,
+    @SerialName(value = "reactions") val reactions: Map<kotlin.String, kotlin.Long>,
 
-    @SerialName(value = "reactionEmojis") val reactionEmojis: Map<kotlin.String, kotlin.Long>? = null,
+    @SerialName(value = "reactionEmojis") val reactionEmojis: Map<kotlin.String, kotlin.String>? = null,
 
-    @SerialName(value = "renoteCount") @Required val renoteCount: kotlin.Double,
+    @SerialName(value = "renoteCount") val renoteCount: kotlin.Double,
 
-    @SerialName(value = "repliesCount") @Required val repliesCount: kotlin.Double,
+    @SerialName(value = "repliesCount") val repliesCount: kotlin.Double,
 
     @SerialName(value = "deletedAt") val deletedAt: kotlin.String? = null,
 

@@ -68,6 +68,7 @@ sealed interface UiUser {
         val matrices: Matrices,
         val isCat: Boolean,
         val isBot: Boolean,
+        val relation: UiRelation.Misskey,
     ) : UiUser {
 
         override val handle = "@$handleInternal@$remoteHost"

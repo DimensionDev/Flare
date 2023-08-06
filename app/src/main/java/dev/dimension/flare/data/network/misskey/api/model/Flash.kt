@@ -26,23 +26,23 @@ import kotlinx.serialization.Serializable
 
 data class Flash(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "updatedAt") @Required val updatedAt: kotlin.String,
+    @SerialName(value = "updatedAt") val updatedAt: kotlin.String,
 
-    @SerialName(value = "title") @Required val title: kotlin.String,
+    @SerialName(value = "title") val title: kotlin.String,
 
-    @SerialName(value = "summary") @Required val summary: kotlin.String,
+    @SerialName(value = "summary") val summary: kotlin.String,
 
-    @SerialName(value = "script") @Required val script: kotlin.String,
+    @SerialName(value = "script") val script: kotlin.String,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
-    @SerialName(value = "user") @Required val user: UserLite,
+    @SerialName(value = "user") val user: UserLite,
 
-    @SerialName(value = "likedCount") @Required val likedCount: kotlin.Double?,
+    @SerialName(value = "likedCount") val likedCount: kotlin.Double? = null,
 
     @SerialName(value = "isLiked") val isLiked: kotlin.Boolean? = null
 

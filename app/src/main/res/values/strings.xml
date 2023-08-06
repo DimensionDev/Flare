@@ -15,6 +15,7 @@
     <string name="profile_header_following_count">%1$s Following</string>
     <string name="profile_header_fans_count">%1$s Followers</string>
     <string name="profile_header_toots_count">%1$s Toots</string>
+    <string name="profile_misskey_header_status_count">%1$s Status</string>
 
     <string name="profile_header_button_follow">Follow</string>
     <string name="profile_header_button_following">Following</string>
@@ -57,6 +58,16 @@
     <string name="mastodon_item_reblogged_status">boosted a status</string>
     <string name="mastodon_item_show_more">Show more</string>
     <string name="mastodon_item_show_less">Show less</string>
+
+    <string name="misskey_notification_item_mentioned_you">mentioned you</string>
+    <string name="misskey_notification_item_replied_to_you">replied to you</string>
+    <string name="misskey_notification_item_reposted_your_status">reposted your status</string>
+    <string name="misskey_notification_item_quoted_your_status">quoted your status</string>
+    <string name="misskey_notification_item_reacted_to_your_status">reacted to your status</string>
+    <string name="misskey_notification_item_poll_ended">A poll you were participating in has ended</string>
+    <string name="misskey_notification_item_follow_request_accepted">accepted your follow request</string>
+    <string name="misskey_notification_item_achievement_earned">You\'ve earned an achievement</string>
+    <string name="misskey_notification_item_app">App</string>
 
     <string name="mastodon_visibility_public">Public</string>
     <string name="mastodon_visibility_unlisted">Unlisted</string>

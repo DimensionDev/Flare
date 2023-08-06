@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class DriveFilesUploadFromUrlRequest(
 
-    @SerialName(value = "url") @Required val url: kotlin.String,
+    @SerialName(value = "url") val url: kotlin.String,
 
     @SerialName(value = "folderId") val folderId: kotlin.String? = null,
 

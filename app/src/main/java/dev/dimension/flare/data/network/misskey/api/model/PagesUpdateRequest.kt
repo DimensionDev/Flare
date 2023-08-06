@@ -27,17 +27,17 @@ import kotlinx.serialization.Serializable
 
 data class PagesUpdateRequest(
 
-    @SerialName(value = "pageId") @Required val pageId: kotlin.String,
+    @SerialName(value = "pageId") val pageId: kotlin.String,
 
-    @SerialName(value = "title") @Required val title: kotlin.String,
+    @SerialName(value = "title") val title: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-//    @SerialName(value = "content") @Required val content: kotlin.collections.List<@Contextual kotlin.collections.Map<kotlin.String, kotlin.Any>>,
+//    @SerialName(value = "content") val content: kotlin.collections.List<@Contextual kotlin.collections.Map<kotlin.String, kotlin.Any>>,
 
-//    @SerialName(value = "variables") @Required val variables: kotlin.collections.List<@Contextual kotlin.collections.Map<kotlin.String, kotlin.Any>>,
+//    @SerialName(value = "variables") val variables: kotlin.collections.List<@Contextual kotlin.collections.Map<kotlin.String, kotlin.Any>>,
 
-    @SerialName(value = "script") @Required val script: kotlin.String,
+    @SerialName(value = "script") val script: kotlin.String,
 
     @SerialName(value = "summary") val summary: kotlin.String? = null,
 

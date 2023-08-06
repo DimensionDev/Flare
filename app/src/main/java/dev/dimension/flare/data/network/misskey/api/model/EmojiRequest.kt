@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class EmojiRequest(
 
-    @SerialName(value = "name") @Required val name: kotlin.String
+    @SerialName(value = "name") val name: kotlin.String
 
 )

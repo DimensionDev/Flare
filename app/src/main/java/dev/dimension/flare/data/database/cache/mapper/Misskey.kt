@@ -2,14 +2,17 @@ package dev.dimension.flare.data.database.cache.mapper
 
 import androidx.room.withTransaction
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
 import dev.dimension.flare.data.network.misskey.api.model.Note
 import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.data.network.misskey.api.model.User
@@ -78,7 +81,7 @@ suspend fun saveDbPagingTimelineWithStatus() {
                         }
                     }
 
-                val result = (allUsers + exsitingUsers).distinctBy { it.userKey }
+                val result = (exsitingUsers + allUsers).distinctBy { it.userKey }
                 userDao().insertAll(result)
             }
         (
@@ -239,29 +242,48 @@ private fun Note.toDbStatusWithUser(
 }
 
 private fun UserLite.toDbUser(
-    host: String,
+    accountHost: String,
     emojis: List<dev.dimension.flare.data.network.misskey.api.model.EmojiSimple>,
 ) = DbUser(
     userKey = MicroBlogKey(
         id = id,
-        host = host,
+        host = accountHost,
     ),
     platformType = dev.dimension.flare.model.PlatformType.Misskey,
     name = name ?: "",
     handle = username,
-    content = UserContent.MisskeyLite(this, emojis)
+    content = UserContent.MisskeyLite(this, emojis),
+    host = if (host.isNullOrEmpty()) {
+        accountHost
+    } else {
+        host
+    }
 )
 
 fun User.toDbUser(
-    host: String,
+    accountHost: String,
     emojis: List<dev.dimension.flare.data.network.misskey.api.model.EmojiSimple>,
 ) = DbUser(
     userKey = MicroBlogKey(
         id = id,
-        host = host,
+        host = accountHost,
     ),
     platformType = dev.dimension.flare.model.PlatformType.Misskey,
     name = name ?: "",
     handle = username,
-    content = UserContent.Misskey(this, emojis)
+    content = UserContent.Misskey(this, emojis),
+    host = if (host.isNullOrEmpty()) {
+        accountHost
+    } else {
+        host
+    }
 )
+
+fun List<EmojiSimple>.toDb(
+    host: String
+): DbEmoji {
+    return DbEmoji(
+        host = host,
+        content = EmojiContent.Misskey(this)
+    )
+}

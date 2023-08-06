@@ -48,3 +48,22 @@ internal class MisskeyEmojiCache {
         }
     }
 }
+
+@Composable
+internal fun misskeyEmojiProvider(
+    account: UiAccount.Misskey,
+    cacheDatabase: CacheDatabase = inject(),
+): CacheableState<ImmutableList<UiEmoji>> {
+    return remember(account.accountKey) {
+        Cacheable(
+            fetchSource = {
+                val emojis = account.service.emojis().toImmutableList()
+                cacheDatabase.emojiDao().insertAll(listOf(emojis.toDb(account.accountKey.host)))
+            },
+            cacheSource = {
+                cacheDatabase.emojiDao().getEmoji(account.accountKey.host)
+                    .mapNotNull { it?.toUi()?.toImmutableList() }
+            }
+        )
+    }.collectAsState()
+}

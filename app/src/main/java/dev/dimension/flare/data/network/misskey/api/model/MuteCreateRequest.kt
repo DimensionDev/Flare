@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
 
 data class MuteCreateRequest(
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
     /* A Unix Epoch timestamp that must lie in the future. `null` means an indefinite mute. */
     @SerialName(value = "expiresAt") val expiresAt: kotlin.Int? = null

@@ -21,7 +21,6 @@ internal fun ktorfit(
     baseUrl(baseUrl)
     httpClient(
         HttpClient(OkHttp) {
-            config.invoke(this)
 
             install(ContentNegotiation) {
                 json(JSON)
@@ -36,6 +35,8 @@ internal fun ktorfit(
                 loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
                 addInterceptor(loggingInterceptor)
             }
+
+            config.invoke(this)
 //        install(Logging) {
 //            logger = Logger.ANDROID
 //            level = LogLevel.ALL

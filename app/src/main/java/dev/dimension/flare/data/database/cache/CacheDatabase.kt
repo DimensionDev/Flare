@@ -27,7 +27,7 @@ import dev.dimension.flare.data.database.cache.model.DbUser
         DbPagingTimeline::class,
         DbEmoji::class
     ],
-    version = 3
+    version = 4
 )
 @TypeConverters(Converters::class)
 abstract class CacheDatabase : RoomDatabase() {

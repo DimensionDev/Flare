@@ -26,23 +26,23 @@ import kotlinx.serialization.Serializable
 
 data class AdminAbuseUserReports200ResponseInner(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "comment") @Required val comment: kotlin.String,
+    @SerialName(value = "comment") val comment: kotlin.String,
 
-    @SerialName(value = "resolved") @Required val resolved: kotlin.Boolean,
+    @SerialName(value = "resolved") val resolved: kotlin.Boolean,
 
-    @SerialName(value = "reporterId") @Required val reporterId: kotlin.String,
+    @SerialName(value = "reporterId") val reporterId: kotlin.String,
 
-    @SerialName(value = "targetUserId") @Required val targetUserId: kotlin.String,
+    @SerialName(value = "targetUserId") val targetUserId: kotlin.String,
 
-    @SerialName(value = "assigneeId") @Required val assigneeId: kotlin.String?,
+    @SerialName(value = "assigneeId") val assigneeId: kotlin.String? = null,
 
-    @SerialName(value = "reporter") @Required val reporter: User,
+    @SerialName(value = "reporter") val reporter: User,
 
-    @SerialName(value = "targetUser") @Required val targetUser: User,
+    @SerialName(value = "targetUser") val targetUser: User,
 
     @SerialName(value = "assignee") val assignee: User? = null
 

@@ -26,16 +26,16 @@ import kotlinx.serialization.Serializable
 
 data class AdminShowModerationLogs200ResponseInner(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "type") @Required val type: kotlin.String,
+    @SerialName(value = "type") val type: kotlin.String,
 
-    @SerialName(value = "info") @Required val info: kotlin.String,
+    @SerialName(value = "info") val info: kotlin.String,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
-    @SerialName(value = "user") @Required val user: UserDetailed
+    @SerialName(value = "user") val user: UserDetailed
 
 )

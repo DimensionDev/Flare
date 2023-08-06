@@ -26,16 +26,16 @@ import kotlinx.serialization.Serializable
 
 data class ChartsUsers200Response(
 
-    @SerialName(value = "local.total") @Required val localTotal: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "local.total") val localTotal: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "local.inc") @Required val localInc: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "local.inc") val localInc: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "local.dec") @Required val localDec: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "local.dec") val localDec: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.total") @Required val remoteTotal: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "remote.total") val remoteTotal: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.inc") @Required val remoteInc: kotlin.collections.List<kotlin.Double>,
+    @SerialName(value = "remote.inc") val remoteInc: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.dec") @Required val remoteDec: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "remote.dec") val remoteDec: kotlin.collections.List<kotlin.Double>
 
 )

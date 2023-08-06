@@ -26,20 +26,20 @@ import kotlinx.serialization.Serializable
 
 data class AdminServerInfo200Response(
 
-    @SerialName(value = "machine") @Required val machine: kotlin.String,
+    @SerialName(value = "machine") val machine: kotlin.String,
 
-    @SerialName(value = "os") @Required val os: kotlin.String,
+    @SerialName(value = "os") val os: kotlin.String,
 
-    @SerialName(value = "node") @Required val node: kotlin.String,
+    @SerialName(value = "node") val node: kotlin.String,
 
-    @SerialName(value = "psql") @Required val psql: kotlin.String,
+    @SerialName(value = "psql") val psql: kotlin.String,
 
-    @SerialName(value = "cpu") @Required val cpu: AdminServerInfo200ResponseCpu,
+    @SerialName(value = "cpu") val cpu: AdminServerInfo200ResponseCpu,
 
-    @SerialName(value = "mem") @Required val mem: AdminServerInfo200ResponseMem,
+    @SerialName(value = "mem") val mem: AdminServerInfo200ResponseMem,
 
-    @SerialName(value = "fs") @Required val fs: AdminServerInfo200ResponseFs,
+    @SerialName(value = "fs") val fs: AdminServerInfo200ResponseFs,
 
-    @SerialName(value = "net") @Required val net: AdminServerInfo200ResponseNet
+    @SerialName(value = "net") val net: AdminServerInfo200ResponseNet
 
 )

@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class AdminAdDeleteRequest(
 
-    @SerialName(value = "id") @Required val id: kotlin.String
+    @SerialName(value = "id") val id: kotlin.String
 
 )

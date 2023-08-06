@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class Ping200Response(
 
-    @SerialName(value = "pong") @Required val pong: kotlin.Double
+    @SerialName(value = "pong") val pong: kotlin.Double
 
 )

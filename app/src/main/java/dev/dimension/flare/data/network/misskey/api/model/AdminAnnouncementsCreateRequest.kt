@@ -26,11 +26,11 @@ import kotlinx.serialization.Serializable
 
 data class AdminAnnouncementsCreateRequest(
 
-    @SerialName(value = "title") @Required val title: kotlin.String,
+    @SerialName(value = "title") val title: kotlin.String,
 
-    @SerialName(value = "text") @Required val text: kotlin.String,
+    @SerialName(value = "text") val text: kotlin.String,
 
-    @SerialName(value = "imageUrl") @Required val imageUrl: kotlin.String?,
+    @SerialName(value = "imageUrl") val imageUrl: kotlin.String? = null,
 
     @SerialName(value = "displayOrder") val displayOrder: kotlin.Double? = null,
 

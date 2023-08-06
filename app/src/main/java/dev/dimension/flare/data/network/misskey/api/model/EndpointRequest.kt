@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class EndpointRequest(
 
-    @SerialName(value = "endpoint") @Required val endpoint: kotlin.String
+    @SerialName(value = "endpoint") val endpoint: kotlin.String
 
 )

@@ -156,16 +156,17 @@ private fun mastodonCallbackPresenter(
                 if (application is UiApplication.Mastodon) {
                     tryPendingOAuth(application, code)
                     setPendingOAuthUseCase(application.host, false)
+                    toHome.invoke()
                     break
                 } else {
                     continue
                 }
             } catch (e: Exception) {
                 error = e
+                e.printStackTrace()
                 break
             }
         }
-        toHome.invoke()
     }
     if (error != null) {
         return UiState.Error(error!!)

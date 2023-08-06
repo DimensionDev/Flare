@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class Drive200Response(
 
-    @SerialName(value = "capacity") @Required val capacity: kotlin.Double,
+    @SerialName(value = "capacity") val capacity: kotlin.Double,
 
-    @SerialName(value = "usage") @Required val usage: kotlin.Double
+    @SerialName(value = "usage") val usage: kotlin.Double
 
 )

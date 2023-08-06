@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class HashtagsSearchRequest(
 
-    @SerialName(value = "query") @Required val query: kotlin.String,
+    @SerialName(value = "query") val query: kotlin.String,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 

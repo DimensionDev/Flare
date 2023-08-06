@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class AdminRolesDeleteRequest(
 
-    @SerialName(value = "roleId") @Required val roleId: kotlin.String
+    @SerialName(value = "roleId") val roleId: kotlin.String
 
 )

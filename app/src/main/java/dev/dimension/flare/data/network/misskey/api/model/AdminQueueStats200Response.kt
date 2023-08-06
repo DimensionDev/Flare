@@ -26,12 +26,12 @@ import kotlinx.serialization.Serializable
 
 data class AdminQueueStats200Response(
 
-    @SerialName(value = "deliver") @Required val deliver: QueueCount,
+    @SerialName(value = "deliver") val deliver: QueueCount,
 
-    @SerialName(value = "inbox") @Required val inbox: QueueCount,
+    @SerialName(value = "inbox") val inbox: QueueCount,
 
-    @SerialName(value = "db") @Required val db: QueueCount,
+    @SerialName(value = "db") val db: QueueCount,
 
-    @SerialName(value = "objectStorage") @Required val objectStorage: QueueCount
+    @SerialName(value = "objectStorage") val objectStorage: QueueCount
 
 )

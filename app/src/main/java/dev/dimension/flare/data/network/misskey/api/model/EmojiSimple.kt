@@ -26,13 +26,13 @@ import kotlinx.serialization.Serializable
 
 data class EmojiSimple(
 
-    @SerialName(value = "aliases") @Required val aliases: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "aliases") val aliases: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "category") @Required val category: kotlin.String?,
+    @SerialName(value = "category") val category: kotlin.String? = null,
 
-    @SerialName(value = "url") @Required val url: kotlin.String,
+    @SerialName(value = "url") val url: kotlin.String,
 
     @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean? = null,
 

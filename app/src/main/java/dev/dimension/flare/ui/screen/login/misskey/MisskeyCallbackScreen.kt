@@ -176,22 +176,23 @@ private fun misskeyCallbackPresenter(
         }
         for (application in pendingOAuth) {
             try {
-                if (application is UiApplication.Mastodon) {
+                if (application is UiApplication.Misskey) {
                     misskeyAuthCheckUseCase(
                         host = application.host,
                         session = session
                     )
                     setPendingOAuthUseCase(application.host, false)
+                    toHome.invoke()
                     break
                 } else {
                     continue
                 }
             } catch (e: Exception) {
                 error = e
+                e.printStackTrace()
                 break
             }
         }
-        toHome.invoke()
     }
     if (error != null) {
         return UiState.Error(error!!)

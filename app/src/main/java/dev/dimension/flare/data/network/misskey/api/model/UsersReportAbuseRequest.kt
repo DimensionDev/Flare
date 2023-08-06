@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class UsersReportAbuseRequest(
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
-    @SerialName(value = "comment") @Required val comment: kotlin.String
+    @SerialName(value = "comment") val comment: kotlin.String
 
 )

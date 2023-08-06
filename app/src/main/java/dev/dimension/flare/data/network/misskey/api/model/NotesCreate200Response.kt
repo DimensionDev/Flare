@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class NotesCreate200Response(
 
-    @SerialName(value = "createdNote") @Required val createdNote: Note
+    @SerialName(value = "createdNote") val createdNote: Note
 
 )

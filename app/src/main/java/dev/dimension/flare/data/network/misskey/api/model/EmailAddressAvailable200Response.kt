@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class EmailAddressAvailable200Response(
 
-    @SerialName(value = "available") @Required val available: kotlin.Boolean,
+    @SerialName(value = "available") val available: kotlin.Boolean,
 
-    @SerialName(value = "reason") @Required val reason: kotlin.String?
+    @SerialName(value = "reason") val reason: kotlin.String?
 
 )

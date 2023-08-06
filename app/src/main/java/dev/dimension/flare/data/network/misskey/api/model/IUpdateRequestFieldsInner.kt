@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class IUpdateRequestFieldsInner(
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "value") @Required val `value`: kotlin.String
+    @SerialName(value = "value") val `value`: kotlin.String
 
 )

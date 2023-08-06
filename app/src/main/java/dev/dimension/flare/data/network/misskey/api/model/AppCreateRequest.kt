@@ -26,11 +26,11 @@ import kotlinx.serialization.Serializable
 
 data class AppCreateRequest(
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "description") @Required val description: kotlin.String,
+    @SerialName(value = "description") val description: kotlin.String,
 
-    @SerialName(value = "permission") @Required val permission: kotlin.collections.Set<kotlin.String>,
+    @SerialName(value = "permission") val permission: kotlin.collections.Set<kotlin.String>,
 
     @SerialName(value = "callbackUrl") val callbackUrl: kotlin.String? = null
 

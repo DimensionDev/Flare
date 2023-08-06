@@ -26,9 +26,9 @@ import kotlinx.serialization.Serializable
 
 data class AdminRolesAssignRequest(
 
-    @SerialName(value = "roleId") @Required val roleId: kotlin.String,
+    @SerialName(value = "roleId") val roleId: kotlin.String,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
     @SerialName(value = "expiresAt") val expiresAt: kotlin.Int? = null
 

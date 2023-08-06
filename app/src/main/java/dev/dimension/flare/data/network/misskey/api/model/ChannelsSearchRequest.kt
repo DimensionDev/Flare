@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class ChannelsSearchRequest(
 
-    @SerialName(value = "query") @Required val query: kotlin.String,
+    @SerialName(value = "query") val query: kotlin.String,
 
     @SerialName(value = "type") val type: ChannelsSearchRequest.Type? = Type.NameAndDescription,
 

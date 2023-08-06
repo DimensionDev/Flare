@@ -26,13 +26,13 @@ import kotlinx.serialization.Serializable
 
 data class SwRegister200Response(
 
-    @SerialName(value = "key") @Required val key: kotlin.String?,
+    @SerialName(value = "key") val key: kotlin.String? = null,
 
-    @SerialName(value = "userId") @Required val userId: kotlin.String,
+    @SerialName(value = "userId") val userId: kotlin.String,
 
-    @SerialName(value = "endpoint") @Required val endpoint: kotlin.String,
+    @SerialName(value = "endpoint") val endpoint: kotlin.String,
 
-    @SerialName(value = "sendReadMessage") @Required val sendReadMessage: kotlin.Boolean,
+    @SerialName(value = "sendReadMessage") val sendReadMessage: kotlin.Boolean,
 
     @SerialName(value = "state") val state: SwRegister200Response.State? = null
 

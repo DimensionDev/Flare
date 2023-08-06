@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class GalleryPostsDeleteRequest(
 
-    @SerialName(value = "postId") @Required val postId: kotlin.String
+    @SerialName(value = "postId") val postId: kotlin.String
 
 )

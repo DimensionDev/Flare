@@ -28,78 +28,78 @@ import kotlinx.serialization.Serializable
 
 data class UserDetailedNotMe(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "name") @Required val name: kotlin.String?,
+    @SerialName(value = "name") val name: kotlin.String? = null,
 
-    @SerialName(value = "username") @Required val username: kotlin.String,
+    @SerialName(value = "username") val username: kotlin.String,
 
     /* The local host is represented with `null`. */
-    @SerialName(value = "host") @Required val host: kotlin.String?,
+    @SerialName(value = "host") val host: kotlin.String? = null,
 
-    @SerialName(value = "avatarUrl") @Required val avatarUrl: kotlin.String?,
+    @SerialName(value = "avatarUrl") val avatarUrl: kotlin.String? = null,
 
-    @SerialName(value = "avatarBlurhash") @Required val avatarBlurhash: kotlin.String?,
+    @SerialName(value = "avatarBlurhash") val avatarBlurhash: kotlin.String? = null,
 
-    @SerialName(value = "onlineStatus") @Required val onlineStatus: UserDetailedNotMe.OnlineStatus?,
+    @SerialName(value = "onlineStatus") val onlineStatus: UserDetailedNotMe.OnlineStatus? = null,
 
-    @SerialName(value = "url") @Required val url: kotlin.String?,
+    @SerialName(value = "url") val url: kotlin.String? = null,
 
-    @SerialName(value = "uri") @Required val uri: kotlin.String?,
+    @SerialName(value = "uri") val uri: kotlin.String? = null,
 
-    @SerialName(value = "movedToUri") @Required val movedToUri: kotlin.String?,
+    @SerialName(value = "movedToUri") val movedToUri: kotlin.String? = null,
 
-    @SerialName(value = "alsoKnownAs") @Required val alsoKnownAs: kotlin.collections.List<kotlin.String>?,
+    @SerialName(value = "alsoKnownAs") val alsoKnownAs: kotlin.collections.List<kotlin.String>? = null,
 
-    @SerialName(value = "createdAt") @Required val createdAt: kotlin.String,
+    @SerialName(value = "createdAt") val createdAt: kotlin.String,
 
-    @SerialName(value = "updatedAt") @Required val updatedAt: kotlin.String?,
+    @SerialName(value = "updatedAt") val updatedAt: kotlin.String? = null,
 
-    @SerialName(value = "lastFetchedAt") @Required val lastFetchedAt: kotlin.String?,
+    @SerialName(value = "lastFetchedAt") val lastFetchedAt: kotlin.String? = null,
 
-    @SerialName(value = "bannerUrl") @Required val bannerUrl: kotlin.String?,
+    @SerialName(value = "bannerUrl") val bannerUrl: kotlin.String? = null,
 
-    @SerialName(value = "bannerBlurhash") @Required val bannerBlurhash: kotlin.String?,
+    @SerialName(value = "bannerBlurhash") val bannerBlurhash: kotlin.String? = null,
 
-    @SerialName(value = "isLocked") @Required val isLocked: kotlin.Boolean,
+    @SerialName(value = "isLocked") val isLocked: kotlin.Boolean,
 
-    @SerialName(value = "isSilenced") @Required val isSilenced: kotlin.Boolean,
+    @SerialName(value = "isSilenced") val isSilenced: kotlin.Boolean,
 
-    @SerialName(value = "isLimited") @Required val isLimited: kotlin.Boolean,
+    @SerialName(value = "isLimited") val isLimited: kotlin.Boolean,
 
-    @SerialName(value = "isSuspended") @Required val isSuspended: kotlin.Boolean,
+    @SerialName(value = "isSuspended") val isSuspended: kotlin.Boolean,
 
-    @SerialName(value = "description") @Required val description: kotlin.String?,
+    @SerialName(value = "description") val description: kotlin.String? = null,
 
-    @SerialName(value = "location") @Required val location: kotlin.String?,
+    @SerialName(value = "location") val location: kotlin.String? = null,
 
-    @SerialName(value = "birthday") @Required val birthday: kotlin.String?,
+    @SerialName(value = "birthday") val birthday: kotlin.String? = null,
 
-    @SerialName(value = "lang") @Required val lang: kotlin.String?,
+    @SerialName(value = "lang") val lang: kotlin.String? = null,
 
-    @SerialName(value = "fields") @Required val fields: kotlin.collections.List<UserDetailedNotMeOnlyFieldsInner>,
+    @SerialName(value = "fields") val fields: kotlin.collections.List<UserDetailedNotMeOnlyFieldsInner>,
 
-    @SerialName(value = "followersCount") @Required val followersCount: kotlin.Double,
+    @SerialName(value = "followersCount") val followersCount: kotlin.Double,
 
-    @SerialName(value = "followingCount") @Required val followingCount: kotlin.Double,
+    @SerialName(value = "followingCount") val followingCount: kotlin.Double,
 
-    @SerialName(value = "notesCount") @Required val notesCount: kotlin.Double,
+    @SerialName(value = "notesCount") val notesCount: kotlin.Double,
 
-    @SerialName(value = "pinnedNoteIds") @Required val pinnedNoteIds: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "pinnedNoteIds") val pinnedNoteIds: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "pinnedNotes") @Required val pinnedNotes: kotlin.collections.List<@Contextual Note>,
+    @SerialName(value = "pinnedNotes") val pinnedNotes: kotlin.collections.List<@Contextual Note>,
 
-    @SerialName(value = "pinnedPageId") @Required val pinnedPageId: kotlin.String?,
+    @SerialName(value = "pinnedPageId") val pinnedPageId: kotlin.String? = null,
 
-    @SerialName(value = "pinnedPage") @Required val pinnedPage: Page,
+    @SerialName(value = "pinnedPage") val pinnedPage: Page,
 
-    @SerialName(value = "publicReactions") @Required val publicReactions: kotlin.Boolean,
+    @SerialName(value = "publicReactions") val publicReactions: kotlin.Boolean,
 
-    @SerialName(value = "twoFactorEnabled") @Required val twoFactorEnabled: kotlin.Boolean = false,
+    @SerialName(value = "twoFactorEnabled") val twoFactorEnabled: kotlin.Boolean = false,
 
-    @SerialName(value = "usePasswordLessLogin") @Required val usePasswordLessLogin: kotlin.Boolean = false,
+    @SerialName(value = "usePasswordLessLogin") val usePasswordLessLogin: kotlin.Boolean = false,
 
-    @SerialName(value = "securityKeys") @Required val securityKeys: kotlin.Boolean = false,
+    @SerialName(value = "securityKeys") val securityKeys: kotlin.Boolean = false,
 
     @SerialName(value = "isAdmin") val isAdmin: kotlin.Boolean? = false,
 

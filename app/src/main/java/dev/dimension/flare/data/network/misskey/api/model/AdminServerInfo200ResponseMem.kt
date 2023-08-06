@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class AdminServerInfo200ResponseMem(
 
-    @SerialName(value = "total") @Required val total: kotlin.Double
+    @SerialName(value = "total") val total: kotlin.Double
 
 )

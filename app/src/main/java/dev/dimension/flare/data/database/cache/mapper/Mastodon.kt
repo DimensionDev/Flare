@@ -226,6 +226,11 @@ private fun Status.toDbStatusWithUser(
 fun Account.toDbUser(
     host: String
 ): DbUser {
+    val remoteHost = if (acct != null && acct.contains('@')) {
+        acct.substring(acct.indexOf('@') + 1)
+    } else {
+        host
+    }
     return DbUser(
         userKey = MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
@@ -236,7 +241,8 @@ fun Account.toDbUser(
             ?: throw IllegalArgumentException("mastodon Account.displayName should not be null"),
         handle = username
             ?: throw IllegalArgumentException("mastodon Account.username should not be null"),
-        content = dev.dimension.flare.data.database.cache.model.UserContent.Mastodon(this)
+        content = dev.dimension.flare.data.database.cache.model.UserContent.Mastodon(this),
+        host = remoteHost
     )
 }
 

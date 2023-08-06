@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class AdminEmojiAddAliasesBulkRequest(
 
-    @SerialName(value = "ids") @Required val ids: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "ids") val ids: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "aliases") @Required val aliases: kotlin.collections.List<kotlin.String>
+    @SerialName(value = "aliases") val aliases: kotlin.collections.List<kotlin.String>
 
 )

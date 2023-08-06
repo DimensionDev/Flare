@@ -13,6 +13,10 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesHybridTimelineReq
 import dev.dimension.flare.data.network.misskey.api.model.NotesMentionsRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersNotesRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 
 class MisskeyService(
     private val baseUrl: String,
@@ -25,6 +29,9 @@ class MisskeyService(
                 install(MisskeyAuthorizationPlugin) {
                     token = this@MisskeyService.token
                 }
+                install(DefaultRequest) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json)
+                }
             }
         ).create()
     }
@@ -35,6 +42,9 @@ class MisskeyService(
                 install(MisskeyAuthorizationPlugin) {
                     token = this@MisskeyService.token
                 }
+                install(DefaultRequest) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json)
+                }
             }
         ).create()
     }
@@ -44,6 +54,9 @@ class MisskeyService(
             config = {
                 install(MisskeyAuthorizationPlugin) {
                     token = this@MisskeyService.token
+                }
+                install(DefaultRequest) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
             }
         ).create()
@@ -56,6 +69,9 @@ class MisskeyService(
                 install(MisskeyAuthorizationPlugin) {
                     token = this@MisskeyService.token
                 }
+                install(DefaultRequest) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json)
+                }
             }
         ).create()
     }
@@ -65,8 +81,9 @@ class MisskeyService(
     ) = usersApi.usersShow(UsersShowRequest(userId = userId)).body()
 
     suspend fun emojis(): List<EmojiSimple> {
-        return metaApi.emojis(Any()).body()?.emojis ?: emptyList()
+        return metaApi.emojis().body()?.emojis ?: emptyList()
     }
+
     suspend fun homeTimeline(
         count: Int,
         since_id: String? = null,
@@ -77,7 +94,7 @@ class MisskeyService(
             sinceId = since_id,
             limit = count
         )
-    )
+    ).body()
 
     suspend fun userTimeline(
         userId: String,
@@ -91,7 +108,7 @@ class MisskeyService(
             sinceId = since_id,
             limit = count
         )
-    )
+    ).body()
 
     suspend fun notifications(
         count: Int,
@@ -103,7 +120,7 @@ class MisskeyService(
             sinceId = since_id,
             limit = count
         )
-    )
+    ).body()
 
     suspend fun mentionTimeline(
         count: Int,
@@ -115,11 +132,11 @@ class MisskeyService(
             sinceId = since_id,
             limit = count
         )
-    )
+    ).body()
 
     suspend fun lookupStatus(
         noteId: String,
-    ) = notesApi.notesShow(IPinRequest(noteId = noteId))
+    ) = notesApi.notesShow(IPinRequest(noteId = noteId)).body()
 
     suspend fun childrenTimeline(
         noteId: String,
@@ -133,7 +150,10 @@ class MisskeyService(
             sinceId = since_id,
             limit = count
         )
-    )
+    ).body()
+
+    suspend fun findUserByName(name: String, host: String) =
+        usersApi.usersShow(UsersShowRequest(username = name, host = host)).body()
 
 }
 

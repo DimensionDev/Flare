@@ -36,6 +36,28 @@ internal fun mastodonUserDataPresenter(
 }
 
 @Composable
+internal fun mastodonUserDataByNameAndHostPresenter(
+    account: UiAccount.Mastodon,
+    name: String,
+    host: String,
+    cacheDatabase: CacheDatabase = inject()
+): CacheableState<UiUser> {
+    return remember(account.accountKey, name, host) {
+        Cacheable(
+            fetchSource = {
+                val user = account.service.lookupUserByAcct("$name@$host")
+                    ?.toDbUser(account.accountKey.host) ?: throw Exception("User not found")
+                cacheDatabase.userDao().insertAll(listOf(user))
+            },
+            cacheSource = {
+                cacheDatabase.userDao().getUserByHandleAndHost(name, host)
+                    .mapNotNull { it?.toUi() }
+            }
+        )
+    }.collectAsState()
+}
+
+@Composable
 internal fun misskeyUserDataPresenter(
     account: UiAccount.Misskey,
     userId: String = account.accountKey.id,
@@ -56,6 +78,33 @@ internal fun misskeyUserDataPresenter(
             },
             cacheSource = {
                 cacheDatabase.userDao().getUser(userKey)
+                    .mapNotNull { it?.toUi() }
+            }
+        )
+    }.collectAsState()
+}
+
+@Composable
+internal fun misskeyUserDataByNamePresenter(
+    account: UiAccount.Misskey,
+    name: String,
+    host: String,
+    cacheDatabase: CacheDatabase = inject(),
+    misskeyEmojiCache: MisskeyEmojiCache = inject()
+): CacheableState<UiUser> {
+    return remember(account.accountKey, name) {
+        Cacheable(
+            fetchSource = {
+                val emojis = misskeyEmojiCache.getEmojis(account)
+                val user = account
+                    .service
+                    .findUserByName(name, host)
+                    ?.toDbUser(account.accountKey.host, emojis)
+                    ?: throw Exception("User not found")
+                cacheDatabase.userDao().insertAll(listOf(user))
+            },
+            cacheSource = {
+                cacheDatabase.userDao().getUserByHandleAndHost(name, host)
                     .mapNotNull { it?.toUi() }
             }
         )

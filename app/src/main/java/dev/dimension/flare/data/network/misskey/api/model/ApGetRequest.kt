@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class ApGetRequest(
 
-    @SerialName(value = "uri") @Required val uri: kotlin.String
+    @SerialName(value = "uri") val uri: kotlin.String
 
 )

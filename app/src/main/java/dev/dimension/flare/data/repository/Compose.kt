@@ -16,11 +16,11 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.ui.model.UiStatus
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 private const val CHANNEL_ID = "compose"
 
@@ -67,6 +67,10 @@ private fun composeUseCase(
                         builder = builder.setProgress(max, current, false)
                         notificationManager.notify(notificationId, builder.build())
                     }
+                }
+
+                is ComposeData.MissKey -> {
+
                 }
             }
         }.onSuccess {
@@ -151,4 +155,8 @@ internal sealed interface ComposeData {
             val multiple: Boolean
         )
     }
+
+    data class MissKey(
+        val account: UiAccount.Misskey
+    ) : ComposeData
 }

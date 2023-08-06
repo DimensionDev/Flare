@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class FlashMyLikes200ResponseInner(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "flash") @Required val flash: Flash
+    @SerialName(value = "flash") val flash: Flash
 
 )

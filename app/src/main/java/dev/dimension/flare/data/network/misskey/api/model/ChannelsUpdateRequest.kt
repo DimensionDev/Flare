@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class ChannelsUpdateRequest(
 
-    @SerialName(value = "channelId") @Required val channelId: kotlin.String,
+    @SerialName(value = "channelId") val channelId: kotlin.String,
 
     @SerialName(value = "name") val name: kotlin.String? = null,
 

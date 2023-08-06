@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class ChannelsCreateRequest(
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
     @SerialName(value = "description") val description: kotlin.String? = null,
 

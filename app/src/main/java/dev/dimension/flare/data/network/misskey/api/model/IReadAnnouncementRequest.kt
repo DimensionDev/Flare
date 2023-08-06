@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class IReadAnnouncementRequest(
 
-    @SerialName(value = "announcementId") @Required val announcementId: kotlin.String
+    @SerialName(value = "announcementId") val announcementId: kotlin.String
 
 )

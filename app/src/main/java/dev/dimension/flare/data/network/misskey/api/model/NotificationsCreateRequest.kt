@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class NotificationsCreateRequest(
 
-    @SerialName(value = "body") @Required val body: kotlin.String,
+    @SerialName(value = "body") val body: kotlin.String,
 
     @SerialName(value = "header") val header: kotlin.String? = null,
 

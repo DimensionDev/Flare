@@ -27,17 +27,17 @@ import kotlinx.serialization.Serializable
 
 data class AdminEmojiList200ResponseInner(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "aliases") @Required val aliases: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "aliases") val aliases: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "category") @Required val category: kotlin.String?,
+    @SerialName(value = "category") val category: kotlin.String? = null,
 
     /* The local host is represented with `null`. The field exists for compatibility with other API endpoints that return files. */
-    @SerialName(value = "host") @Required val host: kotlin.String?,
+    @SerialName(value = "host") val host: kotlin.String? = null,
 
-    @SerialName(value = "url") @Required val url: kotlin.String
+    @SerialName(value = "url") val url: kotlin.String
 
 )

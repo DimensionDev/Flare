@@ -18,4 +18,7 @@ interface UserDao {
 
     @Query("SELECT * FROM user WHERE userKey = :userKey")
     fun getUser(userKey: MicroBlogKey): Flow<DbUser?>
+
+    @Query("SELECT * FROM user WHERE handle = :handle AND host = :host")
+    fun getUserByHandleAndHost(handle: String, host: String): Flow<DbUser?>
 }

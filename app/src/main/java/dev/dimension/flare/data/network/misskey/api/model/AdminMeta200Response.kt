@@ -26,55 +26,55 @@ import kotlinx.serialization.Serializable
 
 data class AdminMeta200Response(
 
-    @SerialName(value = "cacheRemoteFiles") @Required val cacheRemoteFiles: kotlin.Boolean,
+    @SerialName(value = "cacheRemoteFiles") val cacheRemoteFiles: kotlin.Boolean,
 
-    @SerialName(value = "cacheRemoteSensitiveFiles") @Required val cacheRemoteSensitiveFiles: kotlin.Boolean,
+    @SerialName(value = "cacheRemoteSensitiveFiles") val cacheRemoteSensitiveFiles: kotlin.Boolean,
 
-    @SerialName(value = "emailRequiredForSignup") @Required val emailRequiredForSignup: kotlin.Boolean,
+    @SerialName(value = "emailRequiredForSignup") val emailRequiredForSignup: kotlin.Boolean,
 
-    @SerialName(value = "enableHcaptcha") @Required val enableHcaptcha: kotlin.Boolean,
+    @SerialName(value = "enableHcaptcha") val enableHcaptcha: kotlin.Boolean,
 
-    @SerialName(value = "hcaptchaSiteKey") @Required val hcaptchaSiteKey: kotlin.String?,
+    @SerialName(value = "hcaptchaSiteKey") val hcaptchaSiteKey: kotlin.String? = null,
 
-    @SerialName(value = "enableRecaptcha") @Required val enableRecaptcha: kotlin.Boolean,
+    @SerialName(value = "enableRecaptcha") val enableRecaptcha: kotlin.Boolean,
 
-    @SerialName(value = "recaptchaSiteKey") @Required val recaptchaSiteKey: kotlin.String?,
+    @SerialName(value = "recaptchaSiteKey") val recaptchaSiteKey: kotlin.String? = null,
 
-    @SerialName(value = "enableTurnstile") @Required val enableTurnstile: kotlin.Boolean,
+    @SerialName(value = "enableTurnstile") val enableTurnstile: kotlin.Boolean,
 
-    @SerialName(value = "turnstileSiteKey") @Required val turnstileSiteKey: kotlin.String?,
+    @SerialName(value = "turnstileSiteKey") val turnstileSiteKey: kotlin.String? = null,
 
-    @SerialName(value = "swPublickey") @Required val swPublickey: kotlin.String?,
+    @SerialName(value = "swPublickey") val swPublickey: kotlin.String? = null,
 
-    @SerialName(value = "mascotImageUrl") @Required val mascotImageUrl: kotlin.String? = "/assets/ai.png",
+    @SerialName(value = "mascotImageUrl") val mascotImageUrl: kotlin.String? = "/assets/ai.png",
 
-    @SerialName(value = "bannerUrl") @Required val bannerUrl: kotlin.String?,
+    @SerialName(value = "bannerUrl") val bannerUrl: kotlin.String? = null,
 
-    @SerialName(value = "serverErrorImageUrl") @Required val serverErrorImageUrl: kotlin.String?,
+    @SerialName(value = "serverErrorImageUrl") val serverErrorImageUrl: kotlin.String? = null,
 
-    @SerialName(value = "infoImageUrl") @Required val infoImageUrl: kotlin.String?,
+    @SerialName(value = "infoImageUrl") val infoImageUrl: kotlin.String? = null,
 
-    @SerialName(value = "notFoundImageUrl") @Required val notFoundImageUrl: kotlin.String?,
+    @SerialName(value = "notFoundImageUrl") val notFoundImageUrl: kotlin.String? = null,
 
-    @SerialName(value = "iconUrl") @Required val iconUrl: kotlin.String?,
+    @SerialName(value = "iconUrl") val iconUrl: kotlin.String? = null,
 
-    @SerialName(value = "enableEmail") @Required val enableEmail: kotlin.Boolean,
+    @SerialName(value = "enableEmail") val enableEmail: kotlin.Boolean,
 
-    @SerialName(value = "enableServiceWorker") @Required val enableServiceWorker: kotlin.Boolean,
+    @SerialName(value = "enableServiceWorker") val enableServiceWorker: kotlin.Boolean,
 
-    @SerialName(value = "translatorAvailable") @Required val translatorAvailable: kotlin.Boolean,
+    @SerialName(value = "translatorAvailable") val translatorAvailable: kotlin.Boolean,
 
-    @SerialName(value = "preservedUsernames") @Required val preservedUsernames: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "preservedUsernames") val preservedUsernames: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "enableChartsForRemoteUser") @Required val enableChartsForRemoteUser: kotlin.Boolean,
+    @SerialName(value = "enableChartsForRemoteUser") val enableChartsForRemoteUser: kotlin.Boolean,
 
-    @SerialName(value = "enableChartsForFederatedInstances") @Required val enableChartsForFederatedInstances: kotlin.Boolean,
+    @SerialName(value = "enableChartsForFederatedInstances") val enableChartsForFederatedInstances: kotlin.Boolean,
 
-    @SerialName(value = "enableServerMachineStats") @Required val enableServerMachineStats: kotlin.Boolean,
+    @SerialName(value = "enableServerMachineStats") val enableServerMachineStats: kotlin.Boolean,
 
-    @SerialName(value = "enableIdenticonGeneration") @Required val enableIdenticonGeneration: kotlin.Boolean,
+    @SerialName(value = "enableIdenticonGeneration") val enableIdenticonGeneration: kotlin.Boolean,
 
-    @SerialName(value = "policies") @Required val policies: kotlin.String,
+    @SerialName(value = "policies") val policies: kotlin.String,
 
     @SerialName(value = "userStarForReactionFallback") val userStarForReactionFallback: kotlin.Boolean? = null,
 

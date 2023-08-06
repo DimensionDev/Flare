@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class AuthSessionGenerate200Response(
 
-    @SerialName(value = "token") @Required val token: kotlin.String,
+    @SerialName(value = "token") val token: kotlin.String,
 
-    @SerialName(value = "url") @Required val url: kotlin.String
+    @SerialName(value = "url") val url: kotlin.String
 
 )

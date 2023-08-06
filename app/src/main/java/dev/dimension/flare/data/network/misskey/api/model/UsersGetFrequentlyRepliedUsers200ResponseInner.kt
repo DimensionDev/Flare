@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
 
 data class UsersGetFrequentlyRepliedUsers200ResponseInner(
 
-    @SerialName(value = "user") @Required val user: UserDetailed,
+    @SerialName(value = "user") val user: UserDetailed,
 
-    @SerialName(value = "weight") @Required val weight: kotlin.Double
+    @SerialName(value = "weight") val weight: kotlin.Double
 
 )

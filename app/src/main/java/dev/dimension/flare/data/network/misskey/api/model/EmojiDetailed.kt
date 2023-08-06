@@ -27,25 +27,25 @@ import kotlinx.serialization.Serializable
 
 data class EmojiDetailed(
 
-    @SerialName(value = "id") @Required val id: kotlin.String,
+    @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "aliases") @Required val aliases: kotlin.collections.List<kotlin.String>,
+    @SerialName(value = "aliases") val aliases: kotlin.collections.List<kotlin.String>,
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "category") @Required val category: kotlin.String?,
+    @SerialName(value = "category") val category: kotlin.String? = null,
 
     /* The local host is represented with `null`. */
-    @SerialName(value = "host") @Required val host: kotlin.String?,
+    @SerialName(value = "host") val host: kotlin.String? = null,
 
-    @SerialName(value = "url") @Required val url: kotlin.String,
+    @SerialName(value = "url") val url: kotlin.String,
 
-    @SerialName(value = "license") @Required val license: kotlin.String?,
+    @SerialName(value = "license") val license: kotlin.String? = null,
 
-    @SerialName(value = "isSensitive") @Required val isSensitive: kotlin.Boolean,
+    @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean,
 
-    @SerialName(value = "localOnly") @Required val localOnly: kotlin.Boolean,
+    @SerialName(value = "localOnly") val localOnly: kotlin.Boolean,
 
-    @SerialName(value = "roleIdsThatCanBeUsedThisEmojiAsReaction") @Required val roleIdsThatCanBeUsedThisEmojiAsReaction: kotlin.collections.List<kotlin.String>
+    @SerialName(value = "roleIdsThatCanBeUsedThisEmojiAsReaction") val roleIdsThatCanBeUsedThisEmojiAsReaction: kotlin.collections.List<kotlin.String>
 
 )

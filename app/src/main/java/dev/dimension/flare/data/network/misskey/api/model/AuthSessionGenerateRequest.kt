@@ -26,6 +26,6 @@ import kotlinx.serialization.Serializable
 
 data class AuthSessionGenerateRequest(
 
-    @SerialName(value = "appSecret") @Required val appSecret: kotlin.String
+    @SerialName(value = "appSecret") val appSecret: kotlin.String
 
 )

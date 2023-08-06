@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 
 data class AdminQueuePromoteRequest(
 
-    @SerialName(value = "type") @Required val type: AdminQueuePromoteRequest.Type
+    @SerialName(value = "type") val type: AdminQueuePromoteRequest.Type
 
 ) {
 

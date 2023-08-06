@@ -27,9 +27,9 @@ import kotlinx.serialization.Serializable
 
 data class AdminEmojiAddRequest(
 
-    @SerialName(value = "name") @Required val name: kotlin.String,
+    @SerialName(value = "name") val name: kotlin.String,
 
-    @SerialName(value = "fileId") @Required val fileId: kotlin.String,
+    @SerialName(value = "fileId") val fileId: kotlin.String,
 
     /* Use `null` to reset the category. */
     @SerialName(value = "category") val category: kotlin.String? = null,

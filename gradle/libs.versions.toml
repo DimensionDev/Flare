@@ -70,7 +70,7 @@ koject-compose-core = { group = "com.moriatsushi.koject", name = "koject-compose
 
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
-apng = "com.github.penfeizhou.android.animation:apng:2.25.0"
+apng = "com.github.penfeizhou.android.animation:apng:2.26.0"
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }

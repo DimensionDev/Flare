@@ -56,7 +56,7 @@ internal fun UiStatusQuoted(
             medias = status.media,
             createdAt = status.humanizedTime,
             onMediaClick = onMediaClick,
-            modifier = modifier,
+            modifier = modifier
         )
 
         is UiStatus.MisskeyNotification -> Unit

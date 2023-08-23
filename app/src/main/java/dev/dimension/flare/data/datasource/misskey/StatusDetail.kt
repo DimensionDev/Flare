@@ -17,14 +17,13 @@ import dev.dimension.flare.data.database.cache.mapper.save
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.cache.MisskeyEmojiCache
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
-import java.io.IOException
-import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.io.IOException
+import java.util.UUID
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -32,8 +31,7 @@ internal class StatusDetailRemoteMediator(
     private val database: CacheDatabase,
     private val account: UiAccount.Misskey,
     private val pagingKey: String,
-    private val statusOnly: Boolean,
-    private val emojiCache: MisskeyEmojiCache,
+    private val statusOnly: Boolean
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
@@ -86,11 +84,9 @@ internal class StatusDetailRemoteMediator(
                 listOfNotNull(current?.reply, current) + children
 //                context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
             }.filterNotNull()
-
-            val emojis = emojiCache.getEmojis(account = account)
             with(database) {
                 with(result) {
-                    save(account.accountKey, pagingKey, emojis) {
+                    save(account.accountKey, pagingKey) {
                         -result.indexOf(it).toLong()
                     }
                 }
@@ -112,8 +108,7 @@ internal fun statusOnlyDataSource(
     account: UiAccount.Misskey,
     statusKey: MicroBlogKey,
     pagingKey: String = "status_only_$statusKey",
-    database: CacheDatabase = rememberInject(),
-    emojiCache: MisskeyEmojiCache = rememberInject()
+    database: CacheDatabase = rememberInject()
 ): Flow<PagingData<UiStatus>> {
     return remember(
         account.accountKey,
@@ -126,8 +121,7 @@ internal fun statusOnlyDataSource(
                 database,
                 account,
                 pagingKey,
-                statusOnly = true,
-                emojiCache
+                statusOnly = true
             )
         ) {
             database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
@@ -146,8 +140,7 @@ internal fun statusDataSource(
     statusKey: MicroBlogKey,
     pageSize: Int = 20,
     pagingKey: String = "status_$statusKey",
-    database: CacheDatabase = rememberInject(),
-    emojiCache: MisskeyEmojiCache = rememberInject()
+    database: CacheDatabase = rememberInject()
 ): Flow<PagingData<UiStatus>> {
     return remember(
         account.accountKey,
@@ -160,8 +153,7 @@ internal fun statusDataSource(
                 database,
                 account,
                 pagingKey,
-                statusOnly = false,
-                emojiCache
+                statusOnly = false
             )
         ) {
             database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)

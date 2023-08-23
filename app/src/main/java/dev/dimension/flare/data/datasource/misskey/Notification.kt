@@ -16,19 +16,17 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveNotification
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.cache.MisskeyEmojiCache
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
-import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 
 @OptIn(ExperimentalPagingApi::class)
 internal class NotificationRemoteMediator(
     private val account: UiAccount.Misskey,
     private val database: CacheDatabase,
-    private val pagingKey: String,
-    private val emojiCache: MisskeyEmojiCache,
+    private val pagingKey: String
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
@@ -42,7 +40,7 @@ internal class NotificationRemoteMediator(
                 )
                 LoadType.REFRESH -> {
                     service.notifications(
-                        count = state.config.pageSize,
+                        count = state.config.pageSize
                     )
                 }
 
@@ -59,13 +57,12 @@ internal class NotificationRemoteMediator(
             } ?: return MediatorResult.Success(
                 endOfPaginationReached = true
             )
-            val emojis = emojiCache.getEmojis(account = account)
             if (loadType == LoadType.REFRESH) {
                 database.pagingTimelineDao().delete(pagingKey, account.accountKey)
             }
             with(database) {
                 with(response) {
-                    saveNotification(account.accountKey, pagingKey, emojis)
+                    saveNotification(account.accountKey, pagingKey)
                 }
             }
 
@@ -86,8 +83,7 @@ internal fun notificationDataSource(
     account: UiAccount.Misskey,
     pageSize: Int = 20,
     pagingKey: String = "notification",
-    database: CacheDatabase = rememberInject(),
-    emojiCache: MisskeyEmojiCache = rememberInject(),
+    database: CacheDatabase = rememberInject()
 ): Flow<PagingData<UiStatus>> {
     return remember(
         account.accountKey
@@ -97,8 +93,7 @@ internal fun notificationDataSource(
             remoteMediator = NotificationRemoteMediator(
                 account,
                 database,
-                pagingKey,
-                emojiCache,
+                pagingKey
             )
         ) {
             database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)

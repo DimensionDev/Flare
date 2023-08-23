@@ -14,13 +14,15 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
+import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
+import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.ui.model.UiStatus
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 private const val CHANNEL_ID = "compose"
 
@@ -69,8 +71,14 @@ private fun composeUseCase(
                     }
                 }
 
-                is ComposeData.MissKey -> {
-
+                is ComposeData.MissKey -> misskeyComposeUseCase(
+                    data = data,
+                    context = context
+                ) { current, max ->
+                    if (notificationManager.areNotificationsEnabled()) {
+                        builder = builder.setProgress(max, current, false)
+                        notificationManager.notify(notificationId, builder.build())
+                    }
                 }
             }
         }.onSuccess {
@@ -138,6 +146,50 @@ private suspend fun mastodonComposeUseCase(
     )
 }
 
+private suspend fun misskeyComposeUseCase(
+    data: ComposeData.MissKey,
+    context: Context,
+    notifyProgress: (current: Int, max: Int) -> Unit
+) {
+    val maxProgress = data.medias.size + 1
+    val mediaIds = data.medias.mapIndexedNotNull { index, uri ->
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            data.account.service.upload(
+                stream,
+                name = uri.lastPathSegment ?: "unknown",
+                sensitive = data.sensitive
+            ).also {
+                notifyProgress(index + 1, maxProgress)
+            }
+        }
+    }.map {
+        it.id
+    }
+    data.account.service.notesCreate(
+        NotesCreateRequest(
+            text = data.content,
+            visibility = when (data.visibility) {
+                UiStatus.Misskey.Visibility.Public -> "public"
+                UiStatus.Misskey.Visibility.Home -> "home"
+                UiStatus.Misskey.Visibility.Followers -> "followers"
+                UiStatus.Misskey.Visibility.Specified -> "specified"
+            },
+            renoteId = data.renoteId,
+            replyId = data.inReplyToID,
+            fileIds = mediaIds.takeIf { it.isNotEmpty() },
+            cw = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
+            poll = data.poll?.let { poll ->
+                NotesCreateRequestPoll(
+                    choices = poll.options.toSet(),
+                    expiredAfter = poll.expiredAfter.toInt(),
+                    multiple = poll.multiple
+                )
+            },
+            localOnly = data.localOnly
+        )
+    )
+}
+
 internal sealed interface ComposeData {
     data class Mastodon(
         val account: UiAccount.Mastodon,
@@ -157,6 +209,21 @@ internal sealed interface ComposeData {
     }
 
     data class MissKey(
-        val account: UiAccount.Misskey
-    ) : ComposeData
+        val account: UiAccount.Misskey,
+        val content: String,
+        val visibility: UiStatus.Misskey.Visibility = UiStatus.Misskey.Visibility.Public,
+        val inReplyToID: String? = null,
+        val renoteId: String? = null,
+        val medias: List<Uri> = emptyList(),
+        val sensitive: Boolean = false,
+        val spoilerText: String? = null,
+        val poll: Poll? = null,
+        val localOnly: Boolean = false
+    ) : ComposeData {
+        data class Poll(
+            val options: List<String>,
+            val expiredAfter: Long,
+            val multiple: Boolean
+        )
+    }
 }

@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.misskey.api
 
 import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.Multipart
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AdminDriveShowFileRequest
 import dev.dimension.flare.data.network.misskey.api.model.Drive200Response
@@ -20,6 +21,7 @@ import dev.dimension.flare.data.network.misskey.api.model.DriveFoldersRequest
 import dev.dimension.flare.data.network.misskey.api.model.DriveFoldersUpdateRequest
 import dev.dimension.flare.data.network.misskey.api.model.DriveStreamRequest
 import dev.dimension.flare.data.network.misskey.api.model.Note
+import io.ktor.client.request.forms.MultiPartFormDataContent
 
 interface DriveApi {
     /**
@@ -109,6 +111,9 @@ interface DriveApi {
 //    @Multipart
 //    @POST("drive/files/create")
 //    suspend fun driveFilesCreate(@Part file: MultipartBody.Part, @Part("folderId") folderId: kotlin.String? = null, @Part("name") name: kotlin.String? = null, @Part("comment") comment: kotlin.String? = null, @Part("isSensitive") isSensitive: kotlin.Boolean? = false, @Part("force") force: kotlin.Boolean? = false): Response<DriveFile>
+    @Multipart
+    @POST("drive/files/create")
+    suspend fun driveFilesCreate(@Body map: MultiPartFormDataContent): Response<DriveFile>
 
     /**
      * drive/files/delete

@@ -31,6 +31,7 @@ import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
@@ -41,6 +42,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
+    contentPadding: PaddingValues,
     modifier: Modifier = Modifier
 ) {
     val state by producePresenter {
@@ -48,13 +50,14 @@ fun NotificationScreen(
     }
     val listState = rememberLazyListState()
     RefreshContainer(
-        indicatorPadding = PaddingValues(top = 48.dp),
+        indicatorPadding = PaddingValues(top = 48.dp) + contentPadding,
         modifier = modifier,
         refreshing = state.refreshing,
         onRefresh = state::refresh,
         content = {
             LazyColumn(
                 state = listState,
+                contentPadding = contentPadding,
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -81,7 +84,7 @@ fun NotificationScreen(
                     }
                 }
                 with(state.listState) {
-                    with (state.statusEvent) {
+                    with(state.statusEvent) {
                         status()
                     }
                 }

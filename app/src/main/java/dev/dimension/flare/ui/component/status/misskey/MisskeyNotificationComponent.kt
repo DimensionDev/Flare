@@ -95,7 +95,7 @@ internal fun MisskeyNotificationComponent(
 private fun MisskeyAppNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -108,7 +108,7 @@ private fun MisskeyAppNotificationComponent(
 private fun MisskeyAchievementEarnedNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -123,7 +123,7 @@ private fun MisskeyAchievementEarnedNotificationComponent(
 private fun MisskeyFollowRequestAcceptedNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -177,7 +177,7 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
 private fun MisskeyReceiveFollowRequestNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
@@ -234,10 +234,10 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
 private fun MisskeyPollEndedNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
@@ -255,10 +255,10 @@ private fun MisskeyPollEndedNotificationComponent(
 private fun MisskeyReactionNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
@@ -276,10 +276,10 @@ private fun MisskeyReactionNotificationComponent(
 private fun MisskeyQuoteNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
@@ -297,10 +297,10 @@ private fun MisskeyQuoteNotificationComponent(
 private fun MisskeyRetweetNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
@@ -318,10 +318,10 @@ private fun MisskeyRetweetNotificationComponent(
 private fun MisskeyReplyNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
@@ -339,10 +339,10 @@ private fun MisskeyReplyNotificationComponent(
 private fun MisskeyMentionNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
@@ -355,7 +355,6 @@ private fun MisskeyMentionNotificationComponent(
         }
     }
 }
-
 
 @Composable
 private fun MisskeyFollowNotificationComponent(

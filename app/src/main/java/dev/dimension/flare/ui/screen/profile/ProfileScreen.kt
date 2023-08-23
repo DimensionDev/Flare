@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -57,6 +59,7 @@ import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.mastodon.userTimelineDataSource
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
@@ -67,6 +70,7 @@ import dev.dimension.flare.data.repository.cache.misskeyUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
@@ -85,8 +89,8 @@ import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.toUi
-import kotlin.math.max
 import org.jsoup.nodes.Element
+import kotlin.math.max
 
 @Composable
 @Destination(
@@ -99,7 +103,7 @@ import org.jsoup.nodes.Element
 fun ProfileWithUserNameAndHostRoute(
     userName: String,
     host: String,
-    navigator: DestinationsNavigator,
+    navigator: DestinationsNavigator
 ) {
     val state by producePresenter(key = "acct_$userName@$host") {
         profileWithUserNameAndHostPresenter(
@@ -143,10 +147,10 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = null
+                                contentDescription = stringResource(id = R.string.navigate_back)
                             )
                         }
-                    },
+                    }
                 )
             }
         ) {
@@ -162,7 +166,6 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileLoadingScreen(onBack: () -> Unit) {
@@ -177,16 +180,16 @@ private fun ProfileLoadingScreen(onBack: () -> Unit) {
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = null
+                                contentDescription = stringResource(id = R.string.navigate_back)
                             )
                         }
-                    },
+                    }
                 )
             }
         ) {
             LazyColumn(
                 contentPadding = it,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {
                     ProfileHeaderLoading()
@@ -204,7 +207,7 @@ private fun ProfileLoadingScreen(onBack: () -> Unit) {
 @Composable
 private fun profileWithUserNameAndHostPresenter(
     userName: String,
-    host: String,
+    host: String
 ) = run {
     val account by activeAccountPresenter()
     val userState = account.flatMap {
@@ -257,7 +260,8 @@ fun ProfileScreen(
     // null means current user
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
-    showTopBar: Boolean = true
+    showTopBar: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val state by producePresenter(key = userKey.toString()) {
         profilePresenter(userKey)
@@ -331,7 +335,7 @@ fun ProfileScreen(
                                 IconButton(onClick = onBack) {
                                     Icon(
                                         imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = null
+                                        contentDescription = stringResource(id = R.string.navigate_back)
                                     )
                                 }
                             },
@@ -354,11 +358,12 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxSize(),
                 refreshing = state.refreshing,
                 onRefresh = state::refresh,
-                indicatorPadding = it,
+                indicatorPadding = it + contentPadding,
                 content = {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        state = listState
+                        state = listState,
+                        contentPadding = contentPadding
                     ) {
                         item {
                             ProfileHeader(
@@ -661,9 +666,9 @@ private fun profilePresenter(
     }
 
     val refreshing = userState is UiState.Loading ||
-            userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
-            listState is UiState.Loading ||
-            listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
+        userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
+        listState is UiState.Loading ||
+        listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
     object {
         val refreshing = refreshing
         val userState = userState.flatMap { it.toUi() }

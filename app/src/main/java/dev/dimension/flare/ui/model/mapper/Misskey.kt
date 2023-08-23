@@ -37,10 +37,9 @@ private val misskeyParser by lazy {
 }
 
 internal fun Notification.toUi(
-    accountKey: MicroBlogKey,
-    emojis: List<EmojiSimple>
+    accountKey: MicroBlogKey
 ): UiStatus.MisskeyNotification {
-    val user = user?.toUi(accountKey.host, emojis)
+    val user = user?.toUi(accountKey.host)
     return UiStatus.MisskeyNotification(
         statusKey = MicroBlogKey(
             id,
@@ -48,18 +47,17 @@ internal fun Notification.toUi(
         ),
         user = user,
         createdAt = createdAt.toInstant(),
-        note = note?.toUi(accountKey, emojis),
+        note = note?.toUi(accountKey),
         type = type,
         accountKey = accountKey,
-        achievement = achievement,
+        achievement = achievement
     )
 }
 
 internal fun Note.toUi(
-    accountKey: MicroBlogKey,
-    emojis: List<EmojiSimple>,
+    accountKey: MicroBlogKey
 ): UiStatus.Misskey {
-    val user = user.toUi(accountKey.host, emojis)
+    val user = user.toUi(accountKey.host)
     return UiStatus.Misskey(
         statusKey = MicroBlogKey(
             id,
@@ -81,27 +79,27 @@ internal fun Note.toUi(
                     )
                 }.toPersistentList(),
                 expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
-                multiple = poll.multiple,
+                multiple = poll.multiple
             )
         },
         // TODO: parse card content lazily
         card = null,
         createdAt = createdAt.toInstant(),
         content = text.orEmpty(),
-        contentToken = parseContent(this, user.userKey.host, emojis),
+        contentToken = parseContent(this, user.userKey.host),
         contentWarningText = cw,
         user = user,
         matrices = UiStatus.Misskey.Matrices(
             replyCount = repliesCount.toLong(),
-            renoteCount = renoteCount.toLong(),
+            renoteCount = renoteCount.toLong()
         ),
         renote = if (text.isNullOrEmpty()) {
-            renote?.toUi(accountKey, emojis)
+            renote?.toUi(accountKey)
         } else {
             null
         },
         quote = if (text != null || !files.isNullOrEmpty() || cw != null) {
-            renote?.toUi(accountKey, emojis)
+            renote?.toUi(accountKey)
         } else {
             null
         },
@@ -120,7 +118,7 @@ internal fun Note.toUi(
                 UiStatus.Misskey.EmojiReaction(
                     name = emoji.key,
                     count = emoji.value,
-                    url = reactionEmojis?.get(emoji.key.trim(':')).orEmpty()
+                    url = resolveMisskeyEmoji(emoji.key, accountKey.host)
                 )
             }.toPersistentList()
         ),
@@ -128,11 +126,11 @@ internal fun Note.toUi(
     )
 }
 
-private fun parseContent(note: Note, host: String, emojis: List<EmojiSimple>): Element {
+private fun parseContent(note: Note, host: String): Element {
     val token = misskeyParser.parse(note.text.orEmpty())
     val element = Element("body")
     token.forEach {
-        element.appendChild(it.toElement(host, emojis))
+        element.appendChild(it.toElement(host))
     }
     return element
 }
@@ -145,7 +143,7 @@ private fun DriveFile.toUi(): UiMedia? {
             description = comment,
             aspectRatio = with(properties) {
                 width?.toFloat()?.div(height?.toFloat() ?: 0f)?.takeUnless { it.isNaN() } ?: 1f
-            },
+            }
         )
     } else if (type.startsWith("video/")) {
         return UiMedia.Video(
@@ -154,17 +152,15 @@ private fun DriveFile.toUi(): UiMedia? {
             description = comment,
             aspectRatio = with(properties) {
                 width?.toFloat()?.div(height?.toFloat() ?: 0f)?.takeUnless { it.isNaN() } ?: 1f
-            },
+            }
         )
     } else {
         return null
     }
 }
 
-
 internal fun UserLite.toUi(
-    accountHost: String,
-    emojis: List<EmojiSimple>,
+    accountHost: String
 ): UiUser.Misskey {
     val remoteHost = if (host.isNullOrEmpty()) {
         accountHost
@@ -178,7 +174,7 @@ internal fun UserLite.toUi(
         ),
         name = name.orEmpty(),
         avatarUrl = avatarUrl.orEmpty(),
-        nameElement = parseName(this, accountHost, emojis),
+        nameElement = parseName(this, accountHost),
         bannerUrl = null,
         description = null,
         descriptionElement = null,
@@ -198,15 +194,14 @@ internal fun UserLite.toUi(
             blocked = false,
             muted = false,
             hasPendingFollowRequestFromYou = false,
-            hasPendingFollowRequestToYou = false,
+            hasPendingFollowRequestToYou = false
         )
     )
 }
 
 private fun parseName(
     user: UserLite,
-    accountHost: String,
-    emojis: List<EmojiSimple>,
+    accountHost: String
 ): Element {
     if (user.name.isNullOrEmpty()) {
         return Element("body")
@@ -214,14 +209,13 @@ private fun parseName(
     val token = misskeyParser.parse(user.name)
     val element = Element("body")
     token.forEach {
-        element.appendChild(it.toElement(accountHost, emojis))
+        element.appendChild(it.toElement(accountHost))
     }
     return element
 }
 
 internal fun User.toUi(
-    accountHost: String,
-    emojis: List<EmojiSimple>,
+    accountHost: String
 ): UiUser.Misskey {
     val remoteHost = if (host.isNullOrEmpty()) {
         accountHost
@@ -235,10 +229,10 @@ internal fun User.toUi(
         ),
         name = name.orEmpty(),
         avatarUrl = avatarUrl.orEmpty(),
-        nameElement = parseName(this, accountHost, emojis),
+        nameElement = parseName(this, accountHost),
         bannerUrl = bannerUrl,
         description = description,
-        descriptionElement = parseDescription(this, accountHost, emojis),
+        descriptionElement = parseDescription(this, accountHost),
         matrices = UiUser.Misskey.Matrices(
             fansCount = followersCount.toLong(),
             followsCount = followingCount.toLong(),
@@ -255,15 +249,14 @@ internal fun User.toUi(
             blocked = isBlocked ?: false,
             muted = isMuted ?: false,
             hasPendingFollowRequestFromYou = hasPendingFollowRequestFromYou ?: false,
-            hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false,
+            hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false
         )
     )
 }
 
 private fun parseDescription(
     user: User,
-    accountHost: String,
-    emojis: List<EmojiSimple>,
+    accountHost: String
 ): Element? {
     if (user.description.isNullOrEmpty()) {
         return null
@@ -271,14 +264,13 @@ private fun parseDescription(
     val token = misskeyParser.parse(user.description)
     val element = Element("body")
     token.forEach {
-        element.appendChild(it.toElement(accountHost, emojis))
+        element.appendChild(it.toElement(accountHost))
     }
     return element
 }
 
 private fun Token.toElement(
-    accountHost: String,
-    emojis: List<EmojiSimple>,
+    accountHost: String
 ): Node {
     return when (this) {
         is CashTagToken -> Element("a").apply {
@@ -287,12 +279,8 @@ private fun Token.toElement(
         }
 
         is EmojiToken -> {
-            if (value in emojis.map { it.name }) {
-                Element("img").apply {
-                    attr("src", emojis.first { it.name == value }.url)
-                }
-            } else {
-                TextNode(value)
+            Element("img").apply {
+                attr("src", resolveMisskeyEmoji(value, accountHost))
             }
         }
 
@@ -322,8 +310,7 @@ private fun Token.toElement(
 
 private fun parseName(
     user: User,
-    accountHost: String,
-    emojis: List<EmojiSimple>,
+    accountHost: String
 ): Element {
     if (user.name.isNullOrEmpty()) {
         return Element("body")
@@ -331,15 +318,24 @@ private fun parseName(
     val token = misskeyParser.parse(user.name)
     val element = Element("body")
     token.forEach {
-        element.appendChild(it.toElement(accountHost, emojis))
+        element.appendChild(it.toElement(accountHost))
     }
     return element
 }
 
-
 internal fun EmojiSimple.toUi(): UiEmoji {
     return UiEmoji(
         shortcode = name,
-        url = url,
+        url = url
     )
+}
+
+internal fun resolveMisskeyEmoji(name: String, accountHost: String): String {
+    return name.trim(':').let {
+        if (it.endsWith("@.")) {
+            "https://$accountHost/emoji/${it.dropLast(2)}.webp"
+        } else {
+            "https://$accountHost/emoji/$it.webp"
+        }
+    }
 }

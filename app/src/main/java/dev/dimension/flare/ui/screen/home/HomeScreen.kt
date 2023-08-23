@@ -7,7 +7,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.CircleShape
@@ -30,13 +31,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -58,15 +67,20 @@ import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.profile.ProfileScreen
 import dev.dimension.flare.ui.theme.FlareTheme
+import kotlin.math.roundToInt
 
 sealed class Screen(
     val route: String,
     @StringRes val title: Int,
     val icon: ImageVector
 ) {
-    object HomeTimeline : Screen("HomeTimeline", R.string.home_tab_home_title, Icons.Default.Home)
-    object Notification : Screen("Notification", R.string.home_tab_notifications_title, Icons.Default.Notifications)
-    object Me : Screen("Me", R.string.home_tab_me_title, Icons.Default.AccountCircle)
+    data object HomeTimeline :
+        Screen("HomeTimeline", R.string.home_tab_home_title, Icons.Default.Home)
+
+    data object Notification :
+        Screen("Notification", R.string.home_tab_notifications_title, Icons.Default.Notifications)
+
+    data object Me : Screen("Me", R.string.home_tab_me_title, Icons.Default.AccountCircle)
 }
 
 private val items = listOf(
@@ -116,14 +130,38 @@ fun HomeScreen(
     val currentScreen = remember(currentDestination) {
         items.find { it.route == currentDestination?.route }
     }
+
+    val bottomBarHeightPx = with(LocalDensity.current) {
+        val navigationBar = WindowInsets.navigationBars
+        remember(navigationBar) {
+            80.0.dp.roundToPx().toFloat() + navigationBar.getBottom(this)
+        }
+    }
+    var bottomBarOffsetHeightPx by rememberSaveable { mutableFloatStateOf(0f) }
+    val nestedScrollConnection = remember(bottomBarHeightPx) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                val newOffset = bottomBarOffsetHeightPx + delta
+                bottomBarOffsetHeightPx = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+
+                return Offset.Zero
+            }
+        }
+    }
+
     FlareTheme {
         Scaffold(
-            modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            modifier = modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .nestedScroll(nestedScrollConnection),
             floatingActionButton = {
                 AnimatedVisibility(
-                    currentScreen == Screen.HomeTimeline,
+                    currentScreen == Screen.HomeTimeline && bottomBarOffsetHeightPx > -(bottomBarHeightPx / 2),
                     enter = scaleIn(),
-                    exit = scaleOut()
+                    exit = scaleOut(),
+                    modifier = Modifier
+                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) }
                 ) {
                     FloatingActionButton(
                         onClick = {
@@ -200,6 +238,7 @@ fun HomeScreen(
                                             )
                                         }
                                     }
+
                                     Screen.Me -> {
                                         IconButton(
                                             onClick = {
@@ -212,6 +251,7 @@ fun HomeScreen(
                                             )
                                         }
                                     }
+
                                     Screen.Notification -> Unit
                                 }
                             }
@@ -220,7 +260,10 @@ fun HomeScreen(
                 )
             },
             bottomBar = {
-                NavigationBar {
+                NavigationBar(
+                    modifier = Modifier
+                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) }
+                ) {
                     items.forEach { screen ->
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = null) },
@@ -239,26 +282,26 @@ fun HomeScreen(
                     }
                 }
             }
-        ) {
+        ) { contentPadding ->
             NavHost(
                 navController = navController,
                 startDestination = Screen.HomeTimeline.route,
                 modifier = Modifier
-                    .padding(it)
                     .consumeWindowInsets(WindowInsets.systemBars)
             ) {
                 composable(Screen.HomeTimeline.route) {
-                    HomeTimelineScreen()
+                    HomeTimelineScreen(contentPadding)
                 }
                 composable(Screen.Notification.route) {
-                    NotificationScreen()
+                    NotificationScreen(contentPadding)
                 }
                 composable(Screen.Me.route) {
                     when (state.user) {
                         is UiState.Error -> Unit
                         is UiState.Loading -> Unit
                         is UiState.Success -> ProfileScreen(
-                            showTopBar = false
+                            showTopBar = false,
+                            contentPadding = contentPadding
                         )
                     }
                 }

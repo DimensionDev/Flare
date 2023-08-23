@@ -16,19 +16,17 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.save
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.cache.MisskeyEmojiCache
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
-import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 
 @OptIn(ExperimentalPagingApi::class)
 internal class HomeTimelineRemoteMediator(
     private val account: UiAccount.Misskey,
     private val database: CacheDatabase,
-    private val pagingKey: String,
-    private val emojiCache: MisskeyEmojiCache,
+    private val pagingKey: String
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
 
     override suspend fun load(
@@ -43,7 +41,7 @@ internal class HomeTimelineRemoteMediator(
                 )
                 LoadType.REFRESH -> {
                     service.homeTimeline(
-                        count = state.config.pageSize,
+                        count = state.config.pageSize
                     )
                 }
 
@@ -60,13 +58,12 @@ internal class HomeTimelineRemoteMediator(
             } ?: return MediatorResult.Success(
                 endOfPaginationReached = true
             )
-            val emojis = emojiCache.getEmojis(account = account)
             if (loadType == LoadType.REFRESH) {
                 database.pagingTimelineDao().delete(pagingKey, account.accountKey)
             }
             with(database) {
                 with(response) {
-                    save(account.accountKey, pagingKey, emojis)
+                    save(account.accountKey, pagingKey)
                 }
             }
 
@@ -87,8 +84,7 @@ internal fun homeTimelineDataSource(
     account: UiAccount.Misskey,
     pageSize: Int = 20,
     pagingKey: String = "home",
-    database: CacheDatabase = rememberInject(),
-    emojiCache: MisskeyEmojiCache = rememberInject(),
+    database: CacheDatabase = rememberInject()
 ): Flow<PagingData<UiStatus>> {
     return remember(
         account.accountKey
@@ -98,8 +94,7 @@ internal fun homeTimelineDataSource(
             remoteMediator = HomeTimelineRemoteMediator(
                 account,
                 database,
-                pagingKey,
-                emojiCache,
+                pagingKey
             )
         ) {
             database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)

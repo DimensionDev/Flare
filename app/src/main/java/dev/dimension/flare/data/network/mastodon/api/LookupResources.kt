@@ -19,6 +19,6 @@ interface LookupResources {
 
     @GET("/api/v1/accounts/lookup")
     suspend fun lookupUserByAcct(
-        @Query("acct") acct: String,
+        @Query("acct") acct: String
     ): Account?
 }

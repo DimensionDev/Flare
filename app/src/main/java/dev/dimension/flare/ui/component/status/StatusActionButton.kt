@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 internal fun StatusActionButton(
     icon: ImageVector,
@@ -29,7 +29,8 @@ internal fun StatusActionButton(
     onClicked: () -> Unit,
     modifier: Modifier = Modifier,
     color: Color = LocalContentColor.current,
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    content: @Composable RowScope.() -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Row(
@@ -64,5 +65,6 @@ internal fun StatusActionButton(
                 color = color
             )
         }
+        content.invoke(this)
     }
 }

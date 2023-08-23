@@ -1,5 +1,5 @@
 [versions]
-agp = "8.2.0-alpha15"
+agp = "8.2.0-alpha16"
 kotlin = "1.9.0"
 core-ktx = "1.10.1"
 junit = "4.13.2"
@@ -11,7 +11,7 @@ compose-bom = "2023.09.00-alpha02"
 ksp = "1.9.0-1.0.13"
 room = "2.5.2"
 paging = "3.2.0"
-navigation = "2.7.0-rc01"
+navigation = "2.7.0"
 kotlinx-datetime = "0.4.0"
 kotlinx-collections-immutable = "0.3.5"
 kotlinx-serialization-json = "1.5.1"
@@ -70,6 +70,7 @@ koject-compose-core = { group = "com.moriatsushi.koject", name = "koject-compose
 
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
+coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 apng = "com.github.penfeizhou.android.animation:apng:2.26.0"
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
@@ -108,7 +109,7 @@ navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-atomicfu"]
 koject = ["koject-core", "koject-android-core", "koject-android-activity", "koject-android-fragment", "koject-android-viewmodel", "koject-compose-core"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-client-okhttp", "okhttp3-logging-interceptor"]
-coil = ["coil-compose", "coil-gif", "apng"]
+coil = ["coil-compose", "coil-gif", "apng", "coil-svg"]
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
 

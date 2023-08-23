@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.compose
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -168,7 +169,27 @@ fun ReplyRoute(
         onBack = {
             navigator.navigateUp()
         },
-        replyTo = replyTo
+        status = ComposeStatus.Reply(replyTo)
+    )
+}
+
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
+        )
+    ]
+)
+@Composable
+fun Quote(
+    navigator: DestinationsNavigator,
+    quoted: MicroBlogKey
+) {
+    ComposeScreen(
+        onBack = {
+            navigator.navigateUp()
+        },
+        status = ComposeStatus.Quote(quoted)
     )
 }
 
@@ -198,6 +219,17 @@ object ComposeTransitions : DestinationStyle.Animated {
     }
 }
 
+private sealed interface ComposeStatus {
+    val statusKey: MicroBlogKey
+    data class Quote(
+        override val statusKey: MicroBlogKey
+    ) : ComposeStatus
+    data class Reply(
+        override val statusKey: MicroBlogKey
+    ) : ComposeStatus
+}
+
+@SuppressLint("MissingPermission")
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
@@ -205,13 +237,13 @@ object ComposeTransitions : DestinationStyle.Animated {
     ExperimentalPermissionsApi::class
 )
 @Composable
-fun ComposeScreen(
+private fun ComposeScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    replyTo: MicroBlogKey? = null
+    status: ComposeStatus? = null
 ) {
     val state by producePresenter {
-        composePresenter(replyTo)
+        composePresenter(status)
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -250,7 +282,10 @@ fun ComposeScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = stringResource(id = R.string.navigate_back)
+                            )
                         }
                     },
                     actions = {
@@ -303,49 +338,15 @@ fun ComposeScreen(
                             ) {
                                 Icon(imageVector = Icons.Default.Poll, contentDescription = null)
                             }
-                            IconButton(
-                                onClick = {
-                                    state.visibilityState.showVisibilityMenu()
-                                }
-                            ) {
-                                VisibilityIcon(visibility = state.visibilityState.visibility)
-                                DropdownMenu(
-                                    expanded = state.visibilityState.showVisibilityMenu,
-                                    onDismissRequest = {
-                                        state.visibilityState.hideVisibilityMenu()
-                                    },
-                                    properties = PopupProperties(focusable = false)
-                                ) {
-                                    state.visibilityState.allVisibilities.forEach { visibility ->
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                state.visibilityState.setVisibility(visibility)
-                                                state.visibilityState.hideVisibilityMenu()
-                                            },
-                                            text = {
-                                                Column(
-                                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                                    horizontalAlignment = Alignment.Start
-                                                ) {
-                                                    Text(
-                                                        text = stringResource(id = visibility.localName),
-                                                        style = MaterialTheme.typography.bodyLarge
-                                                    )
-                                                    Text(
-                                                        text = stringResource(id = visibility.localDescription),
-                                                        style = MaterialTheme.typography.bodySmall
-                                                    )
-                                                }
-                                            },
-                                            leadingIcon = {
-                                                VisibilityIcon(visibility = visibility)
-                                            },
-                                            contentPadding = PaddingValues(
-                                                horizontal = 16.dp,
-                                                vertical = 8.dp
-                                            )
-                                        )
-                                    }
+                            state.visibilityState.onSuccess { visibilityState ->
+                                when (visibilityState) {
+                                    is MastodonVisibilityState -> MastodonVisibilityContent(
+                                        visibilityState
+                                    )
+
+                                    is MisskeyVisibilityState -> MisskeyVisibilityContent(
+                                        visibilityState
+                                    )
                                 }
                             }
                             IconButton(
@@ -637,6 +638,136 @@ fun ComposeScreen(
 }
 
 @Composable
+private fun MisskeyVisibilityContent(
+    visibilityState: MisskeyVisibilityState
+) {
+    IconButton(
+        onClick = {
+            visibilityState.showVisibilityMenu()
+        }
+    ) {
+        dev.dimension.flare.ui.component.status.misskey.VisibilityIcon(visibility = visibilityState.visibility)
+        DropdownMenu(
+            expanded = visibilityState.showVisibilityMenu,
+            onDismissRequest = {
+                visibilityState.hideVisibilityMenu()
+            },
+            properties = PopupProperties(focusable = false)
+        ) {
+            visibilityState.allVisibilities.forEach { visibility ->
+                DropdownMenuItem(
+                    onClick = {
+                        visibilityState.setVisibility(visibility)
+                        visibilityState.hideVisibilityMenu()
+                    },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            Text(
+                                text = stringResource(id = visibility.localName),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = stringResource(id = visibility.localDescription),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    },
+                    leadingIcon = {
+                        dev.dimension.flare.ui.component.status.misskey.VisibilityIcon(visibility = visibility)
+                    },
+                    contentPadding = PaddingValues(
+                        horizontal = 16.dp,
+                        vertical = 8.dp
+                    )
+                )
+            }
+            DropdownMenuItem(
+                text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.misskey_compose_local_only),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = stringResource(id = R.string.misskey_compose_local_only_description),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                },
+                leadingIcon = {
+                    Checkbox(
+                        checked = visibilityState.localOnly,
+                        onCheckedChange = {
+                            visibilityState.setLocalOnly(it)
+                        }
+                    )
+                },
+                onClick = {
+                    visibilityState.setLocalOnly(!visibilityState.localOnly)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun MastodonVisibilityContent(
+    visibilityState: MastodonVisibilityState
+) {
+    IconButton(
+        onClick = {
+            visibilityState.showVisibilityMenu()
+        }
+    ) {
+        VisibilityIcon(visibility = visibilityState.visibility)
+        DropdownMenu(
+            expanded = visibilityState.showVisibilityMenu,
+            onDismissRequest = {
+                visibilityState.hideVisibilityMenu()
+            },
+            properties = PopupProperties(focusable = false)
+        ) {
+            visibilityState.allVisibilities.forEach { visibility ->
+                DropdownMenuItem(
+                    onClick = {
+                        visibilityState.setVisibility(visibility)
+                        visibilityState.hideVisibilityMenu()
+                    },
+                    text = {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            Text(
+                                text = stringResource(id = visibility.localName),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = stringResource(id = visibility.localDescription),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    },
+                    leadingIcon = {
+                        VisibilityIcon(visibility = visibility)
+                    },
+                    contentPadding = PaddingValues(
+                        horizontal = 16.dp,
+                        vertical = 8.dp
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun imeHeight(): Dp {
     var height by remember { mutableIntStateOf(0) }
     val imeHeight = WindowInsets.ime.getBottom(LocalDensity.current)
@@ -678,7 +809,7 @@ private fun PollOption(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun composePresenter(
-    replyTo: MicroBlogKey?,
+    status: ComposeStatus? = null,
     composeUseCase: ComposeUseCase = rememberInject()
 ) = run {
     val account by activeAccountPresenter()
@@ -693,14 +824,18 @@ private fun composePresenter(
     }.collectAsState(initial = "")
     val pollState = pollPresenter()
     val mediaState = mediaPresenter()
-    val visibilityState = visibilityPresenter()
-    val contentWarningState = contentWarningPresenter()
-    val replyState = replyTo?.let { replyTo ->
-        account.map {
-            replyPresenter(it, replyTo)
+    val visibilityState = account.map {
+        when (it) {
+            is UiAccount.Mastodon -> mastodonVisibilityPresenter()
+            is UiAccount.Misskey -> misskeyVisibilityPresenter()
         }
     }
-
+    val contentWarningState = contentWarningPresenter()
+    val replyState = status?.let { status ->
+        account.map {
+            statusPresenter(it, status)
+        }
+    }
     replyState?.onSuccess {
         LaunchedEffect(it.listState.itemCount) {
             if (it.listState.itemCount == 1 && textFieldState.text.isEmpty()) {
@@ -710,11 +845,13 @@ private fun composePresenter(
                             append("${item.user.handle} ")
                         }
                     }
+
                     is UiStatus.Misskey -> {
-                        textFieldState.edit {
-                            append("${item.user.handle} ")
-                        }
+//                        textFieldState.edit {
+//                            append("${item.user.handle} ")
+//                        }
                     }
+
                     is UiStatus.MastodonNotification, is UiStatus.MisskeyNotification, null -> Unit
                 }
             }
@@ -749,49 +886,70 @@ private fun composePresenter(
 
         @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
-            account.onSuccess {
-                val data = when (it) {
-                    is UiAccount.Mastodon -> ComposeData.Mastodon(
-                        content = textFieldState.text.toString(),
-                        medias = mediaState.medias,
-                        poll = if (pollState.enabled) {
-                            ComposeData.Mastodon.Poll(
-                                multiple = !pollState.pollSingleChoice,
-                                expiresIn = pollState.expiredAt.duration.inWholeSeconds,
-                                options = pollState.options.map { option ->
-                                    option.text.toString()
-                                }
-                            )
-                        } else {
-                            null
-                        },
-                        sensitive = mediaState.isMediaSensitive,
-                        spoilerText = contentWarningState.textFieldState.text.toString(),
-                        visibility = visibilityState.visibility,
-                        inReplyToID = replyTo?.id,
-                        account = it
-                    )
+            visibilityState.onSuccess { visibility ->
+                account.onSuccess {
+                    val data = when (it) {
+                        is UiAccount.Mastodon -> ComposeData.Mastodon(
+                            content = textFieldState.text.toString(),
+                            medias = mediaState.medias,
+                            poll = if (pollState.enabled) {
+                                ComposeData.Mastodon.Poll(
+                                    multiple = !pollState.pollSingleChoice,
+                                    expiresIn = pollState.expiredAt.duration.inWholeSeconds,
+                                    options = pollState.options.map { option ->
+                                        option.text.toString()
+                                    }
+                                )
+                            } else {
+                                null
+                            },
+                            sensitive = mediaState.isMediaSensitive,
+                            spoilerText = contentWarningState.textFieldState.text.toString(),
+                            visibility = visibility.visibility as UiStatus.Mastodon.Visibility,
+                            inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                            account = it
+                        )
 
-                    is UiAccount.Misskey -> ComposeData.MissKey(
-                        account = it,
-                    )
+                        is UiAccount.Misskey -> ComposeData.MissKey(
+                            account = it,
+                            medias = mediaState.medias,
+                            poll = if (pollState.enabled) {
+                                ComposeData.MissKey.Poll(
+                                    multiple = !pollState.pollSingleChoice,
+                                    expiredAfter = pollState.expiredAt.duration.inWholeMilliseconds,
+                                    options = pollState.options.map { option ->
+                                        option.text.toString()
+                                    }
+                                )
+                            } else {
+                                null
+                            },
+                            sensitive = mediaState.isMediaSensitive,
+                            spoilerText = contentWarningState.textFieldState.text.toString(),
+                            visibility = visibility.visibility as UiStatus.Misskey.Visibility,
+                            inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                            renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+                            content = textFieldState.text.toString(),
+                            localOnly = (visibility as MisskeyVisibilityState).localOnly
+                        )
+                    }
+                    composeUseCase(data)
                 }
-                composeUseCase(data)
             }
         }
     }
 }
 
 @Composable
-private fun replyPresenter(
+private fun statusPresenter(
     account: UiAccount,
-    replyTo: MicroBlogKey
+    status: ComposeStatus
 ) = run {
     val listState = when (account) {
-        is UiAccount.Mastodon -> statusOnlyDataSource(account, replyTo)
+        is UiAccount.Mastodon -> statusOnlyDataSource(account, status.statusKey)
         is UiAccount.Misskey -> dev.dimension.flare.data.datasource.misskey.statusOnlyDataSource(
             account = account,
-            statusKey = replyTo
+            statusKey = status.statusKey
         )
     }.collectAsLazyPagingItems()
 
@@ -831,27 +989,87 @@ private fun contentWarningPresenter() = run {
     }
 }
 
+internal sealed interface VisibilityState<T> {
+    val visibility: T
+    val showVisibilityMenu: Boolean
+    val allVisibilities: List<T>
+    fun setVisibility(value: T)
+    fun showVisibilityMenu()
+    fun hideVisibilityMenu()
+}
+
+internal abstract class MastodonVisibilityState(
+    override val visibility: UiStatus.Mastodon.Visibility,
+    override val showVisibilityMenu: Boolean,
+    override val allVisibilities: List<UiStatus.Mastodon.Visibility>
+) : VisibilityState<UiStatus.Mastodon.Visibility>
+
+internal abstract class MisskeyVisibilityState(
+    override val visibility: UiStatus.Misskey.Visibility,
+    override val showVisibilityMenu: Boolean,
+    override val allVisibilities: List<UiStatus.Misskey.Visibility>,
+    val localOnly: Boolean
+) : VisibilityState<UiStatus.Misskey.Visibility> {
+    abstract fun setLocalOnly(value: Boolean)
+}
+
 @Composable
-private fun visibilityPresenter() = run {
+private fun misskeyVisibilityPresenter() = run {
+    var localOnly by remember {
+        mutableStateOf(false)
+    }
+    var showVisibilityMenu by remember {
+        mutableStateOf(false)
+    }
+    var visibility by remember {
+        mutableStateOf(UiStatus.Misskey.Visibility.Public)
+    }
+    object : MisskeyVisibilityState(
+        visibility = visibility,
+        showVisibilityMenu = showVisibilityMenu,
+        allVisibilities = UiStatus.Misskey.Visibility.values().toList(),
+        localOnly = localOnly
+    ) {
+        override fun setLocalOnly(value: Boolean) {
+            localOnly = value
+        }
+
+        override fun setVisibility(value: UiStatus.Misskey.Visibility) {
+            visibility = value
+        }
+
+        override fun showVisibilityMenu() {
+            showVisibilityMenu = true
+        }
+
+        override fun hideVisibilityMenu() {
+            showVisibilityMenu = false
+        }
+    }
+}
+
+@Composable
+private fun mastodonVisibilityPresenter() = run {
     var showVisibilityMenu by remember {
         mutableStateOf(false)
     }
     var visibility by remember {
         mutableStateOf(UiStatus.Mastodon.Visibility.Public)
     }
-    object {
-        val visibility = visibility
-        val showVisibilityMenu = showVisibilityMenu
-        val allVisibilities = UiStatus.Mastodon.Visibility.values()
-        fun setVisibility(value: UiStatus.Mastodon.Visibility) {
+    object : MastodonVisibilityState(
+        visibility = visibility,
+        showVisibilityMenu = showVisibilityMenu,
+        allVisibilities = UiStatus.Mastodon.Visibility.values().toList()
+    ) {
+        override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
             visibility = value
         }
 
-        fun showVisibilityMenu() {
+        override fun showVisibilityMenu() {
             showVisibilityMenu = true
         }
 
-        fun hideVisibilityMenu() {
+        override fun hideVisibilityMenu() {
             showVisibilityMenu = false
         }
     }
@@ -886,14 +1104,14 @@ private fun mediaPresenter() = run {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun pollPresenter() = run {
     var enabled by remember {
         mutableStateOf(false)
     }
     var options by remember {
-        mutableStateOf(listOf<TextFieldState>(TextFieldState(), TextFieldState()))
+        mutableStateOf(listOf(TextFieldState(), TextFieldState()))
     }
     var pollSingleChoice by remember {
         mutableStateOf(true)

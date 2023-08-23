@@ -30,14 +30,12 @@ sealed interface UserContent {
     @Serializable
     @SerialName("Misskey")
     data class Misskey(
-        val data: dev.dimension.flare.data.network.misskey.api.model.User,
-        val emojis: List<dev.dimension.flare.data.network.misskey.api.model.EmojiSimple>,
+        val data: dev.dimension.flare.data.network.misskey.api.model.User
     ) : UserContent
 
     @Serializable
     @SerialName("MisskeyLite")
     data class MisskeyLite(
-        val data: dev.dimension.flare.data.network.misskey.api.model.UserLite,
-        val emojis: List<dev.dimension.flare.data.network.misskey.api.model.EmojiSimple>,
+        val data: dev.dimension.flare.data.network.misskey.api.model.UserLite
     ) : UserContent
 }

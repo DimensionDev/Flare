@@ -15,8 +15,6 @@
 
 package dev.dimension.flare.data.network.misskey.api.model
 
-import kotlinx.serialization.Required
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -36,5 +34,5 @@ data class NotesSearchByTagRequest(
     /**
      * The outer arrays are chained with OR, the inner arrays are chained with AND.
      */
-    val query: List<List<String>>? = null,
+    val query: List<List<String>>? = null
 )

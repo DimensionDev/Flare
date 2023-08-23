@@ -8,9 +8,9 @@ import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import java.util.UUID
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 @Entity(
     tableName = "status",
@@ -41,15 +41,13 @@ sealed interface StatusContent {
     @Serializable
     @SerialName("misskey")
     data class Misskey(
-        val data: dev.dimension.flare.data.network.misskey.api.model.Note,
-        val emojis: List<dev.dimension.flare.data.network.misskey.api.model.EmojiSimple>,
+        val data: dev.dimension.flare.data.network.misskey.api.model.Note
     ) : StatusContent
 
     @Serializable
     @SerialName("misskey-notification")
     data class MisskeyNotification(
-        val data: dev.dimension.flare.data.network.misskey.api.model.Notification,
-        val emojis: List<dev.dimension.flare.data.network.misskey.api.model.EmojiSimple>,
+        val data: dev.dimension.flare.data.network.misskey.api.model.Notification
     ) : StatusContent
 }
 

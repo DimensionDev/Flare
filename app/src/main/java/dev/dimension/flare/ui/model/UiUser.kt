@@ -3,8 +3,8 @@ package dev.dimension.flare.ui.model
 import androidx.compose.ui.unit.LayoutDirection
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
-import java.text.Bidi
 import org.jsoup.nodes.Element
+import java.text.Bidi
 
 sealed interface UiUser {
     val userKey: MicroBlogKey
@@ -68,7 +68,7 @@ sealed interface UiUser {
         val matrices: Matrices,
         val isCat: Boolean,
         val isBot: Boolean,
-        val relation: UiRelation.Misskey,
+        val relation: UiRelation.Misskey
     ) : UiUser {
 
         override val handle = "@$handleInternal@$remoteHost"

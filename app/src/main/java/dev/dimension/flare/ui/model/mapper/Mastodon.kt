@@ -27,7 +27,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 
-
 internal fun Notification.toUi(
     accountKey: MicroBlogKey
 ): UiStatus {
@@ -302,6 +301,5 @@ internal fun DbEmoji.toUi(): List<UiEmoji> {
                 )
             }
         }
-
     }
 }

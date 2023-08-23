@@ -6,11 +6,11 @@ import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.humanizer.humanizePercentage
-import java.text.Bidi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.jsoup.nodes.Element
+import java.text.Bidi
 
 internal sealed class UiStatus {
     abstract val statusKey: MicroBlogKey
@@ -42,7 +42,7 @@ internal sealed class UiStatus {
 
             is Misskey -> buildString {
                 append("misskey")
-                if (renote != null){
+                if (renote != null) {
                     append("_reblog")
                     append("_${renote.itemType}")
                 }
@@ -127,7 +127,7 @@ internal sealed class UiStatus {
         data class PollOption(
             val title: String,
             val votesCount: Long,
-            val percentage: Float,
+            val percentage: Float
         ) {
             val humanizedPercentage by lazy { percentage.humanizePercentage() }
         }
@@ -181,13 +181,13 @@ internal sealed class UiStatus {
 
         data class Reaction(
             val emojiReactions: ImmutableList<EmojiReaction>,
-            val myReaction: String?,
+            val myReaction: String?
         )
 
         data class EmojiReaction(
             val name: String,
             val url: String,
-            val count: Long,
+            val count: Long
         ) {
             val humanizedCount by lazy {
                 count.humanize()
@@ -198,14 +198,14 @@ internal sealed class UiStatus {
             Public,
             Home,
             Followers,
-            Specified,
+            Specified
         }
 
         data class Poll(
             val id: String,
             val options: ImmutableList<PollOption>,
             val expiresAt: Instant,
-            val multiple: Boolean,
+            val multiple: Boolean
         ) {
             val expired: Boolean by lazy { expiresAt < Clock.System.now() }
             val humanizedExpiresAt by lazy { expiresAt.humanize() }
@@ -215,14 +215,14 @@ internal sealed class UiStatus {
             val title: String,
             val votesCount: Long,
             val percentage: Float,
-            val voted: Boolean,
+            val voted: Boolean
         ) {
             val humanizedPercentage by lazy { percentage.humanizePercentage() }
         }
 
         data class Matrices(
             val replyCount: Long,
-            val renoteCount: Long,
+            val renoteCount: Long
         ) {
             val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
             val humanizedReNoteCount by lazy { if (renoteCount > 0) renoteCount.toString() else null }
@@ -236,7 +236,7 @@ internal sealed class UiStatus {
         val createdAt: Instant,
         val note: Misskey?,
         val type: Notification.Type,
-        val achievement: String?,
+        val achievement: String?
     ) : UiStatus() {
         val humanizedTime by lazy {
             createdAt.humanize()
@@ -258,4 +258,20 @@ internal val UiStatus.Mastodon.Visibility.localDescription: Int
         UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted_description
         UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private_description
         UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct_description
+    }
+
+internal val UiStatus.Misskey.Visibility.localName: Int
+    get() = when (this) {
+        UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public
+        UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home
+        UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers
+        UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified
+    }
+
+internal val UiStatus.Misskey.Visibility.localDescription: Int
+    get() = when (this) {
+        UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public_description
+        UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home_description
+        UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers_description
+        UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified_description
     }

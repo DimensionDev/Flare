@@ -16,7 +16,6 @@
 package dev.dimension.flare.data.network.misskey.api.model
 
 import kotlinx.serialization.Contextual
-import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -88,6 +87,3 @@ data class Note(
     @SerialName(value = "myReaction") val myReaction: kotlin.String? = null
 
 )
-
-
-

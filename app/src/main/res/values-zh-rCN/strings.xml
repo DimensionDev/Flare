@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="login_button">登录</string>
+    <string name="navigate_back">返回</string>
 
     <string name="home_tab_home_title">首页</string>
     <string name="home_tab_notifications_title">通知</string>
@@ -101,6 +102,21 @@
     <string name="notification_channel_compose_name">发送</string>
     <string name="notification_channel_compose_description">用于通知嘟文发送的状态</string>
 
-
     <string name="status_title">嘟文详情</string>
+
+    <string name="misskey_compose_local_only">仅本站可见</string>
+    <string name="misskey_compose_local_only_description">只有本站的用户可以看到这条嘟文</string>
+
+
+    <string name="misskey_item_action_renote">转嘟</string>
+    <string name="misskey_item_action_quote">引用</string>
+
+    <string name="misskey_visibility_public">公开</string>
+    <string name="misskey_visibility_home">本站可见</string>
+    <string name="misskey_visibility_followers">关注可见</string>
+    <string name="misskey_visibility_specified">提到的人可见</string>
+    <string name="misskey_visibility_public_description">任何人都可以看到这条嘟文</string>
+    <string name="misskey_visibility_home_description">只有本站的用户可以看到这条嘟文</string>
+    <string name="misskey_visibility_followers_description">只有关注你的人可以看到这条嘟文</string>
+    <string name="misskey_visibility_specified_description">只有提到的人可以看到这条嘟文</string>
 </resources>

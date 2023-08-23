@@ -10,10 +10,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.text2.input.TextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
@@ -52,13 +59,19 @@ fun LoginScreenPreview() {
 
 @Destination
 @Composable
-fun MastodonLoginRoute() {
-    MastodonLoginScreen()
+fun MastodonLoginRoute(
+    navigator: DestinationsNavigator
+) {
+    MastodonLoginScreen(
+        onBack = navigator::navigateUp
+    )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-internal fun MastodonLoginScreen() {
+internal fun MastodonLoginScreen(
+    onBack: () -> Unit = {}
+) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
         loginPresenter(
@@ -72,18 +85,35 @@ internal fun MastodonLoginScreen() {
         focusRequester.requestFocus()
     }
     FlareTheme {
-        Scaffold {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = onBack
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = stringResource(id = R.string.navigate_back)
+                            )
+                        }
+                    }
+                )
+            }
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
-                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .weight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
                 ) {

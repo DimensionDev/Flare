@@ -21,7 +21,6 @@ internal fun ktorfit(
     baseUrl(baseUrl)
     httpClient(
         HttpClient(OkHttp) {
-
             install(ContentNegotiation) {
                 json(JSON)
             }

@@ -211,5 +211,5 @@ internal fun status() {
 @Provides
 internal data class StatusEvent(
     val mastodonStatusEvent: MastodonStatusEvent,
-    val misskeyStatusEvent: MisskeyStatusEvent,
+    val misskeyStatusEvent: MisskeyStatusEvent
 )

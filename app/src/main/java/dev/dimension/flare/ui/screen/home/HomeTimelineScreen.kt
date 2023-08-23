@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -50,7 +51,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun HomeTimelineScreen() {
+internal fun HomeTimelineScreen(
+    contentPadding: PaddingValues
+) {
     val state by producePresenter {
         homeTimelinePresenter()
     }
@@ -73,9 +76,11 @@ internal fun HomeTimelineScreen() {
             .fillMaxSize(),
         onRefresh = state::refresh,
         refreshing = state.refreshing,
+        indicatorPadding = contentPadding,
         content = {
             LazyColumn(
                 state = lazyListState,
+                contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 with(state.listState) {
@@ -131,7 +136,7 @@ private fun homeTimelinePresenter(
     var showNewToots by remember { mutableStateOf(false) }
     val refreshing =
         listState is UiState.Loading ||
-                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+            listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
     if (listState is UiState.Success && listState.data.itemCount > 0) {
         LaunchedEffect(Unit) {
             snapshotFlow { listState.data.peek(0)?.statusKey }

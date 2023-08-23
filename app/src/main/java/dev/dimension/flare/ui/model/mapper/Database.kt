@@ -18,13 +18,11 @@ internal fun DbPagingTimelineWithStatus.toUi(): UiStatus {
         )
 
         is StatusContent.Misskey -> status.data.toUi(
-            accountKey = timeline.accountKey,
-            emojis = status.emojis
+            accountKey = timeline.accountKey
         )
 
         is StatusContent.MisskeyNotification -> status.data.toUi(
-            accountKey = timeline.accountKey,
-            emojis = status.emojis
+            accountKey = timeline.accountKey
         )
     }
 }
@@ -34,13 +32,11 @@ internal fun DbUser.toUi(): UiUser {
         is UserContent.Mastodon -> user.data.toUi(host = userKey.host)
 
         is UserContent.Misskey -> user.data.toUi(
-            accountHost = userKey.host,
-            emojis = user.emojis
+            accountHost = userKey.host
         )
 
         is UserContent.MisskeyLite -> user.data.toUi(
-            accountHost = userKey.host,
-            emojis = user.emojis
+            accountHost = userKey.host
         )
     }
 }

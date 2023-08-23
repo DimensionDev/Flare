@@ -15,8 +15,6 @@
 
 package dev.dimension.flare.data.network.misskey.api.model
 
-import kotlinx.serialization.Required
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -27,5 +25,5 @@ import kotlinx.serialization.Serializable
 data class PagesShowRequest(
     val pageId: String? = null,
     val name: String? = null,
-    val username: String? = null,
+    val username: String? = null
 )

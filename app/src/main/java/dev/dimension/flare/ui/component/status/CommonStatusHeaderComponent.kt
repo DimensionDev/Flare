@@ -23,7 +23,6 @@ import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.theme.MediumAlpha
 
-
 @Composable
 internal fun CommonStatusHeaderComponent(
     data: UiUser,

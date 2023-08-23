@@ -6,6 +6,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import coil.decode.SvgDecoder
 import com.moriatsushi.koject.Koject
 import com.moriatsushi.koject.android.application
 import com.moriatsushi.koject.start
@@ -28,6 +29,7 @@ class App : Application(), ImageLoaderFactory {
                     add(GifDecoder.Factory())
                 }
                 add(AnimatedPngDecoder.Factory())
+                add(SvgDecoder.Factory())
             }
             .crossfade(true)
             .build()

@@ -52,7 +52,10 @@ internal fun SettingsScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = stringResource(id = R.string.navigate_back)
+                            )
                         }
                     }
                 )

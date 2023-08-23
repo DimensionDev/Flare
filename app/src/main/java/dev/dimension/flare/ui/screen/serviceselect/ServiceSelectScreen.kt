@@ -5,14 +5,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,6 +43,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.screen.destinations.MastodonLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MisskeyLoginRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -53,16 +64,23 @@ fun ServiceSelectRoute(
         },
         toMisskey = {
             navigator.navigate(MisskeyLoginRouteDestination)
-        }
+        },
+        toBluesky = {
+//            navigator.navigate(BlueskyLoginRouteDestination)
+        },
+        onBack = navigator::navigateUp
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceSelectScreen(
     toMastodon: () -> Unit,
     toPasskey: () -> Unit,
     toMisskey: () -> Unit,
-    modifier: Modifier = Modifier
+    toBluesky: () -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {}
 ) {
     val view = LocalView.current
     val state by producePresenter {
@@ -70,7 +88,23 @@ fun ServiceSelectScreen(
     }
     FlareTheme {
         Scaffold(
-            modifier = modifier
+            modifier = modifier,
+            topBar = {
+                TopAppBar(
+                    title = {
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = onBack
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = stringResource(id = R.string.navigate_back)
+                            )
+                        }
+                    }
+                )
+            }
         ) {
             Box(
                 modifier = Modifier
@@ -84,7 +118,7 @@ fun ServiceSelectScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f),
+                            .weight(0.8f),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
                     ) {
@@ -98,39 +132,116 @@ fun ServiceSelectScreen(
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
-                    Column(
+                    LazyVerticalGrid(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(2f)
                             .padding(horizontal = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.CenterHorizontally
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.Top
+                        ),
+                        columns = GridCells.Adaptive(112.dp)
                     ) {
-                        Button(
-                            onClick = {
-                                state.launchPasskey()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            enabled = state.loading.not()
-                        ) {
-                            Text(text = stringResource(id = R.string.service_select_passkey))
+                        item {
+                            Card(
+                                onClick = {
+                                    state.launchPasskey()
+                                },
+                                modifier = Modifier
+                                    .aspectRatio(1f),
+                                enabled = state.loading.not()
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(
+                                        8.dp,
+                                        Alignment.CenterVertically
+                                    )
+                                ) {
+                                    Text(text = stringResource(id = R.string.service_select_passkey))
+                                }
+                            }
                         }
-                        FilledTonalButton(
-                            onClick = toMastodon,
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            enabled = state.loading.not()
-                        ) {
-                            Text(text = stringResource(id = R.string.service_select_mastodon))
+                        item {
+                            Card(
+                                onClick = toMastodon,
+                                modifier = Modifier
+                                    .aspectRatio(1f),
+                                enabled = state.loading.not()
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(
+                                        8.dp,
+                                        Alignment.CenterVertically
+                                    )
+                                ) {
+                                    NetworkImage(
+                                        model = "https://joinmastodon.org/logos/logo-purple.svg",
+                                        contentDescription = "Mastodon Logo",
+                                        modifier = Modifier.size(64.dp),
+                                        contentScale = ContentScale.Fit
+                                    )
+                                    Text(text = stringResource(id = R.string.service_select_mastodon))
+                                }
+                            }
                         }
-                        FilledTonalButton(
-                            onClick = toMisskey,
-                            enabled = state.loading.not(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            Text(text = stringResource(id = R.string.service_select_misskey))
+                        item {
+                            Card(
+                                onClick = toMisskey,
+                                enabled = state.loading.not(),
+                                modifier = Modifier
+                                    .aspectRatio(1f)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(
+                                        8.dp,
+                                        Alignment.CenterVertically
+                                    )
+                                ) {
+                                    NetworkImage(
+                                        model = "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png",
+                                        contentDescription = "Misskey Logo",
+                                        modifier = Modifier.size(64.dp),
+                                        contentScale = ContentScale.Fit
+                                    )
+                                    Text(text = stringResource(id = R.string.service_select_misskey))
+                                }
+                            }
+                        }
+                        item {
+                            Card(
+                                onClick = toBluesky,
+                                enabled = state.loading.not(),
+                                modifier = Modifier
+                                    .aspectRatio(1f)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(
+                                        8.dp,
+                                        Alignment.CenterVertically
+                                    )
+                                ) {
+                                    NetworkImage(
+                                        model = "https://blueskyweb.xyz/images/apple-touch-icon.png",
+                                        contentDescription = "Bluesky Logo",
+                                        modifier = Modifier.size(64.dp),
+                                        contentScale = ContentScale.Fit
+                                    )
+                                    Text(text = stringResource(id = R.string.service_select_bluesky))
+                                }
+                            }
                         }
                     }
                 }

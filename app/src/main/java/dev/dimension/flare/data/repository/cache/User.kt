@@ -61,18 +61,16 @@ internal fun mastodonUserDataByNameAndHostPresenter(
 internal fun misskeyUserDataPresenter(
     account: UiAccount.Misskey,
     userId: String = account.accountKey.id,
-    cacheDatabase: CacheDatabase = inject(),
-    misskeyEmojiCache: MisskeyEmojiCache = inject()
+    cacheDatabase: CacheDatabase = inject()
 ): CacheableState<UiUser> {
     return remember(account.accountKey, userId) {
         val userKey = MicroBlogKey(userId, account.accountKey.host)
         Cacheable(
             fetchSource = {
-                val emojis = misskeyEmojiCache.getEmojis(account)
                 val user = account
                     .service
                     .findUserById(userId)
-                    ?.toDbUser(account.accountKey.host, emojis)
+                    ?.toDbUser(account.accountKey.host)
                     ?: throw Exception("User not found")
                 cacheDatabase.userDao().insertAll(listOf(user))
             },
@@ -89,17 +87,15 @@ internal fun misskeyUserDataByNamePresenter(
     account: UiAccount.Misskey,
     name: String,
     host: String,
-    cacheDatabase: CacheDatabase = inject(),
-    misskeyEmojiCache: MisskeyEmojiCache = inject()
+    cacheDatabase: CacheDatabase = inject()
 ): CacheableState<UiUser> {
     return remember(account.accountKey, name) {
         Cacheable(
             fetchSource = {
-                val emojis = misskeyEmojiCache.getEmojis(account)
                 val user = account
                     .service
                     .findUserByName(name, host)
-                    ?.toDbUser(account.accountKey.host, emojis)
+                    ?.toDbUser(account.accountKey.host)
                     ?: throw Exception("User not found")
                 cacheDatabase.userDao().insertAll(listOf(user))
             },

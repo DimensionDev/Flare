@@ -75,7 +75,10 @@ internal fun StatusScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = stringResource(id = R.string.navigate_back)
+                            )
                         }
                     }
                 )
@@ -122,7 +125,7 @@ private fun statusPresenter(
 
     val refreshing =
         listState is UiState.Loading ||
-                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+            listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
     object {
         val listState = listState
         val refreshing = refreshing

@@ -8,5 +8,5 @@ enum class ReferenceType {
     Reply,
     Quote,
     MastodonNotification,
-    MisskeyNotification,
+    MisskeyNotification
 }

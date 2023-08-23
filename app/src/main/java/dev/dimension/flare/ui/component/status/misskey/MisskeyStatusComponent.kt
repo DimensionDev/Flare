@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MailOutline
@@ -30,6 +31,8 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
@@ -40,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,6 +57,8 @@ import com.moriatsushi.koject.Provides
 import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.repository.app.UiAccount
+import dev.dimension.flare.data.repository.app.getAccountUseCase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
@@ -66,12 +72,13 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun MisskeyStatusComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val actualData = data.renote ?: data
     Column(
@@ -113,14 +120,14 @@ internal fun MisskeyStatusComponent(
             UiStatusQuoted(
                 status = actualData.quote,
                 onMediaClick = event::onMediaClick,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
         }
         if (actualData.reaction.emojiReactions.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusReactionComponent(
                 data = actualData,
-                event = event,
+                event = event
             )
         }
         StatusFooterComponent(
@@ -137,6 +144,9 @@ private fun StatusFooterComponent(
     modifier: Modifier = Modifier
 ) {
     val actualData = data.renote ?: data
+    var showRenoteMenu by remember {
+        mutableStateOf(false)
+    }
     Row(
         modifier = modifier
             .padding(vertical = 4.dp)
@@ -161,8 +171,49 @@ private fun StatusFooterComponent(
                 modifier = Modifier
                     .weight(1f),
                 onClicked = {
-                    event.onReblogClick(actualData)
+                    showRenoteMenu = !showRenoteMenu
                 },
+                content = {
+                    DropdownMenu(
+                        expanded = showRenoteMenu,
+                        onDismissRequest = { showRenoteMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.misskey_item_action_renote)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.SyncAlt,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showRenoteMenu = false
+                                event.onReblogClick(actualData)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.misskey_item_action_quote)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.FormatQuote,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showRenoteMenu = false
+                                event.onQuoteClick(actualData)
+                            }
+                        )
+                    }
+                }
             )
             StatusActionButton(
                 icon = if (actualData.reaction.myReaction != null) {
@@ -175,7 +226,7 @@ private fun StatusFooterComponent(
                     .weight(1f),
                 onClicked = {
                     event.onAddReactionClick(actualData)
-                },
+                }
             )
             StatusActionButton(
                 icon = Icons.Default.MoreHoriz,
@@ -187,20 +238,21 @@ private fun StatusFooterComponent(
         }
     }
 }
+
 @Composable
 private fun StatusReactionComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier,
+        modifier = modifier
     ) {
         items(data.reaction.emojiReactions) { reaction ->
             Card(
-                shape = RoundedCornerShape(100),
+                shape = RoundedCornerShape(100)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -213,11 +265,11 @@ private fun StatusReactionComponent(
                     NetworkImage(
                         model = reaction.url,
                         contentDescription = null,
-                        modifier = Modifier.height(16.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = reaction.humanizedCount,
+                        text = reaction.humanizedCount
                     )
                 }
             }
@@ -326,7 +378,7 @@ private fun StatusHeaderComponent(
     CommonStatusHeaderComponent(
         data = data.user,
         onUserClick = { event.onUserClick(it) },
-        modifier = modifier,
+        modifier = modifier
     ) {
         VisibilityIcon(
             visibility = data.visibility,
@@ -345,7 +397,7 @@ private fun StatusHeaderComponent(
 }
 
 @Composable
-private fun VisibilityIcon(
+internal fun VisibilityIcon(
     visibility: UiStatus.Misskey.Visibility,
     modifier: Modifier = Modifier
 ) {
@@ -383,6 +435,7 @@ internal interface MisskeyStatusEvent {
     fun onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.Misskey.EmojiReaction)
     fun onReplyClick(data: UiStatus.Misskey)
     fun onReblogClick(data: UiStatus.Misskey)
+    fun onQuoteClick(data: UiStatus.Misskey)
     fun onAddReactionClick(data: UiStatus.Misskey)
     fun onMoreClick(data: UiStatus.Misskey)
 }
@@ -400,7 +453,8 @@ internal class DefaultMisskeyStatusEvent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
                     dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
-                        .deeplink())
+                        .deeplink()
+                )
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
@@ -419,7 +473,9 @@ internal class DefaultMisskeyStatusEvent(
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(
-                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url).deeplink())
+                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url)
+                            .deeplink()
+                    )
                 )
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
@@ -435,13 +491,34 @@ internal class DefaultMisskeyStatusEvent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
                     dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
-                        .deeplink())
+                        .deeplink()
+                )
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     }
 
     override fun onReblogClick(data: UiStatus.Misskey) {
+        scope.launch {
+            val account = getAccountUseCase<UiAccount.Misskey>(data.accountKey) ?: return@launch
+            runCatching {
+                account.service.renote(data.statusKey.id)
+            }.onFailure {
+            }
+        }
+    }
+
+    override fun onQuoteClick(data: UiStatus.Misskey) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
+                        .deeplink()
+                )
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     override fun onAddReactionClick(data: UiStatus.Misskey) {
@@ -449,5 +526,4 @@ internal class DefaultMisskeyStatusEvent(
 
     override fun onMoreClick(data: UiStatus.Misskey) {
     }
-
 }

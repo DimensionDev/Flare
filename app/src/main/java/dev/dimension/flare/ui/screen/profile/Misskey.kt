@@ -147,4 +147,3 @@ internal fun misskeyUserRelationPresenter(
         }
     }
 }
-

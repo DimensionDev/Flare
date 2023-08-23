@@ -2,6 +2,7 @@
     <string name="app_name" translatable="false">Flare</string>
 
     <string name="login_button">Login</string>
+    <string name="navigate_back">Navigate back</string>
 
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifications</string>
@@ -89,6 +90,7 @@
     <string name="service_select_mastodon" translatable="false">Mastodon</string>
     <string name="service_select_passkey" translatable="false">Passkey</string>
     <string name="service_select_misskey" translatable="false">Misskey</string>
+    <string name="service_select_bluesky" translatable="false">Bluesky</string>
 
     <string name="mastodon_login_title">Login to Mastodon</string>
     <string name="mastodon_login_message">Please enter your instance URL below.</string>
@@ -104,4 +106,19 @@
     <string name="notification_channel_compose_description">Notifications about toots being sent</string>
 
     <string name="status_title">Toot detail</string>
+
+    <string name="misskey_compose_local_only">Local only</string>
+    <string name="misskey_compose_local_only_description">Only users on this instance can see this toot</string>
+
+    <string name="misskey_item_action_renote">Renote</string>
+    <string name="misskey_item_action_quote">Quote</string>
+
+    <string name="misskey_visibility_public">Public</string>
+    <string name="misskey_visibility_home">Home</string>
+    <string name="misskey_visibility_followers">Followers</string>
+    <string name="misskey_visibility_specified">Specified</string>
+    <string name="misskey_visibility_public_description">Anyone can see and boost this toot</string>
+    <string name="misskey_visibility_home_description">Only users on this instance can see this toot</string>
+    <string name="misskey_visibility_followers_description">Only followers can see this toot</string>
+    <string name="misskey_visibility_specified_description">Only mentioned users can see this toot</string>
 </resources>

@@ -280,8 +280,6 @@ private fun StatusFooterComponent(
     }
 }
 
-
-
 @Composable
 fun MediaItem(
     media: UiMedia,
@@ -410,7 +408,7 @@ private fun StatusHeaderComponent(
     CommonStatusHeaderComponent(
         data = data.user,
         onUserClick = { event.onUserClick(it) },
-        modifier = modifier,
+        modifier = modifier
     ) {
         VisibilityIcon(
             visibility = data.visibility,
@@ -459,7 +457,6 @@ internal fun VisibilityIcon(
         )
     }
 }
-
 
 internal interface MastodonStatusEvent {
     fun onUserClick(userKey: MicroBlogKey)
@@ -546,9 +543,9 @@ internal class DefaultMastodonStatusEvent(
                             data = it.data.copy(
                                 reblogged = status.reaction.reblogged,
                                 reblogsCount = if (status.reaction.reblogged) {
-                                    it.data.reblogsCount?.minus(1)
-                                } else {
                                     it.data.reblogsCount?.plus(1)
+                                } else {
+                                    it.data.reblogsCount?.minus(1)
                                 }
                             )
                         )
@@ -593,9 +590,9 @@ internal class DefaultMastodonStatusEvent(
                             data = it.data.copy(
                                 favourited = status.reaction.liked,
                                 favouritesCount = if (status.reaction.liked) {
-                                    it.data.favouritesCount?.minus(1)
-                                } else {
                                     it.data.favouritesCount?.plus(1)
+                                } else {
+                                    it.data.favouritesCount?.minus(1)
                                 }
                             )
                         )

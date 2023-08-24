@@ -16,9 +16,9 @@ import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
+import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import sh.christian.ozone.api.AtIdentifier
-import java.io.IOException
 
 // @OptIn(ExperimentalPagingApi::class)
 // internal class UserTimelineRemoteMediator(
@@ -104,7 +104,7 @@ private class UserTimelinePagingSource(
             return LoadResult.Page(
                 data = response.feed.map {
                     it.toUi(account.accountKey)
-                },
+                }.distinctBy { it.statusKey },
                 prevKey = null,
                 nextKey = if (response.cursor != params.key) response.cursor else null
             )

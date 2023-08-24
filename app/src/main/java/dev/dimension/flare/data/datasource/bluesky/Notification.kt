@@ -97,7 +97,7 @@ private class NotificationPagingSrouce(
             LoadResult.Page(
                 data = response.notifications.map {
                     it.toUi(account.accountKey)
-                },
+                }.distinctBy { it.statusKey },
                 prevKey = null,
                 nextKey = if (response.cursor != params.key) response.cursor else null
             )

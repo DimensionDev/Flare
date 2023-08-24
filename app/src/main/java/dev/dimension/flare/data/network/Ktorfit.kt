@@ -20,7 +20,12 @@ internal fun ktorfit(
 ) = de.jensklingenberg.ktorfit.ktorfit {
     baseUrl(baseUrl)
     httpClient(
-        ktorClient(authorization, config)
+        ktorClient(authorization) {
+            install(ContentNegotiation) {
+                json(JSON)
+            }
+            config.invoke(this)
+        }
     )
     converterFactories(
         FlowConverterFactory(),
@@ -32,9 +37,6 @@ internal fun ktorClient(
     authorization: Authorization? = null,
     config: HttpClientConfig<OkHttpConfig>.() -> Unit = {}
 ) = HttpClient(OkHttp) {
-    install(ContentNegotiation) {
-        json(JSON)
-    }
     if (authorization != null) {
         install(AuthorizationPlugin) {
             this.authorization = authorization

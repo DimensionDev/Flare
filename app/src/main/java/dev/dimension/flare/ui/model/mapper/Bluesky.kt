@@ -5,7 +5,6 @@ import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
-import app.bsky.embed.RecordWithMediaViewMediaUnion
 import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
@@ -137,19 +136,15 @@ private fun findCard(postView: PostView): UiCard? {
 }
 
 private fun findMedias(postView: PostView): ImmutableList<UiMedia> {
-    return if (postView.embed is PostViewEmbedUnion.RecordWithMediaView) {
-        val embed = postView.embed as PostViewEmbedUnion.RecordWithMediaView
-        when (val media = embed.value.media) {
-            is RecordWithMediaViewMediaUnion.ImagesView -> media.value.images.map {
-                UiMedia.Image(
-                    url = it.fullsize,
-                    previewUrl = it.thumb,
-                    description = it.alt,
-                    aspectRatio = 1f
-                )
-            }
-
-            else -> emptyList()
+    return if (postView.embed is PostViewEmbedUnion.ImagesView) {
+        val embed = postView.embed as PostViewEmbedUnion.ImagesView
+        embed.value.images.map {
+            UiMedia.Image(
+                url = it.fullsize,
+                previewUrl = it.thumb,
+                description = it.alt,
+                aspectRatio = 1f
+            )
         }
     } else {
         emptyList()

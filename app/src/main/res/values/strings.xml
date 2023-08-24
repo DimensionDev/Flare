@@ -121,4 +121,13 @@
     <string name="misskey_visibility_home_description">Only users on this instance can see this toot</string>
     <string name="misskey_visibility_followers_description">Only followers can see this toot</string>
     <string name="misskey_visibility_specified_description">Only mentioned users can see this toot</string>
+
+    <string name="bluesky_login_title">Login to Bluesky</string>
+    <string name="bluesky_login_message">Please enter your login credentials below.</string>
+    <string name="bluesky_login_base_url_hint">Base URL, e.g. https://bsky.social</string>
+    <string name="bluesky_login_username_hint">Username</string>
+    <string name="bluesky_login_password_hint">Password</string>
+
+    <string name="bluesky_notification_unknown_message">Unknown notification type %1$s</string>
+    <string name="bluesky_notification_unknown_message2">Please report this issue to the developer.</string>
 </resources>

@@ -100,4 +100,47 @@ sealed interface UiUser {
             val statusesCountHumanized = statusesCount.humanize()
         }
     }
+
+    data class Bluesky(
+        override val userKey: MicroBlogKey,
+        val name: String,
+        val handleInternal: String,
+        override val avatarUrl: String,
+        val bannerUrl: String?,
+        override val nameElement: Element,
+        val description: String?,
+        val descriptionElement: Element?,
+        val matrices: Matrices,
+        val relation: UiRelation.Bluesky
+    ) : UiUser {
+
+        override val handle: String = "@$handleInternal"
+        val nameDirection by lazy {
+            if (Bidi(name, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
+                LayoutDirection.Ltr
+            } else {
+                LayoutDirection.Rtl
+            }
+        }
+
+        val descriptionDirection by lazy {
+            description?.let {
+                if (Bidi(it, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
+                    LayoutDirection.Ltr
+                } else {
+                    LayoutDirection.Rtl
+                }
+            }
+        }
+
+        data class Matrices(
+            val fansCount: Long,
+            val followsCount: Long,
+            val statusesCount: Long
+        ) {
+            val fansCountHumanized = fansCount.humanize()
+            val followsCountHumanized = followsCount.humanize()
+            val statusesCountHumanized = statusesCount.humanize()
+        }
+    }
 }

@@ -80,6 +80,10 @@ sealed interface UiApplication {
         val session: String
     ) : UiApplication
 
+    data class Bluesky(
+        override val host: String
+    ) : UiApplication
+
     companion object {
         fun DbApplication.toUi(): UiApplication {
             return when (platform_type) {
@@ -91,6 +95,10 @@ sealed interface UiApplication {
                 PlatformType.Misskey -> Misskey(
                     host = host,
                     session = credential_json
+                )
+
+                PlatformType.Bluesky -> Bluesky(
+                    host = host
                 )
             }
         }

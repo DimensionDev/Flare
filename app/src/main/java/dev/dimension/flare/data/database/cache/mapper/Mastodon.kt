@@ -113,7 +113,7 @@ private fun Notification.toDbStatusWithReference(
     return DbStatusWithReference(
         status = status,
         references = listOfNotNull(
-            retweet?.toDbStatusReference(status.data.statusKey, ReferenceType.MastodonNotification)
+            retweet?.toDbStatusReference(status.data.statusKey, ReferenceType.Notification)
         )
     )
 }

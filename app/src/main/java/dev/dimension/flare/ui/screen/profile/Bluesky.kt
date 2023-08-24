@@ -17,7 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.cache.misskeyUserDataPresenter
+import dev.dimension.flare.data.repository.cache.blueskyUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.HtmlText
@@ -30,8 +30,8 @@ import dev.dimension.flare.ui.toUi
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun MisskeyProfileHeader(
-    user: UiUser.Misskey,
+internal fun BlueskyProfileHeader(
+    user: UiUser.Bluesky,
     relationState: UiState<UiRelation>,
     modifier: Modifier = Modifier
 ) {
@@ -40,17 +40,6 @@ internal fun MisskeyProfileHeader(
         avatarUrl = user.avatarUrl,
         displayName = user.nameElement,
         handle = user.handle,
-//        handleTrailing = {
-//            if (user.isBot) {
-//                Icon(
-//                    imageVector = Icons.Default.Lock,
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .size(12.dp)
-//                        .alpha(MediumAlpha)
-//                )
-//            }
-//        },
         headerTrailing = {
             when (relationState) {
                 is UiState.Error -> Unit
@@ -67,15 +56,14 @@ internal fun MisskeyProfileHeader(
                 }
 
                 is UiState.Success -> {
-                    if (relationState.data is UiRelation.Mastodon) {
+                    if (relationState.data is UiRelation.Bluesky) {
                         FilledTonalButton(
                             onClick = { /*TODO*/ }
                         ) {
                             Text(
                                 text = stringResource(
                                     when {
-                                        relationState.data.following -> R.string.profile_header_button_following
-                                        relationState.data.requested -> R.string.profile_header_button_requested
+                                        relationState.data.isFollowing -> R.string.profile_header_button_following
                                         else -> R.string.profile_header_button_follow
                                     }
                                 )
@@ -105,7 +93,7 @@ internal fun MisskeyProfileHeader(
                 ) {
                     Text(
                         text = stringResource(
-                            R.string.profile_misskey_header_status_count,
+                            R.string.profile_header_toots_count,
                             user.matrices.statusesCountHumanized
                         ),
                         style = MaterialTheme.typography.bodySmall
@@ -132,15 +120,15 @@ internal fun MisskeyProfileHeader(
 }
 
 @Composable
-internal fun misskeyUserRelationPresenter(
-    account: UiAccount.Misskey,
+internal fun blueskyUserRelationPresenter(
+    account: UiAccount.Bluesky,
     userKey: MicroBlogKey
 ): UiState<UiRelation> {
     if (account.accountKey == userKey) {
         return UiState.Error(IllegalStateException("Cannot show relation of self"))
     }
-    return misskeyUserDataPresenter(account, userKey.id).toUi().flatMap {
-        if (it is UiUser.Misskey) {
+    return blueskyUserDataPresenter(account, userKey.id).toUi().flatMap {
+        if (it is UiUser.Bluesky) {
             UiState.Success(it.relation)
         } else {
             UiState.Error(IllegalStateException("User is not a Misskey user"))

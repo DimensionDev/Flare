@@ -113,6 +113,7 @@ import dev.dimension.flare.data.repository.cache.mastodonEmojiProvider
 import dev.dimension.flare.data.repository.cache.misskeyEmojiProvider
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
@@ -124,6 +125,7 @@ import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.localDescription
 import dev.dimension.flare.ui.model.localName
+import dev.dimension.flare.ui.onError
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -221,9 +223,11 @@ object ComposeTransitions : DestinationStyle.Animated {
 
 private sealed interface ComposeStatus {
     val statusKey: MicroBlogKey
+
     data class Quote(
         override val statusKey: MicroBlogKey
     ) : ComposeStatus
+
     data class Reply(
         override val statusKey: MicroBlogKey
     ) : ComposeStatus
@@ -255,13 +259,18 @@ private fun ComposeScreen(
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(state.contentWarningState.enabled) {
-        if (state.contentWarningState.enabled) {
-            contentWarningFocusRequester.requestFocus()
-        } else {
+    LaunchedEffect(state.contentWarningState) {
+        state.contentWarningState.onSuccess { contentWarningState ->
+            if (contentWarningState.enabled) {
+                contentWarningFocusRequester.requestFocus()
+            } else {
+                focusRequester.requestFocus()
+            }
+        }.onError {
             focusRequester.requestFocus()
         }
     }
+
     val permissionState = rememberPermissionState(
         Manifest.permission.POST_NOTIFICATIONS,
         onPermissionResult = {
@@ -330,13 +339,18 @@ private fun ComposeScreen(
                             ) {
                                 Icon(imageVector = Icons.Default.Image, contentDescription = null)
                             }
-                            IconButton(
-                                onClick = {
-                                    state.pollState.togglePoll()
-                                },
-                                enabled = state.canPoll
-                            ) {
-                                Icon(imageVector = Icons.Default.Poll, contentDescription = null)
+                            state.pollState.onSuccess {
+                                IconButton(
+                                    onClick = {
+                                        it.togglePoll()
+                                    },
+                                    enabled = state.canPoll
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Poll,
+                                        contentDescription = null
+                                    )
+                                }
                             }
                             state.visibilityState.onSuccess { visibilityState ->
                                 when (visibilityState) {
@@ -349,27 +363,34 @@ private fun ComposeScreen(
                                     )
                                 }
                             }
-                            IconButton(
-                                onClick = {
-                                    state.contentWarningState.toggle()
-                                }
-                            ) {
-                                Icon(imageVector = Icons.Default.Warning, contentDescription = null)
-                            }
-                            val isImeVisible = WindowInsets.isImeVisible
-                            IconButton(
-                                onClick = {
-                                    if (isImeVisible) {
-                                        keyboardController?.hide()
-                                    } else {
-                                        keyboardController?.show()
+                            state.contentWarningState.onSuccess {
+                                IconButton(
+                                    onClick = {
+                                        it.toggle()
                                     }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = null
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.EmojiEmotions,
-                                    contentDescription = null
-                                )
+                            }
+                            state.emojiState.onSuccess {
+                                val isImeVisible = WindowInsets.isImeVisible
+                                IconButton(
+                                    onClick = {
+                                        if (isImeVisible) {
+                                            keyboardController?.hide()
+                                        } else {
+                                            keyboardController?.show()
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.EmojiEmotions,
+                                        contentDescription = null
+                                    )
+                                }
                             }
                         }
 
@@ -378,8 +399,8 @@ private fun ComposeScreen(
                                 .fillMaxWidth()
                                 .height(imeHeight())
                         ) {
-                            if (!WindowInsets.isImeVisible) {
-                                state.emojiState.onSuccess { emojis ->
+                            state.emojiState.onSuccess { emojis ->
+                                if (!WindowInsets.isImeVisible) {
                                     LazyVerticalGrid(
                                         columns = GridCells.Adaptive(48.dp),
                                         modifier = Modifier
@@ -415,30 +436,32 @@ private fun ComposeScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AnimatedVisibility(state.contentWarningState.enabled) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        TextField2(
-                            state = state.contentWarningState.textFieldState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(
-                                    focusRequester = contentWarningFocusRequester
+                state.contentWarningState.onSuccess {
+                    AnimatedVisibility(it.enabled) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TextField2(
+                                state = it.textFieldState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(
+                                        focusRequester = contentWarningFocusRequester
+                                    ),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent,
+                                    errorIndicatorColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
                                 ),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            placeholder = {
-                                Text(text = stringResource(id = R.string.compose_content_warning_hint))
-                            }
-                        )
-                        HorizontalDivider()
+                                placeholder = {
+                                    Text(text = stringResource(id = R.string.compose_content_warning_hint))
+                                }
+                            )
+                            HorizontalDivider()
+                        }
                     }
                 }
                 TextField2(
@@ -518,98 +541,100 @@ private fun ComposeScreen(
                         Text(text = stringResource(id = R.string.compose_media_sensitive))
                     }
                 }
-                if (state.pollState.enabled) {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = screenHorizontalPadding)
-                            .fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            SingleChoiceSegmentedButtonRow(
-                                modifier = Modifier
-                                    .weight(1f)
-                            ) {
-                                SegmentedButton(
-                                    selected = state.pollState.pollSingleChoice,
-                                    onClick = {
-                                        state.pollState.setPollSingleChoice(true)
-                                    },
-                                    shape = SegmentedButtonDefaults.shape(
-                                        position = 0,
-                                        count = 2
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.compose_poll_single_choice))
-                                }
-                                SegmentedButton(
-                                    selected = !state.pollState.pollSingleChoice,
-                                    onClick = {
-                                        state.pollState.setPollSingleChoice(false)
-                                    },
-                                    shape = SegmentedButtonDefaults.shape(
-                                        position = 1,
-                                        count = 2
-                                    )
-                                ) {
-                                    Text(text = stringResource(id = R.string.compose_poll_multiple_choice))
-                                }
-                            }
-                            FilledTonalIconButton(
-                                onClick = {
-                                    state.pollState.addPollOption()
-                                },
-                                enabled = state.pollState.canAddPollOption
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                        state.pollState.options.forEachIndexed { index, textFieldState ->
-                            PollOption(
-                                textFieldState = textFieldState,
-                                index = index,
-                                onRemove = {
-                                    state.pollState.removePollOption(index)
-                                }
-                            )
-                        }
-                        FilledTonalButton(
-                            onClick = {
-                                state.pollState.setShowExpirationMenu(true)
-                            },
+                state.pollState.onSuccess { pollState ->
+                    if (pollState.enabled) {
+                        Column(
                             modifier = Modifier
-                                .align(Alignment.End)
+                                .padding(horizontal = screenHorizontalPadding)
+                                .fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = stringResource(
-                                    id = R.string.compose_poll_expiration_at,
-                                    stringResource(id = state.pollState.expiredAt.textId)
-                                )
-                            )
-                            DropdownMenu(
-                                expanded = state.pollState.showExpirationMenu,
-                                onDismissRequest = {
-                                    state.pollState.setShowExpirationMenu(false)
-                                },
-                                properties = PopupProperties(focusable = false)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                PollExpiration.values().forEach { expiration ->
-                                    DropdownMenuItem(
+                                SingleChoiceSegmentedButtonRow(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                ) {
+                                    SegmentedButton(
+                                        selected = pollState.pollSingleChoice,
                                         onClick = {
-                                            state.pollState.setExpiredAt(expiration)
-                                            state.pollState.setShowExpirationMenu(false)
+                                            pollState.setPollSingleChoice(true)
                                         },
-                                        text = {
-                                            Text(text = stringResource(id = expiration.textId))
-                                        }
+                                        shape = SegmentedButtonDefaults.shape(
+                                            position = 0,
+                                            count = 2
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.compose_poll_single_choice))
+                                    }
+                                    SegmentedButton(
+                                        selected = !pollState.pollSingleChoice,
+                                        onClick = {
+                                            pollState.setPollSingleChoice(false)
+                                        },
+                                        shape = SegmentedButtonDefaults.shape(
+                                            position = 1,
+                                            count = 2
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = R.string.compose_poll_multiple_choice))
+                                    }
+                                }
+                                FilledTonalIconButton(
+                                    onClick = {
+                                        pollState.addPollOption()
+                                    },
+                                    enabled = pollState.canAddPollOption
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
                                     )
+                                }
+                            }
+                            pollState.options.forEachIndexed { index, textFieldState ->
+                                PollOption(
+                                    textFieldState = textFieldState,
+                                    index = index,
+                                    onRemove = {
+                                        pollState.removePollOption(index)
+                                    }
+                                )
+                            }
+                            FilledTonalButton(
+                                onClick = {
+                                    pollState.setShowExpirationMenu(true)
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        id = R.string.compose_poll_expiration_at,
+                                        stringResource(id = pollState.expiredAt.textId)
+                                    )
+                                )
+                                DropdownMenu(
+                                    expanded = pollState.showExpirationMenu,
+                                    onDismissRequest = {
+                                        pollState.setShowExpirationMenu(false)
+                                    },
+                                    properties = PopupProperties(focusable = false)
+                                ) {
+                                    PollExpiration.values().forEach { expiration ->
+                                        DropdownMenuItem(
+                                            onClick = {
+                                                pollState.setExpiredAt(expiration)
+                                                pollState.setShowExpirationMenu(false)
+                                            },
+                                            text = {
+                                                Text(text = stringResource(id = expiration.textId))
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -814,7 +839,7 @@ private fun composePresenter(
 ) = run {
     val account by activeAccountPresenter()
     val emojiState = account.flatMap {
-        emojiPresenter(it).emojiState
+        emojiPresenter(it).emojiState ?: UiState.Error(IllegalStateException("Emoji not supported"))
     }
     val textFieldState by remember {
         mutableStateOf(TextFieldState(""))
@@ -822,15 +847,26 @@ private fun composePresenter(
     val text by remember {
         textFieldState.textAsFlow()
     }.collectAsState(initial = "")
-    val pollState = pollPresenter()
-    val mediaState = mediaPresenter()
-    val visibilityState = account.map {
+    val pollState = account.flatMap {
         when (it) {
-            is UiAccount.Mastodon -> mastodonVisibilityPresenter()
-            is UiAccount.Misskey -> misskeyVisibilityPresenter()
+            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
+            is UiAccount.Mastodon, is UiAccount.Misskey -> UiState.Success(pollPresenter())
         }
     }
-    val contentWarningState = contentWarningPresenter()
+    val mediaState = mediaPresenter()
+    val visibilityState = account.flatMap {
+        when (it) {
+            is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
+            is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
+            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
+        }
+    }
+    val contentWarningState = account.flatMap {
+        when (it) {
+            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
+            is UiAccount.Misskey, is UiAccount.Mastodon -> UiState.Success(contentWarningPresenter())
+        }
+    }
     val replyState = status?.let { status ->
         account.map {
             statusPresenter(it, status)
@@ -852,7 +888,7 @@ private fun composePresenter(
 //                        }
                     }
 
-                    is UiStatus.MastodonNotification, is UiStatus.MisskeyNotification, null -> Unit
+                    is UiStatus.BlueskyNotification, is UiStatus.Bluesky, is UiStatus.MastodonNotification, is UiStatus.MisskeyNotification, null -> Unit
                 }
             }
         }
@@ -865,7 +901,7 @@ private fun composePresenter(
         mediaState.medias.isEmpty()
     }
     val canMedia = remember(mediaState, pollState) {
-        mediaState.medias.size < 4 && !pollState.enabled
+        mediaState.medias.size < 4 && !(pollState is UiState.Success && pollState.data.enabled)
     }
     object {
         val textFieldState = textFieldState
@@ -886,55 +922,61 @@ private fun composePresenter(
 
         @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
-            visibilityState.onSuccess { visibility ->
-                account.onSuccess {
-                    val data = when (it) {
-                        is UiAccount.Mastodon -> ComposeData.Mastodon(
-                            content = textFieldState.text.toString(),
-                            medias = mediaState.medias,
-                            poll = if (pollState.enabled) {
-                                ComposeData.Mastodon.Poll(
-                                    multiple = !pollState.pollSingleChoice,
-                                    expiresIn = pollState.expiredAt.duration.inWholeSeconds,
-                                    options = pollState.options.map { option ->
-                                        option.text.toString()
-                                    }
-                                )
-                            } else {
-                                null
-                            },
-                            sensitive = mediaState.isMediaSensitive,
-                            spoilerText = contentWarningState.textFieldState.text.toString(),
-                            visibility = visibility.visibility as UiStatus.Mastodon.Visibility,
-                            inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                            account = it
-                        )
+            account.onSuccess {
+                val data = when (it) {
+                    is UiAccount.Mastodon -> ComposeData.Mastodon(
+                        content = textFieldState.text.toString(),
+                        medias = mediaState.medias,
+                        poll = if (pollState is UiState.Success && pollState.data.enabled) {
+                            ComposeData.Mastodon.Poll(
+                                multiple = !pollState.data.pollSingleChoice,
+                                expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
+                                options = pollState.data.options.map { option ->
+                                    option.text.toString()
+                                }
+                            )
+                        } else {
+                            null
+                        },
+                        sensitive = mediaState.isMediaSensitive,
+                        spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
+                        visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Mastodon.Visibility,
+                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                        account = it
+                    )
 
-                        is UiAccount.Misskey -> ComposeData.MissKey(
-                            account = it,
-                            medias = mediaState.medias,
-                            poll = if (pollState.enabled) {
-                                ComposeData.MissKey.Poll(
-                                    multiple = !pollState.pollSingleChoice,
-                                    expiredAfter = pollState.expiredAt.duration.inWholeMilliseconds,
-                                    options = pollState.options.map { option ->
-                                        option.text.toString()
-                                    }
-                                )
-                            } else {
-                                null
-                            },
-                            sensitive = mediaState.isMediaSensitive,
-                            spoilerText = contentWarningState.textFieldState.text.toString(),
-                            visibility = visibility.visibility as UiStatus.Misskey.Visibility,
-                            inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                            renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                            content = textFieldState.text.toString(),
-                            localOnly = (visibility as MisskeyVisibilityState).localOnly
-                        )
-                    }
-                    composeUseCase(data)
+                    is UiAccount.Misskey -> ComposeData.MissKey(
+                        account = it,
+                        medias = mediaState.medias,
+                        poll = if (pollState is UiState.Success && pollState.data.enabled) {
+                            ComposeData.MissKey.Poll(
+                                multiple = !pollState.data.pollSingleChoice,
+                                expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
+                                options = pollState.data.options.map { option ->
+                                    option.text.toString()
+                                }
+                            )
+                        } else {
+                            null
+                        },
+                        sensitive = mediaState.isMediaSensitive,
+                        spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
+                        visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Misskey.Visibility,
+                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                        renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+                        content = textFieldState.text.toString(),
+                        localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly
+                    )
+
+                    is UiAccount.Bluesky -> ComposeData.Bluesky(
+                        account = it,
+                        medias = mediaState.medias,
+                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                        quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+                        content = textFieldState.text.toString()
+                    )
                 }
+                composeUseCase(data)
             }
         }
     }
@@ -948,6 +990,11 @@ private fun statusPresenter(
     val listState = when (account) {
         is UiAccount.Mastodon -> statusOnlyDataSource(account, status.statusKey)
         is UiAccount.Misskey -> dev.dimension.flare.data.datasource.misskey.statusOnlyDataSource(
+            account = account,
+            statusKey = status.statusKey
+        )
+
+        is UiAccount.Bluesky -> dev.dimension.flare.data.datasource.bluesky.statusOnlyDataSource(
             account = account,
             statusKey = status.statusKey
         )
@@ -965,6 +1012,7 @@ private fun emojiPresenter(
     val emojiState = when (account) {
         is UiAccount.Mastodon -> mastodonEmojiProvider(account = account).toUi()
         is UiAccount.Misskey -> misskeyEmojiProvider(account = account).toUi()
+        is UiAccount.Bluesky -> null
     }
     object {
         val emojiState = emojiState

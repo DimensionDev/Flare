@@ -2,6 +2,8 @@ package dev.dimension.flare.data.database.cache.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import app.bsky.actor.ProfileViewBasic
+import app.bsky.actor.ProfileViewDetailed
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -37,5 +39,17 @@ sealed interface UserContent {
     @SerialName("MisskeyLite")
     data class MisskeyLite(
         val data: dev.dimension.flare.data.network.misskey.api.model.UserLite
+    ) : UserContent
+
+    @Serializable
+    @SerialName("Bluesky")
+    data class Bluesky(
+        val data: ProfileViewDetailed
+    ) : UserContent
+
+    @Serializable
+    @SerialName("BlueskyLite")
+    data class BlueskyLite(
+        val data: ProfileViewBasic
     ) : UserContent
 }

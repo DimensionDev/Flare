@@ -7,11 +7,13 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text2.BasicSecureTextField
 import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.foundation.text2.input.CodepointTransformation
 import androidx.compose.foundation.text2.input.TextEditFilter
 import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.text2.input.TextFieldState
+import androidx.compose.foundation.text2.input.TextObfuscationMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -28,6 +30,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Density
 
@@ -196,5 +200,91 @@ fun OutlinedTextField2(
                 }
             )
         }
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun OutlinedSecureTextField2(
+    state: TextFieldState,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    filter: TextEditFilter? = null,
+    textStyle: TextStyle = LocalTextStyle.current,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
+    onTextLayout: Density.(TextLayoutResult) -> Unit = {},
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    cursorBrush: Brush = SolidColor(LocalContentColor.current),
+    scrollState: ScrollState = rememberScrollState(),
+    onSubmit: ((ImeAction) -> Boolean)? = null,
+    imeAction: ImeAction = ImeAction.Default,
+    textObfuscationMode: TextObfuscationMode = TextObfuscationMode.RevealLastTyped,
+    keyboardType: KeyboardType = KeyboardType.Password,
+    label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    prefix: @Composable (() -> Unit)? = null,
+    suffix: @Composable (() -> Unit)? = null,
+    supportingText: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
+) {
+    // If color is not provided via the text style, use content color as a default
+    val textColor = textStyle.color.takeOrElse {
+        with(colors) {
+            val focused by interactionSource.collectIsFocusedAsState()
+            when {
+                !enabled -> disabledTextColor
+                isError -> errorTextColor
+                focused -> focusedTextColor
+                else -> unfocusedTextColor
+            }
+        }
+    }
+    val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
+    BasicSecureTextField(
+        state = state,
+        modifier = modifier,
+        enabled = enabled,
+        filter = filter,
+        textStyle = mergedTextStyle,
+        onTextLayout = onTextLayout,
+        interactionSource = interactionSource,
+        cursorBrush = cursorBrush,
+        scrollState = scrollState,
+        decorationBox = { innerTextField ->
+            OutlinedTextFieldDefaults.DecorationBox(
+                value = state.text.toString(),
+                visualTransformation = VisualTransformation.None,
+                innerTextField = innerTextField,
+                placeholder = placeholder,
+                label = label,
+                leadingIcon = leadingIcon,
+                trailingIcon = trailingIcon,
+                prefix = prefix,
+                suffix = suffix,
+                supportingText = supportingText,
+                singleLine = lineLimits == TextFieldLineLimits.SingleLine,
+                enabled = enabled,
+                isError = isError,
+                interactionSource = interactionSource,
+                colors = colors,
+                container = {
+                    OutlinedTextFieldDefaults.ContainerBox(
+                        enabled,
+                        isError,
+                        interactionSource = interactionSource,
+                        colors,
+                        shape
+                    )
+                }
+            )
+        },
+        onSubmit = onSubmit,
+        imeAction = imeAction,
+        textObfuscationMode = textObfuscationMode,
+        keyboardType = keyboardType
     )
 }

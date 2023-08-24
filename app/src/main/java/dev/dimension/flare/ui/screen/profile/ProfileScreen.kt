@@ -63,6 +63,8 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.mastodon.userTimelineDataSource
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.repository.cache.blueskyUserDataByNamePresenter
+import dev.dimension.flare.data.repository.cache.blueskyUserDataPresenter
 import dev.dimension.flare.data.repository.cache.mastodonUserDataByNameAndHostPresenter
 import dev.dimension.flare.data.repository.cache.mastodonUserDataPresenter
 import dev.dimension.flare.data.repository.cache.misskeyUserDataByNamePresenter
@@ -221,6 +223,12 @@ private fun profileWithUserNameAndHostPresenter(
             }
 
             is UiAccount.Misskey -> misskeyUserDataByNamePresenter(
+                account = it,
+                name = userName,
+                host = host
+            )
+
+            is UiAccount.Bluesky -> blueskyUserDataByNamePresenter(
                 account = it,
                 name = userName,
                 host = host
@@ -445,6 +453,12 @@ private fun ProfileHeaderSuccess(
                 modifier = modifier
             )
         }
+
+        is UiUser.Bluesky -> BlueskyProfileHeader(
+            user = user,
+            relationState = relationState,
+            modifier = modifier
+        )
     }
 }
 
@@ -454,10 +468,10 @@ internal fun CommonProfileHeader(
     avatarUrl: String?,
     displayName: Element,
     handle: String,
-    headerTrailing: @Composable () -> Unit,
-    handleTrailing: @Composable RowScope.() -> Unit,
-    content: @Composable () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    headerTrailing: @Composable () -> Unit = {},
+    handleTrailing: @Composable RowScope.() -> Unit = {},
+    content: @Composable () -> Unit = {}
 ) {
     val statusBarHeight = with(LocalDensity.current) {
         WindowInsets.statusBars.getTop(this).toDp()
@@ -631,6 +645,11 @@ private fun profilePresenter(
                 account = it,
                 userId = userKey?.id ?: it.accountKey.id
             )
+
+            is UiAccount.Bluesky -> blueskyUserDataPresenter(
+                account = it,
+                userId = userKey?.id ?: it.accountKey.id
+            )
         }
     }
 
@@ -649,6 +668,13 @@ private fun profilePresenter(
                     userKey = userKey ?: it.accountKey
                 ).collectAsLazyPagingItems()
             )
+
+            is UiAccount.Bluesky -> UiState.Success(
+                dev.dimension.flare.data.datasource.bluesky.userTimelineDataSource(
+                    account = it,
+                    userKey = userKey ?: it.accountKey
+                ).collectAsLazyPagingItems()
+            )
         }
     }
     val relationState = account.flatMap {
@@ -659,6 +685,11 @@ private fun profilePresenter(
             )
 
             is UiAccount.Misskey -> misskeyUserRelationPresenter(
+                account = it,
+                userKey = userKey ?: it.accountKey
+            )
+
+            is UiAccount.Bluesky -> blueskyUserRelationPresenter(
                 account = it,
                 userKey = userKey ?: it.accountKey
             )

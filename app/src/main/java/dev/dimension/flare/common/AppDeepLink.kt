@@ -8,7 +8,6 @@ object AppDeepLink {
     object Callback {
         const val Mastodon = "$AppSchema://Callback/SignIn/Mastodon"
         const val Misskey = "$AppSchema://Callback/SignIn/Misskey"
-        const val Twitter = "$AppSchema://Callback/SignIn/Twitter"
     }
 
     object Search {

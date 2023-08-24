@@ -19,4 +19,14 @@ sealed interface UiRelation {
         val hasPendingFollowRequestFromYou: Boolean,
         val hasPendingFollowRequestToYou: Boolean
     ) : UiRelation
+
+    data class Bluesky(
+        val following: String?,
+        val followedBy: String?,
+        val blocked: Boolean,
+        val muted: Boolean
+    ) : UiRelation {
+        val isFans = followedBy.isNullOrEmpty().not()
+        val isFollowing = following.isNullOrEmpty().not()
+    }
 }

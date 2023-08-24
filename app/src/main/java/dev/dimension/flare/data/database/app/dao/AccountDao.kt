@@ -29,4 +29,8 @@ interface AccountDao {
 
     @Delete
     suspend fun deleteAccount(account: DbAccount)
+
+    // update credential_json
+    @Query("UPDATE DbAccount SET credential_json = :credentialJson WHERE account_key = :accountKey")
+    suspend fun updateCredentialJson(accountKey: MicroBlogKey, credentialJson: String)
 }

@@ -131,6 +131,12 @@ private fun homeTimelinePresenter(
                     account = it
                 ).collectAsLazyPagingItems()
             )
+
+            is UiAccount.Bluesky -> UiState.Success(
+                dev.dimension.flare.data.datasource.bluesky.homeTimelineDataSource(
+                    account = it
+                ).collectAsLazyPagingItems()
+            )
         }
     }
     var showNewToots by remember { mutableStateOf(false) }

@@ -12,6 +12,7 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.repository.app.UiAccount.Companion.toUi
+import dev.dimension.flare.data.repository.cache.blueskyUserDataPresenter
 import dev.dimension.flare.data.repository.cache.mastodonUserDataPresenter
 import dev.dimension.flare.data.repository.cache.misskeyUserDataPresenter
 import dev.dimension.flare.model.MicroBlogKey
@@ -112,6 +113,43 @@ internal suspend fun addMisskeyAccountUseCase(
     appDatabase.accountDao().addAccount(account)
 }
 
+internal suspend fun addBlueskyAccountUseCase(
+    baseUrl: String,
+    accessToken: String,
+    refreshToken: String,
+    accountKey: MicroBlogKey,
+    appDatabase: AppDatabase = inject()
+) {
+    val account = DbAccount(
+        account_key = accountKey,
+        credential_json = UiAccount.Bluesky.Credential(
+            baseUrl = baseUrl,
+            accessToken = accessToken,
+            refreshToken = refreshToken
+        ).encodeJson(),
+        platform_type = PlatformType.Bluesky,
+        lastActive = Clock.System.now().toEpochMilliseconds()
+    )
+    appDatabase.accountDao().addAccount(account)
+}
+
+internal suspend fun updateBlueskyTokenUseCase(
+    baseUrl: String,
+    accessToken: String,
+    refreshToken: String,
+    accountKey: MicroBlogKey,
+    appDatabase: AppDatabase = inject()
+) {
+    appDatabase.accountDao().updateCredentialJson(
+        accountKey,
+        UiAccount.Bluesky.Credential(
+            baseUrl = baseUrl,
+            accessToken = accessToken,
+            refreshToken = refreshToken
+        ).encodeJson()
+    )
+}
+
 internal suspend fun setActiveAccountUseCase(
     accountKey: MicroBlogKey,
     appDatabase: AppDatabase = inject()
@@ -124,6 +162,7 @@ internal fun accountDataPresenter(account: UiAccount): UiState<UiUser> {
     return when (account) {
         is UiAccount.Mastodon -> mastodonUserDataPresenter(account = account).toUi()
         is UiAccount.Misskey -> misskeyUserDataPresenter(account = account).toUi()
+        is UiAccount.Bluesky -> blueskyUserDataPresenter(account = account).toUi()
     }
 }
 
@@ -166,6 +205,18 @@ sealed interface UiAccount {
         }
     }
 
+    data class Bluesky(
+        val credential: Credential,
+        override val accountKey: MicroBlogKey
+    ) : UiAccount {
+        @Serializable
+        data class Credential(
+            val baseUrl: String,
+            val accessToken: String,
+            val refreshToken: String
+        )
+    }
+
     companion object {
         fun DbAccount.toUi(): UiAccount = when (platform_type) {
             PlatformType.Mastodon -> {
@@ -179,6 +230,14 @@ sealed interface UiAccount {
             PlatformType.Misskey -> {
                 val credential = credential_json.decodeJson<Misskey.Credential>()
                 Misskey(
+                    credential = credential,
+                    accountKey = account_key
+                )
+            }
+
+            PlatformType.Bluesky -> {
+                val credential = credential_json.decodeJson<Bluesky.Credential>()
+                Bluesky(
                     credential = credential,
                     accountKey = account_key
                 )

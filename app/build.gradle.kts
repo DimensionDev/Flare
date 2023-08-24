@@ -114,6 +114,8 @@ dependencies {
     lintChecks(libs.compose.lint.checks)
     implementation(libs.androidx.credentials)
     implementation(libs.zoomable)
+    implementation(libs.bluesky.binding)
+    implementation(libs.mfm.multiplatform)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

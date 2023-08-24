@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class PlatformType {
     Mastodon,
-    Misskey
+    Misskey,
+    Bluesky
 }

@@ -26,6 +26,9 @@ import androidx.paging.compose.itemKey
 import com.moriatsushi.koject.Provides
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
+import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusComponent
+import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.MastodonNotificationComponent
 import dev.dimension.flare.ui.component.status.mastodon.MastodonStatusComponent
 import dev.dimension.flare.ui.component.status.mastodon.MastodonStatusEvent
@@ -129,6 +132,17 @@ internal fun status() {
                             event = misskeyStatusEvent,
                             modifier = Modifier.padding(horizontal = screenHorizontalPadding)
                         )
+
+                        is UiStatus.Bluesky -> BlueskyStatusComponent(
+                            data = item,
+                            event = blueskyStatusEvent,
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                        )
+                        is UiStatus.BlueskyNotification -> BlueskyNotificationComponent(
+                            data = item,
+                            event = blueskyStatusEvent,
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                        )
                     }
                     // draw divider
                     if (it != lazyPagingItems.itemCount - 1) {
@@ -211,5 +225,6 @@ internal fun status() {
 @Provides
 internal data class StatusEvent(
     val mastodonStatusEvent: MastodonStatusEvent,
-    val misskeyStatusEvent: MisskeyStatusEvent
+    val misskeyStatusEvent: MisskeyStatusEvent,
+    val blueskyStatusEvent: BlueskyStatusEvent
 )

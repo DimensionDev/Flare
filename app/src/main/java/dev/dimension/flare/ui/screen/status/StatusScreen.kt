@@ -120,6 +120,11 @@ private fun statusPresenter(
                 it,
                 statusKey
             ).collectAsLazyPagingItems()
+
+            is UiAccount.Bluesky -> dev.dimension.flare.data.datasource.bluesky.statusDataSource(
+                it,
+                statusKey
+            ).collectAsLazyPagingItems()
         }
     }
 

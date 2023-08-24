@@ -61,6 +61,21 @@ internal sealed class UiStatus {
                     append(note.itemType)
                 }
             }
+
+            is Bluesky -> buildString {
+                append("bluesky")
+                if (repostBy != null) append("_reblog")
+                if (medias.isNotEmpty()) append("_media")
+                if (quote != null) {
+                    append("_quote")
+                    append("_${quote.itemType}")
+                }
+            }
+
+            is BlueskyNotification -> buildString {
+                append("bluesky_notification")
+                append("_${reason.lowercase()}")
+            }
         }
     }
 
@@ -240,6 +255,60 @@ internal sealed class UiStatus {
     ) : UiStatus() {
         val humanizedTime by lazy {
             createdAt.humanize()
+        }
+    }
+
+    data class Bluesky(
+        override val accountKey: MicroBlogKey,
+        override val statusKey: MicroBlogKey,
+        val user: UiUser.Bluesky,
+        val indexedAt: Instant,
+        val repostBy: UiUser.Bluesky?,
+        val quote: Bluesky?,
+        val content: String,
+        val contentToken: Element,
+        val medias: ImmutableList<UiMedia>,
+        val card: UiCard?,
+        val matrices: Matrices,
+        val reaction: Reaction
+    ) : UiStatus() {
+        val humanizedTime by lazy {
+            indexedAt.humanize()
+        }
+        val contentDirection by lazy {
+            if (Bidi(content, Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT).baseIsLeftToRight()) {
+                LayoutDirection.Ltr
+            } else {
+                LayoutDirection.Rtl
+            }
+        }
+        data class Matrices(
+            val replyCount: Long,
+            val likeCount: Long,
+            val repostCount: Long
+        ) {
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
+            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
+            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.toString() else null }
+        }
+        data class Reaction(
+            val liked: Boolean,
+            val reposted: Boolean
+        )
+    }
+
+    data class BlueskyNotification(
+        override val statusKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
+        val user: UiUser.Bluesky?,
+        /**
+         * Expected values are 'like', 'repost', 'follow', 'mention', 'reply', and 'quote'.
+         */
+        val reason: String,
+        val indexedAt: Instant
+    ) : UiStatus() {
+        val humanizedTime by lazy {
+            indexedAt.humanize()
         }
     }
 }

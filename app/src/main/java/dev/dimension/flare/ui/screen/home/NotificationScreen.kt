@@ -31,11 +31,11 @@ import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.flatMap
+import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
@@ -50,7 +50,7 @@ fun NotificationScreen(
     }
     val listState = rememberLazyListState()
     RefreshContainer(
-        indicatorPadding = PaddingValues(top = 48.dp) + contentPadding,
+        indicatorPadding = contentPadding,
         modifier = modifier,
         refreshing = state.refreshing,
         onRefresh = state::refresh,
@@ -61,24 +61,28 @@ fun NotificationScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                item {
-                    SingleChoiceSegmentedButtonRow(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = screenHorizontalPadding)
-                    ) {
-                        NotificationType.values().forEachIndexed { index, notificationType ->
-                            SegmentedButton(
-                                selected = state.notificationType == notificationType,
-                                onClick = {
-                                    state.onNotificationTypeChanged(notificationType)
-                                },
-                                shape = SegmentedButtonDefaults.shape(
-                                    position = index,
-                                    count = NotificationType.values().size
-                                )
+                state.shouldShowTypes.onSuccess {
+                    if (it) {
+                        item {
+                            SingleChoiceSegmentedButtonRow(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = screenHorizontalPadding)
                             ) {
-                                Text(text = stringResource(id = notificationType.title))
+                                NotificationType.values().forEachIndexed { index, notificationType ->
+                                    SegmentedButton(
+                                        selected = state.notificationType == notificationType,
+                                        onClick = {
+                                            state.onNotificationTypeChanged(notificationType)
+                                        },
+                                        shape = SegmentedButtonDefaults.shape(
+                                            position = index,
+                                            count = NotificationType.values().size
+                                        )
+                                    ) {
+                                        Text(text = stringResource(id = notificationType.title))
+                                    }
+                                }
                             }
                         }
                     }
@@ -103,8 +107,14 @@ private fun notificationPresenter(
     statusEvent: StatusEvent = rememberInject()
 ) = run {
     var type by remember { mutableStateOf(NotificationType.All) }
-
     val account by activeAccountPresenter()
+    val shouldShowTypes = account.map {
+        when (it) {
+            is UiAccount.Mastodon -> true
+            is UiAccount.Misskey -> true
+            is UiAccount.Bluesky -> false
+        }
+    }
     val listState = account.flatMap {
         when (it) {
             is UiAccount.Mastodon -> UiState.Success(
@@ -120,6 +130,12 @@ private fun notificationPresenter(
                     NotificationType.Mention -> dev.dimension.flare.data.datasource.misskey.mentionTimelineDataSource(account = it)
                 }.collectAsLazyPagingItems()
             )
+
+            is UiAccount.Bluesky -> UiState.Success(
+                dev.dimension.flare.data.datasource.bluesky.notificationTimelineDataSource(
+                    account = it
+                ).collectAsLazyPagingItems()
+            )
         }
     }
     val refreshing =
@@ -130,6 +146,7 @@ private fun notificationPresenter(
         val notificationType = type
         val listState = listState
         val statusEvent = statusEvent
+        val shouldShowTypes = shouldShowTypes
         fun onNotificationTypeChanged(value: NotificationType) {
             type = value
         }

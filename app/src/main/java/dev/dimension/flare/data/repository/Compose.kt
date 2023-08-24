@@ -9,8 +9,10 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.atproto.repo.CreateRecordRequest
 import com.moriatsushi.koject.Provides
 import dev.dimension.flare.R
+import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
@@ -21,6 +23,13 @@ import dev.dimension.flare.ui.model.UiStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import sh.christian.ozone.api.AtIdentifier
+import sh.christian.ozone.api.Nsid
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
@@ -80,6 +89,16 @@ private fun composeUseCase(
                         notificationManager.notify(notificationId, builder.build())
                     }
                 }
+
+                is ComposeData.Bluesky -> blueskyComposeUseCase(
+                    data = data,
+                    context = context
+                ) { current, max ->
+                    if (notificationManager.areNotificationsEnabled()) {
+                        builder = builder.setProgress(max, current, false)
+                        notificationManager.notify(notificationId, builder.build())
+                    }
+                }
             }
         }.onSuccess {
             if (notificationManager.areNotificationsEnabled()) {
@@ -101,6 +120,64 @@ private fun composeUseCase(
             }
         }
     }
+}
+
+private suspend fun blueskyComposeUseCase(
+    data: ComposeData.Bluesky,
+    context: Context,
+    notifyProgress: (current: Int, max: Int) -> Unit
+) {
+    val maxProgress = data.medias.size + 1
+    val service = data.account.getService()
+    val mediaBlob = data.medias.mapIndexedNotNull { index, uri ->
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            service.uploadBlob(stream.readBytes()).also {
+                notifyProgress(index + 1, maxProgress)
+            }.maybeResponse()
+        }
+    }.map {
+        it.blob
+    }
+    service.createRecord(
+        CreateRecordRequest(
+            repo = AtIdentifier(data.account.accountKey.id),
+            collection = Nsid("app.bsky.feed.post"),
+            record = buildJsonObject {
+                put("\$type", "app.bsky.feed.post")
+                put("createdAt", Clock.System.now().toString())
+                put("text", data.content)
+                if (mediaBlob.any()) {
+                    put(
+                        "embed",
+                        buildJsonObject {
+                            put("\$type", "app.bsky.embed.images")
+                            put(
+                                "images",
+                                buildJsonArray {
+                                    mediaBlob.forEach { blob ->
+                                        add(
+                                            buildJsonObject {
+                                                put("image", blob)
+                                                put("alt", "")
+                                            }
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    )
+                }
+                put(
+                    "langs",
+                    buildJsonArray {
+                        data.language.forEach { lang ->
+                            add(lang)
+                        }
+                    }
+                )
+            }
+        )
+    )
 }
 
 private suspend fun mastodonComposeUseCase(
@@ -226,4 +303,14 @@ internal sealed interface ComposeData {
             val multiple: Boolean
         )
     }
+
+    data class Bluesky(
+        val account: UiAccount.Bluesky,
+        val content: String,
+        val visibility: UiStatus.Misskey.Visibility = UiStatus.Misskey.Visibility.Public,
+        val inReplyToID: String? = null,
+        val quoteId: String? = null,
+        val language: List<String> = listOf("en"),
+        val medias: List<Uri> = emptyList()
+    ) : ComposeData
 }

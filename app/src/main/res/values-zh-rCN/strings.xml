@@ -119,4 +119,10 @@
     <string name="misskey_visibility_home_description">只有本站的用户可以看到这条嘟文</string>
     <string name="misskey_visibility_followers_description">只有关注你的人可以看到这条嘟文</string>
     <string name="misskey_visibility_specified_description">只有提到的人可以看到这条嘟文</string>
+
+    <string name="bluesky_login_title">登录到 BlueSky</string>
+    <string name="bluesky_login_message">请在下面输入登录凭据。</string>
+    <string name="bluesky_login_base_url_hint">实例主机名称，比如 https://bsky.social</string>
+    <string name="bluesky_login_username_hint">用户名</string>
+    <string name="bluesky_login_password_hint">密码</string>
 </resources>

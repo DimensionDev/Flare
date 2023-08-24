@@ -181,7 +181,7 @@ private suspend fun mastodonLoginUseCase(
     val service = MastodonOAuthService(
         baseUrl = baseUrl.toString(),
         client_name = "Flare",
-        website = "https://github.com/TwidereProject/TwidereX-Android",
+        website = "https://github.com/DimensionDev/Flare",
         redirect_uri = AppDeepLink.Callback.Mastodon
     )
 

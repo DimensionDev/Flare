@@ -102,6 +102,10 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 
 zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.1" }
 
+bluesky-binding = "sh.christian.ozone:bluesky:0.0.2"
+
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.0.3"
+
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]
 paging = ["paging-runtime", "paging-compose"]

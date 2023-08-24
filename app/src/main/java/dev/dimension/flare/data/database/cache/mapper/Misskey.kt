@@ -47,7 +47,7 @@ suspend fun saveNotification(
 }
 
 context(CacheDatabase, List<DbPagingTimelineWithStatus>)
-suspend fun saveDbPagingTimelineWithStatus() {
+private suspend fun saveDbPagingTimelineWithStatus() {
     withTransaction {
         (
             mapNotNull { it.status.status.user } + flatMap { it.status.references }
@@ -132,7 +132,7 @@ private fun Notification.toDbStatusWithReference(
     return DbStatusWithReference(
         status = status,
         references = listOfNotNull(
-            retweet?.toDbStatusReference(status.data.statusKey, ReferenceType.MisskeyNotification)
+            retweet?.toDbStatusReference(status.data.statusKey, ReferenceType.Notification)
         )
     )
 }

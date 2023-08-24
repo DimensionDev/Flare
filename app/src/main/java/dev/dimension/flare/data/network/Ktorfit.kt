@@ -20,30 +20,35 @@ internal fun ktorfit(
 ) = de.jensklingenberg.ktorfit.ktorfit {
     baseUrl(baseUrl)
     httpClient(
-        HttpClient(OkHttp) {
-            install(ContentNegotiation) {
-                json(JSON)
-            }
-            if (authorization != null) {
-                install(AuthorizationPlugin) {
-                    this.authorization = authorization
-                }
-            }
-            engine {
-                val loggingInterceptor = HttpLoggingInterceptor()
-                loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-                addInterceptor(loggingInterceptor)
-            }
-
-            config.invoke(this)
-//        install(Logging) {
-//            logger = Logger.ANDROID
-//            level = LogLevel.ALL
-//        }
-        }
+        ktorClient(authorization, config)
     )
     converterFactories(
         FlowConverterFactory(),
         CallConverterFactory()
     )
+}
+
+internal fun ktorClient(
+    authorization: Authorization? = null,
+    config: HttpClientConfig<OkHttpConfig>.() -> Unit = {}
+) = HttpClient(OkHttp) {
+    install(ContentNegotiation) {
+        json(JSON)
+    }
+    if (authorization != null) {
+        install(AuthorizationPlugin) {
+            this.authorization = authorization
+        }
+    }
+    engine {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        addInterceptor(loggingInterceptor)
+    }
+
+    config.invoke(this)
+//        install(Logging) {
+//            logger = Logger.ANDROID
+//            level = LogLevel.ALL
+//        }
 }

@@ -35,7 +35,7 @@ data class AdminAbuseReportResolverUpdateRequest(
 
     @SerialName(value = "reportContentPattern") val reportContentPattern: kotlin.String? = null,
 
-    @SerialName(value = "expiresAt") val expiresAt: AdminAbuseReportResolverUpdateRequest.ExpiresAt? = null,
+//    @SerialName(value = "expiresAt") val expiresAt: AdminAbuseReportResolverUpdateRequest.ExpiresAt? = null,
 
     @SerialName(value = "forward") val forward: kotlin.Boolean? = null
 
@@ -45,33 +45,33 @@ data class AdminAbuseReportResolverUpdateRequest(
      * *
      * Values: _1hour,_12hours,_1day,_1week,_1month,_3months,_6months,_1year,Indefinitely
      */
-    @Serializable
-    enum class ExpiresAt(val value: kotlin.String) {
-        @SerialName(value = "1hour")
-        _1hour("1hour"),
-
-        @SerialName(value = "12hours")
-        _12hours("12hours"),
-
-        @SerialName(value = "1day")
-        _1day("1day"),
-
-        @SerialName(value = "1week")
-        _1week("1week"),
-
-        @SerialName(value = "1month")
-        _1month("1month"),
-
-        @SerialName(value = "3months")
-        _3months("3months"),
-
-        @SerialName(value = "6months")
-        _6months("6months"),
-
-        @SerialName(value = "1year")
-        _1year("1year"),
-
-        @SerialName(value = "indefinitely")
-        Indefinitely("indefinitely");
-    }
+//    @Serializable
+//    enum class ExpiresAt(val value: kotlin.String) {
+//        @SerialName(value = "1hour")
+//        _1hour("1hour"),
+//
+//        @SerialName(value = "12hours")
+//        _12hours("12hours"),
+//
+//        @SerialName(value = "1day")
+//        _1day("1day"),
+//
+//        @SerialName(value = "1week")
+//        _1week("1week"),
+//
+//        @SerialName(value = "1month")
+//        _1month("1month"),
+//
+//        @SerialName(value = "3months")
+//        _3months("3months"),
+//
+//        @SerialName(value = "6months")
+//        _6months("6months"),
+//
+//        @SerialName(value = "1year")
+//        _1year("1year"),
+//
+//        @SerialName(value = "indefinitely")
+//        Indefinitely("indefinitely");
+//    }
 }

@@ -9,9 +9,11 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import app.bsky.feed.GetPostsQueryParams
 import com.atproto.repo.CreateRecordRequest
 import com.moriatsushi.koject.Provides
 import dev.dimension.flare.R
+import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
@@ -20,6 +22,7 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.ui.model.UiStatus
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,8 +30,10 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import sh.christian.ozone.api.AtIdentifier
+import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Nsid
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
@@ -146,6 +151,62 @@ private suspend fun blueskyComposeUseCase(
                 put("\$type", "app.bsky.feed.post")
                 put("createdAt", Clock.System.now().toString())
                 put("text", data.content)
+                if (data.quoteId != null) {
+                    val item =
+                        service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(data.quoteId))))
+                            .maybeResponse()
+                            ?.posts
+                            ?.firstOrNull()
+                    if (item != null) {
+                        put(
+                            "embed",
+                            buildJsonObject {
+                                put("\$type", "app.bsky.embed.record")
+                                put(
+                                    "record",
+                                    buildJsonObject {
+                                        put("cid", item.cid.cid)
+                                        put("uri", item.uri.atUri)
+                                    }
+                                )
+                            }
+                        )
+                    }
+                }
+                if (data.inReplyToID != null) {
+                    val item =
+                        service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(data.inReplyToID))))
+                            .maybeResponse()
+                            ?.posts
+                            ?.firstOrNull()
+                    if (item != null) {
+                        put(
+                            "reply",
+                            buildJsonObject {
+                                put(
+                                    "parent",
+                                    buildJsonObject {
+                                        put("cid", item.cid.cid)
+                                        put("uri", item.uri.atUri)
+                                    }
+                                )
+                                put(
+                                    "root",
+                                    buildJsonObject {
+                                        item.record.jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
+                                            ?.jsonObjectOrNull?.let { root ->
+                                                put("cid", root["cid"]?.jsonPrimitive?.content)
+                                                put("uri", root["uri"]?.jsonPrimitive?.content)
+                                            } ?: run {
+                                            put("cid", item.cid.cid)
+                                            put("uri", item.uri.atUri)
+                                        }
+                                    }
+                                )
+                            }
+                        )
+                    }
+                }
                 if (mediaBlob.any()) {
                     put(
                         "embed",

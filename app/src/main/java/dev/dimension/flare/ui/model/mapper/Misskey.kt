@@ -20,12 +20,31 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
+import moe.tlaster.mfm.parser.MFMParser
+import moe.tlaster.mfm.parser.tree.BoldNode
+import moe.tlaster.mfm.parser.tree.CashNode
+import moe.tlaster.mfm.parser.tree.CenterNode
+import moe.tlaster.mfm.parser.tree.CodeBlockNode
+import moe.tlaster.mfm.parser.tree.EmojiCodeNode
+import moe.tlaster.mfm.parser.tree.FnNode
+import moe.tlaster.mfm.parser.tree.HashtagNode
+import moe.tlaster.mfm.parser.tree.InlineCodeNode
+import moe.tlaster.mfm.parser.tree.ItalicNode
+import moe.tlaster.mfm.parser.tree.LinkNode
+import moe.tlaster.mfm.parser.tree.MathBlockNode
+import moe.tlaster.mfm.parser.tree.MathInlineNode
+import moe.tlaster.mfm.parser.tree.MentionNode
+import moe.tlaster.mfm.parser.tree.QuoteNode
+import moe.tlaster.mfm.parser.tree.RootNode
+import moe.tlaster.mfm.parser.tree.SearchNode
+import moe.tlaster.mfm.parser.tree.SmallNode
+import moe.tlaster.mfm.parser.tree.StrikeNode
+import moe.tlaster.mfm.parser.tree.UrlNode
 import moe.tlaster.twitter.parser.CashTagToken
 import moe.tlaster.twitter.parser.EmojiToken
 import moe.tlaster.twitter.parser.HashTagToken
 import moe.tlaster.twitter.parser.StringToken
 import moe.tlaster.twitter.parser.Token
-import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
 import moe.tlaster.twitter.parser.UserNameToken
 import org.jsoup.nodes.Element
@@ -33,7 +52,7 @@ import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
 
 private val misskeyParser by lazy {
-    TwitterParser(enableAcct = true, enableEmoji = true, enableDotInUserName = true)
+    MFMParser()
 }
 
 internal fun Notification.toUi(
@@ -127,12 +146,7 @@ internal fun Note.toUi(
 }
 
 private fun parseContent(note: Note, host: String): Element {
-    val token = misskeyParser.parse(note.text.orEmpty())
-    val element = Element("body")
-    token.forEach {
-        element.appendChild(it.toElement(host))
-    }
-    return element
+    return misskeyParser.parse(note.text.orEmpty()).toHtml(host) as? Element ?: Element("body")
 }
 
 private fun DriveFile.toUi(): UiMedia? {
@@ -206,12 +220,7 @@ private fun parseName(
     if (user.name.isNullOrEmpty()) {
         return Element("body")
     }
-    val token = misskeyParser.parse(user.name)
-    val element = Element("body")
-    token.forEach {
-        element.appendChild(it.toElement(accountHost))
-    }
-    return element
+    return misskeyParser.parse(user.name).toHtml(accountHost) as? Element ?: Element("body")
 }
 
 internal fun User.toUi(
@@ -261,12 +270,7 @@ private fun parseDescription(
     if (user.description.isNullOrEmpty()) {
         return null
     }
-    val token = misskeyParser.parse(user.description)
-    val element = Element("body")
-    token.forEach {
-        element.appendChild(it.toElement(accountHost))
-    }
-    return element
+    return misskeyParser.parse(user.description).toHtml(accountHost) as? Element
 }
 
 private fun Token.toElement(
@@ -301,7 +305,7 @@ private fun Token.toElement(
                 val (username, host) = trimmed.split('@')
                 attr("href", ProfileWithUserNameAndHostRouteDestination(username, host).deeplink())
             } else {
-                attr("href", ProfileWithUserNameAndHostRouteDestination(value, accountHost).deeplink())
+                attr("href", ProfileWithUserNameAndHostRouteDestination(trimmed, accountHost).deeplink())
             }
             text(value)
         }
@@ -315,12 +319,151 @@ private fun parseName(
     if (user.name.isNullOrEmpty()) {
         return Element("body")
     }
-    val token = misskeyParser.parse(user.name)
-    val element = Element("body")
-    token.forEach {
-        element.appendChild(it.toElement(accountHost))
+    return misskeyParser.parse(user.name).toHtml(accountHost) as? Element ?: Element("body")
+}
+
+private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
+    accountHost: String
+): Node {
+    return when (this) {
+        is CenterNode -> {
+            Element("center").apply {
+                content.forEach {
+                    appendChild(it.toHtml(accountHost))
+                }
+            }
+        }
+        is CodeBlockNode -> {
+            Element("pre").apply {
+                Element("code").apply {
+                    language?.let { attr("lang", it) }
+                    text(code)
+                }
+            }
+        }
+        is MathBlockNode -> {
+            Element("pre").apply {
+                Element("code").apply {
+                    attr("lang", "math")
+                    text(formula)
+                }
+            }
+        }
+        is QuoteNode -> {
+            Element("blockquote").apply {
+                content.forEach {
+                    appendChild(it.toHtml(accountHost))
+                }
+            }
+        }
+        is SearchNode -> {
+            Element("search").apply {
+                text(query)
+            }
+        }
+        is BoldNode -> {
+            Element("strong").apply {
+                content.forEach {
+                    appendChild(it.toHtml(accountHost))
+                }
+            }
+        }
+        is FnNode -> {
+            Element("fn").apply {
+                attr("name", name)
+                content.forEach {
+                    appendChild(it.toHtml(accountHost))
+                }
+            }
+        }
+        is ItalicNode -> {
+            Element("em").apply {
+                content.forEach {
+                    appendChild(it.toHtml(accountHost))
+                }
+            }
+        }
+        is RootNode -> {
+            Element("body").apply {
+                content.forEach {
+                    appendChild(it.toHtml(accountHost))
+                }
+            }
+        }
+        is SmallNode -> {
+            Element("small").apply {
+                content.forEach {
+                    appendChild(it.toHtml(accountHost))
+                }
+            }
+        }
+        is StrikeNode -> {
+            Element("s").apply {
+                content.forEach {
+                    appendChild(it.toHtml(accountHost))
+                }
+            }
+        }
+        is CashNode -> {
+            Element("a").apply {
+                attr("href", AppDeepLink.Search("$$content"))
+                text("$$content")
+            }
+        }
+        is EmojiCodeNode -> {
+            Element("img").apply {
+                attr("src", resolveMisskeyEmoji(emoji, accountHost))
+            }
+        }
+        is HashtagNode -> {
+            Element("a").apply {
+                attr("href", AppDeepLink.Search("#$tag"))
+                text("#$tag")
+            }
+        }
+        is InlineCodeNode -> {
+            Element("code").apply {
+                text(code)
+            }
+        }
+        is LinkNode -> {
+            Element("a").apply {
+                attr("href", url)
+                text(content)
+            }
+        }
+        is MathInlineNode -> {
+            Element("code").apply {
+                attr("lang", "math")
+                text(formula)
+            }
+        }
+        is MentionNode -> {
+            Element("a").apply {
+                val deeplink = host?.let {
+                    ProfileWithUserNameAndHostRouteDestination(userName, it).deeplink()
+                } ?: ProfileWithUserNameAndHostRouteDestination(userName, accountHost).deeplink()
+                attr("href", deeplink)
+                text(
+                    buildString {
+                        append("@")
+                        append(userName)
+                        if (host != null) {
+                            append("@")
+                            append(host)
+                        }
+                    }
+                )
+            }
+        }
+        is moe.tlaster.mfm.parser.tree.TextNode -> TextNode(content)
+        is UrlNode -> {
+            Element("a").apply {
+                attr("href", url)
+                text(url)
+            }
+        }
     }
-    return element
 }
 
 internal fun EmojiSimple.toUi(): UiEmoji {

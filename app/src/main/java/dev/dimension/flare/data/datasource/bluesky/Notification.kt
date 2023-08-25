@@ -14,8 +14,8 @@ import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
-import java.io.IOException
 import kotlinx.coroutines.flow.Flow
+import java.io.IOException
 
 // @OptIn(ExperimentalPagingApi::class)
 // internal class NotificationRemoteMediator(
@@ -88,7 +88,8 @@ private class NotificationPagingSrouce(
         return try {
             val response = service.listNotifications(
                 ListNotificationsQueryParams(
-                    limit = params.loadSize.toLong()
+                    limit = params.loadSize.toLong(),
+                    cursor = params.key
                 )
             ).maybeResponse() ?: return LoadResult.Error(
                 IOException("response is null")
@@ -97,7 +98,7 @@ private class NotificationPagingSrouce(
             LoadResult.Page(
                 data = response.notifications.map {
                     it.toUi(account.accountKey)
-                }.distinctBy { it.statusKey },
+                },
                 prevKey = null,
                 nextKey = if (response.cursor != params.key) response.cursor else null
             )

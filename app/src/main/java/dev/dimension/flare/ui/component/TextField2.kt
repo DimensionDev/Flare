@@ -10,7 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text2.BasicSecureTextField
 import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.foundation.text2.input.CodepointTransformation
-import androidx.compose.foundation.text2.input.TextEditFilter
+import androidx.compose.foundation.text2.input.InputTransformation
 import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.foundation.text2.input.TextObfuscationMode
@@ -42,12 +42,12 @@ fun TextField2(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
-    filter: TextEditFilter? = null,
+    inputTransformation: InputTransformation? = null,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
-    onTextLayout: Density.(TextLayoutResult) -> Unit = {},
+    onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
@@ -82,7 +82,7 @@ fun TextField2(
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
-        filter = filter,
+        inputTransformation = inputTransformation,
         textStyle = mergedTextStyle,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
@@ -122,12 +122,12 @@ fun OutlinedTextField2(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
-    filter: TextEditFilter? = null,
+    inputTransformation: InputTransformation? = null,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
-    onTextLayout: Density.(TextLayoutResult) -> Unit = {},
+    onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
@@ -162,7 +162,7 @@ fun OutlinedTextField2(
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
-        filter = filter,
+        inputTransformation = inputTransformation,
         textStyle = mergedTextStyle,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
@@ -209,10 +209,10 @@ fun OutlinedSecureTextField2(
     state: TextFieldState,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    filter: TextEditFilter? = null,
+    inputTransformation: InputTransformation? = null,
     textStyle: TextStyle = LocalTextStyle.current,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
-    onTextLayout: Density.(TextLayoutResult) -> Unit = {},
+    onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
@@ -248,7 +248,7 @@ fun OutlinedSecureTextField2(
         state = state,
         modifier = modifier,
         enabled = enabled,
-        filter = filter,
+        inputTransformation = inputTransformation,
         textStyle = mergedTextStyle,
         onTextLayout = onTextLayout,
         interactionSource = interactionSource,

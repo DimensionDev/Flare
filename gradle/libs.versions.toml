@@ -7,7 +7,7 @@ androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 lifecycle-runtime-ktx = "2.6.1"
 activity-compose = "1.7.2"
-compose-bom = "2023.09.00-alpha02"
+compose-bom = "2023.09.00-alpha03"
 ksp = "1.9.0-1.0.13"
 room = "2.5.2"
 paging = "3.2.0"
@@ -22,7 +22,7 @@ ktor = "2.3.3"
 twitter-parser = "0.2.9"
 molecule = "1.2.0"
 jsoup = "1.16.1"
-accompanist = "0.33.0-alpha"
+accompanist = "0.33.1-alpha"
 kotlinx-atomicfu = "0.22.0"
 compose-destinations = "1.9.52"
 okhttp3 = "4.11.0"
@@ -104,7 +104,7 @@ zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.
 
 bluesky-binding = "sh.christian.ozone:bluesky:0.0.2"
 
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.0.3"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.0.9"
 
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]

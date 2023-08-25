@@ -243,6 +243,11 @@ private fun AnnotatedString.Builder.renderElement(
         "emoji" -> {
             renderEmoji(element)
         }
+        else -> {
+            element.childNodes().forEach {
+                renderNode(node = it, styleData = styleData)
+            }
+        }
     }
 }
 

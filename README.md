@@ -5,4 +5,4 @@
 ![badge-Misskey](https://img.shields.io/badge/Social-Misskey-acea31)
 ![badge-Bluesky](https://img.shields.io/badge/Social-Bluesky-blue)
 
-Next generation social network client for Android.
+The ultimate next generation open-sourced decentralized social network client for Android.

@@ -367,7 +367,7 @@ private fun Token.toElement(
             } else {
                 attr(
                     "href",
-                    ProfileWithUserNameAndHostRouteDestination(value, accountHost).deeplink()
+                    ProfileWithUserNameAndHostRouteDestination(trimmed, accountHost).deeplink()
                 )
             }
             text(value)

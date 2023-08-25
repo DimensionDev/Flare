@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.component.status.bluesky
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,14 +13,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -28,15 +39,19 @@ import com.moriatsushi.koject.Binds
 import com.moriatsushi.koject.Provides
 import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.R
+import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
+import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 internal fun BlueskyStatusComponent(
@@ -72,6 +87,14 @@ internal fun BlueskyStatusComponent(
             StatusMediaComponent(
                 data = data.medias,
                 onMediaClick = event::onMediaClick
+            )
+        }
+        if (data.quote != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            UiStatusQuoted(
+                status = data.quote,
+                onMediaClick = event::onMediaClick,
+                modifier = Modifier.fillMaxWidth()
             )
         }
         StatusFooterComponent(
@@ -126,6 +149,9 @@ private fun StatusFooterComponent(
     event: BlueskyStatusEvent,
     modifier: Modifier = Modifier
 ) {
+    var showRenoteMenu by remember {
+        mutableStateOf(false)
+    }
     Row(
         modifier = modifier
             .padding(vertical = 4.dp)
@@ -150,12 +176,53 @@ private fun StatusFooterComponent(
                 modifier = Modifier
                     .weight(1f),
                 onClicked = {
-                    event.onReblogClick(data)
+                    showRenoteMenu = true
                 },
                 color = if (data.reaction.reposted) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     LocalContentColor.current
+                },
+                content = {
+                    DropdownMenu(
+                        expanded = showRenoteMenu,
+                        onDismissRequest = { showRenoteMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.blusky_item_action_repost)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.SyncAlt,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showRenoteMenu = false
+                                event.onReblogClick(data)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.blusky_item_action_quote)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.FormatQuote,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                showRenoteMenu = false
+                                event.onQuoteClick(data)
+                            }
+                        )
+                    }
                 }
             )
             StatusActionButton(
@@ -193,6 +260,7 @@ internal interface BlueskyStatusEvent {
     fun onMediaClick(uiMedia: UiMedia)
     fun onReplyClick(data: UiStatus.Bluesky)
     fun onReblogClick(data: UiStatus.Bluesky)
+    fun onQuoteClick(data: UiStatus.Bluesky)
     fun onLikeClick(data: UiStatus.Bluesky)
     fun onMoreClick(data: UiStatus.Bluesky)
 }
@@ -200,17 +268,56 @@ internal interface BlueskyStatusEvent {
 @Singleton
 @Provides
 @Binds(to = BlueskyStatusEvent::class)
-internal class DefaultBlueskyStatusEvent : BlueskyStatusEvent {
+internal class DefaultBlueskyStatusEvent(
+    private val context: Context,
+    private val scope: CoroutineScope
+) : BlueskyStatusEvent {
     override fun onStatusClick(data: UiStatus.Bluesky) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
+                        .deeplink()
+                )
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     override fun onUserClick(userKey: MicroBlogKey) {
+        val intent =
+            Intent(Intent.ACTION_VIEW, Uri.parse(ProfileRouteDestination(userKey).deeplink()))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     override fun onMediaClick(uiMedia: UiMedia) {
+        if (uiMedia is UiMedia.Image) {
+            val intent =
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(
+                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(uiMedia.url)
+                            .deeplink()
+                    )
+                )
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
     }
 
     override fun onReplyClick(data: UiStatus.Bluesky) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
+                        .deeplink()
+                )
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     override fun onReblogClick(data: UiStatus.Bluesky) {
@@ -220,5 +327,18 @@ internal class DefaultBlueskyStatusEvent : BlueskyStatusEvent {
     }
 
     override fun onMoreClick(data: UiStatus.Bluesky) {
+    }
+
+    override fun onQuoteClick(data: UiStatus.Bluesky) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
+                        .deeplink()
+                )
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 }

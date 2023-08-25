@@ -16,7 +16,7 @@ internal sealed class UiStatus {
     abstract val statusKey: MicroBlogKey
     abstract val accountKey: MicroBlogKey
 
-    val itemKey by lazy {
+    open val itemKey: String by lazy {
         statusKey.toString()
     }
 
@@ -295,6 +295,10 @@ internal sealed class UiStatus {
             val liked: Boolean,
             val reposted: Boolean
         )
+
+        override val itemKey: String by lazy {
+            statusKey.toString() + repostBy?.let { "_reblog_${it.userKey}" }.orEmpty()
+        }
     }
 
     data class BlueskyNotification(
@@ -307,6 +311,9 @@ internal sealed class UiStatus {
         val reason: String,
         val indexedAt: Instant
     ) : UiStatus() {
+        override val itemKey: String by lazy {
+            statusKey.toString() + user?.let { "_${it.userKey}" }.orEmpty()
+        }
         val humanizedTime by lazy {
             indexedAt.humanize()
         }

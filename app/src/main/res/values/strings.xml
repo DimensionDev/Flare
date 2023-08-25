@@ -130,4 +130,7 @@
 
     <string name="bluesky_notification_unknown_message">Unknown notification type %1$s</string>
     <string name="bluesky_notification_unknown_message2">Please report this issue to the developer.</string>
+
+    <string name="blusky_item_action_repost">Repost</string>
+    <string name="blusky_item_action_quote">Quote</string>
 </resources>

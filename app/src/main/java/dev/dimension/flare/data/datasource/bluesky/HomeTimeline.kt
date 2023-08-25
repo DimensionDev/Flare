@@ -100,7 +100,7 @@ private class HomeTimelinePagingSource(
             return LoadResult.Page(
                 data = response.feed.map {
                     it.toUi(account.accountKey)
-                }.distinctBy { it.statusKey },// TODO: why we need this?
+                },
                 prevKey = null,
                 nextKey = if (response.cursor != params.key) response.cursor else null
             )

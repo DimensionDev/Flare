@@ -12,6 +12,7 @@ import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 import kotlinx.coroutines.flow.mapNotNull
@@ -53,7 +54,7 @@ internal fun mastodonUserDataByNameAndHostPresenter(
                 cacheDatabase.userDao().insertAll(listOf(user))
             },
             cacheSource = {
-                cacheDatabase.userDao().getUserByHandleAndHost(name, host)
+                cacheDatabase.userDao().getUserByHandleAndHost(name, host, PlatformType.Mastodon)
                     .mapNotNull { it?.toUi() }
             }
         )
@@ -103,7 +104,7 @@ internal fun misskeyUserDataByNamePresenter(
                 cacheDatabase.userDao().insertAll(listOf(user))
             },
             cacheSource = {
-                cacheDatabase.userDao().getUserByHandleAndHost(name, host)
+                cacheDatabase.userDao().getUserByHandleAndHost(name, host, PlatformType.Misskey)
                     .mapNotNull { it?.toUi() }
             }
         )
@@ -147,7 +148,7 @@ internal fun blueskyUserDataByNamePresenter(
             cacheDatabase.userDao().insertAll(listOf(user))
         },
         cacheSource = {
-            cacheDatabase.userDao().getUserByHandleAndHost(name, host)
+            cacheDatabase.userDao().getUserByHandleAndHost(name, host, PlatformType.Bluesky)
                 .mapNotNull { it?.toUi() }
         }
     )

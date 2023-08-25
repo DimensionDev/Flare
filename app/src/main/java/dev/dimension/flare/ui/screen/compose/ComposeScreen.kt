@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -126,6 +127,7 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.localDescription
 import dev.dimension.flare.ui.model.localName
 import dev.dimension.flare.ui.onError
+import dev.dimension.flare.ui.onLoading
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -394,12 +396,12 @@ private fun ComposeScreen(
                             }
                         }
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(imeHeight())
-                        ) {
-                            state.emojiState.onSuccess { emojis ->
+                        state.emojiState.onSuccess { emojis ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(imeHeight())
+                            ) {
                                 if (!WindowInsets.isImeVisible) {
                                     LazyVerticalGrid(
                                         columns = GridCells.Adaptive(48.dp),
@@ -424,6 +426,18 @@ private fun ComposeScreen(
                                     }
                                 }
                             }
+                        }.onError {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .imePadding()
+                            )
+                        }.onLoading {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .imePadding()
+                            )
                         }
                     }
                 }

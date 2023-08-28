@@ -176,7 +176,7 @@ private fun misskeyCallbackPresenter(
         }
         for (application in pendingOAuth) {
             try {
-                if (application is UiApplication.Misskey && application.session == session) {
+                if (application is UiApplication.Misskey) {
                     misskeyAuthCheckUseCase(
                         host = application.host,
                         session = session,

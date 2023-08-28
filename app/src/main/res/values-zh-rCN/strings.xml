@@ -84,6 +84,7 @@
     <string name="status_loadmore_end">没有更多嘟文了</string>
     <string name="status_loadmore_error">加载失败</string>
     <string name="status_loadmore_error_retry">重试</string>
+    <string name="status_empty">这里什么都没有</string>
 
     <string name="service_select_welcome_title">欢迎使用 Flare</string>
     <string name="service_select_welcome_message">Flare 是一个 Android 平台社交客户端。\n请先选择一个服务来开始。</string>
@@ -91,7 +92,6 @@
     <string name="mastodon_login_title">登录到 Mastodon</string>
     <string name="mastodon_login_message">请在下面输入实例主机名称。</string>
     <string name="mastodon_login_hint">实例主机名称，比如 mastodon.social</string>
-
 
     <string name="misskey_login_title">登录到 Misskey</string>
     <string name="misskey_login_message">请在下面输入实例主机名称。</string>
@@ -125,4 +125,10 @@
     <string name="bluesky_login_base_url_hint">实例主机名称，比如 https://bsky.social</string>
     <string name="bluesky_login_username_hint">用户名</string>
     <string name="bluesky_login_password_hint">密码</string>
+
+    <string name="bluesky_notification_unknown_message">未知的通知类型 %1$s</string>
+    <string name="bluesky_notification_unknown_message2">请提交一个错误报告</string>
+
+    <string name="blusky_item_action_repost">转发</string>
+    <string name="blusky_item_action_quote">引用</string>
 </resources>

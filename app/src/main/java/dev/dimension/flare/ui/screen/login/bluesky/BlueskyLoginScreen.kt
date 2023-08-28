@@ -164,7 +164,7 @@ private fun BlueskyLoginScreen(
                                     expanded = state.showDropdown,
                                     onDismissRequest = { state.setDropdown(false) },
                                 ) {
-                                    KnownInstance.values().forEach {
+                                    KnownInstance.entries.forEach {
                                         DropdownMenuItem(
                                             text = { Text(text = it.url) },
                                             onClick = { state.selectBaseUrl(it.url) },
@@ -194,10 +194,7 @@ private fun BlueskyLoginScreen(
                         },
                         enabled = !state.loading,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(
-                                focusRequester = focusRequester,
-                            ),
+                            .fillMaxWidth(),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         onSubmit = {
                             state.login()

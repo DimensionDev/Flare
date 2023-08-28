@@ -639,7 +639,7 @@ private fun ComposeScreen(
                                     },
                                     properties = PopupProperties(focusable = false),
                                 ) {
-                                    PollExpiration.values().forEach { expiration ->
+                                    PollExpiration.entries.forEach { expiration ->
                                         DropdownMenuItem(
                                             onClick = {
                                                 pollState.setExpiredAt(expiration)
@@ -1083,7 +1083,7 @@ private fun misskeyVisibilityPresenter() = run {
     object : MisskeyVisibilityState(
         visibility = visibility,
         showVisibilityMenu = showVisibilityMenu,
-        allVisibilities = UiStatus.Misskey.Visibility.values().toList(),
+        allVisibilities = UiStatus.Misskey.Visibility.entries.toList(),
         localOnly = localOnly,
     ) {
         override fun setLocalOnly(value: Boolean) {
@@ -1115,7 +1115,7 @@ private fun mastodonVisibilityPresenter() = run {
     object : MastodonVisibilityState(
         visibility = visibility,
         showVisibilityMenu = showVisibilityMenu,
-        allVisibilities = UiStatus.Mastodon.Visibility.values().toList(),
+        allVisibilities = UiStatus.Mastodon.Visibility.entries.toList(),
     ) {
         override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
             visibility = value

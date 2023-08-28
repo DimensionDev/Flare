@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoodBad
+import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -90,6 +91,28 @@ internal fun status() {
                     )
                 }
             }
+        } else if (lazyPagingItems.itemCount == 0) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillParentMaxSize()
+                        .clickable {
+                            lazyPagingItems.refresh()
+                        },
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.EmojiEmotions,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Text(
+                        text = stringResource(id = R.string.status_empty),
+                        modifier = Modifier.padding(16.dp),
+                    )
+                }
+            }
         } else {
             items(
                 lazyPagingItems.itemCount,
@@ -164,7 +187,7 @@ internal fun status() {
                                     .fillMaxWidth()
                                     .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 Text(
                                     text = stringResource(R.string.status_loadmore_error),

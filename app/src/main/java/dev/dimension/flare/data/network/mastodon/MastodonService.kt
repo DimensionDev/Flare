@@ -118,7 +118,7 @@ class MastodonService(
             since_id = since_id,
             limit = count,
             min_id = min_id,
-            exclude_types = NotificationTypes.values().filter { it != NotificationTypes.Mention },
+            exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
         )
     }
 

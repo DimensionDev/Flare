@@ -40,6 +40,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.repository.app.addMisskeyApplicationUseCase
+import dev.dimension.flare.data.repository.app.clearAnyPendingOauthUseCase
 import dev.dimension.flare.data.repository.app.setPendingOAuthUseCase
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
@@ -169,6 +170,7 @@ private suspend fun misskeyLoginUseCase(
         session = session,
     )
     addMisskeyApplicationUseCase(host, session)
+    clearAnyPendingOauthUseCase()
     setPendingOAuthUseCase(host, true)
     val target = service.getAuthorizeUrl()
     launchOAuth(target)

@@ -63,7 +63,7 @@ data class User(
 
     @SerialName(value = "isSilenced") val isSilenced: kotlin.Boolean,
 
-    @SerialName(value = "isLimited") val isLimited: kotlin.Boolean,
+    @SerialName(value = "isLimited") val isLimited: kotlin.Boolean? = null,
 
     @SerialName(value = "isSuspended") val isSuspended: kotlin.Boolean,
 

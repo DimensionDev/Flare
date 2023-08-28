@@ -193,7 +193,6 @@ private fun misskeyCallbackPresenter(
                 break
             }
         }
-        error = Exception("No pending OAuth")
     }
     if (error != null) {
         return UiState.Error(error!!)

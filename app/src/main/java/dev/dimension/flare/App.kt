@@ -11,6 +11,7 @@ import com.moriatsushi.koject.Koject
 import com.moriatsushi.koject.android.application
 import com.moriatsushi.koject.start
 import dev.dimension.flare.common.AnimatedPngDecoder
+import dev.dimension.flare.common.AnimatedWebPDecoder
 
 class App : Application(), ImageLoaderFactory {
     override fun onCreate() {
@@ -30,6 +31,7 @@ class App : Application(), ImageLoaderFactory {
                 }
                 add(AnimatedPngDecoder.Factory())
                 add(SvgDecoder.Factory())
+                add(AnimatedWebPDecoder.Factory())
             }
             .crossfade(true)
             .build()

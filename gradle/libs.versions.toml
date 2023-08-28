@@ -72,6 +72,7 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 apng = "com.github.penfeizhou.android.animation:apng:2.26.0"
+awebp = "com.github.penfeizhou.android.animation:awebp:2.26.0"
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
@@ -113,7 +114,7 @@ navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-atomicfu"]
 koject = ["koject-core", "koject-android-core", "koject-android-activity", "koject-android-fragment", "koject-android-viewmodel", "koject-compose-core"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-client-okhttp", "okhttp3-logging-interceptor"]
-coil = ["coil-compose", "coil-gif", "apng", "coil-svg"]
+coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp"]
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
 

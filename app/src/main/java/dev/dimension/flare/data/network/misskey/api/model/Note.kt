@@ -41,7 +41,7 @@ data class Note(
 
     @SerialName(value = "reactions") val reactions: Map<kotlin.String, kotlin.Long>,
 
-    @SerialName(value = "reactionEmojis") val reactionEmojis: Map<kotlin.String, kotlin.String>? = null,
+//    @SerialName(value = "reactionEmojis") val reactionEmojis: Map<kotlin.String, kotlin.String>? = null,
 
     @SerialName(value = "renoteCount") val renoteCount: kotlin.Double,
 

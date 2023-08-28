@@ -72,7 +72,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.2"
+        kotlinCompilerExtensionVersion = "1.5.3-dev-k1.9.10-593b4c95fce"
     }
     packaging {
         resources {
@@ -128,4 +128,8 @@ dependencies {
 
 configure<de.jensklingenberg.ktorfit.gradle.KtorfitGradleConfiguration> {
     version = libs.versions.ktorfit.get()
+}
+
+ktlint {
+    version.set("0.50.0")
 }

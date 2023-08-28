@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization) apply false
     alias(libs.plugins.ktorfit) apply false
     alias(libs.plugins.ktlint) apply false
+    id("com.github.ben-manes.versions").version("0.47.0")
 }
 true // Needed to make the Suppress annotation work for the plugins block
 

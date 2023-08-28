@@ -11,7 +11,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Entity(
-    tableName = "user"
+    tableName = "user",
 )
 data class DbUser(
     @PrimaryKey
@@ -20,7 +20,7 @@ data class DbUser(
     val name: String,
     val handle: String,
     val host: String,
-    val content: UserContent
+    val content: UserContent,
 )
 
 @Serializable
@@ -32,24 +32,24 @@ sealed interface UserContent {
     @Serializable
     @SerialName("Misskey")
     data class Misskey(
-        val data: dev.dimension.flare.data.network.misskey.api.model.User
+        val data: dev.dimension.flare.data.network.misskey.api.model.User,
     ) : UserContent
 
     @Serializable
     @SerialName("MisskeyLite")
     data class MisskeyLite(
-        val data: dev.dimension.flare.data.network.misskey.api.model.UserLite
+        val data: dev.dimension.flare.data.network.misskey.api.model.UserLite,
     ) : UserContent
 
     @Serializable
     @SerialName("Bluesky")
     data class Bluesky(
-        val data: ProfileViewDetailed
+        val data: ProfileViewDetailed,
     ) : UserContent
 
     @Serializable
     @SerialName("BlueskyLite")
     data class BlueskyLite(
-        val data: ProfileViewBasic
+        val data: ProfileViewBasic,
     ) : UserContent
 }

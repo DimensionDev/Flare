@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,12 +23,11 @@ import kotlinx.serialization.Serializable
  * @param ids * @param license Use `null` to reset the license.
  */
 @Serializable
-
 data class AdminEmojiSetLicenseBulkRequest(
 
     @SerialName(value = "ids") val ids: kotlin.collections.List<kotlin.String>,
 
     /* Use `null` to reset the license. */
-    @SerialName(value = "license") val license: kotlin.String? = null
+    @SerialName(value = "license") val license: kotlin.String? = null,
 
 )

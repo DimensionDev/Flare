@@ -33,7 +33,7 @@ import sh.christian.ozone.api.response.AtpErrorDescription
 class BlueskyService(
     private val baseUrl: String,
     private val accountKey: MicroBlogKey? = null,
-    private val accountDao: AccountDao? = null
+    private val accountDao: AccountDao? = null,
 ) : BlueskyApi by XrpcBlueskyApi(
     ktorClient {
         install(DefaultRequest) {
@@ -49,7 +49,7 @@ class BlueskyService(
         }
 
         expectSuccess = false
-    }
+    },
 )
 
 /**
@@ -59,12 +59,12 @@ class BlueskyService(
 internal class XrpcAuthPlugin(
     private val json: Json,
     private val accountKey: MicroBlogKey?,
-    private val accountDao: AccountDao?
+    private val accountDao: AccountDao?,
 ) {
     class Config(
         var json: Json = Json { ignoreUnknownKeys = true },
         var accountKey: MicroBlogKey? = null,
-        var accountDao: AccountDao? = null
+        var accountDao: AccountDao? = null,
     )
 
     companion object : HttpClientPlugin<Config, XrpcAuthPlugin> {
@@ -77,7 +77,7 @@ internal class XrpcAuthPlugin(
 
         override fun install(
             plugin: XrpcAuthPlugin,
-            scope: HttpClient
+            scope: HttpClient,
         ) {
             scope.plugin(HttpSend).intercept { context ->
                 if (!context.headers.contains(Authorization) && plugin.accountKey != null && plugin.accountDao != null) {
@@ -116,7 +116,7 @@ internal class XrpcAuthPlugin(
                                     baseUrl = account.credential.baseUrl,
                                     accountKey = plugin.accountKey,
                                     accessToken = newAccessToken,
-                                    refreshToken = newRefreshToken
+                                    refreshToken = newRefreshToken,
                                 )
 
                                 context.headers.remove(Authorization)
@@ -133,9 +133,9 @@ internal class XrpcAuthPlugin(
 }
 
 fun UiAccount.Bluesky.getService(
-    appDatabase: AppDatabase = inject()
+    appDatabase: AppDatabase = inject(),
 ) = BlueskyService(
     baseUrl = credential.baseUrl,
     accountKey = accountKey,
-    accountDao = appDatabase.accountDao()
+    accountDao = appDatabase.accountDao(),
 )

@@ -30,7 +30,7 @@ internal fun StatusActionButton(
     modifier: Modifier = Modifier,
     color: Color = LocalContentColor.current,
     contentDescription: String? = null,
-    content: @Composable RowScope.() -> Unit = {}
+    content: @Composable RowScope.() -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Row(
@@ -38,10 +38,10 @@ internal fun StatusActionButton(
             .clickable(
                 indication = null,
                 interactionSource = interactionSource,
-                onClick = onClicked
+                onClick = onClicked,
             )
             .padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = icon,
@@ -51,18 +51,18 @@ internal fun StatusActionButton(
                     interactionSource = interactionSource,
                     indication = rememberRipple(
                         bounded = false,
-                        radius = 20.dp
-                    )
+                        radius = 20.dp,
+                    ),
                 )
                 .size(16.dp),
-            tint = color
+            tint = color,
         )
         if (!text.isNullOrEmpty()) {
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
-                color = color
+                color = color,
             )
         }
         content.invoke(this)

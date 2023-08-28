@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,13 +22,12 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param offset * @param userId */
 @Serializable
-
 data class AdminAnnouncementsListRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
 
-    @SerialName(value = "userId") val userId: kotlin.String? = null
+    @SerialName(value = "userId") val userId: kotlin.String? = null,
 
 )

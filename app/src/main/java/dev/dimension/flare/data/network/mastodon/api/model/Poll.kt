@@ -27,5 +27,5 @@ data class Poll(
     val ownVotes: List<Int>? = null,
 
     val options: List<Option>? = null,
-    val emojis: List<Emoji>? = null
+    val emojis: List<Emoji>? = null,
 )

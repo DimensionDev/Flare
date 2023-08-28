@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param deliveredInstances * @param inboxInstances * @param stalled * @param sub * @param pub * @param pubsub * @param subActive * @param pubActive */
 @Serializable
-
 data class ChartsFederation200Response(
 
     @SerialName(value = "deliveredInstances") val deliveredInstances: kotlin.collections.List<kotlin.Double>,
@@ -39,6 +38,6 @@ data class ChartsFederation200Response(
 
     @SerialName(value = "subActive") val subActive: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "pubActive") val pubActive: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "pubActive") val pubActive: kotlin.collections.List<kotlin.Double>,
 
 )

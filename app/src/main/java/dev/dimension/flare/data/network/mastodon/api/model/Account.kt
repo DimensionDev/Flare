@@ -46,5 +46,5 @@ data class Account(
 
     val emojis: List<Emoji>? = null,
     val fields: List<Field>? = null,
-    val source: Source? = null
+    val source: Source? = null,
 )

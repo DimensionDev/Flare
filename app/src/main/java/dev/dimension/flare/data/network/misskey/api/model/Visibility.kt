@@ -15,5 +15,5 @@ enum class Visibility {
     Followers,
 
     @SerialName("specified")
-    Specified
+    Specified,
 }

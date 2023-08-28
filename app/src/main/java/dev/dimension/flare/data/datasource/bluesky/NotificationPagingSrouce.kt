@@ -1,20 +1,11 @@
 package dev.dimension.flare.data.datasource.bluesky
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import androidx.paging.PagingState
 import app.bsky.notification.ListNotificationsQueryParams
-import com.moriatsushi.koject.compose.rememberInject
-import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
-import kotlinx.coroutines.flow.Flow
 import java.io.IOException
 
 // @OptIn(ExperimentalPagingApi::class)
@@ -76,8 +67,8 @@ import java.io.IOException
 //    }
 // }
 
-private class NotificationPagingSrouce(
-    private val account: UiAccount.Bluesky
+internal class NotificationPagingSrouce(
+    private val account: UiAccount.Bluesky,
 ) : androidx.paging.PagingSource<String, UiStatus>() {
     override fun getRefreshKey(state: PagingState<String, UiStatus>): String? {
         return null
@@ -89,10 +80,10 @@ private class NotificationPagingSrouce(
             val response = service.listNotifications(
                 ListNotificationsQueryParams(
                     limit = params.loadSize.toLong(),
-                    cursor = params.key
-                )
+                    cursor = params.key,
+                ),
             ).maybeResponse() ?: return LoadResult.Error(
-                IOException("response is null")
+                IOException("response is null"),
             )
 
             LoadResult.Page(
@@ -100,30 +91,11 @@ private class NotificationPagingSrouce(
                     it.toUi(account.accountKey)
                 },
                 prevKey = null,
-                nextKey = if (response.cursor != params.key) response.cursor else null
+                nextKey = if (response.cursor != params.key) response.cursor else null,
             )
         } catch (e: Exception) {
             e.printStackTrace()
             return LoadResult.Error(e)
         }
-    }
-}
-
-@Composable
-internal fun notificationTimelineDataSource(
-    account: UiAccount.Bluesky,
-    pageSize: Int = 20,
-    pagingKey: String = "notification",
-    accountKey: MicroBlogKey = account.accountKey,
-    database: CacheDatabase = rememberInject()
-): Flow<PagingData<UiStatus>> {
-    return remember(
-        accountKey
-    ) {
-        Pager(
-            config = PagingConfig(pageSize = pageSize)
-        ) {
-            NotificationPagingSrouce(account)
-        }.flow
     }
 }

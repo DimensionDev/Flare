@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param query * @param limit * @param sinceId * @param untilId */
 @Serializable
-
 data class AdminEmojiListRequest(
 
     @SerialName(value = "query") val query: kotlin.String? = null,
@@ -31,6 +30,6 @@ data class AdminEmojiListRequest(
 
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
 
-    @SerialName(value = "untilId") val untilId: kotlin.String? = null
+    @SerialName(value = "untilId") val untilId: kotlin.String? = null,
 
 )

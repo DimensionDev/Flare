@@ -13,7 +13,7 @@ internal class AnimatedPngDecoder(private val source: ImageSource) : Decoder {
     override suspend fun decode(): DecodeResult {
         return DecodeResult(
             drawable = APNGDrawable.fromFile(source.file().toString()),
-            isSampled = false
+            isSampled = false,
         )
     }
     class Factory : Decoder.Factory {

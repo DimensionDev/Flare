@@ -18,5 +18,5 @@ enum class MediaType {
     Video,
 
     @SerialName("audio")
-    Audio
+    Audio,
 }

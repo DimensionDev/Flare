@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param userId * @param includeReplies * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate * @param includeMyRenotes * @param withFiles * @param fileType * @param excludeNsfw */
 @Serializable
-
 data class UsersNotesRequest(
 
     @SerialName(value = "userId") val userId: kotlin.String,
@@ -45,6 +44,6 @@ data class UsersNotesRequest(
 
     @SerialName(value = "fileType") val fileType: kotlin.collections.List<kotlin.String>? = null,
 
-    @SerialName(value = "excludeNsfw") val excludeNsfw: kotlin.Boolean? = false
+    @SerialName(value = "excludeNsfw") val excludeNsfw: kotlin.Boolean? = false,
 
 )

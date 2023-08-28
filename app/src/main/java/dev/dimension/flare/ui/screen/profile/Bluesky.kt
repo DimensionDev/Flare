@@ -16,24 +16,19 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.cache.blueskyUserDataPresenter
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.placeholder.placeholder
-import dev.dimension.flare.ui.flatMap
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import dev.dimension.flare.ui.toUi
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun BlueskyProfileHeader(
     user: UiUser.Bluesky,
     relationState: UiState<UiRelation>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     CommonProfileHeader(
         bannerUrl = user.bannerUrl,
@@ -48,8 +43,8 @@ internal fun BlueskyProfileHeader(
                         onClick = { /*TODO*/ },
                         modifier = Modifier.placeholder(
                             true,
-                            shape = ButtonDefaults.filledTonalShape
-                        )
+                            shape = ButtonDefaults.filledTonalShape,
+                        ),
                     ) {
                         Text(text = stringResource(R.string.profile_header_button_follow))
                     }
@@ -58,15 +53,15 @@ internal fun BlueskyProfileHeader(
                 is UiState.Success -> {
                     if (relationState.data is UiRelation.Bluesky) {
                         FilledTonalButton(
-                            onClick = { /*TODO*/ }
+                            onClick = { /*TODO*/ },
                         ) {
                             Text(
                                 text = stringResource(
                                     when {
                                         relationState.data.isFollowing -> R.string.profile_header_button_following
                                         else -> R.string.profile_header_button_follow
-                                    }
-                                )
+                                    },
+                                ),
                             )
                         }
                     }
@@ -78,60 +73,43 @@ internal fun BlueskyProfileHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = screenHorizontalPadding),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 user.descriptionElement?.let {
                     HtmlText(
                         element = it,
-                        layoutDirection = user.descriptionDirection ?: LocalLayoutDirection.current
+                        layoutDirection = user.descriptionDirection ?: LocalLayoutDirection.current,
                     )
                 }
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
                         text = stringResource(
                             R.string.profile_header_toots_count,
-                            user.matrices.statusesCountHumanized
+                            user.matrices.statusesCountHumanized,
                         ),
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
                         text = stringResource(
                             R.string.profile_header_following_count,
-                            user.matrices.followsCountHumanized
+                            user.matrices.followsCountHumanized,
                         ),
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
                         text = stringResource(
                             R.string.profile_header_fans_count,
-                            user.matrices.fansCountHumanized
+                            user.matrices.fansCountHumanized,
                         ),
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
         },
-        modifier = modifier
+        modifier = modifier,
     )
-}
-
-@Composable
-internal fun blueskyUserRelationPresenter(
-    account: UiAccount.Bluesky,
-    userKey: MicroBlogKey
-): UiState<UiRelation> {
-    if (account.accountKey == userKey) {
-        return UiState.Error(IllegalStateException("Cannot show relation of self"))
-    }
-    return blueskyUserDataPresenter(account, userKey.id).toUi().flatMap {
-        if (it is UiUser.Bluesky) {
-            UiState.Success(it.relation)
-        } else {
-            UiState.Error(IllegalStateException("User is not a Misskey user"))
-        }
-    }
 }

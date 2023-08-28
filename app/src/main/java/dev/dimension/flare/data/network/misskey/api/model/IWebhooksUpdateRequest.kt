@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param webhookId * @param name * @param url * @param secret * @param on * @param active */
 @Serializable
-
 data class IWebhooksUpdateRequest(
 
     @SerialName(value = "webhookId") val webhookId: kotlin.String,
@@ -35,7 +34,7 @@ data class IWebhooksUpdateRequest(
 
     @SerialName(value = "on") val on: kotlin.collections.List<IWebhooksUpdateRequest.On>,
 
-    @SerialName(value = "active") val active: kotlin.Boolean
+    @SerialName(value = "active") val active: kotlin.Boolean,
 
 ) {
 
@@ -67,6 +66,6 @@ data class IWebhooksUpdateRequest(
         Renote("renote"),
 
         @SerialName(value = "reaction")
-        Reaction("reaction");
+        Reaction("reaction"),
     }
 }

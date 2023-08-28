@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param waiting * @param active * @param completed * @param failed * @param delayed */
 @Serializable
-
 data class QueueCount(
 
     @SerialName(value = "waiting") val waiting: kotlin.Double,
@@ -33,6 +32,6 @@ data class QueueCount(
 
     @SerialName(value = "failed") val failed: kotlin.Double,
 
-    @SerialName(value = "delayed") val delayed: kotlin.Double
+    @SerialName(value = "delayed") val delayed: kotlin.Double,
 
 )

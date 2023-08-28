@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param type * @param user * @param userId * @param note * @param reaction * @param choice * @param invitation * @param body * @param header * @param icon */
 @Serializable
-
 data class Notification(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -48,7 +47,7 @@ data class Notification(
     @SerialName(value = "header") val header: kotlin.String? = null,
 
     @SerialName(value = "icon") val icon: kotlin.String? = null,
-    val achievement: String? = null
+    val achievement: String? = null,
 ) {
 
     /**
@@ -88,6 +87,6 @@ data class Notification(
         AchievementEarned("achievementEarned"),
 
         @SerialName(value = "app")
-        App("app");
+        App("app"),
     }
 }

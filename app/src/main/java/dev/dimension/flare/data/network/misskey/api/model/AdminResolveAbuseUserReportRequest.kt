@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,11 +22,10 @@ import kotlinx.serialization.Serializable
  * *
  * @param reportId * @param forward */
 @Serializable
-
 data class AdminResolveAbuseUserReportRequest(
 
     @SerialName(value = "reportId") val reportId: kotlin.String,
 
-    @SerialName(value = "forward") val forward: kotlin.Boolean? = false
+    @SerialName(value = "forward") val forward: kotlin.Boolean? = false,
 
 )

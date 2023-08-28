@@ -10,7 +10,7 @@ data class Trend(
     @SerialName("name")
     val name: String? = null,
     @SerialName("url")
-    val url: String? = null
+    val url: String? = null,
 )
 
 @Serializable
@@ -20,5 +20,5 @@ data class TrendHistory(
     @SerialName("day")
     val day: String? = null,
     @SerialName("uses")
-    val uses: String? = null
+    val uses: String? = null,
 )

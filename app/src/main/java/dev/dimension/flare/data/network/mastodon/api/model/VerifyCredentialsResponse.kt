@@ -9,5 +9,5 @@ data class VerifyCredentialsResponse(
     val website: String? = null,
 
     @SerialName("vapid_key")
-    val vapidKey: String? = null
+    val vapidKey: String? = null,
 )

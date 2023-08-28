@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param clipId * @param name * @param isPublic * @param description */
 @Serializable
-
 data class ClipsUpdateRequest(
 
     @SerialName(value = "clipId") val clipId: kotlin.String,
@@ -31,6 +30,6 @@ data class ClipsUpdateRequest(
 
     @SerialName(value = "isPublic") val isPublic: kotlin.Boolean? = null,
 
-    @SerialName(value = "description") val description: kotlin.String? = null
+    @SerialName(value = "description") val description: kotlin.String? = null,
 
 )

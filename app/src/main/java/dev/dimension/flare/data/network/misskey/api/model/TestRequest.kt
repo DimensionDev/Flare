@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param required * @param string * @param default * @param nullableDefault * @param id */
 @Serializable
-
 data class TestRequest(
 
     @SerialName(value = "required") val required: kotlin.Boolean,
@@ -33,6 +32,6 @@ data class TestRequest(
 
     @SerialName(value = "nullableDefault") val nullableDefault: kotlin.String? = "hello",
 
-    @SerialName(value = "id") val id: kotlin.String? = null
+    @SerialName(value = "id") val id: kotlin.String? = null,
 
 )

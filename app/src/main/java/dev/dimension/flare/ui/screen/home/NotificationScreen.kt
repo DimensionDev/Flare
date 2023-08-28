@@ -24,17 +24,13 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datasource.mastodon.mentionTimelineDataSource
-import dev.dimension.flare.data.datasource.mastodon.notificationTimelineDataSource
-import dev.dimension.flare.data.datasource.misskey.notificationDataSource
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.repository.app.activeAccountServicePresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.flatMap
 import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -43,7 +39,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 @Composable
 fun NotificationScreen(
     contentPadding: PaddingValues,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by producePresenter {
         notificationPresenter()
@@ -59,17 +55,17 @@ fun NotificationScreen(
                 state = listState,
                 contentPadding = contentPadding,
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                state.shouldShowTypes.onSuccess {
-                    if (it) {
+                state.allTypes.onSuccess {
+                    if (it.size > 1) {
                         item {
                             SingleChoiceSegmentedButtonRow(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(horizontal = screenHorizontalPadding)
+                                    .padding(horizontal = screenHorizontalPadding),
                             ) {
-                                NotificationType.values().forEachIndexed { index, notificationType ->
+                                it.forEachIndexed { index, notificationType ->
                                     SegmentedButton(
                                         selected = state.notificationType == notificationType,
                                         onClick = {
@@ -77,8 +73,8 @@ fun NotificationScreen(
                                         },
                                         shape = SegmentedButtonDefaults.shape(
                                             position = index,
-                                            count = NotificationType.values().size
-                                        )
+                                            count = it.size,
+                                        ),
                                     ) {
                                         Text(text = stringResource(id = notificationType.title))
                                     }
@@ -93,50 +89,34 @@ fun NotificationScreen(
                     }
                 }
             }
-        }
+        },
     )
 }
 
-enum class NotificationType(@StringRes val title: Int) {
-    All(title = R.string.notification_tab_all_title),
-    Mention(title = R.string.notification_tab_mentions_title)
+enum class NotificationType(@StringRes val title: Int, val type: NotificationFilter) {
+    All(title = R.string.notification_tab_all_title, type = NotificationFilter.All),
+    Mention(title = R.string.notification_tab_mentions_title, type = NotificationFilter.Mention),
 }
 
 @Composable
 private fun notificationPresenter(
-    statusEvent: StatusEvent = rememberInject()
+    statusEvent: StatusEvent = rememberInject(),
 ) = run {
     var type by remember { mutableStateOf(NotificationType.All) }
-    val account by activeAccountPresenter()
-    val shouldShowTypes = account.map {
-        when (it) {
-            is UiAccount.Mastodon -> true
-            is UiAccount.Misskey -> true
-            is UiAccount.Bluesky -> false
+    val allTypes = activeAccountServicePresenter().map { (service, account) ->
+        service.supportedNotificationFilter.map {
+            when (it) {
+                NotificationFilter.All -> NotificationType.All
+                NotificationFilter.Mention -> NotificationType.Mention
+            }
         }
     }
-    val listState = account.flatMap {
-        when (it) {
-            is UiAccount.Mastodon -> UiState.Success(
-                when (type) {
-                    NotificationType.All -> notificationTimelineDataSource(account = it)
-                    NotificationType.Mention -> mentionTimelineDataSource(account = it)
-                }.collectAsLazyPagingItems()
+    val listState = activeAccountServicePresenter().map { (service, account) ->
+        remember(account.accountKey, type.type) {
+            service.notification(
+                type = type.type,
             )
-
-            is UiAccount.Misskey -> UiState.Success(
-                when (type) {
-                    NotificationType.All -> notificationDataSource(account = it)
-                    NotificationType.Mention -> dev.dimension.flare.data.datasource.misskey.mentionTimelineDataSource(account = it)
-                }.collectAsLazyPagingItems()
-            )
-
-            is UiAccount.Bluesky -> UiState.Success(
-                dev.dimension.flare.data.datasource.bluesky.notificationTimelineDataSource(
-                    account = it
-                ).collectAsLazyPagingItems()
-            )
-        }
+        }.collectAsLazyPagingItems()
     }
     val refreshing =
         listState is UiState.Loading ||
@@ -146,7 +126,7 @@ private fun notificationPresenter(
         val notificationType = type
         val listState = listState
         val statusEvent = statusEvent
-        val shouldShowTypes = shouldShowTypes
+        val allTypes = allTypes
         fun onNotificationTypeChanged(value: NotificationType) {
             type = value
         }

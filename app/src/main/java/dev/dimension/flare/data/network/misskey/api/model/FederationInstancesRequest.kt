@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param host Omit or use `null` to not filter by host.
  * @param blocked * @param notResponding * @param suspended * @param federating * @param subscribing * @param publishing * @param limit * @param offset * @param sort */
 @Serializable
-
 data class FederationInstancesRequest(
 
     /* Omit or use `null` to not filter by host. */
@@ -45,6 +44,6 @@ data class FederationInstancesRequest(
 
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
 
-    @SerialName(value = "sort") val sort: kotlin.String? = null
+    @SerialName(value = "sort") val sort: kotlin.String? = null,
 
 )

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param available */
 @Serializable
-
 data class UsernameAvailable200Response(
 
-    @SerialName(value = "available") val available: kotlin.Boolean
+    @SerialName(value = "available") val available: kotlin.Boolean,
 
 )

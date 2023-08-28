@@ -5,25 +5,25 @@ sealed interface UiMedia {
         val url: String,
         val previewUrl: String,
         val description: String?,
-        val aspectRatio: Float
+        val aspectRatio: Float,
     ) : UiMedia
 
     data class Video(
         val url: String,
         val thumbnailUrl: String,
         val description: String?,
-        val aspectRatio: Float
+        val aspectRatio: Float,
     ) : UiMedia
 
     data class Gif(
         val url: String,
         val previewUrl: String,
         val description: String?,
-        val aspectRatio: Float
+        val aspectRatio: Float,
     ) : UiMedia
 
     data class Audio(
         val url: String,
-        val description: String?
+        val description: String?,
     ) : UiMedia
 }

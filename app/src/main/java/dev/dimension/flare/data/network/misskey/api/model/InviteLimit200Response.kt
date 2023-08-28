@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param remaining */
 @Serializable
-
 data class InviteLimit200Response(
 
-    @SerialName(value = "remaining") val remaining: kotlin.Int?
+    @SerialName(value = "remaining") val remaining: kotlin.Int?,
 
 )

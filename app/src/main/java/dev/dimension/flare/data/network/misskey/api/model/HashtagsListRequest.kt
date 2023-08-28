@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param sort * @param limit * @param attachedToUserOnly * @param attachedToLocalUserOnly * @param attachedToRemoteUserOnly */
 @Serializable
-
 data class HashtagsListRequest(
 
     @SerialName(value = "sort") val sort: HashtagsListRequest.Sort,
@@ -33,7 +32,7 @@ data class HashtagsListRequest(
 
     @SerialName(value = "attachedToLocalUserOnly") val attachedToLocalUserOnly: kotlin.Boolean? = false,
 
-    @SerialName(value = "attachedToRemoteUserOnly") val attachedToRemoteUserOnly: kotlin.Boolean? = false
+    @SerialName(value = "attachedToRemoteUserOnly") val attachedToRemoteUserOnly: kotlin.Boolean? = false,
 
 ) {
 
@@ -77,6 +76,6 @@ data class HashtagsListRequest(
         PlusAttachedRemoteUsers("+attachedRemoteUsers"),
 
         @SerialName(value = "-attachedRemoteUsers")
-        MinusAttachedRemoteUsers("-attachedRemoteUsers");
+        MinusAttachedRemoteUsers("-attachedRemoteUsers"),
     }
 }

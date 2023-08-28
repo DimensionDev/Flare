@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PostAccounts(
-    val account_ids: List<String>
+    val account_ids: List<String>,
 )

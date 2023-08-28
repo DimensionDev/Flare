@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param span * @param userId * @param limit * @param offset */
 @Serializable
-
 data class ChartsUserDriveRequest(
 
     @SerialName(value = "span") val span: ChartsUserDriveRequest.Span,
@@ -31,7 +30,7 @@ data class ChartsUserDriveRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 30,
 
-    @SerialName(value = "offset") val offset: kotlin.Int? = null
+    @SerialName(value = "offset") val offset: kotlin.Int? = null,
 
 ) {
 
@@ -45,6 +44,6 @@ data class ChartsUserDriveRequest(
         Day("day"),
 
         @SerialName(value = "hour")
-        Hour("hour");
+        Hour("hour"),
     }
 }

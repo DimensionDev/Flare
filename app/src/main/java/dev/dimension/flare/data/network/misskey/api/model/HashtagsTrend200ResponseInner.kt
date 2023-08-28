@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,13 +22,12 @@ import kotlinx.serialization.Serializable
  * *
  * @param tag * @param chart * @param usersCount */
 @Serializable
-
 data class HashtagsTrend200ResponseInner(
 
     @SerialName(value = "tag") val tag: kotlin.String,
 
     @SerialName(value = "chart") val chart: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "usersCount") val usersCount: kotlin.Double
+    @SerialName(value = "usersCount") val usersCount: kotlin.Double,
 
 )

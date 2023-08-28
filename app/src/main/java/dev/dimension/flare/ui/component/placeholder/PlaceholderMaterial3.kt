@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.isSpecified
 public fun PlaceholderDefaults.color(
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(backgroundColor),
-    contentAlpha: Float = 0.1f
+    contentAlpha: Float = 0.1f,
 ): Color = contentColor.copy(contentAlpha).compositeOver(backgroundColor)
 
 /**
@@ -40,7 +40,7 @@ public fun PlaceholderDefaults.color(
 @Composable
 public fun PlaceholderDefaults.fadeHighlightColor(
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    alpha: Float = 0.3f
+    alpha: Float = 0.3f,
 ): Color = backgroundColor.copy(alpha = alpha)
 
 /**
@@ -54,7 +54,7 @@ public fun PlaceholderDefaults.fadeHighlightColor(
 @Composable
 public fun PlaceholderDefaults.shimmerHighlightColor(
     backgroundColor: Color = MaterialTheme.colorScheme.inverseSurface,
-    alpha: Float = 0.75f
+    alpha: Float = 0.75f,
 ): Color {
     return backgroundColor.copy(alpha = alpha)
 }
@@ -95,7 +95,7 @@ public fun Modifier.placeholder(
     shape: Shape? = null,
     highlight: PlaceholderHighlight? = null,
     placeholderFadeTransitionSpec: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> = { spring() },
-    contentFadeTransitionSpec: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> = { spring() }
+    contentFadeTransitionSpec: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> = { spring() },
 ): Modifier = composed {
     Modifier.placeholder(
         visible = visible,
@@ -104,6 +104,6 @@ public fun Modifier.placeholder(
         highlight = highlight
             ?: PlaceholderHighlight.fade(PlaceholderDefaults.fadeHighlightColor()),
         placeholderFadeTransitionSpec = placeholderFadeTransitionSpec,
-        contentFadeTransitionSpec = contentFadeTransitionSpec
+        contentFadeTransitionSpec = contentFadeTransitionSpec,
     )
 }

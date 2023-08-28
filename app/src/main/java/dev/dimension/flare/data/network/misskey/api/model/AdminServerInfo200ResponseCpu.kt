@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,11 +22,10 @@ import kotlinx.serialization.Serializable
  * *
  * @param model * @param cores */
 @Serializable
-
 data class AdminServerInfo200ResponseCpu(
 
     @SerialName(value = "model") val model: kotlin.String,
 
-    @SerialName(value = "cores") val cores: kotlin.Double
+    @SerialName(value = "cores") val cores: kotlin.Double,
 
 )

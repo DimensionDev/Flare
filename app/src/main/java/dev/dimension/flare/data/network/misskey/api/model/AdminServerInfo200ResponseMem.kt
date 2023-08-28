@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param total */
 @Serializable
-
 data class AdminServerInfo200ResponseMem(
 
-    @SerialName(value = "total") val total: kotlin.Double
+    @SerialName(value = "total") val total: kotlin.Double,
 
 )

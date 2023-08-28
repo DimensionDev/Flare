@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,13 +22,12 @@ import kotlinx.serialization.Serializable
  * *
  * @param place * @param url * @param imageUrl */
 @Serializable
-
 data class Meta200ResponseAdsInner(
 
     @SerialName(value = "place") val place: kotlin.String,
 
     @SerialName(value = "url") val url: kotlin.String,
 
-    @SerialName(value = "imageUrl") val imageUrl: kotlin.String
+    @SerialName(value = "imageUrl") val imageUrl: kotlin.String,
 
 )

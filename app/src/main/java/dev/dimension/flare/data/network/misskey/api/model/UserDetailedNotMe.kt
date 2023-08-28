@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -24,7 +24,6 @@ import kotlinx.serialization.Serializable
  * @param id * @param name * @param username * @param host The local host is represented with `null`.
  * @param avatarUrl * @param avatarBlurhash * @param onlineStatus * @param url * @param uri * @param movedToUri * @param alsoKnownAs * @param createdAt * @param updatedAt * @param lastFetchedAt * @param bannerUrl * @param bannerBlurhash * @param isLocked * @param isSilenced * @param isLimited * @param isSuspended * @param description * @param location * @param birthday * @param lang * @param fields * @param followersCount * @param followingCount * @param notesCount * @param pinnedNoteIds * @param pinnedNotes * @param pinnedPageId * @param pinnedPage * @param publicReactions * @param twoFactorEnabled * @param usePasswordLessLogin * @param securityKeys * @param isAdmin * @param isModerator * @param isBot * @param isCat * @param isFollowing * @param isFollowed * @param hasPendingFollowRequestFromYou * @param hasPendingFollowRequestToYou * @param isBlocking * @param isBlocked * @param isMuted * @param isRenoteMuted * @param memo */
 @Serializable
-
 data class UserDetailedNotMe(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -124,7 +123,7 @@ data class UserDetailedNotMe(
 
     @SerialName(value = "isRenoteMuted") val isRenoteMuted: kotlin.Boolean? = null,
 
-    @SerialName(value = "memo") val memo: kotlin.String? = null
+    @SerialName(value = "memo") val memo: kotlin.String? = null,
 
 ) {
 
@@ -144,6 +143,6 @@ data class UserDetailedNotMe(
         Active("active"),
 
         @SerialName(value = "offline")
-        Offline("offline");
+        Offline("offline"),
     }
 }

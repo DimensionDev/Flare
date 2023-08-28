@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param endpoint * @param auth * @param publickey * @param sendReadMessage */
 @Serializable
-
 data class SwRegisterRequest(
 
     @SerialName(value = "endpoint") val endpoint: kotlin.String,
@@ -31,6 +30,6 @@ data class SwRegisterRequest(
 
     @SerialName(value = "publickey") val publickey: kotlin.String,
 
-    @SerialName(value = "sendReadMessage") val sendReadMessage: kotlin.Boolean? = false
+    @SerialName(value = "sendReadMessage") val sendReadMessage: kotlin.Boolean? = false,
 
 )

@@ -10,5 +10,5 @@ data class MastodonList(
     @SerialName("replies_policy")
     val repliesPolicy: String? = null,
     @SerialName("title")
-    val title: String? = null
+    val title: String? = null,
 )

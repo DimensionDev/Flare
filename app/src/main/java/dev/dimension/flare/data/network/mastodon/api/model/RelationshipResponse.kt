@@ -32,5 +32,5 @@ data class RelationshipResponse(
     val domainBlocking: Boolean? = null,
 
     val endorsed: Boolean? = null,
-    val note: String? = null
+    val note: String? = null,
 )

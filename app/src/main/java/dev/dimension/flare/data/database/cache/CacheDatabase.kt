@@ -25,9 +25,9 @@ import dev.dimension.flare.data.database.cache.model.DbUser
         DbUser::class,
         DbStatusReference::class,
         DbPagingTimeline::class,
-        DbEmoji::class
+        DbEmoji::class,
     ],
-    version = 4
+    version = 4,
 )
 @TypeConverters(Converters::class)
 abstract class CacheDatabase : RoomDatabase() {
@@ -41,13 +41,13 @@ abstract class CacheDatabase : RoomDatabase() {
 @Singleton
 @Provides
 fun provideCacheDatabase(
-    applicationContext: Context
+    applicationContext: Context,
 ): CacheDatabase {
     return Room
         .databaseBuilder(
             applicationContext,
             CacheDatabase::class.java,
-            "cache_database"
+            "cache_database",
         )
         .fallbackToDestructiveMigration()
         .build()

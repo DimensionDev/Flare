@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param antennaId */
 @Serializable
-
 data class AntennasDeleteRequest(
 
-    @SerialName(value = "antennaId") val antennaId: kotlin.String
+    @SerialName(value = "antennaId") val antennaId: kotlin.String,
 
 )

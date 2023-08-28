@@ -32,7 +32,7 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 internal fun BlueskyNotificationComponent(
     data: UiStatus.BlueskyNotification,
     event: BlueskyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     when (data.reason) {
         "like" -> {
@@ -41,7 +41,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.Favorite,
-                text = stringResource(id = R.string.mastodon_notification_item_favourited_your_status)
+                text = stringResource(id = R.string.mastodon_notification_item_favourited_your_status),
             )
         }
 
@@ -51,7 +51,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.SyncAlt,
-                text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status)
+                text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status),
             )
         }
 
@@ -61,7 +61,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.PersonAdd,
-                text = stringResource(id = R.string.mastodon_notification_item_followed_you)
+                text = stringResource(id = R.string.mastodon_notification_item_followed_you),
             )
         }
 
@@ -71,7 +71,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.PersonAdd,
-                text = stringResource(id = R.string.misskey_notification_item_mentioned_you)
+                text = stringResource(id = R.string.misskey_notification_item_mentioned_you),
             )
         }
 
@@ -81,7 +81,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.Reply,
-                text = stringResource(id = R.string.misskey_notification_item_replied_to_you)
+                text = stringResource(id = R.string.misskey_notification_item_replied_to_you),
             )
         }
 
@@ -91,7 +91,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.PersonAdd,
-                text = stringResource(id = R.string.misskey_notification_item_quoted_your_status)
+                text = stringResource(id = R.string.misskey_notification_item_quoted_your_status),
             )
         }
 
@@ -99,7 +99,7 @@ internal fun BlueskyNotificationComponent(
             UnknwonNotificationComponent(
                 data = data,
                 event = event,
-                modifier = modifier
+                modifier = modifier,
             )
         }
     }
@@ -111,19 +111,19 @@ private fun NotificationComponent(
     icon: ImageVector,
     text: String,
     event: BlueskyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = icon,
             user = data.user,
-            text = text
+            text = text,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (data.user != null) {
                 AvatarComponent(
@@ -131,12 +131,12 @@ private fun NotificationComponent(
                     modifier = Modifier
                         .clickable {
                             event.onUserClick(data.user.userKey)
-                        }
+                        },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(1f),
                 ) {
                     HtmlText(
                         element = data.user.nameElement,
@@ -144,7 +144,7 @@ private fun NotificationComponent(
                         modifier = Modifier
                             .clickable {
                                 event.onUserClick(data.user.userKey)
-                            }
+                            },
                     )
                     Text(
                         text = data.user.handle,
@@ -153,7 +153,7 @@ private fun NotificationComponent(
                             .alpha(MediumAlpha)
                             .clickable {
                                 event.onUserClick(data.user.userKey)
-                            }
+                            },
                     )
                 }
             }
@@ -166,7 +166,7 @@ private fun NotificationComponent(
 private fun UnknwonNotificationComponent(
     data: UiStatus.BlueskyNotification,
     event: BlueskyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     ListItem(
         modifier = modifier,
@@ -175,6 +175,6 @@ private fun UnknwonNotificationComponent(
         },
         supportingContent = {
             Text(text = stringResource(id = R.string.bluesky_notification_unknown_message2))
-        }
+        },
     )
 }

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param memo * @param url * @param imageUrl * @param place * @param priority * @param ratio * @param expiresAt * @param startsAt * @param dayOfWeek */
 @Serializable
-
 data class AdminAdUpdateRequest(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -43,6 +42,6 @@ data class AdminAdUpdateRequest(
 
     @SerialName(value = "startsAt") val startsAt: kotlin.Int,
 
-    @SerialName(value = "dayOfWeek") val dayOfWeek: kotlin.Int
+    @SerialName(value = "dayOfWeek") val dayOfWeek: kotlin.Int,
 
 )

@@ -17,7 +17,7 @@ data class Field(
     val value: String? = null,
     @SerialName("verified_at")
     @Serializable(with = DateSerializer::class)
-    val verifiedAt: Instant? = null
+    val verifiedAt: Instant? = null,
 )
 
 internal object DateSerializer : KSerializer<Instant> {

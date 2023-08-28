@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param localTotal * @param localInc * @param localDec * @param localDiffsNormal * @param localDiffsReply * @param localDiffsRenote * @param localDiffsWithFile * @param remoteTotal * @param remoteInc * @param remoteDec * @param remoteDiffsNormal * @param remoteDiffsReply * @param remoteDiffsRenote * @param remoteDiffsWithFile */
 @Serializable
-
 data class ChartsNotes200Response(
 
     @SerialName(value = "local.total") val localTotal: kotlin.collections.List<kotlin.Double>,
@@ -51,6 +50,6 @@ data class ChartsNotes200Response(
 
     @SerialName(value = "remote.diffs.renote") val remoteDiffsRenote: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.diffs.withFile") val remoteDiffsWithFile: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "remote.diffs.withFile") val remoteDiffsWithFile: kotlin.collections.List<kotlin.Double>,
 
 )

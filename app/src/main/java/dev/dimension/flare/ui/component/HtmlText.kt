@@ -62,10 +62,10 @@ fun HtmlText(
     overflow: TextOverflow = TextOverflow.Ellipsis,
     softWrap: Boolean = true,
     textStyle: TextStyle = LocalTextStyle.current,
-    linkStyle: TextStyle = textStyle.copy(MaterialTheme.colorScheme.primary)
+    linkStyle: TextStyle = textStyle.copy(MaterialTheme.colorScheme.primary),
 ) {
     CompositionLocalProvider(
-        LocalLayoutDirection provides layoutDirection
+        LocalLayoutDirection provides layoutDirection,
     ) {
         ProvideTextStyle(value = textStyle) {
             RenderContent(
@@ -84,7 +84,7 @@ fun HtmlText(
                 textAlign = textAlign,
                 lineHeight = lineHeight,
                 overflow = overflow,
-                softWrap = softWrap
+                softWrap = softWrap,
             )
         }
     }
@@ -108,14 +108,14 @@ private fun RenderContent(
     textAlign: TextAlign? = null,
     lineHeight: TextUnit = TextUnit.Unspecified,
     overflow: TextOverflow = TextOverflow.Clip,
-    softWrap: Boolean = true
+    softWrap: Boolean = true,
 ) {
     val uriHandler = LocalUriHandler.current
     val value = remember(element, textStyle, linkStyle) {
         buildContentAnnotatedString(
             element = element,
             textStyle = textStyle,
-            linkStyle = linkStyle
+            linkStyle = linkStyle,
         )
     }
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -161,17 +161,17 @@ private fun RenderContent(
                     Placeholder(
                         width = LocalTextStyle.current.fontSize,
                         height = LocalTextStyle.current.fontSize,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
-                    )
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+                    ),
                 ) { target ->
                     NetworkImage(
                         model = target,
                         contentDescription = null,
                         modifier = Modifier
-                            .size(LocalTextStyle.current.fontSize.value.dp)
+                            .size(LocalTextStyle.current.fontSize.value.dp),
                     )
-                }
-            )
+                },
+            ),
         )
     }
 }
@@ -180,11 +180,11 @@ private fun RenderContent(
 fun buildContentAnnotatedString(
     element: Element,
     textStyle: TextStyle,
-    linkStyle: TextStyle
+    linkStyle: TextStyle,
 ): AnnotatedString {
     val styleData = StyleData(
         textStyle = textStyle,
-        linkStyle = linkStyle
+        linkStyle = linkStyle,
     )
     return buildAnnotatedString {
         element.childNodes().forEach {
@@ -195,12 +195,12 @@ fun buildContentAnnotatedString(
 
 data class StyleData(
     val textStyle: TextStyle,
-    val linkStyle: TextStyle
+    val linkStyle: TextStyle,
 )
 
 private fun AnnotatedString.Builder.renderNode(
     node: Node,
-    styleData: StyleData
+    styleData: StyleData,
 ) {
     when (node) {
         is Element -> {
@@ -215,7 +215,7 @@ private fun AnnotatedString.Builder.renderNode(
 
 private fun AnnotatedString.Builder.renderText(text: String, textStyle: TextStyle) {
     pushStyle(
-        textStyle.toSpanStyle()
+        textStyle.toSpanStyle(),
     )
     append(text)
     pop()
@@ -223,7 +223,7 @@ private fun AnnotatedString.Builder.renderText(text: String, textStyle: TextStyl
 
 private fun AnnotatedString.Builder.renderElement(
     element: Element,
-    styleData: StyleData
+    styleData: StyleData,
 ) {
     when (element.normalName()) {
         "a" -> {
@@ -252,7 +252,7 @@ private fun AnnotatedString.Builder.renderElement(
 }
 
 private fun AnnotatedString.Builder.renderEmoji(
-    element: Element
+    element: Element,
 ) {
     val target = element.attr("target")
     appendInlineContent(ID_IMAGE, target)
@@ -261,14 +261,14 @@ private fun AnnotatedString.Builder.renderEmoji(
 @OptIn(ExperimentalTextApi::class)
 private fun AnnotatedString.Builder.renderLink(
     element: Element,
-    styleData: StyleData
+    styleData: StyleData,
 ) {
     val href = element.attr("href")
     withAnnotation(UrlAnnotation(href)) {
         element.childNodes().forEach {
             renderNode(
                 node = it,
-                styleData = styleData.copy(textStyle = styleData.linkStyle)
+                styleData = styleData.copy(textStyle = styleData.linkStyle),
             )
         }
     }

@@ -15,12 +15,12 @@ import kotlinx.coroutines.flow.transform
 
 fun <T> Cacheable(
     fetchSource: suspend () -> Unit,
-    cacheSource: () -> Flow<T>
+    cacheSource: () -> Flow<T>,
 ) = CacheData(fetchSource, cacheSource)
 
 class CacheData<T> internal constructor(
     private val fetchSource: suspend () -> Unit,
-    private val cacheSource: () -> Flow<T>
+    private val cacheSource: () -> Flow<T>,
 ) {
     private val refreshFlow = MutableStateFlow(0)
     private val cacheFlow by lazy {
@@ -35,7 +35,7 @@ class CacheData<T> internal constructor(
                     LoadState.Success
                 } catch (e: Throwable) {
                     LoadState.Error(e)
-                }
+                },
             )
         }
         .catch { emit(LoadState.Error(it)) }
@@ -80,7 +80,7 @@ fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
 }
 
 class CacheableState<T>(
-    private val cacheData: CacheData<T>
+    private val cacheData: CacheData<T>,
 ) {
     fun refresh() {
         cacheData.refresh()

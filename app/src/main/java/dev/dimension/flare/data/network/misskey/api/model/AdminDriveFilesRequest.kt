@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param limit * @param sinceId * @param untilId * @param userId * @param type * @param origin * @param hostname The local host is represented with `null`.
  */
 @Serializable
-
 data class AdminDriveFilesRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
@@ -39,7 +38,7 @@ data class AdminDriveFilesRequest(
     @SerialName(value = "origin") val origin: AdminDriveFilesRequest.Origin? = Origin.Local,
 
     /* The local host is represented with `null`. */
-    @SerialName(value = "hostname") val hostname: kotlin.String? = null
+    @SerialName(value = "hostname") val hostname: kotlin.String? = null,
 
 ) {
 
@@ -56,6 +55,6 @@ data class AdminDriveFilesRequest(
         Local("local"),
 
         @SerialName(value = "remote")
-        Remote("remote");
+        Remote("remote"),
     }
 }

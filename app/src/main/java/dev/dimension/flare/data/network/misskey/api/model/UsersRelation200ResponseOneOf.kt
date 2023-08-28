@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param isFollowing * @param hasPendingFollowRequestFromYou * @param hasPendingFollowRequestToYou * @param isFollowed * @param isBlocking * @param isBlocked * @param isMuted * @param isRenoteMuted */
 @Serializable
-
 data class UsersRelation200ResponseOneOf(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -41,6 +40,6 @@ data class UsersRelation200ResponseOneOf(
 
     @SerialName(value = "isMuted") val isMuted: kotlin.Boolean,
 
-    @SerialName(value = "isRenoteMuted") val isRenoteMuted: kotlin.Boolean
+    @SerialName(value = "isRenoteMuted") val isRenoteMuted: kotlin.Boolean,
 
 )

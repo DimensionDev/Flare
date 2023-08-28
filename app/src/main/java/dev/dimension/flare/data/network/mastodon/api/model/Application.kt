@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Application(
     val name: String? = null,
-    val website: String? = null
+    val website: String? = null,
 )

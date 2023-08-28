@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param name * @param parentId * @param foldersCount * @param filesCount * @param parent */
 @Serializable
-
 data class DriveFolder(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -37,6 +36,6 @@ data class DriveFolder(
 
     @SerialName(value = "filesCount") val filesCount: kotlin.Double? = null,
 
-    @SerialName(value = "parent") val parent: DriveFolder? = null
+    @SerialName(value = "parent") val parent: DriveFolder? = null,
 
 )

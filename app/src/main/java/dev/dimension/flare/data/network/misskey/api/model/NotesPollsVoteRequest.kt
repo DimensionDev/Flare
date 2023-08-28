@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,11 +22,10 @@ import kotlinx.serialization.Serializable
  * *
  * @param noteId * @param choice */
 @Serializable
-
 data class NotesPollsVoteRequest(
 
     @SerialName(value = "noteId") val noteId: kotlin.String,
 
-    @SerialName(value = "choice") val choice: kotlin.Int
+    @SerialName(value = "choice") val choice: kotlin.Int,
 
 )

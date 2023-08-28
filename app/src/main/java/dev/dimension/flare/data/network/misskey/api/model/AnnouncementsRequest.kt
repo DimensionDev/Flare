@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param offset * @param withUnreads * @param privateOnly */
 @Serializable
-
 data class AnnouncementsRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
@@ -31,6 +30,6 @@ data class AnnouncementsRequest(
 
     @SerialName(value = "withUnreads") val withUnreads: kotlin.Boolean? = false,
 
-    @SerialName(value = "privateOnly") val privateOnly: kotlin.Boolean? = false
+    @SerialName(value = "privateOnly") val privateOnly: kotlin.Boolean? = false,
 
 )

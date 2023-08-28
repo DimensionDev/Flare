@@ -77,7 +77,7 @@ fun PullRefreshIndicator(
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(backgroundColor),
-    scale: Boolean = false
+    scale: Boolean = false,
 ) {
     val showElevation by remember(refreshing, state) {
         derivedStateOf { refreshing || state.position > 0.5f }
@@ -88,16 +88,16 @@ fun PullRefreshIndicator(
             .size(IndicatorSize)
             .pullRefreshIndicatorTransform(state, scale)
             .shadow(if (showElevation) Elevation else 0.dp, SpinnerShape, clip = true)
-            .background(color = backgroundColor, shape = SpinnerShape)
+            .background(color = backgroundColor, shape = SpinnerShape),
     ) {
         Crossfade(
             targetState = refreshing,
             animationSpec = tween(durationMillis = CrossfadeDurationMs),
-            label = "PullRefreshIndicator"
+            label = "PullRefreshIndicator",
         ) { refreshing ->
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 val spinnerSize = (ArcRadius + StrokeWidth).times(2)
 
@@ -105,7 +105,7 @@ fun PullRefreshIndicator(
                     CircularProgressIndicator(
                         color = contentColor,
                         strokeWidth = StrokeWidth,
-                        modifier = Modifier.size(spinnerSize)
+                        modifier = Modifier.size(spinnerSize),
                     )
                 } else {
                     CircularArrowIndicator(state, contentColor, Modifier.size(spinnerSize))
@@ -123,7 +123,7 @@ fun PullRefreshIndicator(
 private fun CircularArrowIndicator(
     state: PullRefreshState,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val path = remember { Path().apply { fillType = PathFillType.EvenOdd } }
 
@@ -146,7 +146,7 @@ private fun CircularArrowIndicator(
                 size.center.x - arcRadius,
                 size.center.y - arcRadius,
                 size.center.x + arcRadius,
-                size.center.y + arcRadius
+                size.center.y + arcRadius,
             )
             drawArc(
                 color = color,
@@ -158,8 +158,8 @@ private fun CircularArrowIndicator(
                 size = arcBounds.size,
                 style = Stroke(
                     width = StrokeWidth.toPx(),
-                    cap = StrokeCap.Square
-                )
+                    cap = StrokeCap.Square,
+                ),
             )
             drawArrow(path, arcBounds, color, alpha, values)
         }
@@ -171,7 +171,7 @@ private class ArrowValues(
     val rotation: Float,
     val startAngle: Float,
     val endAngle: Float,
-    val scale: Float
+    val scale: Float,
 )
 
 private fun ArrowValues(progress: Float): ArrowValues {
@@ -199,7 +199,7 @@ private fun DrawScope.drawArrow(
     bounds: Rect,
     color: Color,
     alpha: Float,
-    values: ArrowValues
+    values: ArrowValues,
 ) {
     arrow.reset()
     arrow.moveTo(0f, 0f) // Move to left corner
@@ -208,7 +208,7 @@ private fun DrawScope.drawArrow(
     // Line to tip of arrow
     arrow.lineTo(
         x = ArrowWidth.toPx() * values.scale / 2,
-        y = ArrowHeight.toPx() * values.scale
+        y = ArrowHeight.toPx() * values.scale,
     )
 
     val radius = min(bounds.width, bounds.height) / 2f
@@ -216,8 +216,8 @@ private fun DrawScope.drawArrow(
     arrow.translate(
         Offset(
             x = radius + bounds.center.x - inset,
-            y = bounds.center.y + StrokeWidth.toPx() / 2f
-        )
+            y = bounds.center.y + StrokeWidth.toPx() / 2f,
+        ),
     )
     arrow.close()
     rotate(degrees = values.endAngle) {

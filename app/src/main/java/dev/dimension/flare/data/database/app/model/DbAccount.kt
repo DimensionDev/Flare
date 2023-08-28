@@ -11,5 +11,5 @@ data class DbAccount(
     val account_key: MicroBlogKey,
     val credential_json: String,
     val platform_type: PlatformType,
-    val lastActive: Long
+    val lastActive: Long,
 )

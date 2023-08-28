@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MastodonException(
     @SerialName("error")
-    val error: String? = null
+    val error: String? = null,
 ) : Throwable(error)

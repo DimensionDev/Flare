@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param query * @param type * @param sinceId * @param untilId * @param limit */
 @Serializable
-
 data class ChannelsSearchRequest(
 
     @SerialName(value = "query") val query: kotlin.String,
@@ -33,7 +32,7 @@ data class ChannelsSearchRequest(
 
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
 
-    @SerialName(value = "limit") val limit: kotlin.Int? = 5
+    @SerialName(value = "limit") val limit: kotlin.Int? = 5,
 
 ) {
 
@@ -47,6 +46,6 @@ data class ChannelsSearchRequest(
         NameAndDescription("nameAndDescription"),
 
         @SerialName(value = "nameOnly")
-        NameOnly("nameOnly");
+        NameOnly("nameOnly"),
     }
 }

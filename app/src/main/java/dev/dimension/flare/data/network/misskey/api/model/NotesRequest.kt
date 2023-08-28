@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param local * @param reply * @param renote * @param withFiles * @param poll * @param limit * @param sinceId * @param untilId */
 @Serializable
-
 data class NotesRequest(
 
     @SerialName(value = "local") val local: kotlin.Boolean? = false,
@@ -39,6 +38,6 @@ data class NotesRequest(
 
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
 
-    @SerialName(value = "untilId") val untilId: kotlin.String? = null
+    @SerialName(value = "untilId") val untilId: kotlin.String? = null,
 
 )

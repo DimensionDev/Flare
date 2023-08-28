@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param host * @param sinceId * @param untilId * @param limit */
 @Serializable
-
 data class FederationFollowersRequest(
 
     @SerialName(value = "host") val host: kotlin.String,
@@ -31,6 +30,6 @@ data class FederationFollowersRequest(
 
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
 
-    @SerialName(value = "limit") val limit: kotlin.Int? = 10
+    @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 
 )

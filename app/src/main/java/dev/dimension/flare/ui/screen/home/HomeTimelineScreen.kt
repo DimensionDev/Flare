@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -34,25 +33,22 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datasource.mastodon.homeTimelineDataSource
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.repository.app.activeAccountServicePresenter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.flatMap
+import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.onSuccess
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeTimelineScreen(
-    contentPadding: PaddingValues
+    contentPadding: PaddingValues,
 ) {
     val state by producePresenter {
         homeTimelinePresenter()
@@ -81,7 +77,7 @@ internal fun HomeTimelineScreen(
             LazyColumn(
                 state = lazyListState,
                 contentPadding = contentPadding,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 with(state.listState) {
                     with(state.statusEvent) {
@@ -94,7 +90,7 @@ internal fun HomeTimelineScreen(
                     state.showNewToots,
                     enter = slideInVertically { -it },
                     exit = slideOutVertically { -it },
-                    modifier = Modifier.align(Alignment.TopCenter)
+                    modifier = Modifier.align(Alignment.TopCenter),
                 ) {
                     FilledTonalButton(
                         onClick = {
@@ -102,42 +98,30 @@ internal fun HomeTimelineScreen(
                             scope.launch {
                                 lazyListState.animateScrollToItem(0)
                             }
-                        }
+                        },
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowUpward,
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(text = stringResource(id = R.string.home_timeline_new_toots))
                     }
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
 private fun homeTimelinePresenter(
-    statusEvent: StatusEvent = rememberInject()
+    statusEvent: StatusEvent = rememberInject(),
 ) = run {
-    val account by activeAccountPresenter()
-    val listState = account.flatMap {
-        when (it) {
-            is UiAccount.Mastodon -> UiState.Success(homeTimelineDataSource(account = it).collectAsLazyPagingItems())
-            is UiAccount.Misskey -> UiState.Success(
-                dev.dimension.flare.data.datasource.misskey.homeTimelineDataSource(
-                    account = it
-                ).collectAsLazyPagingItems()
-            )
-
-            is UiAccount.Bluesky -> UiState.Success(
-                dev.dimension.flare.data.datasource.bluesky.homeTimelineDataSource(
-                    account = it
-                ).collectAsLazyPagingItems()
-            )
-        }
+    val listState = activeAccountServicePresenter().map { (service, account) ->
+        remember(account.accountKey) {
+            service.homeTimeline()
+        }.collectAsLazyPagingItems()
     }
     var showNewToots by remember { mutableStateOf(false) }
     val refreshing =

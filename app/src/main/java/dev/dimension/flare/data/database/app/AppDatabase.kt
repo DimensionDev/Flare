@@ -23,11 +23,11 @@ abstract class AppDatabase : RoomDatabase() {
 @Singleton
 @Provides
 fun provideAppDatabase(
-    applicationContext: Context
+    applicationContext: Context,
 ): AppDatabase {
     return Room.databaseBuilder(
         applicationContext,
         AppDatabase::class.java,
-        "app_database"
+        "app_database",
     ).build()
 }

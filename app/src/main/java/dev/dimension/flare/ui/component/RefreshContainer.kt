@@ -20,19 +20,19 @@ fun RefreshContainer(
     onRefresh: () -> Unit,
     content: @Composable BoxScope.() -> Unit,
     modifier: Modifier = Modifier,
-    indicatorPadding: PaddingValues = PaddingValues(0.dp)
+    indicatorPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val refreshState = rememberPullRefreshState(refreshing, onRefresh)
     Box(
         modifier = modifier
-            .pullRefresh(refreshState)
+            .pullRefresh(refreshState),
     ) {
         content.invoke(this)
         PullRefreshIndicator(
             refreshing,
             refreshState,
             Modifier.align(Alignment.TopCenter)
-                .padding(indicatorPadding)
+                .padding(indicatorPadding),
         )
     }
 }

@@ -54,5 +54,5 @@ data class Status(
     val emojis: List<Emoji>? = null,
     val card: Card? = null,
     val poll: Poll? = null,
-    val pinned: Boolean? = null
+    val pinned: Boolean? = null,
 )

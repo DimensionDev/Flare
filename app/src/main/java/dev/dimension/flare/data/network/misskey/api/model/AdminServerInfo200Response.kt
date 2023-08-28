@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param machine * @param os * @param node * @param psql * @param cpu * @param mem * @param fs * @param net */
 @Serializable
-
 data class AdminServerInfo200Response(
 
     @SerialName(value = "machine") val machine: kotlin.String,
@@ -39,6 +38,6 @@ data class AdminServerInfo200Response(
 
     @SerialName(value = "fs") val fs: AdminServerInfo200ResponseFs,
 
-    @SerialName(value = "net") val net: AdminServerInfo200ResponseNet
+    @SerialName(value = "net") val net: AdminServerInfo200ResponseNet,
 
 )

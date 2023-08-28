@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param count */
 @Serializable
-
 data class IGetWordMutedNotesCount200Response(
 
-    @SerialName(value = "count") val count: kotlin.Double
+    @SerialName(value = "count") val count: kotlin.Double,
 
 )

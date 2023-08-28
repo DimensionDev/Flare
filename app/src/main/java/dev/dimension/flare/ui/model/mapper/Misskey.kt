@@ -56,31 +56,31 @@ private val misskeyParser by lazy {
 }
 
 internal fun Notification.toUi(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): UiStatus.MisskeyNotification {
     val user = user?.toUi(accountKey.host)
     return UiStatus.MisskeyNotification(
         statusKey = MicroBlogKey(
             id,
-            host = accountKey.host
+            host = accountKey.host,
         ),
         user = user,
         createdAt = createdAt.toInstant(),
         note = note?.toUi(accountKey),
         type = type,
         accountKey = accountKey,
-        achievement = achievement
+        achievement = achievement,
     )
 }
 
 internal fun Note.toUi(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): UiStatus.Misskey {
     val user = user.toUi(accountKey.host)
     return UiStatus.Misskey(
         statusKey = MicroBlogKey(
             id,
-            host = user.userKey.host
+            host = user.userKey.host,
         ),
         sensitive = files?.any { it.isSensitive } ?: false,
         poll = poll?.let {
@@ -92,13 +92,13 @@ internal fun Note.toUi(
                         title = option.text,
                         votesCount = option.votes.toLong(),
                         percentage = option.votes.toFloat().div(
-                            poll.choices.sumOf { it.votes }.toFloat()
+                            poll.choices.sumOf { it.votes }.toFloat(),
                         ).takeUnless { it.isNaN() } ?: 0f,
-                        voted = option.isVoted
+                        voted = option.isVoted,
                     )
                 }.toPersistentList(),
                 expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
-                multiple = poll.multiple
+                multiple = poll.multiple,
             )
         },
         // TODO: parse card content lazily
@@ -110,7 +110,7 @@ internal fun Note.toUi(
         user = user,
         matrices = UiStatus.Misskey.Matrices(
             replyCount = repliesCount.toLong(),
-            renoteCount = renoteCount.toLong()
+            renoteCount = renoteCount.toLong(),
         ),
         renote = if (text.isNullOrEmpty()) {
             renote?.toUi(accountKey)
@@ -137,11 +137,11 @@ internal fun Note.toUi(
                 UiStatus.Misskey.EmojiReaction(
                     name = emoji.key,
                     count = emoji.value,
-                    url = resolveMisskeyEmoji(emoji.key, accountKey.host)
+                    url = resolveMisskeyEmoji(emoji.key, accountKey.host),
                 )
-            }.toPersistentList()
+            }.toPersistentList(),
         ),
-        accountKey = accountKey
+        accountKey = accountKey,
     )
 }
 
@@ -157,7 +157,7 @@ private fun DriveFile.toUi(): UiMedia? {
             description = comment,
             aspectRatio = with(properties) {
                 width?.toFloat()?.div(height?.toFloat() ?: 0f)?.takeUnless { it.isNaN() } ?: 1f
-            }
+            },
         )
     } else if (type.startsWith("video/")) {
         return UiMedia.Video(
@@ -166,7 +166,7 @@ private fun DriveFile.toUi(): UiMedia? {
             description = comment,
             aspectRatio = with(properties) {
                 width?.toFloat()?.div(height?.toFloat() ?: 0f)?.takeUnless { it.isNaN() } ?: 1f
-            }
+            },
         )
     } else {
         return null
@@ -174,7 +174,7 @@ private fun DriveFile.toUi(): UiMedia? {
 }
 
 internal fun UserLite.toUi(
-    accountHost: String
+    accountHost: String,
 ): UiUser.Misskey {
     val remoteHost = if (host.isNullOrEmpty()) {
         accountHost
@@ -184,7 +184,7 @@ internal fun UserLite.toUi(
     return UiUser.Misskey(
         userKey = MicroBlogKey(
             id = id,
-            host = accountHost
+            host = accountHost,
         ),
         name = name.orEmpty(),
         avatarUrl = avatarUrl.orEmpty(),
@@ -195,7 +195,7 @@ internal fun UserLite.toUi(
         matrices = UiUser.Misskey.Matrices(
             fansCount = 0,
             followsCount = 0,
-            statusesCount = 0
+            statusesCount = 0,
         ),
         handleInternal = username,
         remoteHost = remoteHost,
@@ -208,14 +208,14 @@ internal fun UserLite.toUi(
             blocked = false,
             muted = false,
             hasPendingFollowRequestFromYou = false,
-            hasPendingFollowRequestToYou = false
-        )
+            hasPendingFollowRequestToYou = false,
+        ),
     )
 }
 
 private fun parseName(
     user: UserLite,
-    accountHost: String
+    accountHost: String,
 ): Element {
     if (user.name.isNullOrEmpty()) {
         return Element("body")
@@ -224,7 +224,7 @@ private fun parseName(
 }
 
 internal fun User.toUi(
-    accountHost: String
+    accountHost: String,
 ): UiUser.Misskey {
     val remoteHost = if (host.isNullOrEmpty()) {
         accountHost
@@ -234,7 +234,7 @@ internal fun User.toUi(
     return UiUser.Misskey(
         userKey = MicroBlogKey(
             id = id,
-            host = accountHost
+            host = accountHost,
         ),
         name = name.orEmpty(),
         avatarUrl = avatarUrl.orEmpty(),
@@ -245,7 +245,7 @@ internal fun User.toUi(
         matrices = UiUser.Misskey.Matrices(
             fansCount = followersCount.toLong(),
             followsCount = followingCount.toLong(),
-            statusesCount = notesCount.toLong()
+            statusesCount = notesCount.toLong(),
         ),
         handleInternal = username,
         remoteHost = remoteHost,
@@ -258,14 +258,14 @@ internal fun User.toUi(
             blocked = isBlocked ?: false,
             muted = isMuted ?: false,
             hasPendingFollowRequestFromYou = hasPendingFollowRequestFromYou ?: false,
-            hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false
-        )
+            hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false,
+        ),
     )
 }
 
 private fun parseDescription(
     user: User,
-    accountHost: String
+    accountHost: String,
 ): Element? {
     if (user.description.isNullOrEmpty()) {
         return null
@@ -274,7 +274,7 @@ private fun parseDescription(
 }
 
 private fun Token.toElement(
-    accountHost: String
+    accountHost: String,
 ): Node {
     return when (this) {
         is CashTagToken -> Element("a").apply {
@@ -314,7 +314,7 @@ private fun Token.toElement(
 
 private fun parseName(
     user: User,
-    accountHost: String
+    accountHost: String,
 ): Element {
     if (user.name.isNullOrEmpty()) {
         return Element("body")
@@ -323,7 +323,7 @@ private fun parseName(
 }
 
 private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
-    accountHost: String
+    accountHost: String,
 ): Node {
     return when (this) {
         is CenterNode -> {
@@ -452,7 +452,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
                             append("@")
                             append(host)
                         }
-                    }
+                    },
                 )
             }
         }
@@ -469,7 +469,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
 internal fun EmojiSimple.toUi(): UiEmoji {
     return UiEmoji(
         shortcode = name,
-        url = url
+        url = url,
     )
 }
 

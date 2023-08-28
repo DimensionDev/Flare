@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate * @param includeMyRenotes * @param includeRenotedMyNotes * @param includeLocalRenotes * @param withFiles * @param withReplies */
 @Serializable
-
 data class NotesHybridTimelineRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
@@ -43,6 +42,6 @@ data class NotesHybridTimelineRequest(
 
     @SerialName(value = "withFiles") val withFiles: kotlin.Boolean? = false,
 
-    @SerialName(value = "withReplies") val withReplies: kotlin.Boolean? = false
+    @SerialName(value = "withReplies") val withReplies: kotlin.Boolean? = false,
 
 )

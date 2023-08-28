@@ -14,5 +14,5 @@ data class RequestTokenResponse(
     val scope: String? = null,
 
     @SerialName("created_at")
-    val createdAt: Long? = null
+    val createdAt: Long? = null,
 )

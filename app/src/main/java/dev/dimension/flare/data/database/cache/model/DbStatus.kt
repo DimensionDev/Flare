@@ -15,8 +15,8 @@ import java.util.UUID
 @Entity(
     tableName = "status",
     indices = [
-        androidx.room.Index(value = ["statusKey", "accountKey"], unique = true)
-    ]
+        androidx.room.Index(value = ["statusKey", "accountKey"], unique = true),
+    ],
 )
 data class DbStatus(
     @PrimaryKey
@@ -25,7 +25,7 @@ data class DbStatus(
     val accountKey: MicroBlogKey,
     val userKey: MicroBlogKey?,
     val platformType: PlatformType,
-    val content: StatusContent
+    val content: StatusContent,
 )
 
 @Serializable
@@ -41,13 +41,13 @@ sealed interface StatusContent {
     @Serializable
     @SerialName("misskey")
     data class Misskey(
-        val data: dev.dimension.flare.data.network.misskey.api.model.Note
+        val data: dev.dimension.flare.data.network.misskey.api.model.Note,
     ) : StatusContent
 
     @Serializable
     @SerialName("misskey-notification")
     data class MisskeyNotification(
-        val data: dev.dimension.flare.data.network.misskey.api.model.Notification
+        val data: dev.dimension.flare.data.network.misskey.api.model.Notification,
     ) : StatusContent
 
 //    @Serializable
@@ -63,7 +63,7 @@ data class DbStatusWithUser(
     @Embedded
     val data: DbStatus,
     @Relation(parentColumn = "userKey", entityColumn = "userKey")
-    val user: DbUser?
+    val user: DbUser?,
 )
 
 data class DbStatusReferenceWithStatus(
@@ -72,9 +72,9 @@ data class DbStatusReferenceWithStatus(
     @Relation(
         parentColumn = "referenceStatusKey",
         entityColumn = "statusKey",
-        entity = DbStatus::class
+        entity = DbStatus::class,
     )
-    val status: DbStatusWithUser
+    val status: DbStatusWithUser,
 )
 
 data class DbStatusWithReference(
@@ -83,7 +83,7 @@ data class DbStatusWithReference(
     @Relation(
         parentColumn = "statusKey",
         entityColumn = "statusKey",
-        entity = DbStatusReference::class
+        entity = DbStatusReference::class,
     )
-    val references: List<DbStatusReferenceWithStatus>
+    val references: List<DbStatusReferenceWithStatus>,
 )

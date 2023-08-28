@@ -9,7 +9,7 @@ import io.ktor.util.KtorDsl
 
 class AuthorizationPlugin private constructor(
     private val authorization: Authorization,
-    private val header: String
+    private val header: String,
 ) {
     @KtorDsl
     class Config(internal var authorization: Authorization = EmptyAuthorization, internal var header: String? = null)

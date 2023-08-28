@@ -52,10 +52,10 @@ import java.util.UUID
 @Destination
 @Composable
 fun MisskeyLoginRoute(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     MisskeyLoginScreen(
-        onBack = navigator::navigateUp
+        onBack = navigator::navigateUp,
     )
 }
 
@@ -63,14 +63,14 @@ fun MisskeyLoginRoute(
 @Composable
 fun MisskeyLoginScreen(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
         loginPresenter(
             launchUrl = {
                 uriHandler.openUri(it)
-            }
+            },
         )
     }
     val focusRequester = remember { FocusRequester() }
@@ -86,39 +86,39 @@ fun MisskeyLoginScreen(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = onBack
+                            onClick = onBack,
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
                     Text(
                         text = stringResource(id = R.string.misskey_login_title),
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
                     )
                     Text(
                         text = stringResource(id = R.string.misskey_login_message),
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
                 Column(
@@ -127,7 +127,7 @@ fun MisskeyLoginScreen(
                         .weight(2f)
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     OutlinedTextField2(
                         state = state.hostTextState,
@@ -138,13 +138,13 @@ fun MisskeyLoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(
-                                focusRequester = focusRequester
+                                focusRequester = focusRequester,
                             ),
-                        lineLimits = TextFieldLineLimits.SingleLine
+                        lineLimits = TextFieldLineLimits.SingleLine,
                     )
                     Button(
                         onClick = state::login,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(text = stringResource(id = R.string.login_button))
                     }
@@ -159,13 +159,14 @@ fun MisskeyLoginScreen(
 
 private suspend fun misskeyLoginUseCase(
     host: String,
-    launchOAuth: (String) -> Unit
+    launchOAuth: (String) -> Unit,
 ) {
     val session = UUID.randomUUID().toString()
     val service = MisskeyOauthService(
         host = host,
         name = "Flare",
-        callback = AppDeepLink.Callback.Misskey
+        callback = AppDeepLink.Callback.Misskey,
+        session = session,
     )
     addMisskeyApplicationUseCase(host, session)
     setPendingOAuthUseCase(host, true)
@@ -176,7 +177,7 @@ private suspend fun misskeyLoginUseCase(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun loginPresenter(
-    launchUrl: (String) -> Unit
+    launchUrl: (String) -> Unit,
 ) = run {
     val hostTextState by remember {
         mutableStateOf(TextFieldState(""))
@@ -195,7 +196,7 @@ private fun loginPresenter(
                 runCatching {
                     misskeyLoginUseCase(
                         host = hostTextState.text.toString(),
-                        launchOAuth = launchUrl
+                        launchOAuth = launchUrl,
                     )
                 }.onFailure {
                     error = it.message

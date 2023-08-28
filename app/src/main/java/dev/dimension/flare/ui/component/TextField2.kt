@@ -62,7 +62,7 @@ fun TextField2(
     supportingText: @Composable (() -> Unit)? = null,
     shape: Shape = TextFieldDefaults.shape,
     isError: Boolean = false,
-    colors: TextFieldColors = TextFieldDefaults.colors()
+    colors: TextFieldColors = TextFieldDefaults.colors(),
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
@@ -109,9 +109,9 @@ fun TextField2(
                 enabled = enabled,
                 isError = isError,
                 interactionSource = interactionSource,
-                colors = colors
+                colors = colors,
             )
-        }
+        },
     )
 }
 
@@ -142,7 +142,7 @@ fun OutlinedTextField2(
     supportingText: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     shape: Shape = OutlinedTextFieldDefaults.shape,
-    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
@@ -195,11 +195,11 @@ fun OutlinedTextField2(
                         isError,
                         interactionSource = interactionSource,
                         colors,
-                        shape
+                        shape,
                     )
-                }
+                },
             )
-        }
+        },
     )
 }
 
@@ -229,7 +229,7 @@ fun OutlinedSecureTextField2(
     supportingText: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     shape: Shape = OutlinedTextFieldDefaults.shape,
-    colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
@@ -277,14 +277,14 @@ fun OutlinedSecureTextField2(
                         isError,
                         interactionSource = interactionSource,
                         colors,
-                        shape
+                        shape,
                     )
-                }
+                },
             )
         },
         onSubmit = onSubmit,
         imeAction = imeAction,
         textObfuscationMode = textObfuscationMode,
-        keyboardType = keyboardType
+        keyboardType = keyboardType,
     )
 }

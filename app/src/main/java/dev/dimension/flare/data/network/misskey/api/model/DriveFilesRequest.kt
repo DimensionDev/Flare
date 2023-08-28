@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param sinceId * @param untilId * @param folderId * @param type * @param sort */
 @Serializable
-
 data class DriveFilesRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
@@ -35,7 +34,7 @@ data class DriveFilesRequest(
 
     @SerialName(value = "type") val type: kotlin.String? = null,
 
-    @SerialName(value = "sort") val sort: DriveFilesRequest.Sort? = null
+    @SerialName(value = "sort") val sort: DriveFilesRequest.Sort? = null,
 
 ) {
 
@@ -61,6 +60,6 @@ data class DriveFilesRequest(
         PlusSize("+size"),
 
         @SerialName(value = "-size")
-        MinusSize("-size");
+        MinusSize("-size"),
     }
 }

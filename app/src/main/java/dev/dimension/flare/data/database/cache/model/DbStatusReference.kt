@@ -13,11 +13,11 @@ import dev.dimension.flare.model.ReferenceType
             value = [
                 "referenceType",
                 "statusKey",
-                "referenceStatusKey"
+                "referenceStatusKey",
             ],
-            unique = true
-        )
-    ]
+            unique = true,
+        ),
+    ],
 )
 data class DbStatusReference(
     /**
@@ -27,5 +27,5 @@ data class DbStatusReference(
     val _id: String,
     val referenceType: ReferenceType,
     val statusKey: MicroBlogKey,
-    val referenceStatusKey: MicroBlogKey
+    val referenceStatusKey: MicroBlogKey,
 )

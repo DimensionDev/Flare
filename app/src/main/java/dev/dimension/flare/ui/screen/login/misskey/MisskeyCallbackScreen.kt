@@ -47,21 +47,21 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 fun MisskeyCallbackScreenPreview() {
     MisskeyCallbackScreen(
         session = "code",
-        toHome = {}
+        toHome = {},
     )
 }
 
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "${AppDeepLink.Callback.Misskey}?session={session}"
-        )
-    ]
+            uriPattern = "${AppDeepLink.Callback.Misskey}?session={session}",
+        ),
+    ],
 )
 @Composable
 fun MisskeyCallbackRoute(
     session: String?,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     MisskeyCallbackScreen(
         session = session,
@@ -71,19 +71,19 @@ fun MisskeyCallbackRoute(
                     inclusive = true
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
 internal fun MisskeyCallbackScreen(
     session: String?,
-    toHome: () -> Unit
+    toHome: () -> Unit,
 ) {
     val state by producePresenter {
         misskeyCallbackPresenter(
             session = session,
-            toHome = toHome
+            toHome = toHome,
         )
     }
     FlareTheme {
@@ -93,23 +93,23 @@ internal fun MisskeyCallbackScreen(
                     .fillMaxSize()
                     .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
                     Text(
                         text = stringResource(id = R.string.misskey_login_title),
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
                     )
                     Text(
                         text = stringResource(id = R.string.mastodon_login_verify_message),
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
                 Column(
@@ -118,7 +118,7 @@ internal fun MisskeyCallbackScreen(
                         .weight(2f)
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     when (val data = state) {
                         is UiState.Error -> {
@@ -139,11 +139,11 @@ internal fun MisskeyCallbackScreen(
 
 private suspend fun misskeyAuthCheckUseCase(
     host: String,
-    session: String
+    session: String,
 ) {
     val response = MisskeyOauthService(
         host = host,
-        session = session
+        session = session,
     ).check()
     requireNotNull(response.ok) { "No response" }
     require(response.ok) { "Response is not ok" }
@@ -155,15 +155,15 @@ private suspend fun misskeyAuthCheckUseCase(
         token = response.token,
         accountKey = MicroBlogKey(
             id = id,
-            host = host
-        )
+            host = host,
+        ),
     )
 }
 
 @Composable
 private fun misskeyCallbackPresenter(
     session: String?,
-    toHome: () -> Unit
+    toHome: () -> Unit,
 ): UiState<Nothing> {
     if (session == null) {
         return UiState.Error(Exception("No code"))
@@ -176,10 +176,10 @@ private fun misskeyCallbackPresenter(
         }
         for (application in pendingOAuth) {
             try {
-                if (application is UiApplication.Misskey) {
+                if (application is UiApplication.Misskey && application.session == session) {
                     misskeyAuthCheckUseCase(
                         host = application.host,
-                        session = session
+                        session = session,
                     )
                     setPendingOAuthUseCase(application.host, false)
                     toHome.invoke()
@@ -193,6 +193,7 @@ private fun misskeyCallbackPresenter(
                 break
             }
         }
+        error = Exception("No pending OAuth")
     }
     if (error != null) {
         return UiState.Error(error!!)

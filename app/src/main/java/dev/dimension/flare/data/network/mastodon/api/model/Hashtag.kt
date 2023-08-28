@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class Hashtag(
     val name: String? = null,
     val url: String? = null,
-    val history: List<History>? = null
+    val history: List<History>? = null,
 )

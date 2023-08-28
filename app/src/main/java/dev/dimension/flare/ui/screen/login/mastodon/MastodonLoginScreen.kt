@@ -42,6 +42,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.repository.app.UiApplication
 import dev.dimension.flare.data.repository.app.addMastodonApplicationUseCase
+import dev.dimension.flare.data.repository.app.clearAnyPendingOauthUseCase
 import dev.dimension.flare.data.repository.app.findApplicationUseCase
 import dev.dimension.flare.data.repository.app.setPendingOAuthUseCase
 import dev.dimension.flare.molecule.producePresenter
@@ -60,24 +61,24 @@ fun LoginScreenPreview() {
 @Destination
 @Composable
 fun MastodonLoginRoute(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     MastodonLoginScreen(
-        onBack = navigator::navigateUp
+        onBack = navigator::navigateUp,
     )
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 internal fun MastodonLoginScreen(
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
         loginPresenter(
             launchUrl = {
                 uriHandler.openUri(it)
-            }
+            },
         )
     }
     val focusRequester = remember { FocusRequester() }
@@ -92,39 +93,39 @@ internal fun MastodonLoginScreen(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = onBack
+                            onClick = onBack,
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
                     Text(
                         text = stringResource(id = R.string.mastodon_login_title),
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
                     )
                     Text(
                         text = stringResource(id = R.string.mastodon_login_message),
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     )
                 }
                 Column(
@@ -133,7 +134,7 @@ internal fun MastodonLoginScreen(
                         .weight(2f)
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     OutlinedTextField2(
                         state = state.hostTextState,
@@ -144,13 +145,13 @@ internal fun MastodonLoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(
-                                focusRequester = focusRequester
+                                focusRequester = focusRequester,
                             ),
-                        lineLimits = TextFieldLineLimits.SingleLine
+                        lineLimits = TextFieldLineLimits.SingleLine,
                     )
                     Button(
                         onClick = state::login,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(text = stringResource(id = R.string.login_button))
                     }
@@ -165,11 +166,11 @@ internal fun MastodonLoginScreen(
 
 private suspend fun mastodonLoginUseCase(
     domain: String,
-    launchOAuth: (String) -> Unit
+    launchOAuth: (String) -> Unit,
 ) {
     val baseUrl = if (domain.startsWith("http://", ignoreCase = true) || domain.startsWith(
             "https://",
-            ignoreCase = true
+            ignoreCase = true,
         )
     ) {
         Uri.parse(domain)
@@ -182,7 +183,7 @@ private suspend fun mastodonLoginUseCase(
         baseUrl = baseUrl.toString(),
         client_name = "Flare",
         website = "https://github.com/DimensionDev/Flare",
-        redirect_uri = AppDeepLink.Callback.Mastodon
+        redirect_uri = AppDeepLink.Callback.Mastodon,
     )
 
     val application = findApplicationUseCase(host)?.let {
@@ -194,6 +195,7 @@ private suspend fun mastodonLoginUseCase(
     } ?: service.createApplication().also {
         addMastodonApplicationUseCase(host, it)
     }
+    clearAnyPendingOauthUseCase()
     setPendingOAuthUseCase(host, true)
     val target = service.getWebOAuthUrl(application)
     launchOAuth(target)
@@ -214,7 +216,7 @@ private suspend fun mastodonLoginUseCase(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun loginPresenter(
-    launchUrl: (String) -> Unit
+    launchUrl: (String) -> Unit,
 ) = run {
     val hostTextState by remember {
         mutableStateOf(TextFieldState(""))
@@ -234,7 +236,7 @@ private fun loginPresenter(
                 runCatching {
                     mastodonLoginUseCase(
                         domain = hostTextState.text.toString(),
-                        launchOAuth = launchUrl
+                        launchOAuth = launchUrl,
                     )
                 }.onFailure {
                     error = it.message

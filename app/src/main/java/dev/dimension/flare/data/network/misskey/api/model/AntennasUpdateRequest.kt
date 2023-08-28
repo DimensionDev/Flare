@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param antennaId * @param name * @param src * @param keywords * @param excludeKeywords * @param users * @param caseSensitive * @param withReplies * @param withFile * @param notify * @param userListId */
 @Serializable
-
 data class AntennasUpdateRequest(
 
     @SerialName(value = "antennaId") val antennaId: kotlin.String,
@@ -45,7 +44,7 @@ data class AntennasUpdateRequest(
 
     @SerialName(value = "notify") val notify: kotlin.Boolean,
 
-    @SerialName(value = "userListId") val userListId: kotlin.String? = null
+    @SerialName(value = "userListId") val userListId: kotlin.String? = null,
 
 ) {
 
@@ -65,6 +64,6 @@ data class AntennasUpdateRequest(
         Users("users"),
 
         @SerialName(value = "list")
-        List("list");
+        List("list"),
     }
 }

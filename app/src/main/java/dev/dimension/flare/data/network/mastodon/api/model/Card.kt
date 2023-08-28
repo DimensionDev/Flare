@@ -28,5 +28,5 @@ data class Card(
     val image: String? = null,
 
     @SerialName("embed_url")
-    val embedURL: String? = null
+    val embedURL: String? = null,
 )

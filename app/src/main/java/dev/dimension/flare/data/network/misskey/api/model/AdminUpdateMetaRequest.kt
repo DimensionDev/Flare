@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param disableRegistration * @param pinnedUsers * @param hiddenTags * @param blockedHosts * @param sensitiveWords * @param themeColor * @param mascotImageUrl * @param bannerUrl * @param serverErrorImageUrl * @param infoImageUrl * @param notFoundImageUrl * @param iconUrl * @param backgroundImageUrl * @param logoImageUrl * @param name * @param description * @param defaultLightTheme * @param defaultDarkTheme * @param cacheRemoteFiles * @param cacheRemoteSensitiveFiles * @param emailRequiredForSignup * @param enableHcaptcha * @param hcaptchaSiteKey * @param hcaptchaSecretKey * @param enableRecaptcha * @param recaptchaSiteKey * @param recaptchaSecretKey * @param enableTurnstile * @param turnstileSiteKey * @param turnstileSecretKey * @param sensitiveMediaDetection * @param sensitiveMediaDetectionSensitivity * @param setSensitiveFlagAutomatically * @param enableSensitiveMediaDetectionForVideos * @param proxyAccountId * @param maintainerName * @param maintainerEmail * @param langs * @param summalyProxy * @param deeplAuthKey * @param deeplIsPro * @param enableEmail * @param email * @param smtpSecure * @param smtpHost * @param smtpPort * @param smtpUser * @param smtpPass * @param enableServiceWorker * @param swPublicKey * @param swPrivateKey * @param tosUrl * @param repositoryUrl * @param feedbackUrl * @param useObjectStorage * @param objectStorageBaseUrl * @param objectStorageBucket * @param objectStoragePrefix * @param objectStorageEndpoint * @param objectStorageRegion * @param objectStoragePort * @param objectStorageAccessKey * @param objectStorageSecretKey * @param objectStorageUseSSL * @param objectStorageUseProxy * @param objectStorageSetPublicRead * @param objectStorageS3ForcePathStyle * @param enableIpLogging * @param enableActiveEmailValidation * @param enableChartsForRemoteUser * @param enableChartsForFederatedInstances * @param enableServerMachineStats * @param enableIdenticonGeneration * @param serverRules * @param preservedUsernames */
 @Serializable
-
 data class AdminUpdateMetaRequest(
 
     @SerialName(value = "disableRegistration") val disableRegistration: kotlin.Boolean? = null,
@@ -173,7 +172,7 @@ data class AdminUpdateMetaRequest(
 
     @SerialName(value = "serverRules") val serverRules: kotlin.collections.List<kotlin.String>? = null,
 
-    @SerialName(value = "preservedUsernames") val preservedUsernames: kotlin.collections.List<kotlin.String>? = null
+    @SerialName(value = "preservedUsernames") val preservedUsernames: kotlin.collections.List<kotlin.String>? = null,
 
 ) {
 
@@ -193,7 +192,7 @@ data class AdminUpdateMetaRequest(
         Local("local"),
 
         @SerialName(value = "remote")
-        Remote("remote");
+        Remote("remote"),
     }
 
     /**
@@ -215,6 +214,6 @@ data class AdminUpdateMetaRequest(
         VeryLow("veryLow"),
 
         @SerialName(value = "veryHigh")
-        VeryHigh("veryHigh");
+        VeryHigh("veryHigh"),
     }
 }

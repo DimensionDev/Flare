@@ -4,5 +4,5 @@ data class UiCard(
     val title: String,
     val description: String?,
     val media: UiMedia?,
-    val url: String
+    val url: String,
 )

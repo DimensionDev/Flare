@@ -24,18 +24,18 @@ internal fun StatusRetweetHeaderComponent(
     icon: ImageVector,
     user: UiUser?,
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
             .alpha(MediumAlpha),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             painter = rememberVectorPainter(image = icon),
             contentDescription = null,
             modifier = Modifier
-                .size(16.dp)
+                .size(16.dp),
         )
         if (user != null) {
             Spacer(modifier = Modifier.width(8.dp))
@@ -43,14 +43,14 @@ internal fun StatusRetweetHeaderComponent(
                 element = user.nameElement,
                 layoutDirection = LocalLayoutDirection.current,
                 textStyle = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.alignByBaseline()
+                modifier = Modifier.alignByBaseline(),
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.alignByBaseline()
+            modifier = Modifier.alignByBaseline(),
         )
     }
 }

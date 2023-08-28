@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param announcementId */
 @Serializable
-
 data class IReadAnnouncementRequest(
 
-    @SerialName(value = "announcementId") val announcementId: kotlin.String
+    @SerialName(value = "announcementId") val announcementId: kotlin.String,
 
 )

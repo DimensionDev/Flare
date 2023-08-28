@@ -28,65 +28,65 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 internal fun MisskeyNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     when (data.type) {
         Notification.Type.Follow -> MisskeyFollowNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
 
         Notification.Type.Mention -> MisskeyMentionNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
 
         Notification.Type.Reply -> MisskeyReplyNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
         Notification.Type.Renote -> MisskeyRetweetNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
         Notification.Type.Quote -> MisskeyQuoteNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
         Notification.Type.Reaction -> MisskeyReactionNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
         Notification.Type.PollEnded -> MisskeyPollEndedNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
         Notification.Type.ReceiveFollowRequest -> MisskeyReceiveFollowRequestNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
         Notification.Type.FollowRequestAccepted -> MisskeyFollowRequestAcceptedNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
         Notification.Type.AchievementEarned -> MisskeyAchievementEarnedNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
         Notification.Type.App -> MisskeyAppNotificationComponent(
             data = data,
             event = event,
-            modifier = modifier
+            modifier = modifier,
         )
     }
 }
@@ -95,10 +95,10 @@ internal fun MisskeyNotificationComponent(
 private fun MisskeyAppNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Text(text = stringResource(id = R.string.misskey_notification_item_app))
     }
@@ -108,10 +108,10 @@ private fun MisskeyAppNotificationComponent(
 private fun MisskeyAchievementEarnedNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Text(text = stringResource(id = R.string.misskey_notification_item_achievement_earned))
         Spacer(modifier = Modifier.height(8.dp))
@@ -123,32 +123,32 @@ private fun MisskeyAchievementEarnedNotificationComponent(
 private fun MisskeyFollowRequestAcceptedNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.misskey_notification_item_follow_request_accepted)
+            text = stringResource(id = R.string.misskey_notification_item_follow_request_accepted),
         )
         if (data.user != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 AvatarComponent(
                     data = data.user.avatarUrl,
                     modifier = Modifier
                         .clickable {
                             event.onUserClick(data.user.userKey)
-                        }
+                        },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(1f),
                 ) {
                     HtmlText(
                         element = data.user.nameElement,
@@ -156,7 +156,7 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
                         modifier = Modifier
                             .clickable {
                                 event.onUserClick(data.user.userKey)
-                            }
+                            },
                     )
                     Text(
                         text = data.user.handle,
@@ -165,7 +165,7 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
                             .alpha(MediumAlpha)
                             .clickable {
                                 event.onUserClick(data.user.userKey)
-                            }
+                            },
                     )
                 }
             }
@@ -177,32 +177,32 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
 private fun MisskeyReceiveFollowRequestNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.mastodon_notification_item_requested_follow)
+            text = stringResource(id = R.string.mastodon_notification_item_requested_follow),
         )
         if (data.user != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 AvatarComponent(
                     data = data.user.avatarUrl,
                     modifier = Modifier
                         .clickable {
                             event.onUserClick(data.user.userKey)
-                        }
+                        },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(1f),
                 ) {
                     HtmlText(
                         element = data.user.nameElement,
@@ -210,7 +210,7 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
                         modifier = Modifier
                             .clickable {
                                 event.onUserClick(data.user.userKey)
-                            }
+                            },
                     )
                     Text(
                         text = data.user.handle,
@@ -219,7 +219,7 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
                             .alpha(MediumAlpha)
                             .clickable {
                                 event.onUserClick(data.user.userKey)
-                            }
+                            },
                     )
                 }
             }
@@ -234,15 +234,15 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
 private fun MisskeyPollEndedNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = null,
-            text = stringResource(id = R.string.misskey_notification_item_poll_ended)
+            text = stringResource(id = R.string.misskey_notification_item_poll_ended),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.note != null) {
@@ -255,15 +255,15 @@ private fun MisskeyPollEndedNotificationComponent(
 private fun MisskeyReactionNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.misskey_notification_item_reacted_to_your_status)
+            text = stringResource(id = R.string.misskey_notification_item_reacted_to_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.note != null) {
@@ -276,15 +276,15 @@ private fun MisskeyReactionNotificationComponent(
 private fun MisskeyQuoteNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.misskey_notification_item_quoted_your_status)
+            text = stringResource(id = R.string.misskey_notification_item_quoted_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.note != null) {
@@ -297,15 +297,15 @@ private fun MisskeyQuoteNotificationComponent(
 private fun MisskeyRetweetNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.misskey_notification_item_reposted_your_status)
+            text = stringResource(id = R.string.misskey_notification_item_reposted_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.note != null) {
@@ -318,15 +318,15 @@ private fun MisskeyRetweetNotificationComponent(
 private fun MisskeyReplyNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.misskey_notification_item_replied_to_you)
+            text = stringResource(id = R.string.misskey_notification_item_replied_to_you),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.note != null) {
@@ -339,15 +339,15 @@ private fun MisskeyReplyNotificationComponent(
 private fun MisskeyMentionNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.misskey_notification_item_mentioned_you)
+            text = stringResource(id = R.string.misskey_notification_item_mentioned_you),
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (data.note != null) {
@@ -360,32 +360,32 @@ private fun MisskeyMentionNotificationComponent(
 private fun MisskeyFollowNotificationComponent(
     data: UiStatus.MisskeyNotification,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         StatusRetweetHeaderComponent(
             icon = Icons.Default.PersonAdd,
             user = data.user,
-            text = stringResource(id = R.string.mastodon_notification_item_followed_you)
+            text = stringResource(id = R.string.mastodon_notification_item_followed_you),
         )
         if (data.user != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 AvatarComponent(
                     data = data.user.avatarUrl,
                     modifier = Modifier
                         .clickable {
                             event.onUserClick(data.user.userKey)
-                        }
+                        },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(1f),
                 ) {
                     HtmlText(
                         element = data.user.nameElement,
@@ -393,7 +393,7 @@ private fun MisskeyFollowNotificationComponent(
                         modifier = Modifier
                             .clickable {
                                 event.onUserClick(data.user.userKey)
-                            }
+                            },
                     )
                     Text(
                         text = data.user.handle,
@@ -402,7 +402,7 @@ private fun MisskeyFollowNotificationComponent(
                             .alpha(MediumAlpha)
                             .clickable {
                                 event.onUserClick(data.user.userKey)
-                            }
+                            },
                     )
                 }
             }

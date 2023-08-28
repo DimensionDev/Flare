@@ -12,7 +12,7 @@ import app.cash.molecule.launchMolecule
 import kotlinx.coroutines.CoroutineScope
 
 private class PresenterHolder<T>(
-    body: @Composable () -> T
+    body: @Composable () -> T,
 ) : ViewModel() {
     private val scope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
     val state = scope.launchMolecule(RecompositionMode.ContextClock, body)
@@ -27,7 +27,7 @@ private class PresenterHolder<T>(
 @Composable
 fun <T> producePresenter(
     key: String? = null,
-    body: @Composable () -> T
+    body: @Composable () -> T,
 ): State<T> {
     return createPresenter(body, key)
 }
@@ -38,7 +38,7 @@ private fun <T> createPresenter(
     key: String? = null,
     holder: PresenterHolder<T> = viewModel(key = key) {
         PresenterHolder<T>(body)
-    }
+    },
 ): State<T> {
     return holder.state.collectAsState()
 }

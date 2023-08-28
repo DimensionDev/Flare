@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param userId * @param userHost The local host is represented with `null`.
  * @param md5 * @param name * @param type * @param propertySize * @param comment * @param blurhash * @param properties * @param storedInternal * @param url * @param thumbnailUrl * @param webpublicUrl * @param accessKey * @param thumbnailAccessKey * @param webpublicAccessKey * @param uri * @param src * @param folderId * @param isSensitive * @param isLink */
 @Serializable
-
 data class AdminDriveShowFile200Response(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -71,6 +70,6 @@ data class AdminDriveShowFile200Response(
 
     @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean,
 
-    @SerialName(value = "isLink") val isLink: kotlin.Boolean
+    @SerialName(value = "isLink") val isLink: kotlin.Boolean,
 
 )

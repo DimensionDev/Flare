@@ -27,7 +27,7 @@ context(CacheDatabase, List<Note>)
 suspend fun save(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() }
+    sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() },
 ) {
     val data = toDbPagingTimeline(accountKey, pagingKey, sortIdProvider)
     with(data) {
@@ -38,7 +38,7 @@ suspend fun save(
 context(CacheDatabase, List<Notification>)
 suspend fun saveNotification(
     accountKey: MicroBlogKey,
-    pagingKey: String
+    pagingKey: String,
 ) {
     val data = toDb(accountKey, pagingKey)
     with(data) {
@@ -69,9 +69,9 @@ private suspend fun saveDbPagingTimelineWithStatus() {
                                 data = content.data.copy(
                                     name = user.content.data.name,
                                     username = user.content.data.username,
-                                    avatarUrl = user.content.data.avatarUrl
-                                )
-                            )
+                                    avatarUrl = user.content.data.avatarUrl,
+                                ),
+                            ),
                         )
                     } else {
                         it
@@ -96,7 +96,7 @@ private suspend fun saveDbPagingTimelineWithStatus() {
 
 fun List<Notification>.toDb(
     accountKey: MicroBlogKey,
-    pagingKey: String
+    pagingKey: String,
 ): List<DbPagingTimelineWithStatus> {
     return this.map {
         it.toDbPagingTimeline(accountKey, pagingKey)
@@ -105,7 +105,7 @@ fun List<Notification>.toDb(
 
 private fun Notification.toDbPagingTimeline(
     accountKey: MicroBlogKey,
-    pagingKey: String
+    pagingKey: String,
 ): DbPagingTimelineWithStatus {
     val status = this.toDbStatusWithReference(accountKey)
     val sortId = this.createdAt.toInstant().toEpochMilliseconds()
@@ -115,59 +115,59 @@ private fun Notification.toDbPagingTimeline(
             accountKey = accountKey,
             statusKey = MicroBlogKey(
                 this.id,
-                accountKey.host
+                accountKey.host,
             ),
             pagingKey = pagingKey,
-            sortId = sortId
+            sortId = sortId,
         ),
-        status = status
+        status = status,
     )
 }
 
 private fun Notification.toDbStatusWithReference(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): DbStatusWithReference {
     val status = this.toDbStatusWithUser(accountKey)
     val retweet = this.note?.toDbStatusWithUser(accountKey)
     return DbStatusWithReference(
         status = status,
         references = listOfNotNull(
-            retweet?.toDbStatusReference(status.data.statusKey, ReferenceType.Notification)
-        )
+            retweet?.toDbStatusReference(status.data.statusKey, ReferenceType.Notification),
+        ),
     )
 }
 
 private fun Notification.toDbStatusWithUser(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): DbStatusWithUser {
     val user = this.user?.toDbUser(accountKey.host)
     val status = this.toDbStatus(accountKey)
     return DbStatusWithUser(
         data = status,
-        user = user
+        user = user,
     )
 }
 
 private fun Notification.toDbStatus(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): DbStatus {
     val user = this.user?.toDbUser(accountKey.host)
     return DbStatus(
         statusKey = MicroBlogKey(
             this.id,
-            accountKey.host
+            accountKey.host,
         ),
         platformType = PlatformType.Misskey,
         userKey = user?.userKey,
         content = StatusContent.MisskeyNotification(this),
-        accountKey = accountKey
+        accountKey = accountKey,
     )
 }
 
 private fun List<Note>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() }
+    sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() },
 ): List<DbPagingTimelineWithStatus> {
     return this.map {
         it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider)
@@ -177,7 +177,7 @@ private fun List<Note>.toDbPagingTimeline(
 private fun Note.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() }
+    sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() },
 ): DbPagingTimelineWithStatus {
     val status = this.toDbStatusWithReference(accountKey)
     val sortId = sortIdProvider(this)
@@ -187,14 +187,14 @@ private fun Note.toDbPagingTimeline(
             accountKey = accountKey,
             statusKey = status.status.data.statusKey,
             pagingKey = pagingKey,
-            sortId = sortId
+            sortId = sortId,
         ),
-        status = status
+        status = status,
     )
 }
 
 private fun Note.toDbStatusWithReference(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): DbStatusWithReference {
     val status = this.toDbStatusWithUser(accountKey)
     val retweet = this.renote?.toDbStatusWithUser(accountKey)
@@ -203,37 +203,37 @@ private fun Note.toDbStatusWithReference(
         status = status,
         references = listOfNotNull(
             retweet?.toDbStatusReference(status.data.statusKey, ReferenceType.Retweet),
-            reply?.toDbStatusReference(status.data.statusKey, ReferenceType.Reply)
-        )
+            reply?.toDbStatusReference(status.data.statusKey, ReferenceType.Reply),
+        ),
     )
 }
 
 private fun Note.toDbStatusWithUser(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): DbStatusWithUser {
     val user = user.toDbUser(accountKey.host)
     val status = DbStatus(
         statusKey = MicroBlogKey(
             id = id,
-            host = user.userKey.host
+            host = user.userKey.host,
         ),
         platformType = PlatformType.Misskey,
         content = StatusContent.Misskey(this),
         userKey = user.userKey,
-        accountKey = accountKey
+        accountKey = accountKey,
     )
     return DbStatusWithUser(
         data = status,
-        user = user
+        user = user,
     )
 }
 
 private fun UserLite.toDbUser(
-    accountHost: String
+    accountHost: String,
 ) = DbUser(
     userKey = MicroBlogKey(
         id = id,
-        host = accountHost
+        host = accountHost,
     ),
     platformType = dev.dimension.flare.model.PlatformType.Misskey,
     name = name ?: "",
@@ -243,15 +243,15 @@ private fun UserLite.toDbUser(
         accountHost
     } else {
         host
-    }
+    },
 )
 
 fun User.toDbUser(
-    accountHost: String
+    accountHost: String,
 ) = DbUser(
     userKey = MicroBlogKey(
         id = id,
-        host = accountHost
+        host = accountHost,
     ),
     platformType = dev.dimension.flare.model.PlatformType.Misskey,
     name = name ?: "",
@@ -261,14 +261,14 @@ fun User.toDbUser(
         accountHost
     } else {
         host
-    }
+    },
 )
 
 fun List<EmojiSimple>.toDb(
-    host: String
+    host: String,
 ): DbEmoji {
     return DbEmoji(
         host = host,
-        content = EmojiContent.Misskey(this)
+        content = EmojiContent.Misskey(this),
     )
 }

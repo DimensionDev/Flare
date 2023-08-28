@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param followeeId * @param followerId * @param followee * @param follower */
 @Serializable
-
 data class Following(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -35,6 +34,6 @@ data class Following(
 
     @SerialName(value = "followee") val followee: UserDetailed? = null,
 
-    @SerialName(value = "follower") val follower: UserDetailed? = null
+    @SerialName(value = "follower") val follower: UserDetailed? = null,
 
 )

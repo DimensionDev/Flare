@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,9 +27,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datasource.mastodon.statusDataSource
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.repository.app.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
@@ -43,17 +42,17 @@ import dev.dimension.flare.ui.theme.FlareTheme
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
-        )
-    ]
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
 )
 fun StatusRoute(
     statusKey: MicroBlogKey,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     StatusScreen(
         statusKey,
-        onBack = navigator::navigateUp
+        onBack = navigator::navigateUp,
     )
 }
 
@@ -61,7 +60,7 @@ fun StatusRoute(
 @Composable
 internal fun StatusScreen(
     statusKey: MicroBlogKey,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val state by producePresenter(statusKey.toString()) {
         statusPresenter(statusKey)
@@ -77,12 +76,12 @@ internal fun StatusScreen(
                         IconButton(onClick = onBack) {
                             Icon(
                                 Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) {
             val listState = rememberLazyListState()
             RefreshContainer(
@@ -93,7 +92,7 @@ internal fun StatusScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         with(state.listState) {
                             with(state.statusEvent) {
@@ -101,7 +100,7 @@ internal fun StatusScreen(
                             }
                         }
                     }
-                }
+                },
             )
         }
     }
@@ -110,24 +109,13 @@ internal fun StatusScreen(
 @Composable
 private fun statusPresenter(
     statusKey: MicroBlogKey,
-    statusEvent: StatusEvent = rememberInject()
+    statusEvent: StatusEvent = rememberInject(),
 ) = run {
-    val accountState by activeAccountPresenter()
-    val listState = accountState.map {
-        when (it) {
-            is UiAccount.Mastodon -> statusDataSource(it, statusKey).collectAsLazyPagingItems()
-            is UiAccount.Misskey -> dev.dimension.flare.data.datasource.misskey.statusDataSource(
-                it,
-                statusKey
-            ).collectAsLazyPagingItems()
-
-            is UiAccount.Bluesky -> dev.dimension.flare.data.datasource.bluesky.statusDataSource(
-                it,
-                statusKey
-            ).collectAsLazyPagingItems()
-        }
+    val listState = activeAccountServicePresenter().map { (service, account) ->
+        remember(account.accountKey, statusKey) {
+            service.status(statusKey)
+        }.collectAsLazyPagingItems()
     }
-
     val refreshing =
         listState is UiState.Loading ||
             listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0

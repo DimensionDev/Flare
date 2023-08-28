@@ -15,5 +15,5 @@ enum class Visibility {
     Private,
 
     @SerialName("direct")
-    Direct;
+    Direct,
 }

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param expiresAt * @param muteeId * @param mutee */
 @Serializable
-
 data class Muting(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -33,6 +32,6 @@ data class Muting(
 
     @SerialName(value = "muteeId") val muteeId: kotlin.String,
 
-    @SerialName(value = "mutee") val mutee: UserDetailed
+    @SerialName(value = "mutee") val mutee: UserDetailed,
 
 )

@@ -30,7 +30,7 @@ import org.jsoup.nodes.Element
 internal fun UiStatusQuoted(
     status: UiStatus,
     onMediaClick: (UiMedia) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     when (status) {
         is UiStatus.Mastodon -> {
@@ -43,7 +43,7 @@ internal fun UiStatusQuoted(
                 medias = status.media,
                 createdAt = status.humanizedTime,
                 onMediaClick = onMediaClick,
-                modifier = modifier
+                modifier = modifier,
             )
         }
         is UiStatus.MastodonNotification -> Unit
@@ -56,7 +56,7 @@ internal fun UiStatusQuoted(
             medias = status.media,
             createdAt = status.humanizedTime,
             onMediaClick = onMediaClick,
-            modifier = modifier
+            modifier = modifier,
         )
 
         is UiStatus.MisskeyNotification -> Unit
@@ -69,7 +69,7 @@ internal fun UiStatusQuoted(
             medias = status.medias,
             createdAt = status.humanizedTime,
             onMediaClick = onMediaClick,
-            modifier = modifier
+            modifier = modifier,
         )
         is UiStatus.BlueskyNotification -> Unit
     }
@@ -85,35 +85,35 @@ internal fun QuotedStatus(
     medias: ImmutableList<UiMedia>?,
     createdAt: String,
     onMediaClick: (UiMedia) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Column {
             Column(
                 modifier = Modifier
                     .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AvatarComponent(
                         data = avatarUrl,
-                        size = 20.dp
+                        size = 20.dp,
                     )
                     Row(
                         modifier = Modifier
                             .weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         HtmlText(
                             element = nameElement,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             text = handle,
@@ -121,7 +121,7 @@ internal fun QuotedStatus(
                             modifier = Modifier
                                 .alpha(MediumAlpha),
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                     Text(
@@ -129,7 +129,7 @@ internal fun QuotedStatus(
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .alpha(MediumAlpha),
-                        maxLines = 1
+                        maxLines = 1,
                     )
                 }
                 HtmlText(element = contentElement, layoutDirection = contentLayoutDirection)
@@ -145,10 +145,10 @@ internal fun QuotedStatus(
                                 modifier = Modifier
                                     .clickable {
                                         onMediaClick(media)
-                                    }
+                                    },
                             )
                         }
-                    }
+                    },
                 )
             }
         }

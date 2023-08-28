@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param name */
 @Serializable
-
 data class UsersListsCreateRequest(
 
-    @SerialName(value = "name") val name: kotlin.String
+    @SerialName(value = "name") val name: kotlin.String,
 
 )

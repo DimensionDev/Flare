@@ -12,5 +12,5 @@ data class PostPoll(
 
     val multiple: Boolean? = null,
     @SerialName("hide_totals")
-    val hideTotals: Boolean? = null
+    val hideTotals: Boolean? = null,
 )

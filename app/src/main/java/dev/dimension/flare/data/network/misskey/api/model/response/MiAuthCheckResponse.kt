@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class MiAuthCheckResponse(
     val ok: Boolean? = null,
     val token: String? = null,
-    val user: User? = null
+    val user: User? = null,
 )

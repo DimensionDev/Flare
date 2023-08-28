@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param registration * @param localTimeLine * @param globalTimeLine * @param hcaptcha * @param recaptcha * @param objectStorage * @param serviceWorker * @param miauth */
 @Serializable
-
 data class Meta200ResponseFeatures(
 
     @SerialName(value = "registration") val registration: kotlin.Boolean,
@@ -39,6 +38,6 @@ data class Meta200ResponseFeatures(
 
     @SerialName(value = "serviceWorker") val serviceWorker: kotlin.Boolean,
 
-    @SerialName(value = "miauth") val miauth: kotlin.Boolean? = true
+    @SerialName(value = "miauth") val miauth: kotlin.Boolean? = true,
 
 )

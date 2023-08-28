@@ -14,5 +14,5 @@ data class Original(
     val duration: Double? = null,
     val bitrate: Long? = null,
     val size: String? = null,
-    val aspect: Double? = null
+    val aspect: Double? = null,
 )

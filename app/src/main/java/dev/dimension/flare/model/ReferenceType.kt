@@ -7,5 +7,5 @@ enum class ReferenceType {
     Retweet,
     Reply,
     Quote,
-    Notification
+    Notification,
 }

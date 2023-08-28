@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param id * @param name * @param username * @param host The local host is represented with `null`.
  * @param avatarUrl * @param avatarBlurhash * @param onlineStatus * @param isAdmin * @param isModerator * @param isBot * @param isCat */
 @Serializable
-
 data class UserLite(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -47,7 +46,7 @@ data class UserLite(
 
     @SerialName(value = "isBot") val isBot: kotlin.Boolean? = null,
 
-    @SerialName(value = "isCat") val isCat: kotlin.Boolean? = null
+    @SerialName(value = "isCat") val isCat: kotlin.Boolean? = null,
 
 ) {
 
@@ -67,6 +66,6 @@ data class UserLite(
         Active("active"),
 
         @SerialName(value = "offline")
-        Offline("offline");
+        Offline("offline"),
     }
 }

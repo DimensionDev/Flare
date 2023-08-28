@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param postId */
 @Serializable
-
 data class GalleryPostsDeleteRequest(
 
-    @SerialName(value = "postId") val postId: kotlin.String
+    @SerialName(value = "postId") val postId: kotlin.String,
 
 )

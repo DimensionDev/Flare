@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,12 +22,11 @@ import kotlinx.serialization.Serializable
  * *
  * @param type * @param `object` */
 @Serializable
-
 data class ApShow200ResponseOneOf(
 
     @SerialName(value = "type") val type: ApShow200ResponseOneOf.Type,
 
-    @SerialName(value = "object") val `object`: UserDetailedNotMe
+    @SerialName(value = "object") val `object`: UserDetailedNotMe,
 
 ) {
 
@@ -38,6 +37,6 @@ data class ApShow200ResponseOneOf(
     @Serializable
     enum class Type(val value: kotlin.String) {
         @SerialName(value = "User")
-        User("User");
+        User("User"),
     }
 }

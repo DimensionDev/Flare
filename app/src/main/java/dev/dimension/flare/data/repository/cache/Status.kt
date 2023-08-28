@@ -9,7 +9,7 @@ internal suspend inline fun <reified T : StatusContent> updateStatusUseCase(
     statusKey: MicroBlogKey,
     accountKey: MicroBlogKey,
     update: (content: T) -> T,
-    cacheDatabase: CacheDatabase = inject()
+    cacheDatabase: CacheDatabase = inject(),
 ) {
     val status = cacheDatabase.statusDao().getStatus(statusKey, accountKey)
     if (status != null && status.content is T) {

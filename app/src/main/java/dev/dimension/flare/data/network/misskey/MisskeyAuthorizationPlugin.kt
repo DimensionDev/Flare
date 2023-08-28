@@ -14,7 +14,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 
 internal class MisskeyAuthorizationPlugin(
-    private val token: String
+    private val token: String,
 ) {
     @KtorDsl
     class Config(internal var token: String? = null)
@@ -43,16 +43,16 @@ internal class MisskeyAuthorizationPlugin(
                     val newJsonObject = JsonObject(
                         element.jsonObject.toMutableMap().apply {
                             put("i", JsonPrimitive(token))
-                        }
+                        },
                     )
                     proceedWith(
                         TextContent(
                             JSON.encodeToString(
                                 JsonElement.serializer(),
-                                newJsonObject
+                                newJsonObject,
                             ),
-                            body.contentType
-                        )
+                            body.contentType,
+                        ),
                     )
                 }
             } else if (body is ByteArrayContent) {

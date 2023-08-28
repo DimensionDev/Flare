@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param channelId * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
-
 data class ChannelsTimelineRequest(
 
     @SerialName(value = "channelId") val channelId: kotlin.String,
@@ -35,6 +34,6 @@ data class ChannelsTimelineRequest(
 
     @SerialName(value = "sinceDate") val sinceDate: kotlin.Int? = null,
 
-    @SerialName(value = "untilDate") val untilDate: kotlin.Int? = null
+    @SerialName(value = "untilDate") val untilDate: kotlin.Int? = null,
 
 )

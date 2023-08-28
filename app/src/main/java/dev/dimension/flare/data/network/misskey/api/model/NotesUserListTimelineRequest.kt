@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param listId * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate * @param includeMyRenotes * @param includeRenotedMyNotes * @param includeLocalRenotes * @param withFiles Only show notes that have attached files.
  */
 @Serializable
-
 data class NotesUserListTimelineRequest(
 
     @SerialName(value = "listId") val listId: kotlin.String,
@@ -45,6 +44,6 @@ data class NotesUserListTimelineRequest(
     @SerialName(value = "includeLocalRenotes") val includeLocalRenotes: kotlin.Boolean? = true,
 
     /* Only show notes that have attached files. */
-    @SerialName(value = "withFiles") val withFiles: kotlin.Boolean? = false
+    @SerialName(value = "withFiles") val withFiles: kotlin.Boolean? = false,
 
 )

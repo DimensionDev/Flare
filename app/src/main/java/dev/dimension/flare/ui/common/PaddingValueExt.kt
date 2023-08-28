@@ -7,14 +7,14 @@ import androidx.compose.ui.unit.LayoutDirection
 operator fun PaddingValues.plus(contentPadding: PaddingValues): PaddingValues {
     return AdditionalPaddingValues(
         this,
-        contentPadding
+        contentPadding,
     )
 }
 
 @Stable
 private class AdditionalPaddingValues(
     private val base: PaddingValues,
-    private val additional: PaddingValues
+    private val additional: PaddingValues,
 ) : PaddingValues {
 
     override fun calculateLeftPadding(layoutDirection: LayoutDirection) =

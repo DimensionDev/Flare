@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param pong */
 @Serializable
-
 data class Ping200Response(
 
-    @SerialName(value = "pong") val pong: kotlin.Double
+    @SerialName(value = "pong") val pong: kotlin.Double,
 
 )

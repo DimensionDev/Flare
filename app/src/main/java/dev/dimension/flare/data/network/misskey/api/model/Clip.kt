@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param lastClippedAt * @param userId * @param user * @param name * @param description * @param isPublic * @param favoritedCount * @param isFavorited */
 @Serializable
-
 data class Clip(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -43,6 +42,6 @@ data class Clip(
 
     @SerialName(value = "favoritedCount") val favoritedCount: kotlin.Double,
 
-    @SerialName(value = "isFavorited") val isFavorited: kotlin.Boolean? = null
+    @SerialName(value = "isFavorited") val isFavorited: kotlin.Boolean? = null,
 
 )

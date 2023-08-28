@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param url * @param uri * @param movedToUri * @param alsoKnownAs * @param createdAt * @param updatedAt * @param lastFetchedAt * @param bannerUrl * @param bannerBlurhash * @param isLocked * @param isSilenced * @param isLimited * @param isSuspended * @param description * @param location * @param birthday * @param lang * @param fields * @param followersCount * @param followingCount * @param notesCount * @param pinnedNoteIds * @param pinnedNotes * @param pinnedPageId * @param pinnedPage * @param publicReactions * @param twoFactorEnabled * @param usePasswordLessLogin * @param securityKeys * @param isFollowing * @param isFollowed * @param hasPendingFollowRequestFromYou * @param hasPendingFollowRequestToYou * @param isBlocking * @param isBlocked * @param isMuted * @param isRenoteMuted * @param memo */
 @Serializable
-
 data class UserDetailedNotMeOnly(
 
     @SerialName(value = "url") val url: kotlin.String? = null,
@@ -100,6 +99,6 @@ data class UserDetailedNotMeOnly(
 
     @SerialName(value = "isRenoteMuted") val isRenoteMuted: kotlin.Boolean? = null,
 
-    @SerialName(value = "memo") val memo: kotlin.String? = null
+    @SerialName(value = "memo") val memo: kotlin.String? = null,
 
 )

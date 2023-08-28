@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,11 +22,10 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param post */
 @Serializable
-
 data class IGalleryLikes200ResponseInner(
 
     @SerialName(value = "id") val id: kotlin.String,
 
-    @SerialName(value = "post") val post: GalleryPost
+    @SerialName(value = "post") val post: GalleryPost,
 
 )

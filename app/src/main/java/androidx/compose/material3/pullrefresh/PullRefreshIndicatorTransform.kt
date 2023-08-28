@@ -38,13 +38,13 @@ import androidx.compose.ui.platform.inspectable
 @ExperimentalMaterial3Api
 fun Modifier.pullRefreshIndicatorTransform(
     state: PullRefreshState,
-    scale: Boolean = false
+    scale: Boolean = false,
 ) = inspectable(
     inspectorInfo = debugInspectorInfo {
         name = "pullRefreshIndicatorTransform"
         properties["state"] = state
         properties["scale"] = scale
-    }
+    },
 ) {
     Modifier
         // Essentially we only want to clip the at the top, so the indicator will not appear when
@@ -58,7 +58,7 @@ fun Modifier.pullRefreshIndicatorTransform(
                 top = 0f,
                 left = -Float.MAX_VALUE,
                 right = Float.MAX_VALUE,
-                bottom = Float.MAX_VALUE
+                bottom = Float.MAX_VALUE,
             ) {
                 this@drawWithContent.drawContent()
             }

@@ -60,7 +60,7 @@ import kotlinx.coroutines.launch
 @Composable
 @Destination
 fun BlueskyLoginRoute(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     BlueskyLoginScreen(
         onBack = navigator::navigateUp,
@@ -70,7 +70,7 @@ fun BlueskyLoginRoute(
                     inclusive = true
                 }
             }
-        }
+        },
     )
 }
 
@@ -78,7 +78,7 @@ fun BlueskyLoginRoute(
 @Composable
 private fun BlueskyLoginScreen(
     onBack: () -> Unit = {},
-    toHome: () -> Unit = {}
+    toHome: () -> Unit = {},
 ) {
     val state by producePresenter {
         loginPresenter(toHome)
@@ -95,39 +95,39 @@ private fun BlueskyLoginScreen(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = onBack
+                            onClick = onBack,
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
                     Text(
                         text = stringResource(id = R.string.bluesky_login_title),
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
                     )
                     Text(
                         text = stringResource(id = R.string.bluesky_login_message),
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
                 Column(
@@ -136,7 +136,7 @@ private fun BlueskyLoginScreen(
                         .weight(2f)
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     OutlinedTextField2(
                         state = state.baseUrl,
@@ -147,32 +147,32 @@ private fun BlueskyLoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(
-                                focusRequester = focusRequester
+                                focusRequester = focusRequester,
                             ),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         trailingIcon = {
                             IconButton(
                                 onClick = {
                                     state.setDropdown(!state.showDropdown)
-                                }
+                                },
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = stringResource(id = R.string.navigate_back)
+                                    contentDescription = stringResource(id = R.string.navigate_back),
                                 )
                                 DropdownMenu(
                                     expanded = state.showDropdown,
-                                    onDismissRequest = { state.setDropdown(false) }
+                                    onDismissRequest = { state.setDropdown(false) },
                                 ) {
                                     KnownInstance.values().forEach {
                                         DropdownMenuItem(
                                             text = { Text(text = it.url) },
-                                            onClick = { state.selectBaseUrl(it.url) }
+                                            onClick = { state.selectBaseUrl(it.url) },
                                         )
                                     }
                                 }
                             }
-                        }
+                        },
                     )
                     OutlinedTextField2(
                         state = state.username,
@@ -183,9 +183,9 @@ private fun BlueskyLoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(
-                                focusRequester = focusRequester
+                                focusRequester = focusRequester,
                             ),
-                        lineLimits = TextFieldLineLimits.SingleLine
+                        lineLimits = TextFieldLineLimits.SingleLine,
                     )
                     OutlinedSecureTextField2(
                         state = state.password,
@@ -196,17 +196,17 @@ private fun BlueskyLoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(
-                                focusRequester = focusRequester
+                                focusRequester = focusRequester,
                             ),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         onSubmit = {
                             state.login()
                             true
-                        }
+                        },
                     )
                     Button(
                         onClick = state::login,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(text = stringResource(id = R.string.login_button))
                     }
@@ -222,7 +222,7 @@ private fun BlueskyLoginScreen(
 private suspend fun blueskyLoginUseCase(
     baseUrl: String,
     username: String,
-    password: String
+    password: String,
 ) {
     val service = BlueskyService(baseUrl)
     // check if username is email
@@ -241,21 +241,21 @@ private suspend fun blueskyLoginUseCase(
         refreshToken = response.refreshJwt,
         accountKey = MicroBlogKey(
             id = response.did.did,
-            host = Url(baseUrl).host
-        )
+            host = Url(baseUrl).host,
+        ),
     )
 }
 
 private enum class KnownInstance(val url: String) {
     Main("https://bsky.social"),
     Staging("https://staging.bsky.dev"),
-    Local("http://localhost:2583")
+    Local("http://localhost:2583"),
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun loginPresenter(
-    toHome: () -> Unit = {}
+    toHome: () -> Unit = {},
 ) = run {
     val baseUrl by remember { mutableStateOf(TextFieldState("https://bsky.social")) }
     val username by remember { mutableStateOf(TextFieldState("")) }
@@ -293,7 +293,7 @@ private fun loginPresenter(
                     blueskyLoginUseCase(
                         baseUrl = baseUrl.text.toString(),
                         username = username.text.toString(),
-                        password = password.text.toString()
+                        password = password.text.toString(),
                     )
                     toHome.invoke()
                 }.onFailure {

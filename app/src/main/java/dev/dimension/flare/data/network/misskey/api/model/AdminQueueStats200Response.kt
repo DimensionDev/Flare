@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param deliver * @param inbox * @param db * @param objectStorage */
 @Serializable
-
 data class AdminQueueStats200Response(
 
     @SerialName(value = "deliver") val deliver: QueueCount,
@@ -31,6 +30,6 @@ data class AdminQueueStats200Response(
 
     @SerialName(value = "db") val db: QueueCount,
 
-    @SerialName(value = "objectStorage") val objectStorage: QueueCount
+    @SerialName(value = "objectStorage") val objectStorage: QueueCount,
 
 )

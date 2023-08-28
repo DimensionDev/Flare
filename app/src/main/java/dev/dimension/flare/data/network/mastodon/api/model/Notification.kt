@@ -14,7 +14,7 @@ data class Notification(
     val createdAt: Instant? = null,
 
     val account: Account? = null,
-    val status: Status? = null
+    val status: Status? = null,
 )
 
 @Serializable
@@ -41,5 +41,5 @@ enum class NotificationTypes {
     Status,
 
     @SerialName("update")
-    Update
+    Update,
 }

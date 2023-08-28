@@ -12,13 +12,13 @@ import androidx.compose.ui.unit.dp
 fun AvatarComponent(
     data: String?,
     modifier: Modifier = Modifier,
-    size: Dp = 44.dp
+    size: Dp = 44.dp,
 ) {
     NetworkImage(
         model = data,
         contentDescription = null,
         modifier = modifier
             .size(size)
-            .clip(CircleShape)
+            .clip(CircleShape),
     )
 }

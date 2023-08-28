@@ -14,6 +14,9 @@ interface ApplicationDao {
     @Query("SELECT * FROM DbApplication")
     fun getApplications(): Flow<List<DbApplication>>
 
+    @Query("SELECT * FROM DbApplication")
+    suspend fun getApplicationsSync(): List<DbApplication>
+
     @Query("SELECT * FROM DbApplication WHERE host = :host")
     suspend fun getApplication(host: String): DbApplication?
 

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,10 +22,9 @@ import kotlinx.serialization.Serializable
  * *
  * @param type */
 @Serializable
-
 data class AdminQueuePromoteRequest(
 
-    @SerialName(value = "type") val type: AdminQueuePromoteRequest.Type
+    @SerialName(value = "type") val type: AdminQueuePromoteRequest.Type,
 
 ) {
 
@@ -39,6 +38,6 @@ data class AdminQueuePromoteRequest(
         Deliver("deliver"),
 
         @SerialName(value = "inbox")
-        Inbox("inbox");
+        Inbox("inbox"),
     }
 }

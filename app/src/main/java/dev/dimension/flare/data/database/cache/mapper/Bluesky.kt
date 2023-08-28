@@ -270,11 +270,11 @@ import dev.dimension.flare.model.PlatformType
 // }
 
 private fun ProfileView.toDbUser(
-    host: String
+    host: String,
 ) = DbUser(
     userKey = MicroBlogKey(
         id = did.did,
-        host = host
+        host = host,
     ),
     platformType = PlatformType.Bluesky,
     name = displayName.orEmpty(),
@@ -285,35 +285,35 @@ private fun ProfileView.toDbUser(
             did = did,
             handle = handle,
             displayName = displayName,
-            avatar = avatar
-        )
-    )
+            avatar = avatar,
+        ),
+    ),
 )
 
 private fun ProfileViewBasic.toDbUser(
-    host: String
+    host: String,
 ) = DbUser(
     userKey = MicroBlogKey(
         id = did.did,
-        host = host
+        host = host,
     ),
     platformType = PlatformType.Bluesky,
     name = displayName.orEmpty(),
     handle = handle.handle,
     host = host,
-    content = UserContent.BlueskyLite(this)
+    content = UserContent.BlueskyLite(this),
 )
 
 fun ProfileViewDetailed.toDbUser(
-    host: String
+    host: String,
 ) = DbUser(
     userKey = MicroBlogKey(
         id = did.did,
-        host = host
+        host = host,
     ),
     platformType = PlatformType.Bluesky,
     name = displayName.orEmpty(),
     handle = handle.handle,
     host = host,
-    content = UserContent.Bluesky(this)
+    content = UserContent.Bluesky(this),
 )

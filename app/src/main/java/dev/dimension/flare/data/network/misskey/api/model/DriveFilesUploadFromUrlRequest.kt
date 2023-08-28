@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param url * @param folderId * @param isSensitive * @param comment * @param marker * @param force */
 @Serializable
-
 data class DriveFilesUploadFromUrlRequest(
 
     @SerialName(value = "url") val url: kotlin.String,
@@ -35,6 +34,6 @@ data class DriveFilesUploadFromUrlRequest(
 
     @SerialName(value = "marker") val marker: kotlin.String? = null,
 
-    @SerialName(value = "force") val force: kotlin.Boolean? = false
+    @SerialName(value = "force") val force: kotlin.Boolean? = false,
 
 )

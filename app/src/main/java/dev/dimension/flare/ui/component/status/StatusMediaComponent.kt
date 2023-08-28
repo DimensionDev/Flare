@@ -14,7 +14,7 @@ import kotlinx.collections.immutable.ImmutableList
 internal fun StatusMediaComponent(
     data: ImmutableList<UiMedia>,
     onMediaClick: (UiMedia) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     AdaptiveGrid(
         modifier = modifier
@@ -26,9 +26,9 @@ internal fun StatusMediaComponent(
                     modifier = Modifier
                         .clickable {
                             onMediaClick(media)
-                        }
+                        },
                 )
             }
-        }
+        },
     )
 }

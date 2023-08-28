@@ -36,14 +36,14 @@ import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
 
 internal fun FeedViewPost.toUi(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): UiStatus.Bluesky {
     return with(post) {
         UiStatus.Bluesky(
             user = author.toUi(accountKey.host),
             statusKey = MicroBlogKey(
                 id = uri.atUri,
-                host = accountKey.host
+                host = accountKey.host,
             ),
             accountKey = accountKey,
             content = record.jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
@@ -57,40 +57,40 @@ internal fun FeedViewPost.toUi(
             card = findCard(this),
             reaction = UiStatus.Bluesky.Reaction(
                 liked = viewer?.like?.atUri != null,
-                reposted = viewer?.repost?.atUri != null
+                reposted = viewer?.repost?.atUri != null,
             ),
             matrices = UiStatus.Bluesky.Matrices(
                 replyCount = replyCount ?: 0,
                 likeCount = likeCount ?: 0,
-                repostCount = repostCount ?: 0
-            )
+                repostCount = repostCount ?: 0,
+            ),
         )
     }
 }
 
 internal fun ListNotificationsNotification.toUi(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): UiStatus.BlueskyNotification {
     return UiStatus.BlueskyNotification(
         user = author.toUi(accountKey.host),
         statusKey = MicroBlogKey(
             id = uri.atUri,
-            host = accountKey.host
+            host = accountKey.host,
         ),
         accountKey = accountKey,
         reason = reason,
-        indexedAt = indexedAt
+        indexedAt = indexedAt,
     )
 }
 
 internal fun PostView.toUi(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): UiStatus.Bluesky {
     return UiStatus.Bluesky(
         user = author.toUi(accountKey.host),
         statusKey = MicroBlogKey(
             id = uri.atUri,
-            host = accountKey.host
+            host = accountKey.host,
         ),
         accountKey = accountKey,
         content = record.jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
@@ -104,13 +104,13 @@ internal fun PostView.toUi(
         card = findCard(this),
         reaction = UiStatus.Bluesky.Reaction(
             liked = viewer?.like?.atUri != null,
-            reposted = viewer?.repost?.atUri != null
+            reposted = viewer?.repost?.atUri != null,
         ),
         matrices = UiStatus.Bluesky.Matrices(
             replyCount = replyCount ?: 0,
             likeCount = likeCount ?: 0,
-            repostCount = repostCount ?: 0
-        )
+            repostCount = repostCount ?: 0,
+        ),
     )
 }
 
@@ -126,9 +126,9 @@ private fun findCard(postView: PostView): UiCard? {
                     url = it,
                     previewUrl = it,
                     description = null,
-                    aspectRatio = 1f
+                    aspectRatio = 1f,
                 )
-            }
+            },
         )
     } else {
         null
@@ -143,7 +143,7 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> {
                 url = it.fullsize,
                 previewUrl = it.thumb,
                 description = it.alt,
-                aspectRatio = 1f
+                aspectRatio = 1f,
             )
         }
     } else {
@@ -153,13 +153,13 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> {
 
 private fun findQuote(
     accountKey: MicroBlogKey,
-    postView: PostView
+    postView: PostView,
 ): UiStatus.Bluesky? {
     return when (val embed = postView.embed) {
         is PostViewEmbedUnion.RecordView -> toUi(accountKey, embed.value.record)
         is PostViewEmbedUnion.RecordWithMediaView -> toUi(
             accountKey,
-            embed.value.record.record
+            embed.value.record.record,
         )
 
         else -> null
@@ -168,14 +168,14 @@ private fun findQuote(
 
 private fun toUi(
     accountKey: MicroBlogKey,
-    record: RecordViewRecordUnion
+    record: RecordViewRecordUnion,
 ): UiStatus.Bluesky? {
     return when (record) {
         is RecordViewRecordUnion.ViewRecord -> UiStatus.Bluesky(
             accountKey = accountKey,
             statusKey = MicroBlogKey(
                 id = record.value.uri.atUri,
-                host = accountKey.host
+                host = accountKey.host,
             ),
             content = record.value.value.jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
             contentToken = record.value.value.jsonObjectOrNull?.get("text")?.jsonPrimitive?.content?.let {
@@ -191,7 +191,7 @@ private fun toUi(
                             url = it.fullsize,
                             previewUrl = it.thumb,
                             description = it.alt,
-                            aspectRatio = 1f
+                            aspectRatio = 1f,
                         )
                     }
 
@@ -209,9 +209,9 @@ private fun toUi(
                                 url = it,
                                 previewUrl = it,
                                 description = null,
-                                aspectRatio = 1f
+                                aspectRatio = 1f,
                             )
-                        }
+                        },
                     )
 
                     else -> null
@@ -220,13 +220,13 @@ private fun toUi(
             user = record.value.author.toUi(accountKey.host),
             reaction = UiStatus.Bluesky.Reaction(
                 liked = false,
-                reposted = false
+                reposted = false,
             ),
             matrices = UiStatus.Bluesky.Matrices(
                 replyCount = 0,
                 likeCount = 0,
-                repostCount = 0
-            )
+                repostCount = 0,
+            ),
         )
 
         else -> null
@@ -236,7 +236,7 @@ private fun toUi(
 internal fun ProfileViewDetailed.toUi(accountHost: String): UiUser = UiUser.Bluesky(
     userKey = MicroBlogKey(
         id = did.did,
-        host = accountHost
+        host = accountHost,
     ),
     name = displayName.orEmpty(),
     handleInternal = handle.handle,
@@ -250,21 +250,21 @@ internal fun ProfileViewDetailed.toUi(accountHost: String): UiUser = UiUser.Blue
     matrices = UiUser.Bluesky.Matrices(
         fansCount = followersCount ?: 0,
         followsCount = followsCount ?: 0,
-        statusesCount = postsCount ?: 0
+        statusesCount = postsCount ?: 0,
     ),
     relation = UiRelation.Bluesky(
         following = viewer?.following?.atUri,
         followedBy = viewer?.followedBy?.atUri,
         blocked = viewer?.blockedBy ?: false,
-        muted = viewer?.muted ?: false
-    )
+        muted = viewer?.muted ?: false,
+    ),
 )
 
 internal fun ProfileViewBasic.toUi(accountHost: String): UiUser.Bluesky {
     return UiUser.Bluesky(
         userKey = MicroBlogKey(
             id = did.did,
-            host = accountHost
+            host = accountHost,
         ),
         name = displayName.orEmpty(),
         handleInternal = handle.handle,
@@ -278,14 +278,14 @@ internal fun ProfileViewBasic.toUi(accountHost: String): UiUser.Bluesky {
         matrices = UiUser.Bluesky.Matrices(
             fansCount = 0,
             followsCount = 0,
-            statusesCount = 0
+            statusesCount = 0,
         ),
         relation = UiRelation.Bluesky(
             following = viewer?.following?.atUri,
             followedBy = viewer?.followedBy?.atUri,
             blocked = viewer?.blockedBy ?: false,
-            muted = viewer?.muted ?: false
-        )
+            muted = viewer?.muted ?: false,
+        ),
     )
 }
 
@@ -293,7 +293,7 @@ internal fun ProfileView.toUi(accountHost: String): UiUser.Bluesky {
     return UiUser.Bluesky(
         userKey = MicroBlogKey(
             id = did.did,
-            host = accountHost
+            host = accountHost,
         ),
         name = displayName.orEmpty(),
         handleInternal = handle.handle,
@@ -307,14 +307,14 @@ internal fun ProfileView.toUi(accountHost: String): UiUser.Bluesky {
         matrices = UiUser.Bluesky.Matrices(
             fansCount = 0,
             followsCount = 0,
-            statusesCount = 0
+            statusesCount = 0,
         ),
         relation = UiRelation.Bluesky(
             following = viewer?.following?.atUri,
             followedBy = viewer?.followedBy?.atUri,
             blocked = viewer?.blockedBy ?: false,
-            muted = viewer?.muted ?: false
-        )
+            muted = viewer?.muted ?: false,
+        ),
     )
 }
 
@@ -332,7 +332,7 @@ private fun parseDescription(description: String, accountHost: String): Element 
 }
 
 private fun Token.toElement(
-    accountHost: String
+    accountHost: String,
 ): Node {
     return when (this) {
         is CashTagToken -> Element("a").apply {
@@ -367,7 +367,7 @@ private fun Token.toElement(
             } else {
                 attr(
                     "href",
-                    ProfileWithUserNameAndHostRouteDestination(trimmed, accountHost).deeplink()
+                    ProfileWithUserNameAndHostRouteDestination(trimmed, accountHost).deeplink(),
                 )
             }
             text(value)

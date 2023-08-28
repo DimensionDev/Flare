@@ -85,7 +85,7 @@ internal sealed class UiStatus {
         val user: UiUser.Mastodon,
         val createdAt: Instant,
         val status: Mastodon?,
-        val type: NotificationTypes
+        val type: NotificationTypes,
     ) : UiStatus() {
         val humanizedTime by lazy {
             createdAt.humanize()
@@ -107,7 +107,7 @@ internal sealed class UiStatus {
         val card: UiCard?,
         val reaction: Reaction,
         val sensitive: Boolean,
-        val reblogStatus: Mastodon?
+        val reblogStatus: Mastodon?,
     ) : UiStatus() {
 
         val humanizedTime by lazy {
@@ -124,7 +124,7 @@ internal sealed class UiStatus {
         data class Reaction(
             val liked: Boolean,
             val reblogged: Boolean,
-            val bookmarked: Boolean
+            val bookmarked: Boolean,
         )
 
         data class Poll(
@@ -134,7 +134,7 @@ internal sealed class UiStatus {
             val expired: Boolean,
             val multiple: Boolean,
             val voted: Boolean,
-            val ownVotes: ImmutableList<Int>
+            val ownVotes: ImmutableList<Int>,
         ) {
             val humanizedExpiresAt by lazy { expiresAt.humanize() }
         }
@@ -142,7 +142,7 @@ internal sealed class UiStatus {
         data class PollOption(
             val title: String,
             val votesCount: Long,
-            val percentage: Float
+            val percentage: Float,
         ) {
             val humanizedPercentage by lazy { percentage.humanizePercentage() }
         }
@@ -151,13 +151,13 @@ internal sealed class UiStatus {
             Public,
             Unlisted,
             Private,
-            Direct;
+            Direct,
         }
 
         data class Matrices(
             val replyCount: Long,
             val reblogCount: Long,
-            val favouriteCount: Long
+            val favouriteCount: Long,
         ) {
             val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
             val humanizedReblogCount by lazy { if (reblogCount > 0) reblogCount.toString() else null }
@@ -181,7 +181,7 @@ internal sealed class UiStatus {
         val reaction: Reaction,
         val sensitive: Boolean,
         val quote: Misskey?,
-        val renote: Misskey?
+        val renote: Misskey?,
     ) : UiStatus() {
         val humanizedTime: String by lazy {
             createdAt.humanize()
@@ -196,13 +196,13 @@ internal sealed class UiStatus {
 
         data class Reaction(
             val emojiReactions: ImmutableList<EmojiReaction>,
-            val myReaction: String?
+            val myReaction: String?,
         )
 
         data class EmojiReaction(
             val name: String,
             val url: String,
-            val count: Long
+            val count: Long,
         ) {
             val humanizedCount by lazy {
                 count.humanize()
@@ -213,14 +213,14 @@ internal sealed class UiStatus {
             Public,
             Home,
             Followers,
-            Specified
+            Specified,
         }
 
         data class Poll(
             val id: String,
             val options: ImmutableList<PollOption>,
             val expiresAt: Instant,
-            val multiple: Boolean
+            val multiple: Boolean,
         ) {
             val expired: Boolean by lazy { expiresAt < Clock.System.now() }
             val humanizedExpiresAt by lazy { expiresAt.humanize() }
@@ -230,14 +230,14 @@ internal sealed class UiStatus {
             val title: String,
             val votesCount: Long,
             val percentage: Float,
-            val voted: Boolean
+            val voted: Boolean,
         ) {
             val humanizedPercentage by lazy { percentage.humanizePercentage() }
         }
 
         data class Matrices(
             val replyCount: Long,
-            val renoteCount: Long
+            val renoteCount: Long,
         ) {
             val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
             val humanizedReNoteCount by lazy { if (renoteCount > 0) renoteCount.toString() else null }
@@ -251,7 +251,7 @@ internal sealed class UiStatus {
         val createdAt: Instant,
         val note: Misskey?,
         val type: Notification.Type,
-        val achievement: String?
+        val achievement: String?,
     ) : UiStatus() {
         val humanizedTime by lazy {
             createdAt.humanize()
@@ -270,7 +270,7 @@ internal sealed class UiStatus {
         val medias: ImmutableList<UiMedia>,
         val card: UiCard?,
         val matrices: Matrices,
-        val reaction: Reaction
+        val reaction: Reaction,
     ) : UiStatus() {
         val humanizedTime by lazy {
             indexedAt.humanize()
@@ -285,7 +285,7 @@ internal sealed class UiStatus {
         data class Matrices(
             val replyCount: Long,
             val likeCount: Long,
-            val repostCount: Long
+            val repostCount: Long,
         ) {
             val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
             val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
@@ -293,7 +293,7 @@ internal sealed class UiStatus {
         }
         data class Reaction(
             val liked: Boolean,
-            val reposted: Boolean
+            val reposted: Boolean,
         )
 
         override val itemKey: String by lazy {
@@ -309,7 +309,7 @@ internal sealed class UiStatus {
          * Expected values are 'like', 'repost', 'follow', 'mention', 'reply', and 'quote'.
          */
         val reason: String,
-        val indexedAt: Instant
+        val indexedAt: Instant,
     ) : UiStatus() {
         override val itemKey: String by lazy {
             statusKey.toString() + user?.let { "_${it.userKey}" }.orEmpty()

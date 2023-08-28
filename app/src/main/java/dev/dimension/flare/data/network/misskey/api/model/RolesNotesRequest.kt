@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param roleId * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
-
 data class RolesNotesRequest(
 
     @SerialName(value = "roleId") val roleId: kotlin.String,
@@ -35,6 +34,6 @@ data class RolesNotesRequest(
 
     @SerialName(value = "sinceDate") val sinceDate: kotlin.Int? = null,
 
-    @SerialName(value = "untilDate") val untilDate: kotlin.Int? = null
+    @SerialName(value = "untilDate") val untilDate: kotlin.Int? = null,
 
 )

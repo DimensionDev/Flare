@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,10 +22,9 @@ import kotlinx.serialization.Serializable
  * *
  * @param name */
 @Serializable
-
 data class IClaimAchievementRequest(
 
-    @SerialName(value = "name") val name: IClaimAchievementRequest.Name
+    @SerialName(value = "name") val name: IClaimAchievementRequest.Name,
 
 ) {
 
@@ -255,6 +254,6 @@ data class IClaimAchievementRequest(
         CookieClicked("cookieClicked"),
 
         @SerialName(value = "brainDiver")
-        BrainDiver("brainDiver");
+        BrainDiver("brainDiver"),
     }
 }

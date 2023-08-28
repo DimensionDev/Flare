@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param limit * @param offset * @param sort * @param state * @param origin * @param username * @param hostname The local host is represented with `null`.
  */
 @Serializable
-
 data class AdminShowUsersRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
@@ -39,7 +38,7 @@ data class AdminShowUsersRequest(
     @SerialName(value = "username") val username: kotlin.String? = null,
 
     /* The local host is represented with `null`. */
-    @SerialName(value = "hostname") val hostname: kotlin.String? = null
+    @SerialName(value = "hostname") val hostname: kotlin.String? = null,
 
 ) {
 
@@ -71,7 +70,7 @@ data class AdminShowUsersRequest(
         PlusLastActiveDate("+lastActiveDate"),
 
         @SerialName(value = "-lastActiveDate")
-        MinusLastActiveDate("-lastActiveDate");
+        MinusLastActiveDate("-lastActiveDate"),
     }
 
     /**
@@ -99,7 +98,7 @@ data class AdminShowUsersRequest(
         AdminOrModerator("adminOrModerator"),
 
         @SerialName(value = "suspended")
-        Suspended("suspended");
+        Suspended("suspended"),
     }
 
     /**
@@ -115,6 +114,6 @@ data class AdminShowUsersRequest(
         Local("local"),
 
         @SerialName(value = "remote")
-        Remote("remote");
+        Remote("remote"),
     }
 }

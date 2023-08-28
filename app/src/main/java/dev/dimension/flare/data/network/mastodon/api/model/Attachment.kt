@@ -20,5 +20,5 @@ data class Attachment(
 
     val meta: Meta? = null,
     val description: String? = null,
-    val blurhash: String? = null
+    val blurhash: String? = null,
 )

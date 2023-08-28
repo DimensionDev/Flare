@@ -54,7 +54,7 @@ import kotlinx.coroutines.launch
 @Composable
 @Destination
 fun ServiceSelectRoute(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     ServiceSelectScreen(
         toMastodon = {
@@ -69,7 +69,7 @@ fun ServiceSelectRoute(
         toBluesky = {
             navigator.navigate(BlueskyLoginRouteDestination)
         },
-        onBack = navigator::navigateUp
+        onBack = navigator::navigateUp,
     )
 }
 
@@ -81,7 +81,7 @@ fun ServiceSelectScreen(
     toMisskey: () -> Unit,
     toBluesky: () -> Unit,
     modifier: Modifier = Modifier,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val view = LocalView.current
     val state by producePresenter {
@@ -96,41 +96,41 @@ fun ServiceSelectScreen(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = onBack
+                            onClick = onBack,
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) {
             Box(
                 modifier = Modifier
                     .padding(it + PaddingValues(horizontal = screenHorizontalPadding))
-                    .fillMaxSize()
+                    .fillMaxSize(),
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxSize(),
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(0.8f),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+                        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                     ) {
                         Text(
                             text = stringResource(id = R.string.service_select_welcome_title),
-                            style = MaterialTheme.typography.headlineMedium
+                            style = MaterialTheme.typography.headlineMedium,
                         )
                         Text(
                             text = stringResource(id = R.string.service_select_welcome_message),
                             style = MaterialTheme.typography.bodyMedium,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         )
                     }
                     LazyVerticalGrid(
@@ -140,13 +140,13 @@ fun ServiceSelectScreen(
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(
                             8.dp,
-                            Alignment.CenterHorizontally
+                            Alignment.CenterHorizontally,
                         ),
                         verticalArrangement = Arrangement.spacedBy(
                             8.dp,
-                            Alignment.Top
+                            Alignment.Top,
                         ),
-                        columns = GridCells.Adaptive(112.dp)
+                        columns = GridCells.Adaptive(112.dp),
                     ) {
                         item {
                             Card(
@@ -155,15 +155,15 @@ fun ServiceSelectScreen(
                                 },
                                 modifier = Modifier
                                     .aspectRatio(1f),
-                                enabled = state.loading.not()
+                                enabled = state.loading.not(),
                             ) {
                                 Column(
                                     modifier = Modifier.fillMaxSize(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(
                                         8.dp,
-                                        Alignment.CenterVertically
-                                    )
+                                        Alignment.CenterVertically,
+                                    ),
                                 ) {
                                     Text(text = stringResource(id = R.string.service_select_passkey))
                                 }
@@ -174,21 +174,21 @@ fun ServiceSelectScreen(
                                 onClick = toMastodon,
                                 modifier = Modifier
                                     .aspectRatio(1f),
-                                enabled = state.loading.not()
+                                enabled = state.loading.not(),
                             ) {
                                 Column(
                                     modifier = Modifier.fillMaxSize(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(
                                         8.dp,
-                                        Alignment.CenterVertically
-                                    )
+                                        Alignment.CenterVertically,
+                                    ),
                                 ) {
                                     NetworkImage(
                                         model = "https://joinmastodon.org/logos/logo-purple.svg",
                                         contentDescription = "Mastodon Logo",
                                         modifier = Modifier.size(64.dp),
-                                        contentScale = ContentScale.Fit
+                                        contentScale = ContentScale.Fit,
                                     )
                                     Text(text = stringResource(id = R.string.service_select_mastodon))
                                 }
@@ -199,21 +199,21 @@ fun ServiceSelectScreen(
                                 onClick = toMisskey,
                                 enabled = state.loading.not(),
                                 modifier = Modifier
-                                    .aspectRatio(1f)
+                                    .aspectRatio(1f),
                             ) {
                                 Column(
                                     modifier = Modifier.fillMaxSize(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(
                                         8.dp,
-                                        Alignment.CenterVertically
-                                    )
+                                        Alignment.CenterVertically,
+                                    ),
                                 ) {
                                     NetworkImage(
                                         model = "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png",
                                         contentDescription = "Misskey Logo",
                                         modifier = Modifier.size(64.dp),
-                                        contentScale = ContentScale.Fit
+                                        contentScale = ContentScale.Fit,
                                     )
                                     Text(text = stringResource(id = R.string.service_select_misskey))
                                 }
@@ -224,21 +224,21 @@ fun ServiceSelectScreen(
                                 onClick = toBluesky,
                                 enabled = state.loading.not(),
                                 modifier = Modifier
-                                    .aspectRatio(1f)
+                                    .aspectRatio(1f),
                             ) {
                                 Column(
                                     modifier = Modifier.fillMaxSize(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(
                                         8.dp,
-                                        Alignment.CenterVertically
-                                    )
+                                        Alignment.CenterVertically,
+                                    ),
                                 ) {
                                     NetworkImage(
                                         model = "https://blueskyweb.xyz/images/apple-touch-icon.png",
                                         contentDescription = "Bluesky Logo",
                                         modifier = Modifier.size(64.dp),
-                                        contentScale = ContentScale.Fit
+                                        contentScale = ContentScale.Fit,
                                     )
                                     Text(text = stringResource(id = R.string.service_select_bluesky))
                                 }
@@ -263,7 +263,7 @@ val requestJson = """
 
 @Composable
 private fun serviceSelectPresenter(
-    activityContext: Context
+    activityContext: Context,
 ) = run {
     var loading by remember {
         mutableStateOf(false)
@@ -279,17 +279,17 @@ private fun serviceSelectPresenter(
                 val getPasswordOption = GetPasswordOption()
 
                 val getPublicKeyCredentialOption = GetPublicKeyCredentialOption(
-                    requestJson = requestJson
+                    requestJson = requestJson,
                 )
 
                 val getCredRequest = GetCredentialRequest(
-                    listOf(getPasswordOption, getPublicKeyCredentialOption)
+                    listOf(getPasswordOption, getPublicKeyCredentialOption),
                 )
 
                 val result = runCatching {
                     credentialManager.getCredential(
                         context = activityContext,
-                        request = getCredRequest
+                        request = getCredRequest,
                     )
                 }
                 loading = false

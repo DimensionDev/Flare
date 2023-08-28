@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity.navController = navController
             }
             Content(
-                navController = navController
+                navController = navController,
             )
         }
     }
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Content(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
 ) {
     DestinationsNavHost(
         navGraph = NavGraphs.root,
@@ -61,28 +61,28 @@ fun Content(
                 enterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        initialOffset = { it / 4 }
+                        initialOffset = { it / 4 },
                     ) + fadeIn()
                 },
                 exitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        targetOffset = { it / 4 }
+                        targetOffset = { it / 4 },
                     ) + fadeOut()
                 },
                 popEnterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        initialOffset = { it / 4 }
+                        initialOffset = { it / 4 },
                     ) + fadeIn()
                 },
                 popExitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        targetOffset = { it / 4 }
+                        targetOffset = { it / 4 },
                     ) + fadeOut()
-                }
-            )
-        )
+                },
+            ),
+        ),
     )
 }

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param name * @param targetUserPattern * @param reporterPattern * @param reportContentPattern * @param expiresAt * @param forward */
 @Serializable
-
 data class AdminAbuseReportResolverCreateRequest(
 
     @SerialName(value = "name") val name: kotlin.String,
@@ -35,7 +34,7 @@ data class AdminAbuseReportResolverCreateRequest(
 
     @SerialName(value = "expiresAt") val expiresAt: AdminAbuseReportResolverCreateRequest.ExpiresAt,
 
-    @SerialName(value = "forward") val forward: kotlin.Boolean
+    @SerialName(value = "forward") val forward: kotlin.Boolean,
 
 ) {
 
@@ -70,6 +69,6 @@ data class AdminAbuseReportResolverCreateRequest(
         _1year("1year"),
 
         @SerialName(value = "indefinitely")
-        Indefinitely("indefinitely");
+        Indefinitely("indefinitely"),
     }
 }

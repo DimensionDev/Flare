@@ -47,21 +47,21 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 fun MastodonCallbackScreenPreview() {
     MastodonCallbackScreen(
         code = "code",
-        toHome = {}
+        toHome = {},
     )
 }
 
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "${AppDeepLink.Callback.Mastodon}?code={code}"
-        )
-    ]
+            uriPattern = "${AppDeepLink.Callback.Mastodon}?code={code}",
+        ),
+    ],
 )
 @Composable
 fun MastodonCallbackRoute(
     code: String?,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     MastodonCallbackScreen(
         code = code,
@@ -71,19 +71,19 @@ fun MastodonCallbackRoute(
                     inclusive = true
                 }
             }
-        }
+        },
     )
 }
 
 @Composable
 internal fun MastodonCallbackScreen(
     code: String?,
-    toHome: () -> Unit
+    toHome: () -> Unit,
 ) {
     val state by producePresenter {
         mastodonCallbackPresenter(
             code = code,
-            toHome = toHome
+            toHome = toHome,
         )
     }
     FlareTheme {
@@ -93,23 +93,23 @@ internal fun MastodonCallbackScreen(
                     .fillMaxSize()
                     .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
                     Text(
                         text = stringResource(id = R.string.mastodon_login_title),
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
                     )
                     Text(
                         text = stringResource(id = R.string.mastodon_login_verify_message),
                         style = MaterialTheme.typography.bodyMedium,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     )
                 }
                 Column(
@@ -118,7 +118,7 @@ internal fun MastodonCallbackScreen(
                         .weight(2f)
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     when (val data = state) {
                         is UiState.Error -> {
@@ -140,7 +140,7 @@ internal fun MastodonCallbackScreen(
 @Composable
 private fun mastodonCallbackPresenter(
     code: String?,
-    toHome: () -> Unit
+    toHome: () -> Unit,
 ): UiState<Nothing> {
     if (code == null) {
         return UiState.Error(Exception("No code"))
@@ -176,7 +176,7 @@ private fun mastodonCallbackPresenter(
 
 private suspend fun tryPendingOAuth(
     application: UiApplication.Mastodon,
-    code: String
+    code: String,
 ) {
     val host = application.host
     val baseUrl = Uri.parse("https://$host/")
@@ -184,7 +184,7 @@ private suspend fun tryPendingOAuth(
         baseUrl = baseUrl.toString(),
         client_name = "Flare",
         website = "https://github.com/DimensionDev/Flare",
-        redirect_uri = AppDeepLink.Callback.Mastodon
+        redirect_uri = AppDeepLink.Callback.Mastodon,
     )
     val accessTokenResponse = service.getAccessToken(code, application.application)
     requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
@@ -194,6 +194,6 @@ private suspend fun tryPendingOAuth(
     addMastodonAccountUseCase(
         instance = host,
         accessToken = accessTokenResponse.accessToken,
-        accountKey = MicroBlogKey(id, host)
+        accountKey = MicroBlogKey(id, host),
     )
 }

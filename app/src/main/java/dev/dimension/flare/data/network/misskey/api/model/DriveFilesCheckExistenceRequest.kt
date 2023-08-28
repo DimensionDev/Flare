@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param md5 */
 @Serializable
-
 data class DriveFilesCheckExistenceRequest(
 
-    @SerialName(value = "md5") val md5: kotlin.String
+    @SerialName(value = "md5") val md5: kotlin.String,
 
 )

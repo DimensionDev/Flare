@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param code * @param expiresAt * @param createdAt * @param createdBy * @param usedBy * @param usedAt * @param used */
 @Serializable
-
 data class InviteCode(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -39,6 +38,6 @@ data class InviteCode(
 
     @SerialName(value = "usedAt") val usedAt: kotlin.String? = null,
 
-    @SerialName(value = "used") val used: kotlin.Boolean
+    @SerialName(value = "used") val used: kotlin.Boolean,
 
 )

@@ -28,33 +28,33 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 
 internal fun Notification.toUi(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): UiStatus {
     requireNotNull(account) { "account is null" }
     val user = account.toUi(accountKey.host)
     return UiStatus.MastodonNotification(
         statusKey = MicroBlogKey(
             id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
-            host = user.userKey.host
+            host = user.userKey.host,
         ),
         user = user,
         createdAt = createdAt ?: Instant.DISTANT_PAST,
         status = status?.toUi(accountKey),
         type = type
             ?: throw IllegalArgumentException("mastodon Notification.type should not be null"),
-        accountKey = accountKey
+        accountKey = accountKey,
     )
 }
 
 internal fun Status.toUi(
-    accountKey: MicroBlogKey
+    accountKey: MicroBlogKey,
 ): UiStatus.Mastodon {
     requireNotNull(account) { "account is null" }
     val user = account.toUi(accountKey.host)
     return UiStatus.Mastodon(
         statusKey = MicroBlogKey(
             id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
-            host = user.userKey.host
+            host = user.userKey.host,
         ),
         sensitive = sensitive ?: false,
         poll = poll?.let {
@@ -70,15 +70,15 @@ internal fun Status.toUi(
                             } else {
                                 poll.votesCount
                                     ?: 1
-                            }
-                        )?.takeUnless { it.isNaN() } ?: 0f
+                            },
+                        )?.takeUnless { it.isNaN() } ?: 0f,
                     )
                 }?.toPersistentList() ?: persistentListOf(),
                 expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
                 expired = poll.expired ?: false,
                 multiple = poll.multiple ?: false,
                 voted = poll.voted ?: false,
-                ownVotes = poll.ownVotes?.toPersistentList() ?: persistentListOf()
+                ownVotes = poll.ownVotes?.toPersistentList() ?: persistentListOf(),
             )
         },
         card = card?.url?.let { url ->
@@ -93,9 +93,9 @@ internal fun Status.toUi(
                         description = card.description,
                         aspectRatio = card.width?.toFloat()?.div(card.height ?: 1)
                             ?.coerceAtLeast(0f)
-                            ?.takeUnless { it.isNaN() } ?: 1f
+                            ?.takeUnless { it.isNaN() } ?: 1f,
                     )
-                }
+                },
             )
         },
         createdAt = createdAt
@@ -107,7 +107,7 @@ internal fun Status.toUi(
         matrices = UiStatus.Mastodon.Matrices(
             replyCount = repliesCount ?: 0,
             reblogCount = reblogsCount ?: 0,
-            favouriteCount = favouritesCount ?: 0
+            favouriteCount = favouritesCount ?: 0,
         ),
         reblogStatus = reblog?.toUi(accountKey),
         visibility = visibility?.let { visibility ->
@@ -124,15 +124,15 @@ internal fun Status.toUi(
         reaction = UiStatus.Mastodon.Reaction(
             liked = favourited ?: false,
             reblogged = reblogged ?: false,
-            bookmarked = bookmarked ?: false
+            bookmarked = bookmarked ?: false,
         ),
-        accountKey = accountKey
+        accountKey = accountKey,
     )
 }
 
 private fun parseContent(
     status: Status,
-    host: String
+    host: String,
 ): Element {
     val emoji = status.emojis.orEmpty()
     val mentions = status.mentions.orEmpty()
@@ -141,7 +141,7 @@ private fun parseContent(
     emoji.forEach {
         content = content.replace(
             ":${it.shortcode}:",
-            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>"
+            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>",
         )
     }
     val body = Jsoup.parse(content).body()
@@ -154,7 +154,7 @@ private fun parseContent(
 private fun replaceMentionAndHashtag(
     mentions: List<Mention>,
     node: Node,
-    host: String
+    host: String,
 ) {
     if (mentions.any { it.url == node.attr("href") }) {
         val mention = mentions.firstOrNull { it.url == node.attr("href") }
@@ -162,15 +162,15 @@ private fun replaceMentionAndHashtag(
         if (id != null) {
             node.attr(
                 "href",
-                ProfileRouteDestination(userKey = MicroBlogKey(id, host)).deeplink()
+                ProfileRouteDestination(userKey = MicroBlogKey(id, host)).deeplink(),
             )
         }
     } else if (node is Element && node.normalName() == "a" && node.hasText() && node.text()
-        .startsWith('#')
+            .startsWith('#')
     ) {
         node.attr(
             "href",
-            AppDeepLink.Search(node.text().trimStart('#'))
+            AppDeepLink.Search(node.text().trimStart('#')),
         )
     } else if (node.hasAttr("class") && node.attr("class") == "invisible") {
         node.remove()
@@ -187,7 +187,7 @@ private fun Attachment.toUi(): UiMedia? {
             description = description,
             aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
                 ?.coerceAtLeast(0f)
-                ?.takeUnless { it.isNaN() } ?: 1f
+                ?.takeUnless { it.isNaN() } ?: 1f,
         )
 
         MediaType.GifV -> UiMedia.Gif(
@@ -196,7 +196,7 @@ private fun Attachment.toUi(): UiMedia? {
             description = description,
             aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
                 ?.coerceAtLeast(0f)
-                ?.takeUnless { it.isNaN() } ?: 1f
+                ?.takeUnless { it.isNaN() } ?: 1f,
         )
 
         MediaType.Video -> UiMedia.Video(
@@ -205,12 +205,12 @@ private fun Attachment.toUi(): UiMedia? {
             description = description,
             aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
                 ?.coerceAtLeast(0f)
-                ?.takeUnless { it.isNaN() } ?: 1f
+                ?.takeUnless { it.isNaN() } ?: 1f,
         )
 
         MediaType.Audio -> UiMedia.Audio(
             url = url.orEmpty(),
-            description = description
+            description = description,
         )
 
         else -> null
@@ -218,7 +218,7 @@ private fun Attachment.toUi(): UiMedia? {
 }
 
 internal fun Account.toUi(
-    host: String
+    host: String,
 ): UiUser.Mastodon {
     val remoteHost = if (acct != null && acct.contains('@')) {
         acct.substring(acct.indexOf('@') + 1)
@@ -228,7 +228,7 @@ internal fun Account.toUi(
     return UiUser.Mastodon(
         userKey = MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
-            host = host
+            host = host,
         ),
         name = displayName.orEmpty(),
         avatarUrl = avatar.orEmpty(),
@@ -239,11 +239,11 @@ internal fun Account.toUi(
         matrices = UiUser.Mastodon.Matrices(
             fansCount = followersCount ?: 0,
             followsCount = followingCount ?: 0,
-            statusesCount = statusesCount ?: 0
+            statusesCount = statusesCount ?: 0,
         ),
         locked = locked ?: false,
         handleInternal = username.orEmpty(),
-        remoteHost = remoteHost
+        remoteHost = remoteHost,
     )
 }
 
@@ -253,7 +253,7 @@ private fun parseNote(account: Account): Element? {
     emoji.forEach {
         content = content.replace(
             ":${it.shortcode}:",
-            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>"
+            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>",
         )
     }
     return Jsoup.parse(content).body()
@@ -265,7 +265,7 @@ private fun parseContent(status: Account): Element {
     emoji.forEach {
         content = content.replace(
             ":${it.shortcode}:",
-            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>"
+            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>",
         )
     }
     return Jsoup.parse(content).body()
@@ -278,7 +278,7 @@ internal fun RelationshipResponse.toUi(): UiRelation.Mastodon {
         blocking = blocking ?: false,
         muting = muting ?: false,
         requested = requested ?: false,
-        domainBlocking = domainBlocking ?: false
+        domainBlocking = domainBlocking ?: false,
     )
 }
 
@@ -288,7 +288,7 @@ internal fun DbEmoji.toUi(): List<UiEmoji> {
             content.data.filter { it.visibleInPicker == true }.map {
                 UiEmoji(
                     shortcode = it.shortcode.orEmpty(),
-                    url = it.url.orEmpty()
+                    url = it.url.orEmpty(),
                 )
             }
         }
@@ -297,7 +297,7 @@ internal fun DbEmoji.toUi(): List<UiEmoji> {
             content.data.map {
                 UiEmoji(
                     shortcode = it.name,
-                    url = it.url
+                    url = it.url,
                 )
             }
         }

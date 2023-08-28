@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param maintainerName * @param maintainerEmail * @param version * @param name * @param uri * @param description * @param langs * @param tosUrl * @param repositoryUrl * @param feedbackUrl * @param defaultDarkTheme * @param defaultLightTheme * @param disableRegistration * @param cacheRemoteFiles * @param cacheRemoteSensitiveFiles * @param emailRequiredForSignup * @param enableHcaptcha * @param hcaptchaSiteKey * @param enableRecaptcha * @param recaptchaSiteKey * @param enableTurnstile * @param turnstileSiteKey * @param swPublickey * @param mascotImageUrl * @param bannerUrl * @param serverErrorImageUrl * @param infoImageUrl * @param notFoundImageUrl * @param iconUrl * @param maxNoteTextLength * @param ads * @param requireSetup * @param enableEmail * @param enableServiceWorker * @param translatorAvailable * @param proxyAccountName * @param mediaProxy * @param features */
 @Serializable
-
 data class Meta200Response(
 
     @SerialName(value = "maintainerName") val maintainerName: kotlin.String? = null,
@@ -99,6 +98,6 @@ data class Meta200Response(
 
     @SerialName(value = "mediaProxy") val mediaProxy: kotlin.String,
 
-    @SerialName(value = "features") val features: Meta200ResponseFeatures? = null
+    @SerialName(value = "features") val features: Meta200ResponseFeatures? = null,
 
 )

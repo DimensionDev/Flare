@@ -10,5 +10,5 @@ data class DbApplication(
     val host: String,
     val credential_json: String,
     val platform_type: PlatformType,
-    val hasPendingOAuth: Boolean
+    val hasPendingOAuth: Boolean,
 )

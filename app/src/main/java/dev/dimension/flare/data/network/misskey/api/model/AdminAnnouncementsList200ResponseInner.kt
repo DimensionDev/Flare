@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param updatedAt * @param text * @param title * @param imageUrl * @param displayOrder * @param userId * @param reads * @param closeDuration * @param user */
 @Serializable
-
 data class AdminAnnouncementsList200ResponseInner(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -45,6 +44,6 @@ data class AdminAnnouncementsList200ResponseInner(
 
     @SerialName(value = "closeDuration") val closeDuration: kotlin.Double,
 
-    @SerialName(value = "user") val user: UserLite? = null
+    @SerialName(value = "user") val user: UserLite? = null,
 
 )

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param updatedAt * @param title * @param description * @param userId * @param user * @param isSensitive * @param fileIds * @param files * @param tags */
 @Serializable
-
 data class GalleryPost(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -46,6 +45,6 @@ data class GalleryPost(
 
     @SerialName(value = "files") val files: kotlin.collections.List<@Contextual DriveFile>? = null,
 
-    @SerialName(value = "tags") val tags: kotlin.collections.List<kotlin.String>? = null
+    @SerialName(value = "tags") val tags: kotlin.collections.List<kotlin.String>? = null,
 
 )

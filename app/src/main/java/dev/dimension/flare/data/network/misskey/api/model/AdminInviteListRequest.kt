@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param offset * @param type * @param sort */
 @Serializable
-
 data class AdminInviteListRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 30,
@@ -31,7 +30,7 @@ data class AdminInviteListRequest(
 
     @SerialName(value = "type") val type: AdminInviteListRequest.Type? = Type.All,
 
-    @SerialName(value = "sort") val sort: AdminInviteListRequest.Sort? = null
+    @SerialName(value = "sort") val sort: AdminInviteListRequest.Sort? = null,
 
 ) {
 
@@ -51,7 +50,7 @@ data class AdminInviteListRequest(
         Expired("expired"),
 
         @SerialName(value = "all")
-        All("all");
+        All("all"),
     }
 
     /**
@@ -70,6 +69,6 @@ data class AdminInviteListRequest(
         PlusUsedAt("+usedAt"),
 
         @SerialName(value = "-usedAt")
-        MinusUsedAt("-usedAt");
+        MinusUsedAt("-usedAt"),
     }
 }

@@ -13,5 +13,5 @@ data class Source(
     val fields: JsonArray? = null,
 
     @SerialName("follow_requests_count")
-    val followRequestsCount: Long? = null
+    val followRequestsCount: Long? = null,
 )

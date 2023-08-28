@@ -16,7 +16,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 internal fun ktorfit(
     baseUrl: String,
     authorization: Authorization? = null,
-    config: HttpClientConfig<OkHttpConfig>.() -> Unit = {}
+    config: HttpClientConfig<OkHttpConfig>.() -> Unit = {},
 ) = de.jensklingenberg.ktorfit.ktorfit {
     baseUrl(baseUrl)
     httpClient(
@@ -25,17 +25,17 @@ internal fun ktorfit(
                 json(JSON)
             }
             config.invoke(this)
-        }
+        },
     )
     converterFactories(
         FlowConverterFactory(),
-        CallConverterFactory()
+        CallConverterFactory(),
     )
 }
 
 internal fun ktorClient(
     authorization: Authorization? = null,
-    config: HttpClientConfig<OkHttpConfig>.() -> Unit = {}
+    config: HttpClientConfig<OkHttpConfig>.() -> Unit = {},
 ) = HttpClient(OkHttp) {
     if (authorization != null) {
         install(AuthorizationPlugin) {

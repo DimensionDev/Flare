@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param id * @param aliases * @param name * @param category * @param host The local host is represented with `null`. The field exists for compatibility with other API endpoints that return files.
  * @param url */
 @Serializable
-
 data class AdminEmojiList200ResponseInner(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -37,6 +36,6 @@ data class AdminEmojiList200ResponseInner(
     /* The local host is represented with `null`. The field exists for compatibility with other API endpoints that return files. */
     @SerialName(value = "host") val host: kotlin.String? = null,
 
-    @SerialName(value = "url") val url: kotlin.String
+    @SerialName(value = "url") val url: kotlin.String,
 
 )

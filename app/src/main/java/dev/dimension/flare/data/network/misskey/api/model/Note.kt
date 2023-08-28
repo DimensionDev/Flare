@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param text * @param userId * @param user * @param visibility * @param reactionAcceptance * @param reactions * @param renoteCount * @param repliesCount * @param deletedAt * @param cw * @param replyId * @param renoteId * @param reply * @param renote * @param isHidden * @param mentions * @param visibleUserIds * @param fileIds * @param files * @param tags * @param poll * @param channelId * @param channel * @param localOnly * @param uri * @param url * @param myReaction */
 @Serializable
-
 data class Note(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -84,6 +83,6 @@ data class Note(
 
     @SerialName(value = "url") val url: kotlin.String? = null,
 
-    @SerialName(value = "myReaction") val myReaction: kotlin.String? = null
+    @SerialName(value = "myReaction") val myReaction: kotlin.String? = null,
 
 )

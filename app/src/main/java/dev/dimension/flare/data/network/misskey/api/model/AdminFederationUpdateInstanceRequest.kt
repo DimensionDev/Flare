@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,11 +22,10 @@ import kotlinx.serialization.Serializable
  * *
  * @param host * @param isSuspended */
 @Serializable
-
 data class AdminFederationUpdateInstanceRequest(
 
     @SerialName(value = "host") val host: kotlin.String,
 
-    @SerialName(value = "isSuspended") val isSuspended: kotlin.Boolean
+    @SerialName(value = "isSuspended") val isSuspended: kotlin.Boolean,
 
 )

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -21,7 +21,6 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-
 data class NotesSearchByTagRequest(
     val reply: Boolean? = null,
     val renote: Boolean? = null,
@@ -34,5 +33,5 @@ data class NotesSearchByTagRequest(
     /**
      * The outer arrays are chained with OR, the inner arrays are chained with AND.
      */
-    val query: List<List<String>>? = null
+    val query: List<List<String>>? = null,
 )

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,13 +22,12 @@ import kotlinx.serialization.Serializable
  * *
  * @param query * @param limit * @param offset */
 @Serializable
-
 data class HashtagsSearchRequest(
 
     @SerialName(value = "query") val query: kotlin.String,
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 
-    @SerialName(value = "offset") val offset: kotlin.Int? = 0
+    @SerialName(value = "offset") val offset: kotlin.Int? = 0,
 
 )

@@ -10,19 +10,19 @@ import dev.dimension.flare.ui.model.UiUser
 internal fun DbPagingTimelineWithStatus.toUi(): UiStatus {
     return when (val status = status.status.data.content) {
         is StatusContent.Mastodon -> status.data.toUi(
-            accountKey = timeline.accountKey
+            accountKey = timeline.accountKey,
         )
 
         is StatusContent.MastodonNotification -> status.data.toUi(
-            accountKey = timeline.accountKey
+            accountKey = timeline.accountKey,
         )
 
         is StatusContent.Misskey -> status.data.toUi(
-            accountKey = timeline.accountKey
+            accountKey = timeline.accountKey,
         )
 
         is StatusContent.MisskeyNotification -> status.data.toUi(
-            accountKey = timeline.accountKey
+            accountKey = timeline.accountKey,
         )
 
 //        is StatusContent.Bluesky -> status.data.toUi(
@@ -37,18 +37,18 @@ internal fun DbUser.toUi(): UiUser {
         is UserContent.Mastodon -> user.data.toUi(host = userKey.host)
 
         is UserContent.Misskey -> user.data.toUi(
-            accountHost = userKey.host
+            accountHost = userKey.host,
         )
 
         is UserContent.MisskeyLite -> user.data.toUi(
-            accountHost = userKey.host
+            accountHost = userKey.host,
         )
 
         is UserContent.Bluesky -> user.data.toUi(
-            accountHost = userKey.host
+            accountHost = userKey.host,
         )
         is UserContent.BlueskyLite -> user.data.toUi(
-            accountHost = userKey.host
+            accountHost = userKey.host,
         )
     }
 }

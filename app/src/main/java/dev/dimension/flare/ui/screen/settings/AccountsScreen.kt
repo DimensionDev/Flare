@@ -17,14 +17,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.accountDataPresenter
+import dev.dimension.flare.data.repository.app.accountServiceProvider
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
 import dev.dimension.flare.data.repository.app.allAccountsPresenter
 import dev.dimension.flare.data.repository.app.setActiveAccountUseCase
@@ -39,19 +41,20 @@ import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.onSuccess
 import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
+import dev.dimension.flare.ui.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 @Composable
 @Destination
 fun AccountsRoute(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     AccountsScreen(
         onBack = navigator::navigateUp,
         toLogin = {
             navigator.navigate(ServiceSelectRouteDestination)
-        }
+        },
     )
 }
 
@@ -59,7 +62,7 @@ fun AccountsRoute(
 @Composable
 internal fun AccountsScreen(
     onBack: () -> Unit,
-    toLogin: () -> Unit
+    toLogin: () -> Unit,
 ) {
     val state by producePresenter {
         accountsPresenter()
@@ -75,7 +78,7 @@ internal fun AccountsScreen(
                         IconButton(onClick = onBack) {
                             Icon(
                                 Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
                     },
@@ -83,16 +86,16 @@ internal fun AccountsScreen(
                         IconButton(
                             onClick = {
                                 toLogin.invoke()
-                            }
+                            },
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null)
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) {
             LazyColumn(
-                contentPadding = it
+                contentPadding = it,
             ) {
                 when (val accountState = state.accounts) {
                     // TODO: show error
@@ -110,7 +113,7 @@ internal fun AccountsScreen(
                                 activeAccount = state.activeAccount,
                                 onClick = {
                                     state.setActiveAccount(it)
-                                }
+                                },
                             )
                         }
                     }
@@ -125,7 +128,7 @@ private fun AccountItem(
     userState: UiState<UiUser>,
     activeAccount: UiState<UiAccount>,
     onClick: (MicroBlogKey) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     when (userState) {
         // TODO: show error
@@ -152,13 +155,13 @@ private fun AccountItem(
                             selected = it.accountKey == userState.data.userKey,
                             onClick = {
                                 onClick.invoke(userState.data.userKey)
-                            }
+                            },
                         )
                     }
                 },
                 supportingContent = {
                     Text(text = userState.data.handle)
-                }
+                },
             )
         }
     }
@@ -166,7 +169,7 @@ private fun AccountItem(
 
 @Composable
 private fun AccountItemLoadingPlaceholder(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     ListItem(
         headlineContent = {
@@ -178,7 +181,7 @@ private fun AccountItemLoadingPlaceholder(
         },
         supportingContent = {
             Text(text = "Loading...", modifier = Modifier.placeholder(true))
-        }
+        },
     )
 }
 
@@ -189,7 +192,10 @@ private fun accountsPresenter() = run {
     val activeAccount by activeAccountPresenter()
     val user = accounts.map {
         it.map {
-            accountDataPresenter(account = it)
+            val service = accountServiceProvider(account = it)
+            remember(it.accountKey) {
+                service.userById(it.accountKey.id)
+            }.collectAsState().toUi()
         }.toImmutableList()
     }
 

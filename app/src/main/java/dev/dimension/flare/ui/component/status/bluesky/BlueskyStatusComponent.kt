@@ -57,36 +57,36 @@ import kotlinx.coroutines.CoroutineScope
 internal fun BlueskyStatusComponent(
     data: UiStatus.Bluesky,
     event: BlueskyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = Modifier
             .clickable {
                 event.onStatusClick(data)
             }
-            .then(modifier)
+            .then(modifier),
     ) {
         if (data.repostBy != null) {
             StatusRetweetHeaderComponent(
                 icon = Icons.Default.SyncAlt,
                 user = data.repostBy,
-                text = stringResource(id = R.string.mastodon_item_reblogged_status)
+                text = stringResource(id = R.string.mastodon_item_reblogged_status),
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
         StatusHeaderComponent(
             data = data,
-            event = event
+            event = event,
         )
         StatusContentComponent(
             data = data,
-            event = event
+            event = event,
         )
         if (data.medias.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusMediaComponent(
                 data = data.medias,
-                onMediaClick = event::onMediaClick
+                onMediaClick = event::onMediaClick,
             )
         }
         if (data.quote != null) {
@@ -94,12 +94,12 @@ internal fun BlueskyStatusComponent(
             UiStatusQuoted(
                 status = data.quote,
                 onMediaClick = event::onMediaClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         StatusFooterComponent(
             data = data,
-            event = event
+            event = event,
         )
     }
 }
@@ -108,18 +108,18 @@ internal fun BlueskyStatusComponent(
 private fun StatusHeaderComponent(
     data: UiStatus.Bluesky,
     event: BlueskyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     CommonStatusHeaderComponent(
         data = data.user,
         onUserClick = { event.onUserClick(it) },
-        modifier = modifier
+        modifier = modifier,
     ) {
         Text(
             text = data.humanizedTime,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
-                .alpha(MediumAlpha)
+                .alpha(MediumAlpha),
         )
     }
 }
@@ -128,16 +128,16 @@ private fun StatusHeaderComponent(
 private fun StatusContentComponent(
     data: UiStatus.Bluesky,
     event: BlueskyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         if (data.content.isNotEmpty() && data.content.isNotBlank()) {
             HtmlText(
                 element = data.contentToken,
                 layoutDirection = data.contentDirection,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
@@ -147,7 +147,7 @@ private fun StatusContentComponent(
 private fun StatusFooterComponent(
     data: UiStatus.Bluesky,
     event: BlueskyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var showRenoteMenu by remember {
         mutableStateOf(false)
@@ -156,10 +156,10 @@ private fun StatusFooterComponent(
         modifier = modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         CompositionLocalProvider(
-            LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha)
+            LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
         ) {
             StatusActionButton(
                 icon = Icons.Default.Reply,
@@ -168,7 +168,7 @@ private fun StatusFooterComponent(
                     .weight(1f),
                 onClicked = {
                     event.onReplyClick(data)
-                }
+                },
             )
             StatusActionButton(
                 icon = Icons.Default.SyncAlt,
@@ -186,44 +186,44 @@ private fun StatusFooterComponent(
                 content = {
                     DropdownMenu(
                         expanded = showRenoteMenu,
-                        onDismissRequest = { showRenoteMenu = false }
+                        onDismissRequest = { showRenoteMenu = false },
                     ) {
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = stringResource(id = R.string.blusky_item_action_repost)
+                                    text = stringResource(id = R.string.blusky_item_action_repost),
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.SyncAlt,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             },
                             onClick = {
                                 showRenoteMenu = false
                                 event.onReblogClick(data)
-                            }
+                            },
                         )
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = stringResource(id = R.string.blusky_item_action_quote)
+                                    text = stringResource(id = R.string.blusky_item_action_quote),
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.FormatQuote,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             },
                             onClick = {
                                 showRenoteMenu = false
                                 event.onQuoteClick(data)
-                            }
+                            },
                         )
                     }
-                }
+                },
             )
             StatusActionButton(
                 icon = if (data.reaction.liked) {
@@ -241,14 +241,14 @@ private fun StatusFooterComponent(
                     Color.Red
                 } else {
                     LocalContentColor.current
-                }
+                },
             )
             StatusActionButton(
                 icon = Icons.Default.MoreHoriz,
                 text = null,
                 onClicked = {
                     event.onMoreClick(data)
-                }
+                },
             )
         }
     }
@@ -270,7 +270,7 @@ internal interface BlueskyStatusEvent {
 @Binds(to = BlueskyStatusEvent::class)
 internal class DefaultBlueskyStatusEvent(
     private val context: Context,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
 ) : BlueskyStatusEvent {
     override fun onStatusClick(data: UiStatus.Bluesky) {
         val intent =
@@ -278,8 +278,8 @@ internal class DefaultBlueskyStatusEvent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
                     dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
-                        .deeplink()
-                )
+                        .deeplink(),
+                ),
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
@@ -299,8 +299,8 @@ internal class DefaultBlueskyStatusEvent(
                     Intent.ACTION_VIEW,
                     Uri.parse(
                         dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(uiMedia.url)
-                            .deeplink()
-                    )
+                            .deeplink(),
+                    ),
                 )
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
@@ -313,8 +313,8 @@ internal class DefaultBlueskyStatusEvent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
                     dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
-                        .deeplink()
-                )
+                        .deeplink(),
+                ),
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
@@ -335,8 +335,8 @@ internal class DefaultBlueskyStatusEvent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
                     dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
-                        .deeplink()
-                )
+                        .deeplink(),
+                ),
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)

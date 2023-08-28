@@ -12,5 +12,5 @@ data class Meta(
     val height: Long? = null,
     val aspect: Double? = null,
     val original: Original? = null,
-    val small: Small? = null
+    val small: Small? = null,
 )

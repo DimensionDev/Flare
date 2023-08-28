@@ -13,7 +13,7 @@ data class Poll(
     val expiresAt: Instant? = null,
 
     @SerialName("multiple")
-    val multiple: Boolean
+    val multiple: Boolean,
 ) {
 
     @Serializable
@@ -25,6 +25,6 @@ data class Poll(
         val votes: Int,
 
         @SerialName("isVoted")
-        val isVoted: Boolean = false
+        val isVoted: Boolean = false,
     )
 }

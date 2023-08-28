@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param tag * @param sort * @param limit * @param state * @param origin */
 @Serializable
-
 data class HashtagsUsersRequest(
 
     @SerialName(value = "tag") val tag: kotlin.String,
@@ -33,7 +32,7 @@ data class HashtagsUsersRequest(
 
     @SerialName(value = "state") val state: HashtagsUsersRequest.State? = State.All,
 
-    @SerialName(value = "origin") val origin: HashtagsUsersRequest.Origin? = Origin.Local
+    @SerialName(value = "origin") val origin: HashtagsUsersRequest.Origin? = Origin.Local,
 
 ) {
 
@@ -59,7 +58,7 @@ data class HashtagsUsersRequest(
         PlusUpdatedAt("+updatedAt"),
 
         @SerialName(value = "-updatedAt")
-        MinusUpdatedAt("-updatedAt");
+        MinusUpdatedAt("-updatedAt"),
     }
 
     /**
@@ -72,7 +71,7 @@ data class HashtagsUsersRequest(
         All("all"),
 
         @SerialName(value = "alive")
-        Alive("alive");
+        Alive("alive"),
     }
 
     /**
@@ -88,6 +87,6 @@ data class HashtagsUsersRequest(
         Local("local"),
 
         @SerialName(value = "remote")
-        Remote("remote");
+        Remote("remote"),
     }
 }

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param cacheRemoteFiles * @param cacheRemoteSensitiveFiles * @param emailRequiredForSignup * @param enableHcaptcha * @param hcaptchaSiteKey * @param enableRecaptcha * @param recaptchaSiteKey * @param enableTurnstile * @param turnstileSiteKey * @param swPublickey * @param mascotImageUrl * @param bannerUrl * @param serverErrorImageUrl * @param infoImageUrl * @param notFoundImageUrl * @param iconUrl * @param enableEmail * @param enableServiceWorker * @param translatorAvailable * @param preservedUsernames * @param enableChartsForRemoteUser * @param enableChartsForFederatedInstances * @param enableServerMachineStats * @param enableIdenticonGeneration * @param policies * @param userStarForReactionFallback * @param pinnedUsers * @param hiddenTags * @param blockedHosts * @param sensitiveWords * @param hcaptchaSecretKey * @param recaptchaSecretKey * @param turnstileSecretKey * @param sensitiveMediaDetection * @param sensitiveMediaDetectionSensitivity * @param setSensitiveFlagAutomatically * @param enableSensitiveMediaDetectionForVideos * @param proxyAccountId * @param summaryProxy * @param email * @param smtpSecure * @param smtpHost * @param smtpPort * @param smtpUser * @param smtpPass * @param swPrivateKey * @param useObjectStorage * @param objectStorageBaseUrl * @param objectStorageBucket * @param objectStoragePrefix * @param objectStorageEndpoint * @param objectStorageRegion * @param objectStoragePort * @param objectStorageAccessKey * @param objectStorageSecretKey * @param objectStorageUseSSL * @param objectStorageUseProxy * @param objectStorageSetPublicRead * @param enableIpLogging * @param enableActiveEmailValidation */
 @Serializable
-
 data class AdminMeta200Response(
 
     @SerialName(value = "cacheRemoteFiles") val cacheRemoteFiles: kotlin.Boolean,
@@ -143,6 +142,6 @@ data class AdminMeta200Response(
 
     @SerialName(value = "enableIpLogging") val enableIpLogging: kotlin.Boolean? = null,
 
-    @SerialName(value = "enableActiveEmailValidation") val enableActiveEmailValidation: kotlin.Boolean? = null
+    @SerialName(value = "enableActiveEmailValidation") val enableActiveEmailValidation: kotlin.Boolean? = null,
 
 )

@@ -17,7 +17,7 @@ private fun Int.withLeadingZero(): String {
 
 fun Instant.humanize(
     compareTo: Instant = Clock.System.now(),
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): String {
     val time = toLocalDateTime(timeZone)
     val diff = compareTo - this

@@ -4,10 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import dev.dimension.flare.common.CacheData
+import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.CacheableState
 import dev.dimension.flare.common.LoadState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -63,6 +66,20 @@ internal fun <T> CacheableState<T>.toUi(): UiState<T> {
             is LoadState.Error -> UiState.Error(state.error)
             LoadState.Loading -> UiState.Loading()
             LoadState.Success -> UiState.Error(IllegalStateException("Data is null"))
+        }
+    }
+}
+
+internal fun <T> CacheData<T>.toUi(): Flow<UiState<T>> {
+    return combine(data, refreshState) { data, refresh ->
+        if (data is CacheState.Success) {
+            UiState.Success(data.data)
+        } else {
+            when (refresh) {
+                is LoadState.Error -> UiState.Error(refresh.error)
+                LoadState.Loading -> UiState.Loading()
+                LoadState.Success -> UiState.Error(IllegalStateException("Data is null"))
+            }
         }
     }
 }

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param sinceId * @param untilId * @param state * @param reporterOrigin * @param targetUserOrigin * @param forwarded */
 @Serializable
-
 data class AdminAbuseUserReportsRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
@@ -37,7 +36,7 @@ data class AdminAbuseUserReportsRequest(
 
     @SerialName(value = "targetUserOrigin") val targetUserOrigin: AdminAbuseUserReportsRequest.TargetUserOrigin? = TargetUserOrigin.Combined,
 
-    @SerialName(value = "forwarded") val forwarded: kotlin.Boolean? = false
+    @SerialName(value = "forwarded") val forwarded: kotlin.Boolean? = false,
 
 ) {
 
@@ -54,7 +53,7 @@ data class AdminAbuseUserReportsRequest(
         Local("local"),
 
         @SerialName(value = "remote")
-        Remote("remote");
+        Remote("remote"),
     }
 
     /**
@@ -70,6 +69,6 @@ data class AdminAbuseUserReportsRequest(
         Local("local"),
 
         @SerialName(value = "remote")
-        Remote("remote");
+        Remote("remote"),
     }
 }

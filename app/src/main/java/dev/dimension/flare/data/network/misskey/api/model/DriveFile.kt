@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param name * @param type * @param md5 * @param propertySize * @param isSensitive * @param blurhash * @param properties * @param url * @param thumbnailUrl * @param comment * @param folderId * @param userId * @param folder * @param user */
 @Serializable
-
 data class DriveFile(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -55,6 +54,6 @@ data class DriveFile(
 
     @SerialName(value = "folder") val folder: DriveFolder? = null,
 
-    @SerialName(value = "user") val user: UserLite? = null
+    @SerialName(value = "user") val user: UserLite? = null,
 
 )

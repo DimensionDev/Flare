@@ -28,11 +28,11 @@ internal fun CommonStatusHeaderComponent(
     data: UiUser,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
-    trailing: @Composable RowScope.() -> Unit = {}
+    trailing: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarComponent(
             data = data.avatarUrl,
@@ -40,22 +40,22 @@ internal fun CommonStatusHeaderComponent(
                 .clip(CircleShape)
                 .clickable {
                     onUserClick(data.userKey)
-                }
+                },
         )
         Spacer(modifier = Modifier.width(8.dp))
         Column(
             modifier = Modifier
-                .weight(1f)
+                .weight(1f),
         ) {
             HtmlText(
                 element = data.nameElement,
                 modifier = Modifier
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null
+                        indication = null,
                     ) {
                         onUserClick(data.userKey)
-                    }
+                    },
             )
             Text(
                 text = data.handle,
@@ -64,10 +64,10 @@ internal fun CommonStatusHeaderComponent(
                     .alpha(MediumAlpha)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null
+                        indication = null,
                     ) {
                         onUserClick(data.userKey)
-                    }
+                    },
             )
         }
         trailing.invoke(this)

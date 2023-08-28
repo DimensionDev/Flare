@@ -12,7 +12,7 @@ import kotlin.math.sqrt
 fun AdaptiveGrid(
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    spacing: Dp = 4.dp
+    spacing: Dp = 4.dp,
 ) {
     Layout(
         modifier = modifier,
@@ -24,12 +24,12 @@ fun AdaptiveGrid(
                 }
                 layout(
                     width = placeables[0].width,
-                    height = placeables[0].height
+                    height = placeables[0].height,
                 ) {
                     placeables.forEach { placeable ->
                         placeable.place(
                             x = 0,
-                            y = 0
+                            y = 0,
                         )
                     }
                 }
@@ -42,21 +42,21 @@ fun AdaptiveGrid(
                     minWidth = itemSize,
                     maxWidth = itemSize,
                     minHeight = itemSize,
-                    maxHeight = itemSize
+                    maxHeight = itemSize,
                 )
                 val placeables = measurables.map {
                     it.measure(itemConstraints)
                 }
                 layout(
                     width = constraints.maxWidth,
-                    height = (rows * itemSize).toInt()
+                    height = (rows * itemSize).toInt(),
                 ) {
                     var row = 0
                     var column = 0
                     placeables.forEach { placeable ->
                         placeable.place(
                             x = column * itemSize + column * space,
-                            y = row * itemSize + row * space
+                            y = row * itemSize + row * space,
                         )
                         column++
                         if (column == columns) {
@@ -66,6 +66,6 @@ fun AdaptiveGrid(
                     }
                 }
             }
-        }
+        },
     )
 }

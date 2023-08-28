@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param sinceId * @param untilId * @param markAsRead * @param includeTypes * @param excludeTypes */
 @Serializable
-
 data class INotificationsRequest(
 
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
@@ -35,7 +34,7 @@ data class INotificationsRequest(
 
     @SerialName(value = "includeTypes") val includeTypes: kotlin.collections.List<INotificationsRequest.IncludeTypes>? = null,
 
-    @SerialName(value = "excludeTypes") val excludeTypes: kotlin.collections.List<INotificationsRequest.ExcludeTypes>? = null
+    @SerialName(value = "excludeTypes") val excludeTypes: kotlin.collections.List<INotificationsRequest.ExcludeTypes>? = null,
 
 ) {
 
@@ -82,7 +81,7 @@ data class INotificationsRequest(
         PollVote("pollVote"),
 
         @SerialName(value = "groupInvited")
-        GroupInvited("groupInvited");
+        GroupInvited("groupInvited"),
     }
 
     /**
@@ -128,6 +127,6 @@ data class INotificationsRequest(
         PollVote("pollVote"),
 
         @SerialName(value = "groupInvited")
-        GroupInvited("groupInvited");
+        GroupInvited("groupInvited"),
     }
 }

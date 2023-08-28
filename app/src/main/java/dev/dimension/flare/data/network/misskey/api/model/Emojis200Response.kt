@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,9 +23,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param emojis */
 @Serializable
-
 data class Emojis200Response(
 
-    @SerialName(value = "emojis") val emojis: kotlin.collections.List<@Contextual EmojiSimple>
+    @SerialName(value = "emojis") val emojis: kotlin.collections.List<@Contextual EmojiSimple>,
 
 )

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -26,7 +26,6 @@ import kotlinx.serialization.Serializable
  * @param id An error ID. This ID is static.
  */
 @Serializable
-
 data class ErrorError(
 
     /* An error code. Unique within the endpoint. */
@@ -36,6 +35,6 @@ data class ErrorError(
     @SerialName(value = "message") val message: kotlin.String,
 
     /* An error ID. This ID is static. */
-    @SerialName(value = "id") val id: kotlin.String
+    @SerialName(value = "id") val id: kotlin.String,
 
 )

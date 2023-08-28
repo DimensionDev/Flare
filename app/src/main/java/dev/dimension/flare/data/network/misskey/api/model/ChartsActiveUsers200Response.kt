@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param readWrite * @param read * @param write * @param registeredWithinWeek * @param registeredWithinMonth * @param registeredWithinYear * @param registeredOutsideWeek * @param registeredOutsideMonth * @param registeredOutsideYear */
 @Serializable
-
 data class ChartsActiveUsers200Response(
 
     @SerialName(value = "readWrite") val readWrite: kotlin.collections.List<kotlin.Double>,
@@ -41,6 +40,6 @@ data class ChartsActiveUsers200Response(
 
     @SerialName(value = "registeredOutsideMonth") val registeredOutsideMonth: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "registeredOutsideYear") val registeredOutsideYear: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "registeredOutsideYear") val registeredOutsideYear: kotlin.collections.List<kotlin.Double>,
 
 )

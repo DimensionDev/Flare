@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,11 +22,10 @@ import kotlinx.serialization.Serializable
  * *
  * @param count * @param expiresAt */
 @Serializable
-
 data class AdminInviteCreateRequest(
 
     @SerialName(value = "count") val count: kotlin.Int? = 1,
 
-    @SerialName(value = "expiresAt") val expiresAt: kotlin.String? = null
+    @SerialName(value = "expiresAt") val expiresAt: kotlin.String? = null,
 
 )

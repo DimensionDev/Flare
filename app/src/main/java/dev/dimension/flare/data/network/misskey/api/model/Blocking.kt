@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param blockeeId * @param blockee */
 @Serializable
-
 data class Blocking(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -31,6 +30,6 @@ data class Blocking(
 
     @SerialName(value = "blockeeId") val blockeeId: kotlin.String,
 
-    @SerialName(value = "blockee") val blockee: UserDetailed
+    @SerialName(value = "blockee") val blockee: UserDetailed,
 
 )

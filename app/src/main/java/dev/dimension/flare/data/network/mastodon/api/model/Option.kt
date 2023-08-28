@@ -8,5 +8,5 @@ data class Option(
     val title: String? = null,
 
     @SerialName("votes_count")
-    val votesCount: Long? = null
+    val votesCount: Long? = null,
 )

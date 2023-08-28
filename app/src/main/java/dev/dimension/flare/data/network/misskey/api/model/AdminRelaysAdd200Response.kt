@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,14 +22,13 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param inbox * @param status */
 @Serializable
-
 data class AdminRelaysAdd200Response(
 
     @SerialName(value = "id") val id: kotlin.String,
 
     @SerialName(value = "inbox") val inbox: kotlin.String,
 
-    @SerialName(value = "status") val status: AdminRelaysAdd200Response.Status = Status.Requesting
+    @SerialName(value = "status") val status: AdminRelaysAdd200Response.Status = Status.Requesting,
 
 ) {
 
@@ -46,6 +45,6 @@ data class AdminRelaysAdd200Response(
         Accepted("accepted"),
 
         @SerialName(value = "rejected")
-        Rejected("rejected");
+        Rejected("rejected"),
     }
 }

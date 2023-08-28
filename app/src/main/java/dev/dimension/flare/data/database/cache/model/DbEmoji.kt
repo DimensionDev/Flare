@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 data class DbEmoji(
     @PrimaryKey
     val host: String,
-    val content: EmojiContent
+    val content: EmojiContent,
 )
 
 @Serializable

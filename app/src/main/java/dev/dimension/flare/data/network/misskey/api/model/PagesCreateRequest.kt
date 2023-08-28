@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param title * @param name * @param content * @param variables * @param script * @param summary * @param eyeCatchingImageId * @param font * @param alignCenter * @param hideTitleWhenPinned */
 @Serializable
-
 data class PagesCreateRequest(
 
     @SerialName(value = "title") val title: kotlin.String,
@@ -43,7 +42,7 @@ data class PagesCreateRequest(
 
     @SerialName(value = "alignCenter") val alignCenter: kotlin.Boolean? = false,
 
-    @SerialName(value = "hideTitleWhenPinned") val hideTitleWhenPinned: kotlin.Boolean? = false
+    @SerialName(value = "hideTitleWhenPinned") val hideTitleWhenPinned: kotlin.Boolean? = false,
 
 ) {
 
@@ -57,6 +56,6 @@ data class PagesCreateRequest(
         Serif("serif"),
 
         @SerialName(value = "sans-serif")
-        SansMinusSerif("sans-serif");
+        SansMinusSerif("sans-serif"),
     }
 }

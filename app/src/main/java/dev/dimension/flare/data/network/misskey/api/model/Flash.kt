@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param updatedAt * @param title * @param summary * @param script * @param userId * @param user * @param likedCount * @param isLiked */
 @Serializable
-
 data class Flash(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -43,6 +42,6 @@ data class Flash(
 
     @SerialName(value = "likedCount") val likedCount: kotlin.Double? = null,
 
-    @SerialName(value = "isLiked") val isLiked: kotlin.Boolean? = null
+    @SerialName(value = "isLiked") val isLiked: kotlin.Boolean? = null,
 
 )

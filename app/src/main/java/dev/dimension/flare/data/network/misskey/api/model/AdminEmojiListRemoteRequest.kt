@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param query * @param host Use `null` to represent the local host.
  * @param limit * @param sinceId * @param untilId */
 @Serializable
-
 data class AdminEmojiListRemoteRequest(
 
     @SerialName(value = "query") val query: kotlin.String? = null,
@@ -35,6 +34,6 @@ data class AdminEmojiListRemoteRequest(
 
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
 
-    @SerialName(value = "untilId") val untilId: kotlin.String? = null
+    @SerialName(value = "untilId") val untilId: kotlin.String? = null,
 
 )

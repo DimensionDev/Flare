@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param localFollowingsTotal * @param localFollowingsInc * @param localFollowingsDec * @param localFollowersTotal * @param localFollowersInc * @param localFollowersDec * @param remoteFollowingsTotal * @param remoteFollowingsInc * @param remoteFollowingsDec * @param remoteFollowersTotal * @param remoteFollowersInc * @param remoteFollowersDec */
 @Serializable
-
 data class ChartsUserFollowing200Response(
 
     @SerialName(value = "local.followings.total") val localFollowingsTotal: kotlin.collections.List<kotlin.Double>,
@@ -47,6 +46,6 @@ data class ChartsUserFollowing200Response(
 
     @SerialName(value = "remote.followers.inc") val remoteFollowersInc: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "remote.followers.dec") val remoteFollowersDec: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "remote.followers.dec") val remoteFollowersDec: kotlin.collections.List<kotlin.Double>,
 
 )

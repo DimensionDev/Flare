@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param emojiId */
 @Serializable
-
 data class AdminEmojiCopyRequest(
 
-    @SerialName(value = "emojiId") val emojiId: kotlin.String
+    @SerialName(value = "emojiId") val emojiId: kotlin.String,
 
 )

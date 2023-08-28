@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param notesCount * @param originalNotesCount * @param usersCount * @param originalUsersCount * @param instances * @param driveUsageLocal * @param driveUsageRemote */
 @Serializable
-
 data class Stats200Response(
 
     @SerialName(value = "notesCount") val notesCount: kotlin.Double,
@@ -37,6 +36,6 @@ data class Stats200Response(
 
     @SerialName(value = "driveUsageLocal") val driveUsageLocal: kotlin.Double,
 
-    @SerialName(value = "driveUsageRemote") val driveUsageRemote: kotlin.Double
+    @SerialName(value = "driveUsageRemote") val driveUsageRemote: kotlin.Double,
 
 )

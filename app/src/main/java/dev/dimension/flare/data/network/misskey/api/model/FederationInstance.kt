@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param firstRetrievedAt * @param host * @param usersCount * @param notesCount * @param followingCount * @param followersCount * @param isNotResponding * @param isSuspended * @param isBlocked * @param softwareName * @param softwareVersion * @param openRegistrations * @param name * @param description * @param maintainerName * @param maintainerEmail * @param iconUrl * @param faviconUrl * @param themeColor * @param infoUpdatedAt */
 @Serializable
-
 data class FederationInstance(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -65,6 +64,6 @@ data class FederationInstance(
 
     @SerialName(value = "themeColor") val themeColor: kotlin.String? = null,
 
-    @SerialName(value = "infoUpdatedAt") val infoUpdatedAt: kotlin.String?
+    @SerialName(value = "infoUpdatedAt") val infoUpdatedAt: kotlin.String?,
 
 )

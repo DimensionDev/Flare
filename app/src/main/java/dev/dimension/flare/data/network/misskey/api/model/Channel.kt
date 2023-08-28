@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param lastNotedAt * @param name * @param description * @param bannerUrl * @param isArchived * @param notesCount * @param usersCount * @param userId * @param pinnedNoteIds * @param color * @param isFollowing * @param isFavorited */
 @Serializable
-
 data class Channel(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -51,6 +50,6 @@ data class Channel(
 
     @SerialName(value = "isFollowing") val isFollowing: kotlin.Boolean? = null,
 
-    @SerialName(value = "isFavorited") val isFavorited: kotlin.Boolean? = null
+    @SerialName(value = "isFavorited") val isFavorited: kotlin.Boolean? = null,
 
 )

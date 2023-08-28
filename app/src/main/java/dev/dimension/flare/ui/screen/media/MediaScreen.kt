@@ -22,36 +22,36 @@ import dev.dimension.flare.ui.theme.FlareTheme
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
-        )
-    ]
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
 )
 fun MediaRoute(
-    uri: String
+    uri: String,
 ) {
     MediaScreen(
-        uri = uri
+        uri = uri,
     )
 }
 
 @Composable
 internal fun MediaScreen(
-    uri: String
+    uri: String,
 ) {
     FlareTheme(
-        darkTheme = true
+        darkTheme = true,
     ) {
         Scaffold {
             Zoomable(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)
+                    .padding(it),
             ) {
                 val painter = rememberAsyncImagePainter(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(uri)
                         .size(Size.ORIGINAL)
-                        .build()
+                        .build(),
                 )
                 if (painter.state is AsyncImagePainter.State.Success) {
                     val size = painter.intrinsicSize
@@ -60,7 +60,7 @@ internal fun MediaScreen(
                         contentDescription = null,
                         modifier = Modifier
                             .aspectRatio(size.width / size.height)
-                            .fillMaxSize()
+                            .fillMaxSize(),
                     )
                 }
             }

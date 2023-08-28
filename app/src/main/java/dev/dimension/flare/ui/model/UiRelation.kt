@@ -7,7 +7,7 @@ sealed interface UiRelation {
         val blocking: Boolean,
         val muting: Boolean,
         val requested: Boolean,
-        val domainBlocking: Boolean
+        val domainBlocking: Boolean,
     ) : UiRelation
 
     data class Misskey(
@@ -17,14 +17,14 @@ sealed interface UiRelation {
         val blocked: Boolean,
         val muted: Boolean,
         val hasPendingFollowRequestFromYou: Boolean,
-        val hasPendingFollowRequestToYou: Boolean
+        val hasPendingFollowRequestToYou: Boolean,
     ) : UiRelation
 
     data class Bluesky(
         val following: String?,
         val followedBy: String?,
         val blocked: Boolean,
-        val muted: Boolean
+        val muted: Boolean,
     ) : UiRelation {
         val isFans = followedBy.isNullOrEmpty().not()
         val isFollowing = following.isNullOrEmpty().not()

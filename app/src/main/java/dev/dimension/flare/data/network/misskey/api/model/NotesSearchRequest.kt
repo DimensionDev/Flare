@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param query * @param sinceId * @param untilId * @param limit * @param offset * @param host The local host is represented with `.`.
  * @param userId * @param channelId */
 @Serializable
-
 data class NotesSearchRequest(
 
     @SerialName(value = "query") val query: kotlin.String,
@@ -41,6 +40,6 @@ data class NotesSearchRequest(
 
     @SerialName(value = "userId") val userId: kotlin.String? = null,
 
-    @SerialName(value = "channelId") val channelId: kotlin.String? = null
+    @SerialName(value = "channelId") val channelId: kotlin.String? = null,
 
 )

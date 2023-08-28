@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param tag */
 @Serializable
-
 data class HashtagsShowRequest(
 
-    @SerialName(value = "tag") val tag: kotlin.String
+    @SerialName(value = "tag") val tag: kotlin.String,
 
 )

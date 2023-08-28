@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param title * @param summary * @param script * @param permissions */
 @Serializable
-
 data class FlashCreateRequest(
 
     @SerialName(value = "title") val title: kotlin.String,
@@ -31,6 +30,6 @@ data class FlashCreateRequest(
 
     @SerialName(value = "script") val script: kotlin.String,
 
-    @SerialName(value = "permissions") val permissions: kotlin.collections.List<kotlin.String>
+    @SerialName(value = "permissions") val permissions: kotlin.collections.List<kotlin.String>,
 
 )

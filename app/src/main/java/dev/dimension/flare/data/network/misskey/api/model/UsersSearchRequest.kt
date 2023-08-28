@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param query * @param offset * @param limit * @param origin * @param detail */
 @Serializable
-
 data class UsersSearchRequest(
 
     @SerialName(value = "query") val query: kotlin.String,
@@ -33,7 +32,7 @@ data class UsersSearchRequest(
 
     @SerialName(value = "origin") val origin: UsersSearchRequest.Origin? = Origin.Combined,
 
-    @SerialName(value = "detail") val detail: kotlin.Boolean? = true
+    @SerialName(value = "detail") val detail: kotlin.Boolean? = true,
 
 ) {
 
@@ -50,6 +49,6 @@ data class UsersSearchRequest(
         Remote("remote"),
 
         @SerialName(value = "combined")
-        Combined("combined");
+        Combined("combined"),
     }
 }

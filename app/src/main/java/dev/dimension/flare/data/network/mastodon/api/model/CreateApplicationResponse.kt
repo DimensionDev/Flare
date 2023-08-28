@@ -19,5 +19,5 @@ data class CreateApplicationResponse(
     val clientSecret: String,
 
     @SerialName("vapid_key")
-    val vapidKey: String? = null
+    val vapidKey: String? = null,
 )

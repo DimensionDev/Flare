@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param `interface` */
 @Serializable
-
 data class AdminServerInfo200ResponseNet(
 
-    @SerialName(value = "interface") val `interface`: kotlin.String
+    @SerialName(value = "interface") val `interface`: kotlin.String,
 
 )

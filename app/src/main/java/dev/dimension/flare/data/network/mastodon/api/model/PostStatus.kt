@@ -23,5 +23,5 @@ data class PostStatus(
     @SerialName("scheduled_at")
     val scheduledAt: String? = null,
     @SerialName("language")
-    val language: String? = null
+    val language: String? = null,
 )

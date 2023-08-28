@@ -105,13 +105,14 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datasource.mastodon.statusOnlyDataSource
+import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.mastodon.MastodonService
+import dev.dimension.flare.data.datasource.misskey.MisskeyService
 import dev.dimension.flare.data.repository.ComposeData
 import dev.dimension.flare.data.repository.ComposeUseCase
 import dev.dimension.flare.data.repository.app.UiAccount
+import dev.dimension.flare.data.repository.app.accountServiceProvider
 import dev.dimension.flare.data.repository.app.activeAccountPresenter
-import dev.dimension.flare.data.repository.cache.mastodonEmojiProvider
-import dev.dimension.flare.data.repository.cache.misskeyEmojiProvider
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
@@ -148,77 +149,77 @@ fun ComposeScreenPreview() {
 @Destination
 @Composable
 fun ComposeRoute(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
-        }
+        },
     )
 }
 
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
-        )
-    ]
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
 )
 @Composable
 fun ReplyRoute(
     navigator: DestinationsNavigator,
-    replyTo: MicroBlogKey
+    replyTo: MicroBlogKey,
 ) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
         },
-        status = ComposeStatus.Reply(replyTo)
+        status = ComposeStatus.Reply(replyTo),
     )
 }
 
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
-        )
-    ]
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
 )
 @Composable
 fun Quote(
     navigator: DestinationsNavigator,
-    quoted: MicroBlogKey
+    quoted: MicroBlogKey,
 ) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
         },
-        status = ComposeStatus.Quote(quoted)
+        status = ComposeStatus.Quote(quoted),
     )
 }
 
 object ComposeTransitions : DestinationStyle.Animated {
     override fun AnimatedContentTransitionScope<NavBackStackEntry>.enterTransition(): EnterTransition? {
         return slideIntoContainer(
-            AnimatedContentTransitionScope.SlideDirection.Up
+            AnimatedContentTransitionScope.SlideDirection.Up,
         ) + fadeIn()
     }
 
     override fun AnimatedContentTransitionScope<NavBackStackEntry>.exitTransition(): ExitTransition? {
         return slideOutOfContainer(
-            AnimatedContentTransitionScope.SlideDirection.Up
+            AnimatedContentTransitionScope.SlideDirection.Up,
         ) + fadeOut()
     }
 
     override fun AnimatedContentTransitionScope<NavBackStackEntry>.popEnterTransition(): EnterTransition? {
         return slideIntoContainer(
-            AnimatedContentTransitionScope.SlideDirection.Down
+            AnimatedContentTransitionScope.SlideDirection.Down,
         ) + fadeIn()
     }
 
     override fun AnimatedContentTransitionScope<NavBackStackEntry>.popExitTransition(): ExitTransition? {
         return slideOutOfContainer(
-            AnimatedContentTransitionScope.SlideDirection.Down
+            AnimatedContentTransitionScope.SlideDirection.Down,
         ) + fadeOut()
     }
 }
@@ -227,11 +228,11 @@ private sealed interface ComposeStatus {
     val statusKey: MicroBlogKey
 
     data class Quote(
-        override val statusKey: MicroBlogKey
+        override val statusKey: MicroBlogKey,
     ) : ComposeStatus
 
     data class Reply(
-        override val statusKey: MicroBlogKey
+        override val statusKey: MicroBlogKey,
     ) : ComposeStatus
 }
 
@@ -240,13 +241,13 @@ private sealed interface ComposeStatus {
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
     ExperimentalLayoutApi::class,
-    ExperimentalPermissionsApi::class
+    ExperimentalPermissionsApi::class,
 )
 @Composable
 private fun ComposeScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    status: ComposeStatus? = null
+    status: ComposeStatus? = null,
 ) {
     val state by producePresenter {
         composePresenter(status)
@@ -256,7 +257,7 @@ private fun ComposeScreen(
         contract = ActivityResultContracts.PickMultipleVisualMedia(4),
         onResult = { uris ->
             state.mediaState.addMedia(uris)
-        }
+        },
     )
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
@@ -280,7 +281,7 @@ private fun ComposeScreen(
                 state.send()
                 onBack.invoke()
             }
-        }
+        },
     )
 
     FlareTheme {
@@ -295,7 +296,7 @@ private fun ComposeScreen(
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
                     },
@@ -309,35 +310,35 @@ private fun ComposeScreen(
                                     permissionState.launchPermissionRequest()
                                 }
                             },
-                            enabled = state.canSend
+                            enabled = state.canSend,
                         ) {
                             Icon(imageVector = Icons.Default.Send, contentDescription = null)
                         }
-                    }
+                    },
                 )
             },
             bottomBar = {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    tonalElevation = 3.dp
+                    tonalElevation = 3.dp,
                 ) {
                     Column(
                         modifier = Modifier
-                            .navigationBarsPadding()
+                            .navigationBarsPadding(),
                     ) {
                         Row(
-                            modifier = Modifier
+                            modifier = Modifier,
                         ) {
                             IconButton(
                                 onClick = {
                                     photoPickerLauncher.launch(
                                         PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.ImageAndVideo
-                                        )
+                                            ActivityResultContracts.PickVisualMedia.ImageAndVideo,
+                                        ),
                                     )
                                 },
-                                enabled = state.canMedia
+                                enabled = state.canMedia,
                             ) {
                                 Icon(imageVector = Icons.Default.Image, contentDescription = null)
                             }
@@ -346,22 +347,22 @@ private fun ComposeScreen(
                                     onClick = {
                                         it.togglePoll()
                                     },
-                                    enabled = state.canPoll
+                                    enabled = state.canPoll,
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Poll,
-                                        contentDescription = null
+                                        contentDescription = null,
                                     )
                                 }
                             }
                             state.visibilityState.onSuccess { visibilityState ->
                                 when (visibilityState) {
                                     is MastodonVisibilityState -> MastodonVisibilityContent(
-                                        visibilityState
+                                        visibilityState,
                                     )
 
                                     is MisskeyVisibilityState -> MisskeyVisibilityContent(
-                                        visibilityState
+                                        visibilityState,
                                     )
                                 }
                             }
@@ -369,11 +370,11 @@ private fun ComposeScreen(
                                 IconButton(
                                     onClick = {
                                         it.toggle()
-                                    }
+                                    },
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Warning,
-                                        contentDescription = null
+                                        contentDescription = null,
                                     )
                                 }
                             }
@@ -386,11 +387,11 @@ private fun ComposeScreen(
                                         } else {
                                             keyboardController?.show()
                                         }
-                                    }
+                                    },
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.EmojiEmotions,
-                                        contentDescription = null
+                                        contentDescription = null,
                                     )
                                 }
                             }
@@ -400,7 +401,7 @@ private fun ComposeScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(imeHeight())
+                                    .height(imeHeight()),
                             ) {
                                 if (!WindowInsets.isImeVisible) {
                                     LazyVerticalGrid(
@@ -409,7 +410,7 @@ private fun ComposeScreen(
                                             .fillMaxWidth(),
                                         contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
                                     ) {
                                         items(emojis) { emoji ->
                                             NetworkImage(
@@ -420,7 +421,7 @@ private fun ComposeScreen(
                                                     .size(48.dp)
                                                     .clickable {
                                                         state.selectEmoji(emoji)
-                                                    }
+                                                    },
                                             )
                                         }
                                     }
@@ -430,37 +431,37 @@ private fun ComposeScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .imePadding()
+                                    .imePadding(),
                             )
                         }.onLoading {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .imePadding()
+                                    .imePadding(),
                             )
                         }
                     }
                 }
-            }
+            },
         ) {
             Column(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 state.contentWarningState.onSuccess {
                     AnimatedVisibility(it.enabled) {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             TextField2(
                                 state = it.textFieldState,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .focusRequester(
-                                        focusRequester = contentWarningFocusRequester
+                                        focusRequester = contentWarningFocusRequester,
                                     ),
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = Color.Transparent,
@@ -468,11 +469,11 @@ private fun ComposeScreen(
                                     disabledIndicatorColor = Color.Transparent,
                                     errorIndicatorColor = Color.Transparent,
                                     focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent
+                                    unfocusedIndicatorColor = Color.Transparent,
                                 ),
                                 placeholder = {
                                     Text(text = stringResource(id = R.string.compose_content_warning_hint))
-                                }
+                                },
                             )
                             HorizontalDivider()
                         }
@@ -483,7 +484,7 @@ private fun ComposeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(
-                            focusRequester = focusRequester
+                            focusRequester = focusRequester,
                         ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
@@ -491,11 +492,11 @@ private fun ComposeScreen(
                         disabledIndicatorColor = Color.Transparent,
                         errorIndicatorColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        unfocusedIndicatorColor = Color.Transparent,
                     ),
                     placeholder = {
                         Text(text = stringResource(id = R.string.compose_hint))
-                    }
+                    },
                 )
                 if (state.mediaState.medias.isNotEmpty()) {
                     Row(
@@ -503,7 +504,7 @@ private fun ComposeScreen(
                             .padding(horizontal = screenHorizontalPadding)
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         state.mediaState.medias.forEach { uri ->
                             Box {
@@ -512,7 +513,7 @@ private fun ComposeScreen(
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(128.dp)
-                                        .clip(RoundedCornerShape(8.dp))
+                                        .clip(RoundedCornerShape(8.dp)),
                                 )
                                 IconButton(
                                     onClick = {
@@ -522,12 +523,12 @@ private fun ComposeScreen(
                                         .align(Alignment.TopEnd)
                                         .background(
                                             color = Color.Black.copy(alpha = 0.3f),
-                                            shape = CircleShape
-                                        )
+                                            shape = CircleShape,
+                                        ),
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
-                                        contentDescription = null
+                                        contentDescription = null,
                                     )
                                 }
                             }
@@ -540,17 +541,17 @@ private fun ComposeScreen(
                             .fillMaxWidth()
                             .clickable(
                                 interactionSource = sensitiveInteractionSource,
-                                indication = null
+                                indication = null,
                             ) {
                                 state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
                             },
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Checkbox(
                             checked = state.mediaState.isMediaSensitive,
                             onCheckedChange = { state.mediaState.setMediaSensitive(it) },
-                            interactionSource = sensitiveInteractionSource
+                            interactionSource = sensitiveInteractionSource,
                         )
                         Text(text = stringResource(id = R.string.compose_media_sensitive))
                     }
@@ -561,15 +562,15 @@ private fun ComposeScreen(
                             modifier = Modifier
                                 .padding(horizontal = screenHorizontalPadding)
                                 .fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 SingleChoiceSegmentedButtonRow(
                                     modifier = Modifier
-                                        .weight(1f)
+                                        .weight(1f),
                                 ) {
                                     SegmentedButton(
                                         selected = pollState.pollSingleChoice,
@@ -578,8 +579,8 @@ private fun ComposeScreen(
                                         },
                                         shape = SegmentedButtonDefaults.shape(
                                             position = 0,
-                                            count = 2
-                                        )
+                                            count = 2,
+                                        ),
                                     ) {
                                         Text(text = stringResource(id = R.string.compose_poll_single_choice))
                                     }
@@ -590,8 +591,8 @@ private fun ComposeScreen(
                                         },
                                         shape = SegmentedButtonDefaults.shape(
                                             position = 1,
-                                            count = 2
-                                        )
+                                            count = 2,
+                                        ),
                                     ) {
                                         Text(text = stringResource(id = R.string.compose_poll_multiple_choice))
                                     }
@@ -600,12 +601,12 @@ private fun ComposeScreen(
                                     onClick = {
                                         pollState.addPollOption()
                                     },
-                                    enabled = pollState.canAddPollOption
+                                    enabled = pollState.canAddPollOption,
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Add,
                                         contentDescription = null,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(16.dp),
                                     )
                                 }
                             }
@@ -615,7 +616,7 @@ private fun ComposeScreen(
                                     index = index,
                                     onRemove = {
                                         pollState.removePollOption(index)
-                                    }
+                                    },
                                 )
                             }
                             FilledTonalButton(
@@ -623,20 +624,20 @@ private fun ComposeScreen(
                                     pollState.setShowExpirationMenu(true)
                                 },
                                 modifier = Modifier
-                                    .align(Alignment.End)
+                                    .align(Alignment.End),
                             ) {
                                 Text(
                                     text = stringResource(
                                         id = R.string.compose_poll_expiration_at,
-                                        stringResource(id = pollState.expiredAt.textId)
-                                    )
+                                        stringResource(id = pollState.expiredAt.textId),
+                                    ),
                                 )
                                 DropdownMenu(
                                     expanded = pollState.showExpirationMenu,
                                     onDismissRequest = {
                                         pollState.setShowExpirationMenu(false)
                                     },
-                                    properties = PopupProperties(focusable = false)
+                                    properties = PopupProperties(focusable = false),
                                 ) {
                                     PollExpiration.values().forEach { expiration ->
                                         DropdownMenuItem(
@@ -646,7 +647,7 @@ private fun ComposeScreen(
                                             },
                                             text = {
                                                 Text(text = stringResource(id = expiration.textId))
-                                            }
+                                            },
                                         )
                                     }
                                 }
@@ -665,7 +666,7 @@ private fun ComposeScreen(
                                     onMediaClick = {},
                                     modifier = Modifier
                                         .padding(horizontal = screenHorizontalPadding)
-                                        .fillMaxWidth()
+                                        .fillMaxWidth(),
                                 )
                             }
                         }
@@ -678,12 +679,12 @@ private fun ComposeScreen(
 
 @Composable
 private fun MisskeyVisibilityContent(
-    visibilityState: MisskeyVisibilityState
+    visibilityState: MisskeyVisibilityState,
 ) {
     IconButton(
         onClick = {
             visibilityState.showVisibilityMenu()
-        }
+        },
     ) {
         dev.dimension.flare.ui.component.status.misskey.VisibilityIcon(visibility = visibilityState.visibility)
         DropdownMenu(
@@ -691,7 +692,7 @@ private fun MisskeyVisibilityContent(
             onDismissRequest = {
                 visibilityState.hideVisibilityMenu()
             },
-            properties = PopupProperties(focusable = false)
+            properties = PopupProperties(focusable = false),
         ) {
             visibilityState.allVisibilities.forEach { visibility ->
                 DropdownMenuItem(
@@ -702,15 +703,15 @@ private fun MisskeyVisibilityContent(
                     text = {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
-                            horizontalAlignment = Alignment.Start
+                            horizontalAlignment = Alignment.Start,
                         ) {
                             Text(
                                 text = stringResource(id = visibility.localName),
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge,
                             )
                             Text(
                                 text = stringResource(id = visibility.localDescription),
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     },
@@ -719,23 +720,23 @@ private fun MisskeyVisibilityContent(
                     },
                     contentPadding = PaddingValues(
                         horizontal = 16.dp,
-                        vertical = 8.dp
-                    )
+                        vertical = 8.dp,
+                    ),
                 )
             }
             DropdownMenuItem(
                 text = {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
-                        horizontalAlignment = Alignment.Start
+                        horizontalAlignment = Alignment.Start,
                     ) {
                         Text(
                             text = stringResource(id = R.string.misskey_compose_local_only),
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                         Text(
                             text = stringResource(id = R.string.misskey_compose_local_only_description),
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                 },
@@ -744,12 +745,12 @@ private fun MisskeyVisibilityContent(
                         checked = visibilityState.localOnly,
                         onCheckedChange = {
                             visibilityState.setLocalOnly(it)
-                        }
+                        },
                     )
                 },
                 onClick = {
                     visibilityState.setLocalOnly(!visibilityState.localOnly)
-                }
+                },
             )
         }
     }
@@ -757,12 +758,12 @@ private fun MisskeyVisibilityContent(
 
 @Composable
 private fun MastodonVisibilityContent(
-    visibilityState: MastodonVisibilityState
+    visibilityState: MastodonVisibilityState,
 ) {
     IconButton(
         onClick = {
             visibilityState.showVisibilityMenu()
-        }
+        },
     ) {
         VisibilityIcon(visibility = visibilityState.visibility)
         DropdownMenu(
@@ -770,7 +771,7 @@ private fun MastodonVisibilityContent(
             onDismissRequest = {
                 visibilityState.hideVisibilityMenu()
             },
-            properties = PopupProperties(focusable = false)
+            properties = PopupProperties(focusable = false),
         ) {
             visibilityState.allVisibilities.forEach { visibility ->
                 DropdownMenuItem(
@@ -781,15 +782,15 @@ private fun MastodonVisibilityContent(
                     text = {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
-                            horizontalAlignment = Alignment.Start
+                            horizontalAlignment = Alignment.Start,
                         ) {
                             Text(
                                 text = stringResource(id = visibility.localName),
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge,
                             )
                             Text(
                                 text = stringResource(id = visibility.localDescription),
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     },
@@ -798,8 +799,8 @@ private fun MastodonVisibilityContent(
                     },
                     contentPadding = PaddingValues(
                         horizontal = 16.dp,
-                        vertical = 8.dp
-                    )
+                        vertical = 8.dp,
+                    ),
                 )
             }
         }
@@ -825,7 +826,7 @@ private fun PollOption(
     textFieldState: TextFieldState,
     index: Int,
     onRemove: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     OutlinedTextField2(
         state = textFieldState,
@@ -837,11 +838,11 @@ private fun PollOption(
         trailingIcon = {
             IconButton(
                 onClick = onRemove,
-                enabled = index > 1
+                enabled = index > 1,
             ) {
                 Icon(imageVector = Icons.Default.Close, contentDescription = null)
             }
-        }
+        },
     )
 }
 
@@ -849,7 +850,7 @@ private fun PollOption(
 @Composable
 private fun composePresenter(
     status: ComposeStatus? = null,
-    composeUseCase: ComposeUseCase = rememberInject()
+    composeUseCase: ComposeUseCase = rememberInject(),
 ) = run {
     val account by activeAccountPresenter()
     val emojiState = account.flatMap {
@@ -947,7 +948,7 @@ private fun composePresenter(
                                 expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
                                 options = pollState.data.options.map { option ->
                                     option.text.toString()
-                                }
+                                },
                             )
                         } else {
                             null
@@ -956,7 +957,7 @@ private fun composePresenter(
                         spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
                         visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Mastodon.Visibility,
                         inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                        account = it
+                        account = it,
                     )
 
                     is UiAccount.Misskey -> ComposeData.MissKey(
@@ -968,7 +969,7 @@ private fun composePresenter(
                                 expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
                                 options = pollState.data.options.map { option ->
                                     option.text.toString()
-                                }
+                                },
                             )
                         } else {
                             null
@@ -979,7 +980,7 @@ private fun composePresenter(
                         inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                         renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                         content = textFieldState.text.toString(),
-                        localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly
+                        localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly,
                     )
 
                     is UiAccount.Bluesky -> ComposeData.Bluesky(
@@ -987,7 +988,7 @@ private fun composePresenter(
                         medias = mediaState.medias,
                         inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                         quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                        content = textFieldState.text.toString()
+                        content = textFieldState.text.toString(),
                     )
                 }
                 composeUseCase(data)
@@ -999,19 +1000,11 @@ private fun composePresenter(
 @Composable
 private fun statusPresenter(
     account: UiAccount,
-    status: ComposeStatus
+    status: ComposeStatus,
 ) = run {
-    val listState = when (account) {
-        is UiAccount.Mastodon -> statusOnlyDataSource(account, status.statusKey)
-        is UiAccount.Misskey -> dev.dimension.flare.data.datasource.misskey.statusOnlyDataSource(
-            account = account,
-            statusKey = status.statusKey
-        )
-
-        is UiAccount.Bluesky -> dev.dimension.flare.data.datasource.bluesky.statusOnlyDataSource(
-            account = account,
-            statusKey = status.statusKey
-        )
+    val service = accountServiceProvider(account = account)
+    val listState = remember(account.accountKey) {
+        service.status(status.statusKey)
     }.collectAsLazyPagingItems()
 
     object {
@@ -1021,13 +1014,14 @@ private fun statusPresenter(
 
 @Composable
 private fun emojiPresenter(
-    account: UiAccount
+    account: UiAccount,
 ) = run {
-    val emojiState = when (account) {
-        is UiAccount.Mastodon -> mastodonEmojiProvider(account = account).toUi()
-        is UiAccount.Misskey -> misskeyEmojiProvider(account = account).toUi()
-        is UiAccount.Bluesky -> null
-    }
+    val service = accountServiceProvider(account = account)
+    val emojiState = when (service) {
+        is MastodonService -> service.emoji()
+        is MisskeyService -> service.emoji()
+        else -> null
+    }?.collectAsState()?.toUi()
     object {
         val emojiState = emojiState
     }
@@ -1063,14 +1057,14 @@ internal sealed interface VisibilityState<T> {
 internal abstract class MastodonVisibilityState(
     override val visibility: UiStatus.Mastodon.Visibility,
     override val showVisibilityMenu: Boolean,
-    override val allVisibilities: List<UiStatus.Mastodon.Visibility>
+    override val allVisibilities: List<UiStatus.Mastodon.Visibility>,
 ) : VisibilityState<UiStatus.Mastodon.Visibility>
 
 internal abstract class MisskeyVisibilityState(
     override val visibility: UiStatus.Misskey.Visibility,
     override val showVisibilityMenu: Boolean,
     override val allVisibilities: List<UiStatus.Misskey.Visibility>,
-    val localOnly: Boolean
+    val localOnly: Boolean,
 ) : VisibilityState<UiStatus.Misskey.Visibility> {
     abstract fun setLocalOnly(value: Boolean)
 }
@@ -1090,7 +1084,7 @@ private fun misskeyVisibilityPresenter() = run {
         visibility = visibility,
         showVisibilityMenu = showVisibilityMenu,
         allVisibilities = UiStatus.Misskey.Visibility.values().toList(),
-        localOnly = localOnly
+        localOnly = localOnly,
     ) {
         override fun setLocalOnly(value: Boolean) {
             localOnly = value
@@ -1121,7 +1115,7 @@ private fun mastodonVisibilityPresenter() = run {
     object : MastodonVisibilityState(
         visibility = visibility,
         showVisibilityMenu = showVisibilityMenu,
-        allVisibilities = UiStatus.Mastodon.Visibility.values().toList()
+        allVisibilities = UiStatus.Mastodon.Visibility.values().toList(),
     ) {
         override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
             visibility = value
@@ -1234,5 +1228,5 @@ internal enum class PollExpiration(val textId: Int, val duration: Duration) {
     Hours12(R.string.compose_poll_expiration_12_hours, 12.hours),
     Days1(R.string.compose_poll_expiration_1_day, 1.days),
     Days3(R.string.compose_poll_expiration_3_days, 3.days),
-    Days7(R.string.compose_poll_expiration_7_days, 7.days)
+    Days7(R.string.compose_poll_expiration_7_days, 7.days),
 }

@@ -4,5 +4,5 @@ enum class MastodonAuthScope(val value: String) {
     Read("read"),
     Write("write"),
     Follow("follow"),
-    Push("push")
+    Push("push"),
 }

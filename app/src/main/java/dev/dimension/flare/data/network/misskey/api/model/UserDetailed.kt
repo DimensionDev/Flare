@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -24,7 +24,6 @@ import kotlinx.serialization.Serializable
  * @param id * @param name * @param username * @param host The local host is represented with `null`.
  * @param avatarUrl * @param avatarBlurhash * @param onlineStatus * @param url * @param uri * @param movedToUri * @param alsoKnownAs * @param createdAt * @param updatedAt * @param lastFetchedAt * @param bannerUrl * @param bannerBlurhash * @param isLocked * @param isSilenced * @param isLimited * @param isSuspended * @param description * @param location * @param birthday * @param lang * @param fields * @param followersCount * @param followingCount * @param notesCount * @param pinnedNoteIds * @param pinnedNotes * @param pinnedPageId * @param pinnedPage * @param publicReactions * @param twoFactorEnabled * @param usePasswordLessLogin * @param securityKeys * @param avatarId * @param bannerId * @param injectFeaturedNote * @param receiveAnnouncementEmail * @param alwaysMarkNsfw * @param autoSensitive * @param carefulBot * @param autoAcceptFollowed * @param noCrawle * @param preventAiLearning * @param isExplorable * @param isDeleted * @param twoFactorBackupCodes * @param hideOnlineStatus * @param hasUnreadSpecifiedNotes * @param hasUnreadMentions * @param hasUnreadAnnouncement * @param hasUnreadAntenna * @param hasUnreadNotification * @param hasPendingReceivedFollowRequest * @param mutedWords * @param mutedInstances * @param mutingNotificationTypes * @param emailNotificationTypes * @param isAdmin * @param isModerator * @param isBot * @param isCat * @param isFollowing * @param isFollowed * @param hasPendingFollowRequestFromYou * @param hasPendingFollowRequestToYou * @param isBlocking * @param isBlocked * @param isMuted * @param isRenoteMuted * @param memo * @param email * @param emailVerified * @param securityKeysList */
 @Serializable
-
 data class UserDetailed(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -178,7 +177,7 @@ data class UserDetailed(
 
     @SerialName(value = "emailVerified") val emailVerified: kotlin.Boolean? = null,
 
-    @SerialName(value = "securityKeysList") val securityKeysList: kotlin.collections.List<kotlin.String>? = null
+    @SerialName(value = "securityKeysList") val securityKeysList: kotlin.collections.List<kotlin.String>? = null,
 
 ) {
 
@@ -198,7 +197,7 @@ data class UserDetailed(
         Active("active"),
 
         @SerialName(value = "offline")
-        Offline("offline");
+        Offline("offline"),
     }
 
     /**
@@ -214,6 +213,6 @@ data class UserDetailed(
         Partial("partial"),
 
         @SerialName(value = "none")
-        None("none");
+        None("none"),
     }
 }

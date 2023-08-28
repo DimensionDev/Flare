@@ -23,7 +23,7 @@ sealed interface UiUser {
         val description: String?,
         val descriptionElement: Element?,
         val matrices: Matrices,
-        val locked: Boolean
+        val locked: Boolean,
     ) : UiUser {
         override val handle = "@$handleInternal@$remoteHost"
         val nameDirection by lazy {
@@ -47,7 +47,7 @@ sealed interface UiUser {
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
-            val statusesCount: Long
+            val statusesCount: Long,
         ) {
             val fansCountHumanized = fansCount.humanize()
             val followsCountHumanized = followsCount.humanize()
@@ -68,7 +68,7 @@ sealed interface UiUser {
         val matrices: Matrices,
         val isCat: Boolean,
         val isBot: Boolean,
-        val relation: UiRelation.Misskey
+        val relation: UiRelation.Misskey,
     ) : UiUser {
 
         override val handle = "@$handleInternal@$remoteHost"
@@ -93,7 +93,7 @@ sealed interface UiUser {
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
-            val statusesCount: Long
+            val statusesCount: Long,
         ) {
             val fansCountHumanized = fansCount.humanize()
             val followsCountHumanized = followsCount.humanize()
@@ -111,7 +111,7 @@ sealed interface UiUser {
         val description: String?,
         val descriptionElement: Element?,
         val matrices: Matrices,
-        val relation: UiRelation.Bluesky
+        val relation: UiRelation.Bluesky,
     ) : UiUser {
 
         override val handle: String = "@$handleInternal"
@@ -136,7 +136,7 @@ sealed interface UiUser {
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
-            val statusesCount: Long
+            val statusesCount: Long,
         ) {
             val fansCountHumanized = fansCount.humanize()
             val followsCountHumanized = followsCount.humanize()

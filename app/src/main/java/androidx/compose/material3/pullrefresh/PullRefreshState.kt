@@ -58,7 +58,7 @@ fun rememberPullRefreshState(
     refreshing: Boolean,
     onRefresh: () -> Unit,
     refreshThreshold: Dp = PullRefreshDefaults.RefreshThreshold,
-    refreshingOffset: Dp = PullRefreshDefaults.RefreshingOffset
+    refreshingOffset: Dp = PullRefreshDefaults.RefreshingOffset,
 ): PullRefreshState {
     require(refreshThreshold > 0.dp) { "The refresh trigger must be greater than zero!" }
 
@@ -103,7 +103,7 @@ class PullRefreshState internal constructor(
     private val animationScope: CoroutineScope,
     private val onRefreshState: State<() -> Unit>,
     refreshingOffset: Float,
-    threshold: Float
+    threshold: Float,
 ) {
     /**
      * A float representing how far the user has pulled as a percentage of the refreshThreshold.

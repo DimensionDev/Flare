@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param ids */
 @Serializable
-
 data class AdminEmojiDeleteBulkRequest(
 
-    @SerialName(value = "ids") val ids: kotlin.collections.List<kotlin.String>
+    @SerialName(value = "ids") val ids: kotlin.collections.List<kotlin.String>,
 
 )

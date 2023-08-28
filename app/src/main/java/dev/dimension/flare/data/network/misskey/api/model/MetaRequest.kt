@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param detail */
 @Serializable
-
 data class MetaRequest(
 
-    @SerialName(value = "detail") val detail: kotlin.Boolean? = true
+    @SerialName(value = "detail") val detail: kotlin.Boolean? = true,
 
 )

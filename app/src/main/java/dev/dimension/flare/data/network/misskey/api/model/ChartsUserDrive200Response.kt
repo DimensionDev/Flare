@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param totalCount * @param totalSize * @param incCount * @param incSize * @param decCount * @param decSize */
 @Serializable
-
 data class ChartsUserDrive200Response(
 
     @SerialName(value = "totalCount") val totalCount: kotlin.collections.List<kotlin.Double>,
@@ -35,6 +34,6 @@ data class ChartsUserDrive200Response(
 
     @SerialName(value = "decCount") val decCount: kotlin.collections.List<kotlin.Double>,
 
-    @SerialName(value = "decSize") val decSize: kotlin.collections.List<kotlin.Double>
+    @SerialName(value = "decSize") val decSize: kotlin.collections.List<kotlin.Double>,
 
 )

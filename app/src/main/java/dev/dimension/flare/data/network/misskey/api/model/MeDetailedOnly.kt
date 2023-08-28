@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param avatarId * @param bannerId * @param injectFeaturedNote * @param receiveAnnouncementEmail * @param alwaysMarkNsfw * @param autoSensitive * @param carefulBot * @param autoAcceptFollowed * @param noCrawle * @param preventAiLearning * @param isExplorable * @param isDeleted * @param twoFactorBackupCodes * @param hideOnlineStatus * @param hasUnreadSpecifiedNotes * @param hasUnreadMentions * @param hasUnreadAnnouncement * @param hasUnreadAntenna * @param hasUnreadNotification * @param hasPendingReceivedFollowRequest * @param mutedWords * @param mutedInstances * @param mutingNotificationTypes * @param emailNotificationTypes * @param email * @param emailVerified * @param securityKeysList */
 @Serializable
-
 data class MeDetailedOnly(
 
     @SerialName(value = "avatarId") val avatarId: kotlin.String? = null,
@@ -77,7 +76,7 @@ data class MeDetailedOnly(
 
     @SerialName(value = "emailVerified") val emailVerified: kotlin.Boolean? = null,
 
-    @SerialName(value = "securityKeysList") val securityKeysList: kotlin.collections.List<kotlin.String>? = null
+    @SerialName(value = "securityKeysList") val securityKeysList: kotlin.collections.List<kotlin.String>? = null,
 
 ) {
 
@@ -94,6 +93,6 @@ data class MeDetailedOnly(
         Partial("partial"),
 
         @SerialName(value = "none")
-        None("none");
+        None("none"),
     }
 }

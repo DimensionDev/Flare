@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param folderId */
 @Serializable
-
 data class DriveFoldersDeleteRequest(
 
-    @SerialName(value = "folderId") val folderId: kotlin.String
+    @SerialName(value = "folderId") val folderId: kotlin.String,
 
 )

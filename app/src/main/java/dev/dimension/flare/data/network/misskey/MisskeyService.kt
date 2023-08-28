@@ -27,7 +27,7 @@ import java.io.InputStream
 
 class MisskeyService(
     private val baseUrl: String,
-    private val token: String
+    private val token: String,
 ) {
     private val usersApi: UsersApi by lazy {
         ktorfit(
@@ -39,7 +39,7 @@ class MisskeyService(
                 install(DefaultRequest) {
                     header(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
-            }
+            },
         ).create()
     }
     private val metaApi: MetaApi by lazy {
@@ -49,7 +49,7 @@ class MisskeyService(
                 install(DefaultRequest) {
                     header(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
-            }
+            },
         ).create()
     }
     private val notesApi: NotesApi by lazy {
@@ -62,7 +62,7 @@ class MisskeyService(
                 install(DefaultRequest) {
                     header(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
-            }
+            },
         ).create()
     }
 
@@ -76,7 +76,7 @@ class MisskeyService(
                 install(DefaultRequest) {
                     header(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
-            }
+            },
         ).create()
     }
 
@@ -90,12 +90,12 @@ class MisskeyService(
                 install(DefaultRequest) {
                     header(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
-            }
+            },
         ).create()
     }
 
     suspend fun findUserById(
-        userId: String
+        userId: String,
     ) = usersApi.usersShow(UsersShowRequest(userId = userId)).body()
 
     suspend fun emojis(): List<EmojiSimple> {
@@ -105,69 +105,69 @@ class MisskeyService(
     suspend fun homeTimeline(
         count: Int,
         since_id: String? = null,
-        until_id: String? = null
+        until_id: String? = null,
     ) = notesApi.notesTimeline(
         NotesHybridTimelineRequest(
             untilId = until_id,
             sinceId = since_id,
-            limit = count
-        )
+            limit = count,
+        ),
     ).body()
 
     suspend fun userTimeline(
         userId: String,
         count: Int,
         since_id: String? = null,
-        until_id: String? = null
+        until_id: String? = null,
     ) = usersApi.usersNotes(
         UsersNotesRequest(
             userId = userId,
             untilId = until_id,
             sinceId = since_id,
-            limit = count
-        )
+            limit = count,
+        ),
     ).body()
 
     suspend fun notifications(
         count: Int,
         since_id: String? = null,
-        until_id: String? = null
+        until_id: String? = null,
     ) = accountApi.iNotifications(
         INotificationsRequest(
             untilId = until_id,
             sinceId = since_id,
-            limit = count
-        )
+            limit = count,
+        ),
     ).body()
 
     suspend fun mentionTimeline(
         count: Int,
         since_id: String? = null,
-        until_id: String? = null
+        until_id: String? = null,
     ) = notesApi.notesMentions(
         NotesMentionsRequest(
             untilId = until_id,
             sinceId = since_id,
-            limit = count
-        )
+            limit = count,
+        ),
     ).body()
 
     suspend fun lookupStatus(
-        noteId: String
+        noteId: String,
     ) = notesApi.notesShow(IPinRequest(noteId = noteId)).body()
 
     suspend fun childrenTimeline(
         noteId: String,
         count: Int,
         since_id: String? = null,
-        until_id: String? = null
+        until_id: String? = null,
     ) = notesApi.notesChildren(
         NotesChildrenRequest(
             noteId = noteId,
             untilId = until_id,
             sinceId = since_id,
-            limit = count
-        )
+            limit = count,
+        ),
     ).body()
 
     suspend fun findUserByName(name: String, host: String) =
@@ -179,7 +179,7 @@ class MisskeyService(
     suspend fun upload(
         channel: InputStream,
         name: String,
-        sensitive: Boolean = false
+        sensitive: Boolean = false,
     ): DriveFile? {
         val data = channel.readBytes()
         val multipart = MultiPartFormDataContent(
@@ -189,14 +189,14 @@ class MisskeyService(
                     data,
                     Headers.build {
                         append(HttpHeaders.ContentDisposition, "filename=$name")
-                    }
+                    },
                 )
                 append("isSensitive", sensitive)
                 append("i", token)
-            }
+            },
         )
         return driveApi.driveFilesCreate(
-            multipart
+            multipart,
         ).body()
     }
 

@@ -43,7 +43,7 @@ private const val CHANNEL_ID = "compose"
 @Provides
 internal class ComposeUseCase(
     private val scope: CoroutineScope,
-    private val context: Context
+    private val context: Context,
 ) {
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     operator fun invoke(data: ComposeData) = composeUseCase(data, scope, context)
@@ -53,7 +53,7 @@ internal class ComposeUseCase(
 private fun composeUseCase(
     data: ComposeData,
     scope: CoroutineScope,
-    context: Context
+    context: Context,
 ) {
     scope.launch {
         val notificationId = UUID.randomUUID().hashCode()
@@ -77,7 +77,7 @@ private fun composeUseCase(
             when (data) {
                 is ComposeData.Mastodon -> mastodonComposeUseCase(
                     data = data,
-                    context = context
+                    context = context,
                 ) { current, max ->
                     if (notificationManager.areNotificationsEnabled()) {
                         builder = builder.setProgress(max, current, false)
@@ -87,7 +87,7 @@ private fun composeUseCase(
 
                 is ComposeData.MissKey -> misskeyComposeUseCase(
                     data = data,
-                    context = context
+                    context = context,
                 ) { current, max ->
                     if (notificationManager.areNotificationsEnabled()) {
                         builder = builder.setProgress(max, current, false)
@@ -97,7 +97,7 @@ private fun composeUseCase(
 
                 is ComposeData.Bluesky -> blueskyComposeUseCase(
                     data = data,
-                    context = context
+                    context = context,
                 ) { current, max ->
                     if (notificationManager.areNotificationsEnabled()) {
                         builder = builder.setProgress(max, current, false)
@@ -130,7 +130,7 @@ private fun composeUseCase(
 private suspend fun blueskyComposeUseCase(
     data: ComposeData.Bluesky,
     context: Context,
-    notifyProgress: (current: Int, max: Int) -> Unit
+    notifyProgress: (current: Int, max: Int) -> Unit,
 ) {
     val maxProgress = data.medias.size + 1
     val service = data.account.getService()
@@ -167,9 +167,9 @@ private suspend fun blueskyComposeUseCase(
                                     buildJsonObject {
                                         put("cid", item.cid.cid)
                                         put("uri", item.uri.atUri)
-                                    }
+                                    },
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -188,7 +188,7 @@ private suspend fun blueskyComposeUseCase(
                                     buildJsonObject {
                                         put("cid", item.cid.cid)
                                         put("uri", item.uri.atUri)
-                                    }
+                                    },
                                 )
                                 put(
                                     "root",
@@ -201,9 +201,9 @@ private suspend fun blueskyComposeUseCase(
                                             put("cid", item.cid.cid)
                                             put("uri", item.uri.atUri)
                                         }
-                                    }
+                                    },
                                 )
-                            }
+                            },
                         )
                     }
                 }
@@ -220,12 +220,12 @@ private suspend fun blueskyComposeUseCase(
                                             buildJsonObject {
                                                 put("image", blob)
                                                 put("alt", "")
-                                            }
+                                            },
                                         )
                                     }
-                                }
+                                },
                             )
-                        }
+                        },
                     )
                 }
                 put(
@@ -234,24 +234,24 @@ private suspend fun blueskyComposeUseCase(
                         data.language.forEach { lang ->
                             add(lang)
                         }
-                    }
+                    },
                 )
-            }
-        )
+            },
+        ),
     )
 }
 
 private suspend fun mastodonComposeUseCase(
     data: ComposeData.Mastodon,
     context: Context,
-    notifyProgress: (current: Int, max: Int) -> Unit
+    notifyProgress: (current: Int, max: Int) -> Unit,
 ) {
     val maxProgress = data.medias.size + 1
     val mediaIds = data.medias.mapIndexedNotNull { index, uri ->
         context.contentResolver.openInputStream(uri)?.use { stream ->
             data.account.service.upload(
                 stream,
-                name = uri.lastPathSegment ?: "unknown"
+                name = uri.lastPathSegment ?: "unknown",
             ).also {
                 notifyProgress(index + 1, maxProgress)
             }
@@ -277,17 +277,17 @@ private suspend fun mastodonComposeUseCase(
                 PostPoll(
                     options = poll.options,
                     expiresIn = poll.expiresIn,
-                    multiple = poll.multiple
+                    multiple = poll.multiple,
                 )
-            }
-        )
+            },
+        ),
     )
 }
 
 private suspend fun misskeyComposeUseCase(
     data: ComposeData.MissKey,
     context: Context,
-    notifyProgress: (current: Int, max: Int) -> Unit
+    notifyProgress: (current: Int, max: Int) -> Unit,
 ) {
     val maxProgress = data.medias.size + 1
     val mediaIds = data.medias.mapIndexedNotNull { index, uri ->
@@ -295,7 +295,7 @@ private suspend fun misskeyComposeUseCase(
             data.account.service.upload(
                 stream,
                 name = uri.lastPathSegment ?: "unknown",
-                sensitive = data.sensitive
+                sensitive = data.sensitive,
             ).also {
                 notifyProgress(index + 1, maxProgress)
             }
@@ -320,11 +320,11 @@ private suspend fun misskeyComposeUseCase(
                 NotesCreateRequestPoll(
                     choices = poll.options.toSet(),
                     expiredAfter = poll.expiredAfter.toInt(),
-                    multiple = poll.multiple
+                    multiple = poll.multiple,
                 )
             },
-            localOnly = data.localOnly
-        )
+            localOnly = data.localOnly,
+        ),
     )
 }
 
@@ -337,12 +337,12 @@ internal sealed interface ComposeData {
         val medias: List<Uri> = emptyList(),
         val sensitive: Boolean = false,
         val spoilerText: String? = null,
-        val poll: Poll? = null
+        val poll: Poll? = null,
     ) : ComposeData {
         data class Poll(
             val options: List<String>,
             val expiresIn: Long,
-            val multiple: Boolean
+            val multiple: Boolean,
         )
     }
 
@@ -356,12 +356,12 @@ internal sealed interface ComposeData {
         val sensitive: Boolean = false,
         val spoilerText: String? = null,
         val poll: Poll? = null,
-        val localOnly: Boolean = false
+        val localOnly: Boolean = false,
     ) : ComposeData {
         data class Poll(
             val options: List<String>,
             val expiredAfter: Long,
-            val multiple: Boolean
+            val multiple: Boolean,
         )
     }
 
@@ -372,6 +372,6 @@ internal sealed interface ComposeData {
         val inReplyToID: String? = null,
         val quoteId: String? = null,
         val language: List<String> = listOf("en"),
-        val medias: List<Uri> = emptyList()
+        val medias: List<Uri> = emptyList(),
     ) : ComposeData
 }

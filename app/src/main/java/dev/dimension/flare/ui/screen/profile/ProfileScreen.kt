@@ -60,18 +60,12 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datasource.mastodon.userTimelineDataSource
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.activeAccountPresenter
-import dev.dimension.flare.data.repository.cache.blueskyUserDataByNamePresenter
-import dev.dimension.flare.data.repository.cache.blueskyUserDataPresenter
-import dev.dimension.flare.data.repository.cache.mastodonUserDataByNameAndHostPresenter
-import dev.dimension.flare.data.repository.cache.mastodonUserDataPresenter
-import dev.dimension.flare.data.repository.cache.misskeyUserDataByNamePresenter
-import dev.dimension.flare.data.repository.cache.misskeyUserDataPresenter
+import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.repository.app.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
+import dev.dimension.flare.ui.collectAsUiState
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
@@ -98,19 +92,19 @@ import kotlin.math.max
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
-        )
-    ]
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
 )
 fun ProfileWithUserNameAndHostRoute(
     userName: String,
     host: String,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     val state by producePresenter(key = "acct_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
-            host = host
+            host = host,
         )
     }
     state.userState.onSuccess {
@@ -118,19 +112,19 @@ fun ProfileWithUserNameAndHostRoute(
             userKey = it.userKey,
             onBack = {
                 navigator.navigateUp()
-            }
+            },
         )
     }.onLoading {
         ProfileLoadingScreen(
             onBack = {
                 navigator.navigateUp()
-            }
+            },
         )
     }.onError {
         ProfileErrorScreen(
             onBack = {
                 navigator.navigateUp()
-            }
+            },
         )
     }
 }
@@ -149,18 +143,18 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Text(text = "Error")
             }
@@ -182,23 +176,23 @@ private fun ProfileLoadingScreen(onBack: () -> Unit) {
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back)
+                                contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) {
             LazyColumn(
                 contentPadding = it,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 item {
                     ProfileHeaderLoading()
                 }
                 items(5) {
                     StatusPlaceholder(
-                        modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                     )
                 }
             }
@@ -209,31 +203,12 @@ private fun ProfileLoadingScreen(onBack: () -> Unit) {
 @Composable
 private fun profileWithUserNameAndHostPresenter(
     userName: String,
-    host: String
+    host: String,
 ) = run {
-    val account by activeAccountPresenter()
-    val userState = account.flatMap {
-        when (it) {
-            is UiAccount.Mastodon -> {
-                mastodonUserDataByNameAndHostPresenter(
-                    account = it,
-                    name = userName,
-                    host = host
-                )
-            }
-
-            is UiAccount.Misskey -> misskeyUserDataByNamePresenter(
-                account = it,
-                name = userName,
-                host = host
-            )
-
-            is UiAccount.Bluesky -> blueskyUserDataByNamePresenter(
-                account = it,
-                name = userName,
-                host = host
-            )
-        }.toUi()
+    val userState = activeAccountServicePresenter().flatMap { (service, account) ->
+        remember(account.accountKey) {
+            service.userByAcct("$userName@$host")
+        }.collectAsState().toUi()
     }
 
     object {
@@ -245,19 +220,19 @@ private fun profileWithUserNameAndHostPresenter(
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER"
-        )
-    ]
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
 )
 fun ProfileRoute(
     userKey: MicroBlogKey,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     ProfileScreen(
         userKey = userKey,
         onBack = {
             navigator.navigateUp()
-        }
+        },
     )
 }
 
@@ -269,7 +244,7 @@ fun ProfileScreen(
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     showTopBar: Boolean = true,
-    contentPadding: PaddingValues = PaddingValues(0.dp)
+    contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state by producePresenter(key = userKey.toString()) {
         profilePresenter(userKey)
@@ -290,7 +265,7 @@ fun ProfileScreen(
                             } else {
                                 max(
                                     0f,
-                                    (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.toFloat())
+                                    (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.toFloat()),
                                 )
                             }
                         }
@@ -300,7 +275,7 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .graphicsLayer {
                                     alpha = titleAlpha
-                                }
+                                },
                         ) {
                             Spacer(
                                 modifier = Modifier
@@ -308,9 +283,9 @@ fun ProfileScreen(
                                     .windowInsetsTopHeight(WindowInsets.statusBars)
                                     .background(
                                         color = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                            3.dp
-                                        )
-                                    )
+                                            3.dp,
+                                        ),
+                                    ),
                             )
                             Spacer(
                                 modifier = Modifier
@@ -318,9 +293,9 @@ fun ProfileScreen(
                                     .height(64.dp)
                                     .background(
                                         color = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                            3.dp
-                                        )
-                                    )
+                                            3.dp,
+                                        ),
+                                    ),
                             )
                         }
                         TopAppBar(
@@ -330,12 +305,12 @@ fun ProfileScreen(
                                         element = it.nameElement,
                                         modifier = Modifier.graphicsLayer {
                                             alpha = titleAlpha
-                                        }
+                                        },
                                     )
                                 }
                             },
                             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = Color.Transparent
+                                containerColor = Color.Transparent,
                             ),
                             modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
                             scrollBehavior = scrollBehavior,
@@ -343,7 +318,7 @@ fun ProfileScreen(
                                 IconButton(onClick = onBack) {
                                     Icon(
                                         imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = stringResource(id = R.string.navigate_back)
+                                        contentDescription = stringResource(id = R.string.navigate_back),
                                     )
                                 }
                             },
@@ -352,15 +327,15 @@ fun ProfileScreen(
                                     IconButton(onClick = { /*TODO*/ }) {
                                         Icon(
                                             imageVector = Icons.Default.MoreVert,
-                                            contentDescription = null
+                                            contentDescription = null,
                                         )
                                     }
                                 }
-                            }
+                            },
                         )
                     }
                 }
-            }
+            },
         ) {
             RefreshContainer(
                 modifier = Modifier.fillMaxSize(),
@@ -371,12 +346,12 @@ fun ProfileScreen(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         state = listState,
-                        contentPadding = contentPadding
+                        contentPadding = contentPadding,
                     ) {
                         item {
                             ProfileHeader(
                                 state.userState,
-                                state.relationState
+                                state.relationState,
                             )
                         }
                         with(state.listState) {
@@ -385,7 +360,7 @@ fun ProfileScreen(
                             }
                         }
                     }
-                }
+                },
             )
         }
     }
@@ -395,7 +370,7 @@ fun ProfileScreen(
 private fun ProfileHeader(
     userState: UiState<UiUser>,
     relationState: UiState<UiRelation>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
         targetState = userState,
@@ -410,7 +385,7 @@ private fun ProfileHeader(
                 is UiState.Error -> "Error"
                 is UiState.Success -> "Success"
             }
-        }
+        },
     ) { state ->
         when (state) {
             is UiState.Loading -> {
@@ -424,7 +399,7 @@ private fun ProfileHeader(
             is UiState.Success -> {
                 ProfileHeaderSuccess(
                     user = state.data,
-                    relationState = relationState
+                    relationState = relationState,
                 )
             }
         }
@@ -435,14 +410,14 @@ private fun ProfileHeader(
 private fun ProfileHeaderSuccess(
     user: UiUser,
     relationState: UiState<UiRelation>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     when (user) {
         is UiUser.Mastodon -> {
             MastodonProfileHeader(
                 user = user,
                 relationState = relationState,
-                modifier = modifier
+                modifier = modifier,
             )
         }
 
@@ -450,14 +425,14 @@ private fun ProfileHeaderSuccess(
             MisskeyProfileHeader(
                 user = user,
                 relationState = relationState,
-                modifier = modifier
+                modifier = modifier,
             )
         }
 
         is UiUser.Bluesky -> BlueskyProfileHeader(
             user = user,
             relationState = relationState,
-            modifier = modifier
+            modifier = modifier,
         )
     }
 }
@@ -471,7 +446,7 @@ internal fun CommonProfileHeader(
     modifier: Modifier = Modifier,
     headerTrailing: @Composable () -> Unit = {},
     handleTrailing: @Composable RowScope.() -> Unit = {},
-    content: @Composable () -> Unit = {}
+    content: @Composable () -> Unit = {},
 ) {
     val statusBarHeight = with(LocalDensity.current) {
         WindowInsets.statusBars.getTop(this).toDp()
@@ -482,7 +457,7 @@ internal fun CommonProfileHeader(
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(bottom = 8.dp)
+            .padding(bottom = 8.dp),
     ) {
         bannerUrl?.let {
             NetworkImage(
@@ -490,52 +465,52 @@ internal fun CommonProfileHeader(
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(actualBannerHeight)
+                    .height(actualBannerHeight),
             )
         }
         // avatar
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = screenHorizontalPadding),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
                     modifier = Modifier
                         .padding(
-                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2)
-                        )
+                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                        ),
                 ) {
                     AvatarComponent(data = avatarUrl, size = ProfileHeaderConstants.AvatarSize.dp)
                 }
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(top = actualBannerHeight)
+                        .padding(top = actualBannerHeight),
                 ) {
                     HtmlText(
                         element = displayName,
-                        textStyle = MaterialTheme.typography.titleMedium
+                        textStyle = MaterialTheme.typography.titleMedium,
                     )
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             text = handle,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                         handleTrailing.invoke(this)
                     }
                 }
                 Box(
                     modifier = Modifier
-                        .padding(top = actualBannerHeight)
+                        .padding(top = actualBannerHeight),
                 ) {
                     headerTrailing()
                 }
@@ -555,13 +530,13 @@ private object ProfileHeaderConstants {
 
 @Composable
 private fun ProfileHeaderError(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
 }
 
 @Composable
 private fun ProfileHeaderLoading(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val statusBarHeight = with(LocalDensity.current) {
         WindowInsets.statusBars.getTop(this).toDp()
@@ -572,53 +547,53 @@ private fun ProfileHeaderLoading(
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(bottom = 8.dp)
+            .padding(bottom = 8.dp),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(actualBannerHeight)
-                .placeholder(true)
+                .placeholder(true),
         )
         // avatar
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = screenHorizontalPadding),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
                     modifier = Modifier
                         .padding(
-                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2)
-                        )
+                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                        ),
                 ) {
                     Box(
                         modifier = Modifier
                             .size(ProfileHeaderConstants.AvatarSize.dp)
                             .clip(CircleShape)
-                            .placeholder(true)
+                            .placeholder(true),
                     )
                 }
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(top = actualBannerHeight)
+                        .padding(top = actualBannerHeight),
                 ) {
                     Text(
                         text = "Loading user",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.placeholder(true)
+                        modifier = Modifier.placeholder(true),
                     )
                     Text(
                         text = "Loading",
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.placeholder(true)
+                        modifier = Modifier.placeholder(true),
                     )
                 }
             }
@@ -629,71 +604,23 @@ private fun ProfileHeaderLoading(
 @Composable
 private fun profilePresenter(
     userKey: MicroBlogKey?,
-    statusEvent: StatusEvent = rememberInject()
+    statusEvent: StatusEvent = rememberInject(),
 ) = run {
-    val account by activeAccountPresenter()
-    val userState = account.map {
-        when (it) {
-            is UiAccount.Mastodon -> {
-                mastodonUserDataPresenter(
-                    account = it,
-                    userId = userKey?.id ?: it.accountKey.id
-                )
-            }
-
-            is UiAccount.Misskey -> misskeyUserDataPresenter(
-                account = it,
-                userId = userKey?.id ?: it.accountKey.id
-            )
-
-            is UiAccount.Bluesky -> blueskyUserDataPresenter(
-                account = it,
-                userId = userKey?.id ?: it.accountKey.id
-            )
-        }
+    val userState = activeAccountServicePresenter().map { (service, account) ->
+        remember(account.accountKey, userKey) {
+            service.userById(userKey?.id ?: account.accountKey.id)
+        }.collectAsState()
     }
 
-    val listState = account.flatMap {
-        when (it) {
-            is UiAccount.Mastodon -> UiState.Success(
-                userTimelineDataSource(
-                    account = it,
-                    userKey = userKey ?: it.accountKey
-                ).collectAsLazyPagingItems()
-            )
-
-            is UiAccount.Misskey -> UiState.Success(
-                dev.dimension.flare.data.datasource.misskey.userTimelineDataSource(
-                    account = it,
-                    userKey = userKey ?: it.accountKey
-                ).collectAsLazyPagingItems()
-            )
-
-            is UiAccount.Bluesky -> UiState.Success(
-                dev.dimension.flare.data.datasource.bluesky.userTimelineDataSource(
-                    account = it,
-                    userKey = userKey ?: it.accountKey
-                ).collectAsLazyPagingItems()
-            )
-        }
+    val listState = activeAccountServicePresenter().map { (service, account) ->
+        remember(account.accountKey, userKey) {
+            service.userTimeline(userKey ?: account.accountKey)
+        }.collectAsLazyPagingItems()
     }
-    val relationState = account.flatMap {
-        when (it) {
-            is UiAccount.Mastodon -> mastodonUserRelationPresenter(
-                account = it,
-                userKey = userKey ?: it.accountKey
-            )
-
-            is UiAccount.Misskey -> misskeyUserRelationPresenter(
-                account = it,
-                userKey = userKey ?: it.accountKey
-            )
-
-            is UiAccount.Bluesky -> blueskyUserRelationPresenter(
-                account = it,
-                userKey = userKey ?: it.accountKey
-            )
-        }
+    val relationState = activeAccountServicePresenter().flatMap { (service, account) ->
+        remember(account.accountKey, userKey) {
+            service.relation(userKey ?: account.accountKey)
+        }.collectAsUiState().value.flatMap { it }
     }
 
     val refreshing = userState is UiState.Loading ||

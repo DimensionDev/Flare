@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param name * @param callbackUrl * @param permission * @param secret * @param isAuthorized */
 @Serializable
-
 data class App(
 
     @SerialName(value = "id") val id: kotlin.String,
@@ -35,6 +34,6 @@ data class App(
 
     @SerialName(value = "secret") val secret: kotlin.String? = null,
 
-    @SerialName(value = "isAuthorized") val isAuthorized: kotlin.Boolean? = null
+    @SerialName(value = "isAuthorized") val isAuthorized: kotlin.Boolean? = null,
 
 )

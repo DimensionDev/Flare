@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param roleId * @param name * @param description * @param color * @param iconUrl * @param target * @param condFormula * @param isPublic * @param isModerator * @param isAdministrator * @param asBadge * @param canEditMembersByModerator * @param displayOrder * @param policies * @param isExplorable */
 @Serializable
-
 data class AdminRolesUpdateRequest(
 
     @SerialName(value = "roleId") val roleId: kotlin.String,
@@ -53,7 +52,7 @@ data class AdminRolesUpdateRequest(
 
     @SerialName(value = "policies") val policies: kotlin.String,
 
-    @SerialName(value = "isExplorable") val isExplorable: kotlin.Boolean? = null
+    @SerialName(value = "isExplorable") val isExplorable: kotlin.Boolean? = null,
 
 ) {
 
@@ -67,6 +66,6 @@ data class AdminRolesUpdateRequest(
         Manual("manual"),
 
         @SerialName(value = "conditional")
-        Conditional("conditional");
+        Conditional("conditional"),
     }
 }

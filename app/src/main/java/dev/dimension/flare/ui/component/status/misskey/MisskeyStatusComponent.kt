@@ -78,7 +78,7 @@ import kotlinx.coroutines.launch
 internal fun MisskeyStatusComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val actualData = data.renote ?: data
     Column(
@@ -86,29 +86,29 @@ internal fun MisskeyStatusComponent(
             .clickable {
                 event.onStatusClick(data)
             }
-            .then(modifier)
+            .then(modifier),
     ) {
         if (data.renote != null) {
             StatusRetweetHeaderComponent(
                 icon = Icons.Default.SyncAlt,
                 user = data.user,
-                text = stringResource(id = R.string.mastodon_item_reblogged_status)
+                text = stringResource(id = R.string.mastodon_item_reblogged_status),
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
         StatusHeaderComponent(
             data = actualData,
-            event = event
+            event = event,
         )
         StatusContentComponent(
             data = actualData,
-            event = event
+            event = event,
         )
         if (actualData.media.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusMediaComponent(
                 data = actualData.media,
-                onMediaClick = event::onMediaClick
+                onMediaClick = event::onMediaClick,
             )
         }
 //        StatusCardComponent(
@@ -120,19 +120,19 @@ internal fun MisskeyStatusComponent(
             UiStatusQuoted(
                 status = actualData.quote,
                 onMediaClick = event::onMediaClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         if (actualData.reaction.emojiReactions.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusReactionComponent(
                 data = actualData,
-                event = event
+                event = event,
             )
         }
         StatusFooterComponent(
             data = data,
-            event = event
+            event = event,
         )
     }
 }
@@ -141,7 +141,7 @@ internal fun MisskeyStatusComponent(
 private fun StatusFooterComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val actualData = data.renote ?: data
     var showRenoteMenu by remember {
@@ -151,10 +151,10 @@ private fun StatusFooterComponent(
         modifier = modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         CompositionLocalProvider(
-            LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha)
+            LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
         ) {
             StatusActionButton(
                 icon = Icons.Default.Reply,
@@ -163,7 +163,7 @@ private fun StatusFooterComponent(
                     .weight(1f),
                 onClicked = {
                     event.onReplyClick(actualData)
-                }
+                },
             )
             StatusActionButton(
                 icon = Icons.Default.SyncAlt,
@@ -176,44 +176,44 @@ private fun StatusFooterComponent(
                 content = {
                     DropdownMenu(
                         expanded = showRenoteMenu,
-                        onDismissRequest = { showRenoteMenu = false }
+                        onDismissRequest = { showRenoteMenu = false },
                     ) {
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = stringResource(id = R.string.misskey_item_action_renote)
+                                    text = stringResource(id = R.string.misskey_item_action_renote),
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.SyncAlt,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             },
                             onClick = {
                                 showRenoteMenu = false
                                 event.onReblogClick(actualData)
-                            }
+                            },
                         )
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    text = stringResource(id = R.string.misskey_item_action_quote)
+                                    text = stringResource(id = R.string.misskey_item_action_quote),
                                 )
                             },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.FormatQuote,
-                                    contentDescription = null
+                                    contentDescription = null,
                                 )
                             },
                             onClick = {
                                 showRenoteMenu = false
                                 event.onQuoteClick(actualData)
-                            }
+                            },
                         )
                     }
-                }
+                },
             )
             StatusActionButton(
                 icon = if (actualData.reaction.myReaction != null) {
@@ -226,14 +226,14 @@ private fun StatusFooterComponent(
                     .weight(1f),
                 onClicked = {
                     event.onAddReactionClick(actualData)
-                }
+                },
             )
             StatusActionButton(
                 icon = Icons.Default.MoreHoriz,
                 text = null,
                 onClicked = {
                     event.onMoreClick(data)
-                }
+                },
             )
         }
     }
@@ -243,16 +243,16 @@ private fun StatusFooterComponent(
 private fun StatusReactionComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+        modifier = modifier,
     ) {
         items(data.reaction.emojiReactions) { reaction ->
             Card(
-                shape = RoundedCornerShape(100)
+                shape = RoundedCornerShape(100),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -260,16 +260,16 @@ private fun StatusReactionComponent(
                         .clickable {
                             event.onReactionClick(data, reaction)
                         }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     NetworkImage(
                         model = reaction.url,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = reaction.humanizedCount
+                        text = reaction.humanizedCount,
                     )
                 }
             }
@@ -281,28 +281,28 @@ private fun StatusReactionComponent(
 private fun StatusContentComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     // TODO: not a best way to handle this
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         if (!data.contentWarningText.isNullOrEmpty()) {
             Text(
-                text = data.contentWarningText
+                text = data.contentWarningText,
             )
             TextButton(
                 onClick = {
                     expanded = !expanded
-                }
+                },
             ) {
                 Text(
                     text = stringResource(
-                        if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more
-                    )
+                        if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
+                    ),
                 )
             }
         }
@@ -312,14 +312,14 @@ private fun StatusContentComponent(
                     HtmlText(
                         element = data.contentToken,
                         layoutDirection = data.contentDirection,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 if (data.poll != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusPollComponent(
                         data = data.poll,
-                        event = event
+                        event = event,
                     )
                 }
             }
@@ -331,27 +331,27 @@ private fun StatusContentComponent(
 private fun StatusPollComponent(
     data: UiStatus.Misskey.Poll,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         data.options.forEach { option ->
             Column {
                 Row {
                     Box {
                         Text(
-                            text = option.humanizedPercentage
+                            text = option.humanizedPercentage,
                         )
                         Text(
                             text = "100%",
-                            modifier = Modifier.alpha(0f)
+                            modifier = Modifier.alpha(0f),
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = option.title
+                        text = option.title,
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -359,12 +359,12 @@ private fun StatusPollComponent(
                     progress = option.percentage,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(CircleShape)
+                        .clip(CircleShape),
                 )
             }
         }
         Text(
-            text = data.humanizedExpiresAt
+            text = data.humanizedExpiresAt,
         )
     }
 }
@@ -373,25 +373,25 @@ private fun StatusPollComponent(
 private fun StatusHeaderComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     CommonStatusHeaderComponent(
         data = data.user,
         onUserClick = { event.onUserClick(it) },
-        modifier = modifier
+        modifier = modifier,
     ) {
         VisibilityIcon(
             visibility = data.visibility,
             modifier = Modifier
                 .size(14.dp)
-                .alpha(MediumAlpha)
+                .alpha(MediumAlpha),
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = data.humanizedTime,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
-                .alpha(MediumAlpha)
+                .alpha(MediumAlpha),
         )
     }
 }
@@ -399,31 +399,31 @@ private fun StatusHeaderComponent(
 @Composable
 internal fun VisibilityIcon(
     visibility: UiStatus.Misskey.Visibility,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     when (visibility) {
         UiStatus.Misskey.Visibility.Public -> Icon(
             imageVector = Icons.Default.Public,
             contentDescription = stringResource(id = R.string.mastodon_visibility_public),
-            modifier = modifier
+            modifier = modifier,
         )
 
         UiStatus.Misskey.Visibility.Home -> Icon(
             imageVector = Icons.Default.LockOpen,
             contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
-            modifier = modifier
+            modifier = modifier,
         )
 
         UiStatus.Misskey.Visibility.Followers -> Icon(
             imageVector = Icons.Default.Lock,
             contentDescription = stringResource(id = R.string.mastodon_visibility_private),
-            modifier = modifier
+            modifier = modifier,
         )
 
         UiStatus.Misskey.Visibility.Specified -> Icon(
             imageVector = Icons.Default.MailOutline,
             contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
-            modifier = modifier
+            modifier = modifier,
         )
     }
 }
@@ -445,7 +445,7 @@ internal interface MisskeyStatusEvent {
 @Binds(to = MisskeyStatusEvent::class)
 internal class DefaultMisskeyStatusEvent(
     private val context: Context,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
 ) : MisskeyStatusEvent {
     override fun onStatusClick(data: UiStatus.Misskey) {
         val intent =
@@ -453,8 +453,8 @@ internal class DefaultMisskeyStatusEvent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
                     dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
-                        .deeplink()
-                )
+                        .deeplink(),
+                ),
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
@@ -474,8 +474,8 @@ internal class DefaultMisskeyStatusEvent(
                     Intent.ACTION_VIEW,
                     Uri.parse(
                         dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url)
-                            .deeplink()
-                    )
+                            .deeplink(),
+                    ),
                 )
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
@@ -491,8 +491,8 @@ internal class DefaultMisskeyStatusEvent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
                     dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
-                        .deeplink()
-                )
+                        .deeplink(),
+                ),
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
@@ -514,8 +514,8 @@ internal class DefaultMisskeyStatusEvent(
                 Intent.ACTION_VIEW,
                 Uri.parse(
                     dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
-                        .deeplink()
-                )
+                        .deeplink(),
+                ),
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)

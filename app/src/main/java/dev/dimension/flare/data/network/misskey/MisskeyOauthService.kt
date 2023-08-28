@@ -33,7 +33,7 @@ private val defaultPermission = listOf(
     "write:page-likes",
     "read:page-likes",
     "write:gallery-likes",
-    "read:gallery-likes"
+    "read:gallery-likes",
 )
 
 class MisskeyOauthService(
@@ -42,7 +42,7 @@ class MisskeyOauthService(
     private val icon: String? = null,
     private val callback: String? = null,
     private val permission: List<String> = defaultPermission,
-    private val session: String = UUID.randomUUID().toString()
+    private val session: String = UUID.randomUUID().toString(),
 ) {
     private val authResources: AuthResources by lazy {
         ktorfit("https://$host/").create()

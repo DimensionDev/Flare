@@ -47,26 +47,26 @@ context(LazyListScope, UiState<LazyPagingItems<UiStatus>>, StatusEvent)
 internal fun status() {
     onSuccess { lazyPagingItems ->
         if ((
-            lazyPagingItems.loadState.refresh == LoadState.Loading ||
-                lazyPagingItems.loadState.prepend == LoadState.Loading
-            ) &&
+                lazyPagingItems.loadState.refresh == LoadState.Loading ||
+                    lazyPagingItems.loadState.prepend == LoadState.Loading
+                ) &&
             lazyPagingItems.itemCount == 0
         ) {
             items(10) {
                 Column {
                     StatusPlaceholder(
-                        modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider(
-                        modifier = Modifier.alpha(DisabledAlpha)
+                        modifier = Modifier.alpha(DisabledAlpha),
                     )
                 }
             }
         } else if ((
-            lazyPagingItems.loadState.refresh is LoadState.Error ||
-                lazyPagingItems.loadState.prepend is LoadState.Error
-            ) &&
+                lazyPagingItems.loadState.refresh is LoadState.Error ||
+                    lazyPagingItems.loadState.prepend is LoadState.Error
+                ) &&
             lazyPagingItems.itemCount == 0
         ) {
             item {
@@ -77,16 +77,16 @@ internal fun status() {
                             lazyPagingItems.retry()
                         },
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoodBad,
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(48.dp),
                     )
                     Text(
                         text = stringResource(id = R.string.status_loadmore_error_retry),
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(16.dp),
                     )
                 }
             }
@@ -98,25 +98,25 @@ internal fun status() {
                 },
                 contentType = lazyPagingItems.itemContentType {
                     it.itemType
-                }
+                },
             ) {
                 Column {
                     when (val item = lazyPagingItems[it]) {
                         is UiStatus.Mastodon -> MastodonStatusComponent(
                             data = item,
                             event = mastodonStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                         )
 
                         is UiStatus.MastodonNotification -> MastodonNotificationComponent(
                             data = item,
                             event = mastodonStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                         )
 
                         null -> {
                             StatusPlaceholder(
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -124,30 +124,30 @@ internal fun status() {
                         is UiStatus.Misskey -> MisskeyStatusComponent(
                             data = item,
                             event = misskeyStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                         )
 
                         is UiStatus.MisskeyNotification -> MisskeyNotificationComponent(
                             data = item,
                             event = misskeyStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                         )
 
                         is UiStatus.Bluesky -> BlueskyStatusComponent(
                             data = item,
                             event = blueskyStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                         )
                         is UiStatus.BlueskyNotification -> BlueskyNotificationComponent(
                             data = item,
                             event = blueskyStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                         )
                     }
                     // draw divider
                     if (it != lazyPagingItems.itemCount - 1) {
                         HorizontalDivider(
-                            modifier = Modifier.alpha(DisabledAlpha)
+                            modifier = Modifier.alpha(DisabledAlpha),
                         )
                     }
                 }
@@ -164,10 +164,10 @@ internal fun status() {
                                     .fillMaxWidth()
                                     .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
                             ) {
                                 Text(
-                                    text = stringResource(R.string.status_loadmore_error)
+                                    text = stringResource(R.string.status_loadmore_error),
                                 )
                                 Text(text = stringResource(id = R.string.status_loadmore_error_retry))
                             }
@@ -177,11 +177,11 @@ internal fun status() {
                         items(10) {
                             Column {
                                 StatusPlaceholder(
-                                    modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 HorizontalDivider(
-                                    modifier = Modifier.alpha(DisabledAlpha)
+                                    modifier = Modifier.alpha(DisabledAlpha),
                                 )
                             }
                         }
@@ -191,12 +191,12 @@ internal fun status() {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 HorizontalDivider()
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = stringResource(R.string.status_loadmore_end)
+                                    text = stringResource(R.string.status_loadmore_end),
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
@@ -209,11 +209,11 @@ internal fun status() {
         items(10) {
             Column {
                 StatusPlaceholder(
-                    modifier = Modifier.padding(horizontal = screenHorizontalPadding)
+                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider(
-                    modifier = Modifier.alpha(DisabledAlpha)
+                    modifier = Modifier.alpha(DisabledAlpha),
                 )
             }
         }
@@ -226,5 +226,5 @@ internal fun status() {
 internal data class StatusEvent(
     val mastodonStatusEvent: MastodonStatusEvent,
     val misskeyStatusEvent: MisskeyStatusEvent,
-    val blueskyStatusEvent: BlueskyStatusEvent
+    val blueskyStatusEvent: BlueskyStatusEvent,
 )

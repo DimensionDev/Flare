@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -21,12 +21,11 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-
 data class UsersFollowersRequest(
     val sinceId: String? = null,
     val untilId: String? = null,
     val limit: Int? = null,
     val userId: String? = null,
     val username: String? = null,
-    val host: String? = null
+    val host: String? = null,
 )

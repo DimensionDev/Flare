@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
  * @param name * @param fileId * @param category Use `null` to reset the category.
  * @param aliases * @param license * @param isSensitive * @param localOnly * @param roleIdsThatCanBeUsedThisEmojiAsReaction */
 @Serializable
-
 data class AdminEmojiAddRequest(
 
     @SerialName(value = "name") val name: kotlin.String,
@@ -41,6 +40,6 @@ data class AdminEmojiAddRequest(
 
     @SerialName(value = "localOnly") val localOnly: kotlin.Boolean? = null,
 
-    @SerialName(value = "roleIdsThatCanBeUsedThisEmojiAsReaction") val roleIdsThatCanBeUsedThisEmojiAsReaction: kotlin.collections.List<kotlin.String>? = null
+    @SerialName(value = "roleIdsThatCanBeUsedThisEmojiAsReaction") val roleIdsThatCanBeUsedThisEmojiAsReaction: kotlin.collections.List<kotlin.String>? = null,
 
 )

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.misskey.api.model
@@ -22,9 +22,8 @@ import kotlinx.serialization.Serializable
  * *
  * @param host */
 @Serializable
-
 data class AdminFederationDeleteAllFilesRequest(
 
-    @SerialName(value = "host") val host: kotlin.String
+    @SerialName(value = "host") val host: kotlin.String,
 
 )

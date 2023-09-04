@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.mastodon.MediaItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
@@ -110,10 +110,10 @@ internal fun QuotedStatus(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        HtmlText(
+                        HtmlText2(
                             element = nameElement,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+//                            maxLines = 1,
+//                            overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             text = handle,
@@ -132,7 +132,7 @@ internal fun QuotedStatus(
                         maxLines = 1,
                     )
                 }
-                HtmlText(element = contentElement, layoutDirection = contentLayoutDirection)
+                HtmlText2(element = contentElement, layoutDirection = contentLayoutDirection)
             }
             if (medias != null) {
                 AdaptiveGrid(

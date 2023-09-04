@@ -60,8 +60,8 @@ import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.getAccountUseCase
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.HtmlText
-import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.EmojiImage
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
@@ -262,10 +262,9 @@ private fun StatusReactionComponent(
                         }
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
-                    NetworkImage(
-                        model = reaction.url,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                    EmojiImage(
+                        uri = reaction.url,
+                        modifier = Modifier.height(16.dp),
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -309,7 +308,7 @@ private fun StatusContentComponent(
         AnimatedVisibility(visible = expanded || data.contentWarningText.isNullOrEmpty()) {
             Column {
                 if (data.content.isNotEmpty() && data.content.isNotBlank()) {
-                    HtmlText(
+                    HtmlText2(
                         element = data.contentToken,
                         layoutDirection = data.contentDirection,
                         modifier = Modifier.fillMaxWidth(),

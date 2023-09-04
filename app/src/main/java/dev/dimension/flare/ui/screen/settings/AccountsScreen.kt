@@ -34,7 +34,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.model.UiUser
@@ -140,7 +140,7 @@ private fun AccountItem(
         is UiState.Success -> {
             ListItem(
                 headlineContent = {
-                    HtmlText(element = userState.data.nameElement)
+                    HtmlText2(element = userState.data.nameElement)
                 },
                 modifier = modifier
                     .clickable {

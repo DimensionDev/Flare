@@ -58,7 +58,7 @@ import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.data.repository.app.getAccountUseCase
 import dev.dimension.flare.data.repository.cache.updateStatusUseCase
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
@@ -339,7 +339,7 @@ private fun StatusContentComponent(
         AnimatedVisibility(visible = expanded || data.contentWarningText.isNullOrEmpty()) {
             Column {
                 if (data.content.isNotEmpty() && data.content.isNotBlank()) {
-                    HtmlText(
+                    HtmlText2(
                         element = data.contentToken,
                         layoutDirection = data.contentDirection,
                         modifier = Modifier.fillMaxWidth(),

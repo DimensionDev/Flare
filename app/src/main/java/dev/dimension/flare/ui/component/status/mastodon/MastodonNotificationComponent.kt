@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.theme.MediumAlpha
@@ -166,7 +166,7 @@ private fun MastodonFollowRequestNotificationComponent(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                HtmlText(
+                HtmlText2(
                     element = data.user.nameElement,
                     layoutDirection = data.user.nameDirection,
                     modifier = Modifier
@@ -291,7 +291,7 @@ private fun MastodonFollowNotificationComponent(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                HtmlText(
+                HtmlText2(
                     element = data.user.nameElement,
                     layoutDirection = data.user.nameDirection,
                     modifier = Modifier

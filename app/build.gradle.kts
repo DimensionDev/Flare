@@ -24,6 +24,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        packaging {
+            resources {
+                excludes.add("META-INF/versions/9/previous-compilation-data.bin") // <-- This?
+                excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+                excludes.add("DebugProbesKt.bin")
+            }
+        }
     }
 
     val file = rootProject.file("signing.properties")
@@ -72,7 +80,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3-dev-k1.9.10-593b4c95fce"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     packaging {
         resources {
@@ -116,6 +124,7 @@ dependencies {
     implementation(libs.zoomable)
     implementation(libs.bluesky.binding)
     implementation(libs.mfm.multiplatform)
+    implementation(libs.bundles.compose.richtext)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

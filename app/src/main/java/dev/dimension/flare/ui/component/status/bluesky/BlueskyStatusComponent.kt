@@ -41,7 +41,7 @@ import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
@@ -134,7 +134,7 @@ private fun StatusContentComponent(
         modifier = modifier,
     ) {
         if (data.content.isNotEmpty() && data.content.isNotBlank()) {
-            HtmlText(
+            HtmlText2(
                 element = data.contentToken,
                 layoutDirection = data.contentDirection,
                 modifier = Modifier.fillMaxWidth(),

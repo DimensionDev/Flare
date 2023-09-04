@@ -68,7 +68,7 @@ import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.collectAsUiState
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.placeholder.placeholder
@@ -301,7 +301,7 @@ fun ProfileScreen(
                         TopAppBar(
                             title = {
                                 state.userState.onSuccess {
-                                    HtmlText(
+                                    HtmlText2(
                                         element = it.nameElement,
                                         modifier = Modifier.graphicsLayer {
                                             alpha = titleAlpha
@@ -493,9 +493,9 @@ internal fun CommonProfileHeader(
                         .weight(1f)
                         .padding(top = actualBannerHeight),
                 ) {
-                    HtmlText(
+                    HtmlText2(
                         element = displayName,
-                        textStyle = MaterialTheme.typography.titleMedium,
+//                        textStyle = MaterialTheme.typography.titleMedium,
                     )
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),

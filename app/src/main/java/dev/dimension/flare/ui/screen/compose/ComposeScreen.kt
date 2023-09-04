@@ -1017,10 +1017,12 @@ private fun emojiPresenter(
     account: UiAccount,
 ) = run {
     val service = accountServiceProvider(account = account)
-    val emojiState = when (service) {
-        is MastodonService -> service.emoji()
-        is MisskeyService -> service.emoji()
-        else -> null
+    val emojiState = remember(account.accountKey) {
+        when (service) {
+            is MastodonService -> service.emoji()
+            is MisskeyService -> service.emoji()
+            else -> null
+        }
     }?.collectAsState()?.toUi()
     object {
         val emojiState = emojiState

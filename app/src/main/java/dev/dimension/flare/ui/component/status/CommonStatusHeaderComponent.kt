@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.theme.MediumAlpha
 
@@ -47,7 +47,7 @@ internal fun CommonStatusHeaderComponent(
             modifier = Modifier
                 .weight(1f),
         ) {
-            HtmlText(
+            HtmlText2(
                 element = data.nameElement,
                 modifier = Modifier
                     .clickable(

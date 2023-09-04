@@ -47,7 +47,7 @@ class MisskeyService(
             baseUrl = baseUrl,
             config = {
                 install(DefaultRequest) {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json)
+//                    header(HttpHeaders.ContentType, ContentType.Application.Json)
                 }
             },
         ).create()

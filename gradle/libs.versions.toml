@@ -12,14 +12,14 @@ ksp = "1.9.10-1.0.13"
 room = "2.5.2"
 paging = "3.2.0"
 navigation = "2.7.1"
-kotlinx-datetime = "0.4.0"
+kotlinx-datetime = "0.4.1"
 kotlinx-collections-immutable = "0.3.5"
 kotlinx-serialization-json = "1.6.0"
 koject = "1.3.0"
 coil = "2.4.0"
 ktorfit = "1.6.0"
-ktor = "2.3.3"
-twitter-parser = "0.2.9"
+ktor = "2.3.4"
+twitter-parser = "0.3.1"
 molecule = "1.2.0"
 jsoup = "1.16.1"
 accompanist = "0.33.1-alpha"
@@ -29,6 +29,7 @@ okhttp3 = "4.11.0"
 compose-lint-checks = "1.2.0"
 ktlint = "11.5.1"
 androidx-credentials = "1.2.0-beta03"
+compose-richtext = "0.17.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -107,6 +108,9 @@ bluesky-binding = "sh.christian.ozone:bluesky:0.0.2"
 
 mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.0.9"
 
+compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
+compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }
+
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]
 paging = ["paging-runtime", "paging-compose"]
@@ -117,6 +121,7 @@ ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "k
 coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp"]
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
+compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

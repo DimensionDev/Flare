@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.component
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
@@ -45,7 +45,7 @@ import org.jsoup.nodes.TextNode
 private const val ID_IMAGE = "image"
 
 @Composable
-fun HtmlText(
+fun HtmlText3(
     element: Element,
     modifier: Modifier = Modifier,
     layoutDirection: LayoutDirection = LocalLayoutDirection.current,
@@ -164,11 +164,10 @@ private fun RenderContent(
                         placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
                     ),
                 ) { target ->
-                    NetworkImage(
-                        model = target,
-                        contentDescription = null,
+                    EmojiImage(
+                        uri = target,
                         modifier = Modifier
-                            .size(LocalTextStyle.current.fontSize.value.dp),
+                            .height(LocalTextStyle.current.fontSize.value.dp),
                     )
                 },
             ),

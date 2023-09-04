@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.theme.MediumAlpha
@@ -150,7 +150,7 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
                     modifier = Modifier
                         .weight(1f),
                 ) {
-                    HtmlText(
+                    HtmlText2(
                         element = data.user.nameElement,
                         layoutDirection = data.user.nameDirection,
                         modifier = Modifier
@@ -204,7 +204,7 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
                     modifier = Modifier
                         .weight(1f),
                 ) {
-                    HtmlText(
+                    HtmlText2(
                         element = data.user.nameElement,
                         layoutDirection = data.user.nameDirection,
                         modifier = Modifier
@@ -387,7 +387,7 @@ private fun MisskeyFollowNotificationComponent(
                     modifier = Modifier
                         .weight(1f),
                 ) {
-                    HtmlText(
+                    HtmlText2(
                         element = data.user.nameElement,
                         layoutDirection = data.user.nameDirection,
                         modifier = Modifier

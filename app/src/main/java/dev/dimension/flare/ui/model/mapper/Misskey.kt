@@ -40,13 +40,6 @@ import moe.tlaster.mfm.parser.tree.SearchNode
 import moe.tlaster.mfm.parser.tree.SmallNode
 import moe.tlaster.mfm.parser.tree.StrikeNode
 import moe.tlaster.mfm.parser.tree.UrlNode
-import moe.tlaster.twitter.parser.CashTagToken
-import moe.tlaster.twitter.parser.EmojiToken
-import moe.tlaster.twitter.parser.HashTagToken
-import moe.tlaster.twitter.parser.StringToken
-import moe.tlaster.twitter.parser.Token
-import moe.tlaster.twitter.parser.UrlToken
-import moe.tlaster.twitter.parser.UserNameToken
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
@@ -273,45 +266,6 @@ private fun parseDescription(
     return misskeyParser.parse(user.description).toHtml(accountHost) as? Element
 }
 
-private fun Token.toElement(
-    accountHost: String,
-): Node {
-    return when (this) {
-        is CashTagToken -> Element("a").apply {
-            attr("href", AppDeepLink.Search(value))
-            text(value)
-        }
-
-        is EmojiToken -> {
-            Element("img").apply {
-                attr("src", resolveMisskeyEmoji(value, accountHost))
-            }
-        }
-
-        is HashTagToken -> Element("a").apply {
-            attr("href", AppDeepLink.Search(value))
-            text(value)
-        }
-
-        is StringToken -> TextNode(value)
-        is UrlToken -> Element("a").apply {
-            attr("href", value)
-            text(value)
-        }
-
-        is UserNameToken -> Element("a").apply {
-            val trimmed = value.trimStart('@')
-            if (trimmed.contains('@')) {
-                val (username, host) = trimmed.split('@')
-                attr("href", ProfileWithUserNameAndHostRouteDestination(username, host).deeplink())
-            } else {
-                attr("href", ProfileWithUserNameAndHostRouteDestination(trimmed, accountHost).deeplink())
-            }
-            text(value)
-        }
-    }
-}
-
 private fun parseName(
     user: User,
     accountHost: String,
@@ -335,18 +289,22 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         }
         is CodeBlockNode -> {
             Element("pre").apply {
-                Element("code").apply {
-                    language?.let { attr("lang", it) }
-                    text(code)
-                }
+                appendChild(
+                    Element("code").apply {
+                        language?.let { attr("lang", it) }
+                        text(code)
+                    },
+                )
             }
         }
         is MathBlockNode -> {
             Element("pre").apply {
-                Element("code").apply {
-                    attr("lang", "math")
-                    text(formula)
-                }
+                appendChild(
+                    Element("code").apply {
+                        attr("lang", "math")
+                        text(formula)
+                    },
+                )
             }
         }
         is QuoteNode -> {
@@ -413,6 +371,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is EmojiCodeNode -> {
             Element("img").apply {
                 attr("src", resolveMisskeyEmoji(emoji, accountHost))
+                attr("alt", emoji)
             }
         }
         is HashtagNode -> {
@@ -456,7 +415,9 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
                 )
             }
         }
-        is moe.tlaster.mfm.parser.tree.TextNode -> TextNode(content)
+        is moe.tlaster.mfm.parser.tree.TextNode -> {
+            TextNode(content)
+        }
         is UrlNode -> {
             Element("a").apply {
                 attr("href", url)

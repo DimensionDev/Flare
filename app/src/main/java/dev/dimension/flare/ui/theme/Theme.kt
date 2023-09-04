@@ -13,6 +13,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.halilibo.richtext.ui.material3.SetupMaterial3RichText
 
 private val DarkColorScheme = darkColorScheme(
 //    primary = Purple80,
@@ -58,13 +59,17 @@ fun FlareTheme(
             val window = (view.context as Activity).window
 //            window.statusBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars =
+                !darkTheme
         }
     }
-
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content,
+        content = {
+            SetupMaterial3RichText {
+                content.invoke()
+            }
+        },
     )
 }

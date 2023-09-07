@@ -42,7 +42,7 @@ internal fun StatusRetweetHeaderComponent(
             HtmlText2(
                 element = user.nameElement,
                 layoutDirection = LocalLayoutDirection.current,
-//                textStyle = MaterialTheme.typography.bodySmall,
+                textStyle = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.alignByBaseline(),
             )
         }

@@ -112,8 +112,8 @@ internal fun QuotedStatus(
                     ) {
                         HtmlText2(
                             element = nameElement,
-//                            maxLines = 1,
-//                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             text = handle,

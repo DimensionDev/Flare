@@ -495,7 +495,7 @@ internal fun CommonProfileHeader(
                 ) {
                     HtmlText2(
                         element = displayName,
-//                        textStyle = MaterialTheme.typography.titleMedium,
+                        textStyle = MaterialTheme.typography.titleMedium,
                     )
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),

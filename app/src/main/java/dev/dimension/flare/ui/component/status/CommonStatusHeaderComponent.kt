@@ -56,6 +56,7 @@ internal fun CommonStatusHeaderComponent(
                     ) {
                         onUserClick(data.userKey)
                     },
+                maxLines = 1,
             )
             Text(
                 text = data.handle,

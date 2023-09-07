@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,21 +13,26 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.ui.BlockQuote
 import com.halilibo.richtext.ui.CodeBlock
+import com.halilibo.richtext.ui.CodeBlockStyle
 import com.halilibo.richtext.ui.RichText
 import com.halilibo.richtext.ui.RichTextScope
 import com.halilibo.richtext.ui.RichTextStyle
@@ -47,6 +53,10 @@ fun HtmlText2(
     element: Element,
     modifier: Modifier = Modifier,
     layoutDirection: LayoutDirection = LocalLayoutDirection.current,
+    overflow: TextOverflow = TextOverflow.Ellipsis,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    textStyle: TextStyle = LocalTextStyle.current,
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val handler = LocalUriHandler.current
@@ -58,21 +68,31 @@ fun HtmlText2(
                         color = primaryColor,
                     ),
                 ),
+                codeBlockStyle = CodeBlockStyle(
+                    modifier = Modifier
+                        .background(Color.LightGray.copy(alpha = .5f))
+                        .fillMaxWidth(),
+                ),
             ),
+            overflow = overflow,
+            softWrap = softWrap,
+            maxLines = maxLines,
             onLinkClick = {
                 handler.openUri(it)
             },
         )
     }
-    CompositionLocalProvider(
-        LocalLayoutDirection provides layoutDirection,
-    ) {
-        RichText(
-            modifier = modifier,
-            style = context.style,
+    ProvideTextStyle(value = textStyle) {
+        CompositionLocalProvider(
+            LocalLayoutDirection provides layoutDirection,
         ) {
-            with(element) {
-                RenderElement(context)
+            RichText(
+                modifier = modifier,
+                style = context.style,
+            ) {
+                with(element) {
+                    RenderElement(context)
+                }
             }
         }
     }
@@ -272,6 +292,28 @@ private fun RenderElement(
         "pre" -> {
             CodeBlock(text())
         }
+
+//        "span" -> {
+//            childNodes().forEach {
+//                with(it) {
+//                    RenderNode(context)
+//                }
+//            }
+//            with(context) {
+//                RenderTextAndReset()
+//            }
+//        }
+
+        else -> {
+            childNodes().forEach {
+                with(it) {
+                    RenderNode(context)
+                }
+            }
+            with(context) {
+                RenderTextAndReset()
+            }
+        }
     }
 }
 
@@ -314,6 +356,9 @@ private fun RenderNode(
 
 private class RenderContext(
     val style: RichTextStyle,
+    val overflow: TextOverflow,
+    val softWrap: Boolean,
+    val maxLines: Int,
     val onLinkClick: (String) -> Unit,
 ) {
     var builder = RichTextString.Builder()
@@ -330,6 +375,14 @@ private class RenderContext(
     fun RenderTextAndReset(
         modifier: Modifier = Modifier,
     ) {
-        getTextAndReset()?.let { Text(text = it, modifier = modifier) }
+        getTextAndReset()?.let {
+            Text(
+                text = it,
+                modifier = modifier,
+                overflow = overflow,
+                softWrap = softWrap,
+                maxLines = maxLines,
+            )
+        }
     }
 }

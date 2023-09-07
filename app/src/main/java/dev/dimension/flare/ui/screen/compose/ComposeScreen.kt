@@ -577,8 +577,8 @@ private fun ComposeScreen(
                                         onClick = {
                                             pollState.setPollSingleChoice(true)
                                         },
-                                        shape = SegmentedButtonDefaults.shape(
-                                            position = 0,
+                                        shape = SegmentedButtonDefaults.itemShape(
+                                            index = 0,
                                             count = 2,
                                         ),
                                     ) {
@@ -589,8 +589,8 @@ private fun ComposeScreen(
                                         onClick = {
                                             pollState.setPollSingleChoice(false)
                                         },
-                                        shape = SegmentedButtonDefaults.shape(
-                                            position = 1,
+                                        shape = SegmentedButtonDefaults.itemShape(
+                                            index = 1,
                                             count = 2,
                                         ),
                                     ) {

@@ -71,8 +71,8 @@ fun NotificationScreen(
                                         onClick = {
                                             state.onNotificationTypeChanged(notificationType)
                                         },
-                                        shape = SegmentedButtonDefaults.shape(
-                                            position = index,
+                                        shape = SegmentedButtonDefaults.itemShape(
+                                            index = index,
                                             count = it.size,
                                         ),
                                     ) {

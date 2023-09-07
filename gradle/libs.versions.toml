@@ -1,17 +1,17 @@
 [versions]
-agp = "8.2.0-beta01"
+agp = "8.2.0-beta02"
 kotlin = "1.9.10"
-core-ktx = "1.10.1"
+core-ktx = "1.12.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
-lifecycle-runtime-ktx = "2.6.1"
+lifecycle-runtime-ktx = "2.6.2"
 activity-compose = "1.7.2"
-compose-bom = "2023.09.00-alpha03"
+compose-bom = "2023.10.00-alpha01"
 ksp = "1.9.10-1.0.13"
 room = "2.5.2"
-paging = "3.2.0"
-navigation = "2.7.1"
+paging = "3.2.1"
+navigation = "2.7.2"
 kotlinx-datetime = "0.4.1"
 kotlinx-collections-immutable = "0.3.5"
 kotlinx-serialization-json = "1.6.0"
@@ -30,6 +30,7 @@ compose-lint-checks = "1.2.0"
 ktlint = "11.5.1"
 androidx-credentials = "1.2.0-beta03"
 compose-richtext = "0.17.0"
+apng-android = "2.27.3"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -72,8 +73,9 @@ koject-compose-core = { group = "com.moriatsushi.koject", name = "koject-compose
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
-apng = "com.github.penfeizhou.android.animation:apng:2.26.0"
-awebp = "com.github.penfeizhou.android.animation:awebp:2.26.0"
+apng = { group = "com.github.penfeizhou.android.animation", name = "apng", version.ref = "apng-android" }
+awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", version.ref = "apng-android" }
+vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.1.0" }
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
@@ -106,7 +108,7 @@ zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.
 
 bluesky-binding = "sh.christian.ozone:bluesky:0.0.2"
 
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.0.9"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.0"
 
 compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
 compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }
@@ -118,7 +120,7 @@ navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-atomicfu"]
 koject = ["koject-core", "koject-android-core", "koject-android-activity", "koject-android-fragment", "koject-android-viewmodel", "koject-compose-core"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-client-okhttp", "okhttp3-logging-interceptor"]
-coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp"]
+coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated"]
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
 compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]

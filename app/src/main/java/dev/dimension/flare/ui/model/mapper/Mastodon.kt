@@ -141,7 +141,7 @@ private fun parseContent(
     emoji.forEach {
         content = content.replace(
             ":${it.shortcode}:",
-            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>",
+            "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
         )
     }
     val body = Jsoup.parse(content).body()
@@ -253,7 +253,7 @@ private fun parseNote(account: Account): Element? {
     emoji.forEach {
         content = content.replace(
             ":${it.shortcode}:",
-            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>",
+            "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
         )
     }
     return Jsoup.parse(content).body()
@@ -265,7 +265,7 @@ private fun parseContent(status: Account): Element {
     emoji.forEach {
         content = content.replace(
             ":${it.shortcode}:",
-            "<emoji target=\"${it.url}\">:${it.shortcode}:</emoji>",
+            "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
         )
     }
     return Jsoup.parse(content).body()

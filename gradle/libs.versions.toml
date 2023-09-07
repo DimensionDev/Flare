@@ -108,7 +108,7 @@ zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.
 
 bluesky-binding = "sh.christian.ozone:bluesky:0.0.2"
 
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.0"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.1"
 
 compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
 compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }

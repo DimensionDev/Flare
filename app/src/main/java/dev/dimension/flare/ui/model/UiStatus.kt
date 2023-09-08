@@ -304,7 +304,7 @@ internal sealed class UiStatus {
     data class BlueskyNotification(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
-        val user: UiUser.Bluesky?,
+        val user: UiUser.Bluesky,
         /**
          * Expected values are 'like', 'repost', 'follow', 'mention', 'reply', and 'quote'.
          */
@@ -312,7 +312,7 @@ internal sealed class UiStatus {
         val indexedAt: Instant,
     ) : UiStatus() {
         override val itemKey: String by lazy {
-            statusKey.toString() + user?.let { "_${it.userKey}" }.orEmpty()
+            statusKey.toString() + "_${user.userKey}"
         }
         val humanizedTime by lazy {
             indexedAt.humanize()

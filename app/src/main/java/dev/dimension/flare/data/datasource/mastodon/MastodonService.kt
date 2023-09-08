@@ -1,10 +1,7 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.map
 import com.moriatsushi.koject.lazyInject
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
@@ -13,6 +10,7 @@ import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.MicroblogService
 import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.datasource.timelinePager
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -24,7 +22,6 @@ import dev.dimension.flare.ui.model.mapper.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
 @OptIn(ExperimentalPagingApi::class)
@@ -33,30 +30,30 @@ internal class MastodonService(
 ) : MicroblogService {
     private val database: CacheDatabase by lazyInject()
     override fun homeTimeline(pageSize: Int, pagingKey: String): Flow<PagingData<UiStatus>> {
-        return Pager(
-            config = PagingConfig(pageSize = pageSize),
-            remoteMediator = HomeTimelineRemoteMediator(
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = HomeTimelineRemoteMediator(
                 account.service,
                 database,
                 account.accountKey,
                 pagingKey,
             ),
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+        )
     }
 
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> = Pager(
-        config = PagingConfig(pageSize = pageSize),
-        remoteMediator = when (type) {
+    ): Flow<PagingData<UiStatus>> = timelinePager(
+        pageSize = pageSize,
+        pagingKey = pagingKey,
+        accountKey = account.accountKey,
+        database = database,
+        mediator = when (type) {
             NotificationFilter.All -> NotificationRemoteMediator(
                 account.service,
                 database,
@@ -71,13 +68,7 @@ internal class MastodonService(
                 pagingKey,
             )
         },
-    ) {
-        database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-    }.flow.map {
-        it.map {
-            it.toUi()
-        }
-    }
+    )
 
     override val supportedNotificationFilter: List<NotificationFilter>
         get() = listOf(
@@ -131,51 +122,46 @@ internal class MastodonService(
         userKey: MicroBlogKey,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
-        Pager(
-            config = PagingConfig(pageSize = pageSize),
-            remoteMediator = UserTimelineRemoteMediator(
-                account.service,
-                database,
-                account.accountKey,
-                userKey,
-                pagingKey,
-            ),
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+    ): Flow<PagingData<UiStatus>> = timelinePager(
+        pageSize = pageSize,
+        pagingKey = pagingKey,
+        accountKey = account.accountKey,
+        database = database,
+        mediator = UserTimelineRemoteMediator(
+            account.service,
+            database,
+            account.accountKey,
+            userKey,
+            pagingKey,
+        ),
+    )
 
     override fun context(
         statusKey: MicroBlogKey,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
-        Pager(
-            config = PagingConfig(pageSize = pageSize),
-            remoteMediator = StatusDetailRemoteMediator(
-                statusKey,
-                account.service,
-                database,
-                account.accountKey,
-                pagingKey,
-                statusOnly = false,
-            ),
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+    ): Flow<PagingData<UiStatus>> = timelinePager(
+        pageSize = pageSize,
+        pagingKey = pagingKey,
+        accountKey = account.accountKey,
+        database = database,
+        mediator = StatusDetailRemoteMediator(
+            statusKey,
+            account.service,
+            database,
+            account.accountKey,
+            pagingKey,
+            statusOnly = false,
+        ),
+    )
 
     override fun status(statusKey: MicroBlogKey, pagingKey: String): Flow<PagingData<UiStatus>> =
-        Pager(
-            config = PagingConfig(pageSize = 20),
-            remoteMediator = StatusDetailRemoteMediator(
+        timelinePager(
+            pageSize = 1,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = StatusDetailRemoteMediator(
                 statusKey,
                 account.service,
                 database,
@@ -183,13 +169,7 @@ internal class MastodonService(
                 pagingKey,
                 statusOnly = true,
             ),
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+        )
 
     fun emoji() = Cacheable(
         fetchSource = {

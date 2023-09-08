@@ -13,7 +13,10 @@ import app.bsky.notification.ListNotificationsNotification
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.common.jsonObjectOrNull
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
@@ -34,6 +37,18 @@ import moe.tlaster.twitter.parser.UserNameToken
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
+
+internal fun FeedViewPostReasonUnion.toUi(
+    accountKey: MicroBlogKey,
+    data: DbPagingTimelineWithStatus,
+): UiStatus.Bluesky {
+    val actualPost = data.status.references.firstOrNull { it.reference.referenceType == ReferenceType.Retweet }
+    requireNotNull(actualPost)
+    require(actualPost.status.data.content is StatusContent.Bluesky)
+    return actualPost.status.data.content.data.toUi(accountKey).copy(
+        repostBy = (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey.host),
+    )
+}
 
 internal fun FeedViewPost.toUi(
     accountKey: MicroBlogKey,

@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.datasource.bluesky
 
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
 import com.moriatsushi.koject.lazyInject
@@ -11,6 +10,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.MicroblogService
 import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.datasource.timelinePager
 import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
@@ -27,25 +27,43 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import sh.christian.ozone.api.AtIdentifier
 
+@OptIn(ExperimentalPagingApi::class)
 internal class BlueskyService(
     private val account: UiAccount.Bluesky,
 ) : MicroblogService {
     private val database: CacheDatabase by lazyInject()
-    override fun homeTimeline(pageSize: Int, pagingKey: String): Flow<PagingData<UiStatus>> = Pager(
-        config = PagingConfig(pageSize = pageSize),
-    ) {
-        HomeTimelinePagingSource(account)
-    }.flow
+    override fun homeTimeline(pageSize: Int, pagingKey: String): Flow<PagingData<UiStatus>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = HomeTimelineRemoteMediator(
+                account,
+                database,
+                pagingKey,
+            ),
+        )
 
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> = Pager(
-        config = PagingConfig(pageSize = pageSize),
-    ) {
-        NotificationPagingSrouce(account)
-    }.flow
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = when (type) {
+                NotificationFilter.All -> NotificationRemoteMediator(
+                    account,
+                    database,
+                    pagingKey,
+                )
+                else -> throw IllegalArgumentException("Unsupported notification filter")
+            },
+        )
 
     override val supportedNotificationFilter: List<NotificationFilter>
         get() = listOf(NotificationFilter.All)
@@ -100,38 +118,50 @@ internal class BlueskyService(
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> =
-        Pager(
-            config = PagingConfig(pageSize = pageSize),
-        ) {
-            UserTimelinePagingSource(
-                account = account,
-                userKey = userKey,
-            )
-        }.flow
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = UserTimelineRemoteMediator(
+                account,
+                database,
+                userKey,
+                pagingKey,
+            ),
+        )
 
     override fun context(
         statusKey: MicroBlogKey,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> =
-        Pager(
-            config = PagingConfig(pageSize = pageSize),
-        ) {
-            StatusDetailPagingSource(
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = StatusDetailRemoteMediator(
+                statusKey,
+                account,
+                database,
+                pagingKey,
                 statusOnly = false,
-                account = account,
-                statusKey = statusKey,
-            )
-        }.flow
+            ),
+        )
 
     override fun status(statusKey: MicroBlogKey, pagingKey: String): Flow<PagingData<UiStatus>> =
-        Pager(
-            config = PagingConfig(pageSize = 20),
-        ) {
-            StatusDetailPagingSource(
+        timelinePager(
+            pageSize = 1,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = StatusDetailRemoteMediator(
+                statusKey,
+                account,
+                database,
+                pagingKey,
                 statusOnly = true,
-                account = account,
-                statusKey = statusKey,
-            )
-        }.flow
+            ),
+        )
 }

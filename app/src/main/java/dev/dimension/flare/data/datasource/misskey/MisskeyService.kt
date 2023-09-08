@@ -1,10 +1,7 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.map
 import com.moriatsushi.koject.lazyInject
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
@@ -13,6 +10,7 @@ import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.MicroblogService
 import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.datasource.timelinePager
 import dev.dimension.flare.data.repository.app.UiAccount
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -35,20 +33,17 @@ internal class MisskeyService(
     private val database: CacheDatabase by lazyInject()
 
     override fun homeTimeline(pageSize: Int, pagingKey: String): Flow<PagingData<UiStatus>> {
-        return Pager(
-            config = PagingConfig(pageSize = pageSize),
-            remoteMediator = HomeTimelineRemoteMediator(
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = HomeTimelineRemoteMediator(
                 account,
                 database,
                 pagingKey,
             ),
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+        )
     }
 
     override fun notification(
@@ -56,9 +51,12 @@ internal class MisskeyService(
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
-        return Pager(
-            config = PagingConfig(pageSize = pageSize),
-            remoteMediator = when (type) {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = when (type) {
                 NotificationFilter.All -> NotificationRemoteMediator(
                     account,
                     database,
@@ -71,13 +69,7 @@ internal class MisskeyService(
                     pagingKey,
                 )
             },
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+        )
     }
 
     override val supportedNotificationFilter: List<NotificationFilter>
@@ -139,21 +131,18 @@ internal class MisskeyService(
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
-        return Pager(
-            config = PagingConfig(pageSize = pageSize),
-            remoteMediator = UserTimelineRemoteMediator(
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = UserTimelineRemoteMediator(
                 account,
                 userKey,
                 database,
                 pagingKey,
             ),
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+        )
     }
 
     override fun context(
@@ -161,41 +150,35 @@ internal class MisskeyService(
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
-        return Pager(
-            config = PagingConfig(pageSize = pageSize),
-            remoteMediator = StatusDetailRemoteMediator(
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = StatusDetailRemoteMediator(
                 statusKey,
                 database,
                 account,
                 pagingKey,
                 statusOnly = false,
             ),
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+        )
     }
 
     override fun status(statusKey: MicroBlogKey, pagingKey: String): Flow<PagingData<UiStatus>> {
-        return Pager(
-            config = PagingConfig(pageSize = 20),
-            remoteMediator = StatusDetailRemoteMediator(
+        return timelinePager(
+            pageSize = 1,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator = StatusDetailRemoteMediator(
                 statusKey,
                 database,
                 account,
                 pagingKey,
                 statusOnly = true,
             ),
-        ) {
-            database.pagingTimelineDao().getPagingSource(pagingKey, account.accountKey)
-        }.flow.map {
-            it.map {
-                it.toUi()
-            }
-        }
+        )
     }
 
     fun emoji() = Cacheable(

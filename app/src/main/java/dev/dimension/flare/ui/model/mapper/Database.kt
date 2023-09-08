@@ -24,11 +24,16 @@ internal fun DbPagingTimelineWithStatus.toUi(): UiStatus {
         is StatusContent.MisskeyNotification -> status.data.toUi(
             accountKey = timeline.accountKey,
         )
-
-//        is StatusContent.Bluesky -> status.data.toUi(
-//            accountKey = timeline.accountKey
-//        )
-//        is StatusContent.BlueskyNotification -> TODO()
+        is StatusContent.Bluesky -> status.data.toUi(
+            accountKey = timeline.accountKey,
+        )
+        is StatusContent.BlueskyNotification -> status.data.toUi(
+            accountKey = timeline.accountKey,
+        )
+        is StatusContent.BlueskyReason -> status.data.toUi(
+            accountKey = timeline.accountKey,
+            data = this,
+        )
     }
 }
 

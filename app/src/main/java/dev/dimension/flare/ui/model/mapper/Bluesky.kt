@@ -42,8 +42,7 @@ internal fun FeedViewPostReasonUnion.toUi(
     accountKey: MicroBlogKey,
     data: DbPagingTimelineWithStatus,
 ): UiStatus.Bluesky {
-    val actualPost = data.status.references.firstOrNull { it.reference.referenceType == ReferenceType.Retweet }
-    requireNotNull(actualPost)
+    val actualPost = data.status.references.first { it.reference.referenceType == ReferenceType.Retweet }
     require(actualPost.status.data.content is StatusContent.Bluesky)
     return actualPost.status.data.content.data.toUi(accountKey).copy(
         repostBy = (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey.host),

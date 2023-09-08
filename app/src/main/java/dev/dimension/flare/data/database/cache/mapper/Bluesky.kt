@@ -272,8 +272,8 @@ fun FeedViewPost.toDbStatusWithReference(
             return DbStatusWithReference(
                 status = reasonStatus,
                 references = listOfNotNull(
-                    reply?.toDbStatusReference(status.data.statusKey, ReferenceType.Reply),
-                    status.toDbStatusReference(status.data.statusKey, ReferenceType.Retweet),
+                    reply?.toDbStatusReference(reasonStatus.data.statusKey, ReferenceType.Reply),
+                    status.toDbStatusReference(reasonStatus.data.statusKey, ReferenceType.Retweet),
                 ),
             )
         }

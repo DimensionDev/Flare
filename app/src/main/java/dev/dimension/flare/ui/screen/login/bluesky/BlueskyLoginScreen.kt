@@ -50,8 +50,8 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
+import dev.dimension.flare.ui.screen.destinations.BlueskyLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.MastodonCallbackRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.Url
@@ -66,7 +66,7 @@ fun BlueskyLoginRoute(
         onBack = navigator::navigateUp,
         toHome = {
             navigator.navigate(HomeRouteDestination) {
-                popUpTo(MastodonCallbackRouteDestination) {
+                popUpTo(BlueskyLoginRouteDestination) {
                     inclusive = true
                 }
             }

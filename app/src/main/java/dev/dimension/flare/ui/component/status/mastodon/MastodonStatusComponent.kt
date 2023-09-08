@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -59,9 +58,9 @@ import dev.dimension.flare.data.repository.app.getAccountUseCase
 import dev.dimension.flare.data.repository.cache.updateStatusUseCase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HtmlText2
-import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
@@ -277,33 +276,6 @@ private fun StatusFooterComponent(
                 },
             )
         }
-    }
-}
-
-@Composable
-fun MediaItem(
-    media: UiMedia,
-    modifier: Modifier = Modifier,
-) {
-    when (media) {
-        is UiMedia.Image -> {
-            NetworkImage(
-                model = media.url,
-                contentDescription = media.description,
-                modifier = modifier.aspectRatio(media.aspectRatio),
-            )
-        }
-
-        is UiMedia.Video -> {
-            NetworkImage(
-                model = media.thumbnailUrl,
-                contentDescription = media.description,
-                modifier = modifier.aspectRatio(media.aspectRatio),
-            )
-        }
-
-        is UiMedia.Audio -> Unit
-        is UiMedia.Gif -> Unit
     }
 }
 

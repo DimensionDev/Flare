@@ -113,7 +113,7 @@ private fun statusPresenter(
 ) = run {
     val listState = activeAccountServicePresenter().map { (service, account) ->
         remember(account.accountKey, statusKey) {
-            service.status(statusKey)
+            service.context(statusKey)
         }.collectAsLazyPagingItems()
     }
     val refreshing =

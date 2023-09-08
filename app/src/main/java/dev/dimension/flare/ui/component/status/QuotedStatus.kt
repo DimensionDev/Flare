@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
-import dev.dimension.flare.ui.component.status.mastodon.MediaItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.theme.MediumAlpha

@@ -30,7 +30,7 @@ compose-lint-checks = "1.2.0"
 ktlint = "11.5.1"
 androidx-credentials = "1.2.0-beta03"
 compose-richtext = "0.17.0"
-apng-android = "2.27.3"
+apng-android = "2.28.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }

@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS DbVersion (
+    id INTEGER PRIMARY KEY NOT NULL,
+    version INTEGER NOT NULL
+);
+
+findAll:
+SELECT * FROM DbVersion;
+
+find:
+SELECT * FROM DbVersion WHERE id=:id;
+
+insert:
+INSERT OR REPLACE INTO DbVersion(
+     id, version
+) VALUES ?;

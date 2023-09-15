@@ -1,5 +1,8 @@
 [versions]
-agp = "8.2.0-beta03"
+compileSdk = "34"
+minSdk = "21"
+java = "17"
+agp = "8.2.0-beta04"
 kotlin = "1.9.10"
 core-ktx = "1.12.0"
 junit = "4.13.2"
@@ -8,6 +11,7 @@ espresso-core = "3.5.1"
 lifecycle-runtime-ktx = "2.6.2"
 activity-compose = "1.7.2"
 compose-bom = "2023.10.00-alpha01"
+compose-complier = "1.5.3"
 ksp = "1.9.10-1.0.13"
 room = "2.5.2"
 paging = "3.2.1"
@@ -27,10 +31,13 @@ kotlinx-atomicfu = "0.22.0"
 compose-destinations = "1.9.53"
 okhttp3 = "4.11.0"
 compose-lint-checks = "1.2.0"
-ktlint = "11.5.1"
+ktlintPlugin = "11.5.1"
 androidx-credentials = "1.2.0-beta03"
 compose-richtext = "0.17.0"
 apng-android = "2.28.0"
+ktlint = "0.50.0"
+sqldelight = "2.0.0"
+multiplatform-paging = "3.2.0-alpha05-0.2.3"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -64,6 +71,7 @@ kotlinx-atomicfu = { group = "org.jetbrains.kotlinx", name = "atomicfu", version
 
 koject-core = { group = "com.moriatsushi.koject", name = "koject-core", version.ref = "koject" }
 koject-processor-app = { group = "com.moriatsushi.koject", name = "koject-processor-app", version.ref = "koject" }
+koject-processor-lib = { group = "com.moriatsushi.koject", name = "koject-processor-lib", version.ref = "koject" }
 koject-android-core = { group = "com.moriatsushi.koject", name = "koject-android-core", version.ref = "koject" }
 koject-android-activity = { group = "com.moriatsushi.koject", name = "koject-android-activity", version.ref = "koject" }
 koject-android-fragment = { group = "com.moriatsushi.koject", name = "koject-android-fragment", version.ref = "koject" }
@@ -113,6 +121,13 @@ mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.1"
 compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
 compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }
 
+sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
+sqldelight-native-driver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
+sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
+sqldelight-androidx-paging3-extensions = { group = "app.cash.sqldelight", name = "androidx-paging3-extensions", version.ref = "sqldelight" }
+
+paging-multiplatform-common = { group = "app.cash.paging", name = "paging-common", version.ref = "multiplatform-paging" }
+
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]
 paging = ["paging-runtime", "paging-compose"]
@@ -124,11 +139,15 @@ coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
 compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]
+sqldelight = ["sqldelight-coroutines-extensions", "sqldelight-androidx-paging3-extensions"]
 
 [plugins]
-androidApplication = { id = "com.android.application", version.ref = "agp" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version = "1.7.0" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }

@@ -1,0 +1,12 @@
+import dev.dimension.flare.data.database.cache.EmojiContent;
+
+CREATE TABLE IF NOT EXISTS DbEmoji (
+    host TEXT NOT NULL,
+    content TEXT AS EmojiContent NOT NULL
+);
+
+insert:
+INSERT INTO DbEmoji (host, content) VALUES (:host, :content);
+
+get:
+SELECT * FROM DbEmoji WHERE host = :host;

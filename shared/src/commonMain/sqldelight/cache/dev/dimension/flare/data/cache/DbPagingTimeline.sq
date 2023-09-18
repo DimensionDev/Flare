@@ -1,0 +1,53 @@
+import dev.dimension.flare.data.database.cache.StatusContent;
+import dev.dimension.flare.model.MicroBlogKey;
+import dev.dimension.flare.model.PlatformType;
+import dev.dimension.flare.model.ReferenceType;
+
+CREATE TABLE IF NOT EXISTS DbPagingTimeline (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_key TEXT AS MicroBlogKey NOT NULL,
+    paging_key TEXT NOT NULL,
+    status_key TEXT AS MicroBlogKey NOT NULL,
+    sort_id INTEGER NOT NULL,
+    UNIQUE (account_key, paging_key, status_key)
+);
+
+CREATE TABLE IF NOT EXISTS DbStatusReference (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reference_type TEXT AS ReferenceType NOT NULL,
+    status_key TEXT AS MicroBlogKey NOT NULL,
+    reference_key TEXT AS MicroBlogKey NOT NULL,
+    UNIQUE (reference_type, status_key, reference_key)
+);
+
+
+CREATE VIEW IF NOT EXISTS DbPagingTimelineWithStatusView AS
+SELECT
+-- timeline.*,
+status.*,
+user.*
+-- reference.*
+FROM DbPagingTimeline AS timeline
+JOIN DbStatus status ON timeline.status_key = status.status_key
+JOIN DbUser user ON status.user_key = user.user_key
+-- JOIN DbStatusReference reference ON timeline.status_key = reference.status_key
+WHERE timeline.account_key = :account_key AND timeline.paging_key = :paging_key;
+
+insert:
+INSERT INTO DbPagingTimeline (account_key, paging_key, status_key, sort_id)
+    VALUES (:account_key, :paging_key, :status_key, :sort_id);
+
+delete:
+DELETE FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key AND status_key = :status_key;
+
+deletePaging:
+DELETE FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key;
+
+existsPaging:
+SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key);
+
+pageCount:
+SELECT COUNT(*) FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key;
+
+getPage:
+SELECT status_key FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key ORDER BY sort_id DESC LIMIT :limit OFFSET :offset;

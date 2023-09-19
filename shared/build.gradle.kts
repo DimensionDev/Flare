@@ -7,6 +7,8 @@ plugins {
 }
 
 kotlin {
+    mingwX64()
+    linuxX64()
     androidTarget()
 
     listOf(
@@ -15,7 +17,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = "FlareShared"
+            baseName = "shared"
             isStatic = true
         }
     }

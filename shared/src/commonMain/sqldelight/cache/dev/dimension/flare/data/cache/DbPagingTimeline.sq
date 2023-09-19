@@ -1,7 +1,4 @@
-import dev.dimension.flare.data.database.cache.StatusContent;
 import dev.dimension.flare.model.MicroBlogKey;
-import dev.dimension.flare.model.PlatformType;
-import dev.dimension.flare.model.ReferenceType;
 
 CREATE TABLE IF NOT EXISTS DbPagingTimeline (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,26 +9,22 @@ CREATE TABLE IF NOT EXISTS DbPagingTimeline (
     UNIQUE (account_key, paging_key, status_key)
 );
 
-CREATE TABLE IF NOT EXISTS DbStatusReference (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    reference_type TEXT AS ReferenceType NOT NULL,
-    status_key TEXT AS MicroBlogKey NOT NULL,
-    reference_key TEXT AS MicroBlogKey NOT NULL,
-    UNIQUE (reference_type, status_key, reference_key)
-);
-
-
 CREATE VIEW IF NOT EXISTS DbPagingTimelineWithStatusView AS
 SELECT
--- timeline.*,
-status.*,
-user.*
--- reference.*
+timeline.account_key AS timeline_account_key,
+timeline.paging_key AS timeline_paging_key,
+timeline.status_key AS timeline_status_key,
+timeline.sort_id AS timeline_sort_id,
+status.platform_type AS status_platform_type,
+status.content AS status_content,
+user.user_key AS user_user_key,
+user.name AS user_name,
+user.handle AS user_handle,
+user.host AS user_host,
+user.content AS user_content
 FROM DbPagingTimeline AS timeline
-JOIN DbStatus status ON timeline.status_key = status.status_key
-JOIN DbUser user ON status.user_key = user.user_key
--- JOIN DbStatusReference reference ON timeline.status_key = reference.status_key
-WHERE timeline.account_key = :account_key AND timeline.paging_key = :paging_key;
+JOIN DbStatus status ON timeline.status_key = status.status_key AND timeline.account_key = status.account_key
+JOIN DbUser user ON status.user_key = user.user_key;
 
 insert:
 INSERT INTO DbPagingTimeline (account_key, paging_key, status_key, sort_id)
@@ -50,4 +43,4 @@ pageCount:
 SELECT COUNT(*) FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key;
 
 getPage:
-SELECT status_key FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key ORDER BY sort_id DESC LIMIT :limit OFFSET :offset;
+SELECT * FROM DbPagingTimelineWithStatusView WHERE timeline_account_key = :account_key AND timeline_paging_key = :paging_key ORDER BY timeline_sort_id DESC LIMIT :limit OFFSET :offset;

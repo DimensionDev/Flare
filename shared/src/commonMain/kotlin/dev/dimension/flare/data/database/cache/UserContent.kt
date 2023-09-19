@@ -33,5 +33,3 @@ sealed interface UserContent {
 //        val data: ProfileViewBasic,
 //    ) : UserContent
 }
-
-

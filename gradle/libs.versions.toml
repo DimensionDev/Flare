@@ -38,6 +38,9 @@ apng-android = "2.28.0"
 ktlint = "0.50.0"
 sqldelight = "2.0.0"
 multiplatform-paging = "3.2.0-alpha05-0.2.3"
+okio = "3.5.0"
+uuid = "0.8.1"
+sqliter-driver = "1.2.1"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -91,9 +94,9 @@ ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", vers
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
-ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+#ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 
-okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp3" }
+#okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp3" }
 
 twitter-parser = { group = "moe.tlaster", name = "twitter-parser", version.ref = "twitter-parser" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
@@ -128,13 +131,18 @@ sqldelight-androidx-paging3-extensions = { group = "app.cash.sqldelight", name =
 
 paging-multiplatform-common = { group = "app.cash.paging", name = "paging-common", version.ref = "multiplatform-paging" }
 
+okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
+
+uuid = { group = "com.benasher44", name = "uuid", version.ref = "uuid" }
+sqliter-driver = { group = "co.touchlab", name = "sqliter-driver", version.ref = "sqliter-driver" }
+
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]
 paging = ["paging-runtime", "paging-compose"]
 navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-atomicfu"]
 koject = ["koject-core", "koject-android-core", "koject-android-activity", "koject-android-fragment", "koject-android-viewmodel", "koject-compose-core"]
-ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-client-okhttp", "okhttp3-logging-interceptor"]
+ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
 coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated"]
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]

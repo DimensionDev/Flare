@@ -1,6 +1,6 @@
 import dev.dimension.flare.model.MicroBlogKey;
 import dev.dimension.flare.model.PlatformType;
-import dev.dimension.flare.data.database.cache.UserContent;
+import dev.dimension.flare.data.database.cache.model.UserContent;
 
 CREATE TABLE IF NOT EXISTS DbUser (
     user_key TEXT AS MicroBlogKey NOT NULL PRIMARY KEY,
@@ -13,10 +13,13 @@ CREATE TABLE IF NOT EXISTS DbUser (
 
 
 insert:
-INSERT INTO DbUser (user_key, platform_type, name, handle, host, content) VALUES (:user_key, :platform_type, :name, :handle, :host, :content);
+INSERT OR REPLACE INTO DbUser (user_key, platform_type, name, handle, host, content) VALUES (:user_key, :platform_type, :name, :handle, :host, :content);
+
+update:
+UPDATE DbUser SET platform_type = :platform_type, name = :name, handle = :handle, host = :host, content = :content WHERE user_key = :user_key;
 
 findByKeys:
-SELECT * FROM DbUser WHERE user_key IN (:user_keys);
+SELECT * FROM DbUser WHERE user_key IN :user_keys;
 
 findByKey:
 SELECT * FROM DbUser WHERE user_key = :user_key;

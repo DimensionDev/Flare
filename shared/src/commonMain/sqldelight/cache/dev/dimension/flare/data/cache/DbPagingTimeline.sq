@@ -27,7 +27,7 @@ JOIN DbStatus status ON timeline.status_key = status.status_key AND timeline.acc
 JOIN DbUser user ON status.user_key = user.user_key;
 
 insert:
-INSERT INTO DbPagingTimeline (account_key, paging_key, status_key, sort_id)
+INSERT OR REPLACE INTO DbPagingTimeline (account_key, paging_key, status_key, sort_id)
     VALUES (:account_key, :paging_key, :status_key, :sort_id);
 
 delete:

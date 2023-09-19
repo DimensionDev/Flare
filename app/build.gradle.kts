@@ -143,4 +143,7 @@ configure<de.jensklingenberg.ktorfit.gradle.KtorfitGradleConfiguration> {
 
 ktlint {
     version.set(libs.versions.ktlint)
+    filter {
+        exclude { element -> element.file.path.contains("generated/") }
+    }
 }

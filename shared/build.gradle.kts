@@ -4,9 +4,13 @@ plugins {
     alias(libs.plugins.sqldelight)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.ktorfit)
+//    alias(libs.plugins.ktlint)
 }
 
 kotlin {
+    targetHierarchy.default()
+
     mingwX64()
     linuxX64()
     androidTarget()
@@ -14,7 +18,7 @@ kotlin {
     listOf(
         iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "shared"
@@ -29,6 +33,10 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(libs.koject.core)
                 implementation(libs.paging.multiplatform.common)
+                implementation(libs.ktorfit.lib)
+                implementation(libs.bundles.ktor)
+                implementation(libs.okio)
+                implementation(libs.uuid)
             }
         }
         val androidMain by getting {
@@ -36,21 +44,14 @@ kotlin {
                 implementation(libs.sqldelight.android.driver)
             }
         }
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain)
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
+        val nativeMain by getting {
             dependencies {
                 implementation(libs.sqldelight.native.driver)
+                implementation(libs.sqliter.driver)
             }
         }
     }
 }
-
 
 sqldelight {
     databases {
@@ -68,7 +69,6 @@ sqldelight {
         }
     }
 }
-
 
 android {
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -91,13 +91,28 @@ android {
 }
 
 dependencies {
-    add("kspAndroid", libs.koject.processor.lib)
-    add("kspIosX64", libs.koject.processor.lib)
-    add("kspIosArm64", libs.koject.processor.lib)
-    add("kspIosSimulatorArm64", libs.koject.processor.lib)
+    val kspTarget = listOf(
+        "kspAndroid",
+        "kspIosX64",
+        "kspIosArm64",
+        "kspIosSimulatorArm64",
+    )
+
+    kspTarget.forEach { target ->
+        add(target, libs.koject.processor.lib)
+        add(target, libs.ktorfit.ksp)
+    }
 }
 
 ksp {
     arg("moduleName", project.name)
 }
 
+//ktlint {
+//    version.set(libs.versions.ktlint)
+//    filter {
+//        exclude { element ->
+//            element.file.path.contains("generated/")
+//        }
+//    }
+//}

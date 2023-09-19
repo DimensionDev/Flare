@@ -1,4 +1,4 @@
-import dev.dimension.flare.data.database.cache.StatusContent;
+import dev.dimension.flare.data.database.cache.model.StatusContent;
 import dev.dimension.flare.model.MicroBlogKey;
 import dev.dimension.flare.model.PlatformType;
 
@@ -6,9 +6,12 @@ CREATE TABLE IF NOT EXISTS DbStatus (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     status_key TEXT AS MicroBlogKey NOT NULL,
     account_key TEXT AS MicroBlogKey NOT NULL,
-    user_key TEXT AS MicroBlogKey NOT NULL,
+    user_key TEXT AS MicroBlogKey,
     platform_type TEXT AS PlatformType NOT NULL,
     content TEXT AS StatusContent NOT NULL,
     UNIQUE (status_key, account_key)
 );
 
+insert:
+    INSERT OR REPLACE INTO DbStatus (status_key, account_key, user_key, platform_type, content)
+    VALUES (:status_key, :account_key, :user_key, :platform_type, :content);

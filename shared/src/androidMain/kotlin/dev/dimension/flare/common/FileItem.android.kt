@@ -2,6 +2,8 @@ package dev.dimension.flare.common
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.ui.platform.AndroidUiDispatcher
+import kotlin.coroutines.CoroutineContext
 
 actual class FileItem(
     private val context: Context,

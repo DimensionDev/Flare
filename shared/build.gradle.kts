@@ -38,7 +38,7 @@ kotlin {
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
                 implementation(libs.uuid)
-                api(libs.paging.runtime.composeui)
+//                api(libs.paging.runtime.composeui)
             }
         }
         val androidMain by getting {

@@ -44,7 +44,8 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 context(LazyListScope, UiState<LazyPagingItems<UiStatus>>, StatusEvent)
 internal fun status() {
     onSuccess { lazyPagingItems ->
-        if ((
+        if (
+            (
                 lazyPagingItems.loadState.refresh == LoadState.Loading ||
                     lazyPagingItems.loadState.prepend == LoadState.Loading
                 ) &&

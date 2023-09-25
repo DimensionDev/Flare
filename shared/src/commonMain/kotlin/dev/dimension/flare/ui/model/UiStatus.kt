@@ -9,9 +9,16 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
+expect class UiStatusExtra
+
+internal expect fun createStatusExtra(status: UiStatus): UiStatusExtra
+
 sealed class UiStatus {
     abstract val statusKey: MicroBlogKey
     abstract val accountKey: MicroBlogKey
+    val extra by lazy {
+        createStatusExtra(this)
+    }
 
     open val itemKey: String by lazy {
         statusKey.toString()
@@ -104,6 +111,7 @@ sealed class UiStatus {
         val reaction: Reaction,
         val sensitive: Boolean,
         val reblogStatus: Mastodon?,
+        internal val raw: dev.dimension.flare.data.network.mastodon.api.model.Status,
     ) : UiStatus() {
 
         val humanizedTime by lazy {

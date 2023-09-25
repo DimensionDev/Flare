@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.nameElement
 import dev.dimension.flare.ui.theme.MediumAlpha
 
 @Composable

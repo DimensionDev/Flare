@@ -31,6 +31,7 @@ import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.nameElement
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination

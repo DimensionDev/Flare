@@ -142,13 +142,17 @@ class MastodonDataSource(
 
     override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
         return flow {
-            try {
-                emit(
-                    service.showFriendships(listOf(userKey.id)).first().toUi()
-                        .let { UiState.Success(it) },
-                )
-            } catch (e: Exception) {
-                emit(UiState.Error(e))
+            if (userKey == account.accountKey) {
+                emit(UiState.Error(Exception("Cannot follow self")))
+            } else {
+                try {
+                    emit(
+                        service.showFriendships(listOf(userKey.id)).first().toUi()
+                            .let { UiState.Success(it) },
+                    )
+                } catch (e: Exception) {
+                    emit(UiState.Error(e))
+                }
             }
         }
     }

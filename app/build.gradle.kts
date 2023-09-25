@@ -122,7 +122,6 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.zoomable)
     implementation(libs.bluesky.binding)
-    implementation(libs.mfm.multiplatform)
     implementation(libs.bundles.compose.richtext)
 
     implementation(projects.shared)

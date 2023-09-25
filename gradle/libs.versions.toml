@@ -15,7 +15,7 @@ compose-complier = "1.5.3"
 ksp = "1.9.10-1.0.13"
 cash-paging = "3.2.0-alpha05-0.2.3"
 room = "2.5.2"
-paging = "3.3.0-alpha02"
+paging = "3.2.1"
 navigation = "2.7.3"
 kotlinx-datetime = "0.4.1"
 kotlinx-collections-immutable = "0.3.5"
@@ -43,6 +43,7 @@ uuid = "0.8.1"
 sqliter-driver = "1.2.3"
 skie = "0.4.20"
 compose-jb = "1.5.1"
+kermit = "2.0.1"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -52,7 +53,7 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "dev.chrisbanes.compose", name = "compose-bom", version.ref = "compose-bom" }
-paging-runtime-composeui = { module = "app.cash.paging:paging-runtime-composeui", version.ref = "cash-paging" }
+paging-compose-common = { module = "app.cash.paging:paging-compose-common", version.ref = "cash-paging" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -136,6 +137,8 @@ okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 uuid = { group = "com.benasher44", name = "uuid", version.ref = "uuid" }
 sqliter-driver = { group = "co.touchlab", name = "sqliter-driver", version.ref = "sqliter-driver" }
+
+kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermit" }
 
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]

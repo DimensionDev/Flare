@@ -166,6 +166,7 @@ internal fun UserLite.toUi(
             hasPendingFollowRequestFromYou = false,
             hasPendingFollowRequestToYou = false,
         ),
+        accountHost = accountHost,
     )
 }
 
@@ -204,6 +205,7 @@ internal fun User.toUi(
             hasPendingFollowRequestFromYou = hasPendingFollowRequestFromYou ?: false,
             hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false,
         ),
+        accountHost = accountHost,
     )
 }
 

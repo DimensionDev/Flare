@@ -119,6 +119,7 @@ internal fun Status.toUi(
             bookmarked = bookmarked ?: false,
         ),
         accountKey = accountKey,
+        raw = this
     )
 }
 
@@ -185,6 +186,7 @@ internal fun Account.toUi(
         locked = locked ?: false,
         handleInternal = username.orEmpty(),
         remoteHost = remoteHost,
+        raw = this,
     )
 }
 

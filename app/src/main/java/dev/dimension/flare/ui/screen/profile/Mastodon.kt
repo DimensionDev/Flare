@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
@@ -26,6 +25,9 @@ import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.descriptionDirection
+import dev.dimension.flare.ui.model.descriptionElement
+import dev.dimension.flare.ui.model.nameElement
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
@@ -99,7 +101,7 @@ internal fun MastodonProfileHeader(
                 user.descriptionElement?.let {
                     HtmlText2(
                         element = it,
-                        layoutDirection = user.descriptionDirection ?: LocalLayoutDirection.current,
+                        layoutDirection = user.descriptionDirection,
                     )
                 }
                 FlowRow(

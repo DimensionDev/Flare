@@ -293,16 +293,13 @@ private fun RenderElement(
             CodeBlock(text())
         }
 
-//        "span" -> {
-//            childNodes().forEach {
-//                with(it) {
-//                    RenderNode(context)
-//                }
-//            }
-//            with(context) {
-//                RenderTextAndReset()
-//            }
-//        }
+        "span" -> {
+            childNodes().forEach {
+                with(it) {
+                    RenderNode(context)
+                }
+            }
+        }
 
         else -> {
             childNodes().forEach {

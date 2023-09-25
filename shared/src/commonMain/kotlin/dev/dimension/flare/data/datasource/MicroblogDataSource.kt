@@ -100,12 +100,12 @@ internal fun timelinePager(
                 ),
                 transacter = database.dbPagingTimelineQueries,
                 context = Dispatchers.IO,
-                queryProvider = { offset, size ->
+                queryProvider = { limit, offset ->
                     database.dbPagingTimelineQueries.getPage(
                         account_key = accountKey,
                         paging_key = pagingKey,
                         offset = offset,
-                        limit = size,
+                        limit = limit,
                     )
                 },
             )

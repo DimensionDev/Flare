@@ -69,6 +69,8 @@ import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.contentDirection
+import dev.dimension.flare.ui.model.contentToken
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.coroutines.CoroutineScope

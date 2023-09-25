@@ -8,7 +8,6 @@ import dev.dimension.flare.data.network.authorization.AuthorizationPlugin
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
@@ -45,7 +44,11 @@ internal fun ktorClient(
     }
     config.invoke(this)
     install(Logging) {
-        logger = Logger.DEFAULT
+        logger = object: Logger {
+            override fun log(message: String) {
+                co.touchlab.kermit.Logger.v(message, null, "HTTP Client")
+            }
+        }
         level = LogLevel.ALL
     }
 }

@@ -3,10 +3,17 @@ package dev.dimension.flare.ui.model
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
 
-sealed interface UiUser {
-    val userKey: MicroBlogKey
-    val handle: String
-    val avatarUrl: String
+expect class UiUserExtra
+
+internal expect fun createUiUserExtra(user: UiUser): UiUserExtra
+
+sealed class UiUser {
+    abstract val userKey: MicroBlogKey
+    abstract val handle: String
+    abstract val avatarUrl: String
+    val extra by lazy {
+        createUiUserExtra(this)
+    }
 
     data class Mastodon(
         override val userKey: MicroBlogKey,
@@ -18,7 +25,8 @@ sealed interface UiUser {
         val description: String?,
         val matrices: Matrices,
         val locked: Boolean,
-    ) : UiUser {
+        internal val raw: dev.dimension.flare.data.network.mastodon.api.model.Account,
+    ) : UiUser() {
         override val handle = "@$handleInternal@$remoteHost"
 
         data class Matrices(
@@ -44,7 +52,8 @@ sealed interface UiUser {
         val isCat: Boolean,
         val isBot: Boolean,
         val relation: UiRelation.Misskey,
-    ) : UiUser {
+        internal val accountHost: String,
+    ) : UiUser() {
 
         override val handle = "@$handleInternal@$remoteHost"
         data class Matrices(

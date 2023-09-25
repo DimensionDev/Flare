@@ -57,8 +57,7 @@ import com.moriatsushi.koject.Provides
 import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.getAccountUseCase
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.HtmlText2
@@ -67,6 +66,7 @@ import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
@@ -115,10 +115,10 @@ internal fun MisskeyStatusComponent(
 //            data = actualData,
 //            event = event
 //        )
-        if (actualData.quote != null) {
+        actualData.quote?.let { quote ->
             Spacer(modifier = Modifier.height(8.dp))
             UiStatusQuoted(
-                status = actualData.quote,
+                status = quote,
                 onMediaClick = event::onMediaClick,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -289,20 +289,22 @@ private fun StatusContentComponent(
     Column(
         modifier = modifier,
     ) {
-        if (!data.contentWarningText.isNullOrEmpty()) {
-            Text(
-                text = data.contentWarningText,
-            )
-            TextButton(
-                onClick = {
-                    expanded = !expanded
-                },
-            ) {
+        data.contentWarningText?.let {
+            if (it.isNotEmpty()) {
                 Text(
-                    text = stringResource(
-                        if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
-                    ),
+                    text = it,
                 )
+                TextButton(
+                    onClick = {
+                        expanded = !expanded
+                    },
+                ) {
+                    Text(
+                        text = stringResource(
+                            if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
+                        ),
+                    )
+                }
             }
         }
         AnimatedVisibility(visible = expanded || data.contentWarningText.isNullOrEmpty()) {
@@ -314,10 +316,10 @@ private fun StatusContentComponent(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                if (data.poll != null) {
+                data.poll?.let {
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusPollComponent(
-                        data = data.poll,
+                        data = it,
                         event = event,
                     )
                 }
@@ -445,6 +447,7 @@ internal interface MisskeyStatusEvent {
 internal class DefaultMisskeyStatusEvent(
     private val context: Context,
     private val scope: CoroutineScope,
+    private val accountRepository: AccountRepository,
 ) : MisskeyStatusEvent {
     override fun onStatusClick(data: UiStatus.Misskey) {
         val intent =
@@ -499,9 +502,9 @@ internal class DefaultMisskeyStatusEvent(
 
     override fun onReblogClick(data: UiStatus.Misskey) {
         scope.launch {
-            val account = getAccountUseCase<UiAccount.Misskey>(data.accountKey) ?: return@launch
+            val account = accountRepository.get(data.accountKey) as? UiAccount.Misskey ?: return@launch
             runCatching {
-                account.service.renote(data.statusKey.id)
+                account.dataSource.renote(data)
             }.onFailure {
             }
         }

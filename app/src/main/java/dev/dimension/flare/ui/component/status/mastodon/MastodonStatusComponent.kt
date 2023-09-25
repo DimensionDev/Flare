@@ -52,10 +52,7 @@ import com.moriatsushi.koject.Provides
 import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
-import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.getAccountUseCase
-import dev.dimension.flare.data.repository.cache.updateStatusUseCase
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.placeholder.placeholder
@@ -64,6 +61,7 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.screen.destinations.MediaRouteDestination
@@ -174,7 +172,7 @@ private fun StatusCardComponent(
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
-    if (data.card != null) {
+    data.card?.let { card ->
         Column(
             modifier = modifier,
         ) {
@@ -183,12 +181,12 @@ private fun StatusCardComponent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        uriHandler.openUri(data.card.url)
+                        uriHandler.openUri(card.url)
                     },
             ) {
-                if (data.card.media != null) {
+                card.media?.let {
                     MediaItem(
-                        media = data.card.media,
+                        media = it,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -196,10 +194,10 @@ private fun StatusCardComponent(
                     modifier = Modifier
                         .padding(8.dp),
                 ) {
-                    Text(text = data.card.title)
-                    if (data.card.description != null) {
+                    Text(text = card.title)
+                    card.description?.let {
                         Text(
-                            text = data.card.description,
+                            text = it,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier
                                 .alpha(MediumAlpha),
@@ -292,20 +290,22 @@ private fun StatusContentComponent(
     Column(
         modifier = modifier,
     ) {
-        if (!data.contentWarningText.isNullOrEmpty()) {
-            Text(
-                text = data.contentWarningText,
-            )
-            TextButton(
-                onClick = {
-                    expanded = !expanded
-                },
-            ) {
+        data.contentWarningText?.let {
+            if (it.isNotEmpty()) {
                 Text(
-                    text = stringResource(
-                        if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
-                    ),
+                    text = it,
                 )
+                TextButton(
+                    onClick = {
+                        expanded = !expanded
+                    },
+                ) {
+                    Text(
+                        text = stringResource(
+                            if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
+                        ),
+                    )
+                }
             }
         }
         AnimatedVisibility(visible = expanded || data.contentWarningText.isNullOrEmpty()) {
@@ -317,10 +317,10 @@ private fun StatusContentComponent(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                if (data.poll != null) {
+                data.poll?.let {
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusPollComponent(
-                        data = data.poll,
+                        data = it,
                         event = event,
                     )
                 }
@@ -449,6 +449,7 @@ internal interface MastodonStatusEvent {
 internal class DefaultMastodonStatusEvent(
     private val context: Context,
     private val scope: CoroutineScope,
+    private val accountRepository: AccountRepository,
 ) : MastodonStatusEvent {
     override fun onUserClick(userKey: MicroBlogKey) {
         val intent =
@@ -482,95 +483,17 @@ internal class DefaultMastodonStatusEvent(
 
     override fun onReblogClick(status: UiStatus.Mastodon) {
         scope.launch {
-            val account = getAccountUseCase<UiAccount.Mastodon>(status.accountKey) ?: return@launch
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                update = {
-                    it.copy(
-                        data = it.data.copy(
-                            reblogged = !status.reaction.reblogged,
-                            reblogsCount = if (status.reaction.reblogged) {
-                                it.data.reblogsCount?.minus(1)
-                            } else {
-                                it.data.reblogsCount?.plus(1)
-                            },
-                        ),
-                    )
-                },
-            )
-
-            runCatching {
-                if (status.reaction.reblogged) {
-                    account.service.unRetweet(status.statusKey.id)
-                } else {
-                    account.service.retweet(status.statusKey.id)
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.Mastodon>(
-                    statusKey = status.statusKey,
-                    accountKey = status.accountKey,
-                    update = {
-                        it.copy(
-                            data = it.data.copy(
-                                reblogged = status.reaction.reblogged,
-                                reblogsCount = if (status.reaction.reblogged) {
-                                    it.data.reblogsCount?.plus(1)
-                                } else {
-                                    it.data.reblogsCount?.minus(1)
-                                },
-                            ),
-                        )
-                    },
-                )
-            }
+            val account =
+                accountRepository.get(status.accountKey) as? UiAccount.Mastodon ?: return@launch
+            account.dataSource.reblog(status)
         }
     }
 
     override fun onLikeClick(status: UiStatus.Mastodon) {
         scope.launch {
-            val account = getAccountUseCase<UiAccount.Mastodon>(status.accountKey) ?: return@launch
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                update = {
-                    it.copy(
-                        data = it.data.copy(
-                            favourited = !status.reaction.liked,
-                            favouritesCount = if (status.reaction.liked) {
-                                it.data.favouritesCount?.minus(1)
-                            } else {
-                                it.data.favouritesCount?.plus(1)
-                            },
-                        ),
-                    )
-                },
-            )
-
-            runCatching {
-                if (status.reaction.liked) {
-                    account.service.unlike(status.statusKey.id)
-                } else {
-                    account.service.like(status.statusKey.id)
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.Mastodon>(
-                    statusKey = status.statusKey,
-                    accountKey = status.accountKey,
-                    update = {
-                        it.copy(
-                            data = it.data.copy(
-                                favourited = status.reaction.liked,
-                                favouritesCount = if (status.reaction.liked) {
-                                    it.data.favouritesCount?.plus(1)
-                                } else {
-                                    it.data.favouritesCount?.minus(1)
-                                },
-                            ),
-                        )
-                    },
-                )
-            }
+            val account =
+                accountRepository.get(status.accountKey) as? UiAccount.Mastodon ?: return@launch
+            account.dataSource.like(status)
         }
     }
 

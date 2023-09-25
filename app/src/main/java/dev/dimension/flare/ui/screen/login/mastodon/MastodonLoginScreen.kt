@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.login.mastodon
 
-import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,16 +37,10 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
-import dev.dimension.flare.data.repository.app.UiApplication
-import dev.dimension.flare.data.repository.app.addMastodonApplicationUseCase
-import dev.dimension.flare.data.repository.app.clearAnyPendingOauthUseCase
-import dev.dimension.flare.data.repository.app.findApplicationUseCase
-import dev.dimension.flare.data.repository.app.setPendingOAuthUseCase
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedTextField2
+import dev.dimension.flare.ui.presenter.login.mastodonLoginUseCase
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
@@ -162,55 +155,6 @@ internal fun MastodonLoginScreen(
             }
         }
     }
-}
-
-private suspend fun mastodonLoginUseCase(
-    domain: String,
-    launchOAuth: (String) -> Unit,
-) {
-    val baseUrl = if (domain.startsWith("http://", ignoreCase = true) || domain.startsWith(
-            "https://",
-            ignoreCase = true,
-        )
-    ) {
-        Uri.parse(domain)
-    } else {
-        Uri.parse("https://$domain/")
-    }
-    val host = baseUrl.host
-    requireNotNull(host) { "Invalid host" }
-    val service = MastodonOAuthService(
-        baseUrl = baseUrl.toString(),
-        client_name = "Flare",
-        website = "https://github.com/DimensionDev/Flare",
-        redirect_uri = AppDeepLink.Callback.Mastodon,
-    )
-
-    val application = findApplicationUseCase(host)?.let {
-        if (it is UiApplication.Mastodon) {
-            it.application
-        } else {
-            null
-        }
-    } ?: service.createApplication().also {
-        addMastodonApplicationUseCase(host, it)
-    }
-    clearAnyPendingOauthUseCase()
-    setPendingOAuthUseCase(host, true)
-    val target = service.getWebOAuthUrl(application)
-    launchOAuth(target)
-//    val code = BrowserLoginDeepLinksChannel.waitOne().substringAfter("code=")
-//    require(code.isNotEmpty()) { "Invalid code" }
-//    val accessTokenResponse = service.getAccessToken(code, application)
-//    requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
-//    val user = service.verifyCredentials(accessToken = accessTokenResponse.accessToken)
-//    val id = user.id
-//    requireNotNull(id) { "Invalid user id" }
-//    addMastodonAccountUseCase(
-//        instance = host,
-//        accessToken = accessTokenResponse.accessToken,
-//        accountKey = MicroBlogKey(id, host),
-//    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

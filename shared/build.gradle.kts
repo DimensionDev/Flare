@@ -5,14 +5,14 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
+    alias(libs.plugins.skie)
+    alias(libs.plugins.molecule)
 //    alias(libs.plugins.ktlint)
 }
 
 kotlin {
     targetHierarchy.default()
 
-    mingwX64()
-    linuxX64()
     androidTarget()
 
     listOf(
@@ -32,11 +32,13 @@ kotlin {
                 implementation(libs.bundles.sqldelight)
                 implementation(libs.bundles.kotlinx)
                 implementation(libs.koject.core)
-                implementation(libs.paging.multiplatform.common)
+                implementation(libs.koject.compose.core)
+                implementation(libs.bundles.paging)
                 implementation(libs.ktorfit.lib)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
                 implementation(libs.uuid)
+                api(libs.paging.runtime.composeui)
             }
         }
         val androidMain by getting {
@@ -116,3 +118,10 @@ ksp {
 //        }
 //    }
 //}
+
+skie {
+    analytics {
+        disableUpload.set(true)
+        enabled.set(false)
+    }
+}

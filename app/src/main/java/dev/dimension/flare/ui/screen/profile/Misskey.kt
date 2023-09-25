@@ -16,10 +16,10 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiRelation
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
@@ -62,20 +62,23 @@ internal fun MisskeyProfileHeader(
                 }
 
                 is UiState.Success -> {
-                    if (relationState.data is UiRelation.Mastodon) {
-                        FilledTonalButton(
-                            onClick = { /*TODO*/ },
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    when {
-                                        relationState.data.following -> R.string.profile_header_button_following
-                                        relationState.data.requested -> R.string.profile_header_button_requested
-                                        else -> R.string.profile_header_button_follow
-                                    },
-                                ),
-                            )
+                    when (val data = relationState.data) {
+                        is UiRelation.Mastodon -> {
+                            FilledTonalButton(
+                                onClick = { /*TODO*/ },
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        when {
+                                            data.following -> R.string.profile_header_button_following
+                                            data.requested -> R.string.profile_header_button_requested
+                                            else -> R.string.profile_header_button_follow
+                                        },
+                                    ),
+                                )
+                            }
                         }
+                        else -> Unit
                     }
                 }
             }

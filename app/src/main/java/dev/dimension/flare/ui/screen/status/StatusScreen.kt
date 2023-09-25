@@ -19,23 +19,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.app.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.map
-import dev.dimension.flare.ui.onSuccess
+import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 
 @Composable
@@ -86,15 +81,15 @@ internal fun StatusScreen(
             val listState = rememberLazyListState()
             RefreshContainer(
                 modifier = Modifier.padding(it),
-                refreshing = state.refreshing,
-                onRefresh = state::refresh,
+                refreshing = state.state.refreshing,
+                onRefresh = state.state::refresh,
                 content = {
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        with(state.listState) {
+                        with(state.state.listState) {
                             with(state.statusEvent) {
                                 status()
                             }
@@ -111,22 +106,12 @@ private fun statusPresenter(
     statusKey: MicroBlogKey,
     statusEvent: StatusEvent = rememberInject(),
 ) = run {
-    val listState = activeAccountServicePresenter().map { (service, account) ->
-        remember(account.accountKey, statusKey) {
-            service.context(statusKey)
-        }.collectAsLazyPagingItems()
-    }
-    val refreshing =
-        listState is UiState.Loading ||
-            listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+    val state = remember(statusKey) {
+        StatusPresenter(statusKey)
+    }.invoke()
+
     object {
-        val listState = listState
-        val refreshing = refreshing
+        val state = state
         val statusEvent = statusEvent
-        fun refresh() {
-            listState.onSuccess {
-                it.refresh()
-            }
-        }
     }
 }

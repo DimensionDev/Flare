@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.ktorfit) apply false
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.sqldelight) apply false
+    alias(libs.plugins.skie) apply false
+    alias(libs.plugins.molecule) apply false
     id("com.github.ben-manes.versions").version("0.47.0")
 }
 

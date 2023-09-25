@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.compose
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -105,34 +106,34 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.mastodon.MastodonService
-import dev.dimension.flare.data.datasource.misskey.MisskeyService
-import dev.dimension.flare.data.repository.ComposeData
+import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.ComposeUseCase
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.accountServiceProvider
-import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.component.status.mastodon.VisibilityIcon
-import dev.dimension.flare.ui.flatMap
-import dev.dimension.flare.ui.map
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.localDescription
 import dev.dimension.flare.ui.model.localName
-import dev.dimension.flare.ui.onError
-import dev.dimension.flare.ui.onLoading
-import dev.dimension.flare.ui.onSuccess
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import dev.dimension.flare.ui.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.math.max
 import kotlin.time.Duration
@@ -850,6 +851,7 @@ private fun PollOption(
 @Composable
 private fun composePresenter(
     status: ComposeStatus? = null,
+    context: Context = rememberInject(),
     composeUseCase: ComposeUseCase = rememberInject(),
 ) = run {
     val account by activeAccountPresenter()
@@ -864,7 +866,6 @@ private fun composePresenter(
     }.collectAsState(initial = "")
     val pollState = account.flatMap {
         when (it) {
-            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
             is UiAccount.Mastodon, is UiAccount.Misskey -> UiState.Success(pollPresenter())
         }
     }
@@ -873,12 +874,10 @@ private fun composePresenter(
         when (it) {
             is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
             is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
-            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
         }
     }
     val contentWarningState = account.flatMap {
         when (it) {
-            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
             is UiAccount.Misskey, is UiAccount.Mastodon -> UiState.Success(contentWarningPresenter())
         }
     }
@@ -903,7 +902,7 @@ private fun composePresenter(
 //                        }
                     }
 
-                    is UiStatus.BlueskyNotification, is UiStatus.Bluesky, is UiStatus.MastodonNotification, is UiStatus.MisskeyNotification, null -> Unit
+                    else -> Unit
                 }
             }
         }
@@ -939,11 +938,13 @@ private fun composePresenter(
         fun send() {
             account.onSuccess {
                 val data = when (it) {
-                    is UiAccount.Mastodon -> ComposeData.Mastodon(
+                    is UiAccount.Mastodon -> MastodonDataSource.MastodonComposeData(
                         content = textFieldState.text.toString(),
-                        medias = mediaState.medias,
+                        medias = mediaState.medias.map {
+                            FileItem(context, it)
+                        },
                         poll = if (pollState is UiState.Success && pollState.data.enabled) {
-                            ComposeData.Mastodon.Poll(
+                            MastodonDataSource.MastodonComposeData.Poll(
                                 multiple = !pollState.data.pollSingleChoice,
                                 expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
                                 options = pollState.data.options.map { option ->
@@ -960,11 +961,13 @@ private fun composePresenter(
                         account = it,
                     )
 
-                    is UiAccount.Misskey -> ComposeData.MissKey(
+                    is UiAccount.Misskey -> MisskeyDataSource.MissKeyComposeData(
                         account = it,
-                        medias = mediaState.medias,
+                        medias = mediaState.medias.map {
+                            FileItem(context, it)
+                        },
                         poll = if (pollState is UiState.Success && pollState.data.enabled) {
-                            ComposeData.MissKey.Poll(
+                            MisskeyDataSource.MissKeyComposeData.Poll(
                                 multiple = !pollState.data.pollSingleChoice,
                                 expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
                                 options = pollState.data.options.map { option ->
@@ -983,13 +986,13 @@ private fun composePresenter(
                         localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly,
                     )
 
-                    is UiAccount.Bluesky -> ComposeData.Bluesky(
-                        account = it,
-                        medias = mediaState.medias,
-                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                        quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                        content = textFieldState.text.toString(),
-                    )
+//                    is UiAccount.Bluesky -> ComposeData.Bluesky(
+//                        account = it,
+//                        medias = mediaState.medias,
+//                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+//                        quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+//                        content = textFieldState.text.toString(),
+//                    )
                 }
                 composeUseCase(data)
             }
@@ -1019,8 +1022,8 @@ private fun emojiPresenter(
     val service = accountServiceProvider(account = account)
     val emojiState = remember(account.accountKey) {
         when (service) {
-            is MastodonService -> service.emoji()
-            is MisskeyService -> service.emoji()
+            is MastodonDataSource -> service.emoji()
+            is MisskeyDataSource -> service.emoji()
             else -> null
         }
     }?.collectAsState()?.toUi()

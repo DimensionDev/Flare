@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,20 +53,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.repository.app.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.UiState
-import dev.dimension.flare.ui.collectAsUiState
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
@@ -75,16 +70,16 @@ import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.flatMap
-import dev.dimension.flare.ui.map
 import dev.dimension.flare.ui.model.UiRelation
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.onError
-import dev.dimension.flare.ui.onLoading
-import dev.dimension.flare.ui.onSuccess
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
+import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import dev.dimension.flare.ui.toUi
 import org.jsoup.nodes.Element
 import kotlin.math.max
 
@@ -107,7 +102,7 @@ fun ProfileWithUserNameAndHostRoute(
             host = host,
         )
     }
-    state.userState.onSuccess {
+    state.onSuccess {
         ProfileScreen(
             userKey = it.userKey,
             onBack = {
@@ -205,15 +200,15 @@ private fun profileWithUserNameAndHostPresenter(
     userName: String,
     host: String,
 ) = run {
-    val userState = activeAccountServicePresenter().flatMap { (service, account) ->
-        remember(account.accountKey) {
-            service.userByAcct("$userName@$host")
-        }.collectAsState().toUi()
-    }
-
-    object {
-        val userState = userState
-    }
+    remember(
+        userName,
+        host,
+    ) {
+        ProfileWithUserNameAndHostPresenter(
+            userName = userName,
+            host = host,
+        )
+    }.invoke()
 }
 
 @Composable
@@ -300,7 +295,7 @@ fun ProfileScreen(
                         }
                         TopAppBar(
                             title = {
-                                state.userState.onSuccess {
+                                state.state.userState.onSuccess {
                                     HtmlText2(
                                         element = it.nameElement,
                                         modifier = Modifier.graphicsLayer {
@@ -317,13 +312,13 @@ fun ProfileScreen(
                             navigationIcon = {
                                 IconButton(onClick = onBack) {
                                     Icon(
-                                        imageVector = Icons.Default.ArrowBack,
+                                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
                                         contentDescription = stringResource(id = R.string.navigate_back),
                                     )
                                 }
                             },
                             actions = {
-                                state.userState.onSuccess {
+                                state.state.userState.onSuccess {
                                     IconButton(onClick = { /*TODO*/ }) {
                                         Icon(
                                             imageVector = Icons.Default.MoreVert,
@@ -339,8 +334,8 @@ fun ProfileScreen(
         ) {
             RefreshContainer(
                 modifier = Modifier.fillMaxSize(),
-                refreshing = state.refreshing,
-                onRefresh = state::refresh,
+                refreshing = state.state.refreshing,
+                onRefresh = state.state::refresh,
                 indicatorPadding = it + contentPadding,
                 content = {
                     LazyColumn(
@@ -350,11 +345,11 @@ fun ProfileScreen(
                     ) {
                         item {
                             ProfileHeader(
-                                state.userState,
-                                state.relationState,
+                                state.state.userState,
+                                state.state.relationState,
                             )
                         }
-                        with(state.listState) {
+                        with(state.state.listState) {
                             with(state.statusEvent) {
                                 status()
                             }
@@ -429,11 +424,11 @@ private fun ProfileHeaderSuccess(
             )
         }
 
-        is UiUser.Bluesky -> BlueskyProfileHeader(
-            user = user,
-            relationState = relationState,
-            modifier = modifier,
-        )
+//        is UiUser.Bluesky -> BlueskyProfileHeader(
+//            user = user,
+//            relationState = relationState,
+//            modifier = modifier,
+//        )
     }
 }
 
@@ -606,40 +601,13 @@ private fun profilePresenter(
     userKey: MicroBlogKey?,
     statusEvent: StatusEvent = rememberInject(),
 ) = run {
-    val userState = activeAccountServicePresenter().map { (service, account) ->
-        remember(account.accountKey, userKey) {
-            service.userById(userKey?.id ?: account.accountKey.id)
-        }.collectAsState()
-    }
-
-    val listState = activeAccountServicePresenter().map { (service, account) ->
-        remember(account.accountKey, userKey) {
-            service.userTimeline(userKey ?: account.accountKey)
-        }.collectAsLazyPagingItems()
-    }
-    val relationState = activeAccountServicePresenter().flatMap { (service, account) ->
-        remember(account.accountKey, userKey) {
-            service.relation(userKey ?: account.accountKey)
-        }.collectAsUiState().value.flatMap { it }
-    }
-
-    val refreshing = userState is UiState.Loading ||
-        userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
-        listState is UiState.Loading ||
-        listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
+    val state = remember(userKey) {
+        ProfilePresenter(
+            userKey = userKey,
+        )
+    }.invoke()
     object {
-        val refreshing = refreshing
-        val userState = userState.flatMap { it.toUi() }
-        val listState = listState
+        val state = state
         val statusEvent = statusEvent
-        val relationState = relationState
-        fun refresh() {
-            userState.onSuccess {
-                it.refresh()
-            }
-            listState.onSuccess {
-                it.refresh()
-            }
-        }
     }
 }

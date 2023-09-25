@@ -13,5 +13,11 @@ CREATE TABLE IF NOT EXISTS DbStatus (
 );
 
 insert:
-    INSERT OR REPLACE INTO DbStatus (status_key, account_key, user_key, platform_type, content)
-    VALUES (:status_key, :account_key, :user_key, :platform_type, :content);
+INSERT OR REPLACE INTO DbStatus (status_key, account_key, user_key, platform_type, content)
+VALUES (:status_key, :account_key, :user_key, :platform_type, :content);
+
+get:
+SELECT * FROM DbStatus WHERE status_key = :status_key AND account_key = :account_key;
+
+update:
+UPDATE DbStatus SET content = :content WHERE status_key = :status_key AND account_key = :account_key;

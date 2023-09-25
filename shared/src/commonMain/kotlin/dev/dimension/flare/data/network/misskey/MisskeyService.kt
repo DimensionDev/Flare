@@ -14,6 +14,7 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentLength
 
 private fun config(
     baseUrl: String,
@@ -25,7 +26,9 @@ private fun config(
             token = accessToken
         }
         install(DefaultRequest) {
-            header(HttpHeaders.ContentType, ContentType.Application.Json)
+            if (contentLength() != 0L) {
+                header(HttpHeaders.ContentType, ContentType.Application.Json)
+            }
         }
     },
 )

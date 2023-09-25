@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal sealed interface EmojiContent {
+sealed interface EmojiContent {
     @Serializable
     @SerialName("Mastodon")
     data class Mastodon(val data: List<Emoji>) : EmojiContent

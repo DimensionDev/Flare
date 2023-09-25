@@ -18,32 +18,23 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.accountServiceProvider
-import dev.dimension.flare.data.repository.app.activeAccountPresenter
-import dev.dimension.flare.data.repository.app.allAccountsPresenter
-import dev.dimension.flare.data.repository.app.setActiveAccountUseCase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.placeholder.placeholder
-import dev.dimension.flare.ui.map
+import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.onSuccess
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
-import dev.dimension.flare.ui.toUi
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.launch
 
 @Composable
 @Destination
@@ -187,25 +178,7 @@ private fun AccountItemLoadingPlaceholder(
 
 @Composable
 private fun accountsPresenter() = run {
-    val scope = rememberCoroutineScope()
-    val accounts by allAccountsPresenter()
-    val activeAccount by activeAccountPresenter()
-    val user = accounts.map {
-        it.map {
-            val service = accountServiceProvider(account = it)
-            remember(it.accountKey) {
-                service.userById(it.accountKey.id)
-            }.collectAsState().toUi()
-        }.toImmutableList()
-    }
-
-    object {
-        val accounts = user
-        val activeAccount = activeAccount
-        fun setActiveAccount(accountKey: MicroBlogKey) {
-            scope.launch {
-                setActiveAccountUseCase(accountKey)
-            }
-        }
-    }
+    remember {
+        AccountsPresenter()
+    }.invoke()
 }

@@ -102,7 +102,6 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)
-    implementation(libs.bundles.paging)
     implementation(libs.bundles.navigation)
     implementation(libs.bundles.kotlinx)
     implementation(libs.bundles.koject)

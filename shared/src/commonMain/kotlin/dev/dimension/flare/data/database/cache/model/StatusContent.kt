@@ -1,10 +1,13 @@
 package dev.dimension.flare.data.database.cache.model
 
+import com.moriatsushi.koject.inject
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal sealed interface StatusContent {
+sealed interface StatusContent {
     @Serializable
     @SerialName("mastodon")
     data class Mastodon(val data: dev.dimension.flare.data.network.mastodon.api.model.Status) :
@@ -39,4 +42,17 @@ internal sealed interface StatusContent {
 //    @SerialName("bluesky-notification")
 //    data class BlueskyNotification(val data: app.bsky.notification.ListNotificationsNotification) :
 //        StatusContent
+}
+
+
+internal inline fun <reified T : StatusContent> updateStatusUseCase(
+    statusKey: MicroBlogKey,
+    accountKey: MicroBlogKey,
+    update: (content: T) -> T,
+    cacheDatabase: CacheDatabase = inject(),
+) {
+    val status = cacheDatabase.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()
+    if (status != null && status.content is T) {
+        cacheDatabase.dbStatusQueries.update(update(status.content), statusKey, accountKey)
+    }
 }

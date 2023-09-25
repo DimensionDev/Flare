@@ -27,3 +27,6 @@ UPDATE DbApplication SET has_pending_oauth_request = :has_pending_oauth_request 
 
 delete:
 DELETE FROM DbApplication WHERE host = :host;
+
+clearPending:
+UPDATE DbApplication SET has_pending_oauth_request = 0 WHERE has_pending_oauth_request = 1;

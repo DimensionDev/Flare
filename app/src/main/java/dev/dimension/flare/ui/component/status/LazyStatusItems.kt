@@ -21,15 +21,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
+import app.cash.paging.compose.LazyPagingItems
+import app.cash.paging.compose.itemContentType
+import app.cash.paging.compose.itemKey
 import com.moriatsushi.koject.Provides
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.UiState
-import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
-import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusComponent
-import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.MastodonNotificationComponent
 import dev.dimension.flare.ui.component.status.mastodon.MastodonStatusComponent
 import dev.dimension.flare.ui.component.status.mastodon.MastodonStatusEvent
@@ -37,10 +33,11 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.onError
-import dev.dimension.flare.ui.onLoading
-import dev.dimension.flare.ui.onSuccess
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
@@ -156,16 +153,16 @@ internal fun status() {
                             modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                         )
 
-                        is UiStatus.Bluesky -> BlueskyStatusComponent(
-                            data = item,
-                            event = blueskyStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                        )
-                        is UiStatus.BlueskyNotification -> BlueskyNotificationComponent(
-                            data = item,
-                            event = blueskyStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                        )
+//                        is UiStatus.Bluesky -> BlueskyStatusComponent(
+//                            data = item,
+//                            event = blueskyStatusEvent,
+//                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+//                        )
+//                        is UiStatus.BlueskyNotification -> BlueskyNotificationComponent(
+//                            data = item,
+//                            event = blueskyStatusEvent,
+//                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+//                        )
                     }
                     // draw divider
                     if (it != lazyPagingItems.itemCount - 1) {
@@ -249,5 +246,5 @@ internal fun status() {
 internal data class StatusEvent(
     val mastodonStatusEvent: MastodonStatusEvent,
     val misskeyStatusEvent: MisskeyStatusEvent,
-    val blueskyStatusEvent: BlueskyStatusEvent,
+//    val blueskyStatusEvent: BlueskyStatusEvent,
 )

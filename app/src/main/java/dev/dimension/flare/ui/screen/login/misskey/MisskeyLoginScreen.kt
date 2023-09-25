@@ -37,18 +37,13 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.network.misskey.MisskeyOauthService
-import dev.dimension.flare.data.repository.app.addMisskeyApplicationUseCase
-import dev.dimension.flare.data.repository.app.clearAnyPendingOauthUseCase
-import dev.dimension.flare.data.repository.app.setPendingOAuthUseCase
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedTextField2
+import dev.dimension.flare.ui.presenter.login.misskeyLoginUseCase
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @Destination
 @Composable
@@ -156,24 +151,6 @@ fun MisskeyLoginScreen(
             }
         }
     }
-}
-
-private suspend fun misskeyLoginUseCase(
-    host: String,
-    launchOAuth: (String) -> Unit,
-) {
-    val session = UUID.randomUUID().toString()
-    val service = MisskeyOauthService(
-        host = host,
-        name = "Flare",
-        callback = AppDeepLink.Callback.Misskey,
-        session = session,
-    )
-    addMisskeyApplicationUseCase(host, session)
-    clearAnyPendingOauthUseCase()
-    setPendingOAuthUseCase(host, true)
-    val target = service.getAuthorizeUrl()
-    launchOAuth(target)
 }
 
 @OptIn(ExperimentalFoundationApi::class)

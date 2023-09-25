@@ -1,40 +1,40 @@
 package dev.dimension.flare.data.network.bluesky
 
-//import com.atproto.server.RefreshSessionResponse
-//import com.moriatsushi.koject.inject
-//import dev.dimension.flare.common.JSON
-//import dev.dimension.flare.data.database.app.AppDatabase
-//import dev.dimension.flare.data.database.app.dao.AccountDao
-//import dev.dimension.flare.data.network.ktorClient
-//import dev.dimension.flare.data.repository.app.UiAccount
-//import dev.dimension.flare.data.repository.app.UiAccount.Companion.toUi
-//import dev.dimension.flare.data.repository.app.updateBlueskyTokenUseCase
-//import dev.dimension.flare.model.MicroBlogKey
-//import io.ktor.client.HttpClient
-//import io.ktor.client.call.HttpClientCall
-//import io.ktor.client.call.body
-//import io.ktor.client.call.save
-//import io.ktor.client.plugins.DefaultRequest
-//import io.ktor.client.plugins.HttpClientPlugin
-//import io.ktor.client.plugins.HttpSend
-//import io.ktor.client.plugins.plugin
-//import io.ktor.client.request.bearerAuth
-//import io.ktor.client.request.post
-//import io.ktor.client.statement.bodyAsText
-//import io.ktor.http.HttpHeaders.Authorization
-//import io.ktor.http.HttpStatusCode.Companion.BadRequest
-//import io.ktor.http.Url
-//import io.ktor.util.AttributeKey
-//import kotlinx.serialization.json.Json
-//import sh.christian.ozone.BlueskyApi
-//import sh.christian.ozone.XrpcBlueskyApi
-//import sh.christian.ozone.api.response.AtpErrorDescription
+// import com.atproto.server.RefreshSessionResponse
+// import com.moriatsushi.koject.inject
+// import dev.dimension.flare.common.JSON
+// import dev.dimension.flare.data.database.app.AppDatabase
+// import dev.dimension.flare.data.database.app.dao.AccountDao
+// import dev.dimension.flare.data.network.ktorClient
+// import dev.dimension.flare.data.repository.app.UiAccount
+// import dev.dimension.flare.data.repository.app.UiAccount.Companion.toUi
+// import dev.dimension.flare.data.repository.app.updateBlueskyTokenUseCase
+// import dev.dimension.flare.model.MicroBlogKey
+// import io.ktor.client.HttpClient
+// import io.ktor.client.call.HttpClientCall
+// import io.ktor.client.call.body
+// import io.ktor.client.call.save
+// import io.ktor.client.plugins.DefaultRequest
+// import io.ktor.client.plugins.HttpClientPlugin
+// import io.ktor.client.plugins.HttpSend
+// import io.ktor.client.plugins.plugin
+// import io.ktor.client.request.bearerAuth
+// import io.ktor.client.request.post
+// import io.ktor.client.statement.bodyAsText
+// import io.ktor.http.HttpHeaders.Authorization
+// import io.ktor.http.HttpStatusCode.Companion.BadRequest
+// import io.ktor.http.Url
+// import io.ktor.util.AttributeKey
+// import kotlinx.serialization.json.Json
+// import sh.christian.ozone.BlueskyApi
+// import sh.christian.ozone.XrpcBlueskyApi
+// import sh.christian.ozone.api.response.AtpErrorDescription
 //
-//class BlueskyService(
+// class BlueskyService(
 //    private val baseUrl: String,
 //    private val accountKey: MicroBlogKey? = null,
 //    private val accountDao: AccountDao? = null,
-//) : BlueskyApi by XrpcBlueskyApi(
+// ) : BlueskyApi by XrpcBlueskyApi(
 //    ktorClient {
 //        install(DefaultRequest) {
 //            val hostUrl = Url(baseUrl)
@@ -50,17 +50,17 @@ package dev.dimension.flare.data.network.bluesky
 //
 //        expectSuccess = false
 //    },
-//)
+// )
 //
-///**
+// /**
 // * Appends the `Authorization` header to XRPC requests, as well as automatically refreshing and
 // * replaying a network request if it fails due to an expired access token.
 // */
-//internal class XrpcAuthPlugin(
+// internal class XrpcAuthPlugin(
 //    private val json: Json,
 //    private val accountKey: MicroBlogKey?,
 //    private val accountDao: AccountDao?,
-//) {
+// ) {
 //    class Config(
 //        var json: Json = Json { ignoreUnknownKeys = true },
 //        var accountKey: MicroBlogKey? = null,
@@ -130,12 +130,12 @@ package dev.dimension.flare.data.network.bluesky
 //            }
 //        }
 //    }
-//}
+// }
 //
-//fun UiAccount.Bluesky.getService(
+// fun UiAccount.Bluesky.getService(
 //    appDatabase: AppDatabase = inject(),
-//) = BlueskyService(
+// ) = BlueskyService(
 //    baseUrl = credential.baseUrl,
 //    accountKey = accountKey,
 //    accountDao = appDatabase.accountDao(),
-//)
+// )

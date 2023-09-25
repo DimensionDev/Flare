@@ -6,7 +6,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.skie)
-    alias(libs.plugins.molecule)
+//    alias(libs.plugins.molecule)
+    alias(libs.plugins.compose.jb)
 //    alias(libs.plugins.ktlint)
 }
 
@@ -33,11 +34,12 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(libs.koject.core)
                 implementation(libs.koject.compose.core)
-                implementation(libs.bundles.paging)
+                implementation(libs.paging.common)
                 implementation(libs.ktorfit.lib)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
                 implementation(libs.uuid)
+                implementation(libs.molecule.runtime)
 //                api(libs.paging.runtime.composeui)
             }
         }
@@ -125,3 +127,7 @@ skie {
         enabled.set(false)
     }
 }
+
+//compose {
+//    kotlinCompilerPlugin.set("org.jetbrains.compose.compiler:compiler:${libs.versions.compose.jb.get()}")
+//}

@@ -11,7 +11,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
-import com.moriatsushi.koject.Provides
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -75,4 +74,41 @@ abstract class HomeTimelineState(
     abstract fun refresh()
 
     abstract fun onNewTootsShown()
+
+    companion object {
+        val Empty = object : HomeTimelineState(
+            refreshing = false,
+            listState = UiState.Loading(),
+            showNewToots = false,
+        ) {
+            override fun refresh() {
+            }
+
+            override fun onNewTootsShown() {
+            }
+        }
+    }
+}
+
+class CounterPresenter : PresenterBase<CounterState>() {
+    @Composable
+    override fun body(): CounterState {
+        var count by remember { mutableStateOf(0) }
+        return object : CounterState(count.toString()) {
+            override fun increment() {
+                count++
+            }
+        }
+    }
+}
+abstract class CounterState(
+    val count: String
+) {
+    abstract fun increment()
+    companion object {
+        val Empty = object : CounterState("0") {
+            override fun increment() {
+            }
+        }
+    }
 }

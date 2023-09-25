@@ -42,6 +42,7 @@ okio = "3.5.0"
 uuid = "0.8.1"
 sqliter-driver = "1.2.3"
 skie = "0.4.20"
+compose-jb = "1.5.1"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -161,3 +162,4 @@ ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 molecule = { id = "app.cash.molecule", version.ref = "molecule" }
+compose-jb = { id = "org.jetbrains.compose", version.ref = "compose-jb" }

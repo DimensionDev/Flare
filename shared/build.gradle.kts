@@ -34,7 +34,7 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(libs.koject.core)
                 implementation(libs.koject.compose.core)
-//                implementation(libs.paging.common)
+                implementation(libs.paging.common)
                 implementation(libs.ktorfit.lib)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)

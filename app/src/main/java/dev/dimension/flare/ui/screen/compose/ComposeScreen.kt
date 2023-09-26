@@ -87,6 +87,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -248,8 +249,9 @@ private fun ComposeScreen(
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
 ) {
+    val context = LocalContext.current
     val state by producePresenter {
-        composePresenter(status)
+        composePresenter(context, status)
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -848,8 +850,8 @@ private fun PollOption(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun composePresenter(
+    context: Context,
     status: ComposeStatus? = null,
-    context: Context = rememberInject(),
     composeUseCase: ComposeUseCase = rememberInject(),
 ) = run {
     val account by activeAccountPresenter()

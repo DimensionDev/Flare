@@ -19,6 +19,8 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 
 class MisskeyCallbackPresenter(
     private val session: String?,
@@ -31,18 +33,24 @@ class MisskeyCallbackPresenter(
         }
         val applicationRepository: ApplicationRepository = rememberInject()
         val accountRepository: AccountRepository = rememberInject()
-        var error by remember { mutableStateOf<Exception?>(null) }
+        var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(session) {
             val pendingOAuth = applicationRepository.getPendingOAuth()
             if (pendingOAuth == null) {
                 error = Exception("No pending OAuth")
             }
             if (pendingOAuth is UiApplication.Misskey) {
-                misskeyAuthCheckUseCase(pendingOAuth.host, session, accountRepository)
-                applicationRepository.setPendingOAuth(pendingOAuth.host, false)
-                toHome.invoke()
+                runCatching {
+                    misskeyAuthCheckUseCase(pendingOAuth.host, session, accountRepository)
+                    applicationRepository.setPendingOAuth(pendingOAuth.host, false)
+                    // TODO: delay to workaround iOS NavigationPath.append not working
+                    delay(2.seconds)
+                    toHome.invoke()
+                }.onFailure {
+                    error = it
+                }
             } else {
-                error = Exception("Invalid pending OAuth")
+                error = Exception("Invalid pending OAuth: $pendingOAuth")
             }
         }
         if (error != null) {
@@ -83,22 +91,24 @@ class MisskeyCallbackPresenter(
 fun misskeyLoginUseCase(
     host: String,
     launchOAuth: (String) -> Unit,
-) {
-    val applicationRepository: ApplicationRepository = inject()
-    val session = uuid4().toString()
-    val service = MisskeyOauthService(
-        host = host,
-        name = "Flare",
-        callback = AppDeepLink.Callback.Misskey,
-        session = session,
-    )
-    applicationRepository.addApplication(
-        host = host,
-        credentialJson = session,
-        platformType = PlatformType.Misskey,
-    )
-    applicationRepository.clearPendingOAuth()
-    applicationRepository.setPendingOAuth(host, true)
-    val target = service.getAuthorizeUrl()
-    launchOAuth(target)
+): Result<Unit> {
+    return runCatching {
+        val applicationRepository: ApplicationRepository = inject()
+        val session = uuid4().toString()
+        val service = MisskeyOauthService(
+            host = host,
+            name = "Flare",
+            callback = AppDeepLink.Callback.Misskey,
+            session = session,
+        )
+        applicationRepository.addApplication(
+            host = host,
+            credentialJson = session,
+            platformType = PlatformType.Misskey,
+        )
+        applicationRepository.clearPendingOAuth()
+        applicationRepository.setPendingOAuth(host, true)
+        val target = service.getAuthorizeUrl()
+        launchOAuth(target)
+    }
 }

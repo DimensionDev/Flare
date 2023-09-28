@@ -3,21 +3,43 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
+		060D00C02AC406560087427A /* MisskeyOAuthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00BF2AC406560087427A /* MisskeyOAuthScreen.swift */; };
+		060D00C22AC407DF0087427A /* FlareApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C12AC407DF0087427A /* FlareApp.swift */; };
+		060D00C42AC414400087427A /* MastodonCallbackScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C32AC414400087427A /* MastodonCallbackScreen.swift */; };
+		060D00C62AC41D050087427A /* MisskeyCallbackScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C52AC41D050087427A /* MisskeyCallbackScreen.swift */; };
+		0620DD9E2AC44237009BD1BE /* TimelineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0620DD9D2AC44237009BD1BE /* TimelineScreen.swift */; };
+		064E893B2AC52C4D00F30759 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		0661511F2AC52E1400CCB945 /* RichText in Frameworks */ = {isa = PBXBuildFile; productRef = 0661511E2AC52E1400CCB945 /* RichText */; };
+		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
+		066151242AC54A9C00CCB945 /* MastodonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151232AC54A9C00CCB945 /* MastodonStatusComponent.swift */; };
+		06AD156B2AC3F454000DC865 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156A2AC3F454000DC865 /* Route.swift */; };
+		06AD156F2AC400A0000DC865 /* MastodonOAuthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156E2AC400A0000DC865 /* MastodonOAuthScreen.swift */; };
 		06C433AB2AC13B550022B819 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C433AA2AC13B550022B819 /* ContentView.swift */; };
-		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
+		06D5C9142AC3BB09007439D5 /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9132AC3BB09007439D5 /* MoleculeViewModelBase.swift */; };
+		06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		060D00BF2AC406560087427A /* MisskeyOAuthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyOAuthScreen.swift; sourceTree = "<group>"; };
+		060D00C12AC407DF0087427A /* FlareApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareApp.swift; sourceTree = "<group>"; };
+		060D00C32AC414400087427A /* MastodonCallbackScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonCallbackScreen.swift; sourceTree = "<group>"; };
+		060D00C52AC41D050087427A /* MisskeyCallbackScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyCallbackScreen.swift; sourceTree = "<group>"; };
+		0620DD9D2AC44237009BD1BE /* TimelineScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineScreen.swift; sourceTree = "<group>"; };
+		066151202AC540B700CCB945 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		066151232AC54A9C00CCB945 /* MastodonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonStatusComponent.swift; sourceTree = "<group>"; };
+		06AD156A2AC3F454000DC865 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
+		06AD156E2AC400A0000DC865 /* MastodonOAuthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonOAuthScreen.swift; sourceTree = "<group>"; };
 		06C433AA2AC13B550022B819 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
+		06D5C9132AC3BB09007439D5 /* MoleculeViewModelBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoleculeViewModelBase.swift; sourceTree = "<group>"; };
+		06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSelectScreen.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -28,6 +50,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				064E893B2AC52C4D00F30759 /* (null) in Frameworks */,
+				0661511F2AC52E1400CCB945 /* RichText in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,6 +64,70 @@
 				058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		060D00BE2AC4064B0087427A /* Misskey */ = {
+			isa = PBXGroup;
+			children = (
+				060D00BF2AC406560087427A /* MisskeyOAuthScreen.swift */,
+				060D00C52AC41D050087427A /* MisskeyCallbackScreen.swift */,
+			);
+			path = Misskey;
+			sourceTree = "<group>";
+		};
+		0620DD9C2AC44224009BD1BE /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				0620DD9D2AC44237009BD1BE /* TimelineScreen.swift */,
+				066151202AC540B700CCB945 /* HomeScreen.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		066151222AC54A8200CCB945 /* Component */ = {
+			isa = PBXGroup;
+			children = (
+				066151232AC54A9C00CCB945 /* MastodonStatusComponent.swift */,
+			);
+			path = Component;
+			sourceTree = "<group>";
+		};
+		06AD156C2AC40067000DC865 /* OAuth */ = {
+			isa = PBXGroup;
+			children = (
+				060D00BE2AC4064B0087427A /* Misskey */,
+				06AD156D2AC4008D000DC865 /* Mastodon */,
+				06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */,
+			);
+			path = OAuth;
+			sourceTree = "<group>";
+		};
+		06AD156D2AC4008D000DC865 /* Mastodon */ = {
+			isa = PBXGroup;
+			children = (
+				06AD156E2AC400A0000DC865 /* MastodonOAuthScreen.swift */,
+				060D00C32AC414400087427A /* MastodonCallbackScreen.swift */,
+			);
+			path = Mastodon;
+			sourceTree = "<group>";
+		};
+		06D5C9152AC3BB2B007439D5 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				066151222AC54A8200CCB945 /* Component */,
+				06D5C9162AC3BB35007439D5 /* Screen */,
+				06AD156A2AC3F454000DC865 /* Route.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		06D5C9162AC3BB35007439D5 /* Screen */ = {
+			isa = PBXGroup;
+			children = (
+				0620DD9C2AC44224009BD1BE /* Home */,
+				06AD156C2AC40067000DC865 /* OAuth */,
+			);
+			path = Screen;
 			sourceTree = "<group>";
 		};
 		42799AB246E5F90AF97AA0EF /* Frameworks */ = {
@@ -70,11 +158,13 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				06D5C9152AC3BB2B007439D5 /* UI */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF8C242A565B00829871 /* Info.plist */,
-				2152FB032600AC8F00CF470E /* iOSApp.swift */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				06C433AA2AC13B550022B819 /* ContentView.swift */,
+				06D5C9132AC3BB09007439D5 /* MoleculeViewModelBase.swift */,
+				060D00C12AC407DF0087427A /* FlareApp.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -104,6 +194,9 @@
 			dependencies = (
 			);
 			name = iosApp;
+			packageProductDependencies = (
+				0661511E2AC52E1400CCB945 /* RichText */,
+			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
 			productType = "com.apple.product-type.application";
@@ -132,6 +225,9 @@
 				Base,
 			);
 			mainGroup = 7555FF72242A565900829871;
+			packageReferences = (
+				0661511D2AC52E1400CCB945 /* XCRemoteSwiftPackageReference "RichText" */,
+			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -179,8 +275,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
+				060D00C42AC414400087427A /* MastodonCallbackScreen.swift in Sources */,
 				06C433AB2AC13B550022B819 /* ContentView.swift in Sources */,
-				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
+				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
+				066151242AC54A9C00CCB945 /* MastodonStatusComponent.swift in Sources */,
+				066151212AC540B700CCB945 /* HomeScreen.swift in Sources */,
+				0620DD9E2AC44237009BD1BE /* TimelineScreen.swift in Sources */,
+				06AD156F2AC400A0000DC865 /* MastodonOAuthScreen.swift in Sources */,
+				06D5C9142AC3BB09007439D5 /* MoleculeViewModelBase.swift in Sources */,
+				06AD156B2AC3F454000DC865 /* Route.swift in Sources */,
+				060D00C02AC406560087427A /* MisskeyOAuthScreen.swift in Sources */,
+				060D00C62AC41D050087427A /* MisskeyCallbackScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,7 +418,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				DEVELOPMENT_TEAM = JBX27Q658M;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)\n",
@@ -351,7 +457,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				DEVELOPMENT_TEAM = JBX27Q658M;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)\n",
@@ -405,6 +511,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0661511D2AC52E1400CCB945 /* XCRemoteSwiftPackageReference "RichText" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/NuPlay/RichText.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0661511E2AC52E1400CCB945 /* RichText */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0661511D2AC52E1400CCB945 /* XCRemoteSwiftPackageReference "RichText" */;
+			productName = RichText;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7555FF73242A565900829871 /* Project object */;
 }

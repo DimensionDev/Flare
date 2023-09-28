@@ -11,9 +11,7 @@ struct ContentView: View {
             }, label: {
                 Text("click me!")
             })
-        }.task {
-            await viewModel.activate()
-        }
+        }.activateViewModel(viewModel: viewModel)
     }
 }
 
@@ -22,21 +20,4 @@ struct ContentView: View {
 }
 
 class CounterViewModel: MoleculeViewModelBase<CounterState, CounterPresenter> {
-}
-
-@Observable
-class MoleculeViewModelBase<Model, Presenter: PresenterBase<Model>> {
-    private let presenter = Presenter()
-    private(set) var model: Model
-    
-    init() {
-        model = presenter.models.value!
-    }
-    
-    @MainActor
-    func activate() async {
-        for await model in presenter.models {
-            self.model = model!
-        }
-    }
 }

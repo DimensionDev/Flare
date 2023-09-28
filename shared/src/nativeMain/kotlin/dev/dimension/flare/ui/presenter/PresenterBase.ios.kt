@@ -12,8 +12,10 @@ actual abstract class PresenterBase<Model> {
 
     private val scope = CoroutineScope(DisplayLinkClock)
 
-    val models: StateFlow<Model> = scope.launchMolecule(mode = RecompositionMode.Immediate) {
-        body()
+    val models: StateFlow<Model> by lazy {
+        scope.launchMolecule(mode = RecompositionMode.Immediate) {
+            body()
+        }
     }
 
     @OptIn(ExperimentalObjCRefinement::class)

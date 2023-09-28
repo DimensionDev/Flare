@@ -82,8 +82,8 @@ import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlin.math.max
 import org.jsoup.nodes.Element
+import kotlin.math.max
 
 @Composable
 @Destination(

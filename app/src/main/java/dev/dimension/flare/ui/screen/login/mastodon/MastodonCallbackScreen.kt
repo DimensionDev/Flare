@@ -133,6 +133,9 @@ private fun mastodonCallbackPresenter(
     code: String?,
     toHome: () -> Unit,
 ): UiState<Nothing> {
+    if (code == null) {
+        return UiState.Error(Throwable("No code"))
+    }
     return remember(code, toHome) {
         MastodonCallbackPresenter(
             code = code,

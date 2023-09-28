@@ -17,7 +17,7 @@ getPending:
 SELECT * FROM DbApplication WHERE has_pending_oauth_request = 1;
 
 insert:
-INSERT INTO DbApplication (host, credential_json, platform_type) VALUES (:host, :credential_json, :platform_type);
+INSERT OR REPLACE INTO DbApplication (host, credential_json, platform_type) VALUES (:host, :credential_json, :platform_type);
 
 update:
 UPDATE DbApplication SET credential_json = :credential_json, platform_type = :platform_type WHERE host = :host;

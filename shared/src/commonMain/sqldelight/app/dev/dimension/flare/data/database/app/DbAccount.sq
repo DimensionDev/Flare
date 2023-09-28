@@ -15,7 +15,7 @@ allAccounts:
 SELECT * FROM DbAccount;
 
 insert:
-INSERT INTO DbAccount (account_key, credential_json, platform_type, last_active) VALUES (:accountKey, :credentialJson, :platformType, :lastActive);
+INSERT OR REPLACE INTO DbAccount (account_key, credential_json, platform_type, last_active) VALUES (:accountKey, :credentialJson, :platformType, :lastActive);
 
 setLastActive:
 UPDATE DbAccount SET last_active = :lastActive WHERE account_key = :accountKey;

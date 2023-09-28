@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import co.touchlab.kermit.Logger
 import com.moriatsushi.koject.compose.rememberInject
 import com.moriatsushi.koject.inject
 import dev.dimension.flare.common.AppDeepLink
@@ -43,10 +44,13 @@ class MastodonCallbackPresenter(
                 applicationRepository.setPendingOAuth(pendingOAuth.host, false)
                 toHome.invoke()
             } else {
-                error = Exception("Invalid pending OAuth")
+                error = Exception("Invalid pending OAuth: $pendingOAuth")
             }
         }
         if (error != null) {
+            Logger.e(throwable = error) {
+                error.toString()
+            }
             return UiState.Error(error!!)
         }
         return UiState.Loading()
@@ -88,40 +92,42 @@ class MastodonCallbackPresenter(
 suspend fun mastodonLoginUseCase(
     domain: String,
     launchOAuth: (String) -> Unit,
-) {
-    val applicationRepository: ApplicationRepository = inject()
-    val baseUrl = if (domain.startsWith("http://", ignoreCase = true) || domain.startsWith(
-            "https://",
-            ignoreCase = true,
-        )
-    ) {
-        Url(domain)
-    } else {
-        Url("https://$domain/")
-    }
-    val host = baseUrl.host
-    val service = MastodonOAuthService(
-        baseUrl = baseUrl.toString(),
-        client_name = "Flare",
-        website = "https://github.com/DimensionDev/Flare",
-        redirect_uri = AppDeepLink.Callback.Mastodon,
-    )
-
-    val application = applicationRepository.findByHost(host)?.let {
-        if (it is UiApplication.Mastodon) {
-            it.application
+): Result<Unit> {
+    return runCatching {
+        val applicationRepository: ApplicationRepository = inject()
+        val baseUrl = if (domain.startsWith("http://", ignoreCase = true) || domain.startsWith(
+                "https://",
+                ignoreCase = true,
+            )
+        ) {
+            Url(domain)
         } else {
-            null
+            Url("https://$domain/")
         }
-    } ?: service.createApplication().also {
-        applicationRepository.addApplication(
-            host,
-            it.encodeJson(),
-            platformType = PlatformType.Mastodon,
+        val host = baseUrl.host
+        val service = MastodonOAuthService(
+            baseUrl = baseUrl.toString(),
+            client_name = "Flare",
+            website = "https://github.com/DimensionDev/Flare",
+            redirect_uri = AppDeepLink.Callback.Mastodon,
         )
+
+        val application = applicationRepository.findByHost(host)?.let {
+            if (it is UiApplication.Mastodon) {
+                it.application
+            } else {
+                null
+            }
+        } ?: service.createApplication().also {
+            applicationRepository.addApplication(
+                host,
+                it.encodeJson(),
+                platformType = PlatformType.Mastodon,
+            )
+        }
+        applicationRepository.clearPendingOAuth()
+        applicationRepository.setPendingOAuth(host, true)
+        val target = service.getWebOAuthUrl(application)
+        launchOAuth(target)
     }
-    applicationRepository.clearPendingOAuth()
-    applicationRepository.setPendingOAuth(host, true)
-    val target = service.getWebOAuthUrl(application)
-    launchOAuth(target)
 }

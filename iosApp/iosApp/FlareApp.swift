@@ -2,13 +2,14 @@ import SwiftUI
 import shared
 
 @main
-struct iOSApp: SwiftUI.App {
+struct FlareApp: SwiftUI.App {
     init() {
         KojectHelper.shared.start()
     }
-	var body: some Scene {
-		WindowGroup {
-            ContentView()
+    
+    var body: some Scene {
+        WindowGroup {
+            RouterView()
         }
     }
 }

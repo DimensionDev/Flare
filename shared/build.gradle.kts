@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.skie)
-//    alias(libs.plugins.molecule)
     alias(libs.plugins.compose.jb)
 //    alias(libs.plugins.ktlint)
 }
@@ -23,7 +22,7 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "shared"
-            isStatic = true
+//            isStatic = true
         }
     }
 
@@ -55,7 +54,9 @@ kotlin {
         val nativeMain by getting {
             dependencies {
                 implementation(libs.sqldelight.native.driver)
-                implementation(libs.sqliter.driver)
+//                implementation(libs.sqliter.driver)
+                implementation("co.touchlab:stately-isolate:2.0.4")
+                implementation("co.touchlab:stately-iso-collections:2.0.4")
             }
         }
     }
@@ -105,16 +106,19 @@ dependencies {
         "kspIosArm64",
         "kspIosSimulatorArm64",
     )
+    add("kspAndroid", libs.koject.processor.lib)
+    add("kspIosX64", libs.koject.processor.app)
+    add("kspIosArm64", libs.koject.processor.app)
+    add("kspIosSimulatorArm64", libs.koject.processor.app)
 
     kspTarget.forEach { target ->
-        add(target, libs.koject.processor.lib)
         add(target, libs.ktorfit.ksp)
     }
 }
 
-ksp {
-    arg("moduleName", project.name)
-}
+//ksp {
+//    arg("moduleName", project.name)
+//}
 
 //ktlint {
 //    version.set(libs.versions.ktlint)
@@ -131,7 +135,3 @@ skie {
         enabled.set(false)
     }
 }
-
-//compose {
-//    kotlinCompilerPlugin.set("org.jetbrains.compose.compiler:compiler:${libs.versions.compose.jb.get()}")
-//}

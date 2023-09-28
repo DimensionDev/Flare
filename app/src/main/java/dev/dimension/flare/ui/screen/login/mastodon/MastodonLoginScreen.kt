@@ -177,12 +177,10 @@ private fun loginPresenter(
             scope.launch {
                 loading = true
                 error = null
-                runCatching {
-                    mastodonLoginUseCase(
-                        domain = hostTextState.text.toString(),
-                        launchOAuth = launchUrl,
-                    )
-                }.onFailure {
+                mastodonLoginUseCase(
+                    domain = hostTextState.text.toString(),
+                    launchOAuth = launchUrl,
+                ).onFailure {
                     error = it.message
                 }
                 loading = false

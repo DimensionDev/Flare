@@ -172,12 +172,10 @@ private fun loginPresenter(
             scope.launch {
                 loading = true
                 error = null
-                runCatching {
-                    misskeyLoginUseCase(
-                        host = hostTextState.text.toString(),
-                        launchOAuth = launchUrl,
-                    )
-                }.onFailure {
+                misskeyLoginUseCase(
+                    host = hostTextState.text.toString(),
+                    launchOAuth = launchUrl,
+                ).onFailure {
                     error = it.message
                 }
                 loading = false

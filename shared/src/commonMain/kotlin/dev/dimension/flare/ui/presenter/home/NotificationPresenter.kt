@@ -16,6 +16,9 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toImmutableList
 
 class NotificationPresenter : PresenterBase<NotificationState>() {
 
@@ -23,7 +26,7 @@ class NotificationPresenter : PresenterBase<NotificationState>() {
     override fun body(): NotificationState {
         var type by remember { mutableStateOf(NotificationFilter.All) }
         val allTypes = activeAccountServicePresenter().map { (service, _) ->
-            service.supportedNotificationFilter
+            service.supportedNotificationFilter.toImmutableList()
         }
         val listState = activeAccountServicePresenter().map { (service, account) ->
             remember(account.accountKey, type) {
@@ -60,7 +63,7 @@ abstract class NotificationState(
     val refreshing: Boolean = false,
     val listState: UiState<LazyPagingItems<UiStatus>>,
     val notificationType: NotificationFilter,
-    val allTypes: UiState<List<NotificationFilter>>,
+    val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {
     abstract fun refresh()
     abstract fun onNotificationTypeChanged(value: NotificationFilter)

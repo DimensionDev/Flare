@@ -23,9 +23,8 @@ struct MisskeyCallbackScreen: View {
                 .frame(height: 16)
             ProgressView()
             
-            if viewModel.model is UiStateError<Unit> {
-                let errorModel = viewModel.model as! UiStateError<Unit>
-                Text(errorModel.throwable.message ?? "error")
+            if case .error(let error) = onEnum(of: viewModel.model) {
+                Text(error.throwable.message ?? "error")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
@@ -39,7 +38,7 @@ struct MisskeyCallbackScreen: View {
 @Observable
 class MisskeyCallbackViewModel : MoleculeViewModelProto {
     var model: Model
-    typealias Model = UiState
+    typealias Model = UiState<KotlinNothing>
     typealias Presenter = MisskeyCallbackPresenter
     let presenter: MisskeyCallbackPresenter
     

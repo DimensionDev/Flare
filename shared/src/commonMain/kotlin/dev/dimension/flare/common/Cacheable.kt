@@ -53,9 +53,9 @@ class CacheData<T> internal constructor(
     }
 }
 
-sealed interface CacheState<T> {
-    class Empty<T> : CacheState<T>
-    data class Success<T>(val data: T) : CacheState<T>
+sealed class CacheState<T> {
+    class Empty<T> : CacheState<T>()
+    data class Success<T>(val data: T) : CacheState<T>()
 }
 
 sealed interface LoadState {

@@ -3,12 +3,12 @@ import SwiftUI
 struct HomeScreen: View {
     var body: some View {
         TabView {
-            TimelineScreen()
+            HomeTimelineScreen()
                 .tabItem {
                     Image(systemName: "house")
                     Text("Home")
                 }
-            ContentView()
+            NotificationScreen()
                 .tabItem {
                     Image(systemName: "bell")
                     Text("Notification")
@@ -18,8 +18,7 @@ struct HomeScreen: View {
                     Image(systemName: "person.circle")
                     Text("Me")
                 }
-        }.navigationTitle("Flare")
-            .navigationBarBackButtonHidden(true)
+        }
     }
 }
 

@@ -3,29 +3,38 @@ import SwiftUI
 import shared
 
 struct RouterView : View {
-    @Bindable var router = Router<RootDestination>()
+    @Bindable var oauthRouter = Router<OAuthDestination>()
     var body: some View {
-        NavigationStack(path: $router.navPath) {
-            ServiceSelectScreen(
-                toMisskey: {
-                    router.navigate(to: .misskey)
-                },
-                toMastodon: {
-                    router.navigate(to: .mastodon)
+        NavigationStack(path: $oauthRouter.navPath) {
+            SplashScreen { type in
+                switch type {
+                case .home:
+                    HomeScreen()
+                case .login:
+                    ServiceSelectScreen(
+                        toMisskey: {
+                            oauthRouter.navigate(to: .misskey)
+                        },
+                        toMastodon: {
+                            oauthRouter.navigate(to: .mastodon)
+                        }
+                    )
+                    .withOAuthRouter(router: oauthRouter)
+                case .splash:
+                    Text("Flare")
                 }
-            )
-            .withOAuthRouter(router: router)
+            }
         }.onOpenURL { url in
             if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Mastodon)) {
                 if let range = url.absoluteString.range(of: "code=") {
                     let code = url.absoluteString.suffix(from: range.upperBound)
-                    router.navigate(to: .mastodonCallback(code: String(code)))
+                    oauthRouter.navigate(to: .mastodonCallback(code: String(code)))
                 }
-
+                
             } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Misskey)) {
                 if let range = url.absoluteString.range(of: "session=") {
                     let session = url.absoluteString.suffix(from: range.upperBound)
-                    router.navigate(to: .misskeyCallback(session: String(session)))
+                    oauthRouter.navigate(to: .misskeyCallback(session: String(session)))
                 }
             }
         }
@@ -40,12 +49,13 @@ public enum TabDestination: Codable, Hashable {
     case accountSettings
 }
 
-public enum RootDestination: Codable, Hashable {
+public enum OAuthDestination: Codable, Hashable {
     case mastodon
     case mastodonCallback(code: String)
     case misskey
     case misskeyCallback(session: String)
     case home
+    case serviceSelection
 }
 
 @Observable
@@ -66,7 +76,7 @@ final class Router<T: Hashable>: ObservableObject {
     }
     
     func clearBackStack() {
-        
+        navPath = NavigationPath()
     }
 }
 
@@ -77,33 +87,43 @@ extension View {
             for: TabDestination.self
         ) { destination in
             switch destination {
-                case let .profile(userKey):
-                    ContentView()
-                case let .statusDetail(statusKey):
-                    ContentView()
-                case let .profileWithUserNameAndHost(userName, host):
-                    ContentView()
-                case .settings:
-                    ContentView()
-                case .accountSettings:
-                    ContentView()
+            case let .profile(userKey):
+                ContentView()
+            case let .statusDetail(statusKey):
+                ContentView()
+            case let .profileWithUserNameAndHost(userName, host):
+                ContentView()
+            case .settings:
+                ContentView()
+            case .accountSettings:
+                ContentView()
             }
         }
     }
     
-    func withOAuthRouter(router: Router<RootDestination>) -> some View {
-        navigationDestination(for: RootDestination.self) { destination in
+    func withOAuthRouter(router: Router<OAuthDestination>) -> some View {
+        navigationDestination(for: OAuthDestination.self) { destination in
             switch destination {
-                case .mastodon:
-                    MastodonOAuthScreen()
-                case let .mastodonCallback(code):
-                    MastodonCallbackScreen(code: code, toHome: {router.navigate(to: .home)})
-                case .misskey:
-                    MisskeyOAuthScreen()
-                case let .misskeyCallback(session):
-                    MisskeyCallbackScreen(session: session, toHome: {router.navigate(to: .home)})
-                case .home:
-                    HomeScreen()
+            case .mastodon:
+                MastodonOAuthScreen()
+            case let .mastodonCallback(code):
+                MastodonCallbackScreen(code: code, toHome: {router.navigate(to: .home)})
+            case .misskey:
+                MisskeyOAuthScreen()
+            case let .misskeyCallback(session):
+                MisskeyCallbackScreen(session: session, toHome: {router.navigate(to: .home)})
+            case .home:
+                HomeScreen()
+            case .serviceSelection:
+                ServiceSelectScreen(
+                    toMisskey: {
+                        router.navigate(to: .misskey)
+                    },
+                    toMastodon: {
+                        router.navigate(to: .mastodon)
+                    }
+                )
+                
             }
         }
     }

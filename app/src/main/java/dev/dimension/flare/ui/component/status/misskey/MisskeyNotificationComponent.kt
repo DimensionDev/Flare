@@ -23,7 +23,6 @@ import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.nameDirection
-import dev.dimension.flare.ui.model.nameElement
 import dev.dimension.flare.ui.theme.MediumAlpha
 
 @Composable

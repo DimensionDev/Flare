@@ -5,12 +5,12 @@ import shared
 struct RouterView : View {
     @Bindable var oauthRouter = Router<OAuthDestination>()
     var body: some View {
-        NavigationStack(path: $oauthRouter.navPath) {
-            SplashScreen { type in
-                switch type {
-                case .home:
-                    HomeScreen()
-                case .login:
+        SplashScreen { type in
+            switch type {
+            case .home:
+                HomeScreen()
+            case .login:
+                NavigationStack(path: $oauthRouter.navPath) {
                     ServiceSelectScreen(
                         toMisskey: {
                             oauthRouter.navigate(to: .misskey)
@@ -20,22 +20,22 @@ struct RouterView : View {
                         }
                     )
                     .withOAuthRouter(router: oauthRouter)
-                case .splash:
-                    Text("Flare")
+                }.onOpenURL { url in
+                    if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Mastodon)) {
+                        if let range = url.absoluteString.range(of: "code=") {
+                            let code = url.absoluteString.suffix(from: range.upperBound)
+                            oauthRouter.navigate(to: .mastodonCallback(code: String(code)))
+                        }
+                        
+                    } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Misskey)) {
+                        if let range = url.absoluteString.range(of: "session=") {
+                            let session = url.absoluteString.suffix(from: range.upperBound)
+                            oauthRouter.navigate(to: .misskeyCallback(session: String(session)))
+                        }
+                    }
                 }
-            }
-        }.onOpenURL { url in
-            if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Mastodon)) {
-                if let range = url.absoluteString.range(of: "code=") {
-                    let code = url.absoluteString.suffix(from: range.upperBound)
-                    oauthRouter.navigate(to: .mastodonCallback(code: String(code)))
-                }
-                
-            } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Misskey)) {
-                if let range = url.absoluteString.range(of: "session=") {
-                    let session = url.absoluteString.suffix(from: range.upperBound)
-                    oauthRouter.navigate(to: .misskeyCallback(session: String(session)))
-                }
+            case .splash:
+                Text("Flare")
             }
         }
     }
@@ -54,7 +54,6 @@ public enum OAuthDestination: Codable, Hashable {
     case mastodonCallback(code: String)
     case misskey
     case misskeyCallback(session: String)
-    case home
     case serviceSelection
 }
 
@@ -88,7 +87,7 @@ extension View {
         ) { destination in
             switch destination {
             case let .profile(userKey):
-                ContentView()
+                ProfileScreen(userKey: MicroBlogKey.companion.valueOf(str: userKey))
             case let .statusDetail(statusKey):
                 ContentView()
             case let .profileWithUserNameAndHost(userName, host):
@@ -107,13 +106,11 @@ extension View {
             case .mastodon:
                 MastodonOAuthScreen()
             case let .mastodonCallback(code):
-                MastodonCallbackScreen(code: code, toHome: {router.navigate(to: .home)})
+                MastodonCallbackScreen(code: code, toHome: {router.clearBackStack()})
             case .misskey:
                 MisskeyOAuthScreen()
             case let .misskeyCallback(session):
-                MisskeyCallbackScreen(session: session, toHome: {router.navigate(to: .home)})
-            case .home:
-                HomeScreen()
+                MisskeyCallbackScreen(session: session, toHome: {router.clearBackStack()})
             case .serviceSelection:
                 ServiceSelectScreen(
                     toMisskey: {

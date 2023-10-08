@@ -10,8 +10,21 @@ struct ProfileScreen: View {
     
     var body: some View {
         List {
-            
-        }.activateViewModel(viewModel: viewModel)
+            ProfileHeader(user: viewModel.model.userState, relation: viewModel.model.relationState)
+                .listRowInsets(EdgeInsets())
+            StatusTimelineStateBuilder(data: viewModel.model.listState)
+        }
+        .listStyle(.plain)
+        .edgesIgnoringSafeArea(.top)
+        .toolbar {
+            Menu {
+                
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+
+        }
+        .activateViewModel(viewModel: viewModel)
     }
 }
 
@@ -24,7 +37,13 @@ struct ProfileHeader: View {
         case .error(_):
             Text("error")
         case .loading:
-            Text("loading")
+            CommonProfileHeader(bannerUrl: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500", avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", displayName: "test", handle: "test@test.test", description: "tefewfewfewfewfewst", headerTrailing: {
+                Text("header")
+            }, handleTrailing: {
+                Text("handle")
+            }, content: {
+                Text("content")
+            })
         case .success(let data):
             ProfileHeaderSuccess(user: data.data, relation: relation)
         }
@@ -48,7 +67,7 @@ struct MastodonProfileHeader: View {
     let user: UiUser.Mastodon
     let relation: UiState<UiRelation>
     var body: some View {
-        Text("")
+        CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown)
     }
 }
 
@@ -56,7 +75,7 @@ struct MisskeyProfileHeader: View {
     let user: UiUser.Misskey
     let relation: UiState<UiRelation>
     var body: some View {
-        CommonProfileHeader(bannerUrl: "", avatarUrl: "", displayName: "", handle: "", description: "")
+        CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown)
     }
 }
 

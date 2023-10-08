@@ -113,7 +113,7 @@ dependencies {
     implementation(libs.twitter.parser)
     implementation(libs.material.icons.extended)
     implementation(libs.molecule.runtime)
-    implementation(libs.jsoup)
+    implementation(libs.ktml)
     implementation(libs.bundles.accompanist)
     implementation(libs.nestedScrollView)
     implementation(libs.bundles.compose.destinations)

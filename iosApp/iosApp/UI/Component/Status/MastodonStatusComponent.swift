@@ -1,4 +1,5 @@
 import SwiftUI
+import MarkdownUI
 import shared
 
 struct MastodonStatusComponent: View {
@@ -15,15 +16,17 @@ struct MastodonStatusComponent: View {
                     .frame(width: 48, height: 48)
                     .clipShape(Circle())
                 VStack(alignment: .leading) {
-                    Text(name)
+                    Markdown(name)
                         .font(.headline)
+                        .markdownInlineImageProvider(.emoji)
                     Text(handle)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
             }
-            Text(content)
+            Markdown(content)
                 .font(.body)
+                .markdownInlineImageProvider(.emoji)
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
 }

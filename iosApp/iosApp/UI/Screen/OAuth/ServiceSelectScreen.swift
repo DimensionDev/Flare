@@ -10,7 +10,6 @@ struct ServiceSelectScreen: View {
             Text("Welcome to Flare")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.black)
             Text("Flare is a social network client for iOS.\nTo get started, please select a service to connect to.")
                 .font(.subheadline)
                 .foregroundColor(.gray)

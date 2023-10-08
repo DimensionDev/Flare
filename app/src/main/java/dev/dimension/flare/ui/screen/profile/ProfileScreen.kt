@@ -74,7 +74,6 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.nameElement
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -82,7 +81,7 @@ import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import org.jsoup.nodes.Element
+import moe.tlaster.ktml.dom.Element
 import kotlin.math.max
 
 @Composable

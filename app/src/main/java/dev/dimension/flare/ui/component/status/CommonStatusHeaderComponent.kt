@@ -21,7 +21,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.nameElement
 import dev.dimension.flare.ui.theme.MediumAlpha
 
 @Composable

@@ -21,8 +21,6 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.descriptionDirection
-import dev.dimension.flare.ui.model.descriptionElement
-import dev.dimension.flare.ui.model.nameElement
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @OptIn(ExperimentalLayoutApi::class)

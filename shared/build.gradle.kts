@@ -41,22 +41,21 @@ kotlin {
                 implementation(libs.molecule.runtime)
                 implementation(libs.kermit)
                 api(libs.paging.compose.common)
+                implementation(libs.ktml)
+                implementation(libs.mfm.multiplatform)
             }
         }
         val androidMain by getting {
             dependencies {
                 implementation(libs.sqldelight.android.driver)
-                implementation(compose.foundation)
-                implementation(libs.jsoup)
-                implementation(libs.mfm.multiplatform)
             }
         }
         val nativeMain by getting {
             dependencies {
                 implementation(libs.sqldelight.native.driver)
 //                implementation(libs.sqliter.driver)
-                implementation("co.touchlab:stately-isolate:2.0.4")
-                implementation("co.touchlab:stately-iso-collections:2.0.4")
+                implementation(libs.stately.isolate)
+                implementation(libs.stately.iso.collections)
             }
         }
     }

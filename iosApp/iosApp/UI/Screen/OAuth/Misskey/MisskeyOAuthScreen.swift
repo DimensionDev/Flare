@@ -11,7 +11,6 @@ struct MisskeyOAuthScreen: View {
             Text("Login to Misskey")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.black)
             
             Text("Please enter your instance URL below.")
                 .font(.subheadline)

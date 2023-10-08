@@ -13,7 +13,6 @@ struct MisskeyCallbackScreen: View {
             Text("Login to Misskey")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.black)
 
             Text("Please wait while we verify your credentials.")
                 .font(.subheadline)

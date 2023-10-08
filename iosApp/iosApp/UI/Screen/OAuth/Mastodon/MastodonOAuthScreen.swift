@@ -11,7 +11,6 @@ struct MastodonOAuthScreen: View {
             Text("Login to Mastodon")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.black)
 
             Text("Please enter your instance URL below.")
                 .font(.subheadline)

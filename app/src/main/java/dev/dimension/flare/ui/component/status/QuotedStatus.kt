@@ -22,11 +22,9 @@ import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
-import dev.dimension.flare.ui.model.contentToken
-import dev.dimension.flare.ui.model.nameElement
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
-import org.jsoup.nodes.Element
+import moe.tlaster.ktml.dom.Element
 
 @Composable
 internal fun UiStatusQuoted(

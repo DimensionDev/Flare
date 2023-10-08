@@ -1,6 +1,9 @@
 package dev.dimension.flare.ui.model
 
+import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
+import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
@@ -8,6 +11,34 @@ import dev.dimension.flare.ui.humanizer.humanizePercentage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import moe.tlaster.ktml.Ktml
+import moe.tlaster.ktml.dom.Element
+import moe.tlaster.ktml.dom.Node
+import moe.tlaster.ktml.dom.Text
+import moe.tlaster.mfm.parser.MFMParser
+import moe.tlaster.mfm.parser.tree.BoldNode
+import moe.tlaster.mfm.parser.tree.CashNode
+import moe.tlaster.mfm.parser.tree.CenterNode
+import moe.tlaster.mfm.parser.tree.CodeBlockNode
+import moe.tlaster.mfm.parser.tree.EmojiCodeNode
+import moe.tlaster.mfm.parser.tree.FnNode
+import moe.tlaster.mfm.parser.tree.HashtagNode
+import moe.tlaster.mfm.parser.tree.InlineCodeNode
+import moe.tlaster.mfm.parser.tree.ItalicNode
+import moe.tlaster.mfm.parser.tree.LinkNode
+import moe.tlaster.mfm.parser.tree.MathBlockNode
+import moe.tlaster.mfm.parser.tree.MathInlineNode
+import moe.tlaster.mfm.parser.tree.MentionNode
+import moe.tlaster.mfm.parser.tree.QuoteNode
+import moe.tlaster.mfm.parser.tree.RootNode
+import moe.tlaster.mfm.parser.tree.SearchNode
+import moe.tlaster.mfm.parser.tree.SmallNode
+import moe.tlaster.mfm.parser.tree.StrikeNode
+import moe.tlaster.mfm.parser.tree.UrlNode
+
+internal val misskeyParser by lazy {
+    MFMParser()
+}
 
 expect class UiStatusExtra
 
@@ -118,6 +149,10 @@ sealed class UiStatus {
             createdAt.humanize()
         }
 
+        val contentToken by lazy {
+            parseContent(raw, accountKey.host)
+        }
+
         data class Reaction(
             val liked: Boolean,
             val reblogged: Boolean,
@@ -181,6 +216,10 @@ sealed class UiStatus {
     ) : UiStatus() {
         val humanizedTime: String by lazy {
             createdAt.humanize()
+        }
+
+        val contentToken by lazy {
+            misskeyParser.parse(content).toHtml(accountKey.host)
         }
 
         data class Reaction(
@@ -299,4 +338,271 @@ sealed class UiStatus {
 //            indexedAt.humanize()
 //        }
 //    }
+}
+
+
+//internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
+//    return when (status) {
+//        is UiStatus.Mastodon -> {
+//            UiStatusExtra(
+//                contentElement = parseContent(status.raw, status.accountKey.host),
+//                contentDirection = if (Bidi(
+//                        status.content,
+//                        Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
+//                    ).baseIsLeftToRight()
+//                ) {
+//                    LayoutDirection.Ltr
+//                } else {
+//                    LayoutDirection.Rtl
+//                },
+//            )
+//        }
+//
+//        is UiStatus.MastodonNotification -> {
+//            UiStatusExtra.Empty
+//        }
+//
+//        is UiStatus.Misskey -> {
+//            UiStatusExtra(
+//                contentElement = misskeyParser.parse(status.content).toHtml(status.accountKey.host),
+//                contentDirection = if (Bidi(
+//                        status.content,
+//                        Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
+//                    ).baseIsLeftToRight()
+//                ) {
+//                    LayoutDirection.Ltr
+//                } else {
+//                    LayoutDirection.Rtl
+//                },
+//            )
+//        }
+//
+//        is UiStatus.MisskeyNotification -> {
+//            UiStatusExtra.Empty
+//        }
+//    }
+//}
+
+
+private fun parseContent(
+    status: Status,
+    host: String,
+): Element {
+    val emoji = status.emojis.orEmpty()
+    val mentions = status.mentions.orEmpty()
+//    val tags = status.tags.orEmpty()
+    var content = status.content.orEmpty()
+    emoji.forEach {
+        content = content.replace(
+            ":${it.shortcode}:",
+            "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
+        )
+    }
+    val body = Ktml.parse(content)
+    body.children.forEach {
+        replaceMentionAndHashtag(mentions, it, host)
+    }
+    return body
+}
+
+private fun replaceMentionAndHashtag(
+    mentions: List<Mention>,
+    node: Node,
+    host: String,
+) {
+    if (node is Element) {
+        val href = node.attributes["href"]
+        val mention = mentions.firstOrNull { it.url == href }
+        if (mention != null) {
+            val id = mention.id
+            if (id != null) {
+                node.attributes["href"] = AppDeepLink.Profile(userKey = MicroBlogKey(id, host))
+            }
+        } else if (node.innerText.startsWith("#")) {
+            node.attributes["href"] = AppDeepLink.Search(node.innerText.trimStart('#'))
+        }
+        node.children.forEach { replaceMentionAndHashtag(mentions, it, host) }
+    }
+}
+
+
+internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(
+    accountHost: String,
+): Element {
+    return when (this) {
+        is CenterNode -> {
+            Element("center").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountHost))
+                }
+            }
+        }
+
+        is CodeBlockNode -> {
+            Element("pre").apply {
+                children.add(
+                    Element("code").apply {
+                        language?.let { attributes["lang"] = it }
+                        children.add(Text(code))
+                    },
+                )
+            }
+        }
+
+        is MathBlockNode -> {
+            Element("pre").apply {
+                children.add(
+                    Element("code").apply {
+                        attributes["lang"] = "math"
+                        children.add(Text(formula))
+                    },
+                )
+            }
+        }
+
+        is QuoteNode -> {
+            Element("blockquote").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountHost))
+                }
+            }
+        }
+
+        is SearchNode -> {
+            Element("search").apply {
+                children.add(Text(query))
+            }
+        }
+
+        is BoldNode -> {
+            Element("strong").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountHost))
+                }
+            }
+        }
+
+        is FnNode -> {
+            Element("fn").apply {
+                attributes["name"] = name
+                content.forEach {
+                    children.add(it.toHtml(accountHost))
+                }
+            }
+        }
+
+        is ItalicNode -> {
+            Element("em").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountHost))
+                }
+            }
+        }
+
+        is RootNode -> {
+            Element("body").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountHost))
+                }
+            }
+        }
+
+        is SmallNode -> {
+            Element("small").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountHost))
+                }
+            }
+        }
+
+        is StrikeNode -> {
+            Element("s").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountHost))
+                }
+            }
+        }
+
+        is CashNode -> {
+            Element("a").apply {
+                attributes["href"] = AppDeepLink.Search("$$content")
+                children.add(Text("$$content"))
+            }
+        }
+
+        is EmojiCodeNode -> {
+            Element("img").apply {
+                attributes["src"] = resolveMisskeyEmoji(emoji, accountHost)
+                attributes["alt"] = emoji
+            }
+        }
+
+        is HashtagNode -> {
+            Element("a").apply {
+                attributes["href"] = AppDeepLink.Search(tag)
+                children.add(Text("#$tag"))
+            }
+        }
+
+        is InlineCodeNode -> {
+            Element("code").apply {
+                children.add(Text(code))
+            }
+        }
+
+        is LinkNode -> {
+            Element("a").apply {
+                attributes["href"] = url
+                children.add(Text(content))
+            }
+        }
+
+        is MathInlineNode -> {
+            Element("code").apply {
+                attributes["lang"] = "math"
+                children.add(Text(formula))
+            }
+        }
+
+        is MentionNode -> {
+            Element("a").apply {
+                val deeplink = host?.let {
+                    AppDeepLink.ProfileWithNameAndHost(userName, it)
+                } ?: AppDeepLink.ProfileWithNameAndHost(userName, accountHost)
+                attributes["href"] = deeplink
+                children.add(Text(buildString {
+                    append("@")
+                    append(userName)
+                    if (host != null) {
+                        append("@")
+                        append(host)
+                    }
+                }))
+            }
+        }
+
+        is moe.tlaster.mfm.parser.tree.TextNode -> {
+            Element("span").apply {
+                children.add(Text(content))
+            }
+        }
+
+        is UrlNode -> {
+            Element("a").apply {
+                attributes["href"] = url
+                children.add(Text(url))
+            }
+        }
+    }
+}
+
+
+private fun resolveMisskeyEmoji(name: String, accountHost: String): String {
+    return name.trim(':').let {
+        if (it.endsWith("@.")) {
+            "https://$accountHost/emoji/${it.dropLast(2)}.webp"
+        } else {
+            "https://$accountHost/emoji/$it.webp"
+        }
+    }
 }

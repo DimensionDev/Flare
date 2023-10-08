@@ -13,7 +13,6 @@ struct MastodonCallbackScreen: View {
             Text("Login to Mastodon")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.black)
 
             Text("Please wait while we verify your credentials.")
                 .font(.subheadline)

@@ -24,9 +24,9 @@ koject = "1.3.0"
 coil = "2.4.0"
 ktorfit = "1.7.0"
 ktor = "2.3.4"
+stately = "2.0.4"
 twitter-parser = "0.3.2"
 molecule = "1.2.1"
-jsoup = "1.16.1"
 accompanist = "0.33.1-alpha"
 kotlinx-atomicfu = "0.22.0"
 compose-destinations = "1.9.53"
@@ -44,16 +44,20 @@ sqliter-driver = "1.2.3"
 skie = "0.5.0"
 compose-jb = "1.5.1"
 kermit = "2.0.1"
+ktml = "0.0.4"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+ktml = { group = "moe.tlaster", name = "ktml", version.ref = "ktml" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "dev.chrisbanes.compose", name = "compose-bom", version.ref = "compose-bom" }
 paging-compose-common = { module = "app.cash.paging:paging-compose-common", version.ref = "cash-paging" }
+stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
+stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -103,7 +107,6 @@ ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version
 #okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp3" }
 
 twitter-parser = { group = "moe.tlaster", name = "twitter-parser", version.ref = "twitter-parser" }
-jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
 molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", version.ref = "molecule" }
 

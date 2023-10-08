@@ -35,6 +35,7 @@ struct CommonProfileHeader<HeaderTrailing, HandleTrailing, Content>: View where 
                     AsyncImage(url: URL(string: banner)) { image in
                         image.image?.resizable().scaledToFill()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
+                            .clipped()
                     }
                     .frame(height: CommonProfileHeaderConstants.headerHeight)
                 }
@@ -91,6 +92,19 @@ struct CommonProfileHeader<HeaderTrailing, HandleTrailing, Content>: View where 
     
 }
 
+#Preview {
+    List {
+        CommonProfileHeader(bannerUrl: "https://media.mstdn.jp/accounts/headers/000/927/711/original/5d3f32c897d47597.jpeg", avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", displayName: "test", handle: "test@test.test", description: "tefewfewfewfewfewst", headerTrailing: {
+            Text("header")
+        }, handleTrailing: {
+            Text("handle")
+        }, content: {
+            Text("content")
+        })
+            .listRowInsets(EdgeInsets())
+    }.listStyle(.plain)
+        .edgesIgnoringSafeArea(.top)
+}
 
 
 #Preview {

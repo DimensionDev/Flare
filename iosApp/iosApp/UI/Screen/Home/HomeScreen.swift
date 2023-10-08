@@ -1,9 +1,10 @@
 import SwiftUI
+import shared
 
 struct HomeScreen: View {
     var body: some View {
         TabView {
-            NavigationStack {
+            TabItem {
                 HomeTimelineScreen()
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
@@ -16,7 +17,7 @@ struct HomeScreen: View {
                 Image(systemName: "house")
                 Text("Home")
             }
-            NavigationStack {
+            TabItem {
                 NotificationScreen()
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
@@ -29,7 +30,7 @@ struct HomeScreen: View {
                 Image(systemName: "bell")
                 Text("Notification")
             }
-            NavigationStack {
+            TabItem {
                 ProfileScreen(userKey: nil)
             }
             .tabItem {
@@ -37,6 +38,33 @@ struct HomeScreen: View {
                 Text("Me")
             }
         }
+    }
+}
+
+struct TabItem<Content: View>: View {
+    @Bindable var router = Router<TabDestination>()
+    let content: () -> Content
+    
+    var body: some View {
+        NavigationStack(path: $router.navPath) {
+            content()
+                .withTabRouter()
+        }.environment(\.openURL, OpenURLAction { url in
+            if let event = AppDeepLink.shared.parse(url: url.absoluteString) {
+                switch onEnum(of: event) {
+                case .profile(let data):
+                    router.navigate(to: .profile(userKey: data.userKey.description()))
+                case .profileWithNameAndHost(let data):
+                    router.navigate(to: .profileWithUserNameAndHost(userName: data.userName, host: data.host))
+                case .search(_):
+                    router.navigate(to: .settings)
+                }
+                return .handled
+            } else {
+                return .discarded
+            }
+        })
+        
     }
 }
 

@@ -10,13 +10,13 @@ func StatusTimelineBuilder(data: Paging_compose_commonLazyPagingItems<UiStatus>)
                 if (item != nil) {
                     switch onEnum(of: item!) {
                     case .mastodon(let mastodon):
-                        MastodonStatusComponent(content: mastodon.extra.contentMarkdown, avatar: mastodon.user.avatarUrl, name: mastodon.user.extra.nameMarkdown, handle: mastodon.user.handle)
+                        MastodonStatusComponent(content: mastodon.extra.contentMarkdown, avatar: mastodon.user.avatarUrl, name: mastodon.user.extra.nameMarkdown, handle: mastodon.user.handle, userKey: mastodon.user.userKey)
                     case .mastodonNotification(_):
                         VStack {
                             
                         }
                     case .misskey(let misskey):
-                        MastodonStatusComponent(content: misskey.extra.contentMarkdown, avatar: misskey.user.avatarUrl, name: misskey.user.extra.nameMarkdown, handle: misskey.user.handle)
+                        MastodonStatusComponent(content: misskey.extra.contentMarkdown, avatar: misskey.user.avatarUrl, name: misskey.user.extra.nameMarkdown, handle: misskey.user.handle, userKey: misskey.user.userKey)
                     case .misskeyNotification(_):
                         VStack {
                             

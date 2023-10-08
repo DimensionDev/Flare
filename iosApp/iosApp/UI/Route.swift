@@ -81,7 +81,7 @@ final class Router<T: Hashable>: ObservableObject {
 
 @MainActor
 extension View {
-    func withAppRouter() -> some View {
+    func withTabRouter() -> some View {
         navigationDestination(
             for: TabDestination.self
         ) { destination in

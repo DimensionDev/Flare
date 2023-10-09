@@ -1,33 +1,13 @@
 import SwiftUI
-import MarkdownUI
 import shared
 
-struct MastodonStatusComponent: View {
-    let mastodon: UiStatus.Mastodon
+struct MisskeyStatusComponent: View {
+    let misskey: UiStatus.Misskey
     var body: some View {
-        let actual = mastodon.reblogStatus ?? mastodon
-        VStack(alignment: .leading) {
-            if mastodon.reblogStatus != nil {
-                HStack {
-                    Image(systemName: "arrow.left.arrow.right")
-                        .font(.caption)
-                    Markdown {
-                        Paragraph {
-                            mastodon.user.extra.nameMarkdown
-                            " boosted a status"
-                        }
-                    }
-                    .lineLimit(1)
-                    .markdownTextStyle(\.text) {
-                        FontSize(12)
-                    }
-                    .markdownInlineImageProvider(.emoji)
-                }
-                .foregroundColor(.primary)
-                .opacity(0.6)
-            }
+        VStack {
+            let actual = misskey.renote ?? misskey
             CommonStatusComponent(content: actual.extra.contentMarkdown, avatar: actual.user.avatarUrl, name: actual.user.extra.nameMarkdown, handle: actual.user.handle, userKey: actual.user.userKey, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
-                MastodonVisibilityIcon(visibility: actual.visibility)
+                MisskeyVisibilityIcon(visibility: actual.visibility)
             })
             Spacer()
                 .frame(height: 8)
@@ -45,8 +25,8 @@ struct MastodonStatusComponent: View {
                 Button(action: {}) {
                     HStack {
                         Image(systemName: "arrow.left.arrow.right")
-                        if let humanizedReblogCount = actual.matrices.humanizedReblogCount {
-                            Text(humanizedReblogCount)
+                        if let humanizedReNoteCount = actual.matrices.humanizedReNoteCount {
+                            Text(humanizedReNoteCount)
                         }
                     }
                 }
@@ -54,9 +34,6 @@ struct MastodonStatusComponent: View {
                 Button(action: {}) {
                     HStack {
                         Image(systemName: "star")
-                        if let humanizedFavouriteCount = actual.matrices.humanizedFavouriteCount {
-                            Text(humanizedFavouriteCount)
-                        }
                     }
                 }
                 Spacer()

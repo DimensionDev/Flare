@@ -2,6 +2,7 @@ import SwiftUI
 import shared
 
 struct HomeScreen: View {
+    @State var viewModel = HomeViewModel()
     var body: some View {
         TabView {
             TabItem {
@@ -10,6 +11,18 @@ struct HomeScreen: View {
                     .toolbar {
                         ToolbarItem(placement: .principal) {
                             Text("Flare")
+                        }
+                        ToolbarItem(placement: .primaryAction) {
+                            Button(action: {}) {
+                                Image(systemName: "square.and.pencil")
+                            }
+                        }
+                        ToolbarItem(placement: .navigation) {
+                            if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                UserAvatar(data: data.data.avatarUrl, size: 36)
+                            } else {
+                                UserAvatarPlaceholder(size: 36)
+                            }
                         }
                     }
             }
@@ -37,8 +50,13 @@ struct HomeScreen: View {
                 Image(systemName: "person.circle")
                 Text("Me")
             }
-        }
+        }.activateViewModel(viewModel: viewModel)
     }
+}
+
+@Observable
+class HomeViewModel : MoleculeViewModelBase<HomeState, HomePresenter> {
+    
 }
 
 struct TabItem<Content: View>: View {

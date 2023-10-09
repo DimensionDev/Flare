@@ -1,5 +1,6 @@
 import SwiftUI
 import MarkdownUI
+import NetworkImage
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
@@ -32,8 +33,8 @@ struct CommonProfileHeader<HeaderTrailing, HandleTrailing, Content>: View where 
         ZStack(alignment: .top) {
             if let banner = bannerUrl {
                 Color.clear.overlay {
-                    AsyncImage(url: URL(string: banner)) { image in
-                        image.image?.resizable().scaledToFill()
+                    NetworkImage(url: URL(string: banner)) { image in
+                        image.resizable().scaledToFill()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
                             .clipped()
                     }

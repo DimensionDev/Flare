@@ -84,9 +84,8 @@ internal fun Status.toUi(
                         url = card.image,
                         previewUrl = card.image,
                         description = card.description,
-                        aspectRatio = card.width?.toFloat()?.div(card.height ?: 1)
-                            ?.coerceAtLeast(0f)
-                            ?.takeUnless { it.isNaN() } ?: 1f,
+                        width = card.width?.toFloat() ?: 0f,
+                        height = card.height?.toFloat() ?: 0f,
                     )
                 },
             )
@@ -129,9 +128,8 @@ private fun Attachment.toUi(): UiMedia? {
             url = url.orEmpty(),
             previewUrl = previewURL.orEmpty(),
             description = description,
-            aspectRatio = meta?.width?.toFloat()?.div(meta.height ?: 1)
-                ?.coerceAtLeast(0f)
-                ?.takeUnless { it.isNaN() } ?: 1f,
+            width = meta?.width?.toFloat() ?: 0f,
+            height = meta?.height?.toFloat() ?: 0f,
         )
 
         MediaType.GifV -> UiMedia.Gif(

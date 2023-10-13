@@ -28,8 +28,8 @@ struct NotificationScreen: View {
 @Observable
 class NotificationViewModel: MoleculeViewModelBase<NotificationState, NotificationPresenter> {
     var notificationType: NotificationFilter = NotificationFilter.all {
-        didSet {
-            model.onNotificationTypeChanged(value: notificationType)
+        willSet {
+            model.onNotificationTypeChanged(value: newValue)
         }
     }
 }

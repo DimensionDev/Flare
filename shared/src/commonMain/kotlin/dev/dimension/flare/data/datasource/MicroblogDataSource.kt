@@ -30,7 +30,7 @@ interface MicroblogDataSource {
     fun notification(
         type: NotificationFilter = NotificationFilter.All,
         pageSize: Int = 20,
-        pagingKey: String = "notification",
+        pagingKey: String = "notification_$type",
     ): Flow<PagingData<UiStatus>>
 
     val supportedNotificationFilter: List<NotificationFilter>

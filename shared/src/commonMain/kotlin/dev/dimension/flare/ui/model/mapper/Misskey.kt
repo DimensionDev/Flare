@@ -113,9 +113,8 @@ private fun DriveFile.toUi(): UiMedia? {
             url = url.orEmpty(),
             previewUrl = thumbnailUrl.orEmpty(),
             description = comment,
-            aspectRatio = with(properties) {
-                width?.toFloat()?.div(height?.toFloat() ?: 0f)?.takeUnless { it.isNaN() } ?: 1f
-            },
+            width = properties.width?.toFloat() ?: 0f,
+            height = properties.height?.toFloat() ?: 0f,
         )
     } else if (type.startsWith("video/")) {
         return UiMedia.Video(

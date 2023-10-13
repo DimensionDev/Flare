@@ -8,27 +8,14 @@ struct MastodonStatusComponent: View {
         let actual = mastodon.reblogStatus ?? mastodon
         VStack(alignment: .leading) {
             if mastodon.reblogStatus != nil {
-                HStack {
-                    Image(systemName: "arrow.left.arrow.right")
-                        .font(.caption)
-                    Markdown {
-                        Paragraph {
-                            mastodon.user.extra.nameMarkdown
-                            " boosted a status"
-                        }
-                    }
-                    .lineLimit(1)
-                    .markdownTextStyle(\.text) {
-                        FontSize(12)
-                    }
-                    .markdownInlineImageProvider(.emoji)
-                }
-                .foregroundColor(.primary)
-                .opacity(0.6)
+                StatusRetweetHeaderComponent(iconSystemName: "arrow.left.arrow.right", nameMarkdown: mastodon.user.extra.nameMarkdown, text: "boosted a status")
             }
             CommonStatusComponent(content: actual.extra.contentMarkdown, avatar: actual.user.avatarUrl, name: actual.user.extra.nameMarkdown, handle: actual.user.handle, userKey: actual.user.userKey, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
                 MastodonVisibilityIcon(visibility: actual.visibility)
             })
+            if let card = mastodon.card {
+                LinkPreview(card: card)
+            }
             Spacer()
                 .frame(height: 8)
             HStack {

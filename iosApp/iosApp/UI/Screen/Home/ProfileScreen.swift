@@ -43,7 +43,8 @@ struct ProfileHeader: View {
                 Text("handle")
             }, content: {
                 Text("content")
-            }).redacted(reason: .placeholder)
+            })
+            .redacted(reason: .placeholder)
         case .success(let data):
             ProfileHeaderSuccess(user: data.data, relation: relation)
         }

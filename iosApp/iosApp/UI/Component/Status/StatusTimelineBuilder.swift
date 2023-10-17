@@ -14,10 +14,8 @@ func StatusTimelineBuilder(data: Paging_compose_commonLazyPagingItems<UiStatus>)
                         MastodonNotificationComponent(data: mastodonNotification)
                     case .misskey(let misskey):
                         MisskeyStatusComponent(misskey: misskey)
-                    case .misskeyNotification(_):
-                        VStack {
-                            
-                        }
+                    case .misskeyNotification(let misskeyNotification):
+                        MisskeyNotificationComponent(data: misskeyNotification)
                     }
                 } else {
                     CommonStatusComponent(content: "haha", avatar: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", name: "hahaname", handle: "haha.haha", userKey: MicroBlogKey(id: "", host: ""), medias: [], timestamp: 1696838289, headerTrailing: {EmptyView()})

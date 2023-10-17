@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.moriatsushi.koject.compose.rememberInject
@@ -31,7 +32,7 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
                 remember(it.accountKey) {
                     service.userById(it.accountKey.id)
                 }.collectAsState().toUi()
-            }.toImmutableList()
+            }.toImmutableList().toImmutableListWrapper()
         }
         return object : AccountsState(
             accounts = user,
@@ -48,10 +49,26 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
     }
 }
 
+@Immutable
 abstract class AccountsState(
-    val accounts: UiState<ImmutableList<UiState<UiUser>>>,
+    val accounts: UiState<ImmutableListWrapper<UiState<UiUser>>>,
     val activeAccount: UiState<UiAccount>,
 ) {
     abstract fun setActiveAccount(accountKey: MicroBlogKey)
     abstract fun removeAccount(accountKey: MicroBlogKey)
+}
+
+data class ImmutableListWrapper<T: Any>(
+    private val data: ImmutableList<T>,
+) {
+    operator fun get(index: Int): T {
+        return data[index]
+    }
+
+    val size: Int
+        get() = data.size
+}
+
+fun <T: Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> {
+    return ImmutableListWrapper(this)
 }

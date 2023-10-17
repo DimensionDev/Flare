@@ -93,9 +93,9 @@ extension View {
             case let .profileWithUserNameAndHost(userName, host):
                 ContentView()
             case .settings:
-                ContentView()
+                SettingsScreen()
             case .accountSettings:
-                ContentView()
+                AccountsScreen()
             }
         }
     }

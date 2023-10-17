@@ -19,6 +19,9 @@
 		060881B12AD91B40001AAD2F /* MastodonNotificationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060881B02AD91B40001AAD2F /* MastodonNotificationComponent.swift */; };
 		060881B32AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060881B22AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift */; };
 		060881B52AD9260B001AAD2F /* UserComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060881B42AD9260B001AAD2F /* UserComponent.swift */; };
+		060881B72ADE4F44001AAD2F /* MisskeyNotificationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060881B62ADE4F44001AAD2F /* MisskeyNotificationComponent.swift */; };
+		060881BA2ADE555D001AAD2F /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060881B92ADE555D001AAD2F /* SettingsScreen.swift */; };
+		060881BC2ADE5C68001AAD2F /* AccountsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060881BB2ADE5C68001AAD2F /* AccountsScreen.swift */; };
 		060D00C02AC406560087427A /* MisskeyOAuthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00BF2AC406560087427A /* MisskeyOAuthScreen.swift */; };
 		060D00C22AC407DF0087427A /* FlareApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C12AC407DF0087427A /* FlareApp.swift */; };
 		060D00C42AC414400087427A /* MastodonCallbackScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C32AC414400087427A /* MastodonCallbackScreen.swift */; };
@@ -54,6 +57,9 @@
 		060881B02AD91B40001AAD2F /* MastodonNotificationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonNotificationComponent.swift; sourceTree = "<group>"; };
 		060881B22AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusRetweetHeaderComponent.swift; sourceTree = "<group>"; };
 		060881B42AD9260B001AAD2F /* UserComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserComponent.swift; sourceTree = "<group>"; };
+		060881B62ADE4F44001AAD2F /* MisskeyNotificationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyNotificationComponent.swift; sourceTree = "<group>"; };
+		060881B92ADE555D001AAD2F /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		060881BB2ADE5C68001AAD2F /* AccountsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsScreen.swift; sourceTree = "<group>"; };
 		060D00BF2AC406560087427A /* MisskeyOAuthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyOAuthScreen.swift; sourceTree = "<group>"; };
 		060D00C12AC407DF0087427A /* FlareApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareApp.swift; sourceTree = "<group>"; };
 		060D00C32AC414400087427A /* MastodonCallbackScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonCallbackScreen.swift; sourceTree = "<group>"; };
@@ -110,6 +116,7 @@
 				060881B02AD91B40001AAD2F /* MastodonNotificationComponent.swift */,
 				060881B22AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift */,
 				060881B42AD9260B001AAD2F /* UserComponent.swift */,
+				060881B62ADE4F44001AAD2F /* MisskeyNotificationComponent.swift */,
 			);
 			path = Status;
 			sourceTree = "<group>";
@@ -120,6 +127,15 @@
 				060501C52ACC0F4300DBCCEB /* CommonProfileHeader.swift */,
 			);
 			path = User;
+			sourceTree = "<group>";
+		};
+		060881B82ADE5520001AAD2F /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				060881B92ADE555D001AAD2F /* SettingsScreen.swift */,
+				060881BB2ADE5C68001AAD2F /* AccountsScreen.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		060D00BE2AC4064B0087427A /* Misskey */ = {
@@ -187,6 +203,7 @@
 		06D5C9162AC3BB35007439D5 /* Screen */ = {
 			isa = PBXGroup;
 			children = (
+				060881B82ADE5520001AAD2F /* Settings */,
 				0620DD9C2AC44224009BD1BE /* Home */,
 				06AD156C2AC40067000DC865 /* OAuth */,
 				060501BF2ACAC8AF00DBCCEB /* SplashScreen.swift */,
@@ -344,6 +361,7 @@
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
 				067D898C2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift in Sources */,
 				067D89902AD3FC5300F8F932 /* MisskeyStatusComponent.swift in Sources */,
+				060881B72ADE4F44001AAD2F /* MisskeyNotificationComponent.swift in Sources */,
 				067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */,
 				060501C62ACC0F4300DBCCEB /* CommonProfileHeader.swift in Sources */,
 				060D00C42AC414400087427A /* MastodonCallbackScreen.swift in Sources */,
@@ -360,12 +378,14 @@
 				060501BE2ACAC4ED00DBCCEB /* NotificationScreen.swift in Sources */,
 				06AD156B2AC3F454000DC865 /* Route.swift in Sources */,
 				060881B52AD9260B001AAD2F /* UserComponent.swift in Sources */,
+				060881BC2ADE5C68001AAD2F /* AccountsScreen.swift in Sources */,
 				060D00C02AC406560087427A /* MisskeyOAuthScreen.swift in Sources */,
 				060D00C62AC41D050087427A /* MisskeyCallbackScreen.swift in Sources */,
 				067D89792AD25DB000F8F932 /* MarkdownTheme.swift in Sources */,
 				060881B32AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift in Sources */,
 				060501C22ACBEDA000DBCCEB /* ProfileScreen.swift in Sources */,
 				060501C82ACD09B800DBCCEB /* UserAvatar.swift in Sources */,
+				060881BA2ADE555D001AAD2F /* SettingsScreen.swift in Sources */,
 				060881B12AD91B40001AAD2F /* MastodonNotificationComponent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

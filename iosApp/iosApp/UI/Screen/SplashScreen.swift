@@ -12,21 +12,19 @@ struct SplashScreen<Content: View>: View {
     }
 }
 
-
-
 @Observable
 class SplashViewModel : MoleculeViewModelProto {
-    let presenter: SplashPresenter = SplashPresenter(toHome: {}, toLogin: {})
+    var login = false
+    let presenter: SplashPresenter
     var model: __SplashType
     typealias Model = __SplashType
     typealias Presenter = SplashPresenter
     
     init() {
+        presenter = SplashPresenter(toHome: {}, toLogin: {})
         model = presenter.models.value!
     }
 }
-
-
 
 #Preview {
     SplashScreen { type in

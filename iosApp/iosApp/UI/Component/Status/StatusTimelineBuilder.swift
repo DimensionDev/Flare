@@ -4,7 +4,8 @@ import shared
 @ViewBuilder
 func StatusTimelineBuilder(data: Paging_compose_commonLazyPagingItems<UiStatus>) -> some View {
     if data.itemCount > 0 {
-        ForEach(StatusCollection(data: data), id: \.?.itemKey) { item in
+        ForEach(1...data.itemCount, id: \.self) { index in
+            let item = data.peek(index: index - 1)
             VStack {
                 if (item != nil) {
                     switch onEnum(of: item!) {
@@ -21,13 +22,12 @@ func StatusTimelineBuilder(data: Paging_compose_commonLazyPagingItems<UiStatus>)
                     CommonStatusComponent(content: "haha", avatar: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", name: "hahaname", handle: "haha.haha", userKey: MicroBlogKey(id: "", host: ""), medias: [], timestamp: 1696838289, headerTrailing: {EmptyView()})
                         .redacted(reason: .placeholder)
                 }
+            }.onAppear {
+                data.get(index: index - 1)
             }
         }
     } else {
-        ForEach(1...10, id: \.self) { _ in
-            CommonStatusComponent(content: "haha", avatar: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", name: "hahaname", handle: "haha.haha", userKey: MicroBlogKey(id: "", host: ""), medias: [], timestamp: 1696838289, headerTrailing: {EmptyView()})
-                .redacted(reason: .placeholder)
-        }
+        Text("Empty list")
     }
 }
 
@@ -35,7 +35,7 @@ struct StatusCollection: RandomAccessCollection {
     var data: Paging_compose_commonLazyPagingItems<UiStatus>
     
     var startIndex: Int { 0 }
-    var endIndex: Int { Int(data.itemCount) }
+    var endIndex: Int { Int(data.itemCount - 1) }
     
     subscript(position: Int) -> UiStatus? {
         return data.peek(index: Int32(position))

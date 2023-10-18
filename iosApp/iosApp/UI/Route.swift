@@ -3,41 +3,72 @@ import SwiftUI
 import shared
 
 struct RouterView : View {
-    @Bindable var oauthRouter = Router<OAuthDestination>()
+    @Bindable var sheetRouter = Router<SheetDestination>()
     var body: some View {
         SplashScreen { type in
-            switch type {
-            case .home:
-                HomeScreen()
-            case .login:
-                NavigationStack(path: $oauthRouter.navPath) {
-                    ServiceSelectScreen(
-                        toMisskey: {
-                            oauthRouter.navigate(to: .misskey)
-                        },
-                        toMastodon: {
-                            oauthRouter.navigate(to: .mastodon)
+            ZStack {
+                switch type {
+                case .home:
+                    HomeScreen()
+                case .login:
+                    Text("Flare")
+                case .splash:
+                    Text("Flare")
+                }
+            }.sheet(isPresented: Binding(get: {
+                type == .login
+            }, set: { Value in
+                
+            }), content: {
+                if type == .login {
+                    NavigationStack(path: $sheetRouter.navPath) {
+                        ServiceSelectScreen(
+                            toMisskey: {
+                                sheetRouter.navigate(to: .misskey)
+                            },
+                            toMastodon: {
+                                sheetRouter.navigate(to: .mastodon)
+                            }
+                        )
+                        .withSheetRouter {
+                            sheetRouter.clearBackStack()
+                        } toMisskey: {
+                            sheetRouter.navigate(to: .misskey)
+                        } toMastodon: {
+                            sheetRouter.navigate(to: .mastodon)
                         }
-                    )
-                    .withOAuthRouter(router: oauthRouter)
-                }.onOpenURL { url in
-                    if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Mastodon)) {
-                        if let range = url.absoluteString.range(of: "code=") {
-                            let code = url.absoluteString.suffix(from: range.upperBound)
-                            oauthRouter.navigate(to: .mastodonCallback(code: String(code)))
-                        }
-                        
-                    } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Misskey)) {
-                        if let range = url.absoluteString.range(of: "session=") {
-                            let session = url.absoluteString.suffix(from: range.upperBound)
-                            oauthRouter.navigate(to: .misskeyCallback(session: String(session)))
+
+                    }
+                    .onOpenURL { url in
+                        if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Mastodon)) {
+                            if let range = url.absoluteString.range(of: "code=") {
+                                let code = url.absoluteString.suffix(from: range.upperBound)
+                                sheetRouter.navigate(to: .mastodonCallback(code: String(code)))
+                            }
+                        } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Misskey)) {
+                            if let range = url.absoluteString.range(of: "session=") {
+                                let session = url.absoluteString.suffix(from: range.upperBound)
+                                sheetRouter.navigate(to: .misskeyCallback(session: String(session)))
+                            }
                         }
                     }
+                    .interactiveDismissDisabled()
                 }
-            case .splash:
-                Text("Flare")
-            }
+            })
         }
+    }
+}
+
+@Observable
+class RouterViewModel : MoleculeViewModelProto {
+    let presenter: SplashPresenter
+    var model: __SplashType
+    typealias Model = __SplashType
+    typealias Presenter = SplashPresenter
+    
+    init() {
+        presenter = SplashPresenter(toHome: {}, toLogin: {})
+        model = presenter.models.value!
     }
 }
 
@@ -45,11 +76,12 @@ public enum TabDestination: Codable, Hashable {
     case profile(userKey: String)
     case statusDetail(statusKey: String)
     case profileWithUserNameAndHost(userName: String, host: String)
-    case settings
-    case accountSettings
+    case search(q: String)
 }
 
-public enum OAuthDestination: Codable, Hashable {
+public enum SheetDestination: Codable, Hashable {
+    case settings
+    case accountSettings
     case mastodon
     case mastodonCallback(code: String)
     case misskey
@@ -66,8 +98,8 @@ final class Router<T: Hashable>: ObservableObject {
         navPath.append(destination)
     }
     
-    func navigateBack() {
-        navPath.removeLast()
+    func navigateBack(count: Int = 1) {
+        navPath.removeLast(count)
     }
     
     func navigateToRoot() {
@@ -92,35 +124,32 @@ extension View {
                 ContentView()
             case let .profileWithUserNameAndHost(userName, host):
                 ContentView()
-            case .settings:
-                SettingsScreen()
-            case .accountSettings:
-                AccountsScreen()
+            case let .search(data):
+                ContentView()
             }
         }
     }
     
-    func withOAuthRouter(router: Router<OAuthDestination>) -> some View {
-        navigationDestination(for: OAuthDestination.self) { destination in
+    func withSheetRouter(toHome:@escaping () -> Void, toMisskey: @escaping () -> Void, toMastodon: @escaping () -> Void) -> some View {
+        navigationDestination(for: SheetDestination.self) { destination in
             switch destination {
             case .mastodon:
                 MastodonOAuthScreen()
             case let .mastodonCallback(code):
-                MastodonCallbackScreen(code: code, toHome: {router.clearBackStack()})
+                MastodonCallbackScreen(code: code, toHome: toHome)
             case .misskey:
                 MisskeyOAuthScreen()
             case let .misskeyCallback(session):
-                MisskeyCallbackScreen(session: session, toHome: {router.clearBackStack()})
+                MisskeyCallbackScreen(session: session, toHome: toHome)
             case .serviceSelection:
                 ServiceSelectScreen(
-                    toMisskey: {
-                        router.navigate(to: .misskey)
-                    },
-                    toMastodon: {
-                        router.navigate(to: .mastodon)
-                    }
+                    toMisskey: toMisskey,
+                    toMastodon: toMastodon
                 )
-                
+            case .settings:
+                SettingsScreen()
+            case .accountSettings:
+                AccountsScreen()
             }
         }
     }

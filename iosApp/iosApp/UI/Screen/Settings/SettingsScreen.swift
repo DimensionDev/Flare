@@ -3,7 +3,7 @@ import SwiftUI
 struct SettingsScreen: View {
     var body: some View {
         List {
-            NavigationLink(value: TabDestination.accountSettings) {
+            NavigationLink(value: SheetDestination.accountSettings) {
                 ListItem(systemIconName: "person.circle", title: "Accounts")
             }
         }
@@ -29,6 +29,5 @@ struct ListItem: View {
 #Preview {
     NavigationStack {
         SettingsScreen()
-            .withTabRouter()
     }
 }

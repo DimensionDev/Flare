@@ -34,7 +34,10 @@ struct MisskeyNotificationComponent: View {
             }
             if let user = data.user {
                 if [shared.Notification.Type_.follow, shared.Notification.Type_.followrequestaccepted, shared.Notification.Type_.receivefollowrequest].contains(data.type) {
-                    UserComponent(user: user)
+                    HStack {
+                        UserComponent(user: user)
+                        Spacer()
+                    }
                 }
             }
         }

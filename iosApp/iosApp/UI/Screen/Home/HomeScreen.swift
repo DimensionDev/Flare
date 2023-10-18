@@ -3,6 +3,7 @@ import shared
 
 struct HomeScreen: View {
     @State var viewModel = HomeViewModel()
+    @State var showSettings = false
     var body: some View {
         TabView {
             TabItem {
@@ -13,16 +14,22 @@ struct HomeScreen: View {
                             Text("Flare")
                         }
                         ToolbarItem(placement: .primaryAction) {
-                            Button(action: {}) {
+                            Button(action: {
+                            }) {
                                 Image(systemName: "square.and.pencil")
                             }
                         }
                         ToolbarItem(placement: .navigation) {
-                            if case .success(let data) = onEnum(of: viewModel.model.user) {
-                                UserAvatar(data: data.data.avatarUrl, size: 36)
-                            } else {
-                                UserAvatarPlaceholder(size: 36)
+                            Button {
+                                showSettings = true
+                            } label: {
+                                if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                    UserAvatar(data: data.data.avatarUrl, size: 36)
+                                } else {
+                                    UserAvatarPlaceholder(size: 36)
+                                }
                             }
+                            
                         }
                     }
             }
@@ -50,13 +57,50 @@ struct HomeScreen: View {
                 Image(systemName: "person.circle")
                 Text("Me")
             }
-        }.activateViewModel(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showSettings, content: {
+            HomeSheetContent()
+        })
+        .activateViewModel(viewModel: viewModel)
     }
 }
 
 @Observable
 class HomeViewModel : MoleculeViewModelBase<HomeState, HomePresenter> {
     
+}
+
+struct HomeSheetContent: View {
+    @Bindable var sheetRouter = Router<SheetDestination>()
+    var body: some View {
+        NavigationStack(path: $sheetRouter.navPath) {
+            SettingsScreen()
+                .withSheetRouter {
+                    sheetRouter.navigateBack(count: 3)
+                } toMisskey: {
+                    sheetRouter.navigate(to: .misskey)
+                } toMastodon: {
+                    sheetRouter.navigate(to: .mastodon)
+                }
+        }
+        .onOpenURL { url in
+            if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Mastodon)) {
+                if let range = url.absoluteString.range(of: "code=") {
+                    let code = url.absoluteString.suffix(from: range.upperBound)
+                    sheetRouter.navigate(to: .mastodonCallback(code: String(code)))
+                }
+            } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Misskey)) {
+                if let range = url.absoluteString.range(of: "session=") {
+                    let session = url.absoluteString.suffix(from: range.upperBound)
+                    sheetRouter.navigate(to: .misskeyCallback(session: String(session)))
+                }
+            }
+        }
+    }
+}
+
+#Preview {
+    HomeSheetContent()
 }
 
 struct TabItem<Content: View>: View {
@@ -74,8 +118,8 @@ struct TabItem<Content: View>: View {
                     router.navigate(to: .profile(userKey: data.userKey.description()))
                 case .profileWithNameAndHost(let data):
                     router.navigate(to: .profileWithUserNameAndHost(userName: data.userName, host: data.host))
-                case .search(_):
-                    router.navigate(to: .settings)
+                case .search(let data):
+                    router.navigate(to: .search(q: data.keyword))
                 }
                 return .handled
             } else {

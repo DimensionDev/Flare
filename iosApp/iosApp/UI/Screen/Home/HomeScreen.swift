@@ -4,6 +4,7 @@ import shared
 struct HomeScreen: View {
     @State var viewModel = HomeViewModel()
     @State var showSettings = false
+    @State var showCompose = false
     var body: some View {
         TabView {
             TabItem {
@@ -15,6 +16,7 @@ struct HomeScreen: View {
                         }
                         ToolbarItem(placement: .primaryAction) {
                             Button(action: {
+                                showCompose = true
                             }) {
                                 Image(systemName: "square.and.pencil")
                             }
@@ -29,7 +31,6 @@ struct HomeScreen: View {
                                     UserAvatarPlaceholder(size: 36)
                                 }
                             }
-                            
                         }
                     }
             }
@@ -58,6 +59,11 @@ struct HomeScreen: View {
                 Text("Me")
             }
         }
+        .sheet(isPresented: $showCompose, content: {
+            NavigationStack {
+                ComposeScreen()
+            }
+        })
         .sheet(isPresented: $showSettings, content: {
             HomeSheetContent()
         })

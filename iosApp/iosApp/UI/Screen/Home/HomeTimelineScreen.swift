@@ -7,9 +7,12 @@ struct HomeTimelineScreen: View {
     var body: some View {
         List {
             StatusTimelineStateBuilder(data: viewModel.model.listState)
-        }.listStyle(.plain).refreshable {
+        }
+        .listStyle(.plain)
+        .refreshable {
             viewModel.model.refresh()
-        }.activateViewModel(viewModel: viewModel)
+        }
+        .activateViewModel(viewModel: viewModel)
     }
 }
 

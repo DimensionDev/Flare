@@ -4,3 +4,14 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    registries:
+      - maven-google
+      - gralde-plugin
+
+registries:
+  maven-google:
+    type: maven-repository
+    url: "https://dl.google.com/dl/android/maven2/"
+  gralde-plugin:
+    type: maven-repository
+    url: "https://plugins.gradle.org/m2/"

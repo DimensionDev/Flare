@@ -42,7 +42,7 @@ okio = "3.6.0"
 uuid = "0.8.1"
 sqliter-driver = "1.2.3"
 skie = "0.5.0"
-compose-jb = "1.5.1"
+compose-jb = "1.5.3"
 kermit = "2.0.2"
 ktml = "0.0.4"
 

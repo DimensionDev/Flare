@@ -12,15 +12,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiRelation
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.descriptionDirection
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -62,20 +62,23 @@ internal fun MisskeyProfileHeader(
                 }
 
                 is UiState.Success -> {
-                    if (relationState.data is UiRelation.Mastodon) {
-                        FilledTonalButton(
-                            onClick = { /*TODO*/ },
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    when {
-                                        relationState.data.following -> R.string.profile_header_button_following
-                                        relationState.data.requested -> R.string.profile_header_button_requested
-                                        else -> R.string.profile_header_button_follow
-                                    },
-                                ),
-                            )
+                    when (val data = relationState.data) {
+                        is UiRelation.Mastodon -> {
+                            FilledTonalButton(
+                                onClick = { /*TODO*/ },
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        when {
+                                            data.following -> R.string.profile_header_button_following
+                                            data.requested -> R.string.profile_header_button_requested
+                                            else -> R.string.profile_header_button_follow
+                                        },
+                                    ),
+                                )
+                            }
                         }
+                        else -> Unit
                     }
                 }
             }
@@ -90,7 +93,7 @@ internal fun MisskeyProfileHeader(
                 user.descriptionElement?.let {
                     HtmlText2(
                         element = it,
-                        layoutDirection = user.descriptionDirection ?: LocalLayoutDirection.current,
+                        layoutDirection = user.descriptionDirection,
                     )
                 }
                 FlowRow(

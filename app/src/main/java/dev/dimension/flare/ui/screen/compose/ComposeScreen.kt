@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.compose
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -86,6 +87,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -94,7 +96,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavBackStackEntry
-import androidx.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -105,34 +107,32 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.mastodon.MastodonService
-import dev.dimension.flare.data.datasource.misskey.MisskeyService
-import dev.dimension.flare.data.repository.ComposeData
+import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.ComposeUseCase
-import dev.dimension.flare.data.repository.app.UiAccount
-import dev.dimension.flare.data.repository.app.accountServiceProvider
-import dev.dimension.flare.data.repository.app.activeAccountPresenter
+import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.component.status.mastodon.VisibilityIcon
-import dev.dimension.flare.ui.flatMap
-import dev.dimension.flare.ui.map
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.localDescription
-import dev.dimension.flare.ui.model.localName
-import dev.dimension.flare.ui.onError
-import dev.dimension.flare.ui.onLoading
-import dev.dimension.flare.ui.onSuccess
+import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import dev.dimension.flare.ui.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.math.max
 import kotlin.time.Duration
@@ -249,8 +249,9 @@ private fun ComposeScreen(
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
 ) {
+    val context = LocalContext.current
     val state by producePresenter {
-        composePresenter(status)
+        composePresenter(context, status)
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -849,6 +850,7 @@ private fun PollOption(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun composePresenter(
+    context: Context,
     status: ComposeStatus? = null,
     composeUseCase: ComposeUseCase = rememberInject(),
 ) = run {
@@ -864,7 +866,6 @@ private fun composePresenter(
     }.collectAsState(initial = "")
     val pollState = account.flatMap {
         when (it) {
-            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
             is UiAccount.Mastodon, is UiAccount.Misskey -> UiState.Success(pollPresenter())
         }
     }
@@ -873,12 +874,10 @@ private fun composePresenter(
         when (it) {
             is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
             is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
-            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
         }
     }
     val contentWarningState = account.flatMap {
         when (it) {
-            is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
             is UiAccount.Misskey, is UiAccount.Mastodon -> UiState.Success(contentWarningPresenter())
         }
     }
@@ -903,7 +902,7 @@ private fun composePresenter(
 //                        }
                     }
 
-                    is UiStatus.BlueskyNotification, is UiStatus.Bluesky, is UiStatus.MastodonNotification, is UiStatus.MisskeyNotification, null -> Unit
+                    else -> Unit
                 }
             }
         }
@@ -939,11 +938,13 @@ private fun composePresenter(
         fun send() {
             account.onSuccess {
                 val data = when (it) {
-                    is UiAccount.Mastodon -> ComposeData.Mastodon(
+                    is UiAccount.Mastodon -> MastodonDataSource.MastodonComposeData(
                         content = textFieldState.text.toString(),
-                        medias = mediaState.medias,
+                        medias = mediaState.medias.map {
+                            FileItem(context, it)
+                        },
                         poll = if (pollState is UiState.Success && pollState.data.enabled) {
-                            ComposeData.Mastodon.Poll(
+                            MastodonDataSource.MastodonComposeData.Poll(
                                 multiple = !pollState.data.pollSingleChoice,
                                 expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
                                 options = pollState.data.options.map { option ->
@@ -960,11 +961,13 @@ private fun composePresenter(
                         account = it,
                     )
 
-                    is UiAccount.Misskey -> ComposeData.MissKey(
+                    is UiAccount.Misskey -> MisskeyDataSource.MissKeyComposeData(
                         account = it,
-                        medias = mediaState.medias,
+                        medias = mediaState.medias.map {
+                            FileItem(context, it)
+                        },
                         poll = if (pollState is UiState.Success && pollState.data.enabled) {
-                            ComposeData.MissKey.Poll(
+                            MisskeyDataSource.MissKeyComposeData.Poll(
                                 multiple = !pollState.data.pollSingleChoice,
                                 expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
                                 options = pollState.data.options.map { option ->
@@ -983,13 +986,13 @@ private fun composePresenter(
                         localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly,
                     )
 
-                    is UiAccount.Bluesky -> ComposeData.Bluesky(
-                        account = it,
-                        medias = mediaState.medias,
-                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                        quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                        content = textFieldState.text.toString(),
-                    )
+//                    is UiAccount.Bluesky -> ComposeData.Bluesky(
+//                        account = it,
+//                        medias = mediaState.medias,
+//                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+//                        quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+//                        content = textFieldState.text.toString(),
+//                    )
                 }
                 composeUseCase(data)
             }
@@ -1019,8 +1022,8 @@ private fun emojiPresenter(
     val service = accountServiceProvider(account = account)
     val emojiState = remember(account.accountKey) {
         when (service) {
-            is MastodonService -> service.emoji()
-            is MisskeyService -> service.emoji()
+            is MastodonDataSource -> service.emoji()
+            is MisskeyDataSource -> service.emoji()
             else -> null
         }
     }?.collectAsState()?.toUi()
@@ -1232,3 +1235,35 @@ internal enum class PollExpiration(val textId: Int, val duration: Duration) {
     Days3(R.string.compose_poll_expiration_3_days, 3.days),
     Days7(R.string.compose_poll_expiration_7_days, 7.days),
 }
+
+internal val UiStatus.Mastodon.Visibility.localName: Int
+    get() = when (this) {
+        UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public
+        UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted
+        UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private
+        UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct
+    }
+
+internal val UiStatus.Mastodon.Visibility.localDescription: Int
+    get() = when (this) {
+        UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public_description
+        UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted_description
+        UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private_description
+        UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct_description
+    }
+
+internal val UiStatus.Misskey.Visibility.localName: Int
+    get() = when (this) {
+        UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public
+        UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home
+        UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers
+        UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified
+    }
+
+internal val UiStatus.Misskey.Visibility.localDescription: Int
+    get() = when (this) {
+        UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public_description
+        UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home_description
+        UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers_description
+        UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified_description
+    }

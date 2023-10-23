@@ -44,9 +44,11 @@ import com.halilibo.richtext.ui.string.RichTextString
 import com.halilibo.richtext.ui.string.RichTextStringStyle
 import com.halilibo.richtext.ui.string.Text
 import com.halilibo.richtext.ui.string.withFormat
-import org.jsoup.nodes.Element
-import org.jsoup.nodes.Node
-import org.jsoup.nodes.TextNode
+import moe.tlaster.ktml.dom.Comment
+import moe.tlaster.ktml.dom.Doctype
+import moe.tlaster.ktml.dom.Element
+import moe.tlaster.ktml.dom.Node
+import moe.tlaster.ktml.dom.Text
 
 @Composable
 fun HtmlText2(
@@ -113,18 +115,18 @@ private fun RenderElement(
     context: RenderContext,
 ) {
     // check if element is a block element
-    if (normalName() in blockElementName) {
+    if (name in blockElementName) {
         with(context) {
             RenderTextAndReset()
         }
     }
-    when (normalName()) {
+    when (name.lowercase()) {
         "center" -> {
             CenterRichText(
                 modifier = Modifier.fillMaxWidth(),
                 style = context.style,
             ) {
-                childNodes().forEach {
+                children.forEach {
                     with(it) {
                         RenderNode(context)
                     }
@@ -138,14 +140,14 @@ private fun RenderElement(
         "code" -> {
             with(context.builder) {
                 withFormat(RichTextString.Format.Code) {
-                    append(text())
+                    append(innerText)
                 }
             }
         }
 
         "blockquote" -> {
             BlockQuote {
-                childNodes().forEach {
+                children.forEach {
                     with(it) {
                         RenderNode(context)
                     }
@@ -161,12 +163,12 @@ private fun RenderElement(
                 state = rememberSaveable(
                     saver = TextFieldState.Saver,
                 ) {
-                    TextFieldState(text())
+                    TextFieldState(innerText)
                 },
                 readOnly = true,
                 trailingIcon = {
                     IconButton(onClick = {
-                        context.onLinkClick.invoke("https://www.google.com/search?q=${text()}")
+                        context.onLinkClick.invoke("https://www.google.com/search?q=$innerText")
                     }) {
                         Icon(Icons.Default.Search, contentDescription = null)
                     }
@@ -178,7 +180,7 @@ private fun RenderElement(
         "strong" -> {
             with(context.builder) {
                 withFormat(RichTextString.Format.Bold) {
-                    childNodes().forEach {
+                    children.forEach {
                         with(it) {
                             RenderNode(context)
                         }
@@ -189,7 +191,7 @@ private fun RenderElement(
 
         "fn" -> {
             // TODO: Add fn style
-            childNodes().forEach {
+            children.forEach {
                 with(it) {
                     RenderNode(context)
                 }
@@ -199,7 +201,7 @@ private fun RenderElement(
         "em" -> {
             with(context.builder) {
                 withFormat(RichTextString.Format.Italic) {
-                    childNodes().forEach {
+                    children.forEach {
                         with(it) {
                             RenderNode(context)
                         }
@@ -209,7 +211,7 @@ private fun RenderElement(
         }
 
         "body" -> {
-            childNodes().forEach {
+            children.forEach {
                 with(it) {
                     RenderNode(context)
                 }
@@ -222,7 +224,7 @@ private fun RenderElement(
         "small" -> {
             with(context.builder) {
                 withFormat(RichTextString.Format.Subscript) {
-                    childNodes().forEach {
+                    children.forEach {
                         with(it) {
                             RenderNode(context)
                         }
@@ -234,7 +236,7 @@ private fun RenderElement(
         "s" -> {
             with(context.builder) {
                 withFormat(RichTextString.Format.Strikethrough) {
-                    childNodes().forEach {
+                    children.forEach {
                         with(it) {
                             RenderNode(context)
                         }
@@ -244,15 +246,15 @@ private fun RenderElement(
         }
 
         "a" -> {
-            val href = attr("href")
-            if (href.isNotEmpty()) {
+            val href = attributes["href"]
+            if (!href.isNullOrEmpty()) {
                 with(context.builder) {
                     withFormat(
                         RichTextString.Format.Link(onClick = {
                             context.onLinkClick.invoke(href)
                         }),
                     ) {
-                        childNodes().forEach {
+                        children.forEach {
                             with(it) {
                                 RenderNode(context)
                             }
@@ -260,7 +262,7 @@ private fun RenderElement(
                     }
                 }
             } else {
-                childNodes().forEach {
+                children.forEach {
                     with(it) {
                         RenderNode(context)
                     }
@@ -269,9 +271,9 @@ private fun RenderElement(
         }
 
         "img" -> {
-            val src = attr("src")
-            val alt = attr("alt")
-            if (src.isNotEmpty()) {
+            val src = attributes["src"]
+            val alt = attributes["alt"]
+            if (!src.isNullOrEmpty()) {
                 context.builder.appendInlineContent(
                     "image",
                     InlineContent(
@@ -285,27 +287,24 @@ private fun RenderElement(
                     },
                 )
             } else {
-                context.builder.append(alt)
+                context.builder.append(alt.orEmpty())
             }
         }
 
         "pre" -> {
-            CodeBlock(text())
+            CodeBlock(innerText)
         }
 
-//        "span" -> {
-//            childNodes().forEach {
-//                with(it) {
-//                    RenderNode(context)
-//                }
-//            }
-//            with(context) {
-//                RenderTextAndReset()
-//            }
-//        }
+        "span" -> {
+            children.forEach {
+                with(it) {
+                    RenderNode(context)
+                }
+            }
+        }
 
         else -> {
-            childNodes().forEach {
+            children.forEach {
                 with(it) {
                     RenderNode(context)
                 }
@@ -348,9 +347,12 @@ private fun RenderNode(
 ) {
     when (this@Node) {
         is Element -> RenderElement(context)
-        is TextNode -> {
-            context.builder.append(this@Node.text())
+        is Text -> {
+            context.builder.append(this@Node.text)
         }
+
+        is Comment -> Unit
+        is Doctype -> Unit
     }
 }
 

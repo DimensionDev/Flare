@@ -20,7 +20,7 @@ private class PresenterHolder<T>(
 
 /**
  * Return State, use it in your Compose UI
- * The molecule scope will be managed by the [StateHolder], so it has the same lifecycle as the [StateHolder]
+ * The molecule scope will be managed by the [ViewModel], so it has the same lifecycle as the [ViewModel]
  * @param body The body of the molecule presenter
  * @return State
  */

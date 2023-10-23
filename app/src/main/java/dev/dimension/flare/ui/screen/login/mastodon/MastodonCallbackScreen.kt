@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.login.mastodon
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,11 +11,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,15 +24,10 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
-import dev.dimension.flare.data.repository.app.UiApplication
-import dev.dimension.flare.data.repository.app.addMastodonAccountUseCase
-import dev.dimension.flare.data.repository.app.getPendingOAuthUseCase
-import dev.dimension.flare.data.repository.app.setPendingOAuthUseCase
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.presenter.login.MastodonCallbackPresenter
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MastodonCallbackRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -143,57 +134,12 @@ private fun mastodonCallbackPresenter(
     toHome: () -> Unit,
 ): UiState<Nothing> {
     if (code == null) {
-        return UiState.Error(Exception("No code"))
+        return UiState.Error(Throwable("No code"))
     }
-    var error by remember { mutableStateOf<Exception?>(null) }
-    LaunchedEffect(code) {
-        val pendingOAuth = getPendingOAuthUseCase()
-        if (pendingOAuth.isEmpty()) {
-            error = Exception("No pending OAuth")
-        }
-        for (application in pendingOAuth) {
-            try {
-                if (application is UiApplication.Mastodon) {
-                    tryPendingOAuth(application, code)
-                    setPendingOAuthUseCase(application.host, false)
-                    toHome.invoke()
-                    break
-                } else {
-                    continue
-                }
-            } catch (e: Exception) {
-                error = e
-                e.printStackTrace()
-                break
-            }
-        }
-    }
-    if (error != null) {
-        return UiState.Error(error!!)
-    }
-    return UiState.Loading()
-}
-
-private suspend fun tryPendingOAuth(
-    application: UiApplication.Mastodon,
-    code: String,
-) {
-    val host = application.host
-    val baseUrl = Uri.parse("https://$host/")
-    val service = MastodonOAuthService(
-        baseUrl = baseUrl.toString(),
-        client_name = "Flare",
-        website = "https://github.com/DimensionDev/Flare",
-        redirect_uri = AppDeepLink.Callback.Mastodon,
-    )
-    val accessTokenResponse = service.getAccessToken(code, application.application)
-    requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
-    val user = service.verifyCredentials(accessToken = accessTokenResponse.accessToken)
-    val id = user.id
-    requireNotNull(id) { "Invalid user id" }
-    addMastodonAccountUseCase(
-        instance = host,
-        accessToken = accessTokenResponse.accessToken,
-        accountKey = MicroBlogKey(id, host),
-    )
+    return remember(code, toHome) {
+        MastodonCallbackPresenter(
+            code = code,
+            toHome = toHome,
+        )
+    }.invoke()
 }

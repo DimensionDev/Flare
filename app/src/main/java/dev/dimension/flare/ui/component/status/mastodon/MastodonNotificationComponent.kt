@@ -27,6 +27,7 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.nameDirection
 import dev.dimension.flare.ui.theme.MediumAlpha
 
 @Composable
@@ -53,15 +54,14 @@ internal fun MastodonNotificationComponent(
             event = event,
             modifier = modifier,
         )
+
         NotificationTypes.Mention -> {
-            if (data.status != null) {
+            data.status?.let {
                 MastodonStatusComponent(
-                    data = data.status,
+                    data = it,
                     event = event,
                     modifier = modifier,
                 )
-            } else {
-                // TODO: Handle this case
             }
         }
 
@@ -70,16 +70,19 @@ internal fun MastodonNotificationComponent(
             event = event,
             modifier = modifier,
         )
+
         NotificationTypes.FollowRequest -> MastodonFollowRequestNotificationComponent(
             data = data,
             event = event,
             modifier = modifier,
         )
+
         NotificationTypes.Status -> MastodonStatusNotificationComponent(
             data = data,
             event = event,
             modifier = modifier,
         )
+
         NotificationTypes.Update -> MastodonUpdateNotificationComponent(
             data = data,
             event = event,
@@ -103,9 +106,9 @@ private fun MastodonUpdateNotificationComponent(
             text = stringResource(id = R.string.mastodon_notification_item_updated_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.status != null) {
+        data.status?.let {
             MastodonStatusComponent(
-                data = data.status,
+                data = it,
                 event = event,
             )
         }
@@ -127,9 +130,9 @@ private fun MastodonStatusNotificationComponent(
             text = stringResource(id = R.string.mastodon_notification_item_posted_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.status != null) {
+        data.status?.let {
             MastodonStatusComponent(
-                data = data.status,
+                data = it,
                 event = event,
             )
         }
@@ -204,9 +207,9 @@ private fun MastodonPollNotificationComponent(
             text = stringResource(id = R.string.mastodon_notification_item_poll_ended),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.status != null) {
+        data.status?.let {
             MastodonStatusComponent(
-                data = data.status,
+                data = it,
                 event = event,
             )
         }
@@ -228,9 +231,9 @@ private fun MastodonRetweetNotificationComponent(
             text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.status != null) {
+        data.status?.let {
             MastodonStatusComponent(
-                data = data.status,
+                data = it,
                 event = event,
             )
         }
@@ -252,9 +255,9 @@ private fun MastodonFavouriteNotificationComponent(
             text = stringResource(id = R.string.mastodon_notification_item_favourited_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.status != null) {
+        data.status?.let {
             MastodonStatusComponent(
-                data = data.status,
+                data = it,
                 event = event,
             )
         }

@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    // repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
@@ -17,3 +17,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Flare"
 include(":app")
+include(":shared")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

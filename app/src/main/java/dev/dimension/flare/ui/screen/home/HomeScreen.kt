@@ -56,18 +56,15 @@ import androidx.navigation.compose.rememberNavController
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.repository.app.activeAccountServicePresenter
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder.placeholder
-import dev.dimension.flare.ui.flatMap
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.presenter.home.HomePresenter
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.profile.ProfileScreen
 import dev.dimension.flare.ui.theme.FlareTheme
-import dev.dimension.flare.ui.toUi
 import kotlin.math.roundToInt
 
 sealed class Screen(
@@ -313,13 +310,5 @@ fun HomeScreen(
 
 @Composable
 private fun homePresenter() = run {
-    val user = activeAccountServicePresenter().flatMap { (service, account) ->
-        remember(account.accountKey) {
-            service.userById(account.accountKey.id)
-        }.collectAsState().toUi()
-    }
-
-    object {
-        val user = user
-    }
+    remember { HomePresenter() }.invoke()
 }

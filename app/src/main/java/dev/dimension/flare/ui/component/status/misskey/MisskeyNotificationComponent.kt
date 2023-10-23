@@ -22,6 +22,7 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.nameDirection
 import dev.dimension.flare.ui.theme.MediumAlpha
 
 @Composable
@@ -133,16 +134,16 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
             user = data.user,
             text = stringResource(id = R.string.misskey_notification_item_follow_request_accepted),
         )
-        if (data.user != null) {
+        data.user?.let { user ->
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AvatarComponent(
-                    data = data.user.avatarUrl,
+                    data = user.avatarUrl,
                     modifier = Modifier
                         .clickable {
-                            event.onUserClick(data.user.userKey)
+                            event.onUserClick(user.userKey)
                         },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -151,20 +152,20 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
                         .weight(1f),
                 ) {
                     HtmlText2(
-                        element = data.user.nameElement,
-                        layoutDirection = data.user.nameDirection,
+                        element = user.nameElement,
+                        layoutDirection = user.nameDirection,
                         modifier = Modifier
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(user.userKey)
                             },
                     )
                     Text(
-                        text = data.user.handle,
+                        text = user.handle,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .alpha(MediumAlpha)
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(user.userKey)
                             },
                     )
                 }
@@ -187,16 +188,16 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
             user = data.user,
             text = stringResource(id = R.string.mastodon_notification_item_requested_follow),
         )
-        if (data.user != null) {
+        data.user?.let { user ->
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AvatarComponent(
-                    data = data.user.avatarUrl,
+                    data = user.avatarUrl,
                     modifier = Modifier
                         .clickable {
-                            event.onUserClick(data.user.userKey)
+                            event.onUserClick(user.userKey)
                         },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -205,26 +206,24 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
                         .weight(1f),
                 ) {
                     HtmlText2(
-                        element = data.user.nameElement,
-                        layoutDirection = data.user.nameDirection,
+                        element = user.nameElement,
+                        layoutDirection = user.nameDirection,
                         modifier = Modifier
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(user.userKey)
                             },
                     )
                     Text(
-                        text = data.user.handle,
+                        text = user.handle,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .alpha(MediumAlpha)
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(user.userKey)
                             },
                     )
                 }
             }
-        } else {
-            // TODO: this should not happen
         }
         Spacer(modifier = Modifier.height(8.dp))
     }
@@ -245,9 +244,7 @@ private fun MisskeyPollEndedNotificationComponent(
             text = stringResource(id = R.string.misskey_notification_item_poll_ended),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.note != null) {
-            MisskeyStatusComponent(data = data.note, event = event)
-        }
+        data.note?.let { MisskeyStatusComponent(data = it, event = event) }
     }
 }
 
@@ -266,9 +263,7 @@ private fun MisskeyReactionNotificationComponent(
             text = stringResource(id = R.string.misskey_notification_item_reacted_to_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.note != null) {
-            MisskeyStatusComponent(data = data.note, event = event)
-        }
+        data.note?.let { MisskeyStatusComponent(data = it, event = event) }
     }
 }
 
@@ -287,9 +282,7 @@ private fun MisskeyQuoteNotificationComponent(
             text = stringResource(id = R.string.misskey_notification_item_quoted_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.note != null) {
-            MisskeyStatusComponent(data = data.note, event = event)
-        }
+        data.note?.let { MisskeyStatusComponent(data = it, event = event) }
     }
 }
 
@@ -308,9 +301,7 @@ private fun MisskeyRetweetNotificationComponent(
             text = stringResource(id = R.string.misskey_notification_item_reposted_your_status),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.note != null) {
-            MisskeyStatusComponent(data = data.note, event = event)
-        }
+        data.note?.let { MisskeyStatusComponent(data = it, event = event) }
     }
 }
 
@@ -329,9 +320,7 @@ private fun MisskeyReplyNotificationComponent(
             text = stringResource(id = R.string.misskey_notification_item_replied_to_you),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.note != null) {
-            MisskeyStatusComponent(data = data.note, event = event)
-        }
+        data.note?.let { MisskeyStatusComponent(data = it, event = event) }
     }
 }
 
@@ -350,9 +339,7 @@ private fun MisskeyMentionNotificationComponent(
             text = stringResource(id = R.string.misskey_notification_item_mentioned_you),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (data.note != null) {
-            MisskeyStatusComponent(data = data.note, event = event)
-        }
+        data.note?.let { MisskeyStatusComponent(data = it, event = event) }
     }
 }
 
@@ -370,16 +357,16 @@ private fun MisskeyFollowNotificationComponent(
             user = data.user,
             text = stringResource(id = R.string.mastodon_notification_item_followed_you),
         )
-        if (data.user != null) {
+        data.user?.let { user ->
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AvatarComponent(
-                    data = data.user.avatarUrl,
+                    data = user.avatarUrl,
                     modifier = Modifier
                         .clickable {
-                            event.onUserClick(data.user.userKey)
+                            event.onUserClick(user.userKey)
                         },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -388,26 +375,24 @@ private fun MisskeyFollowNotificationComponent(
                         .weight(1f),
                 ) {
                     HtmlText2(
-                        element = data.user.nameElement,
-                        layoutDirection = data.user.nameDirection,
+                        element = user.nameElement,
+                        layoutDirection = user.nameDirection,
                         modifier = Modifier
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(user.userKey)
                             },
                     )
                     Text(
-                        text = data.user.handle,
+                        text = user.handle,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .alpha(MediumAlpha)
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(user.userKey)
                             },
                     )
                 }
             }
-        } else {
-            // TODO: this should not happen
         }
         Spacer(modifier = Modifier.height(8.dp))
     }

@@ -20,30 +20,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
-import dev.dimension.flare.data.repository.app.activeAccountServicePresenter
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.UiState
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.map
-import dev.dimension.flare.ui.onSuccess
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.mapNotNull
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -62,7 +52,7 @@ internal fun HomeTimelineScreen(
     }
     LaunchedEffect(isAtTheTop) {
         if (isAtTheTop) {
-            state.onNewTootsShown()
+            state.state.onNewTootsShown()
         }
     }
 
@@ -70,8 +60,8 @@ internal fun HomeTimelineScreen(
     RefreshContainer(
         modifier = Modifier
             .fillMaxSize(),
-        onRefresh = state::refresh,
-        refreshing = state.refreshing,
+        onRefresh = state.state::refresh,
+        refreshing = state.state.refreshing,
         indicatorPadding = contentPadding,
         content = {
             LazyColumn(
@@ -79,22 +69,22 @@ internal fun HomeTimelineScreen(
                 contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                with(state.listState) {
+                with(state.state.listState) {
                     with(state.statusEvent) {
                         status()
                     }
                 }
             }
-            state.listState.onSuccess {
+            state.state.listState.onSuccess {
                 AnimatedVisibility(
-                    state.showNewToots,
+                    state.state.showNewToots,
                     enter = slideInVertically { -it },
                     exit = slideOutVertically { -it },
                     modifier = Modifier.align(Alignment.TopCenter),
                 ) {
                     FilledTonalButton(
                         onClick = {
-                            state.onNewTootsShown()
+                            state.state.onNewTootsShown()
                             scope.launch {
                                 lazyListState.animateScrollToItem(0)
                             }
@@ -118,39 +108,9 @@ internal fun HomeTimelineScreen(
 private fun homeTimelinePresenter(
     statusEvent: StatusEvent = rememberInject(),
 ) = run {
-    val listState = activeAccountServicePresenter().map { (service, account) ->
-        remember(account.accountKey) {
-            service.homeTimeline()
-        }.collectAsLazyPagingItems()
-    }
-    var showNewToots by remember { mutableStateOf(false) }
-    val refreshing =
-        listState is UiState.Loading ||
-            listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
-    if (listState is UiState.Success && listState.data.itemCount > 0) {
-        LaunchedEffect(Unit) {
-            snapshotFlow { listState.data.peek(0)?.statusKey }
-                .mapNotNull { it }
-                .distinctUntilChanged()
-                .drop(1)
-                .collect {
-                    showNewToots = true
-                }
-        }
-    }
+    val state = remember { HomeTimelinePresenter() }.invoke()
     object {
-        val refreshing = refreshing
-        val listState = listState
-        val showNewToots = showNewToots
+        val state = state
         val statusEvent = statusEvent
-        fun onNewTootsShown() {
-            showNewToots = false
-        }
-
-        fun refresh() {
-            listState.onSuccess {
-                it.refresh()
-            }
-        }
     }
 }

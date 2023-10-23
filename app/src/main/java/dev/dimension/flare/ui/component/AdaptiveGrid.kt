@@ -49,7 +49,7 @@ fun AdaptiveGrid(
                 }
                 layout(
                     width = constraints.maxWidth,
-                    height = (rows * itemSize).toInt(),
+                    height = (rows * itemSize + (rows - 1) * space).toInt(),
                 ) {
                     var row = 0
                     var column = 0

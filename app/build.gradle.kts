@@ -1,22 +1,22 @@
 import java.util.Properties
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.ktlint)
 }
 
 android {
     namespace = "dev.dimension.flare"
-    compileSdk = 34
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "dev.dimension.flare"
-        minSdk = 21
-        targetSdk = 34
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: 1
         versionName = System.getenv("BUILD_VERSION")?.toString()
 
@@ -70,17 +70,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = libs.versions.java.get()
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = libs.versions.compose.complier.get()
     }
     packaging {
         resources {
@@ -102,7 +102,6 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)
-    implementation(libs.bundles.paging)
     implementation(libs.bundles.navigation)
     implementation(libs.bundles.kotlinx)
     implementation(libs.bundles.koject)
@@ -114,7 +113,7 @@ dependencies {
     implementation(libs.twitter.parser)
     implementation(libs.material.icons.extended)
     implementation(libs.molecule.runtime)
-    implementation(libs.jsoup)
+    implementation(libs.ktml)
     implementation(libs.bundles.accompanist)
     implementation(libs.nestedScrollView)
     implementation(libs.bundles.compose.destinations)
@@ -123,8 +122,9 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.zoomable)
     implementation(libs.bluesky.binding)
-    implementation(libs.mfm.multiplatform)
     implementation(libs.bundles.compose.richtext)
+
+    implementation(projects.shared)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
@@ -140,5 +140,8 @@ configure<de.jensklingenberg.ktorfit.gradle.KtorfitGradleConfiguration> {
 }
 
 ktlint {
-    version.set("0.50.0")
+    version.set(libs.versions.ktlint)
+    filter {
+        exclude { element -> element.file.path.contains("generated/") }
+    }
 }

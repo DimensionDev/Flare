@@ -2,7 +2,7 @@
 compileSdk = "34"
 minSdk = "21"
 java = "17"
-agp = "8.2.0-beta05"
+agp = "8.2.0-rc01"
 kotlin = "1.9.10"
 core-ktx = "1.12.0"
 junit = "4.13.2"
@@ -36,7 +36,7 @@ ktlintPlugin = "11.6.1"
 androidx-credentials = "1.2.0-rc01"
 compose-richtext = "0.17.0"
 apng-android = "2.28.0"
-ktlint = "0.50.0"
+ktlint = "1.0.1"
 sqldelight = "2.0.0"
 okio = "3.6.0"
 uuid = "0.8.1"
@@ -45,6 +45,7 @@ skie = "0.5.0"
 compose-jb = "1.5.3"
 kermit = "2.0.2"
 ktml = "0.0.4"
+versionUpdate = "0.49.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -169,3 +170,4 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 molecule = { id = "app.cash.molecule", version.ref = "molecule" }
 compose-jb = { id = "org.jetbrains.compose", version.ref = "compose-jb" }
+ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "versionUpdate" }

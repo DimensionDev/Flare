@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.skie) apply false
 //    alias(libs.plugins.molecule) apply false
     alias(libs.plugins.compose.jb) apply false
-    id("com.github.ben-manes.versions").version("0.47.0")
+    alias(libs.plugins.ben.manes.versions)
 }
 
 allprojects {

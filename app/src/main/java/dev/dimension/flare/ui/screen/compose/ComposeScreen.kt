@@ -148,9 +148,7 @@ fun ComposeScreenPreview() {
 
 @Destination
 @Composable
-fun ComposeRoute(
-    navigator: DestinationsNavigator,
-) {
+fun ComposeRoute(navigator: DestinationsNavigator) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
@@ -254,12 +252,13 @@ private fun ComposeScreen(
         composePresenter(context, status)
     }
     val keyboardController = LocalSoftwareKeyboardController.current
-    val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(4),
-        onResult = { uris ->
-            state.mediaState.addMedia(uris)
-        },
-    )
+    val photoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickMultipleVisualMedia(4),
+            onResult = { uris ->
+                state.mediaState.addMedia(uris)
+            },
+        )
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
 
@@ -275,15 +274,16 @@ private fun ComposeScreen(
         }
     }
 
-    val permissionState = rememberPermissionState(
-        Manifest.permission.POST_NOTIFICATIONS,
-        onPermissionResult = {
-            if (it) {
-                state.send()
-                onBack.invoke()
-            }
-        },
-    )
+    val permissionState =
+        rememberPermissionState(
+            Manifest.permission.POST_NOTIFICATIONS,
+            onPermissionResult = {
+                if (it) {
+                    state.send()
+                    onBack.invoke()
+                }
+            },
+        )
 
     FlareTheme {
         Scaffold(
@@ -320,13 +320,15 @@ private fun ComposeScreen(
             },
             bottomBar = {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
                     tonalElevation = 3.dp,
                 ) {
                     Column(
-                        modifier = Modifier
-                            .navigationBarsPadding(),
+                        modifier =
+                            Modifier
+                                .navigationBarsPadding(),
                     ) {
                         Row(
                             modifier = Modifier,
@@ -358,13 +360,15 @@ private fun ComposeScreen(
                             }
                             state.visibilityState.onSuccess { visibilityState ->
                                 when (visibilityState) {
-                                    is MastodonVisibilityState -> MastodonVisibilityContent(
-                                        visibilityState,
-                                    )
+                                    is MastodonVisibilityState ->
+                                        MastodonVisibilityContent(
+                                            visibilityState,
+                                        )
 
-                                    is MisskeyVisibilityState -> MisskeyVisibilityContent(
-                                        visibilityState,
-                                    )
+                                    is MisskeyVisibilityState ->
+                                        MisskeyVisibilityContent(
+                                            visibilityState,
+                                        )
                                 }
                             }
                             state.contentWarningState.onSuccess {
@@ -400,15 +404,17 @@ private fun ComposeScreen(
 
                         state.emojiState.onSuccess { emojis ->
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(imeHeight()),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(imeHeight()),
                             ) {
                                 if (!WindowInsets.isImeVisible) {
                                     LazyVerticalGrid(
                                         columns = GridCells.Adaptive(48.dp),
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth(),
                                         contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                                         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -418,11 +424,12 @@ private fun ComposeScreen(
                                                 model = emoji.url,
                                                 contentDescription = emoji.shortcode,
                                                 contentScale = ContentScale.Fit,
-                                                modifier = Modifier
-                                                    .size(48.dp)
-                                                    .clickable {
-                                                        state.selectEmoji(emoji)
-                                                    },
+                                                modifier =
+                                                    Modifier
+                                                        .size(48.dp)
+                                                        .clickable {
+                                                            state.selectEmoji(emoji)
+                                                        },
                                             )
                                         }
                                     }
@@ -430,15 +437,17 @@ private fun ComposeScreen(
                             }
                         }.onError {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .imePadding(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .imePadding(),
                             )
                         }.onLoading {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .imePadding(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .imePadding(),
                             )
                         }
                     }
@@ -446,10 +455,11 @@ private fun ComposeScreen(
             },
         ) {
             Column(
-                modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
+                modifier =
+                    Modifier
+                        .padding(it)
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 state.contentWarningState.onSuccess {
@@ -459,19 +469,21 @@ private fun ComposeScreen(
                         ) {
                             TextField2(
                                 state = it.textFieldState,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .focusRequester(
-                                        focusRequester = contentWarningFocusRequester,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .focusRequester(
+                                            focusRequester = contentWarningFocusRequester,
+                                        ),
+                                colors =
+                                    TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        disabledIndicatorColor = Color.Transparent,
+                                        errorIndicatorColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent,
                                     ),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    disabledIndicatorColor = Color.Transparent,
-                                    errorIndicatorColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                ),
                                 placeholder = {
                                     Text(text = stringResource(id = R.string.compose_content_warning_hint))
                                 },
@@ -482,29 +494,32 @@ private fun ComposeScreen(
                 }
                 TextField2(
                     state = state.textFieldState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(
-                            focusRequester = focusRequester,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .focusRequester(
+                                focusRequester = focusRequester,
+                            ),
+                    colors =
+                        TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                         ),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        errorIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    ),
                     placeholder = {
                         Text(text = stringResource(id = R.string.compose_hint))
                     },
                 )
                 if (state.mediaState.medias.isNotEmpty()) {
                     Row(
-                        modifier = Modifier
-                            .padding(horizontal = screenHorizontalPadding)
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding)
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         state.mediaState.medias.forEach { uri ->
@@ -512,20 +527,22 @@ private fun ComposeScreen(
                                 NetworkImage(
                                     model = uri,
                                     contentDescription = null,
-                                    modifier = Modifier
-                                        .size(128.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
+                                    modifier =
+                                        Modifier
+                                            .size(128.dp)
+                                            .clip(RoundedCornerShape(8.dp)),
                                 )
                                 IconButton(
                                     onClick = {
                                         state.mediaState.removeMedia(uri)
                                     },
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .background(
-                                            color = Color.Black.copy(alpha = 0.3f),
-                                            shape = CircleShape,
-                                        ),
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopEnd)
+                                            .background(
+                                                color = Color.Black.copy(alpha = 0.3f),
+                                                shape = CircleShape,
+                                            ),
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
@@ -537,15 +554,16 @@ private fun ComposeScreen(
                     }
                     val sensitiveInteractionSource = remember { MutableInteractionSource() }
                     Row(
-                        modifier = Modifier
-                            .padding(horizontal = screenHorizontalPadding)
-                            .fillMaxWidth()
-                            .clickable(
-                                interactionSource = sensitiveInteractionSource,
-                                indication = null,
-                            ) {
-                                state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
-                            },
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding)
+                                .fillMaxWidth()
+                                .clickable(
+                                    interactionSource = sensitiveInteractionSource,
+                                    indication = null,
+                                ) {
+                                    state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
+                                },
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -560,9 +578,10 @@ private fun ComposeScreen(
                 state.pollState.onSuccess { pollState ->
                     if (pollState.enabled) {
                         Column(
-                            modifier = Modifier
-                                .padding(horizontal = screenHorizontalPadding)
-                                .fillMaxWidth(),
+                            modifier =
+                                Modifier
+                                    .padding(horizontal = screenHorizontalPadding)
+                                    .fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Row(
@@ -570,18 +589,20 @@ private fun ComposeScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 SingleChoiceSegmentedButtonRow(
-                                    modifier = Modifier
-                                        .weight(1f),
+                                    modifier =
+                                        Modifier
+                                            .weight(1f),
                                 ) {
                                     SegmentedButton(
                                         selected = pollState.pollSingleChoice,
                                         onClick = {
                                             pollState.setPollSingleChoice(true)
                                         },
-                                        shape = SegmentedButtonDefaults.itemShape(
-                                            index = 0,
-                                            count = 2,
-                                        ),
+                                        shape =
+                                            SegmentedButtonDefaults.itemShape(
+                                                index = 0,
+                                                count = 2,
+                                            ),
                                     ) {
                                         Text(text = stringResource(id = R.string.compose_poll_single_choice))
                                     }
@@ -590,10 +611,11 @@ private fun ComposeScreen(
                                         onClick = {
                                             pollState.setPollSingleChoice(false)
                                         },
-                                        shape = SegmentedButtonDefaults.itemShape(
-                                            index = 1,
-                                            count = 2,
-                                        ),
+                                        shape =
+                                            SegmentedButtonDefaults.itemShape(
+                                                index = 1,
+                                                count = 2,
+                                            ),
                                     ) {
                                         Text(text = stringResource(id = R.string.compose_poll_multiple_choice))
                                     }
@@ -624,14 +646,16 @@ private fun ComposeScreen(
                                 onClick = {
                                     pollState.setShowExpirationMenu(true)
                                 },
-                                modifier = Modifier
-                                    .align(Alignment.End),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.End),
                             ) {
                                 Text(
-                                    text = stringResource(
-                                        id = R.string.compose_poll_expiration_at,
-                                        stringResource(id = pollState.expiredAt.textId),
-                                    ),
+                                    text =
+                                        stringResource(
+                                            id = R.string.compose_poll_expiration_at,
+                                            stringResource(id = pollState.expiredAt.textId),
+                                        ),
                                 )
                                 DropdownMenu(
                                     expanded = pollState.showExpirationMenu,
@@ -665,9 +689,10 @@ private fun ComposeScreen(
                                 UiStatusQuoted(
                                     status = item,
                                     onMediaClick = {},
-                                    modifier = Modifier
-                                        .padding(horizontal = screenHorizontalPadding)
-                                        .fillMaxWidth(),
+                                    modifier =
+                                        Modifier
+                                            .padding(horizontal = screenHorizontalPadding)
+                                            .fillMaxWidth(),
                                 )
                             }
                         }
@@ -679,9 +704,7 @@ private fun ComposeScreen(
 }
 
 @Composable
-private fun MisskeyVisibilityContent(
-    visibilityState: MisskeyVisibilityState,
-) {
+private fun MisskeyVisibilityContent(visibilityState: MisskeyVisibilityState) {
     IconButton(
         onClick = {
             visibilityState.showVisibilityMenu()
@@ -719,10 +742,11 @@ private fun MisskeyVisibilityContent(
                     leadingIcon = {
                         dev.dimension.flare.ui.component.status.misskey.VisibilityIcon(visibility = visibility)
                     },
-                    contentPadding = PaddingValues(
-                        horizontal = 16.dp,
-                        vertical = 8.dp,
-                    ),
+                    contentPadding =
+                        PaddingValues(
+                            horizontal = 16.dp,
+                            vertical = 8.dp,
+                        ),
                 )
             }
             DropdownMenuItem(
@@ -758,9 +782,7 @@ private fun MisskeyVisibilityContent(
 }
 
 @Composable
-private fun MastodonVisibilityContent(
-    visibilityState: MastodonVisibilityState,
-) {
+private fun MastodonVisibilityContent(visibilityState: MastodonVisibilityState) {
     IconButton(
         onClick = {
             visibilityState.showVisibilityMenu()
@@ -798,10 +820,11 @@ private fun MastodonVisibilityContent(
                     leadingIcon = {
                         VisibilityIcon(visibility = visibility)
                     },
-                    contentPadding = PaddingValues(
-                        horizontal = 16.dp,
-                        vertical = 8.dp,
-                    ),
+                    contentPadding =
+                        PaddingValues(
+                            horizontal = 16.dp,
+                            vertical = 8.dp,
+                        ),
                 )
             }
         }
@@ -831,8 +854,9 @@ private fun PollOption(
 ) {
     OutlinedTextField2(
         state = textFieldState,
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier =
+            modifier
+                .fillMaxWidth(),
         placeholder = {
             Text(text = stringResource(id = R.string.compose_poll_option_hint, index + 1))
         },
@@ -855,37 +879,42 @@ private fun composePresenter(
     composeUseCase: ComposeUseCase = rememberInject(),
 ) = run {
     val account by activeAccountPresenter()
-    val emojiState = account.flatMap {
-        emojiPresenter(it).emojiState ?: UiState.Error(IllegalStateException("Emoji not supported"))
-    }
+    val emojiState =
+        account.flatMap {
+            emojiPresenter(it).emojiState ?: UiState.Error(IllegalStateException("Emoji not supported"))
+        }
     val textFieldState by remember {
         mutableStateOf(TextFieldState(""))
     }
     val text by remember {
         textFieldState.textAsFlow()
     }.collectAsState(initial = "")
-    val pollState = account.flatMap {
-        when (it) {
-            is UiAccount.Mastodon, is UiAccount.Misskey -> UiState.Success(pollPresenter())
+    val pollState =
+        account.flatMap {
+            when (it) {
+                is UiAccount.Mastodon, is UiAccount.Misskey -> UiState.Success(pollPresenter())
+            }
         }
-    }
     val mediaState = mediaPresenter()
-    val visibilityState = account.flatMap {
-        when (it) {
-            is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
-            is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
+    val visibilityState =
+        account.flatMap {
+            when (it) {
+                is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
+                is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
+            }
         }
-    }
-    val contentWarningState = account.flatMap {
-        when (it) {
-            is UiAccount.Misskey, is UiAccount.Mastodon -> UiState.Success(contentWarningPresenter())
+    val contentWarningState =
+        account.flatMap {
+            when (it) {
+                is UiAccount.Misskey, is UiAccount.Mastodon -> UiState.Success(contentWarningPresenter())
+            }
         }
-    }
-    val replyState = status?.let { status ->
-        account.map {
-            statusPresenter(it, status)
+    val replyState =
+        status?.let { status ->
+            account.map {
+                statusPresenter(it, status)
+            }
         }
-    }
     replyState?.onSuccess {
         LaunchedEffect(it.listState.itemCount) {
             if (it.listState.itemCount == 1 && textFieldState.text.isEmpty()) {
@@ -908,15 +937,18 @@ private fun composePresenter(
         }
     }
 
-    val canSend = remember(text) {
-        text.isNotBlank() && text.isNotEmpty()
-    }
-    val canPoll = remember(mediaState) {
-        mediaState.medias.isEmpty()
-    }
-    val canMedia = remember(mediaState, pollState) {
-        mediaState.medias.size < 4 && !(pollState is UiState.Success && pollState.data.enabled)
-    }
+    val canSend =
+        remember(text) {
+            text.isNotBlank() && text.isNotEmpty()
+        }
+    val canPoll =
+        remember(mediaState) {
+            mediaState.medias.isEmpty()
+        }
+    val canMedia =
+        remember(mediaState, pollState) {
+            mediaState.medias.size < 4 && !(pollState is UiState.Success && pollState.data.enabled)
+        }
     object {
         val textFieldState = textFieldState
         val canSend = canSend
@@ -928,6 +960,7 @@ private fun composePresenter(
         val contentWarningState = contentWarningState
         val emojiState = emojiState
         val replyState = replyState
+
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
                 append(" :${emoji.shortcode}: ")
@@ -937,54 +970,63 @@ private fun composePresenter(
         @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
             account.onSuccess {
-                val data = when (it) {
-                    is UiAccount.Mastodon -> MastodonDataSource.MastodonComposeData(
-                        content = textFieldState.text.toString(),
-                        medias = mediaState.medias.map {
-                            FileItem(context, it)
-                        },
-                        poll = if (pollState is UiState.Success && pollState.data.enabled) {
-                            MastodonDataSource.MastodonComposeData.Poll(
-                                multiple = !pollState.data.pollSingleChoice,
-                                expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
-                                options = pollState.data.options.map { option ->
-                                    option.text.toString()
-                                },
+                val data =
+                    when (it) {
+                        is UiAccount.Mastodon ->
+                            MastodonDataSource.MastodonComposeData(
+                                content = textFieldState.text.toString(),
+                                medias =
+                                    mediaState.medias.map {
+                                        FileItem(context, it)
+                                    },
+                                poll =
+                                    if (pollState is UiState.Success && pollState.data.enabled) {
+                                        MastodonDataSource.MastodonComposeData.Poll(
+                                            multiple = !pollState.data.pollSingleChoice,
+                                            expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
+                                            options =
+                                                pollState.data.options.map { option ->
+                                                    option.text.toString()
+                                                },
+                                        )
+                                    } else {
+                                        null
+                                    },
+                                sensitive = mediaState.isMediaSensitive,
+                                spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
+                                visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Mastodon.Visibility,
+                                inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                                account = it,
                             )
-                        } else {
-                            null
-                        },
-                        sensitive = mediaState.isMediaSensitive,
-                        spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
-                        visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Mastodon.Visibility,
-                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                        account = it,
-                    )
 
-                    is UiAccount.Misskey -> MisskeyDataSource.MissKeyComposeData(
-                        account = it,
-                        medias = mediaState.medias.map {
-                            FileItem(context, it)
-                        },
-                        poll = if (pollState is UiState.Success && pollState.data.enabled) {
-                            MisskeyDataSource.MissKeyComposeData.Poll(
-                                multiple = !pollState.data.pollSingleChoice,
-                                expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
-                                options = pollState.data.options.map { option ->
-                                    option.text.toString()
-                                },
+                        is UiAccount.Misskey ->
+                            MisskeyDataSource.MissKeyComposeData(
+                                account = it,
+                                medias =
+                                    mediaState.medias.map {
+                                        FileItem(context, it)
+                                    },
+                                poll =
+                                    if (pollState is UiState.Success && pollState.data.enabled) {
+                                        MisskeyDataSource.MissKeyComposeData.Poll(
+                                            multiple = !pollState.data.pollSingleChoice,
+                                            expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
+                                            options =
+                                                pollState.data.options.map { option ->
+                                                    option.text.toString()
+                                                },
+                                        )
+                                    } else {
+                                        null
+                                    },
+                                sensitive = mediaState.isMediaSensitive,
+                                spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
+                                visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Misskey.Visibility,
+                                inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                                renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+                                content = textFieldState.text.toString(),
+                                localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly,
                             )
-                        } else {
-                            null
-                        },
-                        sensitive = mediaState.isMediaSensitive,
-                        spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
-                        visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Misskey.Visibility,
-                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                        renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                        content = textFieldState.text.toString(),
-                        localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly,
-                    )
 
 //                    is UiAccount.Bluesky -> ComposeData.Bluesky(
 //                        account = it,
@@ -993,7 +1035,7 @@ private fun composePresenter(
 //                        quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
 //                        content = textFieldState.text.toString(),
 //                    )
-                }
+                    }
                 composeUseCase(data)
             }
         }
@@ -1006,9 +1048,10 @@ private fun statusPresenter(
     status: ComposeStatus,
 ) = run {
     val service = accountServiceProvider(account = account)
-    val listState = remember(account.accountKey) {
-        service.status(status.statusKey)
-    }.collectAsLazyPagingItems()
+    val listState =
+        remember(account.accountKey) {
+            service.status(status.statusKey)
+        }.collectAsLazyPagingItems()
 
     object {
         val listState = listState
@@ -1016,46 +1059,51 @@ private fun statusPresenter(
 }
 
 @Composable
-private fun emojiPresenter(
-    account: UiAccount,
-) = run {
-    val service = accountServiceProvider(account = account)
-    val emojiState = remember(account.accountKey) {
-        when (service) {
-            is MastodonDataSource -> service.emoji()
-            is MisskeyDataSource -> service.emoji()
-            else -> null
+private fun emojiPresenter(account: UiAccount) =
+    run {
+        val service = accountServiceProvider(account = account)
+        val emojiState =
+            remember(account.accountKey) {
+                when (service) {
+                    is MastodonDataSource -> service.emoji()
+                    is MisskeyDataSource -> service.emoji()
+                    else -> null
+                }
+            }?.collectAsState()?.toUi()
+        object {
+            val emojiState = emojiState
         }
-    }?.collectAsState()?.toUi()
-    object {
-        val emojiState = emojiState
     }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun contentWarningPresenter() = run {
-    val textFieldState by remember {
-        mutableStateOf(TextFieldState(""))
-    }
-    var enabled by remember {
-        mutableStateOf(false)
-    }
-    object {
-        val textFieldState = textFieldState
-        val enabled = enabled
-        fun toggle() {
-            enabled = !enabled
+private fun contentWarningPresenter() =
+    run {
+        val textFieldState by remember {
+            mutableStateOf(TextFieldState(""))
+        }
+        var enabled by remember {
+            mutableStateOf(false)
+        }
+        object {
+            val textFieldState = textFieldState
+            val enabled = enabled
+
+            fun toggle() {
+                enabled = !enabled
+            }
         }
     }
-}
 
 internal sealed interface VisibilityState<T> {
     val visibility: T
     val showVisibilityMenu: Boolean
     val allVisibilities: List<T>
+
     fun setVisibility(value: T)
+
     fun showVisibilityMenu()
+
     fun hideVisibilityMenu()
 }
 
@@ -1075,155 +1123,162 @@ internal abstract class MisskeyVisibilityState(
 }
 
 @Composable
-private fun misskeyVisibilityPresenter() = run {
-    var localOnly by remember {
-        mutableStateOf(false)
-    }
-    var showVisibilityMenu by remember {
-        mutableStateOf(false)
-    }
-    var visibility by remember {
-        mutableStateOf(UiStatus.Misskey.Visibility.Public)
-    }
-    object : MisskeyVisibilityState(
-        visibility = visibility,
-        showVisibilityMenu = showVisibilityMenu,
-        allVisibilities = UiStatus.Misskey.Visibility.entries.toList(),
-        localOnly = localOnly,
-    ) {
-        override fun setLocalOnly(value: Boolean) {
-            localOnly = value
+private fun misskeyVisibilityPresenter() =
+    run {
+        var localOnly by remember {
+            mutableStateOf(false)
         }
-
-        override fun setVisibility(value: UiStatus.Misskey.Visibility) {
-            visibility = value
+        var showVisibilityMenu by remember {
+            mutableStateOf(false)
         }
-
-        override fun showVisibilityMenu() {
-            showVisibilityMenu = true
+        var visibility by remember {
+            mutableStateOf(UiStatus.Misskey.Visibility.Public)
         }
+        object : MisskeyVisibilityState(
+            visibility = visibility,
+            showVisibilityMenu = showVisibilityMenu,
+            allVisibilities = UiStatus.Misskey.Visibility.entries.toList(),
+            localOnly = localOnly,
+        ) {
+            override fun setLocalOnly(value: Boolean) {
+                localOnly = value
+            }
 
-        override fun hideVisibilityMenu() {
-            showVisibilityMenu = false
-        }
-    }
-}
+            override fun setVisibility(value: UiStatus.Misskey.Visibility) {
+                visibility = value
+            }
 
-@Composable
-private fun mastodonVisibilityPresenter() = run {
-    var showVisibilityMenu by remember {
-        mutableStateOf(false)
-    }
-    var visibility by remember {
-        mutableStateOf(UiStatus.Mastodon.Visibility.Public)
-    }
-    object : MastodonVisibilityState(
-        visibility = visibility,
-        showVisibilityMenu = showVisibilityMenu,
-        allVisibilities = UiStatus.Mastodon.Visibility.entries.toList(),
-    ) {
-        override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
-            visibility = value
-        }
+            override fun showVisibilityMenu() {
+                showVisibilityMenu = true
+            }
 
-        override fun showVisibilityMenu() {
-            showVisibilityMenu = true
-        }
-
-        override fun hideVisibilityMenu() {
-            showVisibilityMenu = false
-        }
-    }
-}
-
-@Composable
-private fun mediaPresenter() = run {
-    var medias by remember {
-        mutableStateOf(listOf<Uri>())
-    }
-    var isMediaSensitive by remember {
-        mutableStateOf(false)
-    }
-
-    object {
-        val medias = medias.toImmutableList()
-        val isMediaSensitive = isMediaSensitive
-        fun addMedia(uris: List<Uri>) {
-            medias = (medias + uris).distinct().takeLast(4)
-        }
-
-        fun removeMedia(uri: Uri) {
-            medias = medias.filterNot { it == uri }
-            if (medias.isEmpty()) {
-                isMediaSensitive = false
+            override fun hideVisibilityMenu() {
+                showVisibilityMenu = false
             }
         }
+    }
 
-        fun setMediaSensitive(value: Boolean) {
-            isMediaSensitive = value
+@Composable
+private fun mastodonVisibilityPresenter() =
+    run {
+        var showVisibilityMenu by remember {
+            mutableStateOf(false)
+        }
+        var visibility by remember {
+            mutableStateOf(UiStatus.Mastodon.Visibility.Public)
+        }
+        object : MastodonVisibilityState(
+            visibility = visibility,
+            showVisibilityMenu = showVisibilityMenu,
+            allVisibilities = UiStatus.Mastodon.Visibility.entries.toList(),
+        ) {
+            override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
+                visibility = value
+            }
+
+            override fun showVisibilityMenu() {
+                showVisibilityMenu = true
+            }
+
+            override fun hideVisibilityMenu() {
+                showVisibilityMenu = false
+            }
         }
     }
-}
+
+@Composable
+private fun mediaPresenter() =
+    run {
+        var medias by remember {
+            mutableStateOf(listOf<Uri>())
+        }
+        var isMediaSensitive by remember {
+            mutableStateOf(false)
+        }
+
+        object {
+            val medias = medias.toImmutableList()
+            val isMediaSensitive = isMediaSensitive
+
+            fun addMedia(uris: List<Uri>) {
+                medias = (medias + uris).distinct().takeLast(4)
+            }
+
+            fun removeMedia(uri: Uri) {
+                medias = medias.filterNot { it == uri }
+                if (medias.isEmpty()) {
+                    isMediaSensitive = false
+                }
+            }
+
+            fun setMediaSensitive(value: Boolean) {
+                isMediaSensitive = value
+            }
+        }
+    }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun pollPresenter() = run {
-    var enabled by remember {
-        mutableStateOf(false)
-    }
-    var options by remember {
-        mutableStateOf(listOf(TextFieldState(), TextFieldState()))
-    }
-    var pollSingleChoice by remember {
-        mutableStateOf(true)
-    }
-    var expiredAt by remember {
-        mutableStateOf(PollExpiration.Minutes5)
-    }
-    var showExpirationMenu by remember {
-        mutableStateOf(false)
-    }
-    val canAddPollOption = remember(options) {
-        options.size < 4
-    }
+private fun pollPresenter() =
+    run {
+        var enabled by remember {
+            mutableStateOf(false)
+        }
+        var options by remember {
+            mutableStateOf(listOf(TextFieldState(), TextFieldState()))
+        }
+        var pollSingleChoice by remember {
+            mutableStateOf(true)
+        }
+        var expiredAt by remember {
+            mutableStateOf(PollExpiration.Minutes5)
+        }
+        var showExpirationMenu by remember {
+            mutableStateOf(false)
+        }
+        val canAddPollOption =
+            remember(options) {
+                options.size < 4
+            }
 
-    object {
-        val enabled = enabled
-        val options = options.toImmutableList()
-        val pollSingleChoice = pollSingleChoice
-        val canAddPollOption = canAddPollOption
-        val expiredAt = expiredAt
-        val showExpirationMenu = showExpirationMenu
-        fun togglePoll() {
-            enabled = !enabled
-            if (!enabled) {
-                options = listOf(TextFieldState(), TextFieldState())
-                pollSingleChoice = true
-                expiredAt = PollExpiration.Minutes5
+        object {
+            val enabled = enabled
+            val options = options.toImmutableList()
+            val pollSingleChoice = pollSingleChoice
+            val canAddPollOption = canAddPollOption
+            val expiredAt = expiredAt
+            val showExpirationMenu = showExpirationMenu
+
+            fun togglePoll() {
+                enabled = !enabled
+                if (!enabled) {
+                    options = listOf(TextFieldState(), TextFieldState())
+                    pollSingleChoice = true
+                    expiredAt = PollExpiration.Minutes5
+                }
+            }
+
+            fun addPollOption() {
+                options = options + TextFieldState()
+            }
+
+            fun removePollOption(index: Int) {
+                options = options.filterIndexed { i, _ -> i != index }
+            }
+
+            fun setPollSingleChoice(singleChoice: Boolean) {
+                pollSingleChoice = singleChoice
+            }
+
+            fun setExpiredAt(value: PollExpiration) {
+                expiredAt = value
+            }
+
+            fun setShowExpirationMenu(value: Boolean) {
+                showExpirationMenu = value
             }
         }
-
-        fun addPollOption() {
-            options = options + TextFieldState()
-        }
-
-        fun removePollOption(index: Int) {
-            options = options.filterIndexed { i, _ -> i != index }
-        }
-
-        fun setPollSingleChoice(singleChoice: Boolean) {
-            pollSingleChoice = singleChoice
-        }
-
-        fun setExpiredAt(value: PollExpiration) {
-            expiredAt = value
-        }
-
-        fun setShowExpirationMenu(value: Boolean) {
-            showExpirationMenu = value
-        }
     }
-}
 
 internal enum class PollExpiration(val textId: Int, val duration: Duration) {
     Minutes5(R.string.compose_poll_expiration_5_minutes, 5.minutes),
@@ -1237,33 +1292,37 @@ internal enum class PollExpiration(val textId: Int, val duration: Duration) {
 }
 
 internal val UiStatus.Mastodon.Visibility.localName: Int
-    get() = when (this) {
-        UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public
-        UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted
-        UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private
-        UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct
-    }
+    get() =
+        when (this) {
+            UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public
+            UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted
+            UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private
+            UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct
+        }
 
 internal val UiStatus.Mastodon.Visibility.localDescription: Int
-    get() = when (this) {
-        UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public_description
-        UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted_description
-        UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private_description
-        UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct_description
-    }
+    get() =
+        when (this) {
+            UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public_description
+            UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted_description
+            UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private_description
+            UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct_description
+        }
 
 internal val UiStatus.Misskey.Visibility.localName: Int
-    get() = when (this) {
-        UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public
-        UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home
-        UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers
-        UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified
-    }
+    get() =
+        when (this) {
+            UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public
+            UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home
+            UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers
+            UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified
+        }
 
 internal val UiStatus.Misskey.Visibility.localDescription: Int
-    get() = when (this) {
-        UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public_description
-        UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home_description
-        UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers_description
-        UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified_description
-    }
+    get() =
+        when (this) {
+            UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public_description
+            UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home_description
+            UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers_description
+            UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified_description
+        }

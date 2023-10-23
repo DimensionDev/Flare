@@ -38,11 +38,12 @@ private fun composeUseCase(
 ) {
     scope.launch {
         val notificationId = UUID.randomUUID().hashCode()
-        var builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(context.getString(R.string.compose_notification_title))
-            .setContentText(context.getString(R.string.compose_notification_text))
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        var builder =
+            NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle(context.getString(R.string.compose_notification_title))
+                .setContentText(context.getString(R.string.compose_notification_text))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         val notificationManager = NotificationManagerCompat.from(context)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -56,23 +57,25 @@ private fun composeUseCase(
 
         runCatching {
             when (data) {
-                is MastodonDataSource.MastodonComposeData -> data.account.dataSource.compose(
-                    data = data,
-                ) { (current, max) ->
-                    if (notificationManager.areNotificationsEnabled()) {
-                        builder = builder.setProgress(max, current, false)
-                        notificationManager.notify(notificationId, builder.build())
+                is MastodonDataSource.MastodonComposeData ->
+                    data.account.dataSource.compose(
+                        data = data,
+                    ) { (current, max) ->
+                        if (notificationManager.areNotificationsEnabled()) {
+                            builder = builder.setProgress(max, current, false)
+                            notificationManager.notify(notificationId, builder.build())
+                        }
                     }
-                }
 
-                is MisskeyDataSource.MissKeyComposeData -> data.account.dataSource.compose(
-                    data = data,
-                ) { (current, max) ->
-                    if (notificationManager.areNotificationsEnabled()) {
-                        builder = builder.setProgress(max, current, false)
-                        notificationManager.notify(notificationId, builder.build())
+                is MisskeyDataSource.MissKeyComposeData ->
+                    data.account.dataSource.compose(
+                        data = data,
+                    ) { (current, max) ->
+                        if (notificationManager.areNotificationsEnabled()) {
+                            builder = builder.setProgress(max, current, false)
+                            notificationManager.notify(notificationId, builder.build())
+                        }
                     }
-                }
 
                 else -> Unit
 
@@ -88,10 +91,11 @@ private fun composeUseCase(
             }
         }.onSuccess {
             if (notificationManager.areNotificationsEnabled()) {
-                builder = builder
-                    .setContentTitle(context.getString(R.string.compose_notification_success_title))
-                    .setContentText(context.getString(R.string.compose_notification_success_text))
-                    .setProgress(0, 0, false)
+                builder =
+                    builder
+                        .setContentTitle(context.getString(R.string.compose_notification_success_title))
+                        .setContentText(context.getString(R.string.compose_notification_success_text))
+                        .setProgress(0, 0, false)
                 notificationManager.notify(notificationId, builder.build())
                 delay(5.seconds)
                 notificationManager.cancel(notificationId)
@@ -99,9 +103,10 @@ private fun composeUseCase(
         }.onFailure {
             it.printStackTrace()
             if (notificationManager.areNotificationsEnabled()) {
-                builder = builder
-                    .setContentTitle(context.getString(R.string.compose_notification_error_title))
-                    .setContentText(context.getString(R.string.compose_notification_error_text))
+                builder =
+                    builder
+                        .setContentTitle(context.getString(R.string.compose_notification_error_title))
+                        .setContentText(context.getString(R.string.compose_notification_error_text))
                 notificationManager.notify(notificationId, builder.build())
             }
         }

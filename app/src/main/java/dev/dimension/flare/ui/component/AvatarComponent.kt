@@ -17,8 +17,9 @@ fun AvatarComponent(
     NetworkImage(
         model = data,
         contentDescription = null,
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape),
+        modifier =
+            modifier
+                .size(size)
+                .clip(CircleShape),
     )
 }

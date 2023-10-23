@@ -36,39 +36,43 @@ internal fun CommonStatusHeaderComponent(
     ) {
         AvatarComponent(
             data = data.avatarUrl,
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable {
-                    onUserClick(data.userKey)
-                },
+            modifier =
+                Modifier
+                    .clip(CircleShape)
+                    .clickable {
+                        onUserClick(data.userKey)
+                    },
         )
         Spacer(modifier = Modifier.width(8.dp))
         Column(
-            modifier = Modifier
-                .weight(1f),
+            modifier =
+                Modifier
+                    .weight(1f),
         ) {
             HtmlText2(
                 element = data.nameElement,
-                modifier = Modifier
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) {
-                        onUserClick(data.userKey)
-                    },
+                modifier =
+                    Modifier
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
+                            onUserClick(data.userKey)
+                        },
                 maxLines = 1,
             )
             Text(
                 text = data.handle,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier
-                    .alpha(MediumAlpha)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) {
-                        onUserClick(data.userKey)
-                    },
+                modifier =
+                    Modifier
+                        .alpha(MediumAlpha)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
+                            onUserClick(data.userKey)
+                        },
             )
         }
         trailing.invoke(this)

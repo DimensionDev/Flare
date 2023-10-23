@@ -72,9 +72,10 @@ fun rememberPullRefreshState(
         refreshingOffsetPx = refreshingOffset.toPx()
     }
 
-    val state = remember(scope) {
-        PullRefreshState(scope, onRefreshState, refreshingOffsetPx, thresholdPx)
-    }
+    val state =
+        remember(scope) {
+            PullRefreshState(scope, onRefreshState, refreshingOffsetPx, thresholdPx)
+        }
 
     SideEffect {
         state.setRefreshing(refreshing)
@@ -144,16 +145,17 @@ class PullRefreshState internal constructor(
             onRefreshState.value()
         }
         animateIndicatorTo(0f)
-        val consumed = when {
-            // We are flinging without having dragged the pull refresh (for example a fling inside
-            // a list) - don't consume
-            distancePulled == 0f -> 0f
-            // If the velocity is negative, the fling is upwards, and we don't want to prevent the
-            // the list from scrolling
-            velocity < 0f -> 0f
-            // We are showing the indicator, and the fling is downwards - consume everything
-            else -> velocity
-        }
+        val consumed =
+            when {
+                // We are flinging without having dragged the pull refresh (for example a fling inside
+                // a list) - don't consume
+                distancePulled == 0f -> 0f
+                // If the velocity is negative, the fling is upwards, and we don't want to prevent the
+                // the list from scrolling
+                velocity < 0f -> 0f
+                // We are showing the indicator, and the fling is downwards - consume everything
+                else -> velocity
+            }
         distancePulled = 0f
         return consumed
     }
@@ -182,29 +184,31 @@ class PullRefreshState internal constructor(
     // overhead of running through the animation pipeline instead of directly mutating the state.
     private val mutatorMutex = MutatorMutex()
 
-    private fun animateIndicatorTo(offset: Float) = animationScope.launch {
-        mutatorMutex.mutate {
-            animate(initialValue = _position, targetValue = offset) { value, _ ->
-                _position = value
+    private fun animateIndicatorTo(offset: Float) =
+        animationScope.launch {
+            mutatorMutex.mutate {
+                animate(initialValue = _position, targetValue = offset) { value, _ ->
+                    _position = value
+                }
             }
         }
-    }
 
-    private fun calculateIndicatorPosition(): Float = when {
-        // If drag hasn't gone past the threshold, the position is the adjustedDistancePulled.
-        adjustedDistancePulled <= threshold -> adjustedDistancePulled
-        else -> {
-            // How far beyond the threshold pull has gone, as a percentage of the threshold.
-            val overshootPercent = abs(progress) - 1.0f
-            // Limit the overshoot to 200%. Linear between 0 and 200.
-            val linearTension = overshootPercent.coerceIn(0f, 2f)
-            // Non-linear tension. Increases with linearTension, but at a decreasing rate.
-            val tensionPercent = linearTension - linearTension.pow(2) / 4
-            // The additional offset beyond the threshold.
-            val extraOffset = threshold * tensionPercent
-            threshold + extraOffset
+    private fun calculateIndicatorPosition(): Float =
+        when {
+            // If drag hasn't gone past the threshold, the position is the adjustedDistancePulled.
+            adjustedDistancePulled <= threshold -> adjustedDistancePulled
+            else -> {
+                // How far beyond the threshold pull has gone, as a percentage of the threshold.
+                val overshootPercent = abs(progress) - 1.0f
+                // Limit the overshoot to 200%. Linear between 0 and 200.
+                val linearTension = overshootPercent.coerceIn(0f, 2f)
+                // Non-linear tension. Increases with linearTension, but at a decreasing rate.
+                val tensionPercent = linearTension - linearTension.pow(2) / 4
+                // The additional offset beyond the threshold.
+                val extraOffset = threshold * tensionPercent
+                threshold + extraOffset
+            }
         }
-    }
 }
 
 /**

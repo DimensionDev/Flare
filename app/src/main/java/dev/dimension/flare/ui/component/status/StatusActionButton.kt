@@ -34,27 +34,30 @@ internal fun StatusActionButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Row(
-        modifier = modifier
-            .clickable(
-                indication = null,
-                interactionSource = interactionSource,
-                onClick = onClicked,
-            )
-            .padding(4.dp),
+        modifier =
+            modifier
+                .clickable(
+                    indication = null,
+                    interactionSource = interactionSource,
+                    onClick = onClicked,
+                )
+                .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier
-                .indication(
-                    interactionSource = interactionSource,
-                    indication = rememberRipple(
-                        bounded = false,
-                        radius = 20.dp,
-                    ),
-                )
-                .size(16.dp),
+            modifier =
+                Modifier
+                    .indication(
+                        interactionSource = interactionSource,
+                        indication =
+                            rememberRipple(
+                                bounded = false,
+                                radius = 20.dp,
+                            ),
+                    )
+                    .size(16.dp),
             tint = color,
         )
         if (!text.isNullOrEmpty()) {

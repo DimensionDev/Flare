@@ -6,9 +6,7 @@ import dev.dimension.flare.model.MicroBlogKey
 
 @NavTypeSerializer
 class MicroBlogKeyTypeSerializer : DestinationsNavTypeSerializer<MicroBlogKey> {
-    override fun toRouteString(value: MicroBlogKey): String =
-        value.toString()
+    override fun toRouteString(value: MicroBlogKey): String = value.toString()
 
-    override fun fromRouteString(routeStr: String): MicroBlogKey =
-        MicroBlogKey.valueOf(routeStr)
+    override fun fromRouteString(routeStr: String): MicroBlogKey = MicroBlogKey.valueOf(routeStr)
 }

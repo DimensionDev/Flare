@@ -26,41 +26,41 @@ import dev.dimension.flare.ui.theme.FlareTheme
         ),
     ],
 )
-fun MediaRoute(
-    uri: String,
-) {
+fun MediaRoute(uri: String) {
     MediaScreen(
         uri = uri,
     )
 }
 
 @Composable
-internal fun MediaScreen(
-    uri: String,
-) {
+internal fun MediaScreen(uri: String) {
     FlareTheme(
         darkTheme = true,
     ) {
         Scaffold {
             Zoomable(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it),
             ) {
-                val painter = rememberAsyncImagePainter(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(uri)
-                        .size(Size.ORIGINAL)
-                        .build(),
-                )
+                val painter =
+                    rememberAsyncImagePainter(
+                        model =
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(uri)
+                                .size(Size.ORIGINAL)
+                                .build(),
+                    )
                 if (painter.state is AsyncImagePainter.State.Success) {
                     val size = painter.intrinsicSize
                     Image(
                         painter = painter,
                         contentDescription = null,
-                        modifier = Modifier
-                            .aspectRatio(size.width / size.height)
-                            .fillMaxSize(),
+                        modifier =
+                            Modifier
+                                .aspectRatio(size.width / size.height)
+                                .fillMaxSize(),
                     )
                 }
             }

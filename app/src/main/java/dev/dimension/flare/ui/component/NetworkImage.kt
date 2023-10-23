@@ -29,9 +29,10 @@ fun NetworkImage(
     modifier: Modifier = Modifier,
     placeholder: @Composable BoxScope.() -> Unit = {
         Box(
-            modifier = Modifier
-                .matchParentSize()
-                .placeholder(true),
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .placeholder(true),
         )
     },
     alignment: Alignment = Alignment.Center,
@@ -53,15 +54,16 @@ fun NetworkImage(
         )
 
         AnimatedVisibility(
-            visible = when (painter.state) {
-                is AsyncImagePainter.State.Empty,
-                is AsyncImagePainter.State.Success,
-                -> false
+            visible =
+                when (painter.state) {
+                    is AsyncImagePainter.State.Empty,
+                    is AsyncImagePainter.State.Success,
+                    -> false
 
-                is AsyncImagePainter.State.Loading,
-                is AsyncImagePainter.State.Error,
-                -> true
-            },
+                    is AsyncImagePainter.State.Loading,
+                    is AsyncImagePainter.State.Error,
+                    -> true
+                },
         ) {
             placeholder()
         }
@@ -74,22 +76,25 @@ fun EmojiImage(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val painter = rememberAsyncImagePainter(
-        model = remember(uri, context) {
-            ImageRequest.Builder(context)
-                .data(uri)
-                .size(Size.ORIGINAL)
-                .build()
-        },
-    )
+    val painter =
+        rememberAsyncImagePainter(
+            model =
+                remember(uri, context) {
+                    ImageRequest.Builder(context)
+                        .data(uri)
+                        .size(Size.ORIGINAL)
+                        .build()
+                },
+        )
     if (painter.state is AsyncImagePainter.State.Success) {
         val size = painter.intrinsicSize
         Image(
             painter = painter,
             contentDescription = null,
-            modifier = modifier
-                .aspectRatio(size.width / size.height)
-                .fillMaxSize(),
+            modifier =
+                modifier
+                    .aspectRatio(size.width / size.height)
+                    .fillMaxSize(),
         )
     }
 }

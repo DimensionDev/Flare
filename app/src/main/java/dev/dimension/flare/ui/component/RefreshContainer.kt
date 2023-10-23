@@ -24,8 +24,9 @@ fun RefreshContainer(
 ) {
     val refreshState = rememberPullRefreshState(refreshing, onRefresh)
     Box(
-        modifier = modifier
-            .pullRefresh(refreshState),
+        modifier =
+            modifier
+                .pullRefresh(refreshState),
     ) {
         content.invoke(this)
         PullRefreshIndicator(

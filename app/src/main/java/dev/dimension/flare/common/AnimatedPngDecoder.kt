@@ -16,9 +16,13 @@ internal class AnimatedPngDecoder(private val source: ImageSource) : Decoder {
             isSampled = false,
         )
     }
-    class Factory : Decoder.Factory {
 
-        override fun create(result: SourceResult, options: Options, imageLoader: ImageLoader): Decoder? {
+    class Factory : Decoder.Factory {
+        override fun create(
+            result: SourceResult,
+            options: Options,
+            imageLoader: ImageLoader,
+        ): Decoder? {
             return if (APNGParser.isAPNG(result.source.file().toString())) {
                 AnimatedPngDecoder(result.source)
             } else {

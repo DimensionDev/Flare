@@ -48,7 +48,7 @@ internal fun status() {
             (
                 lazyPagingItems.loadState.refresh == LoadState.Loading ||
                     lazyPagingItems.loadState.prepend == LoadState.Loading
-                ) &&
+            ) &&
             lazyPagingItems.itemCount == 0
         ) {
             items(10) {
@@ -65,16 +65,17 @@ internal fun status() {
         } else if ((
                 lazyPagingItems.loadState.refresh is LoadState.Error ||
                     lazyPagingItems.loadState.prepend is LoadState.Error
-                ) &&
+            ) &&
             lazyPagingItems.itemCount == 0
         ) {
             item {
                 Column(
-                    modifier = Modifier
-                        .fillParentMaxSize()
-                        .clickable {
-                            lazyPagingItems.retry()
-                        },
+                    modifier =
+                        Modifier
+                            .fillParentMaxSize()
+                            .clickable {
+                                lazyPagingItems.retry()
+                            },
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -92,11 +93,12 @@ internal fun status() {
         } else if (lazyPagingItems.itemCount == 0) {
             item {
                 Column(
-                    modifier = Modifier
-                        .fillParentMaxSize()
-                        .clickable {
-                            lazyPagingItems.refresh()
-                        },
+                    modifier =
+                        Modifier
+                            .fillParentMaxSize()
+                            .clickable {
+                                lazyPagingItems.refresh()
+                            },
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -114,26 +116,30 @@ internal fun status() {
         } else {
             items(
                 lazyPagingItems.itemCount,
-                key = lazyPagingItems.itemKey {
-                    it.itemKey
-                },
-                contentType = lazyPagingItems.itemContentType {
-                    it.itemType
-                },
+                key =
+                    lazyPagingItems.itemKey {
+                        it.itemKey
+                    },
+                contentType =
+                    lazyPagingItems.itemContentType {
+                        it.itemType
+                    },
             ) {
                 Column {
                     when (val item = lazyPagingItems[it]) {
-                        is UiStatus.Mastodon -> MastodonStatusComponent(
-                            data = item,
-                            event = mastodonStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                        )
+                        is UiStatus.Mastodon ->
+                            MastodonStatusComponent(
+                                data = item,
+                                event = mastodonStatusEvent,
+                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                            )
 
-                        is UiStatus.MastodonNotification -> MastodonNotificationComponent(
-                            data = item,
-                            event = mastodonStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                        )
+                        is UiStatus.MastodonNotification ->
+                            MastodonNotificationComponent(
+                                data = item,
+                                event = mastodonStatusEvent,
+                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                            )
 
                         null -> {
                             StatusPlaceholder(
@@ -142,17 +148,19 @@ internal fun status() {
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
-                        is UiStatus.Misskey -> MisskeyStatusComponent(
-                            data = item,
-                            event = misskeyStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                        )
+                        is UiStatus.Misskey ->
+                            MisskeyStatusComponent(
+                                data = item,
+                                event = misskeyStatusEvent,
+                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                            )
 
-                        is UiStatus.MisskeyNotification -> MisskeyNotificationComponent(
-                            data = item,
-                            event = misskeyStatusEvent,
-                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                        )
+                        is UiStatus.MisskeyNotification ->
+                            MisskeyNotificationComponent(
+                                data = item,
+                                event = misskeyStatusEvent,
+                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                            )
 
 //                        is UiStatus.Bluesky -> BlueskyStatusComponent(
 //                            data = item,
@@ -178,12 +186,13 @@ internal fun status() {
                     is LoadState.Error ->
                         item {
                             Column(
-                                modifier = Modifier
-                                    .clickable {
-                                        lazyPagingItems.retry()
-                                    }
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
+                                modifier =
+                                    Modifier
+                                        .clickable {
+                                            lazyPagingItems.retry()
+                                        }
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
@@ -210,8 +219,9 @@ internal fun status() {
                     is LoadState.NotLoading ->
                         item {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 HorizontalDivider()

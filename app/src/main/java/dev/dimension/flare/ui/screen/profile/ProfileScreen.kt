@@ -150,9 +150,10 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
             },
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "Error")
@@ -256,8 +257,9 @@ fun ProfileScreen(
     FlareTheme {
         Scaffold(
             modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentWindowInsets = ScaffoldDefaults
-                .contentWindowInsets.exclude(WindowInsets.statusBars),
+            contentWindowInsets =
+                ScaffoldDefaults
+                    .contentWindowInsets.exclude(WindowInsets.statusBars),
             topBar = {
                 if (showTopBar) {
                     val titleAlpha by remember {
@@ -274,30 +276,35 @@ fun ProfileScreen(
                     }
                     Box {
                         Column(
-                            modifier = Modifier
-                                .graphicsLayer {
-                                    alpha = titleAlpha
-                                },
+                            modifier =
+                                Modifier
+                                    .graphicsLayer {
+                                        alpha = titleAlpha
+                                    },
                         ) {
                             Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .windowInsetsTopHeight(WindowInsets.statusBars)
-                                    .background(
-                                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                            3.dp,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                                        .background(
+                                            color =
+                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                    3.dp,
+                                                ),
                                         ),
-                                    ),
                             )
                             Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(64.dp)
-                                    .background(
-                                        color = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                            3.dp,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(64.dp)
+                                        .background(
+                                            color =
+                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                    3.dp,
+                                                ),
                                         ),
-                                    ),
                             )
                         }
                         TopAppBar(
@@ -305,15 +312,17 @@ fun ProfileScreen(
                                 state.state.userState.onSuccess {
                                     HtmlText2(
                                         element = it.nameElement,
-                                        modifier = Modifier.graphicsLayer {
-                                            alpha = titleAlpha
-                                        },
+                                        modifier =
+                                            Modifier.graphicsLayer {
+                                                alpha = titleAlpha
+                                            },
                                     )
                                 }
                             },
-                            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = Color.Transparent,
-                            ),
+                            colors =
+                                TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                    containerColor = Color.Transparent,
+                                ),
                             modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
                             scrollBehavior = scrollBehavior,
                             navigationIcon = {
@@ -450,50 +459,58 @@ internal fun CommonProfileHeader(
     handleTrailing: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
-    val statusBarHeight = with(LocalDensity.current) {
-        WindowInsets.statusBars.getTop(this).toDp()
-    }
-    val actualBannerHeight = remember(statusBarHeight) {
-        ProfileHeaderConstants.BannerHeight.dp + statusBarHeight
-    }
+    val statusBarHeight =
+        with(LocalDensity.current) {
+            WindowInsets.statusBars.getTop(this).toDp()
+        }
+    val actualBannerHeight =
+        remember(statusBarHeight) {
+            ProfileHeaderConstants.BannerHeight.dp + statusBarHeight
+        }
     Box(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(bottom = 8.dp),
+        modifier =
+            modifier
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+                .padding(bottom = 8.dp),
     ) {
         bannerUrl?.let {
             NetworkImage(
                 model = it,
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(actualBannerHeight),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(actualBannerHeight),
             )
         }
         // avatar
         Column(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = screenHorizontalPadding),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .padding(
-                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
-                        ),
+                    modifier =
+                        Modifier
+                            .padding(
+                                top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                            ),
                 ) {
                     AvatarComponent(data = avatarUrl, size = ProfileHeaderConstants.AvatarSize.dp)
                 }
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(top = actualBannerHeight),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(top = actualBannerHeight),
                 ) {
                     HtmlText2(
                         element = displayName,
@@ -511,8 +528,9 @@ internal fun CommonProfileHeader(
                     }
                 }
                 Box(
-                    modifier = Modifier
-                        .padding(top = actualBannerHeight),
+                    modifier =
+                        Modifier
+                            .padding(top = actualBannerHeight),
                 ) {
                     headerTrailing()
                 }
@@ -531,61 +549,66 @@ private object ProfileHeaderConstants {
 }
 
 @Composable
-private fun ProfileHeaderError(
-    modifier: Modifier = Modifier,
-) {
+private fun ProfileHeaderError(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ProfileHeaderLoading(
-    modifier: Modifier = Modifier,
-) {
-    val statusBarHeight = with(LocalDensity.current) {
-        WindowInsets.statusBars.getTop(this).toDp()
-    }
-    val actualBannerHeight = remember(statusBarHeight) {
-        ProfileHeaderConstants.BannerHeight.dp + statusBarHeight
-    }
+private fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
+    val statusBarHeight =
+        with(LocalDensity.current) {
+            WindowInsets.statusBars.getTop(this).toDp()
+        }
+    val actualBannerHeight =
+        remember(statusBarHeight) {
+            ProfileHeaderConstants.BannerHeight.dp + statusBarHeight
+        }
     Box(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(bottom = 8.dp),
+        modifier =
+            modifier
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+                .padding(bottom = 8.dp),
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(actualBannerHeight)
-                .placeholder(true),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(actualBannerHeight)
+                    .placeholder(true),
         )
         // avatar
         Column(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = screenHorizontalPadding),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .padding(
-                            top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
-                        ),
+                    modifier =
+                        Modifier
+                            .padding(
+                                top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                            ),
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(ProfileHeaderConstants.AvatarSize.dp)
-                            .clip(CircleShape)
-                            .placeholder(true),
+                        modifier =
+                            Modifier
+                                .size(ProfileHeaderConstants.AvatarSize.dp)
+                                .clip(CircleShape)
+                                .placeholder(true),
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(top = actualBannerHeight),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(top = actualBannerHeight),
                 ) {
                     Text(
                         text = "Loading user",
@@ -608,11 +631,12 @@ private fun profilePresenter(
     userKey: MicroBlogKey?,
     statusEvent: StatusEvent = rememberInject(),
 ) = run {
-    val state = remember(userKey) {
-        ProfilePresenter(
-            userKey = userKey,
-        )
-    }.invoke()
+    val state =
+        remember(userKey) {
+            ProfilePresenter(
+                userKey = userKey,
+            )
+        }.invoke()
     object {
         val state = state
         val statusEvent = statusEvent

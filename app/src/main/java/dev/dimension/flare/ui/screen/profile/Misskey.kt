@@ -52,10 +52,11 @@ internal fun MisskeyProfileHeader(
                 is UiState.Loading -> {
                     FilledTonalButton(
                         onClick = { /*TODO*/ },
-                        modifier = Modifier.placeholder(
-                            true,
-                            shape = ButtonDefaults.filledTonalShape,
-                        ),
+                        modifier =
+                            Modifier.placeholder(
+                                true,
+                                shape = ButtonDefaults.filledTonalShape,
+                            ),
                     ) {
                         Text(text = stringResource(R.string.profile_header_button_follow))
                     }
@@ -68,13 +69,14 @@ internal fun MisskeyProfileHeader(
                                 onClick = { /*TODO*/ },
                             ) {
                                 Text(
-                                    text = stringResource(
-                                        when {
-                                            data.following -> R.string.profile_header_button_following
-                                            data.requested -> R.string.profile_header_button_requested
-                                            else -> R.string.profile_header_button_follow
-                                        },
-                                    ),
+                                    text =
+                                        stringResource(
+                                            when {
+                                                data.following -> R.string.profile_header_button_following
+                                                data.requested -> R.string.profile_header_button_requested
+                                                else -> R.string.profile_header_button_follow
+                                            },
+                                        ),
                                 )
                             }
                         }
@@ -85,9 +87,10 @@ internal fun MisskeyProfileHeader(
         },
         content = {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = screenHorizontalPadding),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = screenHorizontalPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 user.descriptionElement?.let {
@@ -102,24 +105,27 @@ internal fun MisskeyProfileHeader(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = stringResource(
-                            R.string.profile_misskey_header_status_count,
-                            user.matrices.statusesCountHumanized,
-                        ),
+                        text =
+                            stringResource(
+                                R.string.profile_misskey_header_status_count,
+                                user.matrices.statusesCountHumanized,
+                            ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        text = stringResource(
-                            R.string.profile_header_following_count,
-                            user.matrices.followsCountHumanized,
-                        ),
+                        text =
+                            stringResource(
+                                R.string.profile_header_following_count,
+                                user.matrices.followsCountHumanized,
+                            ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        text = stringResource(
-                            R.string.profile_header_fans_count,
-                            user.matrices.fansCountHumanized,
-                        ),
+                        text =
+                            stringResource(
+                                R.string.profile_header_fans_count,
+                                user.matrices.fansCountHumanized,
+                            ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

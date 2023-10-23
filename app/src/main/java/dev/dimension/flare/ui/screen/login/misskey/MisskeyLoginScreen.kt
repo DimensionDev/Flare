@@ -47,9 +47,7 @@ import kotlinx.coroutines.launch
 
 @Destination
 @Composable
-fun MisskeyLoginRoute(
-    navigator: DestinationsNavigator,
-) {
+fun MisskeyLoginRoute(navigator: DestinationsNavigator) {
     MisskeyLoginScreen(
         onBack = navigator::navigateUp,
     )
@@ -94,16 +92,18 @@ fun MisskeyLoginScreen(
             },
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.8f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
@@ -118,10 +118,11 @@ fun MisskeyLoginScreen(
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(2f)
-                        .padding(horizontal = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(2f)
+                            .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -131,11 +132,12 @@ fun MisskeyLoginScreen(
                             Text(text = stringResource(id = R.string.misskey_login_hint))
                         },
                         enabled = !state.loading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(
-                                focusRequester = focusRequester,
-                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .focusRequester(
+                                    focusRequester = focusRequester,
+                                ),
                         lineLimits = TextFieldLineLimits.SingleLine,
                     )
                     Button(
@@ -155,31 +157,31 @@ fun MisskeyLoginScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun loginPresenter(
-    launchUrl: (String) -> Unit,
-) = run {
-    val hostTextState by remember {
-        mutableStateOf(TextFieldState(""))
-    }
-    var loading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-    object {
-        val hostTextState = hostTextState
-        val loading = loading
-        val error = error
-        fun login() {
-            scope.launch {
-                loading = true
-                error = null
-                misskeyLoginUseCase(
-                    host = hostTextState.text.toString(),
-                    launchOAuth = launchUrl,
-                ).onFailure {
-                    error = it.message
+private fun loginPresenter(launchUrl: (String) -> Unit) =
+    run {
+        val hostTextState by remember {
+            mutableStateOf(TextFieldState(""))
+        }
+        var loading by remember { mutableStateOf(false) }
+        var error by remember { mutableStateOf<String?>(null) }
+        val scope = rememberCoroutineScope()
+        object {
+            val hostTextState = hostTextState
+            val loading = loading
+            val error = error
+
+            fun login() {
+                scope.launch {
+                    loading = true
+                    error = null
+                    misskeyLoginUseCase(
+                        host = hostTextState.text.toString(),
+                        launchOAuth = launchUrl,
+                    ).onFailure {
+                        error = it.message
+                    }
+                    loading = false
                 }
-                loading = false
             }
         }
     }
-}

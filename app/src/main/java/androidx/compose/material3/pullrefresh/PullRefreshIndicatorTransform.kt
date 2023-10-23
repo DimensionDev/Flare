@@ -40,11 +40,12 @@ fun Modifier.pullRefreshIndicatorTransform(
     state: PullRefreshState,
     scale: Boolean = false,
 ) = inspectable(
-    inspectorInfo = debugInspectorInfo {
-        name = "pullRefreshIndicatorTransform"
-        properties["state"] = state
-        properties["scale"] = scale
-    },
+    inspectorInfo =
+        debugInspectorInfo {
+            name = "pullRefreshIndicatorTransform"
+            properties["state"] = state
+            properties["scale"] = scale
+        },
 ) {
     Modifier
         // Essentially we only want to clip the at the top, so the indicator will not appear when
@@ -67,9 +68,10 @@ fun Modifier.pullRefreshIndicatorTransform(
             translationY = state.position - size.height
 
             if (scale && !state.refreshing) {
-                val scaleFraction = LinearOutSlowInEasing
-                    .transform(state.position / state.threshold)
-                    .coerceIn(0f, 1f)
+                val scaleFraction =
+                    LinearOutSlowInEasing
+                        .transform(state.position / state.threshold)
+                        .coerceIn(0f, 1f)
                 scaleX = scaleFraction
                 scaleY = scaleFraction
             }

@@ -32,63 +32,74 @@ internal fun MisskeyNotificationComponent(
     modifier: Modifier = Modifier,
 ) {
     when (data.type) {
-        Notification.Type.Follow -> MisskeyFollowNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        Notification.Type.Follow ->
+            MisskeyFollowNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
 
-        Notification.Type.Mention -> MisskeyMentionNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        Notification.Type.Mention ->
+            MisskeyMentionNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
 
-        Notification.Type.Reply -> MisskeyReplyNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
-        Notification.Type.Renote -> MisskeyRetweetNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
-        Notification.Type.Quote -> MisskeyQuoteNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
-        Notification.Type.Reaction -> MisskeyReactionNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
-        Notification.Type.PollEnded -> MisskeyPollEndedNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
-        Notification.Type.ReceiveFollowRequest -> MisskeyReceiveFollowRequestNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
-        Notification.Type.FollowRequestAccepted -> MisskeyFollowRequestAcceptedNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
-        Notification.Type.AchievementEarned -> MisskeyAchievementEarnedNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
-        Notification.Type.App -> MisskeyAppNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        Notification.Type.Reply ->
+            MisskeyReplyNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
+        Notification.Type.Renote ->
+            MisskeyRetweetNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
+        Notification.Type.Quote ->
+            MisskeyQuoteNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
+        Notification.Type.Reaction ->
+            MisskeyReactionNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
+        Notification.Type.PollEnded ->
+            MisskeyPollEndedNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
+        Notification.Type.ReceiveFollowRequest ->
+            MisskeyReceiveFollowRequestNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
+        Notification.Type.FollowRequestAccepted ->
+            MisskeyFollowRequestAcceptedNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
+        Notification.Type.AchievementEarned ->
+            MisskeyAchievementEarnedNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
+        Notification.Type.App ->
+            MisskeyAppNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
     }
 }
 
@@ -141,32 +152,36 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
             ) {
                 AvatarComponent(
                     data = user.avatarUrl,
-                    modifier = Modifier
-                        .clickable {
-                            event.onUserClick(user.userKey)
-                        },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                event.onUserClick(user.userKey)
+                            },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier =
+                        Modifier
+                            .weight(1f),
                 ) {
                     HtmlText2(
                         element = user.nameElement,
                         layoutDirection = user.nameDirection,
-                        modifier = Modifier
-                            .clickable {
-                                event.onUserClick(user.userKey)
-                            },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    event.onUserClick(user.userKey)
+                                },
                     )
                     Text(
                         text = user.handle,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier
-                            .alpha(MediumAlpha)
-                            .clickable {
-                                event.onUserClick(user.userKey)
-                            },
+                        modifier =
+                            Modifier
+                                .alpha(MediumAlpha)
+                                .clickable {
+                                    event.onUserClick(user.userKey)
+                                },
                     )
                 }
             }
@@ -195,32 +210,36 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
             ) {
                 AvatarComponent(
                     data = user.avatarUrl,
-                    modifier = Modifier
-                        .clickable {
-                            event.onUserClick(user.userKey)
-                        },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                event.onUserClick(user.userKey)
+                            },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier =
+                        Modifier
+                            .weight(1f),
                 ) {
                     HtmlText2(
                         element = user.nameElement,
                         layoutDirection = user.nameDirection,
-                        modifier = Modifier
-                            .clickable {
-                                event.onUserClick(user.userKey)
-                            },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    event.onUserClick(user.userKey)
+                                },
                     )
                     Text(
                         text = user.handle,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier
-                            .alpha(MediumAlpha)
-                            .clickable {
-                                event.onUserClick(user.userKey)
-                            },
+                        modifier =
+                            Modifier
+                                .alpha(MediumAlpha)
+                                .clickable {
+                                    event.onUserClick(user.userKey)
+                                },
                     )
                 }
             }
@@ -364,32 +383,36 @@ private fun MisskeyFollowNotificationComponent(
             ) {
                 AvatarComponent(
                     data = user.avatarUrl,
-                    modifier = Modifier
-                        .clickable {
-                            event.onUserClick(user.userKey)
-                        },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                event.onUserClick(user.userKey)
+                            },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier =
+                        Modifier
+                            .weight(1f),
                 ) {
                     HtmlText2(
                         element = user.nameElement,
                         layoutDirection = user.nameDirection,
-                        modifier = Modifier
-                            .clickable {
-                                event.onUserClick(user.userKey)
-                            },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    event.onUserClick(user.userKey)
+                                },
                     )
                     Text(
                         text = user.handle,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier
-                            .alpha(MediumAlpha)
-                            .clickable {
-                                event.onUserClick(user.userKey)
-                            },
+                        modifier =
+                            Modifier
+                                .alpha(MediumAlpha)
+                                .clickable {
+                                    event.onUserClick(user.userKey)
+                                },
                     )
                 }
             }

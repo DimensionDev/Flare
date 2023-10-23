@@ -15,9 +15,10 @@ class MastodonMappingTest {
         Assert.assertNotNull(status)
         val accountKey = MicroBlogKey("123", "test")
         val pagingKey = "test"
-        val timeline = status?.map {
-            it.toDbPagingTimeline(accountKey, pagingKey)
-        }
+        val timeline =
+            status?.map {
+                it.toDbPagingTimeline(accountKey, pagingKey)
+            }
         Assert.assertNotNull(timeline)
         Assert.assertEquals("105853517700650526", timeline?.get(0)?.status?.status?.data?.statusKey?.id)
     }

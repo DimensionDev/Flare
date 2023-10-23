@@ -106,9 +106,10 @@ private fun statusPresenter(
     statusKey: MicroBlogKey,
     statusEvent: StatusEvent = rememberInject(),
 ) = run {
-    val state = remember(statusKey) {
-        StatusPresenter(statusKey)
-    }.invoke()
+    val state =
+        remember(statusKey) {
+            StatusPresenter(statusKey)
+        }.invoke()
 
     object {
         val state = state

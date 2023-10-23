@@ -36,9 +36,10 @@ fun <T> producePresenter(
 private fun <T> createPresenter(
     body: @Composable () -> T,
     key: String? = null,
-    holder: PresenterHolder<T> = viewModel(key = key) {
-        PresenterHolder<T>(body)
-    },
+    holder: PresenterHolder<T> =
+        viewModel(key = key) {
+            PresenterHolder<T>(body)
+        },
 ): State<T> {
     return holder.state.collectAsState()
 }

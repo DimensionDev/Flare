@@ -84,11 +84,12 @@ fun PullRefreshIndicator(
     }
 
     Box(
-        modifier = modifier
-            .size(IndicatorSize)
-            .pullRefreshIndicatorTransform(state, scale)
-            .shadow(if (showElevation) Elevation else 0.dp, SpinnerShape, clip = true)
-            .background(color = backgroundColor, shape = SpinnerShape),
+        modifier =
+            modifier
+                .size(IndicatorSize)
+                .pullRefreshIndicatorTransform(state, scale)
+                .shadow(if (showElevation) Elevation else 0.dp, SpinnerShape, clip = true)
+                .background(color = backgroundColor, shape = SpinnerShape),
     ) {
         Crossfade(
             targetState = refreshing,
@@ -142,12 +143,13 @@ private fun CircularArrowIndicator(
 
         rotate(degrees = values.rotation) {
             val arcRadius = ArcRadius.toPx() + StrokeWidth.toPx() / 2f
-            val arcBounds = Rect(
-                size.center.x - arcRadius,
-                size.center.y - arcRadius,
-                size.center.x + arcRadius,
-                size.center.y + arcRadius,
-            )
+            val arcBounds =
+                Rect(
+                    size.center.x - arcRadius,
+                    size.center.y - arcRadius,
+                    size.center.x + arcRadius,
+                    size.center.y + arcRadius,
+                )
             drawArc(
                 color = color,
                 alpha = alpha,
@@ -156,10 +158,11 @@ private fun CircularArrowIndicator(
                 useCenter = false,
                 topLeft = arcBounds.topLeft,
                 size = arcBounds.size,
-                style = Stroke(
-                    width = StrokeWidth.toPx(),
-                    cap = StrokeCap.Square,
-                ),
+                style =
+                    Stroke(
+                        width = StrokeWidth.toPx(),
+                        cap = StrokeCap.Square,
+                    ),
             )
             drawArrow(path, arcBounds, color, alpha, values)
         }

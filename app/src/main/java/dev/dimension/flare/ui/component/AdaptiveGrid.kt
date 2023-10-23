@@ -19,9 +19,10 @@ fun AdaptiveGrid(
         content = content,
         measurePolicy = { measurables, constraints ->
             if (measurables.size == 1) {
-                val placeables = measurables.map {
-                    it.measure(constraints)
-                }
+                val placeables =
+                    measurables.map {
+                        it.measure(constraints)
+                    }
                 layout(
                     width = placeables[0].width,
                     height = placeables[0].height,
@@ -38,15 +39,17 @@ fun AdaptiveGrid(
                 val columns = ceil(sqrt(measurables.size.toDouble())).toInt().coerceAtLeast(1)
                 val rows = ceil(measurables.size.toDouble() / columns)
                 val itemSize = (constraints.maxWidth - space * (columns - 1)) / columns
-                val itemConstraints = constraints.copy(
-                    minWidth = itemSize,
-                    maxWidth = itemSize,
-                    minHeight = itemSize,
-                    maxHeight = itemSize,
-                )
-                val placeables = measurables.map {
-                    it.measure(itemConstraints)
-                }
+                val itemConstraints =
+                    constraints.copy(
+                        minWidth = itemSize,
+                        maxWidth = itemSize,
+                        minHeight = itemSize,
+                        maxHeight = itemSize,
+                    )
+                val placeables =
+                    measurables.map {
+                        it.measure(itemConstraints)
+                    }
                 layout(
                     width = constraints.maxWidth,
                     height = (rows * itemSize + (rows - 1) * space).toInt(),

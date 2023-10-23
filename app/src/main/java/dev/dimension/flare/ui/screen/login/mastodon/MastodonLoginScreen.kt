@@ -53,9 +53,7 @@ fun LoginScreenPreview() {
 
 @Destination
 @Composable
-fun MastodonLoginRoute(
-    navigator: DestinationsNavigator,
-) {
+fun MastodonLoginRoute(navigator: DestinationsNavigator) {
     MastodonLoginScreen(
         onBack = navigator::navigateUp,
     )
@@ -63,9 +61,7 @@ fun MastodonLoginRoute(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-internal fun MastodonLoginScreen(
-    onBack: () -> Unit = {},
-) {
+internal fun MastodonLoginScreen(onBack: () -> Unit = {}) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
         loginPresenter(
@@ -98,16 +94,18 @@ internal fun MastodonLoginScreen(
             },
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.8f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
@@ -122,10 +120,11 @@ internal fun MastodonLoginScreen(
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(2f)
-                        .padding(horizontal = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(2f)
+                            .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -135,11 +134,12 @@ internal fun MastodonLoginScreen(
                             Text(text = stringResource(id = R.string.mastodon_login_hint))
                         },
                         enabled = !state.loading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(
-                                focusRequester = focusRequester,
-                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .focusRequester(
+                                    focusRequester = focusRequester,
+                                ),
                         lineLimits = TextFieldLineLimits.SingleLine,
                     )
                     Button(
@@ -159,32 +159,31 @@ internal fun MastodonLoginScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun loginPresenter(
-    launchUrl: (String) -> Unit,
-) = run {
-    val hostTextState by remember {
-        mutableStateOf(TextFieldState(""))
-    }
-    var loading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-    object {
-        val hostTextState = hostTextState
-        val loading = loading
-        val error = error
+private fun loginPresenter(launchUrl: (String) -> Unit) =
+    run {
+        val hostTextState by remember {
+            mutableStateOf(TextFieldState(""))
+        }
+        var loading by remember { mutableStateOf(false) }
+        var error by remember { mutableStateOf<String?>(null) }
+        val scope = rememberCoroutineScope()
+        object {
+            val hostTextState = hostTextState
+            val loading = loading
+            val error = error
 
-        fun login() {
-            scope.launch {
-                loading = true
-                error = null
-                mastodonLoginUseCase(
-                    domain = hostTextState.text.toString(),
-                    launchOAuth = launchUrl,
-                ).onFailure {
-                    error = it.message
+            fun login() {
+                scope.launch {
+                    loading = true
+                    error = null
+                    mastodonLoginUseCase(
+                        domain = hostTextState.text.toString(),
+                        launchOAuth = launchUrl,
+                    ).onFailure {
+                        error = it.message
+                    }
+                    loading = false
                 }
-                loading = false
             }
         }
     }
-}

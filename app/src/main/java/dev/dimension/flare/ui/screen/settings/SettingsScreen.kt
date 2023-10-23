@@ -26,9 +26,7 @@ import dev.dimension.flare.ui.theme.FlareTheme
 
 @Destination
 @Composable
-fun SettingsRoute(
-    navigator: DestinationsNavigator,
-) {
+fun SettingsRoute(navigator: DestinationsNavigator) {
     SettingsScreen(
         onBack = navigator::navigateUp,
         toAccounts = {
@@ -62,9 +60,10 @@ internal fun SettingsScreen(
             },
         ) {
             Column(
-                modifier = Modifier
-                    .padding(it)
-                    .verticalScroll(rememberScrollState()),
+                modifier =
+                    Modifier
+                        .padding(it)
+                        .verticalScroll(rememberScrollState()),
             ) {
                 ListItem(
                     headlineContent = {
@@ -76,9 +75,10 @@ internal fun SettingsScreen(
                             contentDescription = null,
                         )
                     },
-                    modifier = Modifier.clickable {
-                        toAccounts.invoke()
-                    },
+                    modifier =
+                        Modifier.clickable {
+                            toAccounts.invoke()
+                        },
                 )
             }
         }
@@ -86,7 +86,8 @@ internal fun SettingsScreen(
 }
 
 @Composable
-private fun settingsPresenter() = run {
-    object {
+private fun settingsPresenter() =
+    run {
+        object {
+        }
     }
-}

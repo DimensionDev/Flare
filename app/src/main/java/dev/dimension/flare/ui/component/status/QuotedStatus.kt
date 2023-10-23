@@ -47,17 +47,18 @@ internal fun UiStatusQuoted(
             )
         }
         is UiStatus.MastodonNotification -> Unit
-        is UiStatus.Misskey -> QuotedStatus(
-            avatarUrl = status.user.avatarUrl,
-            nameElement = status.user.nameElement,
-            handle = status.user.handle,
-            contentElement = status.contentToken,
-            contentLayoutDirection = status.contentDirection,
-            medias = status.media,
-            createdAt = status.humanizedTime,
-            onMediaClick = onMediaClick,
-            modifier = modifier,
-        )
+        is UiStatus.Misskey ->
+            QuotedStatus(
+                avatarUrl = status.user.avatarUrl,
+                nameElement = status.user.nameElement,
+                handle = status.user.handle,
+                contentElement = status.contentToken,
+                contentLayoutDirection = status.contentDirection,
+                medias = status.media,
+                createdAt = status.humanizedTime,
+                onMediaClick = onMediaClick,
+                modifier = modifier,
+            )
 
         is UiStatus.MisskeyNotification -> Unit
 //        is UiStatus.Bluesky -> QuotedStatus(
@@ -92,8 +93,9 @@ internal fun QuotedStatus(
     ) {
         Column {
             Column(
-                modifier = Modifier
-                    .padding(8.dp),
+                modifier =
+                    Modifier
+                        .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Row(
@@ -105,8 +107,9 @@ internal fun QuotedStatus(
                         size = 20.dp,
                     )
                     Row(
-                        modifier = Modifier
-                            .weight(1f),
+                        modifier =
+                            Modifier
+                                .weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -118,8 +121,9 @@ internal fun QuotedStatus(
                         Text(
                             text = handle,
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier
-                                .alpha(MediumAlpha),
+                            modifier =
+                                Modifier
+                                    .alpha(MediumAlpha),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -127,8 +131,9 @@ internal fun QuotedStatus(
                     Text(
                         text = createdAt,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier
-                            .alpha(MediumAlpha),
+                        modifier =
+                            Modifier
+                                .alpha(MediumAlpha),
                         maxLines = 1,
                     )
                 }
@@ -136,16 +141,18 @@ internal fun QuotedStatus(
             }
             if (medias != null) {
                 AdaptiveGrid(
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.medium),
+                    modifier =
+                        Modifier
+                            .clip(MaterialTheme.shapes.medium),
                     content = {
                         medias.forEach { media ->
                             MediaItem(
                                 media = media,
-                                modifier = Modifier
-                                    .clickable {
-                                        onMediaClick(media)
-                                    },
+                                modifier =
+                                    Modifier
+                                        .clickable {
+                                            onMediaClick(media)
+                                        },
                             )
                         }
                     },

@@ -83,11 +83,12 @@ internal fun MisskeyStatusComponent(
 ) {
     val actualData = data.renote ?: data
     Column(
-        modifier = Modifier
-            .clickable {
-                event.onStatusClick(data)
-            }
-            .then(modifier),
+        modifier =
+            Modifier
+                .clickable {
+                    event.onStatusClick(data)
+                }
+                .then(modifier),
     ) {
         if (data.renote != null) {
             StatusRetweetHeaderComponent(
@@ -149,9 +150,10 @@ private fun StatusFooterComponent(
         mutableStateOf(false)
     }
     Row(
-        modifier = modifier
-            .padding(vertical = 4.dp)
-            .fillMaxWidth(),
+        modifier =
+            modifier
+                .padding(vertical = 4.dp)
+                .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         CompositionLocalProvider(
@@ -160,8 +162,9 @@ private fun StatusFooterComponent(
             StatusActionButton(
                 icon = Icons.Default.Reply,
                 text = actualData.matrices.humanizedReplyCount,
-                modifier = Modifier
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .weight(1f),
                 onClicked = {
                     event.onReplyClick(actualData)
                 },
@@ -169,8 +172,9 @@ private fun StatusFooterComponent(
             StatusActionButton(
                 icon = Icons.Default.SyncAlt,
                 text = actualData.matrices.humanizedReNoteCount,
-                modifier = Modifier
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .weight(1f),
                 onClicked = {
                     showRenoteMenu = !showRenoteMenu
                 },
@@ -217,14 +221,16 @@ private fun StatusFooterComponent(
                 },
             )
             StatusActionButton(
-                icon = if (actualData.reaction.myReaction != null) {
-                    Icons.Default.Remove
-                } else {
-                    Icons.Default.Add
-                },
+                icon =
+                    if (actualData.reaction.myReaction != null) {
+                        Icons.Default.Remove
+                    } else {
+                        Icons.Default.Add
+                    },
                 text = null,
-                modifier = Modifier
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .weight(1f),
                 onClicked = {
                     event.onAddReactionClick(actualData)
                 },
@@ -257,11 +263,12 @@ private fun StatusReactionComponent(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clickable {
-                            event.onReactionClick(data, reaction)
-                        }
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier =
+                        Modifier
+                            .clickable {
+                                event.onReactionClick(data, reaction)
+                            }
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     EmojiImage(
                         uri = reaction.url,
@@ -301,9 +308,10 @@ private fun StatusContentComponent(
                     },
                 ) {
                     Text(
-                        text = stringResource(
-                            if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
-                        ),
+                        text =
+                            stringResource(
+                                if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
+                            ),
                     )
                 }
             }
@@ -359,9 +367,10 @@ private fun StatusPollComponent(
                 Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
                     progress = option.percentage,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(CircleShape),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(CircleShape),
                 )
             }
         }
@@ -384,16 +393,18 @@ private fun StatusHeaderComponent(
     ) {
         VisibilityIcon(
             visibility = data.visibility,
-            modifier = Modifier
-                .size(14.dp)
-                .alpha(MediumAlpha),
+            modifier =
+                Modifier
+                    .size(14.dp)
+                    .alpha(MediumAlpha),
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = data.humanizedTime,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .alpha(MediumAlpha),
+            modifier =
+                Modifier
+                    .alpha(MediumAlpha),
         )
     }
 }
@@ -404,41 +415,56 @@ internal fun VisibilityIcon(
     modifier: Modifier = Modifier,
 ) {
     when (visibility) {
-        UiStatus.Misskey.Visibility.Public -> Icon(
-            imageVector = Icons.Default.Public,
-            contentDescription = stringResource(id = R.string.mastodon_visibility_public),
-            modifier = modifier,
-        )
+        UiStatus.Misskey.Visibility.Public ->
+            Icon(
+                imageVector = Icons.Default.Public,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_public),
+                modifier = modifier,
+            )
 
-        UiStatus.Misskey.Visibility.Home -> Icon(
-            imageVector = Icons.Default.LockOpen,
-            contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
-            modifier = modifier,
-        )
+        UiStatus.Misskey.Visibility.Home ->
+            Icon(
+                imageVector = Icons.Default.LockOpen,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
+                modifier = modifier,
+            )
 
-        UiStatus.Misskey.Visibility.Followers -> Icon(
-            imageVector = Icons.Default.Lock,
-            contentDescription = stringResource(id = R.string.mastodon_visibility_private),
-            modifier = modifier,
-        )
+        UiStatus.Misskey.Visibility.Followers ->
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_private),
+                modifier = modifier,
+            )
 
-        UiStatus.Misskey.Visibility.Specified -> Icon(
-            imageVector = Icons.Default.MailOutline,
-            contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
-            modifier = modifier,
-        )
+        UiStatus.Misskey.Visibility.Specified ->
+            Icon(
+                imageVector = Icons.Default.MailOutline,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
+                modifier = modifier,
+            )
     }
 }
 
 internal interface MisskeyStatusEvent {
     fun onStatusClick(data: UiStatus.Misskey)
+
     fun onUserClick(userKey: MicroBlogKey)
+
     fun onMediaClick(media: UiMedia)
-    fun onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.Misskey.EmojiReaction)
+
+    fun onReactionClick(
+        data: UiStatus.Misskey,
+        reaction: UiStatus.Misskey.EmojiReaction,
+    )
+
     fun onReplyClick(data: UiStatus.Misskey)
+
     fun onReblogClick(data: UiStatus.Misskey)
+
     fun onQuoteClick(data: UiStatus.Misskey)
+
     fun onAddReactionClick(data: UiStatus.Misskey)
+
     fun onMoreClick(data: UiStatus.Misskey)
 }
 
@@ -485,7 +511,10 @@ internal class DefaultMisskeyStatusEvent(
         }
     }
 
-    override fun onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.Misskey.EmojiReaction) {
+    override fun onReactionClick(
+        data: UiStatus.Misskey,
+        reaction: UiStatus.Misskey.EmojiReaction,
+    ) {
     }
 
     override fun onReplyClick(data: UiStatus.Misskey) {

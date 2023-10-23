@@ -52,7 +52,6 @@ fun TextField2(
     cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
     codepointTransformation: CodepointTransformation? = null,
-
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -65,17 +64,18 @@ fun TextField2(
     colors: TextFieldColors = TextFieldDefaults.colors(),
 ) {
     // If color is not provided via the text style, use content color as a default
-    val textColor = textStyle.color.takeOrElse {
-        with(colors) {
-            val focused by interactionSource.collectIsFocusedAsState()
-            when {
-                !enabled -> disabledTextColor
-                isError -> errorTextColor
-                focused -> focusedTextColor
-                else -> unfocusedTextColor
+    val textColor =
+        textStyle.color.takeOrElse {
+            with(colors) {
+                val focused by interactionSource.collectIsFocusedAsState()
+                when {
+                    !enabled -> disabledTextColor
+                    isError -> errorTextColor
+                    focused -> focusedTextColor
+                    else -> unfocusedTextColor
+                }
             }
         }
-    }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
     BasicTextField2(
         state = state,
@@ -92,7 +92,7 @@ fun TextField2(
         cursorBrush = cursorBrush,
         scrollState = scrollState,
         codepointTransformation = codepointTransformation,
-        decorationBox = { innerTextField ->
+        decorator = { innerTextField ->
             TextFieldDefaults.DecorationBox(
                 value = state.text.toString(),
                 visualTransformation = VisualTransformation.None,
@@ -132,7 +132,6 @@ fun OutlinedTextField2(
     cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
     codepointTransformation: CodepointTransformation? = null,
-
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -145,17 +144,18 @@ fun OutlinedTextField2(
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
 ) {
     // If color is not provided via the text style, use content color as a default
-    val textColor = textStyle.color.takeOrElse {
-        with(colors) {
-            val focused by interactionSource.collectIsFocusedAsState()
-            when {
-                !enabled -> disabledTextColor
-                isError -> errorTextColor
-                focused -> focusedTextColor
-                else -> unfocusedTextColor
+    val textColor =
+        textStyle.color.takeOrElse {
+            with(colors) {
+                val focused by interactionSource.collectIsFocusedAsState()
+                when {
+                    !enabled -> disabledTextColor
+                    isError -> errorTextColor
+                    focused -> focusedTextColor
+                    else -> unfocusedTextColor
+                }
             }
         }
-    }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
     BasicTextField2(
         state = state,
@@ -172,7 +172,7 @@ fun OutlinedTextField2(
         cursorBrush = cursorBrush,
         scrollState = scrollState,
         codepointTransformation = codepointTransformation,
-        decorationBox = { innerTextField ->
+        decorator = { innerTextField ->
             OutlinedTextFieldDefaults.DecorationBox(
                 value = state.text.toString(),
                 visualTransformation = VisualTransformation.None,
@@ -232,17 +232,18 @@ fun OutlinedSecureTextField2(
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
 ) {
     // If color is not provided via the text style, use content color as a default
-    val textColor = textStyle.color.takeOrElse {
-        with(colors) {
-            val focused by interactionSource.collectIsFocusedAsState()
-            when {
-                !enabled -> disabledTextColor
-                isError -> errorTextColor
-                focused -> focusedTextColor
-                else -> unfocusedTextColor
+    val textColor =
+        textStyle.color.takeOrElse {
+            with(colors) {
+                val focused by interactionSource.collectIsFocusedAsState()
+                when {
+                    !enabled -> disabledTextColor
+                    isError -> errorTextColor
+                    focused -> focusedTextColor
+                    else -> unfocusedTextColor
+                }
             }
         }
-    }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
     BasicSecureTextField(
         state = state,
@@ -254,7 +255,7 @@ fun OutlinedSecureTextField2(
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         scrollState = scrollState,
-        decorationBox = { innerTextField ->
+        decorator = { innerTextField ->
             OutlinedTextFieldDefaults.DecorationBox(
                 value = state.text.toString(),
                 visualTransformation = VisualTransformation.None,

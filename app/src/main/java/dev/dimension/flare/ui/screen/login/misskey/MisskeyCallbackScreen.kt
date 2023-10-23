@@ -81,16 +81,18 @@ internal fun MisskeyCallbackScreen(
     FlareTheme {
         Scaffold {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
@@ -105,10 +107,11 @@ internal fun MisskeyCallbackScreen(
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(2f)
-                        .padding(horizontal = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(2f)
+                            .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {

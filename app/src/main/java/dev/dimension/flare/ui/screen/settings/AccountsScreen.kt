@@ -37,9 +37,7 @@ import dev.dimension.flare.ui.theme.FlareTheme
 
 @Composable
 @Destination
-fun AccountsRoute(
-    navigator: DestinationsNavigator,
-) {
+fun AccountsRoute(navigator: DestinationsNavigator) {
     AccountsScreen(
         onBack = navigator::navigateUp,
         toLogin = {
@@ -132,10 +130,11 @@ private fun AccountItem(
                 headlineContent = {
                     HtmlText2(element = userState.data.nameElement)
                 },
-                modifier = modifier
-                    .clickable {
-                        onClick.invoke(userState.data.userKey)
-                    },
+                modifier =
+                    modifier
+                        .clickable {
+                            onClick.invoke(userState.data.userKey)
+                        },
                 leadingContent = {
                     AvatarComponent(data = userState.data.avatarUrl)
                 },
@@ -158,9 +157,7 @@ private fun AccountItem(
 }
 
 @Composable
-private fun AccountItemLoadingPlaceholder(
-    modifier: Modifier = Modifier,
-) {
+private fun AccountItemLoadingPlaceholder(modifier: Modifier = Modifier) {
     ListItem(
         headlineContent = {
             Text(text = "Loading...", modifier = Modifier.placeholder(true))
@@ -176,8 +173,9 @@ private fun AccountItemLoadingPlaceholder(
 }
 
 @Composable
-private fun accountsPresenter() = run {
-    remember {
-        AccountsPresenter()
-    }.invoke()
-}
+private fun accountsPresenter() =
+    run {
+        remember {
+            AccountsPresenter()
+        }.invoke()
+    }

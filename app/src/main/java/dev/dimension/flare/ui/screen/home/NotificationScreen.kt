@@ -54,9 +54,10 @@ fun NotificationScreen(
                     if (it.size > 1) {
                         item {
                             SingleChoiceSegmentedButtonRow(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = screenHorizontalPadding),
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = screenHorizontalPadding),
                             ) {
                                 it.forEachIndexed { index, notificationType ->
                                     SegmentedButton(
@@ -64,10 +65,11 @@ fun NotificationScreen(
                                         onClick = {
                                             state.state.onNotificationTypeChanged(notificationType)
                                         },
-                                        shape = SegmentedButtonDefaults.itemShape(
-                                            index = index,
-                                            count = it.size,
-                                        ),
+                                        shape =
+                                            SegmentedButtonDefaults.itemShape(
+                                                index = index,
+                                                count = it.size,
+                                            ),
                                     ) {
                                         Text(text = stringResource(id = notificationType.title))
                                     }
@@ -87,18 +89,18 @@ fun NotificationScreen(
 }
 
 private val NotificationFilter.title: Int
-    get() = when (this) {
-        NotificationFilter.All -> R.string.notification_tab_all_title
-        NotificationFilter.Mention -> R.string.notification_tab_mentions_title
-    }
+    get() =
+        when (this) {
+            NotificationFilter.All -> R.string.notification_tab_all_title
+            NotificationFilter.Mention -> R.string.notification_tab_mentions_title
+        }
 
 @Composable
-private fun notificationPresenter(
-    statusEvent: StatusEvent = rememberInject(),
-) = run {
-    val state = remember { NotificationPresenter() }.invoke()
-    object {
-        val state = state
-        val statusEvent = statusEvent
+private fun notificationPresenter(statusEvent: StatusEvent = rememberInject()) =
+    run {
+        val state = remember { NotificationPresenter() }.invoke()
+        object {
+            val state = state
+            val statusEvent = statusEvent
+        }
     }
-}

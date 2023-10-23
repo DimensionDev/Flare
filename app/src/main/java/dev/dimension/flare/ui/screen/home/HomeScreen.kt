@@ -81,11 +81,12 @@ sealed class Screen(
     data object Me : Screen("Me", R.string.home_tab_me_title, Icons.Default.AccountCircle)
 }
 
-private val items = listOf(
-    Screen.HomeTimeline,
-    Screen.Notification,
-    Screen.Me,
-)
+private val items =
+    listOf(
+        Screen.HomeTimeline,
+        Screen.Notification,
+        Screen.Me,
+    )
 
 @Composable
 @Preview(showBackground = true)
@@ -98,9 +99,7 @@ fun HomeScreenPreview() {
 
 @Destination
 @Composable
-fun HomeRoute(
-    navigator: DestinationsNavigator,
-) {
+fun HomeRoute(navigator: DestinationsNavigator) {
     HomeScreen(
         toCompose = {
             navigator.navigate(ComposeRouteDestination)
@@ -125,41 +124,49 @@ fun HomeScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val currentScreen = remember(currentDestination) {
-        items.find { it.route == currentDestination?.route }
-    }
-
-    val bottomBarHeightPx = with(LocalDensity.current) {
-        val navigationBar = WindowInsets.navigationBars
-        remember(navigationBar) {
-            80.0.dp.roundToPx().toFloat() + navigationBar.getBottom(this)
+    val currentScreen =
+        remember(currentDestination) {
+            items.find { it.route == currentDestination?.route }
         }
-    }
-    var bottomBarOffsetHeightPx by rememberSaveable { mutableFloatStateOf(0f) }
-    val nestedScrollConnection = remember(bottomBarHeightPx) {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val delta = available.y
-                val newOffset = bottomBarOffsetHeightPx + delta
-                bottomBarOffsetHeightPx = newOffset.coerceIn(-bottomBarHeightPx, 0f)
 
-                return Offset.Zero
+    val bottomBarHeightPx =
+        with(LocalDensity.current) {
+            val navigationBar = WindowInsets.navigationBars
+            remember(navigationBar) {
+                80.0.dp.roundToPx().toFloat() + navigationBar.getBottom(this)
             }
         }
-    }
+    var bottomBarOffsetHeightPx by rememberSaveable { mutableFloatStateOf(0f) }
+    val nestedScrollConnection =
+        remember(bottomBarHeightPx) {
+            object : NestedScrollConnection {
+                override fun onPreScroll(
+                    available: Offset,
+                    source: NestedScrollSource,
+                ): Offset {
+                    val delta = available.y
+                    val newOffset = bottomBarOffsetHeightPx + delta
+                    bottomBarOffsetHeightPx = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+
+                    return Offset.Zero
+                }
+            }
+        }
 
     FlareTheme {
         Scaffold(
-            modifier = modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .nestedScroll(nestedScrollConnection),
+            modifier =
+                modifier
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .nestedScroll(nestedScrollConnection),
             floatingActionButton = {
                 AnimatedVisibility(
                     currentScreen == Screen.HomeTimeline && bottomBarOffsetHeightPx > -(bottomBarHeightPx / 2),
                     enter = scaleIn(),
                     exit = scaleOut(),
-                    modifier = Modifier
-                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                    modifier =
+                        Modifier
+                            .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
                 ) {
                     FloatingActionButton(
                         onClick = {
@@ -213,9 +220,10 @@ fun HomeScreen(
                                     NetworkImage(
                                         model = user.data.avatarUrl,
                                         contentDescription = null,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .clip(CircleShape),
+                                        modifier =
+                                            Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape),
                                     )
                                 }
                             }
@@ -259,8 +267,9 @@ fun HomeScreen(
             },
             bottomBar = {
                 NavigationBar(
-                    modifier = Modifier
-                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                    modifier =
+                        Modifier
+                            .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
                 ) {
                     items.forEach { screen ->
                         NavigationBarItem(
@@ -284,8 +293,9 @@ fun HomeScreen(
             NavHost(
                 navController = navController,
                 startDestination = Screen.HomeTimeline.route,
-                modifier = Modifier
-                    .consumeWindowInsets(WindowInsets.systemBars),
+                modifier =
+                    Modifier
+                        .consumeWindowInsets(WindowInsets.systemBars),
             ) {
                 composable(Screen.HomeTimeline.route) {
                     HomeTimelineScreen(contentPadding)
@@ -297,10 +307,11 @@ fun HomeScreen(
                     when (state.user) {
                         is UiState.Error -> Unit
                         is UiState.Loading -> Unit
-                        is UiState.Success -> ProfileScreen(
-                            showTopBar = false,
-                            contentPadding = contentPadding,
-                        )
+                        is UiState.Success ->
+                            ProfileScreen(
+                                showTopBar = false,
+                                contentPadding = contentPadding,
+                            )
                     }
                 }
             }
@@ -309,6 +320,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun homePresenter() = run {
-    remember { HomePresenter() }.invoke()
-}
+private fun homePresenter() =
+    run {
+        remember { HomePresenter() }.invoke()
+    }

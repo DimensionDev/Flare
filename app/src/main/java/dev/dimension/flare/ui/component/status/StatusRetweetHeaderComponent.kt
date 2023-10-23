@@ -27,15 +27,17 @@ internal fun StatusRetweetHeaderComponent(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .alpha(MediumAlpha),
+        modifier =
+            modifier
+                .alpha(MediumAlpha),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             painter = rememberVectorPainter(image = icon),
             contentDescription = null,
-            modifier = Modifier
-                .size(16.dp),
+            modifier =
+                Modifier
+                    .size(16.dp),
         )
         if (user != null) {
             Spacer(modifier = Modifier.width(8.dp))

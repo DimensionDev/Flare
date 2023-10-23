@@ -59,9 +59,10 @@ internal fun SplashScreen(
     FlareTheme {
         Scaffold {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

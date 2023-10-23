@@ -37,23 +37,26 @@ internal fun MastodonNotificationComponent(
     modifier: Modifier = Modifier,
 ) {
     when (data.type) {
-        NotificationTypes.Follow -> MastodonFollowNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        NotificationTypes.Follow ->
+            MastodonFollowNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
 
-        NotificationTypes.Favourite -> MastodonFavouriteNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        NotificationTypes.Favourite ->
+            MastodonFavouriteNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
 
-        NotificationTypes.Reblog -> MastodonRetweetNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        NotificationTypes.Reblog ->
+            MastodonRetweetNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
 
         NotificationTypes.Mention -> {
             data.status?.let {
@@ -65,29 +68,33 @@ internal fun MastodonNotificationComponent(
             }
         }
 
-        NotificationTypes.Poll -> MastodonPollNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        NotificationTypes.Poll ->
+            MastodonPollNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
 
-        NotificationTypes.FollowRequest -> MastodonFollowRequestNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        NotificationTypes.FollowRequest ->
+            MastodonFollowRequestNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
 
-        NotificationTypes.Status -> MastodonStatusNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        NotificationTypes.Status ->
+            MastodonStatusNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
 
-        NotificationTypes.Update -> MastodonUpdateNotificationComponent(
-            data = data,
-            event = event,
-            modifier = modifier,
-        )
+        NotificationTypes.Update ->
+            MastodonUpdateNotificationComponent(
+                data = data,
+                event = event,
+                modifier = modifier,
+            )
     }
 }
 
@@ -159,32 +166,36 @@ private fun MastodonFollowRequestNotificationComponent(
         ) {
             AvatarComponent(
                 data = data.user.avatarUrl,
-                modifier = Modifier
-                    .clickable {
-                        event.onUserClick(data.user.userKey)
-                    },
+                modifier =
+                    Modifier
+                        .clickable {
+                            event.onUserClick(data.user.userKey)
+                        },
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column(
-                modifier = Modifier
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .weight(1f),
             ) {
                 HtmlText2(
                     element = data.user.nameElement,
                     layoutDirection = data.user.nameDirection,
-                    modifier = Modifier
-                        .clickable {
-                            event.onUserClick(data.user.userKey)
-                        },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                event.onUserClick(data.user.userKey)
+                            },
                 )
                 Text(
                     text = data.user.handle,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .alpha(MediumAlpha)
-                        .clickable {
-                            event.onUserClick(data.user.userKey)
-                        },
+                    modifier =
+                        Modifier
+                            .alpha(MediumAlpha)
+                            .clickable {
+                                event.onUserClick(data.user.userKey)
+                            },
                 )
             }
         }
@@ -284,32 +295,36 @@ private fun MastodonFollowNotificationComponent(
         ) {
             AvatarComponent(
                 data = data.user.avatarUrl,
-                modifier = Modifier
-                    .clickable {
-                        event.onUserClick(data.user.userKey)
-                    },
+                modifier =
+                    Modifier
+                        .clickable {
+                            event.onUserClick(data.user.userKey)
+                        },
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column(
-                modifier = Modifier
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .weight(1f),
             ) {
                 HtmlText2(
                     element = data.user.nameElement,
                     layoutDirection = data.user.nameDirection,
-                    modifier = Modifier
-                        .clickable {
-                            event.onUserClick(data.user.userKey)
-                        },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                event.onUserClick(data.user.userKey)
+                            },
                 )
                 Text(
                     text = data.user.handle,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .alpha(MediumAlpha)
-                        .clickable {
-                            event.onUserClick(data.user.userKey)
-                        },
+                    modifier =
+                        Modifier
+                            .alpha(MediumAlpha)
+                            .clickable {
+                                event.onUserClick(data.user.userKey)
+                            },
                 )
             }
         }

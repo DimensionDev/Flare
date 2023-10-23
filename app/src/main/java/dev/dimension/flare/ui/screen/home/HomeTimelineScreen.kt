@@ -37,9 +37,7 @@ import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun HomeTimelineScreen(
-    contentPadding: PaddingValues,
-) {
+internal fun HomeTimelineScreen(contentPadding: PaddingValues) {
     val state by producePresenter {
         homeTimelinePresenter()
     }
@@ -58,8 +56,9 @@ internal fun HomeTimelineScreen(
 
     val scope = rememberCoroutineScope()
     RefreshContainer(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier =
+            Modifier
+                .fillMaxSize(),
         onRefresh = state.state::refresh,
         refreshing = state.state.refreshing,
         indicatorPadding = contentPadding,
@@ -105,12 +104,11 @@ internal fun HomeTimelineScreen(
 }
 
 @Composable
-private fun homeTimelinePresenter(
-    statusEvent: StatusEvent = rememberInject(),
-) = run {
-    val state = remember { HomeTimelinePresenter() }.invoke()
-    object {
-        val state = state
-        val statusEvent = statusEvent
+private fun homeTimelinePresenter(statusEvent: StatusEvent = rememberInject()) =
+    run {
+        val state = remember { HomeTimelinePresenter() }.invoke()
+        object {
+            val state = state
+            val statusEvent = statusEvent
+        }
     }
-}

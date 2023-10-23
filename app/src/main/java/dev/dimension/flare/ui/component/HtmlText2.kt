@@ -62,28 +62,33 @@ fun HtmlText2(
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val handler = LocalUriHandler.current
-    val context = remember(element) {
-        RenderContext(
-            RichTextStyle(
-                stringStyle = RichTextStringStyle(
-                    linkStyle = SpanStyle(
-                        color = primaryColor,
-                    ),
+    val context =
+        remember(element) {
+            RenderContext(
+                RichTextStyle(
+                    stringStyle =
+                        RichTextStringStyle(
+                            linkStyle =
+                                SpanStyle(
+                                    color = primaryColor,
+                                ),
+                        ),
+                    codeBlockStyle =
+                        CodeBlockStyle(
+                            modifier =
+                                Modifier
+                                    .background(Color.LightGray.copy(alpha = .5f))
+                                    .fillMaxWidth(),
+                        ),
                 ),
-                codeBlockStyle = CodeBlockStyle(
-                    modifier = Modifier
-                        .background(Color.LightGray.copy(alpha = .5f))
-                        .fillMaxWidth(),
-                ),
-            ),
-            overflow = overflow,
-            softWrap = softWrap,
-            maxLines = maxLines,
-            onLinkClick = {
-                handler.openUri(it)
-            },
-        )
-    }
+                overflow = overflow,
+                softWrap = softWrap,
+                maxLines = maxLines,
+                onLinkClick = {
+                    handler.openUri(it)
+                },
+            )
+        }
     ProvideTextStyle(value = textStyle) {
         CompositionLocalProvider(
             LocalLayoutDirection provides layoutDirection,
@@ -100,20 +105,19 @@ fun HtmlText2(
     }
 }
 
-private val blockElementName = listOf(
-    "center",
-    "blockquote",
-    "search",
-    "body",
-    "pre",
-)
+private val blockElementName =
+    listOf(
+        "center",
+        "blockquote",
+        "search",
+        "body",
+        "pre",
+    )
 
 context (RichTextScope, Element)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun RenderElement(
-    context: RenderContext,
-) {
+private fun RenderElement(context: RenderContext) {
     // check if element is a block element
     if (name in blockElementName) {
         with(context) {
@@ -160,11 +164,12 @@ private fun RenderElement(
 
         "search" -> {
             OutlinedTextField2(
-                state = rememberSaveable(
-                    saver = TextFieldState.Saver,
-                ) {
-                    TextFieldState(innerText)
-                },
+                state =
+                    rememberSaveable(
+                        saver = TextFieldState.Saver,
+                    ) {
+                        TextFieldState(innerText)
+                    },
                 readOnly = true,
                 trailingIcon = {
                     IconButton(onClick = {
@@ -281,8 +286,9 @@ private fun RenderElement(
                     ) {
                         EmojiImage(
                             uri = src,
-                            modifier = Modifier
-                                .height(LocalTextStyle.current.fontSize.value.dp),
+                            modifier =
+                                Modifier
+                                    .height(LocalTextStyle.current.fontSize.value.dp),
                         )
                     },
                 )
@@ -325,9 +331,10 @@ fun CenterRichText(
     with(RichTextScope) {
         WithStyle(style) {
             val resolvedStyle = currentRichTextStyle.resolveDefaults()
-            val blockSpacing = with(LocalDensity.current) {
-                resolvedStyle.paragraphSpacing!!.toDp()
-            }
+            val blockSpacing =
+                with(LocalDensity.current) {
+                    resolvedStyle.paragraphSpacing!!.toDp()
+                }
 
             Column(
                 modifier = modifier,
@@ -342,9 +349,7 @@ fun CenterRichText(
 
 context (RichTextScope, Node)
 @Composable
-private fun RenderNode(
-    context: RenderContext,
-) {
+private fun RenderNode(context: RenderContext) {
     when (this@Node) {
         is Element -> RenderElement(context)
         is Text -> {
@@ -374,9 +379,7 @@ private class RenderContext(
 
     context (RichTextScope)
     @Composable
-    fun RenderTextAndReset(
-        modifier: Modifier = Modifier,
-    ) {
+    fun RenderTextAndReset(modifier: Modifier = Modifier) {
         getTextAndReset()?.let {
             Text(
                 text = it,

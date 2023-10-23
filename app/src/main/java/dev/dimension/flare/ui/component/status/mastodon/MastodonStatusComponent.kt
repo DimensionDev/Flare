@@ -74,46 +74,48 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun StatusPlaceholder(
-    modifier: Modifier = Modifier,
-) {
+internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .placeholder(true),
+                modifier =
+                    Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .placeholder(true),
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(
                     text = "Placeholder",
-                    modifier = Modifier
-                        .placeholder(true),
+                    modifier =
+                        Modifier
+                            .placeholder(true),
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "username@Placeholder",
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .alpha(MediumAlpha)
-                        .placeholder(true),
-
+                    modifier =
+                        Modifier
+                            .alpha(MediumAlpha)
+                            .placeholder(true),
                 )
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget ultricies ultrices, nisl nisl aliquet nisl, nec aliquam nisl nisl nec.",
-            modifier = Modifier
-                .placeholder(true),
+            modifier =
+                Modifier
+                    .placeholder(true),
         )
     }
 }
@@ -126,11 +128,12 @@ internal fun MastodonStatusComponent(
 ) {
     val actualData = data.reblogStatus ?: data
     Column(
-        modifier = Modifier
-            .clickable {
-                event.onStatusClick(data)
-            }
-            .then(modifier),
+        modifier =
+            Modifier
+                .clickable {
+                    event.onStatusClick(data)
+                }
+                .then(modifier),
     ) {
         if (data.reblogStatus != null) {
             StatusRetweetHeaderComponent(
@@ -179,11 +182,12 @@ private fun StatusCardComponent(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        uriHandler.openUri(card.url)
-                    },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            uriHandler.openUri(card.url)
+                        },
             ) {
                 card.media?.let {
                     MediaItem(
@@ -192,16 +196,18 @@ private fun StatusCardComponent(
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .padding(8.dp),
+                    modifier =
+                        Modifier
+                            .padding(8.dp),
                 ) {
                     Text(text = card.title)
                     card.description?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier
-                                .alpha(MediumAlpha),
+                            modifier =
+                                Modifier
+                                    .alpha(MediumAlpha),
                         )
                     }
                 }
@@ -218,9 +224,10 @@ private fun StatusFooterComponent(
 ) {
     val actualData = data.reblogStatus ?: data
     Row(
-        modifier = modifier
-            .padding(vertical = 4.dp)
-            .fillMaxWidth(),
+        modifier =
+            modifier
+                .padding(vertical = 4.dp)
+                .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         CompositionLocalProvider(
@@ -229,8 +236,9 @@ private fun StatusFooterComponent(
             StatusActionButton(
                 icon = Icons.Default.Reply,
                 text = actualData.matrices.humanizedReplyCount,
-                modifier = Modifier
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .weight(1f),
                 onClicked = {
                     event.onReplyClick(actualData)
                 },
@@ -238,34 +246,39 @@ private fun StatusFooterComponent(
             StatusActionButton(
                 icon = Icons.Default.SyncAlt,
                 text = actualData.matrices.humanizedReblogCount,
-                modifier = Modifier
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .weight(1f),
                 onClicked = {
                     event.onReblogClick(actualData)
                 },
-                color = if (actualData.reaction.reblogged) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    LocalContentColor.current
-                },
+                color =
+                    if (actualData.reaction.reblogged) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        LocalContentColor.current
+                    },
             )
             StatusActionButton(
-                icon = if (actualData.reaction.liked) {
-                    Icons.Default.Favorite
-                } else {
-                    Icons.Default.FavoriteBorder
-                },
+                icon =
+                    if (actualData.reaction.liked) {
+                        Icons.Default.Favorite
+                    } else {
+                        Icons.Default.FavoriteBorder
+                    },
                 text = actualData.matrices.humanizedFavouriteCount,
-                modifier = Modifier
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .weight(1f),
                 onClicked = {
                     event.onLikeClick(actualData)
                 },
-                color = if (actualData.reaction.liked) {
-                    Color.Red
-                } else {
-                    LocalContentColor.current
-                },
+                color =
+                    if (actualData.reaction.liked) {
+                        Color.Red
+                    } else {
+                        LocalContentColor.current
+                    },
             )
             StatusActionButton(
                 icon = Icons.Default.MoreHoriz,
@@ -302,9 +315,10 @@ private fun StatusContentComponent(
                     },
                 ) {
                     Text(
-                        text = stringResource(
-                            if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
-                        ),
+                        text =
+                            stringResource(
+                                if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
+                            ),
                     )
                 }
             }
@@ -360,9 +374,10 @@ private fun StatusPollComponent(
                 Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
                     progress = option.percentage,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(CircleShape),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(CircleShape),
                 )
             }
         }
@@ -385,16 +400,18 @@ private fun StatusHeaderComponent(
     ) {
         VisibilityIcon(
             visibility = data.visibility,
-            modifier = Modifier
-                .size(14.dp)
-                .alpha(MediumAlpha),
+            modifier =
+                Modifier
+                    .size(14.dp)
+                    .alpha(MediumAlpha),
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = data.humanizedTime,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .alpha(MediumAlpha),
+            modifier =
+                Modifier
+                    .alpha(MediumAlpha),
         )
     }
 }
@@ -405,42 +422,55 @@ internal fun VisibilityIcon(
     modifier: Modifier = Modifier,
 ) {
     when (visibility) {
-        UiStatus.Mastodon.Visibility.Public -> Icon(
-            imageVector = Icons.Default.Public,
-            contentDescription = stringResource(id = R.string.mastodon_visibility_public),
-            modifier = modifier,
-        )
+        UiStatus.Mastodon.Visibility.Public ->
+            Icon(
+                imageVector = Icons.Default.Public,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_public),
+                modifier = modifier,
+            )
 
-        UiStatus.Mastodon.Visibility.Unlisted -> Icon(
-            imageVector = Icons.Default.LockOpen,
-            contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
-            modifier = modifier,
-        )
+        UiStatus.Mastodon.Visibility.Unlisted ->
+            Icon(
+                imageVector = Icons.Default.LockOpen,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
+                modifier = modifier,
+            )
 
-        UiStatus.Mastodon.Visibility.Private -> Icon(
-            imageVector = Icons.Default.Lock,
-            contentDescription = stringResource(id = R.string.mastodon_visibility_private),
-            modifier = modifier,
-        )
+        UiStatus.Mastodon.Visibility.Private ->
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_private),
+                modifier = modifier,
+            )
 
-        UiStatus.Mastodon.Visibility.Direct -> Icon(
-            imageVector = Icons.Default.MailOutline,
-            contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
-            modifier = modifier,
-        )
+        UiStatus.Mastodon.Visibility.Direct ->
+            Icon(
+                imageVector = Icons.Default.MailOutline,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
+                modifier = modifier,
+            )
     }
 }
 
 internal interface MastodonStatusEvent {
     fun onUserClick(userKey: MicroBlogKey)
+
     fun onStatusClick(status: UiStatus.Mastodon)
+
     fun onStatusLongClick(status: UiStatus.Mastodon)
+
     fun onReplyClick(status: UiStatus.Mastodon)
+
     fun onReblogClick(status: UiStatus.Mastodon)
+
     fun onLikeClick(status: UiStatus.Mastodon)
+
     fun onBookmarkClick(status: UiStatus.Mastodon)
+
     fun onMediaClick(media: UiMedia)
+
     fun onShowMoreClick(status: UiStatus.Mastodon)
+
     fun onMoreClick(status: UiStatus.Mastodon)
 }
 

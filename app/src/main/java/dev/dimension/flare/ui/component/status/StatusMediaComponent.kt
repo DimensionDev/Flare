@@ -18,16 +18,18 @@ internal fun StatusMediaComponent(
     modifier: Modifier = Modifier,
 ) {
     AdaptiveGrid(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.medium),
+        modifier =
+            modifier
+                .clip(MaterialTheme.shapes.medium),
         content = {
             data.forEach { media ->
                 MediaItem(
                     media = media,
-                    modifier = Modifier
-                        .clickable {
-                            onMediaClick(media)
-                        },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                onMediaClick(media)
+                            },
                 )
             }
         },

@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.screen.NavGraphs
 
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -56,33 +57,35 @@ fun Content(
         navGraph = NavGraphs.root,
         modifier = modifier,
         navController = navController,
-        engine = rememberAnimatedNavHostEngine(
-            rootDefaultAnimations = RootNavGraphDefaultAnimations(
-                enterTransition = {
-                    slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Left,
-                        initialOffset = { it / 4 },
-                    ) + fadeIn()
-                },
-                exitTransition = {
-                    slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Left,
-                        targetOffset = { it / 4 },
-                    ) + fadeOut()
-                },
-                popEnterTransition = {
-                    slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Right,
-                        initialOffset = { it / 4 },
-                    ) + fadeIn()
-                },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Right,
-                        targetOffset = { it / 4 },
-                    ) + fadeOut()
-                },
+        engine =
+            rememberAnimatedNavHostEngine(
+                rootDefaultAnimations =
+                    RootNavGraphDefaultAnimations(
+                        enterTransition = {
+                            slideIntoContainer(
+                                AnimatedContentTransitionScope.SlideDirection.Left,
+                                initialOffset = { it / 4 },
+                            ) + fadeIn()
+                        },
+                        exitTransition = {
+                            slideOutOfContainer(
+                                AnimatedContentTransitionScope.SlideDirection.Left,
+                                targetOffset = { it / 4 },
+                            ) + fadeOut()
+                        },
+                        popEnterTransition = {
+                            slideIntoContainer(
+                                AnimatedContentTransitionScope.SlideDirection.Right,
+                                initialOffset = { it / 4 },
+                            ) + fadeIn()
+                        },
+                        popExitTransition = {
+                            slideOutOfContainer(
+                                AnimatedContentTransitionScope.SlideDirection.Right,
+                                targetOffset = { it / 4 },
+                            ) + fadeOut()
+                        },
+                    ),
             ),
-        ),
     )
 }

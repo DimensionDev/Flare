@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model
 
+import app.bsky.notification.ListNotificationsReason
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
@@ -97,20 +98,20 @@ sealed class UiStatus {
                 }
             }
 
-//            is Bluesky -> buildString {
-//                append("bluesky")
-//                if (repostBy != null) append("_reblog")
-//                if (medias.isNotEmpty()) append("_media")
-//                if (quote != null) {
-//                    append("_quote")
-//                    append("_${quote.itemType}")
-//                }
-//            }
-//
-//            is BlueskyNotification -> buildString {
-//                append("bluesky_notification")
-//                append("_${reason.lowercase()}")
-//            }
+            is Bluesky -> buildString {
+                append("bluesky")
+                if (repostBy != null) append("_reblog")
+                if (medias.isNotEmpty()) append("_media")
+                if (quote != null) {
+                    append("_quote")
+                    append("_${quote.itemType}")
+                }
+            }
+
+            is BlueskyNotification -> buildString {
+                append("bluesky_notification")
+                append("_${reason.name.lowercase()}")
+            }
         }
     }
 
@@ -286,58 +287,61 @@ sealed class UiStatus {
         }
     }
 
-//    data class Bluesky(
-//        override val accountKey: MicroBlogKey,
-//        override val statusKey: MicroBlogKey,
-//        val user: UiUser.Bluesky,
-//        val indexedAt: Instant,
-//        val repostBy: UiUser.Bluesky?,
-//        val quote: Bluesky?,
-//        val content: String,
-//        val medias: ImmutableList<UiMedia>,
-//        val card: UiCard?,
-//        val matrices: Matrices,
-//        val reaction: Reaction,
-//    ) : UiStatus() {
-//        val humanizedTime by lazy {
-//            indexedAt.humanize()
-//        }
-//        data class Matrices(
-//            val replyCount: Long,
-//            val likeCount: Long,
-//            val repostCount: Long,
-//        ) {
-//            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
-//            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
-//            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.toString() else null }
-//        }
-//        data class Reaction(
-//            val liked: Boolean,
-//            val reposted: Boolean,
-//        )
-//
-//        override val itemKey: String by lazy {
-//            statusKey.toString() + repostBy?.let { "_reblog_${it.userKey}" }.orEmpty()
-//        }
-//    }
-//
-//    data class BlueskyNotification(
-//        override val statusKey: MicroBlogKey,
-//        override val accountKey: MicroBlogKey,
-//        val user: UiUser.Bluesky,
-//        /**
-//         * Expected values are 'like', 'repost', 'follow', 'mention', 'reply', and 'quote'.
-//         */
-//        val reason: String,
-//        val indexedAt: Instant,
-//    ) : UiStatus() {
-//        override val itemKey: String by lazy {
-//            statusKey.toString() + "_${user.userKey}"
-//        }
-//        val humanizedTime by lazy {
-//            indexedAt.humanize()
-//        }
-//    }
+    data class Bluesky(
+        override val accountKey: MicroBlogKey,
+        override val statusKey: MicroBlogKey,
+        val user: UiUser.Bluesky,
+        val indexedAt: Instant,
+        val repostBy: UiUser.Bluesky?,
+        val quote: Bluesky?,
+        val content: String,
+        val medias: ImmutableList<UiMedia>,
+        val card: UiCard?,
+        val matrices: Matrices,
+        val reaction: Reaction,
+    ) : UiStatus() {
+        val humanizedTime by lazy {
+            indexedAt.humanize()
+        }
+        val contentToken by lazy {
+            misskeyParser.parse(content).toHtml(accountKey.host)
+        }
+        data class Matrices(
+            val replyCount: Long,
+            val likeCount: Long,
+            val repostCount: Long,
+        ) {
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
+            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
+            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.toString() else null }
+        }
+        data class Reaction(
+            val liked: Boolean,
+            val reposted: Boolean,
+        )
+
+        override val itemKey: String by lazy {
+            statusKey.toString() + repostBy?.let { "_reblog_${it.userKey}" }.orEmpty()
+        }
+    }
+
+    data class BlueskyNotification(
+        override val statusKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
+        val user: UiUser.Bluesky,
+        /**
+         * Expected values are 'like', 'repost', 'follow', 'mention', 'reply', and 'quote'.
+         */
+        val reason: ListNotificationsReason,
+        val indexedAt: Instant,
+    ) : UiStatus() {
+        override val itemKey: String by lazy {
+            statusKey.toString() + "_${user.userKey}"
+        }
+        val humanizedTime by lazy {
+            indexedAt.humanize()
+        }
+    }
 }
 
 

@@ -55,5 +55,26 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
                 LayoutDirection.Rtl
             },
         )
+
+        is UiUser.Bluesky -> UiUserExtra(
+            nameDirection = if (Bidi(
+                    user.name,
+                    Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
+                ).baseIsLeftToRight()
+            ) {
+                LayoutDirection.Ltr
+            } else {
+                LayoutDirection.Rtl
+            },
+            descriptionDirection = if (Bidi(
+                    user.description ?: "",
+                    Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
+                ).baseIsLeftToRight()
+            ) {
+                LayoutDirection.Ltr
+            } else {
+                LayoutDirection.Rtl
+            },
+        )
     }
 }

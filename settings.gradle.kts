@@ -12,6 +12,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven("https://jitpack.io")
         maven("https://androidx.dev/storage/compose-compiler/repository/")
+        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 

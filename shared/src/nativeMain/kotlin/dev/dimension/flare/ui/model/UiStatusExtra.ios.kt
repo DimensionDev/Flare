@@ -18,6 +18,8 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
             is UiStatus.MastodonNotification -> ""
             is UiStatus.Misskey -> status.contentToken.toMarkdown()
             is UiStatus.MisskeyNotification -> ""
+            is UiStatus.Bluesky -> status.contentToken.toMarkdown()
+            is UiStatus.BlueskyNotification -> ""
         }
     )
 }

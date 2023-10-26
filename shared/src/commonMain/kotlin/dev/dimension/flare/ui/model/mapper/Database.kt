@@ -24,16 +24,16 @@ internal fun DbPagingTimelineWithStatusView.toUi(): UiStatus {
         is StatusContent.MisskeyNotification -> status.data.toUi(
             accountKey = timeline_account_key,
         )
-//        is StatusContent.Bluesky -> status.data.toUi(
-//            accountKey = timeline.accountKey,
-//        )
-//        is StatusContent.BlueskyNotification -> status.data.toUi(
-//            accountKey = timeline.accountKey,
-//        )
-//        is StatusContent.BlueskyReason -> status.data.toUi(
-//            accountKey = timeline.accountKey,
-//            data = this,
-//        )
+        is StatusContent.Bluesky -> status.data.toUi(
+            accountKey = timeline_account_key,
+        )
+        is StatusContent.BlueskyNotification -> status.data.toUi(
+            accountKey = timeline_account_key,
+        )
+        is StatusContent.BlueskyReason -> status.reason.toUi(
+            accountKey = timeline_account_key,
+            data = status.data,
+        )
     }
 }
 
@@ -48,11 +48,11 @@ internal fun DbUser.toUi(): UiUser {
         is UserContent.MisskeyLite -> user.data.toUi(
             accountHost = user_key.host,
         )
-//        is UserContent.Bluesky -> user.data.toUi(
-//            accountHost = userKey.host,
-//        )
-//        is UserContent.BlueskyLite -> user.data.toUi(
-//            accountHost = userKey.host,
-//        )
+        is UserContent.Bluesky -> user.data.toUi(
+            accountHost = user_key.host,
+        )
+        is UserContent.BlueskyLite -> user.data.toUi(
+            accountHost = user_key.host,
+        )
     }
 }

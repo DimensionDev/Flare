@@ -5,6 +5,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
 import moe.tlaster.ktml.Ktml
 import moe.tlaster.ktml.dom.Element
+import moe.tlaster.ktml.dom.Text
 
 expect class UiUserExtra
 
@@ -86,28 +87,38 @@ sealed class UiUser {
         }
     }
 
-//    data class Bluesky(
-//        override val userKey: MicroBlogKey,
-//        val name: String,
-//        val handleInternal: String,
-//        override val avatarUrl: String,
-//        val bannerUrl: String?,
-//        val description: String?,
-//        val matrices: Matrices,
-//        val relation: UiRelation.Bluesky,
-//    ) : UiUser {
-//
-//        override val handle: String = "@$handleInternal"
-//        data class Matrices(
-//            val fansCount: Long,
-//            val followsCount: Long,
-//            val statusesCount: Long,
-//        ) {
-//            val fansCountHumanized = fansCount.humanize()
-//            val followsCountHumanized = followsCount.humanize()
-//            val statusesCountHumanized = statusesCount.humanize()
-//        }
-//    }
+    data class Bluesky(
+        override val userKey: MicroBlogKey,
+        val name: String,
+        val handleInternal: String,
+        override val avatarUrl: String,
+        val bannerUrl: String?,
+        val description: String?,
+        val matrices: Matrices,
+        val relation: UiRelation.Bluesky,
+        internal val accountHost: String,
+    ) : UiUser() {
+
+        override val nameElement by lazy {
+            Element("span").apply {
+                children.add(Text(name))
+            }
+        }
+
+        val descriptionElement by lazy {
+            parseDescription(description, accountHost)
+        }
+        override val handle: String = "@$handleInternal"
+        data class Matrices(
+            val fansCount: Long,
+            val followsCount: Long,
+            val statusesCount: Long,
+        ) {
+            val fansCountHumanized = fansCount.humanize()
+            val followsCountHumanized = followsCount.humanize()
+            val statusesCountHumanized = statusesCount.humanize()
+        }
+    }
 }
 
 

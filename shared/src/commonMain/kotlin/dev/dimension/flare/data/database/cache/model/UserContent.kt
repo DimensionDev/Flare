@@ -1,5 +1,7 @@
 package dev.dimension.flare.data.database.cache.model
 
+import app.bsky.actor.ProfileViewBasic
+import app.bsky.actor.ProfileViewDetailed
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -21,16 +23,16 @@ sealed interface UserContent {
     data class MisskeyLite(
         val data: dev.dimension.flare.data.network.misskey.api.model.UserLite,
     ) : UserContent
-//
-//    @Serializable
-//    @SerialName("Bluesky")
-//    data class Bluesky(
-//        val data: ProfileViewDetailed,
-//    ) : UserContent
-//
-//    @Serializable
-//    @SerialName("BlueskyLite")
-//    data class BlueskyLite(
-//        val data: ProfileViewBasic,
-//    ) : UserContent
+
+    @Serializable
+    @SerialName("Bluesky")
+    data class Bluesky(
+        val data: ProfileViewDetailed,
+    ) : UserContent
+
+    @Serializable
+    @SerialName("BlueskyLite")
+    data class BlueskyLite(
+        val data: ProfileViewBasic,
+    ) : UserContent
 }

@@ -440,11 +440,11 @@ private fun ProfileHeaderSuccess(
             )
         }
 
-//        is UiUser.Bluesky -> BlueskyProfileHeader(
-//            user = user,
-//            relationState = relationState,
-//            modifier = modifier,
-//        )
+        is UiUser.Bluesky -> BlueskyProfileHeader(
+            user = user,
+            relationState = relationState,
+            modifier = modifier,
+        )
     }
 }
 

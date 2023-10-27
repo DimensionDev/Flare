@@ -44,10 +44,12 @@ sqliter-driver = "1.2.3"
 skie = "0.5.0"
 compose-jb = "1.5.3"
 kermit = "2.0.2"
-ktml = "0.0.4"
+ktml = "0.0.5-SNAPSHOT"
 versionUpdate = "0.49.0"
+bluesky = "0.0.1-SNAPSHOT"
 
 [libraries]
+bluesky = { module = "moe.tlaster:bluesky", version.ref = "bluesky" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
@@ -125,9 +127,7 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 
 zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.1" }
 
-bluesky-binding = "sh.christian.ozone:bluesky:0.0.2"
-
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.1"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.1-SNAPSHOT"
 
 compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
 compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }

@@ -14,6 +14,9 @@ import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.datasource.MicroblogDataSource
+import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
+import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
@@ -101,13 +104,19 @@ fun accountServiceProvider(
     return remember(account.accountKey) {
         when (account) {
             is UiAccount.Mastodon -> {
-                dev.dimension.flare.data.datasource.mastodon.MastodonDataSource(
+                MastodonDataSource(
                     account = account,
                 )
             }
 
             is UiAccount.Misskey -> {
-                dev.dimension.flare.data.datasource.misskey.MisskeyDataSource(
+                MisskeyDataSource(
+                    account = account,
+                )
+            }
+
+            is UiAccount.Bluesky -> {
+                BlueskyDataSource(
                     account = account,
                 )
             }

@@ -54,5 +54,22 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
         is UiStatus.MisskeyNotification -> {
             UiStatusExtra.Empty
         }
+
+        is UiStatus.Bluesky -> {
+            UiStatusExtra(
+                contentDirection = if (Bidi(
+                        status.content,
+                        Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
+                    ).baseIsLeftToRight()
+                ) {
+                    LayoutDirection.Ltr
+                } else {
+                    LayoutDirection.Rtl
+                },
+            )
+        }
+        is UiStatus.BlueskyNotification -> {
+            UiStatusExtra.Empty
+        }
     }
 }

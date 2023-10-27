@@ -16,10 +16,12 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
         nameMarkdown = when (user) {
             is UiUser.Mastodon -> user.nameElement.toMarkdown()
             is UiUser.Misskey -> user.nameElement.toMarkdown()
+            is UiUser.Bluesky -> user.nameElement.toMarkdown()
         },
         descriptionMarkdown = when (user) {
             is UiUser.Mastodon -> user.descriptionElement?.toMarkdown()
             is UiUser.Misskey -> user.descriptionElement?.toMarkdown()
+            is UiUser.Bluesky -> user.descriptionElement?.toMarkdown()
         },
     )
 }

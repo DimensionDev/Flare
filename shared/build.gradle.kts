@@ -12,6 +12,7 @@ plugins {
 
 kotlin {
     targetHierarchy.default()
+//    mingwX64()
 
     androidTarget()
 
@@ -43,6 +44,7 @@ kotlin {
                 api(libs.paging.compose.common)
                 implementation(libs.ktml)
                 implementation(libs.mfm.multiplatform)
+                api(libs.bluesky)
             }
         }
         val androidMain by getting {

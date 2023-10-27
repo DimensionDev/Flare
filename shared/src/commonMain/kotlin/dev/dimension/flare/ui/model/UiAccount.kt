@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.DbAccount
+import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.model.MicroBlogKey
@@ -55,20 +56,24 @@ sealed interface UiAccount {
         }
     }
 
-//    data class Bluesky(
-//        override val credential: Credential,
-//        override val accountKey: MicroBlogKey,
-//    ) : UiAccount {
-//        override val platformType: PlatformType
-//            get() = PlatformType.Bluesky
-//        @Serializable
-//        @SerialName("BlueskyCredential")
-//        data class Credential(
-//            val baseUrl: String,
-//            val accessToken: String,
-//            val refreshToken: String,
-//        ): UiAccount.Credential
-//    }
+    data class Bluesky(
+        override val credential: Credential,
+        override val accountKey: MicroBlogKey,
+    ) : UiAccount {
+        override val platformType: PlatformType
+            get() = PlatformType.Bluesky
+        @Serializable
+        @SerialName("BlueskyCredential")
+        data class Credential(
+            val baseUrl: String,
+            val accessToken: String,
+            val refreshToken: String,
+        ): UiAccount.Credential
+
+        val dataSource by lazy {
+            BlueskyDataSource(this)
+        }
+    }
 
     companion object {
         fun DbAccount.toUi(): UiAccount = when (platform_type) {
@@ -88,13 +93,13 @@ sealed interface UiAccount {
                 )
             }
 
-//            PlatformType.Bluesky -> {
-//                val credential = credential_json.decodeJson<Bluesky.Credential>()
-//                Bluesky(
-//                    credential = credential,
-//                    accountKey = account_key,
-//                )
-//            }
+            PlatformType.Bluesky -> {
+                val credential = credential_json.decodeJson<Bluesky.Credential>()
+                Bluesky(
+                    credential = credential,
+                    accountKey = account_key,
+                )
+            }
         }
     }
 }

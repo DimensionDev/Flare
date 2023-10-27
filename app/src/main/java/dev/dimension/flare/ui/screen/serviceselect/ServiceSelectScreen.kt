@@ -44,6 +44,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.screen.destinations.BlueskyLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MastodonLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MisskeyLoginRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -64,7 +65,7 @@ fun ServiceSelectRoute(navigator: DestinationsNavigator) {
             navigator.navigate(MisskeyLoginRouteDestination)
         },
         toBluesky = {
-//            navigator.navigate(BlueskyLoginRouteDestination)
+            navigator.navigate(BlueskyLoginRouteDestination)
         },
         onBack = navigator::navigateUp,
     )

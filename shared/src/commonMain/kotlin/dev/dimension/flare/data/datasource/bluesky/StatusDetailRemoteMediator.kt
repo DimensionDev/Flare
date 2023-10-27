@@ -78,7 +78,7 @@ package dev.dimension.flare.data.datasource.bluesky
                     else -> emptyList()
                 }
             }
-            Bluesky.save(
+            Bluesky.savePost(
                 accountKey,
                 pagingKey,
                 database,

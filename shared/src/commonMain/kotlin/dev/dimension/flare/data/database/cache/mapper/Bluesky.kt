@@ -17,7 +17,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 
 object Bluesky {
-    fun save(
+    fun saveFeed(
         accountKey: MicroBlogKey,
         pagingKey: String,
         database: CacheDatabase,
@@ -30,7 +30,7 @@ object Bluesky {
         save(database, timeline, status, user)
     }
 
-    fun save(
+    fun saveNotification(
         accountKey: MicroBlogKey,
         pagingKey: String,
         database: CacheDatabase,
@@ -42,7 +42,7 @@ object Bluesky {
         save(database, timeline, status, user)
     }
 
-    fun save(
+    fun savePost(
         accountKey: MicroBlogKey,
         pagingKey: String,
         database: CacheDatabase,

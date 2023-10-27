@@ -1,41 +1,40 @@
 package dev.dimension.flare.data.network.bluesky
 
- import com.atproto.server.RefreshSessionResponse
- import com.moriatsushi.koject.inject
- import dev.dimension.flare.common.JSON
- import dev.dimension.flare.data.database.app.AppDatabase
- import dev.dimension.flare.data.database.app.dao.AccountDao
- import dev.dimension.flare.data.network.ktorClient
- import dev.dimension.flare.data.repository.app.UiAccount
- import dev.dimension.flare.data.repository.app.UiAccount.Companion.toUi
- import dev.dimension.flare.data.repository.app.updateBlueskyTokenUseCase
- import dev.dimension.flare.model.MicroBlogKey
- import dev.dimension.flare.ui.model.UiAccount
- import io.ktor.client.HttpClient
- import io.ktor.client.call.HttpClientCall
- import io.ktor.client.call.body
- import io.ktor.client.call.save
- import io.ktor.client.plugins.DefaultRequest
- import io.ktor.client.plugins.HttpClientPlugin
- import io.ktor.client.plugins.HttpSend
- import io.ktor.client.plugins.plugin
- import io.ktor.client.request.bearerAuth
- import io.ktor.client.request.post
- import io.ktor.client.statement.bodyAsText
- import io.ktor.http.HttpHeaders.Authorization
- import io.ktor.http.HttpStatusCode.Companion.BadRequest
- import io.ktor.http.Url
- import io.ktor.util.AttributeKey
- import kotlinx.serialization.json.Json
- import sh.christian.ozone.BlueskyApi
- import sh.christian.ozone.XrpcBlueskyApi
- import sh.christian.ozone.api.response.AtpErrorDescription
+import com.atproto.server.RefreshSessionResponse
+import com.moriatsushi.koject.inject
+import dev.dimension.flare.common.JSON
+import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.DbAccountQueries
+import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
+import io.ktor.client.HttpClient
+import io.ktor.client.call.HttpClientCall
+import io.ktor.client.call.body
+import io.ktor.client.call.save
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpClientPlugin
+import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.plugin
+import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.post
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpHeaders.Authorization
+import io.ktor.http.HttpStatusCode.Companion.BadRequest
+import io.ktor.http.Url
+import io.ktor.util.AttributeKey
+import kotlinx.serialization.json.Json
+import sh.christian.ozone.BlueskyApi
+import sh.christian.ozone.XrpcBlueskyApi
+import sh.christian.ozone.api.response.AtpErrorDescription
 
- class BlueskyService(
+class BlueskyService(
     private val baseUrl: String,
     private val accountKey: MicroBlogKey? = null,
-    private val accountDao: AccountDao? = null,
- ) : BlueskyApi by XrpcBlueskyApi(
+    private val accountQueries: DbAccountQueries? = null,
+) : BlueskyApi by XrpcBlueskyApi(
     ktorClient {
         install(DefaultRequest) {
             val hostUrl = Url(baseUrl)
@@ -46,26 +45,26 @@ package dev.dimension.flare.data.network.bluesky
         install(XrpcAuthPlugin) {
             json = JSON
             this.accountKey = accountKey
-            this.accountDao = accountDao
+            this.accountQueries = accountQueries
         }
 
         expectSuccess = false
     },
- )
+)
 
- /**
+/**
  * Appends the `Authorization` header to XRPC requests, as well as automatically refreshing and
  * replaying a network request if it fails due to an expired access token.
  */
- internal class XrpcAuthPlugin(
+internal class XrpcAuthPlugin(
     private val json: Json,
     private val accountKey: MicroBlogKey?,
-    private val accountDao: AccountDao?,
- ) {
+    private val accountQueries: DbAccountQueries?,
+) {
     class Config(
         var json: Json = Json { ignoreUnknownKeys = true },
         var accountKey: MicroBlogKey? = null,
-        var accountDao: AccountDao? = null,
+        var accountQueries: DbAccountQueries? = null,
     )
 
     companion object : HttpClientPlugin<Config, XrpcAuthPlugin> {
@@ -73,7 +72,7 @@ package dev.dimension.flare.data.network.bluesky
 
         override fun prepare(block: Config.() -> Unit): XrpcAuthPlugin {
             val config = Config().apply(block)
-            return XrpcAuthPlugin(config.json, config.accountKey, config.accountDao)
+            return XrpcAuthPlugin(config.json, config.accountKey, config.accountQueries)
         }
 
         override fun install(
@@ -81,8 +80,8 @@ package dev.dimension.flare.data.network.bluesky
             scope: HttpClient,
         ) {
             scope.plugin(HttpSend).intercept { context ->
-                if (!context.headers.contains(Authorization) && plugin.accountKey != null && plugin.accountDao != null) {
-                    val account = plugin.accountDao.getAccount(plugin.accountKey)
+                if (!context.headers.contains(Authorization) && plugin.accountKey != null && plugin.accountQueries != null) {
+                    val account = plugin.accountQueries.get(plugin.accountKey).executeAsOneOrNull()
                         ?.toUi() as? UiAccount.Bluesky
                     if (account != null) {
                         context.bearerAuth(account.credential.accessToken)
@@ -101,8 +100,8 @@ package dev.dimension.flare.data.network.bluesky
                     plugin.json.decodeFromString(result.response.bodyAsText())
                 }
 
-                if (response.getOrNull()?.error == "ExpiredToken" && plugin.accountKey != null && plugin.accountDao != null) {
-                    val account = plugin.accountDao.getAccount(plugin.accountKey)
+                if (response.getOrNull()?.error == "ExpiredToken" && plugin.accountKey != null && plugin.accountQueries != null) {
+                    val account = plugin.accountQueries.get(plugin.accountKey).executeAsOneOrNull()
                         ?.toUi() as? UiAccount.Bluesky
                     if (account != null) {
                         val refreshResponse =
@@ -113,13 +112,14 @@ package dev.dimension.flare.data.network.bluesky
                             ?.let { refreshed ->
                                 val newAccessToken = refreshed.accessJwt
                                 val newRefreshToken = refreshed.refreshJwt
-                                updateBlueskyTokenUseCase(
-                                    baseUrl = account.credential.baseUrl,
+                                plugin.accountQueries.setCredential(
+                                    credentialJson = UiAccount.Bluesky.Credential(
+                                        baseUrl = account.credential.baseUrl,
+                                        accessToken = newAccessToken,
+                                        refreshToken = newRefreshToken,
+                                    ).encodeJson(),
                                     accountKey = plugin.accountKey,
-                                    accessToken = newAccessToken,
-                                    refreshToken = newRefreshToken,
                                 )
-
                                 context.headers.remove(Authorization)
                                 context.bearerAuth(newAccessToken)
                                 result = execute(context)
@@ -131,12 +131,12 @@ package dev.dimension.flare.data.network.bluesky
             }
         }
     }
- }
+}
 
- fun UiAccount.Bluesky.getService(
+fun UiAccount.Bluesky.getService(
     appDatabase: AppDatabase = inject(),
- ) = BlueskyService(
+) = BlueskyService(
     baseUrl = credential.baseUrl,
     accountKey = accountKey,
-    accountDao = appDatabase.accountDao(),
- )
+    accountQueries = appDatabase.dbAccountQueries,
+)

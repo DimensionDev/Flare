@@ -329,9 +329,6 @@ sealed class UiStatus {
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
         val user: UiUser.Bluesky,
-        /**
-         * Expected values are 'like', 'repost', 'follow', 'mention', 'reply', and 'quote'.
-         */
         val reason: ListNotificationsReason,
         val indexedAt: Instant,
     ) : UiStatus() {
@@ -343,50 +340,6 @@ sealed class UiStatus {
         }
     }
 }
-
-
-//internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
-//    return when (status) {
-//        is UiStatus.Mastodon -> {
-//            UiStatusExtra(
-//                contentElement = parseContent(status.raw, status.accountKey.host),
-//                contentDirection = if (Bidi(
-//                        status.content,
-//                        Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-//                    ).baseIsLeftToRight()
-//                ) {
-//                    LayoutDirection.Ltr
-//                } else {
-//                    LayoutDirection.Rtl
-//                },
-//            )
-//        }
-//
-//        is UiStatus.MastodonNotification -> {
-//            UiStatusExtra.Empty
-//        }
-//
-//        is UiStatus.Misskey -> {
-//            UiStatusExtra(
-//                contentElement = misskeyParser.parse(status.content).toHtml(status.accountKey.host),
-//                contentDirection = if (Bidi(
-//                        status.content,
-//                        Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-//                    ).baseIsLeftToRight()
-//                ) {
-//                    LayoutDirection.Ltr
-//                } else {
-//                    LayoutDirection.Rtl
-//                },
-//            )
-//        }
-//
-//        is UiStatus.MisskeyNotification -> {
-//            UiStatusExtra.Empty
-//        }
-//    }
-//}
-
 
 private fun parseContent(
     status: Status,

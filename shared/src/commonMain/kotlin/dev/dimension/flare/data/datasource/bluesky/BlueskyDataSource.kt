@@ -4,6 +4,8 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.feed.GetPostsQueryParams
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.repo.CreateRecordRequest
 import com.moriatsushi.koject.lazyInject
 import dev.dimension.flare.common.CacheData
@@ -21,16 +23,17 @@ import dev.dimension.flare.data.datasource.NotificationFilter
 import dev.dimension.flare.data.datasource.timelinePager
 import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.UiState
-import dev.dimension.flare.ui.flatMap
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiRelation
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.mapper.toUi
-import dev.dimension.flare.ui.toUi
+import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -56,7 +59,8 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             mediator = HomeTimelineRemoteMediator(
-                account,
+                account.getService(),
+                account.accountKey,
                 database,
                 pagingKey,
             ),
@@ -74,7 +78,8 @@ class BlueskyDataSource(
             database = database,
             mediator = when (type) {
                 NotificationFilter.All -> NotificationRemoteMediator(
-                    account,
+                    account.getService(),
+                    account.accountKey,
                     database,
                     pagingKey,
                 )
@@ -94,11 +99,20 @@ class BlueskyDataSource(
                     .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = name)))
                     .requireResponse()
                     .toDbUser(account.accountKey.host)
-                database.userDao().insertAll(listOf(user))
+                database.dbUserQueries.insert(
+                    user_key = user.user_key,
+                    platform_type = user.platform_type,
+                    name = user.name,
+                    handle = user.handle,
+                    content = user.content,
+                    host = user.host,
+                )
             },
             cacheSource = {
-                database.userDao().getUserByHandleAndHost(name, host, PlatformType.Bluesky)
-                    .mapNotNull { it?.toUi() }
+                database.dbUserQueries.findByHandleAndHost(name, host)
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .mapNotNull { it.toUi() }
             },
         )
     }
@@ -110,11 +124,20 @@ class BlueskyDataSource(
                     .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = id)))
                     .requireResponse()
                     .toDbUser(account.accountKey.host)
-                database.userDao().insertAll(listOf(user))
+                database.dbUserQueries.insert(
+                    user_key = user.user_key,
+                    platform_type = user.platform_type,
+                    name = user.name,
+                    handle = user.handle,
+                    content = user.content,
+                    host = user.host,
+                )
             },
             cacheSource = {
-                database.userDao().getUser(MicroBlogKey(id, account.accountKey.host))
-                    .mapNotNull { it?.toUi() }
+                database.dbUserQueries.findByKey(MicroBlogKey(id, account.accountKey.host))
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .mapNotNull { it.toUi() }
             },
         )
     }
@@ -142,7 +165,8 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             mediator = UserTimelineRemoteMediator(
-                account,
+                account.getService(),
+                account.accountKey,
                 database,
                 userKey,
                 pagingKey,
@@ -161,7 +185,8 @@ class BlueskyDataSource(
             database = database,
             mediator = StatusDetailRemoteMediator(
                 statusKey,
-                account,
+                account.getService(),
+                account.accountKey,
                 database,
                 pagingKey,
                 statusOnly = false,
@@ -176,7 +201,8 @@ class BlueskyDataSource(
             database = database,
             mediator = StatusDetailRemoteMediator(
                 statusKey,
-                account,
+                account.getService(),
+                account.accountKey,
                 database,
                 pagingKey,
                 statusOnly = true,

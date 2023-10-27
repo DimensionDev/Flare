@@ -19,9 +19,9 @@ sealed interface UiApplication {
         val session: String,
     ) : UiApplication
 
-//    data class Bluesky(
-//        override val host: String,
-//    ) : UiApplication
+    data class Bluesky(
+        override val host: String,
+    ) : UiApplication
 
     companion object {
         fun DbApplication.toUi(): UiApplication {
@@ -36,9 +36,9 @@ sealed interface UiApplication {
                     session = credential_json,
                 )
 
-//                PlatformType.Bluesky -> Bluesky(
-//                    host = host,
-//                )
+                PlatformType.Bluesky -> Bluesky(
+                    host = host,
+                )
             }
         }
     }

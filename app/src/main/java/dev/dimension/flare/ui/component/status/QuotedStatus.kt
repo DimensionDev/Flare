@@ -61,18 +61,19 @@ internal fun UiStatusQuoted(
             )
 
         is UiStatus.MisskeyNotification -> Unit
-//        is UiStatus.Bluesky -> QuotedStatus(
-//            avatarUrl = status.user.avatarUrl,
-//            nameElement = status.user.nameElement,
-//            handle = status.user.handle,
-//            contentElement = status.contentToken,
-//            contentLayoutDirection = status.contentDirection,
-//            medias = status.medias,
-//            createdAt = status.humanizedTime,
-//            onMediaClick = onMediaClick,
-//            modifier = modifier,
-//        )
-//        is UiStatus.BlueskyNotification -> Unit
+        is UiStatus.Bluesky ->
+            QuotedStatus(
+                avatarUrl = status.user.avatarUrl,
+                nameElement = status.user.nameElement,
+                handle = status.user.handle,
+                contentElement = status.contentToken,
+                contentLayoutDirection = status.contentDirection,
+                medias = status.medias,
+                createdAt = status.humanizedTime,
+                onMediaClick = onMediaClick,
+                modifier = modifier,
+            )
+        is UiStatus.BlueskyNotification -> Unit
     }
 }
 

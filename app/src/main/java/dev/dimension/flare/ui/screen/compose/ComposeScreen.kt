@@ -109,6 +109,7 @@ import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.ComposeUseCase
@@ -133,12 +134,12 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlinx.collections.immutable.toImmutableList
 import kotlin.math.max
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
@@ -321,14 +322,14 @@ private fun ComposeScreen(
             bottomBar = {
                 Surface(
                     modifier =
-                        Modifier
-                            .fillMaxWidth(),
+                    Modifier
+                        .fillMaxWidth(),
                     tonalElevation = 3.dp,
                 ) {
                     Column(
                         modifier =
-                            Modifier
-                                .navigationBarsPadding(),
+                        Modifier
+                            .navigationBarsPadding(),
                     ) {
                         Row(
                             modifier = Modifier,
@@ -405,16 +406,16 @@ private fun ComposeScreen(
                         state.emojiState.onSuccess { emojis ->
                             Box(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(imeHeight()),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(imeHeight()),
                             ) {
                                 if (!WindowInsets.isImeVisible) {
                                     LazyVerticalGrid(
                                         columns = GridCells.Adaptive(48.dp),
                                         modifier =
-                                            Modifier
-                                                .fillMaxWidth(),
+                                        Modifier
+                                            .fillMaxWidth(),
                                         contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                                         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -425,11 +426,11 @@ private fun ComposeScreen(
                                                 contentDescription = emoji.shortcode,
                                                 contentScale = ContentScale.Fit,
                                                 modifier =
-                                                    Modifier
-                                                        .size(48.dp)
-                                                        .clickable {
-                                                            state.selectEmoji(emoji)
-                                                        },
+                                                Modifier
+                                                    .size(48.dp)
+                                                    .clickable {
+                                                        state.selectEmoji(emoji)
+                                                    },
                                             )
                                         }
                                     }
@@ -438,16 +439,16 @@ private fun ComposeScreen(
                         }.onError {
                             Box(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .imePadding(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .imePadding(),
                             )
                         }.onLoading {
                             Box(
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .imePadding(),
+                                Modifier
+                                    .fillMaxWidth()
+                                    .imePadding(),
                             )
                         }
                     }
@@ -456,10 +457,10 @@ private fun ComposeScreen(
         ) {
             Column(
                 modifier =
-                    Modifier
-                        .padding(it)
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
+                Modifier
+                    .padding(it)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 state.contentWarningState.onSuccess {
@@ -470,20 +471,20 @@ private fun ComposeScreen(
                             TextField2(
                                 state = it.textFieldState,
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .focusRequester(
-                                            focusRequester = contentWarningFocusRequester,
-                                        ),
-                                colors =
-                                    TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.Transparent,
-                                        unfocusedContainerColor = Color.Transparent,
-                                        disabledIndicatorColor = Color.Transparent,
-                                        errorIndicatorColor = Color.Transparent,
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
+                                Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(
+                                        focusRequester = contentWarningFocusRequester,
                                     ),
+                                colors =
+                                TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent,
+                                    errorIndicatorColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                ),
                                 placeholder = {
                                     Text(text = stringResource(id = R.string.compose_content_warning_hint))
                                 },
@@ -495,20 +496,20 @@ private fun ComposeScreen(
                 TextField2(
                     state = state.textFieldState,
                     modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .focusRequester(
-                                focusRequester = focusRequester,
-                            ),
-                    colors =
-                        TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            errorIndicatorColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
+                    Modifier
+                        .fillMaxWidth()
+                        .focusRequester(
+                            focusRequester = focusRequester,
                         ),
+                    colors =
+                    TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                    ),
                     placeholder = {
                         Text(text = stringResource(id = R.string.compose_hint))
                     },
@@ -516,10 +517,10 @@ private fun ComposeScreen(
                 if (state.mediaState.medias.isNotEmpty()) {
                     Row(
                         modifier =
-                            Modifier
-                                .padding(horizontal = screenHorizontalPadding)
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding)
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         state.mediaState.medias.forEach { uri ->
@@ -528,21 +529,21 @@ private fun ComposeScreen(
                                     model = uri,
                                     contentDescription = null,
                                     modifier =
-                                        Modifier
-                                            .size(128.dp)
-                                            .clip(RoundedCornerShape(8.dp)),
+                                    Modifier
+                                        .size(128.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
                                 )
                                 IconButton(
                                     onClick = {
                                         state.mediaState.removeMedia(uri)
                                     },
                                     modifier =
-                                        Modifier
-                                            .align(Alignment.TopEnd)
-                                            .background(
-                                                color = Color.Black.copy(alpha = 0.3f),
-                                                shape = CircleShape,
-                                            ),
+                                    Modifier
+                                        .align(Alignment.TopEnd)
+                                        .background(
+                                            color = Color.Black.copy(alpha = 0.3f),
+                                            shape = CircleShape,
+                                        ),
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
@@ -555,15 +556,15 @@ private fun ComposeScreen(
                     val sensitiveInteractionSource = remember { MutableInteractionSource() }
                     Row(
                         modifier =
-                            Modifier
-                                .padding(horizontal = screenHorizontalPadding)
-                                .fillMaxWidth()
-                                .clickable(
-                                    interactionSource = sensitiveInteractionSource,
-                                    indication = null,
-                                ) {
-                                    state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
-                                },
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding)
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = sensitiveInteractionSource,
+                                indication = null,
+                            ) {
+                                state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
+                            },
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -579,9 +580,9 @@ private fun ComposeScreen(
                     if (pollState.enabled) {
                         Column(
                             modifier =
-                                Modifier
-                                    .padding(horizontal = screenHorizontalPadding)
-                                    .fillMaxWidth(),
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding)
+                                .fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Row(
@@ -590,8 +591,8 @@ private fun ComposeScreen(
                             ) {
                                 SingleChoiceSegmentedButtonRow(
                                     modifier =
-                                        Modifier
-                                            .weight(1f),
+                                    Modifier
+                                        .weight(1f),
                                 ) {
                                     SegmentedButton(
                                         selected = pollState.pollSingleChoice,
@@ -599,10 +600,10 @@ private fun ComposeScreen(
                                             pollState.setPollSingleChoice(true)
                                         },
                                         shape =
-                                            SegmentedButtonDefaults.itemShape(
-                                                index = 0,
-                                                count = 2,
-                                            ),
+                                        SegmentedButtonDefaults.itemShape(
+                                            index = 0,
+                                            count = 2,
+                                        ),
                                     ) {
                                         Text(text = stringResource(id = R.string.compose_poll_single_choice))
                                     }
@@ -612,10 +613,10 @@ private fun ComposeScreen(
                                             pollState.setPollSingleChoice(false)
                                         },
                                         shape =
-                                            SegmentedButtonDefaults.itemShape(
-                                                index = 1,
-                                                count = 2,
-                                            ),
+                                        SegmentedButtonDefaults.itemShape(
+                                            index = 1,
+                                            count = 2,
+                                        ),
                                     ) {
                                         Text(text = stringResource(id = R.string.compose_poll_multiple_choice))
                                     }
@@ -647,15 +648,15 @@ private fun ComposeScreen(
                                     pollState.setShowExpirationMenu(true)
                                 },
                                 modifier =
-                                    Modifier
-                                        .align(Alignment.End),
+                                Modifier
+                                    .align(Alignment.End),
                             ) {
                                 Text(
                                     text =
-                                        stringResource(
-                                            id = R.string.compose_poll_expiration_at,
-                                            stringResource(id = pollState.expiredAt.textId),
-                                        ),
+                                    stringResource(
+                                        id = R.string.compose_poll_expiration_at,
+                                        stringResource(id = pollState.expiredAt.textId),
+                                    ),
                                 )
                                 DropdownMenu(
                                     expanded = pollState.showExpirationMenu,
@@ -690,9 +691,9 @@ private fun ComposeScreen(
                                     status = item,
                                     onMediaClick = {},
                                     modifier =
-                                        Modifier
-                                            .padding(horizontal = screenHorizontalPadding)
-                                            .fillMaxWidth(),
+                                    Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .fillMaxWidth(),
                                 )
                             }
                         }
@@ -743,10 +744,10 @@ private fun MisskeyVisibilityContent(visibilityState: MisskeyVisibilityState) {
                         dev.dimension.flare.ui.component.status.misskey.VisibilityIcon(visibility = visibility)
                     },
                     contentPadding =
-                        PaddingValues(
-                            horizontal = 16.dp,
-                            vertical = 8.dp,
-                        ),
+                    PaddingValues(
+                        horizontal = 16.dp,
+                        vertical = 8.dp,
+                    ),
                 )
             }
             DropdownMenuItem(
@@ -821,10 +822,10 @@ private fun MastodonVisibilityContent(visibilityState: MastodonVisibilityState) 
                         VisibilityIcon(visibility = visibility)
                     },
                     contentPadding =
-                        PaddingValues(
-                            horizontal = 16.dp,
-                            vertical = 8.dp,
-                        ),
+                    PaddingValues(
+                        horizontal = 16.dp,
+                        vertical = 8.dp,
+                    ),
                 )
             }
         }
@@ -855,8 +856,8 @@ private fun PollOption(
     OutlinedTextField2(
         state = textFieldState,
         modifier =
-            modifier
-                .fillMaxWidth(),
+        modifier
+            .fillMaxWidth(),
         placeholder = {
             Text(text = stringResource(id = R.string.compose_poll_option_hint, index + 1))
         },
@@ -881,7 +882,8 @@ private fun composePresenter(
     val account by activeAccountPresenter()
     val emojiState =
         account.flatMap {
-            emojiPresenter(it).emojiState ?: UiState.Error(IllegalStateException("Emoji not supported"))
+            emojiPresenter(it).emojiState
+                ?: UiState.Error(IllegalStateException("Emoji not supported"))
         }
     val textFieldState by remember {
         mutableStateOf(TextFieldState(""))
@@ -892,6 +894,7 @@ private fun composePresenter(
     val pollState =
         account.flatMap {
             when (it) {
+                is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
                 is UiAccount.Mastodon, is UiAccount.Misskey -> UiState.Success(pollPresenter())
             }
         }
@@ -901,12 +904,16 @@ private fun composePresenter(
             when (it) {
                 is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
                 is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
+                is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
             }
         }
     val contentWarningState =
         account.flatMap {
             when (it) {
-                is UiAccount.Misskey, is UiAccount.Mastodon -> UiState.Success(contentWarningPresenter())
+                is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
+                is UiAccount.Misskey, is UiAccount.Mastodon -> UiState.Success(
+                    contentWarningPresenter()
+                )
             }
         }
     val replyState =
@@ -976,22 +983,22 @@ private fun composePresenter(
                             MastodonDataSource.MastodonComposeData(
                                 content = textFieldState.text.toString(),
                                 medias =
-                                    mediaState.medias.map {
-                                        FileItem(context, it)
-                                    },
+                                mediaState.medias.map {
+                                    FileItem(context, it)
+                                },
                                 poll =
-                                    if (pollState is UiState.Success && pollState.data.enabled) {
-                                        MastodonDataSource.MastodonComposeData.Poll(
-                                            multiple = !pollState.data.pollSingleChoice,
-                                            expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
-                                            options =
-                                                pollState.data.options.map { option ->
-                                                    option.text.toString()
-                                                },
-                                        )
-                                    } else {
-                                        null
-                                    },
+                                if (pollState is UiState.Success && pollState.data.enabled) {
+                                    MastodonDataSource.MastodonComposeData.Poll(
+                                        multiple = !pollState.data.pollSingleChoice,
+                                        expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
+                                        options =
+                                        pollState.data.options.map { option ->
+                                            option.text.toString()
+                                        },
+                                    )
+                                } else {
+                                    null
+                                },
                                 sensitive = mediaState.isMediaSensitive,
                                 spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
                                 visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Mastodon.Visibility,
@@ -1003,22 +1010,22 @@ private fun composePresenter(
                             MisskeyDataSource.MissKeyComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.medias.map {
-                                        FileItem(context, it)
-                                    },
+                                mediaState.medias.map {
+                                    FileItem(context, it)
+                                },
                                 poll =
-                                    if (pollState is UiState.Success && pollState.data.enabled) {
-                                        MisskeyDataSource.MissKeyComposeData.Poll(
-                                            multiple = !pollState.data.pollSingleChoice,
-                                            expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
-                                            options =
-                                                pollState.data.options.map { option ->
-                                                    option.text.toString()
-                                                },
-                                        )
-                                    } else {
-                                        null
-                                    },
+                                if (pollState is UiState.Success && pollState.data.enabled) {
+                                    MisskeyDataSource.MissKeyComposeData.Poll(
+                                        multiple = !pollState.data.pollSingleChoice,
+                                        expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
+                                        options =
+                                        pollState.data.options.map { option ->
+                                            option.text.toString()
+                                        },
+                                    )
+                                } else {
+                                    null
+                                },
                                 sensitive = mediaState.isMediaSensitive,
                                 spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
                                 visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Misskey.Visibility,
@@ -1028,13 +1035,15 @@ private fun composePresenter(
                                 localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly,
                             )
 
-//                    is UiAccount.Bluesky -> ComposeData.Bluesky(
-//                        account = it,
-//                        medias = mediaState.medias,
-//                        inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-//                        quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-//                        content = textFieldState.text.toString(),
-//                    )
+                        is UiAccount.Bluesky -> BlueskyDataSource.BlueskyComposeData(
+                            account = it,
+                            medias = mediaState.medias.map {
+                                FileItem(context, it)
+                            },
+                            inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                            quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+                            content = textFieldState.text.toString(),
+                        )
                     }
                 composeUseCase(data)
             }

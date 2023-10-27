@@ -55,7 +55,7 @@ internal class HomeTimelineRemoteMediator(
                 database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
             }
             cursor = response.cursor
-            Bluesky.save(
+            Bluesky.saveFeed(
                 accountKey,
                 pagingKey,
                 database,

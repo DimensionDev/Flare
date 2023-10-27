@@ -53,7 +53,7 @@ package dev.dimension.flare.data.datasource.bluesky
 
             cursor = response.cursor
             cursor = response.cursor
-            Bluesky.save(
+            Bluesky.saveNotification(
                 accountKey,
                 pagingKey,
                 database,

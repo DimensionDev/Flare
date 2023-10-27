@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.datasource.bluesky
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.feed.GetPostsQueryParams
+import androidx.paging.ExperimentalPagingApi
+import app.cash.paging.PagingData
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.repo.CreateRecordRequest

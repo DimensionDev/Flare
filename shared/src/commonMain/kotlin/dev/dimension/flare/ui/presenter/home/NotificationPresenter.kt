@@ -6,7 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.paging.LoadState
+import app.cash.paging.LoadState
+import app.cash.paging.LoadStateLoading
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.datasource.NotificationFilter
@@ -37,7 +38,7 @@ class NotificationPresenter : PresenterBase<NotificationState>() {
         }
         val refreshing =
             listState is UiState.Loading ||
-                    listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+                    listState is UiState.Success && listState.data.loadState.refresh is LoadStateLoading && listState.data.itemCount != 0
 
         return object : NotificationState(
             refreshing,

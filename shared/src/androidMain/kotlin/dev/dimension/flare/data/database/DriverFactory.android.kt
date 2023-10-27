@@ -10,7 +10,7 @@ import com.moriatsushi.koject.Singleton
 
 @Singleton
 @Provides
-internal actual class DriverFactory(
+actual class DriverFactory(
     private val context: Context,
 ) {
     actual fun createDriver(schema: SqlSchema<QueryResult.Value<Unit>>, name: String): SqlDriver {

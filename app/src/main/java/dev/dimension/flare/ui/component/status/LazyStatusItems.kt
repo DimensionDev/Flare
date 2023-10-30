@@ -20,7 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
+import app.cash.paging.LoadStateError
+import app.cash.paging.LoadStateLoading
+import app.cash.paging.LoadStateNotLoading
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
@@ -49,8 +51,8 @@ internal fun status() {
     onSuccess { lazyPagingItems ->
         if (
             (
-                lazyPagingItems.loadState.refresh == LoadState.Loading ||
-                    lazyPagingItems.loadState.prepend == LoadState.Loading
+                lazyPagingItems.loadState.refresh == LoadStateLoading ||
+                    lazyPagingItems.loadState.prepend == LoadStateLoading
             ) &&
             lazyPagingItems.itemCount == 0
         ) {
@@ -66,8 +68,8 @@ internal fun status() {
                 }
             }
         } else if ((
-                lazyPagingItems.loadState.refresh is LoadState.Error ||
-                    lazyPagingItems.loadState.prepend is LoadState.Error
+                lazyPagingItems.loadState.refresh is LoadStateError ||
+                    lazyPagingItems.loadState.prepend is LoadStateError
             ) &&
             lazyPagingItems.itemCount == 0
         ) {
@@ -188,7 +190,7 @@ internal fun status() {
             }
             if (lazyPagingItems.itemCount > 0) {
                 when (lazyPagingItems.loadState.append) {
-                    is LoadState.Error ->
+                    is LoadStateError ->
                         item {
                             Column(
                                 modifier =
@@ -208,7 +210,7 @@ internal fun status() {
                             }
                         }
 
-                    LoadState.Loading ->
+                    androidx.paging.LoadState.Loading, LoadStateLoading ->
                         items(10) {
                             Column {
                                 StatusPlaceholder(
@@ -221,7 +223,7 @@ internal fun status() {
                             }
                         }
 
-                    is LoadState.NotLoading ->
+                    is LoadStateNotLoading ->
                         item {
                             Column(
                                 modifier =
@@ -237,6 +239,7 @@ internal fun status() {
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
+
                 }
             }
         }

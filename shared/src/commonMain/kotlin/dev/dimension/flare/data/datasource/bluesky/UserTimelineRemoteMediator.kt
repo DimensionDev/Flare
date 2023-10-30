@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.datasource.bluesky
 
  import androidx.paging.ExperimentalPagingApi
- import androidx.paging.LoadType
- import androidx.paging.PagingState
- import androidx.paging.RemoteMediator
+ import app.cash.paging.LoadType
+ import app.cash.paging.PagingState
+ import app.cash.paging.RemoteMediator
  import app.bsky.feed.GetAuthorFeedQueryParams
  import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
  import dev.dimension.flare.data.database.cache.CacheDatabase

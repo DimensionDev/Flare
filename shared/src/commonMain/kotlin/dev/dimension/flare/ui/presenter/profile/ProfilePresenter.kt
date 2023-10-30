@@ -2,7 +2,8 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.paging.LoadState
+import app.cash.paging.LoadState
+import app.cash.paging.LoadStateLoading
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
@@ -44,7 +45,7 @@ class ProfilePresenter(
         val refreshing = userState is UiState.Loading ||
                 userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
                 listState is UiState.Loading ||
-                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
+                listState is UiState.Success && listState.data.loadState.refresh is LoadStateLoading
 
         return object : ProfileState(
             refreshing,

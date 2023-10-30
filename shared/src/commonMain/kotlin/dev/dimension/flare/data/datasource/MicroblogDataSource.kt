@@ -1,11 +1,11 @@
 package dev.dimension.flare.data.datasource
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.RemoteMediator
-import androidx.paging.map
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import app.cash.paging.PagingData
+import app.cash.paging.RemoteMediator
+import app.cash.paging.map
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView

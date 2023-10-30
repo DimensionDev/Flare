@@ -19,7 +19,7 @@ import dev.dimension.flare.data.version.DbVersion
 
 @Singleton
 @Provides
-internal fun provideVersionDatabase(driverFactory: DriverFactory): VersionDatabase {
+fun provideVersionDatabase(driverFactory: DriverFactory): VersionDatabase {
     return VersionDatabase(
         driverFactory.createDriver(VersionDatabase.Schema, "version.db"),
     )
@@ -27,7 +27,7 @@ internal fun provideVersionDatabase(driverFactory: DriverFactory): VersionDataba
 
 @Singleton
 @Provides
-internal fun provideAppDatabase(
+fun provideAppDatabase(
     driverFactory: DriverFactory,
     versionDatabase: VersionDatabase,
 ): AppDatabase {
@@ -57,7 +57,7 @@ internal fun provideAppDatabase(
 
 @Singleton
 @Provides
-internal fun provideCacheDatabase(
+fun provideCacheDatabase(
     driverFactory: DriverFactory,
     versionDb: VersionDatabase,
 ): CacheDatabase {

@@ -74,7 +74,7 @@ class AccountRepository(
 object NoActiveAccountException : Exception("No active account.")
 
 @Composable
-fun activeAccountPresenter(
+internal fun activeAccountPresenter(
     repository: AccountRepository = rememberInject()
 ): State<UiState<UiAccount>> {
     return remember(repository) {
@@ -98,7 +98,7 @@ internal fun activeAccountServicePresenter(): UiState<Pair<MicroblogDataSource, 
 }
 
 @Composable
-fun accountServiceProvider(
+internal fun accountServiceProvider(
     account: UiAccount,
 ): MicroblogDataSource {
     return remember(account.accountKey) {

@@ -133,12 +133,12 @@ import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
 import dev.dimension.flare.ui.presenter.compose.VisibilityState
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlinx.collections.immutable.toImmutableList
 import kotlin.math.max
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
@@ -970,7 +970,7 @@ private fun composePresenter(
                                 },
                                 sensitive = mediaState.isMediaSensitive,
                                 spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
-                                visibility = (state.visibilityState as UiState.Success).data.visibility as UiStatus.Mastodon.Visibility,
+                                visibility = ((state.visibilityState as UiState.Success<VisibilityState>).data as MastodonVisibilityState).visibility,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 account = it,
                             )
@@ -997,11 +997,11 @@ private fun composePresenter(
                                 },
                                 sensitive = mediaState.isMediaSensitive,
                                 spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
-                                visibility = (state.visibilityState as UiState.Success).data.visibility as UiStatus.Misskey.Visibility,
+                                visibility = ((state.visibilityState as UiState.Success<VisibilityState>).data as MisskeyVisibilityState).visibility,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 content = textFieldState.text.toString(),
-                                localOnly = ((state.visibilityState as UiState.Success<VisibilityState<out Enum<*>>>).data as MisskeyVisibilityState).localOnly,
+                                localOnly = ((state.visibilityState as UiState.Success<VisibilityState>).data as MisskeyVisibilityState).localOnly,
                             )
 
                         is UiAccount.Bluesky -> BlueskyDataSource.BlueskyComposeData(

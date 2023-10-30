@@ -96,7 +96,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavBackStackEntry
-import app.cash.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -108,13 +107,10 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.ComposeUseCase
-import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
@@ -127,11 +123,14 @@ import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.presenter.compose.ComposePresenter
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
+import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
+import dev.dimension.flare.ui.presenter.compose.VisibilityState
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
@@ -221,18 +220,6 @@ object ComposeTransitions : DestinationStyle.Animated {
             AnimatedContentTransitionScope.SlideDirection.Down,
         ) + fadeOut()
     }
-}
-
-private sealed interface ComposeStatus {
-    val statusKey: MicroBlogKey
-
-    data class Quote(
-        override val statusKey: MicroBlogKey,
-    ) : ComposeStatus
-
-    data class Reply(
-        override val statusKey: MicroBlogKey,
-    ) : ComposeStatus
 }
 
 @SuppressLint("MissingPermission")
@@ -359,7 +346,7 @@ private fun ComposeScreen(
                                     )
                                 }
                             }
-                            state.visibilityState.onSuccess { visibilityState ->
+                            state.state.visibilityState.onSuccess { visibilityState ->
                                 when (visibilityState) {
                                     is MastodonVisibilityState ->
                                         MastodonVisibilityContent(
@@ -384,7 +371,7 @@ private fun ComposeScreen(
                                     )
                                 }
                             }
-                            state.emojiState.onSuccess {
+                            state.state.emojiState.onSuccess {
                                 val isImeVisible = WindowInsets.isImeVisible
                                 IconButton(
                                     onClick = {
@@ -403,7 +390,7 @@ private fun ComposeScreen(
                             }
                         }
 
-                        state.emojiState.onSuccess { emojis ->
+                        state.state.emojiState.onSuccess { emojis ->
                             Box(
                                 modifier =
                                     Modifier
@@ -682,10 +669,10 @@ private fun ComposeScreen(
                     }
                 }
 
-                state.replyState?.let { replyState ->
+                state.state.replyState?.let { replyState ->
                     replyState.onSuccess { state ->
-                        if (state.listState.itemCount > 0) {
-                            val item = state.listState[0]
+                        if (state.itemCount > 0) {
+                            val item = state[0]
                             if (item != null) {
                                 UiStatusQuoted(
                                     status = item,
@@ -879,12 +866,10 @@ private fun composePresenter(
     status: ComposeStatus? = null,
     composeUseCase: ComposeUseCase = rememberInject(),
 ) = run {
-    val account by activeAccountPresenter()
-    val emojiState =
-        account.flatMap {
-            emojiPresenter(it).emojiState
-                ?: UiState.Error(IllegalStateException("Emoji not supported"))
-        }
+
+    val state = remember(status) {
+        ComposePresenter(status)
+    }.invoke()
     val textFieldState by remember {
         mutableStateOf(TextFieldState(""))
     }
@@ -892,23 +877,15 @@ private fun composePresenter(
         textFieldState.textAsFlow()
     }.collectAsState(initial = "")
     val pollState =
-        account.flatMap {
+        state.account.flatMap {
             when (it) {
                 is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
                 is UiAccount.Mastodon, is UiAccount.Misskey -> UiState.Success(pollPresenter())
             }
         }
     val mediaState = mediaPresenter()
-    val visibilityState =
-        account.flatMap {
-            when (it) {
-                is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
-                is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
-                is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
-            }
-        }
     val contentWarningState =
-        account.flatMap {
+        state.account.flatMap {
             when (it) {
                 is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
                 is UiAccount.Misskey, is UiAccount.Mastodon ->
@@ -917,16 +894,10 @@ private fun composePresenter(
                     )
             }
         }
-    val replyState =
-        status?.let { status ->
-            account.map {
-                statusPresenter(it, status)
-            }
-        }
-    replyState?.onSuccess {
-        LaunchedEffect(it.listState.itemCount) {
-            if (it.listState.itemCount == 1 && textFieldState.text.isEmpty()) {
-                when (val item = it.listState[0]) {
+    state.replyState?.onSuccess {
+        LaunchedEffect(it.itemCount) {
+            if (it.itemCount == 1 && textFieldState.text.isEmpty()) {
+                when (val item = it[0]) {
                     is UiStatus.Mastodon -> {
                         textFieldState.edit {
                             append("${item.user.handle} ")
@@ -964,10 +935,8 @@ private fun composePresenter(
         val canMedia = canMedia
         val pollState = pollState
         val mediaState = mediaState
-        val visibilityState = visibilityState
         val contentWarningState = contentWarningState
-        val emojiState = emojiState
-        val replyState = replyState
+        val state = state
 
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
@@ -977,7 +946,7 @@ private fun composePresenter(
 
         @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
-            account.onSuccess {
+            state.account.onSuccess {
                 val data =
                     when (it) {
                         is UiAccount.Mastodon ->
@@ -1002,7 +971,7 @@ private fun composePresenter(
                                     },
                                 sensitive = mediaState.isMediaSensitive,
                                 spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
-                                visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Mastodon.Visibility,
+                                visibility = (state.visibilityState as UiState.Success).data.visibility as UiStatus.Mastodon.Visibility,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 account = it,
                             )
@@ -1029,11 +998,11 @@ private fun composePresenter(
                                     },
                                 sensitive = mediaState.isMediaSensitive,
                                 spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
-                                visibility = (visibilityState as UiState.Success).data.visibility as UiStatus.Misskey.Visibility,
+                                visibility = (state.visibilityState as UiState.Success).data.visibility as UiStatus.Misskey.Visibility,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 content = textFieldState.text.toString(),
-                                localOnly = (visibilityState.data as MisskeyVisibilityState).localOnly,
+                                localOnly = ((state.visibilityState as UiState.Success<VisibilityState<out Enum<*>>>).data as MisskeyVisibilityState).localOnly,
                             )
 
                         is UiAccount.Bluesky ->
@@ -1054,39 +1023,6 @@ private fun composePresenter(
     }
 }
 
-@Composable
-private fun statusPresenter(
-    account: UiAccount,
-    status: ComposeStatus,
-) = run {
-    val service = accountServiceProvider(account = account)
-    val listState =
-        remember(account.accountKey) {
-            service.status(status.statusKey)
-        }.collectAsLazyPagingItems()
-
-    object {
-        val listState = listState
-    }
-}
-
-@Composable
-private fun emojiPresenter(account: UiAccount) =
-    run {
-        val service = accountServiceProvider(account = account)
-        val emojiState =
-            remember(account.accountKey) {
-                when (service) {
-                    is MastodonDataSource -> service.emoji()
-                    is MisskeyDataSource -> service.emoji()
-                    else -> null
-                }
-            }?.collectAsState()?.toUi()
-        object {
-            val emojiState = emojiState
-        }
-    }
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun contentWarningPresenter() =
@@ -1103,97 +1039,6 @@ private fun contentWarningPresenter() =
 
             fun toggle() {
                 enabled = !enabled
-            }
-        }
-    }
-
-internal sealed interface VisibilityState<T> {
-    val visibility: T
-    val showVisibilityMenu: Boolean
-    val allVisibilities: List<T>
-
-    fun setVisibility(value: T)
-
-    fun showVisibilityMenu()
-
-    fun hideVisibilityMenu()
-}
-
-internal abstract class MastodonVisibilityState(
-    override val visibility: UiStatus.Mastodon.Visibility,
-    override val showVisibilityMenu: Boolean,
-    override val allVisibilities: List<UiStatus.Mastodon.Visibility>,
-) : VisibilityState<UiStatus.Mastodon.Visibility>
-
-internal abstract class MisskeyVisibilityState(
-    override val visibility: UiStatus.Misskey.Visibility,
-    override val showVisibilityMenu: Boolean,
-    override val allVisibilities: List<UiStatus.Misskey.Visibility>,
-    val localOnly: Boolean,
-) : VisibilityState<UiStatus.Misskey.Visibility> {
-    abstract fun setLocalOnly(value: Boolean)
-}
-
-@Composable
-private fun misskeyVisibilityPresenter() =
-    run {
-        var localOnly by remember {
-            mutableStateOf(false)
-        }
-        var showVisibilityMenu by remember {
-            mutableStateOf(false)
-        }
-        var visibility by remember {
-            mutableStateOf(UiStatus.Misskey.Visibility.Public)
-        }
-        object : MisskeyVisibilityState(
-            visibility = visibility,
-            showVisibilityMenu = showVisibilityMenu,
-            allVisibilities = UiStatus.Misskey.Visibility.entries.toList(),
-            localOnly = localOnly,
-        ) {
-            override fun setLocalOnly(value: Boolean) {
-                localOnly = value
-            }
-
-            override fun setVisibility(value: UiStatus.Misskey.Visibility) {
-                visibility = value
-            }
-
-            override fun showVisibilityMenu() {
-                showVisibilityMenu = true
-            }
-
-            override fun hideVisibilityMenu() {
-                showVisibilityMenu = false
-            }
-        }
-    }
-
-@Composable
-private fun mastodonVisibilityPresenter() =
-    run {
-        var showVisibilityMenu by remember {
-            mutableStateOf(false)
-        }
-        var visibility by remember {
-            mutableStateOf(UiStatus.Mastodon.Visibility.Public)
-        }
-        object : MastodonVisibilityState(
-            visibility = visibility,
-            showVisibilityMenu = showVisibilityMenu,
-            allVisibilities = UiStatus.Mastodon.Visibility.entries.toList(),
-        ) {
-            override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
-                visibility = value
-            }
-
-            override fun showVisibilityMenu() {
-                showVisibilityMenu = true
-            }
-
-            override fun hideVisibilityMenu() {
-                showVisibilityMenu = false
             }
         }
     }

@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 class ComposePresenter(
     private val status: ComposeStatus? = null,
@@ -47,131 +48,124 @@ class ComposePresenter(
             }
         val emojiState =
             account.flatMap {
-                emojiPresenter(it).emojiState
+                emojiPresenter(it)
                     ?: UiState.Error(IllegalStateException("Emoji not supported"))
             }
 
-        return object : ComposeState(
+        return ComposeState(
             account = account,
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
-        ) {
-        }
-
+        )
     }
 
     @Composable
     private fun statusPresenter(
         account: UiAccount,
         status: ComposeStatus,
-    ) = run {
+    ): LazyPagingItems<UiStatus> {
         val service = accountServiceProvider(account = account)
-        remember(account.accountKey) {
+        return remember(account.accountKey) {
             service.status(status.statusKey)
         }.collectAsLazyPagingItems()
     }
 
     @Composable
-    private fun emojiPresenter(account: UiAccount) =
-        run {
-            val service = accountServiceProvider(account = account)
-            val emojiState =
-                remember(account.accountKey) {
-                    when (service) {
-                        is MastodonDataSource -> service.emoji()
-                        is MisskeyDataSource -> service.emoji()
-                        else -> null
-                    }
-                }?.collectAsState()?.toUi()
-            object {
-                val emojiState = emojiState
+    private fun emojiPresenter(account: UiAccount): UiState<ImmutableList<UiEmoji>>? {
+        val service = accountServiceProvider(account = account)
+        return remember(account.accountKey) {
+            when (service) {
+                is MastodonDataSource -> service.emoji()
+                is MisskeyDataSource -> service.emoji()
+                else -> null
             }
-        }
+        }?.collectAsState()?.toUi()
+    }
 
     @Composable
-    private fun misskeyVisibilityPresenter() =
-        run {
-            var localOnly by remember {
-                mutableStateOf(false)
+    private fun misskeyVisibilityPresenter(): MisskeyVisibilityState {
+        var localOnly by remember {
+            mutableStateOf(false)
+        }
+        var showVisibilityMenu by remember {
+            mutableStateOf(false)
+        }
+        var visibility by remember {
+            mutableStateOf(UiStatus.Misskey.Visibility.Public)
+        }
+        return object : MisskeyVisibilityState(
+            visibility = visibility,
+            showVisibilityMenu = showVisibilityMenu,
+            allVisibilities = UiStatus.Misskey.Visibility.entries.toImmutableList(),
+            localOnly = localOnly,
+        ) {
+            override fun setLocalOnly(value: Boolean) {
+                localOnly = value
             }
-            var showVisibilityMenu by remember {
-                mutableStateOf(false)
+
+            override fun setVisibility(value: UiStatus.Misskey.Visibility) {
+                visibility = value
             }
-            var visibility by remember {
-                mutableStateOf(UiStatus.Misskey.Visibility.Public)
+
+            override fun showVisibilityMenu() {
+                showVisibilityMenu = true
             }
-            object : MisskeyVisibilityState(
-                visibility = visibility,
-                showVisibilityMenu = showVisibilityMenu,
-                allVisibilities = UiStatus.Misskey.Visibility.entries.toList(),
-                localOnly = localOnly,
-            ) {
-                override fun setLocalOnly(value: Boolean) {
-                    localOnly = value
-                }
 
-                override fun setVisibility(value: UiStatus.Misskey.Visibility) {
-                    visibility = value
-                }
-
-                override fun showVisibilityMenu() {
-                    showVisibilityMenu = true
-                }
-
-                override fun hideVisibilityMenu() {
-                    showVisibilityMenu = false
-                }
+            override fun hideVisibilityMenu() {
+                showVisibilityMenu = false
             }
         }
+    }
 
     @Composable
-    private fun mastodonVisibilityPresenter() =
-        run {
-            var showVisibilityMenu by remember {
-                mutableStateOf(false)
+    private fun mastodonVisibilityPresenter(): MastodonVisibilityState {
+        var showVisibilityMenu by remember {
+            mutableStateOf(false)
+        }
+        var visibility by remember {
+            mutableStateOf(UiStatus.Mastodon.Visibility.Public)
+        }
+        return object : MastodonVisibilityState(
+            visibility = visibility,
+            showVisibilityMenu = showVisibilityMenu,
+            allVisibilities = UiStatus.Mastodon.Visibility.entries.toImmutableList(),
+        ) {
+            override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
+                visibility = value
             }
-            var visibility by remember {
-                mutableStateOf(UiStatus.Mastodon.Visibility.Public)
+
+            override fun showVisibilityMenu() {
+                showVisibilityMenu = true
             }
-            object : MastodonVisibilityState(
-                visibility = visibility,
-                showVisibilityMenu = showVisibilityMenu,
-                allVisibilities = UiStatus.Mastodon.Visibility.entries.toList(),
-            ) {
-                override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
-                    visibility = value
-                }
 
-                override fun showVisibilityMenu() {
-                    showVisibilityMenu = true
-                }
-
-                override fun hideVisibilityMenu() {
-                    showVisibilityMenu = false
-                }
+            override fun hideVisibilityMenu() {
+                showVisibilityMenu = false
             }
         }
+    }
 
 }
 
 
 sealed interface VisibilityState
 
+@Immutable
 abstract class MastodonVisibilityState(
     val visibility: UiStatus.Mastodon.Visibility,
     val showVisibilityMenu: Boolean,
-    val allVisibilities: List<UiStatus.Mastodon.Visibility>,
+    val allVisibilities: ImmutableList<UiStatus.Mastodon.Visibility>,
 ) : VisibilityState {
     abstract fun setVisibility(value: UiStatus.Mastodon.Visibility)
     abstract fun showVisibilityMenu()
     abstract fun hideVisibilityMenu()
 }
 
+@Immutable
 abstract class MisskeyVisibilityState(
     val visibility: UiStatus.Misskey.Visibility,
     val showVisibilityMenu: Boolean,
-    val allVisibilities: List<UiStatus.Misskey.Visibility>,
+    val allVisibilities: ImmutableList<UiStatus.Misskey.Visibility>,
     val localOnly: Boolean,
 ) : VisibilityState {
     abstract fun setLocalOnly(value: Boolean)
@@ -193,7 +187,7 @@ sealed interface ComposeStatus {
 }
 
 @Immutable
-abstract class ComposeState(
+data class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
     val replyState: UiState<LazyPagingItems<UiStatus>>?,

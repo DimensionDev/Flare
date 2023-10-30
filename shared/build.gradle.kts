@@ -107,13 +107,10 @@ dependencies {
         "kspIosArm64",
         "kspIosSimulatorArm64",
     )
-    add("kspAndroid", libs.koject.processor.lib)
-    add("kspIosX64", libs.koject.processor.app)
-    add("kspIosArm64", libs.koject.processor.app)
-    add("kspIosSimulatorArm64", libs.koject.processor.app)
 
     kspTarget.forEach { target ->
         add(target, libs.ktorfit.ksp)
+        add(target, libs.koject.processor.lib)
     }
 }
 

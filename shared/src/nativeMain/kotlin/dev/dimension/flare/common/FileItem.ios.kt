@@ -1,5 +1,8 @@
 package dev.dimension.flare.common
 
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.Dispatchers
+
 actual class FileItem(
 
 ) {

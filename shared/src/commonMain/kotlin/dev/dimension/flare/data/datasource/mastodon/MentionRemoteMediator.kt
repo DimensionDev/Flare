@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import app.cash.paging.LoadType
-import app.cash.paging.PagingState
-import app.cash.paging.RemoteMediator
+import androidx.paging.LoadType
+import androidx.paging.PagingState
+import androidx.paging.RemoteMediator
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon

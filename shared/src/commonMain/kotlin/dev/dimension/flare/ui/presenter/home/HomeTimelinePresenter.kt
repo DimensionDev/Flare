@@ -8,10 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import app.cash.paging.LoadState
-import app.cash.paging.LoadStateLoading
-import app.cash.paging.compose.collectAsLazyPagingItems
+import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
+import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -34,7 +33,7 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
         var showNewToots by remember { mutableStateOf(false) }
         val refreshing =
             listState is UiState.Loading ||
-                    listState is UiState.Success && listState.data.loadState.refresh is LoadStateLoading && listState.data.itemCount != 0
+                    listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
         if (listState is UiState.Success && listState.data.itemCount > 0) {
             LaunchedEffect(Unit) {
                 snapshotFlow { listState.data.peek(0)?.statusKey }

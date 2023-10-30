@@ -156,31 +156,28 @@ class ComposePresenter(
 }
 
 
-sealed interface VisibilityState<T: Any> {
-    val visibility: T
-    val showVisibilityMenu: Boolean
-    val allVisibilities: List<T>
-
-    fun setVisibility(value: T)
-
-    fun showVisibilityMenu()
-
-    fun hideVisibilityMenu()
-}
+sealed interface VisibilityState
 
 abstract class MastodonVisibilityState(
-    override val visibility: UiStatus.Mastodon.Visibility,
-    override val showVisibilityMenu: Boolean,
-    override val allVisibilities: List<UiStatus.Mastodon.Visibility>,
-) : VisibilityState<UiStatus.Mastodon.Visibility>
+    val visibility: UiStatus.Mastodon.Visibility,
+    val showVisibilityMenu: Boolean,
+    val allVisibilities: List<UiStatus.Mastodon.Visibility>,
+) : VisibilityState {
+    abstract fun setVisibility(value: UiStatus.Mastodon.Visibility)
+    abstract fun showVisibilityMenu()
+    abstract fun hideVisibilityMenu()
+}
 
 abstract class MisskeyVisibilityState(
-    override val visibility: UiStatus.Misskey.Visibility,
-    override val showVisibilityMenu: Boolean,
-    override val allVisibilities: List<UiStatus.Misskey.Visibility>,
+    val visibility: UiStatus.Misskey.Visibility,
+    val showVisibilityMenu: Boolean,
+    val allVisibilities: List<UiStatus.Misskey.Visibility>,
     val localOnly: Boolean,
-) : VisibilityState<UiStatus.Misskey.Visibility> {
+) : VisibilityState {
     abstract fun setLocalOnly(value: Boolean)
+    abstract fun setVisibility(value: UiStatus.Misskey.Visibility)
+    abstract fun showVisibilityMenu()
+    abstract fun hideVisibilityMenu()
 }
 
 sealed interface ComposeStatus {
@@ -198,7 +195,7 @@ sealed interface ComposeStatus {
 @Immutable
 abstract class ComposeState(
     val account: UiState<UiAccount>,
-    val visibilityState: UiState<VisibilityState<out Enum<*>>>,
+    val visibilityState: UiState<VisibilityState>,
     val replyState: UiState<LazyPagingItems<UiStatus>>?,
     val emojiState: UiState<ImmutableList<UiEmoji>>,
 )

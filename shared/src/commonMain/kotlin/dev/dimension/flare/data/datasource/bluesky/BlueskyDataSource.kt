@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
+import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.feed.GetPostsQueryParams
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull

@@ -17,7 +17,7 @@ fun RefreshContainer(
 ) {
     Box(
         modifier =
-            modifier
+        modifier,
     ) {
         content.invoke(this)
     }

@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -96,14 +95,6 @@ internal fun BlueskyNotificationComponent(
                 text = stringResource(id = R.string.misskey_notification_item_quoted_your_status),
             )
         }
-
-        else -> {
-            UnknwonNotificationComponent(
-                data = data,
-                event = event,
-                modifier = modifier,
-            )
-        }
     }
 }
 
@@ -164,27 +155,4 @@ private fun NotificationComponent(
         }
         Spacer(modifier = Modifier.height(8.dp))
     }
-}
-
-@Composable
-private fun UnknwonNotificationComponent(
-    data: UiStatus.BlueskyNotification,
-    event: BlueskyStatusEvent,
-    modifier: Modifier = Modifier,
-) {
-    ListItem(
-        modifier = modifier,
-        headlineContent = {
-            Text(
-                text =
-                    stringResource(
-                        id = R.string.bluesky_notification_unknown_message,
-                        data.reason,
-                    ),
-            )
-        },
-        supportingContent = {
-            Text(text = stringResource(id = R.string.bluesky_notification_unknown_message2))
-        },
-    )
 }

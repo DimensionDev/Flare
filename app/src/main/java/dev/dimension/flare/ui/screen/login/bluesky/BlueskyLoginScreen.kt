@@ -53,9 +53,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
 @Destination
-fun BlueskyLoginRoute(
-    navigator: DestinationsNavigator,
-) {
+fun BlueskyLoginRoute(navigator: DestinationsNavigator) {
     BlueskyLoginScreen(
         onBack = navigator::navigateUp,
         toHome = {
@@ -101,16 +99,18 @@ private fun BlueskyLoginScreen(
             },
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.8f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(0.8f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
@@ -125,10 +125,11 @@ private fun BlueskyLoginScreen(
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(2f)
-                        .padding(horizontal = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(2f)
+                            .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -138,11 +139,12 @@ private fun BlueskyLoginScreen(
                             Text(text = stringResource(id = R.string.bluesky_login_base_url_hint))
                         },
                         enabled = !state.state.loading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(
-                                focusRequester = focusRequester,
-                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .focusRequester(
+                                    focusRequester = focusRequester,
+                                ),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         trailingIcon = {
                             IconButton(
@@ -174,11 +176,12 @@ private fun BlueskyLoginScreen(
                             Text(text = stringResource(id = R.string.bluesky_login_username_hint))
                         },
                         enabled = !state.state.loading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(
-                                focusRequester = focusRequester,
-                            ),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .focusRequester(
+                                    focusRequester = focusRequester,
+                                ),
                         lineLimits = TextFieldLineLimits.SingleLine,
                     )
                     OutlinedSecureTextField2(
@@ -187,14 +190,15 @@ private fun BlueskyLoginScreen(
                             Text(text = stringResource(id = R.string.bluesky_login_password_hint))
                         },
                         enabled = !state.state.loading,
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         onSubmit = {
                             state.state.login(
                                 state.baseUrl.text.toString(),
                                 state.username.text.toString(),
-                                state.password.text.toString()
+                                state.password.text.toString(),
                             )
                             true
                         },
@@ -204,7 +208,7 @@ private fun BlueskyLoginScreen(
                             state.state.login(
                                 state.baseUrl.text.toString(),
                                 state.username.text.toString(),
-                                state.password.text.toString()
+                                state.password.text.toString(),
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -228,35 +232,35 @@ private enum class KnownInstance(val url: String) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun loginPresenter(
-    toHome: () -> Unit = {},
-) = run {
-    val baseUrl by remember { mutableStateOf(TextFieldState("https://bsky.social")) }
-    val username by remember { mutableStateOf(TextFieldState("")) }
-    val password by remember { mutableStateOf(TextFieldState("")) }
-    var showDropdown by remember { mutableStateOf(false) }
+private fun loginPresenter(toHome: () -> Unit = {}) =
+    run {
+        val baseUrl by remember { mutableStateOf(TextFieldState("https://bsky.social")) }
+        val username by remember { mutableStateOf(TextFieldState("")) }
+        val password by remember { mutableStateOf(TextFieldState("")) }
+        var showDropdown by remember { mutableStateOf(false) }
 
-    val state = remember(toHome) {
-        BlueskyLoginPresenter(toHome)
-    }.invoke()
+        val state =
+            remember(toHome) {
+                BlueskyLoginPresenter(toHome)
+            }.invoke()
 
-    object {
-        val baseUrl = baseUrl
-        val username = username
-        val password = password
-        var showDropdown = showDropdown
-        val state = state
+        object {
+            val baseUrl = baseUrl
+            val username = username
+            val password = password
+            var showDropdown = showDropdown
+            val state = state
 
-        fun setDropdown(value: Boolean) {
-            showDropdown = value
-        }
-
-        fun selectBaseUrl(value: String) {
-            baseUrl.edit {
-                this.delete(0, baseUrl.text.length)
-                this.insert(0, value)
+            fun setDropdown(value: Boolean) {
+                showDropdown = value
             }
-            showDropdown = false
+
+            fun selectBaseUrl(value: String) {
+                baseUrl.edit {
+                    this.delete(0, baseUrl.text.length)
+                    this.insert(0, value)
+                }
+                showDropdown = false
+            }
         }
     }
-}

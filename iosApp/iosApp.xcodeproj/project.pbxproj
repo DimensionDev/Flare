@@ -39,6 +39,9 @@
 		067D898C2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D898B2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift */; };
 		067D898E2AD3F52100F8F932 /* MastodonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D898D2AD3F52100F8F932 /* MastodonStatusComponent.swift */; };
 		067D89902AD3FC5300F8F932 /* MisskeyStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D898F2AD3FC5300F8F932 /* MisskeyStatusComponent.swift */; };
+		068D2E0B2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068D2E0A2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift */; };
+		068D2E0D2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068D2E0C2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift */; };
+		068D2E102AEF5E1C00F2B1AE /* BlueskyLoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068D2E0F2AEF5E1C00F2B1AE /* BlueskyLoginScreen.swift */; };
 		06AD156B2AC3F454000DC865 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156A2AC3F454000DC865 /* Route.swift */; };
 		06AD156F2AC400A0000DC865 /* MastodonOAuthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156E2AC400A0000DC865 /* MastodonOAuthScreen.swift */; };
 		06C433AB2AC13B550022B819 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C433AA2AC13B550022B819 /* ContentView.swift */; };
@@ -77,6 +80,9 @@
 		067D898B2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonVisibilityIcon.swift; sourceTree = "<group>"; };
 		067D898D2AD3F52100F8F932 /* MastodonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonStatusComponent.swift; sourceTree = "<group>"; };
 		067D898F2AD3FC5300F8F932 /* MisskeyStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyStatusComponent.swift; sourceTree = "<group>"; };
+		068D2E0A2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueskyStatusComponent.swift; sourceTree = "<group>"; };
+		068D2E0C2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueskyNotificationComponent.swift; sourceTree = "<group>"; };
+		068D2E0F2AEF5E1C00F2B1AE /* BlueskyLoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueskyLoginScreen.swift; sourceTree = "<group>"; };
 		06AD156A2AC3F454000DC865 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
 		06AD156E2AC400A0000DC865 /* MastodonOAuthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonOAuthScreen.swift; sourceTree = "<group>"; };
 		06C433AA2AC13B550022B819 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -121,6 +127,8 @@
 				060881B22AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift */,
 				060881B42AD9260B001AAD2F /* UserComponent.swift */,
 				060881B62ADE4F44001AAD2F /* MisskeyNotificationComponent.swift */,
+				068D2E0A2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift */,
+				068D2E0C2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift */,
 			);
 			path = Status;
 			sourceTree = "<group>";
@@ -184,9 +192,18 @@
 			path = Component;
 			sourceTree = "<group>";
 		};
+		068D2E0E2AEF5E0D00F2B1AE /* Bluesky */ = {
+			isa = PBXGroup;
+			children = (
+				068D2E0F2AEF5E1C00F2B1AE /* BlueskyLoginScreen.swift */,
+			);
+			path = Bluesky;
+			sourceTree = "<group>";
+		};
 		06AD156C2AC40067000DC865 /* OAuth */ = {
 			isa = PBXGroup;
 			children = (
+				068D2E0E2AEF5E0D00F2B1AE /* Bluesky */,
 				060D00BE2AC4064B0087427A /* Misskey */,
 				06AD156D2AC4008D000DC865 /* Mastodon */,
 				06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */,
@@ -373,8 +390,10 @@
 				060501C02ACAC8AF00DBCCEB /* SplashScreen.swift in Sources */,
 				060881AF2AD908FA001AAD2F /* LinkPreview.swift in Sources */,
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
+				068D2E102AEF5E1C00F2B1AE /* BlueskyLoginScreen.swift in Sources */,
 				067D898C2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift in Sources */,
 				060881BE2AE109FA001AAD2F /* ComposeScreen.swift in Sources */,
+				068D2E0D2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift in Sources */,
 				067D89902AD3FC5300F8F932 /* MisskeyStatusComponent.swift in Sources */,
 				060881B72ADE4F44001AAD2F /* MisskeyNotificationComponent.swift in Sources */,
 				067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */,
@@ -387,6 +406,7 @@
 				067D898A2AD3A88500F8F932 /* AdaptiveGrid.swift in Sources */,
 				060881C12AE10D35001AAD2F /* ComposeViewModel.swift in Sources */,
 				0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */,
+				068D2E0B2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift in Sources */,
 				06AD156F2AC400A0000DC865 /* MastodonOAuthScreen.swift in Sources */,
 				067D898E2AD3F52100F8F932 /* MastodonStatusComponent.swift in Sources */,
 				06D5C9142AC3BB09007439D5 /* MoleculeViewModelBase.swift in Sources */,

@@ -28,6 +28,9 @@ struct RouterView : View {
                             },
                             toMastodon: {
                                 sheetRouter.navigate(to: .mastodon)
+                            },
+                            toBluesky: {
+                                sheetRouter.navigate(to: .bluesky)
                             }
                         )
                         .withSheetRouter {
@@ -36,6 +39,8 @@ struct RouterView : View {
                             sheetRouter.navigate(to: .misskey)
                         } toMastodon: {
                             sheetRouter.navigate(to: .mastodon)
+                        } toBluesky: {
+                            sheetRouter.navigate(to: .bluesky)
                         }
 
                     }
@@ -87,6 +92,7 @@ public enum SheetDestination: Codable, Hashable {
     case misskey
     case misskeyCallback(session: String)
     case serviceSelection
+    case bluesky
 }
 
 @Observable
@@ -130,7 +136,7 @@ extension View {
         }
     }
     
-    func withSheetRouter(toHome:@escaping () -> Void, toMisskey: @escaping () -> Void, toMastodon: @escaping () -> Void) -> some View {
+    func withSheetRouter(toHome:@escaping () -> Void, toMisskey: @escaping () -> Void, toMastodon: @escaping () -> Void, toBluesky: @escaping () -> Void) -> some View {
         navigationDestination(for: SheetDestination.self) { destination in
             switch destination {
             case .mastodon:
@@ -144,12 +150,15 @@ extension View {
             case .serviceSelection:
                 ServiceSelectScreen(
                     toMisskey: toMisskey,
-                    toMastodon: toMastodon
+                    toMastodon: toMastodon,
+                    toBluesky: toBluesky
                 )
             case .settings:
                 SettingsScreen()
             case .accountSettings:
                 AccountsScreen()
+            case .bluesky:
+                BlueskyLoginScreen(toHome: toHome)
             }
         }
     }

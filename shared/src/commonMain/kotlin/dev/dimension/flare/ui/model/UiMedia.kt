@@ -9,7 +9,7 @@ sealed interface UiMedia {
         val width: Float,
     ) : UiMedia {
         val aspectRatio: Float
-            get() = width / (height.takeUnless { it == 0f } ?: 1f)
+            get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
     }
 
     data class Video(

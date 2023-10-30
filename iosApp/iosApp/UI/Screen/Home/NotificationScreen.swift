@@ -6,7 +6,7 @@ struct NotificationScreen: View {
     var body: some View {
         List {
             if case .success(let data) = onEnum(of: viewModel.model.allTypes) {
-                if (data.data.count > 0) {
+                if (data.data.count > 1) {
                     Picker("NotificationType", selection: $viewModel.notificationType) {
                         ForEach(1...data.data.count, id: \.self) { index in
                             if let item = data.data[index - 1] as? NotificationFilter {

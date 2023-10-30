@@ -87,6 +87,8 @@ struct HomeSheetContent: View {
                     sheetRouter.navigate(to: .misskey)
                 } toMastodon: {
                     sheetRouter.navigate(to: .mastodon)
+                } toBluesky: {
+                    sheetRouter.navigate(to: .bluesky)
                 }
         }
         .onOpenURL { url in

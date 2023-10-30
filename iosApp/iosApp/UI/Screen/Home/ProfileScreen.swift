@@ -60,6 +60,8 @@ struct ProfileHeaderSuccess: View {
             MastodonProfileHeader(user: mastodon, relation: relation)
         case .misskey(let misskey):
             MisskeyProfileHeader(user: misskey, relation: relation)
+        case .bluesky(let bluesky):
+            BlueskyProfileHeader(user: bluesky, relation: relation)
         }
     }
 }
@@ -74,6 +76,14 @@ struct MastodonProfileHeader: View {
 
 struct MisskeyProfileHeader: View {
     let user: UiUser.Misskey
+    let relation: UiState<UiRelation>
+    var body: some View {
+        CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown)
+    }
+}
+
+struct BlueskyProfileHeader: View {
+    let user: UiUser.Bluesky
     let relation: UiState<UiRelation>
     var body: some View {
         CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown)

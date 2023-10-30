@@ -17,6 +17,10 @@ func StatusTimelineBuilder(data: Paging_compose_commonLazyPagingItems<UiStatus>)
                         MisskeyStatusComponent(misskey: misskey)
                     case .misskeyNotification(let misskeyNotification):
                         MisskeyNotificationComponent(data: misskeyNotification)
+                    case .bluesky(let bluesky):
+                        BlueskyStatusComponent(bluesky: bluesky)
+                    case .blueskyNotification(let blueskyNotification):
+                        BlueskyNotificationComponent(data: blueskyNotification)
                     }
                 } else {
                     CommonStatusComponent(content: "haha", avatar: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", name: "hahaname", handle: "haha.haha", userKey: MicroBlogKey(id: "", host: ""), medias: [], timestamp: 1696838289, headerTrailing: {EmptyView()})

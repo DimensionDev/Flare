@@ -3,6 +3,7 @@ import SwiftUI
 struct ServiceSelectScreen: View {
     let toMisskey: () -> Void
     let toMastodon: () -> Void
+    let toBluesky: () -> Void
     var body: some View {
         VStack(alignment:.center, spacing: 10) {
             Spacer()
@@ -38,6 +39,17 @@ struct ServiceSelectScreen: View {
                     .cornerRadius(10)
                     .scenePadding([.leading,.trailing])
             }
+            Button(action: toBluesky) {
+                Text("Bluesky")
+                    .frame(maxWidth: .infinity)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.green)
+                    .cornerRadius(10)
+                    .scenePadding([.leading,.trailing])
+            }
         }.frame(maxHeight: .infinity, alignment: .top)
     }
 }
@@ -46,6 +58,6 @@ struct ServiceSelectScreen: View {
 
 #Preview {
     ServiceSelectScreen(
-        toMisskey: {}, toMastodon: {}
+        toMisskey: {}, toMastodon: {}, toBluesky: {}
     )
 }

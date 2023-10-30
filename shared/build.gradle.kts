@@ -12,7 +12,13 @@ plugins {
 
 kotlin {
     targetHierarchy.default()
-//    mingwX64()
+    mingwX64 {
+        binaries {
+            sharedLib {
+                baseName = "libshared"
+            }
+        }
+    }
 
     androidTarget()
 
@@ -34,7 +40,7 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(libs.koject.core)
                 implementation(libs.koject.compose.core)
-                implementation(libs.paging.common)
+//                implementation(libs.paging.common)
                 implementation(libs.ktorfit.lib)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
@@ -106,6 +112,7 @@ dependencies {
         "kspIosX64",
         "kspIosArm64",
         "kspIosSimulatorArm64",
+        "kspMingwX64",
     )
 
     kspTarget.forEach { target ->

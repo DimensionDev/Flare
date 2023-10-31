@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import app.cash.molecule.DisplayLinkClock
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import kotlin.experimental.ExperimentalObjCRefinement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.experimental.ExperimentalObjCRefinement
 
 actual abstract class PresenterBase<Model> {
 
@@ -21,5 +21,5 @@ actual abstract class PresenterBase<Model> {
     @OptIn(ExperimentalObjCRefinement::class)
     @HiddenFromObjC
     @Composable
-    protected actual abstract fun body(): Model
+    internal actual abstract fun body(): Model
 }

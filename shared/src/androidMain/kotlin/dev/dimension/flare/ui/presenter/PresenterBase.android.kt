@@ -10,5 +10,5 @@ actual abstract class PresenterBase<Model> {
     }
 
     @Composable
-    protected actual abstract fun body(): Model
+    internal actual abstract fun body(): Model
 }

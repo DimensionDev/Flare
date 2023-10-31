@@ -67,6 +67,17 @@ kotlin {
             }
         }
     }
+
+    targets.getByName("mingwX64") {
+        compilations.forEach {
+            it.kotlinOptions {
+                freeCompilerArgs = freeCompilerArgs + listOf(
+                    // require msys64 and run pacman --noconfirm -S mingw-w64-x86_64-sqlite3
+                    "-linker-options", "-Lc:\\msys64\\mingw64\\lib -lsqlite3"
+                )
+            }
+        }
+    }
 }
 
 sqldelight {
@@ -84,6 +95,7 @@ sqldelight {
             srcDirs("src/commonMain/sqldelight/version")
         }
     }
+    linkSqlite.set(true)
 }
 
 android {

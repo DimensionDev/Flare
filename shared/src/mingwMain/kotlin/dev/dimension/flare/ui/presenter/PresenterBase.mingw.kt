@@ -21,5 +21,5 @@ actual abstract class PresenterBase<Model> {
     @OptIn(ExperimentalObjCRefinement::class)
     @HiddenFromObjC
     @Composable
-    protected actual abstract fun body(): Model
+    internal actual abstract fun body(): Model
 }

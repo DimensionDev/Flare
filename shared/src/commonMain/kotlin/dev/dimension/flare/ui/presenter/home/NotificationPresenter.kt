@@ -11,6 +11,7 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.datasource.NotificationFilter
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
@@ -20,6 +21,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toImmutableList
 
+@MinGWPresenter
 class NotificationPresenter : PresenterBase<NotificationState>() {
 
     @Composable

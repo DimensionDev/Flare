@@ -51,6 +51,7 @@ kotlin {
                 implementation(libs.ktml)
                 implementation(libs.mfm.multiplatform)
                 api(libs.bluesky)
+                implementation(projects.mingwGen.mingwGenAnnotation)
             }
         }
         val androidMain by getting {
@@ -64,6 +65,10 @@ kotlin {
 //                implementation(libs.sqliter.driver)
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
+            }
+        }
+        val mingwMain by getting {
+            dependencies {
             }
         }
     }
@@ -131,6 +136,7 @@ dependencies {
         add(target, libs.ktorfit.ksp)
         add(target, libs.koject.processor.lib)
     }
+    add("kspMingwX64", projects.mingwGen)
 }
 
 //ksp {

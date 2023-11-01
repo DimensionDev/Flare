@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
 
-actual abstract class PresenterBase<Model> {
+actual abstract class PresenterBase<Model: Any> {
 
     @Composable
     operator fun invoke(): Model {

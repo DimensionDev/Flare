@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.experimental.ExperimentalObjCRefinement
 
-actual abstract class PresenterBase<Model> {
+actual abstract class PresenterBase<Model: Any> {
 
     private val scope = CoroutineScope(DisplayLinkClock)
 

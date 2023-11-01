@@ -47,6 +47,8 @@ kermit = "2.0.2"
 ktml = "0.0.5-SNAPSHOT"
 versionUpdate = "0.49.0"
 bluesky = "0.0.1-SNAPSHOT"
+kotlinpoet = "1.14.2"
+kotlinx-coroutines = "1.7.3"
 
 [libraries]
 bluesky = { module = "moe.tlaster:bluesky", version.ref = "bluesky" }
@@ -82,6 +84,7 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 kotlinx-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-atomicfu = { group = "org.jetbrains.kotlinx", name = "atomicfu", version.ref = "kotlinx-atomicfu" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
 koject-core = { group = "com.moriatsushi.koject", name = "koject-core", version.ref = "koject" }
 koject-processor-app = { group = "com.moriatsushi.koject", name = "koject-processor-app", version.ref = "koject" }
@@ -143,6 +146,8 @@ uuid = { group = "com.benasher44", name = "uuid", version.ref = "uuid" }
 sqliter-driver = { group = "co.touchlab", name = "sqliter-driver", version.ref = "sqliter-driver" }
 
 kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermit" }
+kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 [bundles]
 room = ["room-runtime", "room-ktx", "room-paging"]

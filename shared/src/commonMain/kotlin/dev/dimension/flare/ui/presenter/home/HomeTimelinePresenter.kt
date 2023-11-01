@@ -12,6 +12,7 @@ import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 
+@MinGWPresenter
 class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
 
     @Composable

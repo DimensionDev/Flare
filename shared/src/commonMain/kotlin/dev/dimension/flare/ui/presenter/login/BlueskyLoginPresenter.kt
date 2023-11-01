@@ -10,15 +10,18 @@ import com.atproto.server.CreateSessionRequest
 import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
 import kotlinx.coroutines.launch
 
+@MinGWPresenter
 class BlueskyLoginPresenter(
     private val toHome: () -> Unit,
 ): PresenterBase<BlueskyLoginState>() {
+
     @Composable
     override fun body(): BlueskyLoginState {
         var error by remember { mutableStateOf<Throwable?>(null) }

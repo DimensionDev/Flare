@@ -13,6 +13,7 @@ import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.activeAccountPresenter
+import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
@@ -25,6 +26,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
+@MinGWPresenter
 class ComposePresenter(
     private val status: ComposeStatus? = null,
 ) : PresenterBase<ComposeState>() {

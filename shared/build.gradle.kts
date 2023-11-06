@@ -90,6 +90,8 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(libs.sqldelight.jvm.driver)
+                implementation("org.xerial:sqlite-jdbc:3.39.2.0")
+                implementation("io.ktor:ktor-client-okhttp:${libs.versions.ktor.get()}")
             }
         }
     }
@@ -137,10 +139,11 @@ tasks.withType<Jar>() {
     doFirst {
         configurations["jvmCompileClasspath"].forEach { file: File ->
             from(zipTree(file.absoluteFile))
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
     }
 }
+
 //ksp {
 //    arg("moduleName", project.name)
 //}

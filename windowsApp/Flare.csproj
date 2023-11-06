@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+		<TargetFramework>net7.0-windows10.0.22621.0</TargetFramework>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<RootNamespace>Flare</RootNamespace>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -10,7 +10,12 @@
 		<PublishProfile>win10-$(Platform).pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<EnableMsixTooling>true</EnableMsixTooling>
+		<LangVersion>default</LangVersion>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="UI\Screen\Login\BlueskyLoginView.xaml" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
@@ -23,19 +28,25 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="Fody" Version="6.8.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="IKVM" Version="8.7.1" />
 		<PackageReference Include="IKVM.Maven.Sdk" Version="1.6.1" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231008000" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
+		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
 
 	<ItemGroup>
 		<IkvmReference Include="..\shared\build\libs\shared-jvm.jar">
-			<AssemblyName>Shared</AssemblyName>
-			<AssemblyVersion>1.0.0.6</AssemblyVersion>
-			<AssemblyFileVersion>1.0.0.6</AssemblyFileVersion>
+			<AssemblyName>shared</AssemblyName>
+			<AssemblyVersion>1.0.4</AssemblyVersion>
+			<AssemblyFileVersion>1.0.4</AssemblyFileVersion>
 		</IkvmReference>
 	</ItemGroup>
 
@@ -48,6 +59,11 @@
 	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
+	<ItemGroup>
+		<Page Update="UI\Screen\Login\BlueskyLoginView.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
 
 	<!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
@@ -57,4 +73,8 @@
 	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
 	</PropertyGroup>
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="cd ..&#xD;&#xA;./gradlew :shared:jvmjar" />
+	</Target>
+
 </Project>

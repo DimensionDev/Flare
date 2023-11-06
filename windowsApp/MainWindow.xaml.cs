@@ -1,3 +1,5 @@
+using dev.dimension.flare.ui.presenter;
+using dev.dimension.flare.ui.presenter.login;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -26,18 +28,7 @@ namespace Flare
         public MainWindow()
         {
             this.InitializeComponent();
-        }
-
-        private void myButton_Click(object sender, RoutedEventArgs e)
-        {
-            myButton.Content = "Clicked";
-        }
-    }
-
-    class Callback : dev.dimension.flare.ui.presenter.login.BlueskyLoginCallback
-    {
-        public void onLoginSuccess()
-        {
+            RootFrame.Navigate(typeof(UI.Screen.Login.BlueskyLoginView));
         }
     }
 }

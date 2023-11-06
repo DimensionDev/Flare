@@ -25,7 +25,7 @@ coil = "2.4.0"
 ktorfit = "1.9.1"
 ktor = "2.3.5"
 stately = "2.0.5"
-twitter-parser = "0.3.2"
+twitter-parser = "0.3.5-SNAPSHOT"
 molecule = "1.2.1"
 accompanist = "0.33.2-alpha"
 kotlinx-atomicfu = "0.22.0"
@@ -44,7 +44,7 @@ sqliter-driver = "1.2.3"
 skie = "0.5.0"
 compose-jb = "1.5.3"
 kermit = "2.0.2"
-ktml = "0.0.5-SNAPSHOT"
+ktml = "0.0.6-SNAPSHOT"
 versionUpdate = "0.49.0"
 bluesky = "0.0.1-SNAPSHOT"
 kotlinpoet = "1.14.2"
@@ -138,7 +138,7 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 
 zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.1" }
 
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.1-SNAPSHOT"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.2-SNAPSHOT"
 
 compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
 compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }

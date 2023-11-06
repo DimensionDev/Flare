@@ -12,14 +12,10 @@ import kotlinx.coroutines.launch
 import org.koin.compose.rememberKoinInject
 
 
-fun interface BlueskyLoginCallback {
-    fun onLoginSuccess()
-}
 
 class BlueskyLoginPresenter(
-    private val callback: BlueskyLoginCallback,
+    private val toHome: () -> Unit,
 ): PresenterBase<BlueskyLoginState>() {
-
 
     @Composable
     override fun body(): BlueskyLoginState {
@@ -43,8 +39,7 @@ class BlueskyLoginPresenter(
                             password = password,
                             accountRepository = accountRepository,
                         )
-                        callback.onLoginSuccess()
-//                        toHome.invoke()
+                        toHome.invoke()
                     }.onFailure {
                         error = it
                     }

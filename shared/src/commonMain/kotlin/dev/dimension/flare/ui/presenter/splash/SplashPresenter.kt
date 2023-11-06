@@ -7,12 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.repository.activeAccountPresenter
-import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
 
-@MinGWPresenter
 class SplashPresenter(
     private val toHome: () -> Unit,
     private val toLogin: () -> Unit,

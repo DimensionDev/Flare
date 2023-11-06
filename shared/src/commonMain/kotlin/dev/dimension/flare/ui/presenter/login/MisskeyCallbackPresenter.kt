@@ -13,7 +13,6 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
-import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -23,7 +22,6 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
-@MinGWPresenter
 class MisskeyCallbackPresenter(
     private val session: String?,
     private val toHome: () -> Unit,

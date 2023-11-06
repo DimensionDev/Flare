@@ -10,7 +10,6 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.data.repository.allAccountsPresenter
-import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
@@ -21,7 +20,6 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
-@MinGWPresenter
 class AccountsPresenter : PresenterBase<AccountsState>() {
     @Composable
     override fun body(): AccountsState {

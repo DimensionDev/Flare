@@ -1,3 +1,5 @@
+import app.cash.sqldelight.core.capitalize
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
@@ -12,13 +14,6 @@ plugins {
 
 kotlin {
     targetHierarchy.default()
-    mingwX64 {
-        binaries {
-            sharedLib {
-                baseName = "libshared"
-            }
-        }
-    }
 
     androidTarget()
 
@@ -33,6 +28,17 @@ kotlin {
         }
     }
 
+    targets.forEach { target ->
+        target.name.takeIf {
+            it != "metadata"
+        }?.let {
+            "ksp${it.capitalize()}"
+        }?.let {
+            dependencies.add(it, libs.ktorfit.ksp)
+            dependencies.add(it, libs.koject.processor.lib)
+        }
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -40,7 +46,7 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(libs.koject.core)
                 implementation(libs.koject.compose.core)
-//                implementation(libs.paging.common)
+                implementation(libs.paging.common)
                 implementation(libs.ktorfit.lib)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
@@ -51,7 +57,6 @@ kotlin {
                 implementation(libs.ktml)
                 implementation(libs.mfm.multiplatform)
                 api(libs.bluesky)
-                implementation(projects.mingwGen.mingwGenAnnotation)
             }
         }
         val androidMain by getting {
@@ -65,21 +70,6 @@ kotlin {
 //                implementation(libs.sqliter.driver)
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
-            }
-        }
-        val mingwMain by getting {
-            dependencies {
-            }
-        }
-    }
-
-    targets.getByName("mingwX64") {
-        compilations.forEach {
-            it.kotlinOptions {
-                freeCompilerArgs = freeCompilerArgs + listOf(
-                    // require msys64 and run pacman --noconfirm -S mingw-w64-x86_64-sqlite3
-                    "-linker-options", "-Lc:\\msys64\\mingw64\\lib -lsqlite3"
-                )
             }
         }
     }
@@ -121,22 +111,6 @@ android {
     kotlin {
         jvmToolchain(libs.versions.java.get().toInt())
     }
-}
-
-dependencies {
-    val kspTarget = listOf(
-        "kspAndroid",
-        "kspIosX64",
-        "kspIosArm64",
-        "kspIosSimulatorArm64",
-        "kspMingwX64",
-    )
-
-    kspTarget.forEach { target ->
-        add(target, libs.ktorfit.ksp)
-        add(target, libs.koject.processor.lib)
-    }
-    add("kspMingwX64", projects.mingwGen)
 }
 
 //ksp {

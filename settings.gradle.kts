@@ -19,6 +19,4 @@ dependencyResolutionManagement {
 rootProject.name = "Flare"
 include(":app")
 include(":shared")
-include(":mingw-gen")
-include(":mingw-gen:mingw-gen-annotation")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

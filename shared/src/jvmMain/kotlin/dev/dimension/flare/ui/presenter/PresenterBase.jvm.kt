@@ -6,7 +6,6 @@ import app.cash.molecule.launchMolecule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
-import kotlin.experimental.ExperimentalObjCRefinement
 
 actual abstract class PresenterBase<Model: Any> {
 
@@ -18,8 +17,6 @@ actual abstract class PresenterBase<Model: Any> {
         }
     }
 
-    @OptIn(ExperimentalObjCRefinement::class)
-    @HiddenFromObjC
     @Composable
     internal actual abstract fun body(): Model
 }

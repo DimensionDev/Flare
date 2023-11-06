@@ -53,7 +53,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.koject.compose.rememberInject
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
@@ -82,6 +81,7 @@ import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresen
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.ktml.dom.Element
+import org.koin.compose.rememberKoinInject
 import kotlin.math.max
 
 @Composable
@@ -630,7 +630,7 @@ private fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
 @Composable
 private fun profilePresenter(
     userKey: MicroBlogKey?,
-    statusEvent: StatusEvent = rememberInject(),
+    statusEvent: StatusEvent = rememberKoinInject(),
 ) = run {
     val state =
         remember(userKey) {

@@ -35,9 +35,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.koject.Binds
-import com.moriatsushi.koject.Provides
-import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.MicroBlogKey
@@ -282,9 +279,6 @@ internal interface BlueskyStatusEvent {
     fun onMoreClick(data: UiStatus.Bluesky)
 }
 
-@Singleton
-@Provides
-@Binds(to = BlueskyStatusEvent::class)
 internal class DefaultBlueskyStatusEvent(
     private val context: Context,
     private val scope: CoroutineScope,

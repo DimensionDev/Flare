@@ -1,16 +1,9 @@
 package dev.dimension.flare.data.repository
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
-import com.moriatsushi.koject.Provides
-import com.moriatsushi.koject.Singleton
-import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.datasource.MicroblogDataSource
@@ -29,9 +22,8 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
+import org.koin.compose.rememberKoinInject
 
-@Provides
-@Singleton
 class AccountRepository(
     private val appDatabase: AppDatabase,
 ) {
@@ -75,7 +67,7 @@ object NoActiveAccountException : Exception("No active account.")
 
 @Composable
 internal fun activeAccountPresenter(
-    repository: AccountRepository = rememberInject()
+    repository: AccountRepository = rememberKoinInject()
 ): State<UiState<UiAccount>> {
     return remember(repository) {
         repository.activeAccount
@@ -126,7 +118,7 @@ internal fun accountServiceProvider(
 
 @Composable
 internal fun allAccountsPresenter(
-    repository: AccountRepository = rememberInject()
+    repository: AccountRepository = rememberKoinInject()
 ): State<UiState<ImmutableList<UiAccount>>> {
     return remember(repository) {
         repository.allAccounts

@@ -1,10 +1,6 @@
 package dev.dimension.flare.ui.model
 
-import moe.tlaster.ktml.dom.Comment
-import moe.tlaster.ktml.dom.Doctype
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Node
-import moe.tlaster.ktml.dom.Text
+import moe.tlaster.ktml.dom.*
 
 actual class UiUserExtra(
     val nameMarkdown: String,

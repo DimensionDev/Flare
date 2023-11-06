@@ -99,7 +99,6 @@ import androidx.navigation.NavBackStackEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.moriatsushi.koject.compose.rememberInject
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
@@ -133,12 +132,13 @@ import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
 import dev.dimension.flare.ui.presenter.compose.VisibilityState
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.toImmutableList
+import org.koin.compose.rememberKoinInject
 import kotlin.math.max
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
-import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
@@ -864,12 +864,12 @@ private fun PollOption(
 private fun composePresenter(
     context: Context,
     status: ComposeStatus? = null,
-    composeUseCase: ComposeUseCase = rememberInject(),
+    composeUseCase: ComposeUseCase = rememberKoinInject(),
 ) = run {
-
-    val state = remember(status) {
-        ComposePresenter(status)
-    }.invoke()
+    val state =
+        remember(status) {
+            ComposePresenter(status)
+        }.invoke()
     val textFieldState by remember {
         mutableStateOf(TextFieldState(""))
     }

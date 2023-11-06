@@ -1,31 +1,32 @@
 package dev.dimension.flare.ui.presenter.login
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import com.atproto.server.CreateSessionRequest
-import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
-import io.ktor.http.Url
+import io.ktor.http.*
 import kotlinx.coroutines.launch
+import org.koin.compose.rememberKoinInject
+
+
+fun interface BlueskyLoginCallback {
+    fun onLoginSuccess()
+}
 
 class BlueskyLoginPresenter(
-    private val toHome: () -> Unit,
+    private val callback: BlueskyLoginCallback,
 ): PresenterBase<BlueskyLoginState>() {
+
 
     @Composable
     override fun body(): BlueskyLoginState {
         var error by remember { mutableStateOf<Throwable?>(null) }
         val scope = rememberCoroutineScope()
         var loading by remember { mutableStateOf(false) }
-        val accountRepository: AccountRepository = rememberInject()
+        val accountRepository: AccountRepository = rememberKoinInject()
 
         return object : BlueskyLoginState(
             loading,
@@ -42,7 +43,8 @@ class BlueskyLoginPresenter(
                             password = password,
                             accountRepository = accountRepository,
                         )
-                        toHome.invoke()
+                        callback.onLoginSuccess()
+//                        toHome.invoke()
                     }.onFailure {
                         error = it
                     }

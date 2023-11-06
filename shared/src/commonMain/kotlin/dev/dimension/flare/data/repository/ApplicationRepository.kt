@@ -1,14 +1,10 @@
 package dev.dimension.flare.data.repository
 
-import com.moriatsushi.koject.Provides
-import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiApplication.Companion.toUi
 
-@Provides
-@Singleton
 class ApplicationRepository(
     private val database: AppDatabase,
 ) {

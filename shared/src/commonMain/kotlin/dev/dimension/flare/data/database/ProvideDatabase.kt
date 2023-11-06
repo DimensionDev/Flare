@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.database
 
 import app.cash.sqldelight.EnumColumnAdapter
-import com.moriatsushi.koject.Provides
-import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.data.cache.DbStatus
 import dev.dimension.flare.data.cache.DbUser
 import dev.dimension.flare.data.database.adapter.JsonColumnAdapter
@@ -17,16 +15,12 @@ import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.database.version.VersionDatabase
 import dev.dimension.flare.data.version.DbVersion
 
-@Singleton
-@Provides
 internal fun provideVersionDatabase(driverFactory: DriverFactory): VersionDatabase {
     return VersionDatabase(
         driverFactory.createDriver(VersionDatabase.Schema, "version.db"),
     )
 }
 
-@Singleton
-@Provides
 internal fun provideAppDatabase(
     driverFactory: DriverFactory,
     versionDatabase: VersionDatabase,
@@ -55,8 +49,6 @@ internal fun provideAppDatabase(
     )
 }
 
-@Singleton
-@Provides
 internal fun provideCacheDatabase(
     driverFactory: DriverFactory,
     versionDb: VersionDatabase,

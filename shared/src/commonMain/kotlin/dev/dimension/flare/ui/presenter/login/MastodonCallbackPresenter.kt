@@ -7,8 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import co.touchlab.kermit.Logger
-import com.moriatsushi.koject.compose.rememberInject
-import com.moriatsushi.koject.inject
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
@@ -21,6 +19,7 @@ import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
+import org.koin.compose.rememberKoinInject
 
 class MastodonCallbackPresenter(
     private val code: String?,
@@ -28,8 +27,8 @@ class MastodonCallbackPresenter(
 ) : PresenterBase<UiState<Nothing>>() {
     @Composable
     override fun body(): UiState<Nothing> {
-        val applicationRepository: ApplicationRepository = rememberInject()
-        val accountRepository: AccountRepository = rememberInject()
+        val applicationRepository: ApplicationRepository = rememberKoinInject()
+        val accountRepository: AccountRepository = rememberKoinInject()
         if (code == null) {
             return UiState.Error(Exception("No code"))
         }
@@ -91,10 +90,10 @@ class MastodonCallbackPresenter(
 
 suspend fun mastodonLoginUseCase(
     domain: String,
+    applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,
 ): Result<Unit> {
     return runCatching {
-        val applicationRepository: ApplicationRepository = inject()
         val baseUrl = if (domain.startsWith("http://", ignoreCase = true) || domain.startsWith(
                 "https://",
                 ignoreCase = true,

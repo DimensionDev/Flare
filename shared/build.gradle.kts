@@ -13,7 +13,14 @@ plugins {
 }
 
 kotlin {
-    targetHierarchy.default()
+    targetHierarchy.default {
+        common {
+            group("nonAndroid") {
+                withApple()
+                withJvm()
+            }
+        }
+    }
 
     androidTarget()
 
@@ -28,6 +35,14 @@ kotlin {
         }
     }
 
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "1.8"
+            }
+        }
+    }
+
     targets.forEach { target ->
         target.name.takeIf {
             it != "metadata"
@@ -35,7 +50,6 @@ kotlin {
             "ksp${it.capitalize()}"
         }?.let {
             dependencies.add(it, libs.ktorfit.ksp)
-            dependencies.add(it, libs.koject.processor.lib)
         }
     }
 
@@ -44,8 +58,9 @@ kotlin {
             dependencies {
                 implementation(libs.bundles.sqldelight)
                 implementation(libs.bundles.kotlinx)
-                implementation(libs.koject.core)
-                implementation(libs.koject.compose.core)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
                 implementation(libs.paging.common)
                 implementation(libs.ktorfit.lib)
                 implementation(libs.bundles.ktor)
@@ -70,6 +85,11 @@ kotlin {
 //                implementation(libs.sqliter.driver)
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
+            }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation(libs.sqldelight.jvm.driver)
             }
         }
     }
@@ -113,6 +133,14 @@ android {
     }
 }
 
+tasks.withType<Jar>() {
+    doFirst {
+        configurations["jvmCompileClasspath"].forEach { file: File ->
+            from(zipTree(file.absoluteFile))
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+}
 //ksp {
 //    arg("moduleName", project.name)
 //}

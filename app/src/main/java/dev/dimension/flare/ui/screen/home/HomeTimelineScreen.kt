@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -35,6 +34,7 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import kotlinx.coroutines.launch
+import org.koin.compose.rememberKoinInject
 
 @Composable
 internal fun HomeTimelineScreen(contentPadding: PaddingValues) {
@@ -104,7 +104,7 @@ internal fun HomeTimelineScreen(contentPadding: PaddingValues) {
 }
 
 @Composable
-private fun homeTimelinePresenter(statusEvent: StatusEvent = rememberInject()) =
+private fun homeTimelinePresenter(statusEvent: StatusEvent = rememberKoinInject()) =
     run {
         val state = remember { HomeTimelinePresenter() }.invoke()
         object {

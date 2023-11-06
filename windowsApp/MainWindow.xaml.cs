@@ -28,7 +28,7 @@ namespace Flare
         public MainWindow()
         {
             this.InitializeComponent();
-            RootFrame.Navigate(typeof(UI.Screen.Login.BlueskyLoginView));
+            RootFrame.Navigate(typeof(UI.Screen.Login.MastodonLoginScreen));
         }
     }
 }

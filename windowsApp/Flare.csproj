@@ -14,7 +14,8 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Remove="UI\Screen\Login\BlueskyLoginView.xaml" />
+		<None Remove="UI\Screen\Login\BlueskyLoginScreen.xaml" />
+		<None Remove="UI\Screen\Login\MastodonLoginScreen.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -35,6 +36,9 @@
 		</PackageReference>
 		<PackageReference Include="IKVM" Version="8.7.1" />
 		<PackageReference Include="IKVM.Maven.Sdk" Version="1.6.1" />
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231008000" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
 		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
@@ -45,9 +49,10 @@
 	<ItemGroup>
 		<IkvmReference Include="..\shared\build\libs\shared-jvm.jar">
 			<AssemblyName>shared</AssemblyName>
-			<AssemblyVersion>1.0.4</AssemblyVersion>
-			<AssemblyFileVersion>1.0.4</AssemblyFileVersion>
+			<AssemblyVersion>1.0.0</AssemblyVersion>
+			<AssemblyFileVersion>1.0.0</AssemblyFileVersion>
 		</IkvmReference>
+		
 	</ItemGroup>
 
 
@@ -60,7 +65,12 @@
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
 	<ItemGroup>
-		<Page Update="UI\Screen\Login\BlueskyLoginView.xaml">
+	  <Page Update="UI\Screen\Login\MastodonLoginScreen.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
+	</ItemGroup>
+	<ItemGroup>
+		<Page Update="UI\Screen\Login\BlueskyLoginScreen.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>

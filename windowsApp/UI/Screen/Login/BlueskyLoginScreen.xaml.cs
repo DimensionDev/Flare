@@ -26,10 +26,10 @@ namespace Flare.UI.Screen.Login;
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-sealed partial class BlueskyLoginView : Page
+sealed partial class BlueskyLoginScreen : Page
 {
     public BlueskyLoginViewModel ViewModel { get; }
-    public BlueskyLoginView()
+    public BlueskyLoginScreen()
     {
         ViewModel = new BlueskyLoginViewModel(ToHome);
         this.InitializeComponent();
@@ -51,11 +51,11 @@ sealed partial class BlueskyLoginView : Page
     }
 }
 
-class KotlinFunction : Function0
+class KotlinFunction0 : Function0
 {
     private readonly Action _action;
 
-    public KotlinFunction(Action action)
+    public KotlinFunction0(Action action)
     {
         _action = action;
     }
@@ -66,6 +66,24 @@ class KotlinFunction : Function0
         return kotlin.Unit.INSTANCE;
     }
 }
+
+class KotlinFunction1<T> : Function1 where T : class
+{
+    private readonly Action<T> _action;
+
+    public KotlinFunction1(Action<T> action)
+    {
+        _action = action;
+    }
+
+    public object invoke(object p1)
+    {
+        _action(p1 as T);
+        return kotlin.Unit.INSTANCE;
+    }
+}
+
+
 
 partial class BlueskyLoginViewModel : MoleculeViewModel<BlueskyLoginPresenter, BlueskyLoginState>
 {
@@ -83,7 +101,7 @@ partial class BlueskyLoginViewModel : MoleculeViewModel<BlueskyLoginPresenter, B
     public string? Error => State.getError()?.Message;
 
 
-    public BlueskyLoginViewModel(Action toHome) : base(new BlueskyLoginPresenter(new KotlinFunction(toHome)))
+    public BlueskyLoginViewModel(Action toHome) : base(new BlueskyLoginPresenter(new KotlinFunction0(toHome)))
     {
     }
 

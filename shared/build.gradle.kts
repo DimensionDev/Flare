@@ -19,6 +19,10 @@ kotlin {
                 withApple()
                 withJvm()
             }
+            group("nonJvm") {
+                withApple()
+                withAndroid()
+            }
         }
     }
 
@@ -66,7 +70,6 @@ kotlin {
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
                 implementation(libs.uuid)
-                implementation(libs.molecule.runtime)
                 implementation(libs.kermit)
                 api(libs.paging.compose.common)
                 implementation(libs.ktml)
@@ -92,6 +95,12 @@ kotlin {
                 implementation(libs.sqldelight.jvm.driver)
                 implementation("org.xerial:sqlite-jdbc:3.39.2.0")
                 implementation("io.ktor:ktor-client-okhttp:${libs.versions.ktor.get()}")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${libs.versions.kotlinx.coroutines.get()}")
+            }
+        }
+        val nonJvmMain by getting {
+            dependencies {
+                implementation(libs.molecule.runtime)
             }
         }
     }
@@ -135,11 +144,11 @@ android {
     }
 }
 
-tasks.withType<Jar>() {
+tasks.withType<Jar> {
     doFirst {
-        configurations["jvmCompileClasspath"].forEach { file: File ->
+        configurations["jvmCompileClasspath"].forEach { file ->
             from(zipTree(file.absoluteFile))
-            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
     }
 }

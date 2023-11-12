@@ -1,13 +1,7 @@
 package dev.dimension.flare.ui.component.status
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoodBad
@@ -24,7 +18,6 @@ import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
-import com.moriatsushi.koject.Provides
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusComponent
@@ -36,11 +29,7 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
-import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.*
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
@@ -258,7 +247,6 @@ internal fun status() {
     }
 }
 
-@Provides
 internal data class StatusEvent(
     val mastodonStatusEvent: MastodonStatusEvent,
     val misskeyStatusEvent: MisskeyStatusEvent,

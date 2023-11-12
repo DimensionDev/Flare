@@ -3,35 +3,19 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
-import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.feed.GetPostsQueryParams
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.repo.CreateRecordRequest
-import com.moriatsushi.koject.lazyInject
-import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.common.jsonObjectOrNull
+import dev.dimension.flare.common.*
+import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.datasource.ComposeData
-import dev.dimension.flare.data.datasource.ComposeProgress
-import dev.dimension.flare.data.datasource.MicroblogDataSource
-import dev.dimension.flare.data.datasource.NotificationFilter
-import dev.dimension.flare.data.datasource.timelinePager
+import dev.dimension.flare.data.datasource.*
 import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.*
 import dev.dimension.flare.ui.model.mapper.toUi
-import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -39,11 +23,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Clock
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.*
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import sh.christian.ozone.api.AtIdentifier
 import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Nsid
@@ -51,8 +33,9 @@ import sh.christian.ozone.api.Nsid
 @OptIn(ExperimentalPagingApi::class)
 class BlueskyDataSource(
     private val account: UiAccount.Bluesky,
-) : MicroblogDataSource {
-    private val database: CacheDatabase by lazyInject()
+) : MicroblogDataSource, KoinComponent {
+    private val database: CacheDatabase by inject()
+    private val appDatabase: AppDatabase by inject()
     override fun homeTimeline(pageSize: Int, pagingKey: String): Flow<PagingData<UiStatus>> =
         timelinePager(
             pageSize = pageSize,
@@ -60,7 +43,7 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             mediator = HomeTimelineRemoteMediator(
-                account.getService(),
+                account.getService(appDatabase),
                 account.accountKey,
                 database,
                 pagingKey,
@@ -79,7 +62,7 @@ class BlueskyDataSource(
             database = database,
             mediator = when (type) {
                 NotificationFilter.All -> NotificationRemoteMediator(
-                    account.getService(),
+                    account.getService(appDatabase),
                     account.accountKey,
                     database,
                     pagingKey,
@@ -96,7 +79,7 @@ class BlueskyDataSource(
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
-                val user = account.getService()
+                val user = account.getService(appDatabase)
                     .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = name)))
                     .requireResponse()
                     .toDbUser(account.accountKey.host)
@@ -121,7 +104,7 @@ class BlueskyDataSource(
     override fun userById(id: String): CacheData<UiUser> {
         return Cacheable(
             fetchSource = {
-                val user = account.getService()
+                val user = account.getService(appDatabase)
                     .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = id)))
                     .requireResponse()
                     .toDbUser(account.accountKey.host)
@@ -166,7 +149,7 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             mediator = UserTimelineRemoteMediator(
-                account.getService(),
+                account.getService(appDatabase),
                 account.accountKey,
                 database,
                 userKey,
@@ -186,7 +169,7 @@ class BlueskyDataSource(
             database = database,
             mediator = StatusDetailRemoteMediator(
                 statusKey,
-                account.getService(),
+                account.getService(appDatabase),
                 account.accountKey,
                 database,
                 pagingKey,
@@ -202,7 +185,7 @@ class BlueskyDataSource(
             database = database,
             mediator = StatusDetailRemoteMediator(
                 statusKey,
-                account.getService(),
+                account.getService(appDatabase),
                 account.accountKey,
                 database,
                 pagingKey,
@@ -222,7 +205,7 @@ class BlueskyDataSource(
     override suspend fun compose(data: ComposeData, progress: (ComposeProgress) -> Unit) {
         require(data is BlueskyComposeData)
         val maxProgress = data.medias.size + 1
-        val service = data.account.getService()
+        val service = data.account.getService(appDatabase)
         val mediaBlob = data.medias.mapIndexedNotNull { index, item ->
             service.uploadBlob(item.readBytes()).also {
                 progress(ComposeProgress(index + 1, maxProgress))

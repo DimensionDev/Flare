@@ -8,7 +8,6 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.moriatsushi.koject.Provides
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
@@ -16,12 +15,11 @@ import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.UUID
+import java.util.*
 import kotlin.time.Duration.Companion.seconds
 
 private const val CHANNEL_ID = "compose"
 
-@Provides
 internal class ComposeUseCase(
     private val scope: CoroutineScope,
     private val context: Context,

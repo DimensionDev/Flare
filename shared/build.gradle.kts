@@ -1,3 +1,5 @@
+import app.cash.sqldelight.core.capitalize
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
@@ -11,11 +13,15 @@ plugins {
 }
 
 kotlin {
-    targetHierarchy.default()
-    mingwX64 {
-        binaries {
-            sharedLib {
-                baseName = "libshared"
+    applyDefaultHierarchyTemplate {
+        common {
+            group("nonAndroid") {
+                withApple()
+                withJvm()
+            }
+            group("nonJvm") {
+                withApple()
+                withAndroidTarget()
             }
         }
     }
@@ -33,25 +39,43 @@ kotlin {
         }
     }
 
+    // export as jar for ikvm
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "1.8"
+            }
+        }
+    }
+
+    targets.forEach { target ->
+        target.name.takeIf {
+            it != "metadata"
+        }?.let {
+            "ksp${it.capitalize()}"
+        }?.let {
+            dependencies.add(it, libs.ktorfit.ksp)
+        }
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(libs.bundles.sqldelight)
                 implementation(libs.bundles.kotlinx)
-                implementation(libs.koject.core)
-                implementation(libs.koject.compose.core)
-//                implementation(libs.paging.common)
+                implementation(dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
+                implementation(libs.paging.common)
                 implementation(libs.ktorfit.lib)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
                 implementation(libs.uuid)
-                implementation(libs.molecule.runtime)
                 implementation(libs.kermit)
                 api(libs.paging.compose.common)
                 implementation(libs.ktml)
                 implementation(libs.mfm.multiplatform)
                 api(libs.bluesky)
-                implementation(projects.mingwGen.mingwGenAnnotation)
             }
         }
         val androidMain by getting {
@@ -67,19 +91,18 @@ kotlin {
                 implementation(libs.stately.iso.collections)
             }
         }
-        val mingwMain by getting {
+        val jvmMain by getting {
             dependencies {
+                implementation(libs.sqldelight.jvm.driver)
+                // DO NOT upgrade the version since jvm target should be 1.8, ikvm only supports 1.8
+                implementation("org.xerial:sqlite-jdbc:3.39.2.0")
+                implementation("io.ktor:ktor-client-okhttp:${libs.versions.ktor.get()}")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${libs.versions.kotlinx.coroutines.get()}")
             }
         }
-    }
-
-    targets.getByName("mingwX64") {
-        compilations.forEach {
-            it.kotlinOptions {
-                freeCompilerArgs = freeCompilerArgs + listOf(
-                    // require msys64 and run pacman --noconfirm -S mingw-w64-x86_64-sqlite3
-                    "-linker-options", "-Lc:\\msys64\\mingw64\\lib -lsqlite3"
-                )
+        val nonJvmMain by getting {
+            dependencies {
+                implementation(libs.molecule.runtime)
             }
         }
     }
@@ -123,20 +146,13 @@ android {
     }
 }
 
-dependencies {
-    val kspTarget = listOf(
-        "kspAndroid",
-        "kspIosX64",
-        "kspIosArm64",
-        "kspIosSimulatorArm64",
-        "kspMingwX64",
-    )
-
-    kspTarget.forEach { target ->
-        add(target, libs.ktorfit.ksp)
-        add(target, libs.koject.processor.lib)
+tasks.withType<Jar> {
+    doFirst {
+        configurations["jvmCompileClasspath"].forEach { file ->
+            from(zipTree(file.absoluteFile))
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
     }
-    add("kspMingwX64", projects.mingwGen)
 }
 
 //ksp {

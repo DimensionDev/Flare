@@ -8,11 +8,11 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="6ff565a9-74e5-4607-a0df-67d40c7163a6"
+    Name="7da0ab20-2ea7-4886-8324-2bac050ada69"
     Publisher="CN=Asahi"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="6ff565a9-74e5-4607-a0df-67d40c7163a6" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="7da0ab20-2ea7-4886-8324-2bac050ada69" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Flare</DisplayName>
@@ -42,6 +42,11 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="flare"/>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

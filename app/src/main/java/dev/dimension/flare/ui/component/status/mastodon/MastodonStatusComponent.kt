@@ -47,9 +47,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.koject.Binds
-import com.moriatsushi.koject.Provides
-import com.moriatsushi.koject.Singleton
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.repository.AccountRepository
@@ -474,9 +471,6 @@ internal interface MastodonStatusEvent {
     fun onMoreClick(status: UiStatus.Mastodon)
 }
 
-@Provides
-@Singleton
-@Binds(to = MastodonStatusEvent::class)
 internal class DefaultMastodonStatusEvent(
     private val context: Context,
     private val scope: CoroutineScope,

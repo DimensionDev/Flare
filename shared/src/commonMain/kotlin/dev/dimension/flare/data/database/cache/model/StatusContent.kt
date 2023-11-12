@@ -2,7 +2,6 @@ package dev.dimension.flare.data.database.cache.model
 
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
-import com.moriatsushi.koject.inject
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.SerialName
@@ -50,8 +49,8 @@ sealed interface StatusContent {
 internal inline fun <reified T : StatusContent> updateStatusUseCase(
     statusKey: MicroBlogKey,
     accountKey: MicroBlogKey,
+    cacheDatabase: CacheDatabase,
     update: (content: T) -> T,
-    cacheDatabase: CacheDatabase = inject(),
 ) {
     val status = cacheDatabase.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()
     if (status != null && status.content is T) {

@@ -4,42 +4,33 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
-import com.moriatsushi.koject.lazyInject
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.datasource.ComposeData
-import dev.dimension.flare.data.datasource.ComposeProgress
-import dev.dimension.flare.data.datasource.MicroblogDataSource
-import dev.dimension.flare.data.datasource.NotificationFilter
-import dev.dimension.flare.data.datasource.timelinePager
+import dev.dimension.flare.data.datasource.*
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.*
 import dev.dimension.flare.ui.model.mapper.toUi
-import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
 class MisskeyDataSource(
     private val account: UiAccount.Misskey,
-) : MicroblogDataSource {
-    private val database: CacheDatabase by lazyInject()
+) : MicroblogDataSource, KoinComponent {
+    private val database: CacheDatabase by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://${account.credential.host}/api/",

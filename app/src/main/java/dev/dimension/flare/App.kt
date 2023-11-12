@@ -7,17 +7,19 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
-import com.moriatsushi.koject.Koject
-import com.moriatsushi.koject.android.application
-import com.moriatsushi.koject.start
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
+import dev.dimension.flare.di.androidModule
+import dev.dimension.flare.di.appModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 
 class App : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
-        Koject.start {
-            application(this@App)
+        startKoin {
+            androidContext(this@App)
+            modules(appModule() + androidModule)
         }
     }
 

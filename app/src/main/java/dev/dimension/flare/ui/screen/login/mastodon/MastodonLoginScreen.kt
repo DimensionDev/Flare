@@ -1,31 +1,13 @@
 package dev.dimension.flare.ui.screen.login.mastodon
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -37,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedTextField2
@@ -44,6 +27,7 @@ import dev.dimension.flare.ui.presenter.login.mastodonLoginUseCase
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
+import org.koin.compose.rememberKoinInject
 
 @Composable
 @Preview(showBackground = true)
@@ -161,6 +145,7 @@ internal fun MastodonLoginScreen(onBack: () -> Unit = {}) {
 @Composable
 private fun loginPresenter(launchUrl: (String) -> Unit) =
     run {
+        val applicationRepository: ApplicationRepository = rememberKoinInject()
         val hostTextState by remember {
             mutableStateOf(TextFieldState(""))
         }
@@ -178,6 +163,7 @@ private fun loginPresenter(launchUrl: (String) -> Unit) =
                     error = null
                     mastodonLoginUseCase(
                         domain = hostTextState.text.toString(),
+                        applicationRepository = applicationRepository,
                         launchOAuth = launchUrl,
                     ).onFailure {
                         error = it.message

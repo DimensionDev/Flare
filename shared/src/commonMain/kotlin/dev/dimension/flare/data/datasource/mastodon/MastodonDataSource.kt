@@ -5,7 +5,6 @@ import androidx.paging.PagingData
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.benasher44.uuid.uuid4
-import com.moriatsushi.koject.lazyInject
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
@@ -14,21 +13,13 @@ import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
-import dev.dimension.flare.data.datasource.ComposeData
-import dev.dimension.flare.data.datasource.ComposeProgress
-import dev.dimension.flare.data.datasource.MicroblogDataSource
-import dev.dimension.flare.data.datasource.NotificationFilter
-import dev.dimension.flare.data.datasource.timelinePager
+import dev.dimension.flare.data.datasource.*
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.*
 import dev.dimension.flare.ui.model.mapper.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -36,12 +27,14 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
 class MastodonDataSource(
     private val account: UiAccount.Mastodon,
-) : MicroblogDataSource {
-    private val database: CacheDatabase by lazyInject()
+) : MicroblogDataSource, KoinComponent {
+    private val database: CacheDatabase by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://${account.credential.instance}/",
@@ -284,6 +277,7 @@ class MastodonDataSource(
         updateStatusUseCase<StatusContent.Mastodon>(
             statusKey = status.statusKey,
             accountKey = status.accountKey,
+            cacheDatabase = database,
             update = {
                 it.copy(
                     data = it.data.copy(
@@ -308,6 +302,7 @@ class MastodonDataSource(
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,
+                cacheDatabase = database,
                 update = {
                     it.copy(
                         data = it.data.copy(
@@ -330,6 +325,7 @@ class MastodonDataSource(
         updateStatusUseCase<StatusContent.Mastodon>(
             statusKey = status.statusKey,
             accountKey = status.accountKey,
+            cacheDatabase = database,
             update = {
                 it.copy(
                     data = it.data.copy(
@@ -354,6 +350,7 @@ class MastodonDataSource(
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,
+                cacheDatabase = database,
                 update = {
                     it.copy(
                         data = it.data.copy(

@@ -1,4 +1,5 @@
-import java.util.Properties
+import java.util.*
+
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.android.application)
@@ -104,8 +105,10 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.bundles.navigation)
     implementation(libs.bundles.kotlinx)
-    implementation(libs.bundles.koject)
-    ksp(libs.koject.processor.app)
+//    implementation(libs.bundles.koject)
+//    ksp(libs.koject.processor.app)
+    implementation(platform(libs.koin.bom))
+    implementation(libs.bundles.koin)
     implementation(libs.ktorfit.lib)
     ksp(libs.ktorfit.ksp)
     implementation(libs.bundles.coil)
@@ -132,10 +135,6 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
-}
-
-configure<de.jensklingenberg.ktorfit.gradle.KtorfitGradleConfiguration> {
-    version = libs.versions.ktorfit.get()
 }
 
 ktlint {

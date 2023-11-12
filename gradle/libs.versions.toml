@@ -2,8 +2,8 @@
 compileSdk = "34"
 minSdk = "21"
 java = "17"
-agp = "8.2.0-rc01"
-kotlin = "1.9.10"
+agp = "8.1.2"
+kotlin = "1.9.20"
 core-ktx = "1.12.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
@@ -11,21 +11,21 @@ espresso-core = "3.5.1"
 lifecycle-runtime-ktx = "2.6.2"
 activity-compose = "1.8.0"
 compose-bom = "2023.11.00-alpha02"
-compose-complier = "1.5.3"
-ksp = "1.9.10-1.0.13"
+compose-complier = "1.5.4"
+ksp = "1.9.20-1.0.13"
 cash-paging = "3.3.0-alpha02-0.4.0"
 room = "2.6.0"
 paging = "3.3.0-alpha02"
-navigation = "2.7.4"
+navigation = "2.7.5"
 kotlinx-datetime = "0.4.1"
 kotlinx-collections-immutable = "0.3.6"
 kotlinx-serialization-json = "1.6.0"
 koject = "1.3.0"
-coil = "2.4.0"
+coil = "2.5.0"
 ktorfit = "1.9.1"
 ktor = "2.3.5"
 stately = "2.0.5"
-twitter-parser = "0.3.2"
+twitter-parser = "0.3.5-SNAPSHOT"
 molecule = "1.2.1"
 accompanist = "0.33.2-alpha"
 kotlinx-atomicfu = "0.22.0"
@@ -33,7 +33,7 @@ compose-destinations = "1.9.54"
 okhttp3 = "4.11.0"
 compose-lint-checks = "1.2.0"
 ktlintPlugin = "11.6.1"
-androidx-credentials = "1.2.0-rc01"
+androidx-credentials = "1.2.0"
 compose-richtext = "0.17.0"
 apng-android = "2.28.0"
 ktlint = "1.0.1"
@@ -42,13 +42,15 @@ okio = "3.6.0"
 uuid = "0.8.1"
 sqliter-driver = "1.2.3"
 skie = "0.5.0"
-compose-jb = "1.5.3"
+compose-jb = "1.5.10"
 kermit = "2.0.2"
-ktml = "0.0.5-SNAPSHOT"
+ktml = "0.0.6-SNAPSHOT"
 versionUpdate = "0.49.0"
 bluesky = "0.0.1-SNAPSHOT"
 kotlinpoet = "1.14.2"
 kotlinx-coroutines = "1.7.3"
+koin = "3.5.1"
+koin-annotation = "1.3.0"
 
 [libraries]
 bluesky = { module = "moe.tlaster:bluesky", version.ref = "bluesky" }
@@ -95,6 +97,12 @@ koject-android-fragment = { group = "com.moriatsushi.koject", name = "koject-and
 koject-android-viewmodel = { group = "com.moriatsushi.koject", name = "koject-android-viewmodel", version.ref = "koject" }
 koject-compose-core = { group = "com.moriatsushi.koject", name = "koject-compose-core", version.ref = "koject" }
 
+koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core" }
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-compose = { group = "io.insert-koin", name = "koin-compose" }
+koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
@@ -130,7 +138,7 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 
 zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.1" }
 
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.1-SNAPSHOT"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.2-SNAPSHOT"
 
 compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
 compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }
@@ -139,6 +147,7 @@ sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-dri
 sqldelight-native-driver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
 sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
 sqldelight-androidx-paging3-extensions = { group = "app.cash.sqldelight", name = "androidx-paging3-extensions", version.ref = "sqldelight" }
+sqldelight-jvm-driver = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
@@ -155,6 +164,7 @@ paging = ["paging-common", "paging-compose"]
 navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-atomicfu"]
 koject = ["koject-core", "koject-android-core", "koject-android-activity", "koject-android-fragment", "koject-android-viewmodel", "koject-compose-core"]
+koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
 coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated"]
 accompanist = ["accompanist-permissions"]

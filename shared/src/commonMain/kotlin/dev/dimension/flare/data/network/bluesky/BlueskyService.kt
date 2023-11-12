@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.network.bluesky
 
 import com.atproto.server.RefreshSessionResponse
-import com.moriatsushi.koject.inject
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
@@ -10,21 +9,15 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
-import io.ktor.client.HttpClient
-import io.ktor.client.call.HttpClientCall
-import io.ktor.client.call.body
-import io.ktor.client.call.save
-import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.HttpClientPlugin
-import io.ktor.client.plugins.HttpSend
-import io.ktor.client.plugins.plugin
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.post
-import io.ktor.client.statement.bodyAsText
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
-import io.ktor.http.Url
-import io.ktor.util.AttributeKey
+import io.ktor.util.*
 import kotlinx.serialization.json.Json
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
@@ -134,7 +127,7 @@ internal class XrpcAuthPlugin(
 }
 
 fun UiAccount.Bluesky.getService(
-    appDatabase: AppDatabase = inject(),
+    appDatabase: AppDatabase,
 ) = BlueskyService(
     baseUrl = credential.baseUrl,
     accountKey = accountKey,

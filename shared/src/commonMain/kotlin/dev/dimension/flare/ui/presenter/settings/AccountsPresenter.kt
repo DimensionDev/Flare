@@ -4,13 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import com.moriatsushi.koject.compose.rememberInject
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.data.repository.allAccountsPresenter
-import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
@@ -20,12 +18,12 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import org.koin.compose.rememberKoinInject
 
-@MinGWPresenter
 class AccountsPresenter : PresenterBase<AccountsState>() {
     @Composable
     override fun body(): AccountsState {
-        val accountRepository = rememberInject<AccountRepository>()
+        val accountRepository = rememberKoinInject<AccountRepository>()
         val accounts by allAccountsPresenter()
         val activeAccount by activeAccountPresenter()
         val user = accounts.map {

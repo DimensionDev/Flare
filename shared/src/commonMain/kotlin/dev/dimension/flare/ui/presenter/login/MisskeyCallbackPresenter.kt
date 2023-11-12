@@ -1,19 +1,11 @@
 package dev.dimension.flare.ui.presenter.login
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import com.benasher44.uuid.uuid4
-import com.moriatsushi.koject.compose.rememberInject
-import com.moriatsushi.koject.inject
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
-import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -21,9 +13,9 @@ import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
+import org.koin.compose.rememberKoinInject
 import kotlin.time.Duration.Companion.seconds
 
-@MinGWPresenter
 class MisskeyCallbackPresenter(
     private val session: String?,
     private val toHome: () -> Unit,
@@ -33,8 +25,8 @@ class MisskeyCallbackPresenter(
         if (session == null) {
             return UiState.Error(Exception("No code"))
         }
-        val applicationRepository: ApplicationRepository = rememberInject()
-        val accountRepository: AccountRepository = rememberInject()
+        val applicationRepository: ApplicationRepository = rememberKoinInject()
+        val accountRepository: AccountRepository = rememberKoinInject()
         var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(session) {
             val pendingOAuth = applicationRepository.getPendingOAuth()
@@ -92,10 +84,10 @@ class MisskeyCallbackPresenter(
 
 fun misskeyLoginUseCase(
     host: String,
+    applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,
 ): Result<Unit> {
     return runCatching {
-        val applicationRepository: ApplicationRepository = inject()
         val session = uuid4().toString()
         val service = MisskeyOauthService(
             host = host,

@@ -1,0 +1,2 @@
+SetForegroundWindow
+ShowWindow

@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.koject.compose.rememberInject
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
@@ -32,6 +31,7 @@ import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
+import org.koin.compose.rememberKoinInject
 
 @Composable
 @Destination(
@@ -104,7 +104,7 @@ internal fun StatusScreen(
 @Composable
 private fun statusPresenter(
     statusKey: MicroBlogKey,
-    statusEvent: StatusEvent = rememberInject(),
+    statusEvent: StatusEvent = rememberKoinInject(),
 ) = run {
     val state =
         remember(statusKey) {

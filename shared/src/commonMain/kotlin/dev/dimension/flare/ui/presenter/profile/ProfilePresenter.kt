@@ -7,7 +7,6 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
-import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -20,7 +19,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 
-@MinGWPresenter
 class ProfilePresenter(
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileState>() {

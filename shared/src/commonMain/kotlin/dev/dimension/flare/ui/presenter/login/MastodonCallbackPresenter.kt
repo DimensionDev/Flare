@@ -7,14 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import co.touchlab.kermit.Logger
-import com.moriatsushi.koject.compose.rememberInject
-import com.moriatsushi.koject.inject
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
-import dev.dimension.flare.mingwgen.annotation.MinGWPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -22,16 +19,16 @@ import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
+import org.koin.compose.rememberKoinInject
 
-@MinGWPresenter
 class MastodonCallbackPresenter(
     private val code: String?,
     private val toHome: () -> Unit,
 ) : PresenterBase<UiState<Nothing>>() {
     @Composable
     override fun body(): UiState<Nothing> {
-        val applicationRepository: ApplicationRepository = rememberInject()
-        val accountRepository: AccountRepository = rememberInject()
+        val applicationRepository: ApplicationRepository = rememberKoinInject()
+        val accountRepository: AccountRepository = rememberKoinInject()
         if (code == null) {
             return UiState.Error(Exception("No code"))
         }
@@ -93,10 +90,10 @@ class MastodonCallbackPresenter(
 
 suspend fun mastodonLoginUseCase(
     domain: String,
+    applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,
 ): Result<Unit> {
     return runCatching {
-        val applicationRepository: ApplicationRepository = inject()
         val baseUrl = if (domain.startsWith("http://", ignoreCase = true) || domain.startsWith(
                 "https://",
                 ignoreCase = true,

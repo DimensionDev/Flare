@@ -44,11 +44,12 @@ internal fun ktorClient(
     }
     config.invoke(this)
     install(Logging) {
-        logger = object: Logger {
-            override fun log(message: String) {
-                co.touchlab.kermit.Logger.v(message, null, "HTTP Client")
+        logger =
+            object : Logger {
+                override fun log(message: String) {
+                    co.touchlab.kermit.Logger.v(message, null, "HTTP Client")
+                }
             }
-        }
         level = LogLevel.ALL
     }
 }

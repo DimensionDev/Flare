@@ -23,21 +23,12 @@ import kotlinx.serialization.Serializable
  * @param id * @param code * @param expiresAt * @param createdAt * @param createdBy * @param usedBy * @param usedAt * @param used */
 @Serializable
 data class InviteCode(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "code") val code: kotlin.String,
-
     @SerialName(value = "expiresAt") val expiresAt: kotlin.String? = null,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "createdBy") val createdBy: UserLite,
-
     @SerialName(value = "usedBy") val usedBy: UserLite,
-
     @SerialName(value = "usedAt") val usedAt: kotlin.String? = null,
-
     @SerialName(value = "used") val used: kotlin.Boolean,
-
 )

@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param userId */
 @Serializable
 data class UsersListsListRequest(
-
     @SerialName(value = "userId") val userId: kotlin.String? = null,
-
 )

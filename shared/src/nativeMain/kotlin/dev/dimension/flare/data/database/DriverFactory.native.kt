@@ -7,7 +7,10 @@ import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import co.touchlab.sqliter.DatabaseFileContext
 
 internal actual class DriverFactory {
-    actual fun createDriver(schema: SqlSchema<QueryResult.Value<Unit>>, name: String): SqlDriver {
+    actual fun createDriver(
+        schema: SqlSchema<QueryResult.Value<Unit>>,
+        name: String,
+    ): SqlDriver {
         return NativeSqliteDriver(schema, name)
     }
 

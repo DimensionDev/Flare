@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param appId */
 @Serializable
 data class AppShowRequest(
-
     @SerialName(value = "appId") val appId: kotlin.String,
-
 )

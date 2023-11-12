@@ -70,10 +70,11 @@ public fun <T> CoroutineScope.launchMolecule2(
     emitter: (value: T) -> Unit,
     body: @Composable () -> T,
 ) {
-    val clockContext = when (mode) {
-        RecompositionMode.ContextClock -> EmptyCoroutineContext
-        RecompositionMode.Immediate -> GatedFrameClock(this)
-    }
+    val clockContext =
+        when (mode) {
+            RecompositionMode.ContextClock -> EmptyCoroutineContext
+            RecompositionMode.Immediate -> GatedFrameClock(this)
+        }
 
     with(this + clockContext) {
         val recomposer = Recomposer(coroutineContext)
@@ -89,15 +90,16 @@ public fun <T> CoroutineScope.launchMolecule2(
         }
 
         var applyScheduled = false
-        snapshotHandle = Snapshot.registerGlobalWriteObserver {
-            if (!applyScheduled) {
-                applyScheduled = true
-                launch {
-                    applyScheduled = false
-                    Snapshot.sendApplyNotifications()
+        snapshotHandle =
+            Snapshot.registerGlobalWriteObserver {
+                if (!applyScheduled) {
+                    applyScheduled = true
+                    launch {
+                        applyScheduled = false
+                        Snapshot.sendApplyNotifications()
+                    }
                 }
             }
-        }
 
         composition.setContent {
             emitter(body())
@@ -106,13 +108,29 @@ public fun <T> CoroutineScope.launchMolecule2(
 }
 
 private object UnitApplier : AbstractApplier<Unit>(Unit) {
-    override fun insertBottomUp(index: Int, instance: Unit) {}
-    override fun insertTopDown(index: Int, instance: Unit) {}
-    override fun move(from: Int, to: Int, count: Int) {}
-    override fun remove(index: Int, count: Int) {}
+    override fun insertBottomUp(
+        index: Int,
+        instance: Unit,
+    ) {}
+
+    override fun insertTopDown(
+        index: Int,
+        instance: Unit,
+    ) {}
+
+    override fun move(
+        from: Int,
+        to: Int,
+        count: Int,
+    ) {}
+
+    override fun remove(
+        index: Int,
+        count: Int,
+    ) {}
+
     override fun onClear() {}
 }
-
 
 /**
  * A [MonotonicFrameClock] that is either running, or not.
@@ -146,20 +164,22 @@ internal class GatedFrameClock(scope: CoroutineScope) : MonotonicFrameClock {
 
         // Since we only have millisecond resolution, ensure the nanos form always increases by
         // incrementing a nano offset if we collide with the previous timestamp.
-        val offset = if (timeNanos == lastNanos) {
-            lastOffset + 1
-        } else {
-            lastNanos = timeNanos
-            0
-        }
+        val offset =
+            if (timeNanos == lastNanos) {
+                lastOffset + 1
+            } else {
+                lastNanos = timeNanos
+                0
+            }
         lastOffset = offset
 
         clock.sendFrame(timeNanos + offset)
     }
 
-    private val clock = BroadcastFrameClock {
-        if (isRunning) frameSends.trySend(Unit).getOrThrow()
-    }
+    private val clock =
+        BroadcastFrameClock {
+            if (isRunning) frameSends.trySend(Unit).getOrThrow()
+        }
 
     override suspend fun <R> withFrameNanos(onFrame: (frameTimeNanos: Long) -> R): R {
         return clock.withFrameNanos(onFrame)

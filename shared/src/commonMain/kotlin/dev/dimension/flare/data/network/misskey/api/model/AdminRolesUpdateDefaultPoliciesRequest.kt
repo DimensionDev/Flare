@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param policies */
 @Serializable
 data class AdminRolesUpdateDefaultPoliciesRequest(
-
     @SerialName(value = "policies") val policies: kotlin.String,
-
 )

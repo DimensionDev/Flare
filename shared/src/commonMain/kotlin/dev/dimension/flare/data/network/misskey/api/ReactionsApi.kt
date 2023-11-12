@@ -21,7 +21,9 @@ interface ReactionsApi {
      * @param notesReactionsCreateRequest * @return [Unit]
      */
     @POST("notes/reactions/create")
-    suspend fun notesReactionsCreate(@Body notesReactionsCreateRequest: NotesReactionsCreateRequest): Response<Unit>
+    suspend fun notesReactionsCreate(
+        @Body notesReactionsCreateRequest: NotesReactionsCreateRequest,
+    ): Response<Unit>
 
     /**
      * notes/reactions/delete
@@ -38,5 +40,7 @@ interface ReactionsApi {
      * @param ipinRequest * @return [Unit]
      */
     @POST("notes/reactions/delete")
-    suspend fun notesReactionsDelete(@Body ipinRequest: IPinRequest): Response<Unit>
+    suspend fun notesReactionsDelete(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Unit>
 }

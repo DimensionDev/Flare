@@ -20,7 +20,9 @@ interface ClipApi {
      * @param clipsDeleteRequest * @return [Unit]
      */
     @POST("clips/favorite")
-    suspend fun clipsFavorite(@Body clipsDeleteRequest: ClipsDeleteRequest): Response<Unit>
+    suspend fun clipsFavorite(
+        @Body clipsDeleteRequest: ClipsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * clips/unfavorite
@@ -36,5 +38,7 @@ interface ClipApi {
      * @param clipsDeleteRequest * @return [Unit]
      */
     @POST("clips/unfavorite")
-    suspend fun clipsUnfavorite(@Body clipsDeleteRequest: ClipsDeleteRequest): Response<Unit>
+    suspend fun clipsUnfavorite(
+        @Body clipsDeleteRequest: ClipsDeleteRequest,
+    ): Response<Unit>
 }

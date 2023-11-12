@@ -23,21 +23,13 @@ import kotlinx.serialization.Serializable
  * @param limit * @param sinceId * @param untilId * @param markAsRead * @param includeTypes * @param excludeTypes */
 @Serializable
 data class INotificationsRequest(
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
     @SerialName(value = "markAsRead") val markAsRead: kotlin.Boolean? = true,
-
     @SerialName(value = "includeTypes") val includeTypes: kotlin.collections.List<INotificationsRequest.IncludeTypes>? = null,
-
     @SerialName(value = "excludeTypes") val excludeTypes: kotlin.collections.List<INotificationsRequest.ExcludeTypes>? = null,
-
 ) {
-
     /**
      * *
      * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App,PollVote,GroupInvited

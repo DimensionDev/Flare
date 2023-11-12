@@ -23,19 +23,11 @@ import kotlinx.serialization.Serializable
  * @param tag * @param mentionedUsersCount * @param mentionedLocalUsersCount * @param mentionedRemoteUsersCount * @param attachedUsersCount * @param attachedLocalUsersCount * @param attachedRemoteUsersCount */
 @Serializable
 data class Hashtag(
-
     @SerialName(value = "tag") val tag: kotlin.String,
-
     @SerialName(value = "mentionedUsersCount") val mentionedUsersCount: kotlin.Double,
-
     @SerialName(value = "mentionedLocalUsersCount") val mentionedLocalUsersCount: kotlin.Double,
-
     @SerialName(value = "mentionedRemoteUsersCount") val mentionedRemoteUsersCount: kotlin.Double,
-
     @SerialName(value = "attachedUsersCount") val attachedUsersCount: kotlin.Double,
-
     @SerialName(value = "attachedLocalUsersCount") val attachedLocalUsersCount: kotlin.Double,
-
     @SerialName(value = "attachedRemoteUsersCount") val attachedRemoteUsersCount: kotlin.Double,
-
 )

@@ -58,60 +58,66 @@ sealed class UiStatus {
 
     val itemType: String by lazy {
         when (this) {
-            is Mastodon -> buildString {
-                append("mastodon")
-                if (reblogStatus != null) append("_reblog")
-                with(reblogStatus ?: this@UiStatus) {
+            is Mastodon ->
+                buildString {
+                    append("mastodon")
+                    if (reblogStatus != null) append("_reblog")
+                    with(reblogStatus ?: this@UiStatus) {
+                        if (media.isNotEmpty()) append("_media")
+                        if (poll != null) append("_poll")
+                        if (card != null) append("_card")
+                    }
+                }
+
+            is MastodonNotification ->
+                buildString {
+                    append("mastodon_notification")
+                    append("_${type.name.lowercase()}")
+                    if (status != null) {
+                        append(status.itemType)
+                    }
+                }
+
+            is Misskey ->
+                buildString {
+                    append("misskey")
+                    if (renote != null) {
+                        append("_reblog")
+                        append("_${renote.itemType}")
+                    }
+                    if (quote != null) {
+                        append("_quote")
+                        append("_${quote.itemType}")
+                    }
                     if (media.isNotEmpty()) append("_media")
                     if (poll != null) append("_poll")
                     if (card != null) append("_card")
                 }
-            }
+            is MisskeyNotification ->
+                buildString {
+                    append("misskey_notification")
+                    append("_${type.name.lowercase()}")
+                    if (note != null) {
+                        append(note.itemType)
+                    }
+                }
 
-            is MastodonNotification -> buildString {
-                append("mastodon_notification")
-                append("_${type.name.lowercase()}")
-                if (status != null) {
-                    append(status.itemType)
+            is Bluesky ->
+                buildString {
+                    append("bluesky")
+                    if (repostBy != null) append("_reblog")
+                    if (medias.isNotEmpty()) append("_media")
+                    if (quote != null) {
+                        append("_quote")
+                        append("_${quote.itemType}")
+                    }
                 }
-            }
 
-            is Misskey -> buildString {
-                append("misskey")
-                if (renote != null) {
-                    append("_reblog")
-                    append("_${renote.itemType}")
+            is BlueskyNotification ->
+                buildString {
+                    append("bluesky_notification")
+                    append("_${reason.name.lowercase()}")
                 }
-                if (quote != null) {
-                    append("_quote")
-                    append("_${quote.itemType}")
-                }
-                if (media.isNotEmpty()) append("_media")
-                if (poll != null) append("_poll")
-                if (card != null) append("_card")
-            }
-            is MisskeyNotification -> buildString {
-                append("misskey_notification")
-                append("_${type.name.lowercase()}")
-                if (note != null) {
-                    append(note.itemType)
-                }
-            }
-
-            is Bluesky -> buildString {
-                append("bluesky")
-                if (repostBy != null) append("_reblog")
-                if (medias.isNotEmpty()) append("_media")
-                if (quote != null) {
-                    append("_quote")
-                    append("_${quote.itemType}")
-                }
-            }
-
-            is BlueskyNotification -> buildString {
-                append("bluesky_notification")
-                append("_${reason.name.lowercase()}")
-            }
         }
     }
 
@@ -145,7 +151,6 @@ sealed class UiStatus {
         val reblogStatus: Mastodon?,
         internal val raw: dev.dimension.flare.data.network.mastodon.api.model.Status,
     ) : UiStatus() {
-
         val humanizedTime by lazy {
             createdAt.humanize()
         }
@@ -306,6 +311,7 @@ sealed class UiStatus {
         val contentToken by lazy {
             misskeyParser.parse(content).toHtml(accountKey.host)
         }
+
         data class Matrices(
             val replyCount: Long,
             val likeCount: Long,
@@ -315,6 +321,7 @@ sealed class UiStatus {
             val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
             val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.toString() else null }
         }
+
         data class Reaction(
             val liked: Boolean,
             val reposted: Boolean,
@@ -350,10 +357,11 @@ private fun parseContent(
 //    val tags = status.tags.orEmpty()
     var content = status.content.orEmpty()
     emoji.forEach {
-        content = content.replace(
-            ":${it.shortcode}:",
-            "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
-        )
+        content =
+            content.replace(
+                ":${it.shortcode}:",
+                "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
+            )
     }
     val body = Ktml.parse(content)
     body.children.forEach {
@@ -382,10 +390,7 @@ private fun replaceMentionAndHashtag(
     }
 }
 
-
-internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(
-    accountHost: String,
-): Element {
+internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Element {
     return when (this) {
         is CenterNode -> {
             Element("center").apply {
@@ -523,18 +528,23 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(
 
         is MentionNode -> {
             Element("a").apply {
-                val deeplink = host?.let {
-                    AppDeepLink.ProfileWithNameAndHost(userName, it)
-                } ?: AppDeepLink.ProfileWithNameAndHost(userName, accountHost)
+                val deeplink =
+                    host?.let {
+                        AppDeepLink.ProfileWithNameAndHost(userName, it)
+                    } ?: AppDeepLink.ProfileWithNameAndHost(userName, accountHost)
                 attributes["href"] = deeplink
-                children.add(Text(buildString {
-                    append("@")
-                    append(userName)
-                    if (host != null) {
-                        append("@")
-                        append(host)
-                    }
-                }))
+                children.add(
+                    Text(
+                        buildString {
+                            append("@")
+                            append(userName)
+                            if (host != null) {
+                                append("@")
+                                append(host)
+                            }
+                        },
+                    ),
+                )
             }
         }
 
@@ -553,8 +563,10 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(
     }
 }
 
-
-private fun resolveMisskeyEmoji(name: String, accountHost: String): String {
+private fun resolveMisskeyEmoji(
+    name: String,
+    accountHost: String,
+): String {
     return name.trim(':').let {
         if (it.endsWith("@.")) {
             "https://$accountHost/emoji/${it.dropLast(2)}.webp"

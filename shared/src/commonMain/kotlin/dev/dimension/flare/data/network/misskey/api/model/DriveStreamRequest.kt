@@ -23,13 +23,8 @@ import kotlinx.serialization.Serializable
  * @param limit * @param sinceId * @param untilId * @param type */
 @Serializable
 data class DriveStreamRequest(
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
     @SerialName(value = "type") val type: kotlin.String? = null,
-
 )

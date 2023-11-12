@@ -22,7 +22,9 @@ interface ResetPasswordApi {
      * @param requestResetPasswordRequest * @return [Unit]
      */
     @POST("request-reset-password")
-    suspend fun requestResetPassword(@Body requestResetPasswordRequest: RequestResetPasswordRequest): Response<Unit>
+    suspend fun requestResetPassword(
+        @Body requestResetPasswordRequest: RequestResetPasswordRequest,
+    ): Response<Unit>
 
     /**
      * reset-password
@@ -38,5 +40,7 @@ interface ResetPasswordApi {
      * @param resetPasswordRequest * @return [Unit]
      */
     @POST("reset-password")
-    suspend fun resetPassword(@Body resetPasswordRequest: ResetPasswordRequest): Response<Unit>
+    suspend fun resetPassword(
+        @Body resetPasswordRequest: ResetPasswordRequest,
+    ): Response<Unit>
 }

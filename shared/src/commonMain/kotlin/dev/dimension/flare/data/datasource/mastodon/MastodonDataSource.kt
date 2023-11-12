@@ -41,18 +41,23 @@ class MastodonDataSource(
             accessToken = account.credential.accessToken,
         )
     }
-    override fun homeTimeline(pageSize: Int, pagingKey: String): Flow<PagingData<UiStatus>> {
+
+    override fun homeTimeline(
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = HomeTimelineRemoteMediator(
-                service,
-                database,
-                account.accountKey,
-                pagingKey,
-            ),
+            mediator =
+                HomeTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
         )
     }
 
@@ -60,40 +65,46 @@ class MastodonDataSource(
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> = timelinePager(
-        pageSize = pageSize,
-        pagingKey = pagingKey,
-        accountKey = account.accountKey,
-        database = database,
-        mediator = when (type) {
-            NotificationFilter.All -> NotificationRemoteMediator(
-                service,
-                database,
-                account.accountKey,
-                pagingKey,
-            )
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                when (type) {
+                    NotificationFilter.All ->
+                        NotificationRemoteMediator(
+                            service,
+                            database,
+                            account.accountKey,
+                            pagingKey,
+                        )
 
-            NotificationFilter.Mention -> MentionRemoteMediator(
-                service,
-                database,
-                account.accountKey,
-                pagingKey,
-            )
-        },
-    )
+                    NotificationFilter.Mention ->
+                        MentionRemoteMediator(
+                            service,
+                            database,
+                            account.accountKey,
+                            pagingKey,
+                        )
+                },
+        )
 
     override val supportedNotificationFilter: List<NotificationFilter>
-        get() = listOf(
-            NotificationFilter.All,
-            NotificationFilter.Mention,
-        )
+        get() =
+            listOf(
+                NotificationFilter.All,
+                NotificationFilter.Mention,
+            )
 
     override fun userByAcct(acct: String): CacheData<UiUser> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
-                val user = service.lookupUserByAcct("$name@$host")
-                    ?.toDbUser(account.accountKey.host) ?: throw Exception("User not found")
+                val user =
+                    service.lookupUserByAcct("$name@$host")
+                        ?.toDbUser(account.accountKey.host) ?: throw Exception("User not found")
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,
@@ -154,101 +165,116 @@ class MastodonDataSource(
         userKey: MicroBlogKey,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> = timelinePager(
-        pageSize = pageSize,
-        pagingKey = pagingKey,
-        accountKey = account.accountKey,
-        database = database,
-        mediator = UserTimelineRemoteMediator(
-            service,
-            database,
-            account.accountKey,
-            userKey,
-            pagingKey,
-        ),
-    )
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                UserTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    userKey,
+                    pagingKey,
+                ),
+        )
 
     override fun context(
         statusKey: MicroBlogKey,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> = timelinePager(
-        pageSize = pageSize,
-        pagingKey = pagingKey,
-        accountKey = account.accountKey,
-        database = database,
-        mediator = StatusDetailRemoteMediator(
-            statusKey,
-            service,
-            database,
-            account.accountKey,
-            pagingKey,
-            statusOnly = false,
-        ),
-    )
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                StatusDetailRemoteMediator(
+                    statusKey,
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    statusOnly = false,
+                ),
+        )
 
-    override fun status(statusKey: MicroBlogKey, pagingKey: String): Flow<PagingData<UiStatus>> =
+    override fun status(
+        statusKey: MicroBlogKey,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> =
         timelinePager(
             pageSize = 1,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = StatusDetailRemoteMediator(
-                statusKey,
-                service,
-                database,
-                account.accountKey,
-                pagingKey,
-                statusOnly = true,
-            ),
+            mediator =
+                StatusDetailRemoteMediator(
+                    statusKey,
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    statusOnly = true,
+                ),
         )
 
-    fun emoji() = Cacheable(
-        fetchSource = {
-            val emojis = service.emojis()
-            database.dbEmojiQueries.insert(account.accountKey.host, emojis.toDb(account.accountKey.host).content)
-        },
-        cacheSource = {
-            database.dbEmojiQueries.get(account.accountKey.host).asFlow()
-                .mapToOneNotNull(Dispatchers.IO)
-                .map { it.toUi().toImmutableList() }
-        },
-    )
+    fun emoji() =
+        Cacheable(
+            fetchSource = {
+                val emojis = service.emojis()
+                database.dbEmojiQueries.insert(account.accountKey.host, emojis.toDb(account.accountKey.host).content)
+            },
+            cacheSource = {
+                database.dbEmojiQueries.get(account.accountKey.host).asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .map { it.toUi().toImmutableList() }
+            },
+        )
 
-    override suspend fun compose(data: ComposeData, progress: (ComposeProgress) -> Unit) {
+    override suspend fun compose(
+        data: ComposeData,
+        progress: (ComposeProgress) -> Unit,
+    ) {
         require(data is MastodonComposeData)
         val maxProgress = data.medias.size + 1
-        val mediaIds = data.medias.mapIndexed { index, item ->
-            service.upload(
-                item.readBytes(),
-                name = item.name ?: "unknown",
-            ).also {
-                progress(ComposeProgress(index + 1, maxProgress))
+        val mediaIds =
+            data.medias.mapIndexed { index, item ->
+                service.upload(
+                    item.readBytes(),
+                    name = item.name ?: "unknown",
+                ).also {
+                    progress(ComposeProgress(index + 1, maxProgress))
+                }
+            }.mapNotNull {
+                it.id
             }
-        }.mapNotNull {
-            it.id
-        }
         service.post(
             uuid4().toString(),
             PostStatus(
                 status = data.content,
-                visibility = when (data.visibility) {
-                    UiStatus.Mastodon.Visibility.Public -> Visibility.Public
-                    UiStatus.Mastodon.Visibility.Unlisted -> Visibility.Unlisted
-                    UiStatus.Mastodon.Visibility.Private -> Visibility.Private
-                    UiStatus.Mastodon.Visibility.Direct -> Visibility.Direct
-                },
+                visibility =
+                    when (data.visibility) {
+                        UiStatus.Mastodon.Visibility.Public -> Visibility.Public
+                        UiStatus.Mastodon.Visibility.Unlisted -> Visibility.Unlisted
+                        UiStatus.Mastodon.Visibility.Private -> Visibility.Private
+                        UiStatus.Mastodon.Visibility.Direct -> Visibility.Direct
+                    },
                 inReplyToID = data.inReplyToID,
                 mediaIDS = mediaIds.takeIf { it.isNotEmpty() },
                 sensitive = data.sensitive.takeIf { mediaIds.isNotEmpty() },
                 spoilerText = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
-                poll = data.poll?.let { poll ->
-                    PostPoll(
-                        options = poll.options,
-                        expiresIn = poll.expiresIn,
-                        multiple = poll.multiple,
-                    )
-                },
+                poll =
+                    data.poll?.let { poll ->
+                        PostPoll(
+                            options = poll.options,
+                            expiresIn = poll.expiresIn,
+                            multiple = poll.multiple,
+                        )
+                    },
             ),
         )
         progress(ComposeProgress(maxProgress, maxProgress))
@@ -271,23 +297,23 @@ class MastodonDataSource(
         )
     }
 
-    suspend fun like(
-        status: UiStatus.Mastodon
-    ) {
+    suspend fun like(status: UiStatus.Mastodon) {
         updateStatusUseCase<StatusContent.Mastodon>(
             statusKey = status.statusKey,
             accountKey = status.accountKey,
             cacheDatabase = database,
             update = {
                 it.copy(
-                    data = it.data.copy(
-                        favourited = !status.reaction.liked,
-                        favouritesCount = if (status.reaction.liked) {
-                            it.data.favouritesCount?.minus(1)
-                        } else {
-                            it.data.favouritesCount?.plus(1)
-                        },
-                    ),
+                    data =
+                        it.data.copy(
+                            favourited = !status.reaction.liked,
+                            favouritesCount =
+                                if (status.reaction.liked) {
+                                    it.data.favouritesCount?.minus(1)
+                                } else {
+                                    it.data.favouritesCount?.plus(1)
+                                },
+                        ),
                 )
             },
         )
@@ -305,37 +331,39 @@ class MastodonDataSource(
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data = it.data.copy(
-                            favourited = status.reaction.liked,
-                            favouritesCount = if (status.reaction.liked) {
-                                it.data.favouritesCount?.plus(1)
-                            } else {
-                                it.data.favouritesCount?.minus(1)
-                            },
-                        ),
+                        data =
+                            it.data.copy(
+                                favourited = status.reaction.liked,
+                                favouritesCount =
+                                    if (status.reaction.liked) {
+                                        it.data.favouritesCount?.plus(1)
+                                    } else {
+                                        it.data.favouritesCount?.minus(1)
+                                    },
+                            ),
                     )
                 },
             )
         }
     }
 
-    suspend fun reblog(
-        status: UiStatus.Mastodon
-    ) {
+    suspend fun reblog(status: UiStatus.Mastodon) {
         updateStatusUseCase<StatusContent.Mastodon>(
             statusKey = status.statusKey,
             accountKey = status.accountKey,
             cacheDatabase = database,
             update = {
                 it.copy(
-                    data = it.data.copy(
-                        reblogged = !status.reaction.reblogged,
-                        reblogsCount = if (status.reaction.reblogged) {
-                            it.data.reblogsCount?.minus(1)
-                        } else {
-                            it.data.reblogsCount?.plus(1)
-                        },
-                    ),
+                    data =
+                        it.data.copy(
+                            reblogged = !status.reaction.reblogged,
+                            reblogsCount =
+                                if (status.reaction.reblogged) {
+                                    it.data.reblogsCount?.minus(1)
+                                } else {
+                                    it.data.reblogsCount?.plus(1)
+                                },
+                        ),
                 )
             },
         )
@@ -353,18 +381,19 @@ class MastodonDataSource(
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data = it.data.copy(
-                            reblogged = status.reaction.reblogged,
-                            reblogsCount = if (status.reaction.reblogged) {
-                                it.data.reblogsCount?.plus(1)
-                            } else {
-                                it.data.reblogsCount?.minus(1)
-                            },
-                        ),
+                        data =
+                            it.data.copy(
+                                reblogged = status.reaction.reblogged,
+                                reblogsCount =
+                                    if (status.reaction.reblogged) {
+                                        it.data.reblogsCount?.plus(1)
+                                    } else {
+                                        it.data.reblogsCount?.minus(1)
+                                    },
+                            ),
                     )
                 },
             )
         }
     }
-
 }

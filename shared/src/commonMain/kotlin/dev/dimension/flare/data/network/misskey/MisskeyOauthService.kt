@@ -8,33 +8,34 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.appendPathSegments
 
-private val defaultPermission = listOf(
-    "read:account",
-    "write:account",
-    "read:blocks",
-    "write:blocks",
-    "read:drive",
-    "write:drive",
-    "read:favorites",
-    "write:favorites",
-    "read:following",
-    "write:following",
-    "read:messaging",
-    "write:messaging",
-    "read:mutes",
-    "write:mutes",
-    "write:notes",
-    "read:notifications",
-    "write:notifications",
-    "write:reactions",
-    "write:votes",
-    "read:pages",
-    "write:pages",
-    "write:page-likes",
-    "read:page-likes",
-    "write:gallery-likes",
-    "read:gallery-likes",
-)
+private val defaultPermission =
+    listOf(
+        "read:account",
+        "write:account",
+        "read:blocks",
+        "write:blocks",
+        "read:drive",
+        "write:drive",
+        "read:favorites",
+        "write:favorites",
+        "read:following",
+        "write:following",
+        "read:messaging",
+        "write:messaging",
+        "read:mutes",
+        "write:mutes",
+        "write:notes",
+        "read:notifications",
+        "write:notifications",
+        "write:reactions",
+        "write:votes",
+        "read:pages",
+        "write:pages",
+        "write:page-likes",
+        "read:page-likes",
+        "write:gallery-likes",
+        "read:gallery-likes",
+    )
 
 class MisskeyOauthService(
     private val host: String,
@@ -47,22 +48,24 @@ class MisskeyOauthService(
     private val authResources: AuthResources by lazy {
         ktorfit("https://$host/").create()
     }
+
     fun getAuthorizeUrl(): String {
-        val url = URLBuilder().apply {
-            protocol = URLProtocol.HTTPS
-            this.host = this@MisskeyOauthService.host
-            appendPathSegments("miauth", session)
-            if (name != null) {
-                parameters.append("name", name)
+        val url =
+            URLBuilder().apply {
+                protocol = URLProtocol.HTTPS
+                this.host = this@MisskeyOauthService.host
+                appendPathSegments("miauth", session)
+                if (name != null) {
+                    parameters.append("name", name)
+                }
+                if (icon != null) {
+                    parameters.append("icon", icon)
+                }
+                if (callback != null) {
+                    parameters.append("callback", callback)
+                }
+                parameters.append("permission", permission.joinToString(","))
             }
-            if (icon != null) {
-                parameters.append("icon", icon)
-            }
-            if (callback != null) {
-                parameters.append("callback", callback)
-            }
-            parameters.append("permission", permission.joinToString(","))
-        }
         return url.buildString()
     }
 

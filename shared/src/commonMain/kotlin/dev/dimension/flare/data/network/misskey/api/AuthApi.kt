@@ -25,7 +25,9 @@ interface AuthApi {
      * @param authSessionGenerateRequest * @return [AuthSessionGenerate200Response]
      */
     @POST("auth/session/generate")
-    suspend fun authSessionGenerate(@Body authSessionGenerateRequest: AuthSessionGenerateRequest): Response<AuthSessionGenerate200Response>
+    suspend fun authSessionGenerate(
+        @Body authSessionGenerateRequest: AuthSessionGenerateRequest,
+    ): Response<AuthSessionGenerate200Response>
 
     /**
      * auth/session/show
@@ -41,7 +43,9 @@ interface AuthApi {
      * @param authSessionShowRequest * @return [AuthSessionShow200Response]
      */
     @POST("auth/session/show")
-    suspend fun authSessionShow(@Body authSessionShowRequest: AuthSessionShowRequest): Response<AuthSessionShow200Response>
+    suspend fun authSessionShow(
+        @Body authSessionShowRequest: AuthSessionShowRequest,
+    ): Response<AuthSessionShow200Response>
 
     /**
      * auth/session/userkey
@@ -57,5 +61,7 @@ interface AuthApi {
      * @param authSessionUserkeyRequest * @return [AuthSessionUserkey200Response]
      */
     @POST("auth/session/userkey")
-    suspend fun authSessionUserkey(@Body authSessionUserkeyRequest: AuthSessionUserkeyRequest): Response<AuthSessionUserkey200Response>
+    suspend fun authSessionUserkey(
+        @Body authSessionUserkeyRequest: AuthSessionUserkeyRequest,
+    ): Response<AuthSessionUserkey200Response>
 }

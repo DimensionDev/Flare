@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param remaining */
 @Serializable
 data class InviteLimit200Response(
-
     @SerialName(value = "remaining") val remaining: kotlin.Int?,
-
 )

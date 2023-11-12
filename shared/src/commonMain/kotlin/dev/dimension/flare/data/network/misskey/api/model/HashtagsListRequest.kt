@@ -23,19 +23,12 @@ import kotlinx.serialization.Serializable
  * @param sort * @param limit * @param attachedToUserOnly * @param attachedToLocalUserOnly * @param attachedToRemoteUserOnly */
 @Serializable
 data class HashtagsListRequest(
-
     @SerialName(value = "sort") val sort: HashtagsListRequest.Sort,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "attachedToUserOnly") val attachedToUserOnly: kotlin.Boolean? = false,
-
     @SerialName(value = "attachedToLocalUserOnly") val attachedToLocalUserOnly: kotlin.Boolean? = false,
-
     @SerialName(value = "attachedToRemoteUserOnly") val attachedToRemoteUserOnly: kotlin.Boolean? = false,
-
 ) {
-
     /**
      * *
      * Values: PlusMentionedUsers,MinusMentionedUsers,PlusMentionedLocalUsers,MinusMentionedLocalUsers,PlusMentionedRemoteUsers,MinusMentionedRemoteUsers,PlusAttachedUsers,MinusAttachedUsers,PlusAttachedLocalUsers,MinusAttachedLocalUsers,PlusAttachedRemoteUsers,MinusAttachedRemoteUsers

@@ -3,7 +3,6 @@ package dev.dimension.flare.common
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.encodeURLQueryComponent
 
-
 const val AppSchema = "flare"
 
 object AppDeepLink {
@@ -14,17 +13,23 @@ object AppDeepLink {
 
     object Search {
         const val route = "$AppSchema://Search/{keyword}"
+
         operator fun invoke(keyword: String) = "$AppSchema://Search/${keyword.encodeURLQueryComponent()}"
     }
 
     object Profile {
         const val route = "$AppSchema://Profile/{userKey}"
+
         operator fun invoke(userKey: MicroBlogKey) = "$AppSchema://Profile/$userKey"
     }
 
     object ProfileWithNameAndHost {
         const val route = "$AppSchema://ProfileWithNameAndHost/{userName}/{host}"
-        operator fun invoke(userName: String, host: String) = "$AppSchema://ProfileWithNameAndHost/${userName.encodeURLQueryComponent()}/$host"
+
+        operator fun invoke(
+            userName: String,
+            host: String,
+        ) = "$AppSchema://ProfileWithNameAndHost/${userName.encodeURLQueryComponent()}/$host"
     }
 
     fun parse(url: String): DeeplinkEvent? {
@@ -53,9 +58,11 @@ sealed interface DeeplinkEvent {
     data class Search(
         val keyword: String,
     ) : DeeplinkEvent
+
     data class Profile(
         val userKey: MicroBlogKey,
     ) : DeeplinkEvent
+
     data class ProfileWithNameAndHost(
         val userName: String,
         val host: String,

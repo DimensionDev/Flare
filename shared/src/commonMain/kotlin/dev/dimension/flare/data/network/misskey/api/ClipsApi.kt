@@ -24,7 +24,9 @@ interface ClipsApi {
      * @param clipsCreateRequest * @return [Clip]
      */
     @POST("clips/create")
-    suspend fun clipsCreate(@Body clipsCreateRequest: ClipsCreateRequest): Response<Clip>
+    suspend fun clipsCreate(
+        @Body clipsCreateRequest: ClipsCreateRequest,
+    ): Response<Clip>
 
     /**
      * clips/delete
@@ -40,7 +42,9 @@ interface ClipsApi {
      * @param clipsDeleteRequest * @return [Unit]
      */
     @POST("clips/delete")
-    suspend fun clipsDelete(@Body clipsDeleteRequest: ClipsDeleteRequest): Response<Unit>
+    suspend fun clipsDelete(
+        @Body clipsDeleteRequest: ClipsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * clips/list
@@ -56,7 +60,9 @@ interface ClipsApi {
      * @param body * @return [kotlin.collections.List<Clip>]
      */
     @POST("clips/list")
-    suspend fun clipsList(@Body body: kotlin.Any): Response<kotlin.collections.List<Clip>>
+    suspend fun clipsList(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<Clip>>
 
     /**
      * clips/show
@@ -72,7 +78,9 @@ interface ClipsApi {
      * @param clipsDeleteRequest * @return [Clip]
      */
     @POST("clips/show")
-    suspend fun clipsShow(@Body clipsDeleteRequest: ClipsDeleteRequest): Response<Clip>
+    suspend fun clipsShow(
+        @Body clipsDeleteRequest: ClipsDeleteRequest,
+    ): Response<Clip>
 
     /**
      * clips/update
@@ -88,7 +96,9 @@ interface ClipsApi {
      * @param clipsUpdateRequest * @return [Clip]
      */
     @POST("clips/update")
-    suspend fun clipsUpdate(@Body clipsUpdateRequest: ClipsUpdateRequest): Response<Clip>
+    suspend fun clipsUpdate(
+        @Body clipsUpdateRequest: ClipsUpdateRequest,
+    ): Response<Clip>
 
     /**
      * notes/clips
@@ -104,5 +114,7 @@ interface ClipsApi {
      * @param ipinRequest * @return [kotlin.collections.List<Clip>]
      */
     @POST("notes/clips")
-    suspend fun notesClips(@Body ipinRequest: IPinRequest): Response<kotlin.collections.List<Clip>>
+    suspend fun notesClips(
+        @Body ipinRequest: IPinRequest,
+    ): Response<kotlin.collections.List<Clip>>
 }

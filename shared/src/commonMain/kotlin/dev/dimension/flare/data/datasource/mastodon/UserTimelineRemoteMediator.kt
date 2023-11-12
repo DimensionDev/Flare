@@ -23,33 +23,36 @@ internal class UserTimelineRemoteMediator(
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
     ): MediatorResult {
         return try {
-            val response = when (loadType) {
-                LoadType.REFRESH -> service.userTimeline(
-                    user_id = userKey.id,
-                    limit = state.config.pageSize,
-                )
-
-                LoadType.PREPEND -> {
-                    val firstItem = state.firstItemOrNull()
-                    service.userTimeline(
-                        user_id = userKey.id,
-                        limit = state.config.pageSize,
-                        min_id = firstItem?.timeline_status_key?.id,
-                    )
-                }
-
-                LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                        ?: return MediatorResult.Success(
-                            endOfPaginationReached = true,
+            val response =
+                when (loadType) {
+                    LoadType.REFRESH ->
+                        service.userTimeline(
+                            user_id = userKey.id,
+                            limit = state.config.pageSize,
                         )
-                    service.userTimeline(
-                        user_id = userKey.id,
-                        limit = state.config.pageSize,
-                        max_id = lastItem.timeline_status_key.id,
-                    )
+
+                    LoadType.PREPEND -> {
+                        val firstItem = state.firstItemOrNull()
+                        service.userTimeline(
+                            user_id = userKey.id,
+                            limit = state.config.pageSize,
+                            min_id = firstItem?.timeline_status_key?.id,
+                        )
+                    }
+
+                    LoadType.APPEND -> {
+                        val lastItem =
+                            state.lastItemOrNull()
+                                ?: return MediatorResult.Success(
+                                    endOfPaginationReached = true,
+                                )
+                        service.userTimeline(
+                            user_id = userKey.id,
+                            limit = state.config.pageSize,
+                            max_id = lastItem.timeline_status_key.id,
+                        )
+                    }
                 }
-            }
 
             Mastodon.save(
                 database = database,
@@ -63,6 +66,6 @@ internal class UserTimelineRemoteMediator(
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)
-        } 
+        }
     }
 }

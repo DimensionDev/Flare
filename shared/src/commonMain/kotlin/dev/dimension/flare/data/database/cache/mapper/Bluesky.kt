@@ -80,28 +80,32 @@ object Bluesky {
                 )
             }
 
-            val exsitingUsers = database.dbUserQueries.findByKeys(user.map { it.user_key }).executeAsList()
-                .filter {
-                    it.content is UserContent.Bluesky
-                }.map {
-                    val content = it.content as UserContent.Bluesky
-                    val item = user.find { user ->
-                        user.user_key == it.user_key
+            val exsitingUsers =
+                database.dbUserQueries.findByKeys(user.map { it.user_key }).executeAsList()
+                    .filter {
+                        it.content is UserContent.Bluesky
+                    }.map {
+                        val content = it.content as UserContent.Bluesky
+                        val item =
+                            user.find { user ->
+                                user.user_key == it.user_key
+                            }
+                        if (item != null && item.content is UserContent.BlueskyLite) {
+                            it.copy(
+                                content =
+                                    content.copy(
+                                        data =
+                                            content.data.copy(
+                                                displayName = item.content.data.displayName,
+                                                handle = item.content.data.handle,
+                                                avatar = item.content.data.avatar,
+                                            ),
+                                    ),
+                            )
+                        } else {
+                            it
+                        }
                     }
-                    if (item != null && item.content is UserContent.BlueskyLite) {
-                        it.copy(
-                            content = content.copy(
-                                data = content.data.copy(
-                                    displayName = item.content.data.displayName,
-                                    handle = item.content.data.handle,
-                                    avatar = item.content.data.avatar,
-                                ),
-                            ),
-                        )
-                    } else {
-                        it
-                    }
-                }
             val result = (exsitingUsers + user).distinctBy { it.user_key }
             result.forEach {
                 database.dbUserQueries.insert(
@@ -116,7 +120,6 @@ object Bluesky {
         }
     }
 }
-
 
 fun PostView.toDbPagingTimeline(
     accountKey: MicroBlogKey,
@@ -149,16 +152,14 @@ fun ListNotificationsNotification.toDbPagingTimeline(
     )
 }
 
-
-private fun ListNotificationsNotification.toDbStatus(
-    accountKey: MicroBlogKey,
-): DbStatus {
+private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     val user = this.author.toDbUser(accountKey.host)
     return DbStatus(
-        status_key = MicroBlogKey(
-            uri.atUri + "_" + user.user_key,
-            accountKey.host,
-        ),
+        status_key =
+            MicroBlogKey(
+                uri.atUri + "_" + user.user_key,
+                accountKey.host,
+            ),
         platform_type = PlatformType.Bluesky,
         user_key = user.user_key,
         content = StatusContent.BlueskyNotification(this),
@@ -183,17 +184,16 @@ fun FeedViewPost.toDbPagingTimeline(
     )
 }
 
-fun FeedViewPost.toDbStatus(
-    accountKey: MicroBlogKey,
-): DbStatus {
+fun FeedViewPost.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     when (val data = reason) {
         is FeedViewPostReasonUnion.ReasonRepost -> {
             val user = data.value.by.toDbUser(accountKey.host)
             return DbStatus(
-                status_key = MicroBlogKey(
-                    post.uri.atUri + "_reblog_${user.user_key}",
-                    accountKey.host,
-                ),
+                status_key =
+                    MicroBlogKey(
+                        post.uri.atUri + "_reblog_${user.user_key}",
+                        accountKey.host,
+                    ),
                 platform_type = PlatformType.Bluesky,
                 user_key = user.user_key,
                 content = StatusContent.BlueskyReason(data, post),
@@ -210,68 +210,68 @@ fun FeedViewPost.toDbStatus(
     }
 }
 
-private fun PostView.toDbStatus(
-    accountKey: MicroBlogKey,
-): DbStatus {
+private fun PostView.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     val user = author.toDbUser(accountKey.host)
     return DbStatus(
-        status_key = MicroBlogKey(
-            uri.atUri,
-            host = user.user_key.host,
-        ),
+        status_key =
+            MicroBlogKey(
+                uri.atUri,
+                host = user.user_key.host,
+            ),
         platform_type = PlatformType.Bluesky,
         content = StatusContent.Bluesky(this),
         user_key = user.user_key,
         account_key = accountKey,
-        id = 0
+        id = 0,
     )
 }
 
-private fun ProfileView.toDbUser(
-    host: String,
-) = DbUser(
-    user_key = MicroBlogKey(
-        id = did.did,
+private fun ProfileView.toDbUser(host: String) =
+    DbUser(
+        user_key =
+            MicroBlogKey(
+                id = did.did,
+                host = host,
+            ),
+        platform_type = PlatformType.Bluesky,
+        name = displayName.orEmpty(),
+        handle = handle.handle,
         host = host,
-    ),
-    platform_type = PlatformType.Bluesky,
-    name = displayName.orEmpty(),
-    handle = handle.handle,
-    host = host,
-    content = UserContent.BlueskyLite(
-        ProfileViewBasic(
-            did = did,
-            handle = handle,
-            displayName = displayName,
-            avatar = avatar,
-        ),
-    ),
-)
+        content =
+            UserContent.BlueskyLite(
+                ProfileViewBasic(
+                    did = did,
+                    handle = handle,
+                    displayName = displayName,
+                    avatar = avatar,
+                ),
+            ),
+    )
 
-private fun ProfileViewBasic.toDbUser(
-    host: String,
-) = DbUser(
-    user_key = MicroBlogKey(
-        id = did.did,
+private fun ProfileViewBasic.toDbUser(host: String) =
+    DbUser(
+        user_key =
+            MicroBlogKey(
+                id = did.did,
+                host = host,
+            ),
+        platform_type = PlatformType.Bluesky,
+        name = displayName.orEmpty(),
+        handle = handle.handle,
         host = host,
-    ),
-    platform_type = PlatformType.Bluesky,
-    name = displayName.orEmpty(),
-    handle = handle.handle,
-    host = host,
-    content = UserContent.BlueskyLite(this),
-)
+        content = UserContent.BlueskyLite(this),
+    )
 
-fun ProfileViewDetailed.toDbUser(
-    host: String,
-) = DbUser(
-    user_key = MicroBlogKey(
-        id = did.did,
+fun ProfileViewDetailed.toDbUser(host: String) =
+    DbUser(
+        user_key =
+            MicroBlogKey(
+                id = did.did,
+                host = host,
+            ),
+        platform_type = PlatformType.Bluesky,
+        name = displayName.orEmpty(),
+        handle = handle.handle,
         host = host,
-    ),
-    platform_type = PlatformType.Bluesky,
-    name = displayName.orEmpty(),
-    handle = handle.handle,
-    host = host,
-    content = UserContent.Bluesky(this),
-)
+        content = UserContent.Bluesky(this),
+    )

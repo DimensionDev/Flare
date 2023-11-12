@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param id */
 @Serializable
 data class AdminEmojiCopy200Response(
-
     @SerialName(value = "id") val id: kotlin.String,
-
 )

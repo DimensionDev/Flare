@@ -971,7 +971,11 @@ private fun composePresenter(
                                     },
                                 sensitive = mediaState.isMediaSensitive,
                                 spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
-                                visibility = ((state.visibilityState as UiState.Success<VisibilityState>).data as MastodonVisibilityState).visibility,
+                                visibility =
+                                    (
+                                        (state.visibilityState as UiState.Success<VisibilityState>)
+                                            .data as MastodonVisibilityState
+                                    ).visibility,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 account = it,
                             )
@@ -998,11 +1002,19 @@ private fun composePresenter(
                                     },
                                 sensitive = mediaState.isMediaSensitive,
                                 spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
-                                visibility = ((state.visibilityState as UiState.Success<VisibilityState>).data as MisskeyVisibilityState).visibility,
+                                visibility =
+                                    (
+                                        (state.visibilityState as UiState.Success<VisibilityState>)
+                                            .data as MisskeyVisibilityState
+                                    ).visibility,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 content = textFieldState.text.toString(),
-                                localOnly = ((state.visibilityState as UiState.Success<VisibilityState>).data as MisskeyVisibilityState).localOnly,
+                                localOnly =
+                                    (
+                                        (state.visibilityState as UiState.Success<VisibilityState>)
+                                            .data as MisskeyVisibilityState
+                                    ).localOnly,
                             )
 
                         is UiAccount.Bluesky ->

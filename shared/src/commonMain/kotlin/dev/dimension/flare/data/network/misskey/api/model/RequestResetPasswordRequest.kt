@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param username * @param email */
 @Serializable
 data class RequestResetPasswordRequest(
-
     @SerialName(value = "username") val username: kotlin.String,
-
     @SerialName(value = "email") val email: kotlin.String,
-
 )

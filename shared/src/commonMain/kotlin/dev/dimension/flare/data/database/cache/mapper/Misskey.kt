@@ -67,28 +67,32 @@ internal object Misskey {
                     account_key = it.account_key,
                 )
             }
-            val exsitingUsers = database.dbUserQueries.findByKeys(user.map { it.user_key }).executeAsList()
-                .filter {
-                    it.content is UserContent.Misskey
-                }.map {
-                    val content = it.content as UserContent.Misskey
-                    val item = user.find { user ->
-                        user.user_key == it.user_key
+            val exsitingUsers =
+                database.dbUserQueries.findByKeys(user.map { it.user_key }).executeAsList()
+                    .filter {
+                        it.content is UserContent.Misskey
+                    }.map {
+                        val content = it.content as UserContent.Misskey
+                        val item =
+                            user.find { user ->
+                                user.user_key == it.user_key
+                            }
+                        if (item != null && item.content is UserContent.MisskeyLite) {
+                            it.copy(
+                                content =
+                                    content.copy(
+                                        data =
+                                            content.data.copy(
+                                                name = item.content.data.name,
+                                                username = item.content.data.username,
+                                                avatarUrl = item.content.data.avatarUrl,
+                                            ),
+                                    ),
+                            )
+                        } else {
+                            it
+                        }
                     }
-                    if (item != null && item.content is UserContent.MisskeyLite) {
-                        it.copy(
-                            content = content.copy(
-                                data = content.data.copy(
-                                    name = item.content.data.name,
-                                    username = item.content.data.username,
-                                    avatarUrl = item.content.data.avatarUrl,
-                                ),
-                            ),
-                        )
-                    } else {
-                        it
-                    }
-                }
             val result = (exsitingUsers + user).distinctBy { it.user_key }
             result.forEach {
                 database.dbUserQueries.insert(
@@ -119,16 +123,15 @@ private fun Notification.toDbPagingTimeline(
     )
 }
 
-private fun Notification.toDbStatus(
-    accountKey: MicroBlogKey,
-): DbStatus {
+private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     val user = this.user?.toDbUser(accountKey.host)
     return DbStatus(
         id = 0,
-        status_key = MicroBlogKey(
-            this.id,
-            accountKey.host,
-        ),
+        status_key =
+            MicroBlogKey(
+                this.id,
+                accountKey.host,
+            ),
         platform_type = PlatformType.Misskey,
         user_key = user?.user_key,
         content = StatusContent.MisskeyNotification(this),
@@ -152,16 +155,15 @@ private fun Note.toDbPagingTimeline(
     )
 }
 
-private fun Note.toDbStatus(
-    accountKey: MicroBlogKey,
-): DbStatus {
+private fun Note.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     val user = this.user.toDbUser(accountKey.host)
     return DbStatus(
         id = 0,
-        status_key = MicroBlogKey(
-            id = id,
-            host = user.user_key.host,
-        ),
+        status_key =
+            MicroBlogKey(
+                id = id,
+                host = user.user_key.host,
+            ),
         platform_type = PlatformType.Misskey,
         content = StatusContent.Misskey(this),
         user_key = user.user_key,
@@ -169,45 +171,45 @@ private fun Note.toDbStatus(
     )
 }
 
-private fun UserLite.toDbUser(
-    accountHost: String,
-) = DbUser(
-    user_key = MicroBlogKey(
-        id = id,
-        host = accountHost,
-    ),
-    platform_type = dev.dimension.flare.model.PlatformType.Misskey,
-    name = name ?: "",
-    handle = username,
-    content = UserContent.MisskeyLite(this),
-    host = if (host.isNullOrEmpty()) {
-        accountHost
-    } else {
-        host
-    },
-)
+private fun UserLite.toDbUser(accountHost: String) =
+    DbUser(
+        user_key =
+            MicroBlogKey(
+                id = id,
+                host = accountHost,
+            ),
+        platform_type = dev.dimension.flare.model.PlatformType.Misskey,
+        name = name ?: "",
+        handle = username,
+        content = UserContent.MisskeyLite(this),
+        host =
+            if (host.isNullOrEmpty()) {
+                accountHost
+            } else {
+                host
+            },
+    )
 
-internal fun User.toDbUser(
-    accountHost: String,
-) = DbUser(
-    user_key = MicroBlogKey(
-        id = id,
-        host = accountHost,
-    ),
-    platform_type = PlatformType.Misskey,
-    name = name ?: "",
-    handle = username,
-    content = UserContent.Misskey(this),
-    host = if (host.isNullOrEmpty()) {
-        accountHost
-    } else {
-        host
-    },
-)
+internal fun User.toDbUser(accountHost: String) =
+    DbUser(
+        user_key =
+            MicroBlogKey(
+                id = id,
+                host = accountHost,
+            ),
+        platform_type = PlatformType.Misskey,
+        name = name ?: "",
+        handle = username,
+        content = UserContent.Misskey(this),
+        host =
+            if (host.isNullOrEmpty()) {
+                accountHost
+            } else {
+                host
+            },
+    )
 
-internal fun List<EmojiSimple>.toDb(
-    host: String,
-): DbEmoji {
+internal fun List<EmojiSimple>.toDb(host: String): DbEmoji {
     return DbEmoji(
         host = host,
         content = EmojiContent.Misskey(this),

@@ -24,81 +24,42 @@ import kotlinx.serialization.Serializable
  * @param url * @param uri * @param movedToUri * @param alsoKnownAs * @param createdAt * @param updatedAt * @param lastFetchedAt * @param bannerUrl * @param bannerBlurhash * @param isLocked * @param isSilenced * @param isLimited * @param isSuspended * @param description * @param location * @param birthday * @param lang * @param fields * @param followersCount * @param followingCount * @param notesCount * @param pinnedNoteIds * @param pinnedNotes * @param pinnedPageId * @param pinnedPage * @param publicReactions * @param twoFactorEnabled * @param usePasswordLessLogin * @param securityKeys * @param isFollowing * @param isFollowed * @param hasPendingFollowRequestFromYou * @param hasPendingFollowRequestToYou * @param isBlocking * @param isBlocked * @param isMuted * @param isRenoteMuted * @param memo */
 @Serializable
 data class UserDetailedNotMeOnly(
-
     @SerialName(value = "url") val url: kotlin.String? = null,
-
     @SerialName(value = "uri") val uri: kotlin.String? = null,
-
     @SerialName(value = "movedToUri") val movedToUri: kotlin.String? = null,
-
     @SerialName(value = "alsoKnownAs") val alsoKnownAs: kotlin.collections.List<kotlin.String>? = null,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "updatedAt") val updatedAt: kotlin.String? = null,
-
     @SerialName(value = "lastFetchedAt") val lastFetchedAt: kotlin.String? = null,
-
     @SerialName(value = "bannerUrl") val bannerUrl: kotlin.String? = null,
-
     @SerialName(value = "bannerBlurhash") val bannerBlurhash: kotlin.String? = null,
-
     @SerialName(value = "isLocked") val isLocked: kotlin.Boolean,
-
     @SerialName(value = "isSilenced") val isSilenced: kotlin.Boolean,
-
     @SerialName(value = "isLimited") val isLimited: kotlin.Boolean,
-
     @SerialName(value = "isSuspended") val isSuspended: kotlin.Boolean,
-
     @SerialName(value = "description") val description: kotlin.String? = null,
-
     @SerialName(value = "location") val location: kotlin.String? = null,
-
     @SerialName(value = "birthday") val birthday: kotlin.String? = null,
-
     @SerialName(value = "lang") val lang: kotlin.String? = null,
-
     @SerialName(value = "fields") val fields: kotlin.collections.List<UserDetailedNotMeOnlyFieldsInner>,
-
     @SerialName(value = "followersCount") val followersCount: kotlin.Double,
-
     @SerialName(value = "followingCount") val followingCount: kotlin.Double,
-
     @SerialName(value = "notesCount") val notesCount: kotlin.Double,
-
     @SerialName(value = "pinnedNoteIds") val pinnedNoteIds: kotlin.collections.List<kotlin.String>,
-
     @SerialName(value = "pinnedNotes") val pinnedNotes: kotlin.collections.List<@Contextual Note>,
-
     @SerialName(value = "pinnedPageId") val pinnedPageId: kotlin.String? = null,
-
     @SerialName(value = "pinnedPage") val pinnedPage: Page,
-
     @SerialName(value = "publicReactions") val publicReactions: kotlin.Boolean,
-
     @SerialName(value = "twoFactorEnabled") val twoFactorEnabled: kotlin.Boolean = false,
-
     @SerialName(value = "usePasswordLessLogin") val usePasswordLessLogin: kotlin.Boolean = false,
-
     @SerialName(value = "securityKeys") val securityKeys: kotlin.Boolean = false,
-
     @SerialName(value = "isFollowing") val isFollowing: kotlin.Boolean? = null,
-
     @SerialName(value = "isFollowed") val isFollowed: kotlin.Boolean? = null,
-
     @SerialName(value = "hasPendingFollowRequestFromYou") val hasPendingFollowRequestFromYou: kotlin.Boolean? = null,
-
     @SerialName(value = "hasPendingFollowRequestToYou") val hasPendingFollowRequestToYou: kotlin.Boolean? = null,
-
     @SerialName(value = "isBlocking") val isBlocking: kotlin.Boolean? = null,
-
     @SerialName(value = "isBlocked") val isBlocked: kotlin.Boolean? = null,
-
     @SerialName(value = "isMuted") val isMuted: kotlin.Boolean? = null,
-
     @SerialName(value = "isRenoteMuted") val isRenoteMuted: kotlin.Boolean? = null,
-
     @SerialName(value = "memo") val memo: kotlin.String? = null,
-
 )

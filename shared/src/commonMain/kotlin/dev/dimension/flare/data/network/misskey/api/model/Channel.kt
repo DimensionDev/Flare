@@ -23,33 +23,18 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param lastNotedAt * @param name * @param description * @param bannerUrl * @param isArchived * @param notesCount * @param usersCount * @param userId * @param pinnedNoteIds * @param color * @param isFollowing * @param isFavorited */
 @Serializable
 data class Channel(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "lastNotedAt") val lastNotedAt: kotlin.String? = null,
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "description") val description: kotlin.String? = null,
-
     @SerialName(value = "bannerUrl") val bannerUrl: kotlin.String? = null,
-
     @SerialName(value = "isArchived") val isArchived: kotlin.Boolean,
-
     @SerialName(value = "notesCount") val notesCount: kotlin.Double,
-
     @SerialName(value = "usersCount") val usersCount: kotlin.Double,
-
     @SerialName(value = "userId") val userId: kotlin.String? = null,
-
     @SerialName(value = "pinnedNoteIds") val pinnedNoteIds: kotlin.collections.List<kotlin.String>,
-
     @SerialName(value = "color") val color: kotlin.String,
-
     @SerialName(value = "isFollowing") val isFollowing: kotlin.Boolean? = null,
-
     @SerialName(value = "isFavorited") val isFavorited: kotlin.Boolean? = null,
-
 )

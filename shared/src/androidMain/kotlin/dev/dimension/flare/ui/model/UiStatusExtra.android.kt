@@ -6,12 +6,13 @@ import java.text.Bidi
 
 @Immutable
 actual data class UiStatusExtra(
-    val contentDirection: LayoutDirection
+    val contentDirection: LayoutDirection,
 ) {
     companion object {
-        val Empty = UiStatusExtra(
-            contentDirection = LayoutDirection.Ltr,
-        )
+        val Empty =
+            UiStatusExtra(
+                contentDirection = LayoutDirection.Ltr,
+            )
     }
 }
 
@@ -21,15 +22,16 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
     return when (status) {
         is UiStatus.Mastodon -> {
             UiStatusExtra(
-                contentDirection = if (Bidi(
-                        status.content,
-                        Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                    ).baseIsLeftToRight()
-                ) {
-                    LayoutDirection.Ltr
-                } else {
-                    LayoutDirection.Rtl
-                },
+                contentDirection =
+                    if (Bidi(
+                            status.content,
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
             )
         }
 
@@ -39,15 +41,16 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
 
         is UiStatus.Misskey -> {
             UiStatusExtra(
-                contentDirection = if (Bidi(
-                        status.content,
-                        Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                    ).baseIsLeftToRight()
-                ) {
-                    LayoutDirection.Ltr
-                } else {
-                    LayoutDirection.Rtl
-                },
+                contentDirection =
+                    if (Bidi(
+                            status.content,
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
             )
         }
 
@@ -57,15 +60,16 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
 
         is UiStatus.Bluesky -> {
             UiStatusExtra(
-                contentDirection = if (Bidi(
-                        status.content,
-                        Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                    ).baseIsLeftToRight()
-                ) {
-                    LayoutDirection.Ltr
-                } else {
-                    LayoutDirection.Rtl
-                },
+                contentDirection =
+                    if (Bidi(
+                            status.content,
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
             )
         }
         is UiStatus.BlueskyNotification -> {

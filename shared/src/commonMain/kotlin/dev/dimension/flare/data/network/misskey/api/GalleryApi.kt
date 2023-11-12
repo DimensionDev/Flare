@@ -24,7 +24,9 @@ interface GalleryApi {
      * @param body * @return [kotlin.collections.List<GalleryPost>]
      */
     @POST("gallery/featured")
-    suspend fun galleryFeatured(@Body body: kotlin.Any): Response<kotlin.collections.List<GalleryPost>>
+    suspend fun galleryFeatured(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<GalleryPost>>
 
     /**
      * gallery/popular
@@ -40,7 +42,9 @@ interface GalleryApi {
      * @param body * @return [kotlin.collections.List<GalleryPost>]
      */
     @POST("gallery/popular")
-    suspend fun galleryPopular(@Body body: kotlin.Any): Response<kotlin.collections.List<GalleryPost>>
+    suspend fun galleryPopular(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<GalleryPost>>
 
     /**
      * gallery/posts
@@ -56,7 +60,9 @@ interface GalleryApi {
      * @param adminAdListRequest * @return [kotlin.collections.List<GalleryPost>]
      */
     @POST("gallery/posts")
-    suspend fun galleryPosts(@Body adminAdListRequest: AdminAdListRequest): Response<kotlin.collections.List<GalleryPost>>
+    suspend fun galleryPosts(
+        @Body adminAdListRequest: AdminAdListRequest,
+    ): Response<kotlin.collections.List<GalleryPost>>
 
     /**
      * gallery/posts/create
@@ -73,7 +79,9 @@ interface GalleryApi {
      * @param galleryPostsCreateRequest * @return [GalleryPost]
      */
     @POST("gallery/posts/create")
-    suspend fun galleryPostsCreate(@Body galleryPostsCreateRequest: GalleryPostsCreateRequest): Response<GalleryPost>
+    suspend fun galleryPostsCreate(
+        @Body galleryPostsCreateRequest: GalleryPostsCreateRequest,
+    ): Response<GalleryPost>
 
     /**
      * gallery/posts/delete
@@ -89,7 +97,9 @@ interface GalleryApi {
      * @param galleryPostsDeleteRequest * @return [Unit]
      */
     @POST("gallery/posts/delete")
-    suspend fun galleryPostsDelete(@Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest): Response<Unit>
+    suspend fun galleryPostsDelete(
+        @Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * gallery/posts/like
@@ -105,7 +115,9 @@ interface GalleryApi {
      * @param galleryPostsDeleteRequest * @return [Unit]
      */
     @POST("gallery/posts/like")
-    suspend fun galleryPostsLike(@Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest): Response<Unit>
+    suspend fun galleryPostsLike(
+        @Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * gallery/posts/show
@@ -121,7 +133,9 @@ interface GalleryApi {
      * @param galleryPostsDeleteRequest * @return [GalleryPost]
      */
     @POST("gallery/posts/show")
-    suspend fun galleryPostsShow(@Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest): Response<GalleryPost>
+    suspend fun galleryPostsShow(
+        @Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest,
+    ): Response<GalleryPost>
 
     /**
      * gallery/posts/unlike
@@ -137,7 +151,9 @@ interface GalleryApi {
      * @param galleryPostsDeleteRequest * @return [Unit]
      */
     @POST("gallery/posts/unlike")
-    suspend fun galleryPostsUnlike(@Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest): Response<Unit>
+    suspend fun galleryPostsUnlike(
+        @Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * gallery/posts/update
@@ -154,5 +170,7 @@ interface GalleryApi {
      * @param galleryPostsUpdateRequest * @return [GalleryPost]
      */
     @POST("gallery/posts/update")
-    suspend fun galleryPostsUpdate(@Body galleryPostsUpdateRequest: GalleryPostsUpdateRequest): Response<GalleryPost>
+    suspend fun galleryPostsUpdate(
+        @Body galleryPostsUpdateRequest: GalleryPostsUpdateRequest,
+    ): Response<GalleryPost>
 }

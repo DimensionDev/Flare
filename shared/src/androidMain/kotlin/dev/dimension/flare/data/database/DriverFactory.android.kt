@@ -9,9 +9,13 @@ import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 internal actual class DriverFactory(
     private val context: Context,
 ) {
-    actual fun createDriver(schema: SqlSchema<QueryResult.Value<Unit>>, name: String): SqlDriver {
+    actual fun createDriver(
+        schema: SqlSchema<QueryResult.Value<Unit>>,
+        name: String,
+    ): SqlDriver {
         return AndroidSqliteDriver(schema, context, name)
     }
+
     actual fun deleteDatabase(name: String) {
         context.deleteDatabase(name)
     }

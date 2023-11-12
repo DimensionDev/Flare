@@ -23,23 +23,13 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param updatedAt * @param text * @param title * @param imageUrl * @param isPrivate * @param closeDuration * @param isRead */
 @Serializable
 data class Announcements200ResponseInner(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "updatedAt") val updatedAt: kotlin.String? = null,
-
     @SerialName(value = "text") val text: kotlin.String,
-
     @SerialName(value = "title") val title: kotlin.String,
-
     @SerialName(value = "imageUrl") val imageUrl: kotlin.String? = null,
-
     @SerialName(value = "isPrivate") val isPrivate: kotlin.Boolean? = null,
-
     @SerialName(value = "closeDuration") val closeDuration: kotlin.Double,
-
     @SerialName(value = "isRead") val isRead: kotlin.Boolean? = null,
-
 )

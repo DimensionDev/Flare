@@ -46,7 +46,9 @@ interface UsersApi {
      * @param emailAddressAvailableRequest * @return [EmailAddressAvailable200Response]
      */
     @POST("email-address/available")
-    suspend fun emailAddressAvailable(@Body emailAddressAvailableRequest: EmailAddressAvailableRequest): Response<EmailAddressAvailable200Response>
+    suspend fun emailAddressAvailable(
+        @Body emailAddressAvailableRequest: EmailAddressAvailableRequest,
+    ): Response<EmailAddressAvailable200Response>
 
     /**
      * pinned-users
@@ -62,7 +64,9 @@ interface UsersApi {
      * @param body * @return [kotlin.collections.List<UserDetailed>]
      */
     @POST("pinned-users")
-    suspend fun pinnedUsers(@Body body: kotlin.Any): Response<kotlin.collections.List<UserDetailed>>
+    suspend fun pinnedUsers(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<UserDetailed>>
 
     /**
      * retention
@@ -78,7 +82,9 @@ interface UsersApi {
      * @param body * @return [kotlin.Any]
      */
     @POST("retention")
-    suspend fun retention(@Body body: kotlin.Any): Response<kotlin.Any>
+    suspend fun retention(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.Any>
 
     /**
      * username/available
@@ -94,7 +100,9 @@ interface UsersApi {
      * @param usernameAvailableRequest * @return [UsernameAvailable200Response]
      */
     @POST("username/available")
-    suspend fun usernameAvailable(@Body usernameAvailableRequest: UsernameAvailableRequest): Response<UsernameAvailable200Response>
+    suspend fun usernameAvailable(
+        @Body usernameAvailableRequest: UsernameAvailableRequest,
+    ): Response<UsernameAvailable200Response>
 
     /**
      * users
@@ -110,7 +118,9 @@ interface UsersApi {
      * @param usersRequest * @return [kotlin.collections.List<UserDetailed>]
      */
     @POST("users")
-    suspend fun users(@Body usersRequest: UsersRequest): Response<kotlin.collections.List<UserDetailed>>
+    suspend fun users(
+        @Body usersRequest: UsersRequest,
+    ): Response<kotlin.collections.List<UserDetailed>>
 
     /**
      * users/clips
@@ -126,7 +136,9 @@ interface UsersApi {
      * @param usersClipsRequest * @return [kotlin.collections.List<Clip>]
      */
     @POST("users/clips")
-    suspend fun usersClips(@Body usersClipsRequest: UsersClipsRequest): Response<kotlin.collections.List<Clip>>
+    suspend fun usersClips(
+        @Body usersClipsRequest: UsersClipsRequest,
+    ): Response<kotlin.collections.List<Clip>>
 
     /**
      * users/followers
@@ -142,7 +154,9 @@ interface UsersApi {
      * @param usersFollowersRequest * @return [kotlin.collections.List<Following>]
      */
     @POST("users/followers")
-    suspend fun usersFollowers(@Body usersFollowersRequest: UsersFollowersRequest): Response<kotlin.collections.List<Following>>
+    suspend fun usersFollowers(
+        @Body usersFollowersRequest: UsersFollowersRequest,
+    ): Response<kotlin.collections.List<Following>>
 
     /**
      * users/following
@@ -158,7 +172,9 @@ interface UsersApi {
      * @param usersFollowersRequest * @return [kotlin.collections.List<Following>]
      */
     @POST("users/following")
-    suspend fun usersFollowing(@Body usersFollowersRequest: UsersFollowersRequest): Response<kotlin.collections.List<Following>>
+    suspend fun usersFollowing(
+        @Body usersFollowersRequest: UsersFollowersRequest,
+    ): Response<kotlin.collections.List<Following>>
 
     /**
      * users/gallery/posts
@@ -174,7 +190,9 @@ interface UsersApi {
      * @param usersClipsRequest * @return [kotlin.collections.List<GalleryPost>]
      */
     @POST("users/gallery/posts")
-    suspend fun usersGalleryPosts(@Body usersClipsRequest: UsersClipsRequest): Response<kotlin.collections.List<GalleryPost>>
+    suspend fun usersGalleryPosts(
+        @Body usersClipsRequest: UsersClipsRequest,
+    ): Response<kotlin.collections.List<GalleryPost>>
 
     /**
      * users/get-frequently-replied-users
@@ -190,7 +208,9 @@ interface UsersApi {
      * @param usersGetFrequentlyRepliedUsersRequest * @return [kotlin.collections.List<UsersGetFrequentlyRepliedUsers200ResponseInner>]
      */
     @POST("users/get-frequently-replied-users")
-    suspend fun usersGetFrequentlyRepliedUsers(@Body usersGetFrequentlyRepliedUsersRequest: UsersGetFrequentlyRepliedUsersRequest): Response<kotlin.collections.List<UsersGetFrequentlyRepliedUsers200ResponseInner>>
+    suspend fun usersGetFrequentlyRepliedUsers(
+        @Body usersGetFrequentlyRepliedUsersRequest: UsersGetFrequentlyRepliedUsersRequest,
+    ): Response<kotlin.collections.List<UsersGetFrequentlyRepliedUsers200ResponseInner>>
 
     /**
      * users/notes
@@ -206,7 +226,9 @@ interface UsersApi {
      * @param usersNotesRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("users/notes")
-    suspend fun usersNotes(@Body usersNotesRequest: UsersNotesRequest): Response<kotlin.collections.List<Note>>
+    suspend fun usersNotes(
+        @Body usersNotesRequest: UsersNotesRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * users/pages
@@ -222,7 +244,9 @@ interface UsersApi {
      * @param usersClipsRequest * @return [kotlin.collections.List<Page>]
      */
     @POST("users/pages")
-    suspend fun usersPages(@Body usersClipsRequest: UsersClipsRequest): Response<kotlin.collections.List<Page>>
+    suspend fun usersPages(
+        @Body usersClipsRequest: UsersClipsRequest,
+    ): Response<kotlin.collections.List<Page>>
 
     /**
      * users/reactions
@@ -238,7 +262,9 @@ interface UsersApi {
      * @param usersReactionsRequest * @return [kotlin.collections.List<NoteReaction>]
      */
     @POST("users/reactions")
-    suspend fun usersReactions(@Body usersReactionsRequest: UsersReactionsRequest): Response<kotlin.collections.List<NoteReaction>>
+    suspend fun usersReactions(
+        @Body usersReactionsRequest: UsersReactionsRequest,
+    ): Response<kotlin.collections.List<NoteReaction>>
 
     /**
      * users/recommendation
@@ -254,7 +280,9 @@ interface UsersApi {
      * @param myAppsRequest * @return [kotlin.collections.List<UserDetailed>]
      */
     @POST("users/recommendation")
-    suspend fun usersRecommendation(@Body myAppsRequest: MyAppsRequest): Response<kotlin.collections.List<UserDetailed>>
+    suspend fun usersRecommendation(
+        @Body myAppsRequest: MyAppsRequest,
+    ): Response<kotlin.collections.List<UserDetailed>>
 
     /**
      * users/relation
@@ -270,7 +298,9 @@ interface UsersApi {
      * @param usersRelationRequest * @return [UsersRelation200Response]
      */
     @POST("users/relation")
-    suspend fun usersRelation(@Body usersRelationRequest: UsersRelationRequest): Response<UsersRelation200Response>
+    suspend fun usersRelation(
+        @Body usersRelationRequest: UsersRelationRequest,
+    ): Response<UsersRelation200Response>
 
     /**
      * users/report-abuse
@@ -286,7 +316,9 @@ interface UsersApi {
      * @param usersReportAbuseRequest * @return [Unit]
      */
     @POST("users/report-abuse")
-    suspend fun usersReportAbuse(@Body usersReportAbuseRequest: UsersReportAbuseRequest): Response<Unit>
+    suspend fun usersReportAbuse(
+        @Body usersReportAbuseRequest: UsersReportAbuseRequest,
+    ): Response<Unit>
 
     /**
      * users/search
@@ -302,7 +334,9 @@ interface UsersApi {
      * @param usersSearchRequest * @return [kotlin.collections.List<User>]
      */
     @POST("users/search")
-    suspend fun usersSearch(@Body usersSearchRequest: UsersSearchRequest): Response<kotlin.collections.List<User>>
+    suspend fun usersSearch(
+        @Body usersSearchRequest: UsersSearchRequest,
+    ): Response<kotlin.collections.List<User>>
 
     /**
      * users/search-by-username-and-host
@@ -318,7 +352,9 @@ interface UsersApi {
      * @param usersSearchByUsernameAndHostRequest * @return [kotlin.collections.List<User>]
      */
     @POST("users/search-by-username-and-host")
-    suspend fun usersSearchByUsernameAndHost(@Body usersSearchByUsernameAndHostRequest: UsersSearchByUsernameAndHostRequest): Response<kotlin.collections.List<User>>
+    suspend fun usersSearchByUsernameAndHost(
+        @Body usersSearchByUsernameAndHostRequest: UsersSearchByUsernameAndHostRequest,
+    ): Response<kotlin.collections.List<User>>
 
     /**
      * users/show
@@ -334,5 +370,7 @@ interface UsersApi {
      * @param usersShowRequest * @return [UsersShow200Response]
      */
     @POST("users/show")
-    suspend fun usersShow(@Body usersShowRequest: UsersShowRequest): Response<User>
+    suspend fun usersShow(
+        @Body usersShowRequest: UsersShowRequest,
+    ): Response<User>
 }

@@ -23,17 +23,11 @@ import kotlinx.serialization.Serializable
  * @param name * @param url * @param secret * @param on */
 @Serializable
 data class IWebhooksCreateRequest(
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "url") val url: kotlin.String,
-
     @SerialName(value = "secret") val secret: kotlin.String,
-
     @SerialName(value = "on") val on: kotlin.collections.List<IWebhooksCreateRequest.On>,
-
 ) {
-
     /**
      * *
      * Values: Mention,Unfollow,Follow,Followed,Note,Reply,Renote,Reaction

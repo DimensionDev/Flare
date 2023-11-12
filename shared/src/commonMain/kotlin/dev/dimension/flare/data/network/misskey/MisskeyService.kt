@@ -41,25 +41,25 @@ class MisskeyService(
     NotesApi by config(baseUrl, token).create(),
     AccountApi by config(baseUrl, token).create(),
     DriveApi by config(baseUrl, token).create() {
-
     suspend fun upload(
         data: ByteArray,
         name: String,
         sensitive: Boolean = false,
     ): DriveFile? {
-        val multipart = MultiPartFormDataContent(
-            formData {
-                append(
-                    "file",
-                    data,
-                    Headers.build {
-                        append(HttpHeaders.ContentDisposition, "filename=$name")
-                    },
-                )
-                append("isSensitive", sensitive)
-                append("i", token)
-            },
-        )
+        val multipart =
+            MultiPartFormDataContent(
+                formData {
+                    append(
+                        "file",
+                        data,
+                        Headers.build {
+                            append(HttpHeaders.ContentDisposition, "filename=$name")
+                        },
+                    )
+                    append("isSensitive", sensitive)
+                    append("i", token)
+                },
+            )
         return driveFilesCreate(
             multipart,
         ).body()

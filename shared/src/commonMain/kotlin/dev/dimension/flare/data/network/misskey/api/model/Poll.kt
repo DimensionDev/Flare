@@ -8,22 +8,17 @@ import kotlinx.serialization.Serializable
 data class Poll(
     @SerialName("choices")
     val choices: List<Choice>,
-
     @SerialName("expiresAt")
     val expiresAt: Instant? = null,
-
     @SerialName("multiple")
     val multiple: Boolean,
 ) {
-
     @Serializable
     data class Choice(
         @SerialName("text")
         val text: String,
-
         @SerialName("votes")
         val votes: Int,
-
         @SerialName("isVoted")
         val isVoted: Boolean = false,
     )

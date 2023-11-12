@@ -24,24 +24,28 @@ class ProfilePresenter(
 ) : PresenterBase<ProfileState>() {
     @Composable
     override fun body(): ProfileState {
-        val userState = activeAccountServicePresenter().map { (service, account) ->
-            remember(account.accountKey, userKey) {
-                service.userById(userKey?.id ?: account.accountKey.id)
-            }.collectAsState()
-        }
+        val userState =
+            activeAccountServicePresenter().map { (service, account) ->
+                remember(account.accountKey, userKey) {
+                    service.userById(userKey?.id ?: account.accountKey.id)
+                }.collectAsState()
+            }
 
-        val listState = activeAccountServicePresenter().map { (service, account) ->
-            remember(account.accountKey, userKey) {
-                service.userTimeline(userKey ?: account.accountKey)
-            }.collectAsLazyPagingItems()
-        }
-        val relationState = activeAccountServicePresenter().flatMap { (service, account) ->
-            remember(account.accountKey, userKey) {
-                service.relation(userKey ?: account.accountKey)
-            }.collectAsUiState().value.flatMap { it }
-        }
+        val listState =
+            activeAccountServicePresenter().map { (service, account) ->
+                remember(account.accountKey, userKey) {
+                    service.userTimeline(userKey ?: account.accountKey)
+                }.collectAsLazyPagingItems()
+            }
+        val relationState =
+            activeAccountServicePresenter().flatMap { (service, account) ->
+                remember(account.accountKey, userKey) {
+                    service.relation(userKey ?: account.accountKey)
+                }.collectAsUiState().value.flatMap { it }
+            }
 
-        val refreshing = userState is UiState.Loading ||
+        val refreshing =
+            userState is UiState.Loading ||
                 userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
                 listState is UiState.Loading ||
                 listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
@@ -79,12 +83,12 @@ class ProfileWithUserNameAndHostPresenter(
 ) : PresenterBase<UiState<UiUser>>() {
     @Composable
     override fun body(): UiState<UiUser> {
-
-        val userState = activeAccountServicePresenter().flatMap { (service, account) ->
-            remember(account.accountKey) {
-                service.userByAcct("$userName@$host")
-            }.collectAsState().toUi()
-        }
+        val userState =
+            activeAccountServicePresenter().flatMap { (service, account) ->
+                remember(account.accountKey) {
+                    service.userByAcct("$userName@$host")
+                }.collectAsState().toUi()
+            }
         return userState
     }
 }

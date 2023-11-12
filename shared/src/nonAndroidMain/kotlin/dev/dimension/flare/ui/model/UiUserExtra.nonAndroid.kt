@@ -1,6 +1,10 @@
 package dev.dimension.flare.ui.model
 
-import moe.tlaster.ktml.dom.*
+import moe.tlaster.ktml.dom.Comment
+import moe.tlaster.ktml.dom.Doctype
+import moe.tlaster.ktml.dom.Element
+import moe.tlaster.ktml.dom.Node
+import moe.tlaster.ktml.dom.Text
 
 actual class UiUserExtra(
     val nameMarkdown: String,
@@ -9,16 +13,18 @@ actual class UiUserExtra(
 
 internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
     return UiUserExtra(
-        nameMarkdown = when (user) {
-            is UiUser.Mastodon -> user.nameElement.toMarkdown()
-            is UiUser.Misskey -> user.nameElement.toMarkdown()
-            is UiUser.Bluesky -> user.nameElement.toMarkdown()
-        },
-        descriptionMarkdown = when (user) {
-            is UiUser.Mastodon -> user.descriptionElement?.toMarkdown()
-            is UiUser.Misskey -> user.descriptionElement?.toMarkdown()
-            is UiUser.Bluesky -> user.descriptionElement?.toMarkdown()
-        },
+        nameMarkdown =
+            when (user) {
+                is UiUser.Mastodon -> user.nameElement.toMarkdown()
+                is UiUser.Misskey -> user.nameElement.toMarkdown()
+                is UiUser.Bluesky -> user.nameElement.toMarkdown()
+            },
+        descriptionMarkdown =
+            when (user) {
+                is UiUser.Mastodon -> user.descriptionElement?.toMarkdown()
+                is UiUser.Misskey -> user.descriptionElement?.toMarkdown()
+                is UiUser.Bluesky -> user.descriptionElement?.toMarkdown()
+            },
     )
 }
 

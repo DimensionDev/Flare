@@ -1,4 +1,4 @@
-import java.util.*
+import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
@@ -105,8 +105,6 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.bundles.navigation)
     implementation(libs.bundles.kotlinx)
-//    implementation(libs.bundles.koject)
-//    ksp(libs.koject.processor.app)
     implementation(platform(libs.koin.bom))
     implementation(libs.bundles.koin)
     implementation(libs.ktorfit.lib)
@@ -140,6 +138,6 @@ dependencies {
 ktlint {
     version.set(libs.versions.ktlint)
     filter {
-        exclude { element -> element.file.path.contains("generated/") }
+        exclude { element -> element.file.path.contains("build", ignoreCase = true) }
     }
 }

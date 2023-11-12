@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param name * @param `value` */
 @Serializable
 data class UserDetailedNotMeOnlyFieldsInner(
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "value") val `value`: kotlin.String,
-
 )

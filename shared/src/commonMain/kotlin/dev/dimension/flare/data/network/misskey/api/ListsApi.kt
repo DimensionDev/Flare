@@ -26,7 +26,9 @@ interface ListsApi {
      * @param usersListsCreateRequest * @return [UserList]
      */
     @POST("users/lists/create")
-    suspend fun usersListsCreate(@Body usersListsCreateRequest: UsersListsCreateRequest): Response<UserList>
+    suspend fun usersListsCreate(
+        @Body usersListsCreateRequest: UsersListsCreateRequest,
+    ): Response<UserList>
 
     /**
      * users/lists/delete
@@ -42,7 +44,9 @@ interface ListsApi {
      * @param usersListsDeleteRequest * @return [Unit]
      */
     @POST("users/lists/delete")
-    suspend fun usersListsDelete(@Body usersListsDeleteRequest: UsersListsDeleteRequest): Response<Unit>
+    suspend fun usersListsDelete(
+        @Body usersListsDeleteRequest: UsersListsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * users/lists/list
@@ -58,7 +62,9 @@ interface ListsApi {
      * @param usersListsListRequest * @return [kotlin.collections.List<UserList>]
      */
     @POST("users/lists/list")
-    suspend fun usersListsList(@Body usersListsListRequest: UsersListsListRequest): Response<kotlin.collections.List<UserList>>
+    suspend fun usersListsList(
+        @Body usersListsListRequest: UsersListsListRequest,
+    ): Response<kotlin.collections.List<UserList>>
 
     /**
      * users/lists/pull
@@ -74,7 +80,9 @@ interface ListsApi {
      * @param usersListsPullRequest * @return [Unit]
      */
     @POST("users/lists/pull")
-    suspend fun usersListsPull(@Body usersListsPullRequest: UsersListsPullRequest): Response<Unit>
+    suspend fun usersListsPull(
+        @Body usersListsPullRequest: UsersListsPullRequest,
+    ): Response<Unit>
 
     /**
      * users/lists/push
@@ -91,7 +99,9 @@ interface ListsApi {
      * @param usersListsPullRequest * @return [Unit]
      */
     @POST("users/lists/push")
-    suspend fun usersListsPush(@Body usersListsPullRequest: UsersListsPullRequest): Response<Unit>
+    suspend fun usersListsPush(
+        @Body usersListsPullRequest: UsersListsPullRequest,
+    ): Response<Unit>
 
     /**
      * users/lists/show
@@ -107,7 +117,9 @@ interface ListsApi {
      * @param usersListsShowRequest * @return [UserList]
      */
     @POST("users/lists/show")
-    suspend fun usersListsShow(@Body usersListsShowRequest: UsersListsShowRequest): Response<UserList>
+    suspend fun usersListsShow(
+        @Body usersListsShowRequest: UsersListsShowRequest,
+    ): Response<UserList>
 
     /**
      * users/lists/update
@@ -123,5 +135,7 @@ interface ListsApi {
      * @param usersListsUpdateRequest * @return [UserList]
      */
     @POST("users/lists/update")
-    suspend fun usersListsUpdate(@Body usersListsUpdateRequest: UsersListsUpdateRequest): Response<UserList>
+    suspend fun usersListsUpdate(
+        @Body usersListsUpdateRequest: UsersListsUpdateRequest,
+    ): Response<UserList>
 }

@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param localCount * @param remoteCount */
 @Serializable
 data class ChartsUserReactions200Response(
-
     @SerialName(value = "local.count") val localCount: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "remote.count") val remoteCount: kotlin.collections.List<kotlin.Double>,
-
 )

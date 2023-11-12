@@ -23,37 +23,20 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param name * @param type * @param md5 * @param propertySize * @param isSensitive * @param blurhash * @param properties * @param url * @param thumbnailUrl * @param comment * @param folderId * @param userId * @param folder * @param user */
 @Serializable
 data class DriveFile(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "type") val type: kotlin.String,
-
     @SerialName(value = "md5") val md5: kotlin.String,
-
     @SerialName(value = "size") val propertySize: kotlin.Double,
-
     @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean,
-
     @SerialName(value = "blurhash") val blurhash: kotlin.String? = null,
-
     @SerialName(value = "properties") val properties: DriveFileProperties,
-
     @SerialName(value = "url") val url: kotlin.String? = null,
-
     @SerialName(value = "thumbnailUrl") val thumbnailUrl: kotlin.String? = null,
-
     @SerialName(value = "comment") val comment: kotlin.String? = null,
-
     @SerialName(value = "folderId") val folderId: kotlin.String? = null,
-
     @SerialName(value = "userId") val userId: kotlin.String? = null,
-
     @SerialName(value = "folder") val folder: DriveFolder? = null,
-
     @SerialName(value = "user") val user: UserLite? = null,
-
 )

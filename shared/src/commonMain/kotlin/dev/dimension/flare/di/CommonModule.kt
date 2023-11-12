@@ -8,10 +8,11 @@ import dev.dimension.flare.data.repository.ApplicationRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
-val commonModule = module {
-    singleOf(::AccountRepository)
-    single { provideVersionDatabase(get()) }
-    single { provideAppDatabase(get(), get()) }
-    single { provideCacheDatabase(get(), get()) }
-    singleOf(::ApplicationRepository)
-}
+val commonModule =
+    module {
+        singleOf(::AccountRepository)
+        single { provideVersionDatabase(get()) }
+        single { provideAppDatabase(get(), get()) }
+        single { provideCacheDatabase(get(), get()) }
+        singleOf(::ApplicationRepository)
+    }

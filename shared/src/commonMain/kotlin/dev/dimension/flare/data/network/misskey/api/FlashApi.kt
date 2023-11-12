@@ -24,7 +24,9 @@ interface FlashApi {
      * @param flashCreateRequest * @return [Unit]
      */
     @POST("flash/create")
-    suspend fun flashCreate(@Body flashCreateRequest: FlashCreateRequest): Response<Unit>
+    suspend fun flashCreate(
+        @Body flashCreateRequest: FlashCreateRequest,
+    ): Response<Unit>
 
     /**
      * flash/featured
@@ -40,7 +42,9 @@ interface FlashApi {
      * @param body * @return [kotlin.collections.List<Flash>]
      */
     @POST("flash/featured")
-    suspend fun flashFeatured(@Body body: kotlin.Any): Response<kotlin.collections.List<Flash>>
+    suspend fun flashFeatured(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<Flash>>
 
     /**
      * flash/like
@@ -56,7 +60,9 @@ interface FlashApi {
      * @param flashDeleteRequest * @return [Unit]
      */
     @POST("flash/like")
-    suspend fun flashLike(@Body flashDeleteRequest: FlashDeleteRequest): Response<Unit>
+    suspend fun flashLike(
+        @Body flashDeleteRequest: FlashDeleteRequest,
+    ): Response<Unit>
 
     /**
      * flash/unlike
@@ -72,7 +78,9 @@ interface FlashApi {
      * @param flashDeleteRequest * @return [Unit]
      */
     @POST("flash/unlike")
-    suspend fun flashUnlike(@Body flashDeleteRequest: FlashDeleteRequest): Response<Unit>
+    suspend fun flashUnlike(
+        @Body flashDeleteRequest: FlashDeleteRequest,
+    ): Response<Unit>
 
     /**
      * flash/update
@@ -89,5 +97,7 @@ interface FlashApi {
      * @param flashUpdateRequest * @return [Unit]
      */
     @POST("flash/update")
-    suspend fun flashUpdate(@Body flashUpdateRequest: FlashUpdateRequest): Response<Unit>
+    suspend fun flashUpdate(
+        @Body flashUpdateRequest: FlashUpdateRequest,
+    ): Response<Unit>
 }

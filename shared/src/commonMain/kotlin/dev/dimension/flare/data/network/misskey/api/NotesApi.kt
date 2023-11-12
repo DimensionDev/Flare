@@ -42,7 +42,9 @@ interface NotesApi {
      * @param channelsTimelineRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("channels/timeline")
-    suspend fun channelsTimeline(@Body channelsTimelineRequest: ChannelsTimelineRequest): Response<kotlin.collections.List<Note>>
+    suspend fun channelsTimeline(
+        @Body channelsTimelineRequest: ChannelsTimelineRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes
@@ -58,7 +60,9 @@ interface NotesApi {
      * @param notesRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes")
-    suspend fun notes(@Body notesRequest: NotesRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notes(
+        @Body notesRequest: NotesRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/children
@@ -74,7 +78,9 @@ interface NotesApi {
      * @param notesChildrenRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/children")
-    suspend fun notesChildren(@Body notesChildrenRequest: NotesChildrenRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesChildren(
+        @Body notesChildrenRequest: NotesChildrenRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/conversation
@@ -90,7 +96,9 @@ interface NotesApi {
      * @param notesConversationRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/conversation")
-    suspend fun notesConversation(@Body notesConversationRequest: NotesConversationRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesConversation(
+        @Body notesConversationRequest: NotesConversationRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/create
@@ -107,7 +115,9 @@ interface NotesApi {
      * @param notesCreateRequest * @return [NotesCreate200Response]
      */
     @POST("notes/create")
-    suspend fun notesCreate(@Body notesCreateRequest: NotesCreateRequest): Response<NotesCreate200Response>
+    suspend fun notesCreate(
+        @Body notesCreateRequest: NotesCreateRequest,
+    ): Response<NotesCreate200Response>
 
     /**
      * notes/delete
@@ -124,7 +134,9 @@ interface NotesApi {
      * @param ipinRequest * @return [Unit]
      */
     @POST("notes/delete")
-    suspend fun notesDelete(@Body ipinRequest: IPinRequest): Response<Unit>
+    suspend fun notesDelete(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Unit>
 
     /**
      * notes/favorites/create
@@ -141,7 +153,9 @@ interface NotesApi {
      * @param ipinRequest * @return [Unit]
      */
     @POST("notes/favorites/create")
-    suspend fun notesFavoritesCreate(@Body ipinRequest: IPinRequest): Response<Unit>
+    suspend fun notesFavoritesCreate(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Unit>
 
     /**
      * notes/favorites/delete
@@ -157,7 +171,9 @@ interface NotesApi {
      * @param ipinRequest * @return [Unit]
      */
     @POST("notes/favorites/delete")
-    suspend fun notesFavoritesDelete(@Body ipinRequest: IPinRequest): Response<Unit>
+    suspend fun notesFavoritesDelete(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Unit>
 
     /**
      * notes/featured
@@ -173,7 +189,9 @@ interface NotesApi {
      * @param notesFeaturedRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/featured")
-    suspend fun notesFeatured(@Body notesFeaturedRequest: NotesFeaturedRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesFeatured(
+        @Body notesFeaturedRequest: NotesFeaturedRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/global-timeline
@@ -189,7 +207,9 @@ interface NotesApi {
      * @param notesGlobalTimelineRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/global-timeline")
-    suspend fun notesGlobalTimeline(@Body notesGlobalTimelineRequest: NotesGlobalTimelineRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesGlobalTimeline(
+        @Body notesGlobalTimelineRequest: NotesGlobalTimelineRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/hybrid-timeline
@@ -205,7 +225,9 @@ interface NotesApi {
      * @param notesHybridTimelineRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/hybrid-timeline")
-    suspend fun notesHybridTimeline(@Body notesHybridTimelineRequest: NotesHybridTimelineRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesHybridTimeline(
+        @Body notesHybridTimelineRequest: NotesHybridTimelineRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/local-timeline
@@ -221,7 +243,9 @@ interface NotesApi {
      * @param notesLocalTimelineRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/local-timeline")
-    suspend fun notesLocalTimeline(@Body notesLocalTimelineRequest: NotesLocalTimelineRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesLocalTimeline(
+        @Body notesLocalTimelineRequest: NotesLocalTimelineRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/mentions
@@ -237,7 +261,9 @@ interface NotesApi {
      * @param notesMentionsRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/mentions")
-    suspend fun notesMentions(@Body notesMentionsRequest: NotesMentionsRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesMentions(
+        @Body notesMentionsRequest: NotesMentionsRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/polls/recommendation
@@ -253,7 +279,9 @@ interface NotesApi {
      * @param myAppsRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/polls/recommendation")
-    suspend fun notesPollsRecommendation(@Body myAppsRequest: MyAppsRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesPollsRecommendation(
+        @Body myAppsRequest: MyAppsRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/polls/vote
@@ -269,7 +297,9 @@ interface NotesApi {
      * @param notesPollsVoteRequest * @return [Unit]
      */
     @POST("notes/polls/vote")
-    suspend fun notesPollsVote(@Body notesPollsVoteRequest: NotesPollsVoteRequest): Response<Unit>
+    suspend fun notesPollsVote(
+        @Body notesPollsVoteRequest: NotesPollsVoteRequest,
+    ): Response<Unit>
 
     /**
      * notes/reactions
@@ -285,7 +315,9 @@ interface NotesApi {
      * @param notesReactionsRequest * @return [kotlin.collections.List<NoteReaction>]
      */
     @POST("notes/reactions")
-    suspend fun notesReactions(@Body notesReactionsRequest: NotesReactionsRequest): Response<kotlin.collections.List<NoteReaction>>
+    suspend fun notesReactions(
+        @Body notesReactionsRequest: NotesReactionsRequest,
+    ): Response<kotlin.collections.List<NoteReaction>>
 
     /**
      * notes/renotes
@@ -301,7 +333,9 @@ interface NotesApi {
      * @param notesChildrenRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/renotes")
-    suspend fun notesRenotes(@Body notesChildrenRequest: NotesChildrenRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesRenotes(
+        @Body notesChildrenRequest: NotesChildrenRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/replies
@@ -317,7 +351,9 @@ interface NotesApi {
      * @param notesRepliesRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/replies")
-    suspend fun notesReplies(@Body notesRepliesRequest: NotesRepliesRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesReplies(
+        @Body notesRepliesRequest: NotesRepliesRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/search
@@ -333,7 +369,9 @@ interface NotesApi {
      * @param notesSearchRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/search")
-    suspend fun notesSearch(@Body notesSearchRequest: NotesSearchRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesSearch(
+        @Body notesSearchRequest: NotesSearchRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/search-by-tag
@@ -349,7 +387,9 @@ interface NotesApi {
      * @param notesSearchByTagRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/search-by-tag")
-    suspend fun notesSearchByTag(@Body notesSearchByTagRequest: NotesSearchByTagRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesSearchByTag(
+        @Body notesSearchByTagRequest: NotesSearchByTagRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/show
@@ -365,7 +405,9 @@ interface NotesApi {
      * @param ipinRequest * @return [Note]
      */
     @POST("notes/show")
-    suspend fun notesShow(@Body ipinRequest: IPinRequest): Response<Note>
+    suspend fun notesShow(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Note>
 
     /**
      * notes/state
@@ -381,7 +423,9 @@ interface NotesApi {
      * @param ipinRequest * @return [NotesState200Response]
      */
     @POST("notes/state")
-    suspend fun notesState(@Body ipinRequest: IPinRequest): Response<NotesState200Response>
+    suspend fun notesState(
+        @Body ipinRequest: IPinRequest,
+    ): Response<NotesState200Response>
 
     /**
      * notes/thread-muting/create
@@ -398,7 +442,9 @@ interface NotesApi {
      * @param ipinRequest * @return [Unit]
      */
     @POST("notes/thread-muting/create")
-    suspend fun notesThreadMutingCreate(@Body ipinRequest: IPinRequest): Response<Unit>
+    suspend fun notesThreadMutingCreate(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Unit>
 
     /**
      * notes/thread-muting/delete
@@ -414,7 +460,9 @@ interface NotesApi {
      * @param ipinRequest * @return [Unit]
      */
     @POST("notes/thread-muting/delete")
-    suspend fun notesThreadMutingDelete(@Body ipinRequest: IPinRequest): Response<Unit>
+    suspend fun notesThreadMutingDelete(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Unit>
 
     /**
      * notes/timeline
@@ -430,7 +478,9 @@ interface NotesApi {
      * @param notesHybridTimelineRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/timeline")
-    suspend fun notesTimeline(@Body notesHybridTimelineRequest: NotesHybridTimelineRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesTimeline(
+        @Body notesHybridTimelineRequest: NotesHybridTimelineRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * notes/translate
@@ -446,7 +496,9 @@ interface NotesApi {
      * @param notesTranslateRequest * @return [kotlin.Any]
      */
     @POST("notes/translate")
-    suspend fun notesTranslate(@Body notesTranslateRequest: NotesTranslateRequest): Response<kotlin.Any>
+    suspend fun notesTranslate(
+        @Body notesTranslateRequest: NotesTranslateRequest,
+    ): Response<kotlin.Any>
 
     /**
      * notes/unrenote
@@ -463,7 +515,9 @@ interface NotesApi {
      * @param ipinRequest * @return [Unit]
      */
     @POST("notes/unrenote")
-    suspend fun notesUnrenote(@Body ipinRequest: IPinRequest): Response<Unit>
+    suspend fun notesUnrenote(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Unit>
 
     /**
      * notes/user-list-timeline
@@ -479,7 +533,9 @@ interface NotesApi {
      * @param notesUserListTimelineRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("notes/user-list-timeline")
-    suspend fun notesUserListTimeline(@Body notesUserListTimelineRequest: NotesUserListTimelineRequest): Response<kotlin.collections.List<Note>>
+    suspend fun notesUserListTimeline(
+        @Body notesUserListTimelineRequest: NotesUserListTimelineRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * promo/read
@@ -495,5 +551,7 @@ interface NotesApi {
      * @param ipinRequest * @return [Unit]
      */
     @POST("promo/read")
-    suspend fun promoRead(@Body ipinRequest: IPinRequest): Response<Unit>
+    suspend fun promoRead(
+        @Body ipinRequest: IPinRequest,
+    ): Response<Unit>
 }

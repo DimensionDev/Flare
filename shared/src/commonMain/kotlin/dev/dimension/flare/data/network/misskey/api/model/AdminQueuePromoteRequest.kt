@@ -23,11 +23,8 @@ import kotlinx.serialization.Serializable
  * @param type */
 @Serializable
 data class AdminQueuePromoteRequest(
-
     @SerialName(value = "type") val type: AdminQueuePromoteRequest.Type,
-
 ) {
-
     /**
      * *
      * Values: Deliver,Inbox

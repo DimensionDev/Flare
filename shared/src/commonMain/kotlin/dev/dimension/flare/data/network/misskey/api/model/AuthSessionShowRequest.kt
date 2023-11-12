@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param token */
 @Serializable
 data class AuthSessionShowRequest(
-
     @SerialName(value = "token") val token: kotlin.String,
-
 )

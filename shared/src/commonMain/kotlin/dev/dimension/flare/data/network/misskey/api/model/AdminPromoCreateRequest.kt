@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param noteId * @param expiresAt */
 @Serializable
 data class AdminPromoCreateRequest(
-
     @SerialName(value = "noteId") val noteId: kotlin.String,
-
     @SerialName(value = "expiresAt") val expiresAt: kotlin.Int,
-
 )

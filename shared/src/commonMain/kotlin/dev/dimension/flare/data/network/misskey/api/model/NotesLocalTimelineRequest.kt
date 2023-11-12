@@ -23,23 +23,13 @@ import kotlinx.serialization.Serializable
  * @param withFiles * @param withReplies * @param fileType * @param excludeNsfw * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
 data class NotesLocalTimelineRequest(
-
     @SerialName(value = "withFiles") val withFiles: kotlin.Boolean? = false,
-
     @SerialName(value = "withReplies") val withReplies: kotlin.Boolean? = false,
-
     @SerialName(value = "fileType") val fileType: kotlin.collections.List<kotlin.String>? = null,
-
     @SerialName(value = "excludeNsfw") val excludeNsfw: kotlin.Boolean? = false,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
     @SerialName(value = "sinceDate") val sinceDate: kotlin.Int? = null,
-
     @SerialName(value = "untilDate") val untilDate: kotlin.Int? = null,
-
 )

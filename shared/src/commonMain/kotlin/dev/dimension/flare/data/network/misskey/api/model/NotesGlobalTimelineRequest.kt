@@ -23,19 +23,11 @@ import kotlinx.serialization.Serializable
  * @param withFiles * @param withReplies * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
 data class NotesGlobalTimelineRequest(
-
     @SerialName(value = "withFiles") val withFiles: kotlin.Boolean? = false,
-
     @SerialName(value = "withReplies") val withReplies: kotlin.Boolean? = false,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
     @SerialName(value = "sinceDate") val sinceDate: kotlin.Int? = null,
-
     @SerialName(value = "untilDate") val untilDate: kotlin.Int? = null,
-
 )

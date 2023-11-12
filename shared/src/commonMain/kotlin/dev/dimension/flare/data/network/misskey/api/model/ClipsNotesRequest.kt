@@ -23,13 +23,8 @@ import kotlinx.serialization.Serializable
  * @param clipId * @param limit * @param sinceId * @param untilId */
 @Serializable
 data class ClipsNotesRequest(
-
     @SerialName(value = "clipId") val clipId: kotlin.String,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
 )

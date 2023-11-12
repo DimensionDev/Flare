@@ -11,7 +11,6 @@ data class Source(
     val language: String? = null,
     val note: String? = null,
     val fields: JsonArray? = null,
-
     @SerialName("follow_requests_count")
     val followRequestsCount: Long? = null,
 )

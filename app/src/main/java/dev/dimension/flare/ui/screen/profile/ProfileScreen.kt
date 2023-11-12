@@ -466,7 +466,7 @@ internal fun CommonProfileHeader(
         }
     val actualBannerHeight =
         remember(statusBarHeight) {
-            ProfileHeaderConstants.BannerHeight.dp + statusBarHeight
+            ProfileHeaderConstants.BANNER_HEIGHT.dp + statusBarHeight
         }
     Box(
         modifier =
@@ -502,10 +502,10 @@ internal fun CommonProfileHeader(
                     modifier =
                         Modifier
                             .padding(
-                                top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                                top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
                             ),
                 ) {
-                    AvatarComponent(data = avatarUrl, size = ProfileHeaderConstants.AvatarSize.dp)
+                    AvatarComponent(data = avatarUrl, size = ProfileHeaderConstants.AVATAR_SIZE.dp)
                 }
                 Column(
                     modifier =
@@ -545,8 +545,8 @@ internal fun CommonProfileHeader(
 }
 
 private object ProfileHeaderConstants {
-    const val BannerHeight = 150
-    const val AvatarSize = 96
+    const val BANNER_HEIGHT = 150
+    const val AVATAR_SIZE = 96
 }
 
 @Composable
@@ -561,7 +561,7 @@ private fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
         }
     val actualBannerHeight =
         remember(statusBarHeight) {
-            ProfileHeaderConstants.BannerHeight.dp + statusBarHeight
+            ProfileHeaderConstants.BANNER_HEIGHT.dp + statusBarHeight
         }
     Box(
         modifier =
@@ -594,13 +594,13 @@ private fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
                     modifier =
                         Modifier
                             .padding(
-                                top = (actualBannerHeight - ProfileHeaderConstants.AvatarSize.dp / 2),
+                                top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
                             ),
                 ) {
                     Box(
                         modifier =
                             Modifier
-                                .size(ProfileHeaderConstants.AvatarSize.dp)
+                                .size(ProfileHeaderConstants.AVATAR_SIZE.dp)
                                 .clip(CircleShape)
                                 .placeholder(true),
                     )

@@ -61,12 +61,13 @@ class MastodonCallbackPresenter(
         accountRepository: AccountRepository,
     ) {
         val host = application.host
-        val service = MastodonOAuthService(
-            baseUrl = "https://$host/",
-            client_name = "Flare",
-            website = "https://github.com/DimensionDev/Flare",
-            redirect_uri = AppDeepLink.Callback.Mastodon,
-        )
+        val service =
+            MastodonOAuthService(
+                baseUrl = "https://$host/",
+                client_name = "Flare",
+                website = "https://github.com/DimensionDev/Flare",
+                redirect_uri = AppDeepLink.Callback.Mastodon,
+            )
         val accessTokenResponse = service.getAccessToken(code, application.application)
         requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
         val user = service.verifyCredentials(accessToken = accessTokenResponse.accessToken)
@@ -74,19 +75,20 @@ class MastodonCallbackPresenter(
         requireNotNull(id) { "Invalid user id" }
         accountRepository.addAccount(
             UiAccount.Mastodon(
-                credential = UiAccount.Mastodon.Credential(
-                    instance = host,
-                    accessToken = accessTokenResponse.accessToken,
-                ),
-                accountKey = MicroBlogKey(
-                    id = id,
-                    host = host,
-                ),
-            )
+                credential =
+                    UiAccount.Mastodon.Credential(
+                        instance = host,
+                        accessToken = accessTokenResponse.accessToken,
+                    ),
+                accountKey =
+                    MicroBlogKey(
+                        id = id,
+                        host = host,
+                    ),
+            ),
         )
     }
 }
-
 
 suspend fun mastodonLoginUseCase(
     domain: String,
@@ -94,36 +96,40 @@ suspend fun mastodonLoginUseCase(
     launchOAuth: (String) -> Unit,
 ): Result<Unit> {
     return runCatching {
-        val baseUrl = if (domain.startsWith("http://", ignoreCase = true) || domain.startsWith(
-                "https://",
-                ignoreCase = true,
-            )
-        ) {
-            Url(domain)
-        } else {
-            Url("https://$domain/")
-        }
-        val host = baseUrl.host
-        val service = MastodonOAuthService(
-            baseUrl = baseUrl.toString(),
-            client_name = "Flare",
-            website = "https://github.com/DimensionDev/Flare",
-            redirect_uri = AppDeepLink.Callback.Mastodon,
-        )
-
-        val application = applicationRepository.findByHost(host)?.let {
-            if (it is UiApplication.Mastodon) {
-                it.application
+        val baseUrl =
+            if (domain.startsWith("http://", ignoreCase = true) ||
+                domain.startsWith(
+                    "https://",
+                    ignoreCase = true,
+                )
+            ) {
+                Url(domain)
             } else {
-                null
+                Url("https://$domain/")
             }
-        } ?: service.createApplication().also {
-            applicationRepository.addApplication(
-                host,
-                it.encodeJson(),
-                platformType = PlatformType.Mastodon,
+        val host = baseUrl.host
+        val service =
+            MastodonOAuthService(
+                baseUrl = baseUrl.toString(),
+                client_name = "Flare",
+                website = "https://github.com/DimensionDev/Flare",
+                redirect_uri = AppDeepLink.Callback.Mastodon,
             )
-        }
+
+        val application =
+            applicationRepository.findByHost(host)?.let {
+                if (it is UiApplication.Mastodon) {
+                    it.application
+                } else {
+                    null
+                }
+            } ?: service.createApplication().also {
+                applicationRepository.addApplication(
+                    host,
+                    it.encodeJson(),
+                    platformType = PlatformType.Mastodon,
+                )
+            }
         applicationRepository.clearPendingOAuth()
         applicationRepository.setPendingOAuth(host, true)
         val target = service.getWebOAuthUrl(application)

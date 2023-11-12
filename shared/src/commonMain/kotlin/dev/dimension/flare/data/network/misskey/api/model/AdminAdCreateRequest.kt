@@ -23,23 +23,13 @@ import kotlinx.serialization.Serializable
  * @param url * @param memo * @param place * @param priority * @param ratio * @param expiresAt * @param startsAt * @param imageUrl * @param dayOfWeek */
 @Serializable
 data class AdminAdCreateRequest(
-
     @SerialName(value = "url") val url: kotlin.String,
-
     @SerialName(value = "memo") val memo: kotlin.String,
-
     @SerialName(value = "place") val place: kotlin.String,
-
     @SerialName(value = "priority") val priority: kotlin.String,
-
     @SerialName(value = "ratio") val ratio: kotlin.Int,
-
     @SerialName(value = "expiresAt") val expiresAt: kotlin.Int,
-
     @SerialName(value = "startsAt") val startsAt: kotlin.Int,
-
     @SerialName(value = "imageUrl") val imageUrl: kotlin.String,
-
     @SerialName(value = "dayOfWeek") val dayOfWeek: kotlin.Int,
-
 )

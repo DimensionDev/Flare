@@ -24,26 +24,15 @@ import kotlinx.serialization.Serializable
  * @param blocked * @param notResponding * @param suspended * @param federating * @param subscribing * @param publishing * @param limit * @param offset * @param sort */
 @Serializable
 data class FederationInstancesRequest(
-
-    /* Omit or use `null` to not filter by host. */
+    // Omit or use `null` to not filter by host.
     @SerialName(value = "host") val host: kotlin.String? = null,
-
     @SerialName(value = "blocked") val blocked: kotlin.Boolean? = null,
-
     @SerialName(value = "notResponding") val notResponding: kotlin.Boolean? = null,
-
     @SerialName(value = "suspended") val suspended: kotlin.Boolean? = null,
-
     @SerialName(value = "federating") val federating: kotlin.Boolean? = null,
-
     @SerialName(value = "subscribing") val subscribing: kotlin.Boolean? = null,
-
     @SerialName(value = "publishing") val publishing: kotlin.Boolean? = null,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 30,
-
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
-
     @SerialName(value = "sort") val sort: kotlin.String? = null,
-
 )

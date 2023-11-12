@@ -24,26 +24,16 @@ import kotlinx.serialization.Serializable
  * @param url * @param license * @param isSensitive * @param localOnly * @param roleIdsThatCanBeUsedThisEmojiAsReaction */
 @Serializable
 data class EmojiDetailed(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "aliases") val aliases: kotlin.collections.List<kotlin.String>,
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "category") val category: kotlin.String? = null,
-
-    /* The local host is represented with `null`. */
+    // The local host is represented with `null`.
     @SerialName(value = "host") val host: kotlin.String? = null,
-
     @SerialName(value = "url") val url: kotlin.String,
-
     @SerialName(value = "license") val license: kotlin.String? = null,
-
     @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean,
-
     @SerialName(value = "localOnly") val localOnly: kotlin.Boolean,
-
-    @SerialName(value = "roleIdsThatCanBeUsedThisEmojiAsReaction") val roleIdsThatCanBeUsedThisEmojiAsReaction: kotlin.collections.List<kotlin.String>,
-
+    @SerialName(value = "roleIdsThatCanBeUsedThisEmojiAsReaction") val roleIdsThatCanBeUsedThisEmojiAsReaction:
+        kotlin.collections.List<kotlin.String>,
 )

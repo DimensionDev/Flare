@@ -34,7 +34,9 @@ interface ChartsApi {
      * @param chartsActiveUsersRequest * @return [ChartsActiveUsers200Response]
      */
     @POST("charts/active-users")
-    suspend fun chartsActiveUsers(@Body chartsActiveUsersRequest: ChartsActiveUsersRequest): Response<ChartsActiveUsers200Response>
+    suspend fun chartsActiveUsers(
+        @Body chartsActiveUsersRequest: ChartsActiveUsersRequest,
+    ): Response<ChartsActiveUsers200Response>
 
     /**
      * charts/ap-request
@@ -50,7 +52,9 @@ interface ChartsApi {
      * @param chartsActiveUsersRequest * @return [ChartsApRequest200Response]
      */
     @POST("charts/ap-request")
-    suspend fun chartsApRequest(@Body chartsActiveUsersRequest: ChartsActiveUsersRequest): Response<ChartsApRequest200Response>
+    suspend fun chartsApRequest(
+        @Body chartsActiveUsersRequest: ChartsActiveUsersRequest,
+    ): Response<ChartsApRequest200Response>
 
     /**
      * charts/drive
@@ -66,7 +70,9 @@ interface ChartsApi {
      * @param chartsActiveUsersRequest * @return [ChartsDrive200Response]
      */
     @POST("charts/drive")
-    suspend fun chartsDrive(@Body chartsActiveUsersRequest: ChartsActiveUsersRequest): Response<ChartsDrive200Response>
+    suspend fun chartsDrive(
+        @Body chartsActiveUsersRequest: ChartsActiveUsersRequest,
+    ): Response<ChartsDrive200Response>
 
     /**
      * charts/federation
@@ -82,7 +88,9 @@ interface ChartsApi {
      * @param chartsActiveUsersRequest * @return [ChartsFederation200Response]
      */
     @POST("charts/federation")
-    suspend fun chartsFederation(@Body chartsActiveUsersRequest: ChartsActiveUsersRequest): Response<ChartsFederation200Response>
+    suspend fun chartsFederation(
+        @Body chartsActiveUsersRequest: ChartsActiveUsersRequest,
+    ): Response<ChartsFederation200Response>
 
     /**
      * charts/instance
@@ -98,7 +106,9 @@ interface ChartsApi {
      * @param chartsInstanceRequest * @return [ChartsInstance200Response]
      */
     @POST("charts/instance")
-    suspend fun chartsInstance(@Body chartsInstanceRequest: ChartsInstanceRequest): Response<ChartsInstance200Response>
+    suspend fun chartsInstance(
+        @Body chartsInstanceRequest: ChartsInstanceRequest,
+    ): Response<ChartsInstance200Response>
 
     /**
      * charts/notes
@@ -114,7 +124,9 @@ interface ChartsApi {
      * @param chartsActiveUsersRequest * @return [ChartsNotes200Response]
      */
     @POST("charts/notes")
-    suspend fun chartsNotes(@Body chartsActiveUsersRequest: ChartsActiveUsersRequest): Response<ChartsNotes200Response>
+    suspend fun chartsNotes(
+        @Body chartsActiveUsersRequest: ChartsActiveUsersRequest,
+    ): Response<ChartsNotes200Response>
 
     /**
      * charts/user/drive
@@ -130,7 +142,9 @@ interface ChartsApi {
      * @param chartsUserDriveRequest * @return [ChartsUserDrive200Response]
      */
     @POST("charts/user/drive")
-    suspend fun chartsUserDrive(@Body chartsUserDriveRequest: ChartsUserDriveRequest): Response<ChartsUserDrive200Response>
+    suspend fun chartsUserDrive(
+        @Body chartsUserDriveRequest: ChartsUserDriveRequest,
+    ): Response<ChartsUserDrive200Response>
 
     /**
      * charts/user/following
@@ -146,7 +160,9 @@ interface ChartsApi {
      * @param chartsUserDriveRequest * @return [ChartsUserFollowing200Response]
      */
     @POST("charts/user/following")
-    suspend fun chartsUserFollowing(@Body chartsUserDriveRequest: ChartsUserDriveRequest): Response<ChartsUserFollowing200Response>
+    suspend fun chartsUserFollowing(
+        @Body chartsUserDriveRequest: ChartsUserDriveRequest,
+    ): Response<ChartsUserFollowing200Response>
 
     /**
      * charts/user/notes
@@ -162,7 +178,9 @@ interface ChartsApi {
      * @param chartsUserDriveRequest * @return [ChartsUserNotes200Response]
      */
     @POST("charts/user/notes")
-    suspend fun chartsUserNotes(@Body chartsUserDriveRequest: ChartsUserDriveRequest): Response<ChartsUserNotes200Response>
+    suspend fun chartsUserNotes(
+        @Body chartsUserDriveRequest: ChartsUserDriveRequest,
+    ): Response<ChartsUserNotes200Response>
 
     /**
      * charts/user/pv
@@ -178,7 +196,9 @@ interface ChartsApi {
      * @param chartsUserDriveRequest * @return [ChartsUserPv200Response]
      */
     @POST("charts/user/pv")
-    suspend fun chartsUserPv(@Body chartsUserDriveRequest: ChartsUserDriveRequest): Response<ChartsUserPv200Response>
+    suspend fun chartsUserPv(
+        @Body chartsUserDriveRequest: ChartsUserDriveRequest,
+    ): Response<ChartsUserPv200Response>
 
     /**
      * charts/user/reactions
@@ -194,7 +214,9 @@ interface ChartsApi {
      * @param chartsUserDriveRequest * @return [ChartsUserReactions200Response]
      */
     @POST("charts/user/reactions")
-    suspend fun chartsUserReactions(@Body chartsUserDriveRequest: ChartsUserDriveRequest): Response<ChartsUserReactions200Response>
+    suspend fun chartsUserReactions(
+        @Body chartsUserDriveRequest: ChartsUserDriveRequest,
+    ): Response<ChartsUserReactions200Response>
 
     /**
      * charts/users
@@ -210,5 +232,7 @@ interface ChartsApi {
      * @param chartsActiveUsersRequest * @return [ChartsUsers200Response]
      */
     @POST("charts/users")
-    suspend fun chartsUsers(@Body chartsActiveUsersRequest: ChartsActiveUsersRequest): Response<ChartsUsers200Response>
+    suspend fun chartsUsers(
+        @Body chartsActiveUsersRequest: ChartsActiveUsersRequest,
+    ): Response<ChartsUsers200Response>
 }

@@ -23,11 +23,7 @@ import kotlinx.serialization.Serializable
  * @param sinceId * @param untilId * @param limit */
 @Serializable
 data class ChannelsFollowedRequest(
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 5,
-
 )

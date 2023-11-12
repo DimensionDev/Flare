@@ -18,14 +18,15 @@ class StatusPresenter(
 ) : PresenterBase<StatusState>() {
     @Composable
     override fun body(): StatusState {
-        val listState = activeAccountServicePresenter().map { (service, account) ->
-            remember(account.accountKey, statusKey) {
-                service.context(statusKey)
-            }.collectAsLazyPagingItems()
-        }
+        val listState =
+            activeAccountServicePresenter().map { (service, account) ->
+                remember(account.accountKey, statusKey) {
+                    service.context(statusKey)
+                }.collectAsLazyPagingItems()
+            }
         val refreshing =
             listState is UiState.Loading ||
-                    listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
 
         return object : StatusState(
             listState,

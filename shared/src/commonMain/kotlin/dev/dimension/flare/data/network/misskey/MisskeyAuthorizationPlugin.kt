@@ -24,7 +24,10 @@ internal class MisskeyAuthorizationPlugin(
         override val key: AttributeKey<MisskeyAuthorizationPlugin>
             get() = AttributeKey("MisskeyAuthorizationPlugin")
 
-        override fun install(plugin: MisskeyAuthorizationPlugin, scope: HttpClient) {
+        override fun install(
+            plugin: MisskeyAuthorizationPlugin,
+            scope: HttpClient,
+        ) {
             plugin.setupRequestAuthorization(scope)
         }
 
@@ -40,11 +43,12 @@ internal class MisskeyAuthorizationPlugin(
             if (body is TextContent) {
                 val element = JSON.decodeFromString(JsonElement.serializer(), body.text)
                 if (element is JsonObject) {
-                    val newJsonObject = JsonObject(
-                        element.jsonObject.toMutableMap().apply {
-                            put("i", JsonPrimitive(token))
-                        },
-                    )
+                    val newJsonObject =
+                        JsonObject(
+                            element.jsonObject.toMutableMap().apply {
+                                put("i", JsonPrimitive(token))
+                            },
+                        )
                     proceedWith(
                         TextContent(
                             JSON.encodeToString(

@@ -23,19 +23,11 @@ import kotlinx.serialization.Serializable
  * @param notesCount * @param originalNotesCount * @param usersCount * @param originalUsersCount * @param instances * @param driveUsageLocal * @param driveUsageRemote */
 @Serializable
 data class Stats200Response(
-
     @SerialName(value = "notesCount") val notesCount: kotlin.Double,
-
     @SerialName(value = "originalNotesCount") val originalNotesCount: kotlin.Double,
-
     @SerialName(value = "usersCount") val usersCount: kotlin.Double,
-
     @SerialName(value = "originalUsersCount") val originalUsersCount: kotlin.Double,
-
     @SerialName(value = "instances") val instances: kotlin.Double,
-
     @SerialName(value = "driveUsageLocal") val driveUsageLocal: kotlin.Double,
-
     @SerialName(value = "driveUsageRemote") val driveUsageRemote: kotlin.Double,
-
 )

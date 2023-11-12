@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param limit * @param offset */
 @Serializable
 data class MyAppsRequest(
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
-
 )

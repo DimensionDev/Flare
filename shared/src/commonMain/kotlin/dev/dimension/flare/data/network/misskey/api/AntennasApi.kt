@@ -25,7 +25,9 @@ interface AntennasApi {
      * @param antennasCreateRequest * @return [Antenna]
      */
     @POST("antennas/create")
-    suspend fun antennasCreate(@Body antennasCreateRequest: AntennasCreateRequest): Response<Antenna>
+    suspend fun antennasCreate(
+        @Body antennasCreateRequest: AntennasCreateRequest,
+    ): Response<Antenna>
 
     /**
      * antennas/delete
@@ -41,7 +43,9 @@ interface AntennasApi {
      * @param antennasDeleteRequest * @return [Unit]
      */
     @POST("antennas/delete")
-    suspend fun antennasDelete(@Body antennasDeleteRequest: AntennasDeleteRequest): Response<Unit>
+    suspend fun antennasDelete(
+        @Body antennasDeleteRequest: AntennasDeleteRequest,
+    ): Response<Unit>
 
     /**
      * antennas/list
@@ -57,7 +61,9 @@ interface AntennasApi {
      * @param body * @return [kotlin.collections.List<Antenna>]
      */
     @POST("antennas/list")
-    suspend fun antennasList(@Body body: kotlin.Any): Response<kotlin.collections.List<Antenna>>
+    suspend fun antennasList(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<Antenna>>
 
     /**
      * antennas/notes
@@ -73,7 +79,9 @@ interface AntennasApi {
      * @param antennasNotesRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("antennas/notes")
-    suspend fun antennasNotes(@Body antennasNotesRequest: AntennasNotesRequest): Response<kotlin.collections.List<Note>>
+    suspend fun antennasNotes(
+        @Body antennasNotesRequest: AntennasNotesRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * antennas/show
@@ -89,7 +97,9 @@ interface AntennasApi {
      * @param antennasDeleteRequest * @return [Antenna]
      */
     @POST("antennas/show")
-    suspend fun antennasShow(@Body antennasDeleteRequest: AntennasDeleteRequest): Response<Antenna>
+    suspend fun antennasShow(
+        @Body antennasDeleteRequest: AntennasDeleteRequest,
+    ): Response<Antenna>
 
     /**
      * antennas/update
@@ -105,5 +115,7 @@ interface AntennasApi {
      * @param antennasUpdateRequest * @return [Antenna]
      */
     @POST("antennas/update")
-    suspend fun antennasUpdate(@Body antennasUpdateRequest: AntennasUpdateRequest): Response<Antenna>
+    suspend fun antennasUpdate(
+        @Body antennasUpdateRequest: AntennasUpdateRequest,
+    ): Response<Antenna>
 }

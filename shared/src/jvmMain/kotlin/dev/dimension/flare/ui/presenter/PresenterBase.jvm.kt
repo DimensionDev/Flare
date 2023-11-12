@@ -7,8 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-actual abstract class PresenterBase<Model: Any> {
-
+actual abstract class PresenterBase<Model : Any> {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     val models: StateFlow<Model> by lazy {
@@ -19,11 +18,12 @@ actual abstract class PresenterBase<Model: Any> {
     private var job: Job? = null
 
     fun subscribe(listener: ModelListener<Model>) {
-        job = scope.launch {
-            models.collect {
-                listener.onModelChanged(it)
+        job =
+            scope.launch {
+                models.collect {
+                    listener.onModelChanged(it)
+                }
             }
-        }
     }
 
     @Composable

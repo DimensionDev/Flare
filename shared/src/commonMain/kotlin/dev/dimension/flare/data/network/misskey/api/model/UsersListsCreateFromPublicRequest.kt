@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param name * @param listId */
 @Serializable
 data class UsersListsCreateFromPublicRequest(
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "listId") val listId: kotlin.String,
-
 )

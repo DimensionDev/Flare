@@ -19,7 +19,10 @@ class AuthorizationPlugin private constructor(
         override val key: AttributeKey<AuthorizationPlugin>
             get() = AttributeKey("AuthorizationPlugin")
 
-        override fun install(plugin: AuthorizationPlugin, scope: HttpClient) {
+        override fun install(
+            plugin: AuthorizationPlugin,
+            scope: HttpClient,
+        ) {
             plugin.setupRequestAuthorization(scope)
         }
 

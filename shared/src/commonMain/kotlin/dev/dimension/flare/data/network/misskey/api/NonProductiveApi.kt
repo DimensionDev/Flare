@@ -20,7 +20,9 @@ interface NonProductiveApi {
      * @param body * @return [Unit]
      */
     @POST("reset-db")
-    suspend fun resetDb(@Body body: kotlin.Any): Response<Unit>
+    suspend fun resetDb(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * test
@@ -36,5 +38,7 @@ interface NonProductiveApi {
      * @param testRequest * @return [Unit]
      */
     @POST("test")
-    suspend fun test(@Body testRequest: TestRequest): Response<Unit>
+    suspend fun test(
+        @Body testRequest: TestRequest,
+    ): Response<Unit>
 }

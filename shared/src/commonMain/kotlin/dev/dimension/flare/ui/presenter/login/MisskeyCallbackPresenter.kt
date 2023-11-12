@@ -58,10 +58,11 @@ class MisskeyCallbackPresenter(
         session: String,
         accountRepository: AccountRepository,
     ) {
-        val response = MisskeyOauthService(
-            host = host,
-            session = session,
-        ).check()
+        val response =
+            MisskeyOauthService(
+                host = host,
+                session = session,
+            ).check()
         requireNotNull(response.ok) { "No response" }
         require(response.ok) { "Response is not ok" }
         requireNotNull(response.token) { "No token" }
@@ -69,15 +70,17 @@ class MisskeyCallbackPresenter(
         requireNotNull(id) { "No user id" }
         accountRepository.addAccount(
             UiAccount.Misskey(
-                credential = UiAccount.Misskey.Credential(
-                    host = host,
-                    accessToken = response.token,
-                ),
-                accountKey = MicroBlogKey(
-                    id = id,
-                    host = host,
-                ),
-            )
+                credential =
+                    UiAccount.Misskey.Credential(
+                        host = host,
+                        accessToken = response.token,
+                    ),
+                accountKey =
+                    MicroBlogKey(
+                        id = id,
+                        host = host,
+                    ),
+            ),
         )
     }
 }
@@ -89,12 +92,13 @@ fun misskeyLoginUseCase(
 ): Result<Unit> {
     return runCatching {
         val session = uuid4().toString()
-        val service = MisskeyOauthService(
-            host = host,
-            name = "Flare",
-            callback = AppDeepLink.Callback.Misskey,
-            session = session,
-        )
+        val service =
+            MisskeyOauthService(
+                host = host,
+                name = "Flare",
+                callback = AppDeepLink.Callback.Misskey,
+                session = session,
+            )
         applicationRepository.addApplication(
             host = host,
             credentialJson = session,

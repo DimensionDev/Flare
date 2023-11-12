@@ -50,19 +50,22 @@ class MastodonService(
     ListsResources by config(baseUrl, accessToken).create(),
     TrendsResources by config(baseUrl, accessToken).create(),
     MastodonResources by config(baseUrl, accessToken).create() {
-
-    suspend fun upload(data: ByteArray, name: String): UploadResponse {
-        val multipart = MultiPartFormDataContent(
-            formData {
-                append(
-                    "file",
-                    data,
-                    Headers.build {
-                        append(HttpHeaders.ContentDisposition, "filename=$name")
-                    },
-                )
-            },
-        )
+    suspend fun upload(
+        data: ByteArray,
+        name: String,
+    ): UploadResponse {
+        val multipart =
+            MultiPartFormDataContent(
+                formData {
+                    append(
+                        "file",
+                        data,
+                        Headers.build {
+                            append(HttpHeaders.ContentDisposition, "filename=$name")
+                        },
+                    )
+                },
+            )
         return upload(multipart)
     }
 }

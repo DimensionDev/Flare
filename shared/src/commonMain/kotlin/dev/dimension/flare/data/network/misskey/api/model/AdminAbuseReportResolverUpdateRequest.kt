@@ -23,23 +23,14 @@ import kotlinx.serialization.Serializable
  * @param resolverId * @param name * @param targetUserPattern * @param reporterPattern * @param reportContentPattern * @param expiresAt * @param forward */
 @Serializable
 data class AdminAbuseReportResolverUpdateRequest(
-
     @SerialName(value = "resolverId") val resolverId: kotlin.String,
-
     @SerialName(value = "name") val name: kotlin.String? = null,
-
     @SerialName(value = "targetUserPattern") val targetUserPattern: kotlin.String? = null,
-
     @SerialName(value = "reporterPattern") val reporterPattern: kotlin.String? = null,
-
     @SerialName(value = "reportContentPattern") val reportContentPattern: kotlin.String? = null,
-
 //    @SerialName(value = "expiresAt") val expiresAt: AdminAbuseReportResolverUpdateRequest.ExpiresAt? = null,
-
     @SerialName(value = "forward") val forward: kotlin.Boolean? = null,
-
 ) {
-
     /**
      * *
      * Values: _1hour,_12hours,_1day,_1week,_1month,_3months,_6months,_1year,Indefinitely

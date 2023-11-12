@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param roleId * @param userId */
 @Serializable
 data class AdminRolesUnassignRequest(
-
     @SerialName(value = "roleId") val roleId: kotlin.String,
-
     @SerialName(value = "userId") val userId: kotlin.String,
-
 )

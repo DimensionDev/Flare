@@ -26,7 +26,9 @@ interface ChannelsApi {
      * @param channelsCreateRequest * @return [Channel]
      */
     @POST("channels/create")
-    suspend fun channelsCreate(@Body channelsCreateRequest: ChannelsCreateRequest): Response<Channel>
+    suspend fun channelsCreate(
+        @Body channelsCreateRequest: ChannelsCreateRequest,
+    ): Response<Channel>
 
     /**
      * channels/favorite
@@ -42,7 +44,9 @@ interface ChannelsApi {
      * @param channelsFollowRequest * @return [Unit]
      */
     @POST("channels/favorite")
-    suspend fun channelsFavorite(@Body channelsFollowRequest: ChannelsFollowRequest): Response<Unit>
+    suspend fun channelsFavorite(
+        @Body channelsFollowRequest: ChannelsFollowRequest,
+    ): Response<Unit>
 
     /**
      * channels/featured
@@ -58,7 +62,9 @@ interface ChannelsApi {
      * @param body * @return [kotlin.collections.List<Channel>]
      */
     @POST("channels/featured")
-    suspend fun channelsFeatured(@Body body: kotlin.Any): Response<kotlin.collections.List<Channel>>
+    suspend fun channelsFeatured(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<Channel>>
 
     /**
      * channels/follow
@@ -74,7 +80,9 @@ interface ChannelsApi {
      * @param channelsFollowRequest * @return [Unit]
      */
     @POST("channels/follow")
-    suspend fun channelsFollow(@Body channelsFollowRequest: ChannelsFollowRequest): Response<Unit>
+    suspend fun channelsFollow(
+        @Body channelsFollowRequest: ChannelsFollowRequest,
+    ): Response<Unit>
 
     /**
      * channels/followed
@@ -90,7 +98,9 @@ interface ChannelsApi {
      * @param channelsFollowedRequest * @return [kotlin.collections.List<Channel>]
      */
     @POST("channels/followed")
-    suspend fun channelsFollowed(@Body channelsFollowedRequest: ChannelsFollowedRequest): Response<kotlin.collections.List<Channel>>
+    suspend fun channelsFollowed(
+        @Body channelsFollowedRequest: ChannelsFollowedRequest,
+    ): Response<kotlin.collections.List<Channel>>
 
     /**
      * channels/my-favorites
@@ -106,7 +116,9 @@ interface ChannelsApi {
      * @param body * @return [kotlin.collections.List<Channel>]
      */
     @POST("channels/my-favorites")
-    suspend fun channelsMyFavorites(@Body body: kotlin.Any): Response<kotlin.collections.List<Channel>>
+    suspend fun channelsMyFavorites(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<Channel>>
 
     /**
      * channels/owned
@@ -122,7 +134,9 @@ interface ChannelsApi {
      * @param channelsFollowedRequest * @return [kotlin.collections.List<Channel>]
      */
     @POST("channels/owned")
-    suspend fun channelsOwned(@Body channelsFollowedRequest: ChannelsFollowedRequest): Response<kotlin.collections.List<Channel>>
+    suspend fun channelsOwned(
+        @Body channelsFollowedRequest: ChannelsFollowedRequest,
+    ): Response<kotlin.collections.List<Channel>>
 
     /**
      * channels/search
@@ -138,7 +152,9 @@ interface ChannelsApi {
      * @param channelsSearchRequest * @return [kotlin.collections.List<Channel>]
      */
     @POST("channels/search")
-    suspend fun channelsSearch(@Body channelsSearchRequest: ChannelsSearchRequest): Response<kotlin.collections.List<Channel>>
+    suspend fun channelsSearch(
+        @Body channelsSearchRequest: ChannelsSearchRequest,
+    ): Response<kotlin.collections.List<Channel>>
 
     /**
      * channels/show
@@ -154,7 +170,9 @@ interface ChannelsApi {
      * @param channelsFollowRequest * @return [Channel]
      */
     @POST("channels/show")
-    suspend fun channelsShow(@Body channelsFollowRequest: ChannelsFollowRequest): Response<Channel>
+    suspend fun channelsShow(
+        @Body channelsFollowRequest: ChannelsFollowRequest,
+    ): Response<Channel>
 
     /**
      * channels/unfavorite
@@ -170,7 +188,9 @@ interface ChannelsApi {
      * @param channelsFollowRequest * @return [Unit]
      */
     @POST("channels/unfavorite")
-    suspend fun channelsUnfavorite(@Body channelsFollowRequest: ChannelsFollowRequest): Response<Unit>
+    suspend fun channelsUnfavorite(
+        @Body channelsFollowRequest: ChannelsFollowRequest,
+    ): Response<Unit>
 
     /**
      * channels/unfollow
@@ -186,7 +206,9 @@ interface ChannelsApi {
      * @param channelsFollowRequest * @return [Unit]
      */
     @POST("channels/unfollow")
-    suspend fun channelsUnfollow(@Body channelsFollowRequest: ChannelsFollowRequest): Response<Unit>
+    suspend fun channelsUnfollow(
+        @Body channelsFollowRequest: ChannelsFollowRequest,
+    ): Response<Unit>
 
     /**
      * channels/update
@@ -202,5 +224,7 @@ interface ChannelsApi {
      * @param channelsUpdateRequest * @return [Channel]
      */
     @POST("channels/update")
-    suspend fun channelsUpdate(@Body channelsUpdateRequest: ChannelsUpdateRequest): Response<Channel>
+    suspend fun channelsUpdate(
+        @Body channelsUpdateRequest: ChannelsUpdateRequest,
+    ): Response<Channel>
 }

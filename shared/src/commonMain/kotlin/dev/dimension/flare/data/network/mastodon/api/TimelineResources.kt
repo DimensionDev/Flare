@@ -61,7 +61,9 @@ interface TimelineResources {
     ): List<Notification>
 
     @GET("api/v1/statuses/{id}/context")
-    suspend fun context(@Path("id") id: String): Context
+    suspend fun context(
+        @Path("id") id: String,
+    ): Context
 
     @GET("api/v1/timelines/tag/{hashtag}")
     suspend fun hashtagTimeline(

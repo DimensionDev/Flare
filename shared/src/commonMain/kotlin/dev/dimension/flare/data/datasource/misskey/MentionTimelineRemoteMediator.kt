@@ -23,33 +23,35 @@ internal class MentionTimelineRemoteMediator(
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
     ): MediatorResult {
         return try {
-            val response = when (loadType) {
-                LoadType.PREPEND -> return MediatorResult.Success(
+            val response =
+                when (loadType) {
+                    LoadType.PREPEND -> return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                    LoadType.REFRESH -> {
+                        service.notesMentions(
+                            NotesMentionsRequest(
+                                limit = state.config.pageSize,
+                            ),
+                        )
+                    }
+
+                    LoadType.APPEND -> {
+                        val lastItem =
+                            state.lastItemOrNull()
+                                ?: return MediatorResult.Success(
+                                    endOfPaginationReached = true,
+                                )
+                        service.notesMentions(
+                            NotesMentionsRequest(
+                                limit = state.config.pageSize,
+                                untilId = lastItem.timeline_status_key.id,
+                            ),
+                        )
+                    }
+                }.body() ?: return MediatorResult.Success(
                     endOfPaginationReached = true,
                 )
-                LoadType.REFRESH -> {
-                    service.notesMentions(
-                        NotesMentionsRequest(
-                            limit = state.config.pageSize,
-                        )
-                    )
-                }
-
-                LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                        ?: return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    service.notesMentions(
-                        NotesMentionsRequest(
-                            limit = state.config.pageSize,
-                            untilId = lastItem.timeline_status_key.id,
-                        )
-                    )
-                }
-            }.body() ?: return MediatorResult.Success(
-                endOfPaginationReached = true,
-            )
             if (loadType == LoadType.REFRESH) {
                 database.dbPagingTimelineQueries.deletePaging(account.accountKey, pagingKey)
             }
@@ -64,6 +66,6 @@ internal class MentionTimelineRemoteMediator(
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)
-        } 
+        }
     }
 }

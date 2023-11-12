@@ -4,5 +4,6 @@ import io.ktor.client.request.HttpRequestBuilder
 
 interface Authorization {
     val hasAuthorization: Boolean
+
     fun getAuthorizationHeader(context: HttpRequestBuilder): String = ""
 }

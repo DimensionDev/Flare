@@ -4,12 +4,21 @@ object ResultHelper {
     fun <T> unwrapResult(result: Result<T>): T? {
         return result.getOrNull()
     }
-    fun <T> unwrapResult(result: Result<T>, default: T): T {
+
+    fun <T> unwrapResult(
+        result: Result<T>,
+        default: T,
+    ): T {
         return result.getOrDefault(default)
     }
-    fun <T> unwrapResult(result: Result<T>, default: (() -> T)): T {
+
+    fun <T> unwrapResult(
+        result: Result<T>,
+        default: (() -> T),
+    ): T {
         return result.getOrElse { default() }
     }
+
     fun <T> unwrapException(result: Result<T>): Throwable? {
         return result.exceptionOrNull()
     }

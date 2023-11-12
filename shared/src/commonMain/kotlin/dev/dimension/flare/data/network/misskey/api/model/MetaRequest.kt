@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param detail */
 @Serializable
 data class MetaRequest(
-
     @SerialName(value = "detail") val detail: kotlin.Boolean? = true,
-
 )

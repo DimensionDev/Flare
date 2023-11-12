@@ -39,13 +39,15 @@ internal fun provideAppDatabase(
     }
     return AppDatabase(
         driver,
-        DbAccountAdapter = DbAccount.Adapter(
-            account_keyAdapter = MicroblogKeyAdapter(),
-            platform_typeAdapter = EnumColumnAdapter(),
-        ),
-        DbApplicationAdapter = DbApplication.Adapter(
-            platform_typeAdapter = EnumColumnAdapter(),
-        ),
+        DbAccountAdapter =
+            DbAccount.Adapter(
+                account_keyAdapter = MicroblogKeyAdapter(),
+                platform_typeAdapter = EnumColumnAdapter(),
+            ),
+        DbApplicationAdapter =
+            DbApplication.Adapter(
+                platform_typeAdapter = EnumColumnAdapter(),
+            ),
     )
 }
 
@@ -66,24 +68,28 @@ internal fun provideCacheDatabase(
     }
     return CacheDatabase(
         driver,
-        DbStatusAdapter = DbStatus.Adapter(
-            status_keyAdapter = MicroblogKeyAdapter(),
-            platform_typeAdapter = EnumColumnAdapter(),
-            account_keyAdapter = MicroblogKeyAdapter(),
-            user_keyAdapter = MicroblogKeyAdapter(),
-            contentAdapter = JsonColumnAdapter(StatusContent.serializer()),
-        ),
-        DbUserAdapter = DbUser.Adapter(
-            user_keyAdapter = MicroblogKeyAdapter(),
-            platform_typeAdapter = EnumColumnAdapter(),
-            contentAdapter = JsonColumnAdapter(UserContent.serializer()),
-        ),
-        DbPagingTimelineAdapter = dev.dimension.flare.data.cache.DbPagingTimeline.Adapter(
-            account_keyAdapter = MicroblogKeyAdapter(),
-            status_keyAdapter = MicroblogKeyAdapter(),
-        ),
-        DbEmojiAdapter = dev.dimension.flare.data.cache.DbEmoji.Adapter(
-            contentAdapter = JsonColumnAdapter(EmojiContent.serializer()),
-        ),
+        DbStatusAdapter =
+            DbStatus.Adapter(
+                status_keyAdapter = MicroblogKeyAdapter(),
+                platform_typeAdapter = EnumColumnAdapter(),
+                account_keyAdapter = MicroblogKeyAdapter(),
+                user_keyAdapter = MicroblogKeyAdapter(),
+                contentAdapter = JsonColumnAdapter(StatusContent.serializer()),
+            ),
+        DbUserAdapter =
+            DbUser.Adapter(
+                user_keyAdapter = MicroblogKeyAdapter(),
+                platform_typeAdapter = EnumColumnAdapter(),
+                contentAdapter = JsonColumnAdapter(UserContent.serializer()),
+            ),
+        DbPagingTimelineAdapter =
+            dev.dimension.flare.data.cache.DbPagingTimeline.Adapter(
+                account_keyAdapter = MicroblogKeyAdapter(),
+                status_keyAdapter = MicroblogKeyAdapter(),
+            ),
+        DbEmojiAdapter =
+            dev.dimension.flare.data.cache.DbEmoji.Adapter(
+                contentAdapter = JsonColumnAdapter(EmojiContent.serializer()),
+            ),
     )
 }

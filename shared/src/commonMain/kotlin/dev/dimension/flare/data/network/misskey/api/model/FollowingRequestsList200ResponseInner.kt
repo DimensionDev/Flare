@@ -23,11 +23,7 @@ import kotlinx.serialization.Serializable
  * @param id * @param follower * @param followee */
 @Serializable
 data class FollowingRequestsList200ResponseInner(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "follower") val follower: UserLite,
-
     @SerialName(value = "followee") val followee: UserLite,
-
 )

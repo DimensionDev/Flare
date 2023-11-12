@@ -37,18 +37,23 @@ class MisskeyDataSource(
             token = account.credential.accessToken,
         )
     }
-    override fun homeTimeline(pageSize: Int, pagingKey: String): Flow<PagingData<UiStatus>> {
+
+    override fun homeTimeline(
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = HomeTimelineRemoteMediator(
-                account,
-                service,
-                database,
-                pagingKey,
-            ),
+            mediator =
+                HomeTimelineRemoteMediator(
+                    account,
+                    service,
+                    database,
+                    pagingKey,
+                ),
         )
     }
 
@@ -62,39 +67,44 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = when (type) {
-                NotificationFilter.All -> NotificationRemoteMediator(
-                    account,
-                    service,
-                    database,
-                    pagingKey,
-                )
+            mediator =
+                when (type) {
+                    NotificationFilter.All ->
+                        NotificationRemoteMediator(
+                            account,
+                            service,
+                            database,
+                            pagingKey,
+                        )
 
-                NotificationFilter.Mention -> MentionTimelineRemoteMediator(
-                    account,
-                    service,
-                    database,
-                    pagingKey,
-                )
-            },
+                    NotificationFilter.Mention ->
+                        MentionTimelineRemoteMediator(
+                            account,
+                            service,
+                            database,
+                            pagingKey,
+                        )
+                },
         )
     }
 
     override val supportedNotificationFilter: List<NotificationFilter>
-        get() = listOf(
-            NotificationFilter.All,
-            NotificationFilter.Mention,
-        )
+        get() =
+            listOf(
+                NotificationFilter.All,
+                NotificationFilter.Mention,
+            )
 
     override fun userByAcct(acct: String): CacheData<UiUser> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
-                val user = service
-                    .usersShow(UsersShowRequest(username = name, host = host))
-                    .body()
-                    ?.toDbUser(account.accountKey.host)
-                    ?: throw Exception("User not found")
+                val user =
+                    service
+                        .usersShow(UsersShowRequest(username = name, host = host))
+                        .body()
+                        ?.toDbUser(account.accountKey.host)
+                        ?: throw Exception("User not found")
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,
@@ -116,11 +126,12 @@ class MisskeyDataSource(
         val userKey = MicroBlogKey(id, account.accountKey.host)
         return Cacheable(
             fetchSource = {
-                val user = service
-                    .usersShow(UsersShowRequest(userId = id))
-                    .body()
-                    ?.toDbUser(account.accountKey.host)
-                    ?: throw Exception("User not found")
+                val user =
+                    service
+                        .usersShow(UsersShowRequest(userId = id))
+                        .body()
+                        ?.toDbUser(account.accountKey.host)
+                        ?: throw Exception("User not found")
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,
@@ -160,13 +171,14 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = UserTimelineRemoteMediator(
-                account,
-                service,
-                userKey,
-                database,
-                pagingKey,
-            ),
+            mediator =
+                UserTimelineRemoteMediator(
+                    account,
+                    service,
+                    userKey,
+                    database,
+                    pagingKey,
+                ),
         )
     }
 
@@ -180,83 +192,95 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = StatusDetailRemoteMediator(
-                statusKey,
-                database,
-                account,
-                service,
-                pagingKey,
-                statusOnly = false,
-            ),
+            mediator =
+                StatusDetailRemoteMediator(
+                    statusKey,
+                    database,
+                    account,
+                    service,
+                    pagingKey,
+                    statusOnly = false,
+                ),
         )
     }
 
-    override fun status(statusKey: MicroBlogKey, pagingKey: String): Flow<PagingData<UiStatus>> {
+    override fun status(
+        statusKey: MicroBlogKey,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = 1,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = StatusDetailRemoteMediator(
-                statusKey,
-                database,
-                account,
-                service,
-                pagingKey,
-                statusOnly = true,
-            ),
+            mediator =
+                StatusDetailRemoteMediator(
+                    statusKey,
+                    database,
+                    account,
+                    service,
+                    pagingKey,
+                    statusOnly = true,
+                ),
         )
     }
 
-    fun emoji() = Cacheable(
-        fetchSource = {
-            val emojis = service.emojis().body()?.emojis.orEmpty().toImmutableList()
-            database.dbEmojiQueries.insert(
-                account.accountKey.host,
-                emojis.toDb(account.accountKey.host).content
-            )
-        },
-        cacheSource = {
-            database.dbEmojiQueries.get(account.accountKey.host).asFlow()
-                .mapToOneNotNull(Dispatchers.IO)
-                .map { it.toUi().toImmutableList() }
-        },
-    )
+    fun emoji() =
+        Cacheable(
+            fetchSource = {
+                val emojis = service.emojis().body()?.emojis.orEmpty().toImmutableList()
+                database.dbEmojiQueries.insert(
+                    account.accountKey.host,
+                    emojis.toDb(account.accountKey.host).content,
+                )
+            },
+            cacheSource = {
+                database.dbEmojiQueries.get(account.accountKey.host).asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .map { it.toUi().toImmutableList() }
+            },
+        )
 
-    override suspend fun compose(data: ComposeData, progress: (ComposeProgress) -> Unit) {
+    override suspend fun compose(
+        data: ComposeData,
+        progress: (ComposeProgress) -> Unit,
+    ) {
         require(data is MissKeyComposeData)
         val maxProgress = data.medias.size + 1
-        val mediaIds = data.medias.mapIndexed { index, item ->
-            service.upload(
-                item.readBytes(),
-                name = item.name ?: "unknown",
-                sensitive = data.sensitive,
-            ).also {
-                progress(ComposeProgress(index + 1, maxProgress))
+        val mediaIds =
+            data.medias.mapIndexed { index, item ->
+                service.upload(
+                    item.readBytes(),
+                    name = item.name ?: "unknown",
+                    sensitive = data.sensitive,
+                ).also {
+                    progress(ComposeProgress(index + 1, maxProgress))
+                }
+            }.mapNotNull {
+                it?.id
             }
-        }.mapNotNull {
-            it?.id
-        }
         service.notesCreate(
             NotesCreateRequest(
                 text = data.content,
-                visibility = when (data.visibility) {
-                    UiStatus.Misskey.Visibility.Public -> "public"
-                    UiStatus.Misskey.Visibility.Home -> "home"
-                    UiStatus.Misskey.Visibility.Followers -> "followers"
-                    UiStatus.Misskey.Visibility.Specified -> "specified"
-                },
+                visibility =
+                    when (data.visibility) {
+                        UiStatus.Misskey.Visibility.Public -> "public"
+                        UiStatus.Misskey.Visibility.Home -> "home"
+                        UiStatus.Misskey.Visibility.Followers -> "followers"
+                        UiStatus.Misskey.Visibility.Specified -> "specified"
+                    },
                 renoteId = data.renoteId,
                 replyId = data.inReplyToID,
                 fileIds = mediaIds.takeIf { it.isNotEmpty() },
                 cw = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
-                poll = data.poll?.let { poll ->
-                    NotesCreateRequestPoll(
-                        choices = poll.options.toSet(),
-                        expiredAfter = poll.expiredAfter.toInt(),
-                        multiple = poll.multiple,
-                    )
-                },
+                poll =
+                    data.poll?.let { poll ->
+                        NotesCreateRequestPoll(
+                            choices = poll.options.toSet(),
+                            expiredAfter = poll.expiredAfter.toInt(),
+                            multiple = poll.multiple,
+                        )
+                    },
                 localOnly = data.localOnly,
             ),
         )
@@ -282,9 +306,7 @@ class MisskeyDataSource(
         )
     }
 
-    suspend fun renote(
-        status: UiStatus.Misskey,
-    ) {
+    suspend fun renote(status: UiStatus.Misskey) {
         service.notesRenotes(
             NotesChildrenRequest(
                 noteId = status.statusKey.id,

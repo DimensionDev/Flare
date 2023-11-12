@@ -26,14 +26,15 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
         val accountRepository = rememberKoinInject<AccountRepository>()
         val accounts by allAccountsPresenter()
         val activeAccount by activeAccountPresenter()
-        val user = accounts.map {
-            it.map {
-                val service = accountServiceProvider(account = it)
-                remember(it.accountKey) {
-                    service.userById(it.accountKey.id)
-                }.collectAsState().toUi()
-            }.toImmutableList().toImmutableListWrapper()
-        }
+        val user =
+            accounts.map {
+                it.map {
+                    val service = accountServiceProvider(account = it)
+                    remember(it.accountKey) {
+                        service.userById(it.accountKey.id)
+                    }.collectAsState().toUi()
+                }.toImmutableList().toImmutableListWrapper()
+            }
         return object : AccountsState(
             accounts = user,
             activeAccount = activeAccount,
@@ -55,10 +56,11 @@ abstract class AccountsState(
     val activeAccount: UiState<UiAccount>,
 ) {
     abstract fun setActiveAccount(accountKey: MicroBlogKey)
+
     abstract fun removeAccount(accountKey: MicroBlogKey)
 }
 
-data class ImmutableListWrapper<T: Any>(
+data class ImmutableListWrapper<T : Any>(
     private val data: ImmutableList<T>,
 ) {
     operator fun get(index: Int): T {
@@ -69,6 +71,6 @@ data class ImmutableListWrapper<T: Any>(
         get() = data.size
 }
 
-fun <T: Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> {
+fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> {
     return ImmutableListWrapper(this)
 }

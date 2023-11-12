@@ -24,24 +24,15 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class AdminDriveFilesRequest(
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
     @SerialName(value = "userId") val userId: kotlin.String? = null,
-
     @SerialName(value = "type") val type: kotlin.String? = null,
-
     @SerialName(value = "origin") val origin: AdminDriveFilesRequest.Origin? = Origin.Local,
-
-    /* The local host is represented with `null`. */
+    // The local host is represented with `null`.
     @SerialName(value = "hostname") val hostname: kotlin.String? = null,
-
 ) {
-
     /**
      * *
      * Values: Combined,Local,Remote

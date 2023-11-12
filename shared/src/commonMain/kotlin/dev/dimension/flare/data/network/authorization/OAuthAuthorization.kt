@@ -28,7 +28,6 @@ class OAuthAuthorization(
     private val accessSecret: String? = null,
     private val random: Random = Random.Default,
 ) : Authorization {
-
     override val hasAuthorization: Boolean = true
 
     private fun generateOAuthNonce(): String {
@@ -58,29 +57,31 @@ class OAuthAuthorization(
             builder.parameters.appendAll(body.formData)
         }
 
-        val sortSigningBody = builder.parameters.build()
-            .entries()
-            .sortedBy { it.key }
-            .joinToString(separator = "&") {
-                "${it.key}=${
-                    when {
-                        it.value.isEmpty() -> ""
-                        it.value.size == 1 -> it.value.first()
-                        else -> it.value.toString()
-                    }.encodeOAuth()
-                }"
+        val sortSigningBody =
+            builder.parameters.build()
+                .entries()
+                .sortedBy { it.key }
+                .joinToString(separator = "&") {
+                    "${it.key}=${
+                        when {
+                            it.value.isEmpty() -> ""
+                            it.value.size == 1 -> it.value.first()
+                            else -> it.value.toString()
+                        }.encodeOAuth()
+                    }"
+                }
+
+        val signature =
+            Buffer().use { base ->
+                base.writeUtf8(context.method.value)
+                base.writeByte('&'.code)
+                base.writeUtf8(context.url.buildString().substringBefore('?').encodeOAuth())
+                base.writeByte('&'.code)
+                base.writeUtf8(sortSigningBody.encodeOAuth())
+
+                val signingKey = "$consumerSecret&${accessSecret.orEmpty()}".encodeUtf8()
+                base.hmacSha1(signingKey).base64()
             }
-
-        val signature = Buffer().use { base ->
-            base.writeUtf8(context.method.value)
-            base.writeByte('&'.code)
-            base.writeUtf8(context.url.buildString().substringBefore('?').encodeOAuth())
-            base.writeByte('&'.code)
-            base.writeUtf8(sortSigningBody.encodeOAuth())
-
-            val signingKey = "$consumerSecret&${accessSecret.orEmpty()}".encodeUtf8()
-            base.hmacSha1(signingKey).base64()
-        }
 
         return mapOf(
             OAUTH_CONSUMER_KEY to consumerKey,

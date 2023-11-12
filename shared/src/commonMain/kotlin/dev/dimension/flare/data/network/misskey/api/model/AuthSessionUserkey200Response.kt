@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param accessToken * @param user */
 @Serializable
 data class AuthSessionUserkey200Response(
-
     @SerialName(value = "accessToken") val accessToken: kotlin.String,
-
     @SerialName(value = "user") val user: UserDetailedNotMe,
-
 )

@@ -23,19 +23,12 @@ import kotlinx.serialization.Serializable
  * @param query * @param offset * @param limit * @param origin * @param detail */
 @Serializable
 data class UsersSearchRequest(
-
     @SerialName(value = "query") val query: kotlin.String,
-
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "origin") val origin: UsersSearchRequest.Origin? = Origin.Combined,
-
     @SerialName(value = "detail") val detail: kotlin.Boolean? = true,
-
 ) {
-
     /**
      * *
      * Values: Local,Remote,Combined

@@ -24,7 +24,9 @@ interface FollowingApi {
      * @param adminAccountsDeleteRequest * @return [UserLite]
      */
     @POST("following/create")
-    suspend fun followingCreate(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<UserLite>
+    suspend fun followingCreate(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<UserLite>
 
     /**
      * following/delete
@@ -41,7 +43,9 @@ interface FollowingApi {
      * @param adminAccountsDeleteRequest * @return [UserLite]
      */
     @POST("following/delete")
-    suspend fun followingDelete(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<UserLite>
+    suspend fun followingDelete(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<UserLite>
 
     /**
      * following/invalidate
@@ -58,7 +62,9 @@ interface FollowingApi {
      * @param adminAccountsDeleteRequest * @return [UserLite]
      */
     @POST("following/invalidate")
-    suspend fun followingInvalidate(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<UserLite>
+    suspend fun followingInvalidate(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<UserLite>
 
     /**
      * following/requests/accept
@@ -74,7 +80,9 @@ interface FollowingApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("following/requests/accept")
-    suspend fun followingRequestsAccept(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun followingRequestsAccept(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * following/requests/cancel
@@ -90,7 +98,9 @@ interface FollowingApi {
      * @param adminAccountsDeleteRequest * @return [UserLite]
      */
     @POST("following/requests/cancel")
-    suspend fun followingRequestsCancel(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<UserLite>
+    suspend fun followingRequestsCancel(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<UserLite>
 
     /**
      * following/requests/list
@@ -106,7 +116,9 @@ interface FollowingApi {
      * @param followingRequestsListRequest * @return [kotlin.collections.List<FollowingRequestsList200ResponseInner>]
      */
     @POST("following/requests/list")
-    suspend fun followingRequestsList(@Body followingRequestsListRequest: FollowingRequestsListRequest): Response<kotlin.collections.List<FollowingRequestsList200ResponseInner>>
+    suspend fun followingRequestsList(
+        @Body followingRequestsListRequest: FollowingRequestsListRequest,
+    ): Response<kotlin.collections.List<FollowingRequestsList200ResponseInner>>
 
     /**
      * following/requests/reject
@@ -122,5 +134,7 @@ interface FollowingApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("following/requests/reject")
-    suspend fun followingRequestsReject(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun followingRequestsReject(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 }

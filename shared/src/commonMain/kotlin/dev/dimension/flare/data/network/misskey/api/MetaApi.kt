@@ -35,7 +35,9 @@ interface MetaApi {
      * @param body * @return [AdminMeta200Response]
      */
     @POST("admin/meta")
-    suspend fun adminMeta(@Body body: kotlin.Any): Response<AdminMeta200Response>
+    suspend fun adminMeta(
+        @Body body: kotlin.Any,
+    ): Response<AdminMeta200Response>
 
     /**
      * announcements
@@ -51,7 +53,9 @@ interface MetaApi {
      * @param announcementsRequest * @return [kotlin.collections.List<Announcements200ResponseInner>]
      */
     @POST("announcements")
-    suspend fun announcements(@Body announcementsRequest: AnnouncementsRequest): Response<kotlin.collections.List<Announcements200ResponseInner>>
+    suspend fun announcements(
+        @Body announcementsRequest: AnnouncementsRequest,
+    ): Response<kotlin.collections.List<Announcements200ResponseInner>>
 
     /**
      * emoji
@@ -67,7 +71,9 @@ interface MetaApi {
      * @param emojiRequest * @return [EmojiDetailed]
      */
     @POST("emoji")
-    suspend fun emoji(@Body emojiRequest: EmojiRequest): Response<EmojiDetailed>
+    suspend fun emoji(
+        @Body emojiRequest: EmojiRequest,
+    ): Response<EmojiDetailed>
 
     /**
      * emojis
@@ -99,7 +105,9 @@ interface MetaApi {
      * @param endpointRequest * @return [Unit]
      */
     @POST("endpoint")
-    suspend fun endpoint(@Body endpointRequest: EndpointRequest): Response<Unit>
+    suspend fun endpoint(
+        @Body endpointRequest: EndpointRequest,
+    ): Response<Unit>
 
     /**
      * endpoints
@@ -115,7 +123,9 @@ interface MetaApi {
      * @param body * @return [kotlin.collections.List<kotlin.String>]
      */
     @POST("endpoints")
-    suspend fun endpoints(@Body body: kotlin.Any): Response<kotlin.collections.List<kotlin.String>>
+    suspend fun endpoints(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<kotlin.String>>
 
     /**
      * fetch-rss
@@ -131,7 +141,9 @@ interface MetaApi {
      * @param fetchRssRequest * @return [Unit]
      */
     @POST("fetch-rss")
-    suspend fun fetchRss(@Body fetchRssRequest: FetchRssRequest): Response<Unit>
+    suspend fun fetchRss(
+        @Body fetchRssRequest: FetchRssRequest,
+    ): Response<Unit>
 
     /**
      * get-online-users-count
@@ -147,7 +159,9 @@ interface MetaApi {
      * @param body * @return [Unit]
      */
     @POST("get-online-users-count")
-    suspend fun getOnlineUsersCount(@Body body: kotlin.Any): Response<Unit>
+    suspend fun getOnlineUsersCount(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * invite/create
@@ -163,7 +177,9 @@ interface MetaApi {
      * @param body * @return [AdminInviteCreate200ResponseInner]
      */
     @POST("invite/create")
-    suspend fun inviteCreate(@Body body: kotlin.Any): Response<AdminInviteCreate200ResponseInner>
+    suspend fun inviteCreate(
+        @Body body: kotlin.Any,
+    ): Response<AdminInviteCreate200ResponseInner>
 
     /**
      * invite/delete
@@ -179,7 +195,9 @@ interface MetaApi {
      * @param inviteDeleteRequest * @return [Unit]
      */
     @POST("invite/delete")
-    suspend fun inviteDelete(@Body inviteDeleteRequest: InviteDeleteRequest): Response<Unit>
+    suspend fun inviteDelete(
+        @Body inviteDeleteRequest: InviteDeleteRequest,
+    ): Response<Unit>
 
     /**
      * invite/limit
@@ -195,7 +213,9 @@ interface MetaApi {
      * @param body * @return [InviteLimit200Response]
      */
     @POST("invite/limit")
-    suspend fun inviteLimit(@Body body: kotlin.Any): Response<InviteLimit200Response>
+    suspend fun inviteLimit(
+        @Body body: kotlin.Any,
+    ): Response<InviteLimit200Response>
 
     /**
      * invite/list
@@ -211,7 +231,9 @@ interface MetaApi {
      * @param blockingListRequest * @return [kotlin.collections.List<kotlin.Any>]
      */
     @POST("invite/list")
-    suspend fun inviteList(@Body blockingListRequest: BlockingListRequest): Response<kotlin.collections.List<kotlin.Any>>
+    suspend fun inviteList(
+        @Body blockingListRequest: BlockingListRequest,
+    ): Response<kotlin.collections.List<kotlin.Any>>
 
     /**
      * meta
@@ -227,7 +249,9 @@ interface MetaApi {
      * @param metaRequest * @return [Meta200Response]
      */
     @POST("meta")
-    suspend fun meta(@Body metaRequest: MetaRequest): Response<Meta200Response>
+    suspend fun meta(
+        @Body metaRequest: MetaRequest,
+    ): Response<Meta200Response>
 
     /**
      * ping
@@ -243,7 +267,9 @@ interface MetaApi {
      * @param body * @return [Ping200Response]
      */
     @POST("ping")
-    suspend fun ping(@Body body: kotlin.Any): Response<Ping200Response>
+    suspend fun ping(
+        @Body body: kotlin.Any,
+    ): Response<Ping200Response>
 
     /**
      * server-info
@@ -259,7 +285,9 @@ interface MetaApi {
      * @param body * @return [Unit]
      */
     @POST("server-info")
-    suspend fun serverInfo(@Body body: kotlin.Any): Response<Unit>
+    suspend fun serverInfo(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * stats
@@ -275,5 +303,7 @@ interface MetaApi {
      * @param body * @return [Stats200Response]
      */
     @POST("stats")
-    suspend fun stats(@Body body: kotlin.Any): Response<Stats200Response>
+    suspend fun stats(
+        @Body body: kotlin.Any,
+    ): Response<Stats200Response>
 }

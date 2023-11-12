@@ -23,33 +23,20 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param type * @param user * @param userId * @param note * @param reaction * @param choice * @param invitation * @param body * @param header * @param icon */
 @Serializable
 data class Notification(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "type") val type: Notification.Type,
-
     @SerialName(value = "user") val user: UserLite? = null,
-
     @SerialName(value = "userId") val userId: kotlin.String? = null,
-
     @SerialName(value = "note") val note: Note? = null,
-
     @SerialName(value = "reaction") val reaction: kotlin.String? = null,
-
     @SerialName(value = "choice") val choice: kotlin.Double? = null,
-
     @SerialName(value = "invitation") val invitation: kotlin.String? = null,
-
     @SerialName(value = "body") val body: kotlin.String? = null,
-
     @SerialName(value = "header") val header: kotlin.String? = null,
-
     @SerialName(value = "icon") val icon: kotlin.String? = null,
     val achievement: String? = null,
 ) {
-
     /**
      * *
      * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App

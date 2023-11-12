@@ -26,7 +26,9 @@ interface HashtagsApi {
      * @param hashtagsListRequest * @return [kotlin.collections.List<Hashtag>]
      */
     @POST("hashtags/list")
-    suspend fun hashtagsList(@Body hashtagsListRequest: HashtagsListRequest): Response<kotlin.collections.List<Hashtag>>
+    suspend fun hashtagsList(
+        @Body hashtagsListRequest: HashtagsListRequest,
+    ): Response<kotlin.collections.List<Hashtag>>
 
     /**
      * hashtags/search
@@ -42,7 +44,9 @@ interface HashtagsApi {
      * @param hashtagsSearchRequest * @return [kotlin.collections.List<kotlin.String>]
      */
     @POST("hashtags/search")
-    suspend fun hashtagsSearch(@Body hashtagsSearchRequest: HashtagsSearchRequest): Response<kotlin.collections.List<kotlin.String>>
+    suspend fun hashtagsSearch(
+        @Body hashtagsSearchRequest: HashtagsSearchRequest,
+    ): Response<kotlin.collections.List<kotlin.String>>
 
     /**
      * hashtags/show
@@ -58,7 +62,9 @@ interface HashtagsApi {
      * @param hashtagsShowRequest * @return [Hashtag]
      */
     @POST("hashtags/show")
-    suspend fun hashtagsShow(@Body hashtagsShowRequest: HashtagsShowRequest): Response<Hashtag>
+    suspend fun hashtagsShow(
+        @Body hashtagsShowRequest: HashtagsShowRequest,
+    ): Response<Hashtag>
 
     /**
      * hashtags/trend
@@ -74,7 +80,9 @@ interface HashtagsApi {
      * @param body * @return [kotlin.collections.List<HashtagsTrend200ResponseInner>]
      */
     @POST("hashtags/trend")
-    suspend fun hashtagsTrend(@Body body: kotlin.Any): Response<kotlin.collections.List<HashtagsTrend200ResponseInner>>
+    suspend fun hashtagsTrend(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<HashtagsTrend200ResponseInner>>
 
     /**
      * hashtags/users
@@ -90,5 +98,7 @@ interface HashtagsApi {
      * @param hashtagsUsersRequest * @return [kotlin.collections.List<UserDetailed>]
      */
     @POST("hashtags/users")
-    suspend fun hashtagsUsers(@Body hashtagsUsersRequest: HashtagsUsersRequest): Response<kotlin.collections.List<UserDetailed>>
+    suspend fun hashtagsUsers(
+        @Body hashtagsUsersRequest: HashtagsUsersRequest,
+    ): Response<kotlin.collections.List<UserDetailed>>
 }

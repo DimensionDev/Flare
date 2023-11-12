@@ -36,24 +36,28 @@ internal class StatusDetailRemoteMediator(
                             account_key = accountKey,
                             status_key = statusKey,
                             paging_key = pagingKey,
-                            sort_id = 0
+                            sort_id = 0,
                         )
                 }
             }
-            val result = if (statusOnly) {
-                val current = service.lookupStatus(
-                    statusKey.id,
-                )
-                listOf(current)
-            } else {
-                val context = service.context(
-                    statusKey.id,
-                )
-                val current = service.lookupStatus(
-                    statusKey.id,
-                )
-                context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
-            }
+            val result =
+                if (statusOnly) {
+                    val current =
+                        service.lookupStatus(
+                            statusKey.id,
+                        )
+                    listOf(current)
+                } else {
+                    val context =
+                        service.context(
+                            statusKey.id,
+                        )
+                    val current =
+                        service.lookupStatus(
+                            statusKey.id,
+                        )
+                    context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
+                }
 
             Mastodon.save(
                 database = database,
@@ -69,6 +73,6 @@ internal class StatusDetailRemoteMediator(
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)
-        } 
+        }
     }
 }

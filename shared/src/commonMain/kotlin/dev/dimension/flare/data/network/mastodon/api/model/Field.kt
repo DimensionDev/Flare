@@ -29,7 +29,10 @@ internal object DateSerializer : KSerializer<Instant> {
         return str.toInstant()
     }
 
-    override fun serialize(encoder: Encoder, value: Instant) {
+    override fun serialize(
+        encoder: Encoder,
+        value: Instant,
+    ) {
         encoder.encodeString(value.toString())
     }
 }

@@ -34,17 +34,12 @@ interface MicroblogDataSource {
     ): Flow<PagingData<UiStatus>>
 
     val supportedNotificationFilter: List<NotificationFilter>
-    fun userByAcct(
-        acct: String,
-    ): CacheData<UiUser>
 
-    fun userById(
-        id: String,
-    ): CacheData<UiUser>
+    fun userByAcct(acct: String): CacheData<UiUser>
 
-    fun relation(
-        userKey: MicroBlogKey,
-    ): Flow<UiState<UiRelation>>
+    fun userById(id: String): CacheData<UiUser>
+
+    fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>>
 
     fun userTimeline(
         userKey: MicroBlogKey,
@@ -63,7 +58,10 @@ interface MicroblogDataSource {
         pagingKey: String = "status_only_$statusKey",
     ): Flow<PagingData<UiStatus>>
 
-    suspend fun compose(data: ComposeData, progress: (ComposeProgress) -> Unit)
+    suspend fun compose(
+        data: ComposeData,
+        progress: (ComposeProgress) -> Unit,
+    )
 }
 
 data class ComposeProgress(
@@ -94,10 +92,11 @@ internal fun timelinePager(
         remoteMediator = mediator,
         pagingSourceFactory = {
             QueryPagingSource(
-                countQuery = database.dbPagingTimelineQueries.pageCount(
-                    account_key = accountKey,
-                    paging_key = pagingKey
-                ),
+                countQuery =
+                    database.dbPagingTimelineQueries.pageCount(
+                        account_key = accountKey,
+                        paging_key = pagingKey,
+                    ),
                 transacter = database.dbPagingTimelineQueries,
                 context = Dispatchers.IO,
                 queryProvider = { limit, offset ->
@@ -109,7 +108,7 @@ internal fun timelinePager(
                     )
                 },
             )
-        }
+        },
     ).flow.map {
         it.map {
             it.toUi()

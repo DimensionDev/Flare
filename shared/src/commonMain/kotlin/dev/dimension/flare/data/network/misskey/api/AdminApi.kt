@@ -78,7 +78,9 @@ interface AdminApi {
      * @param adminAbuseReportResolverCreateRequest * @return [AdminAbuseReportResolverCreate200Response]
      */
     @POST("admin/abuse-report-resolver/create")
-    suspend fun adminAbuseReportResolverCreate(@Body adminAbuseReportResolverCreateRequest: AdminAbuseReportResolverCreateRequest): Response<AdminAbuseReportResolverCreate200Response>
+    suspend fun adminAbuseReportResolverCreate(
+        @Body adminAbuseReportResolverCreateRequest: AdminAbuseReportResolverCreateRequest,
+    ): Response<AdminAbuseReportResolverCreate200Response>
 
     /**
      * admin/abuse-user-reports
@@ -94,7 +96,9 @@ interface AdminApi {
      * @param adminAbuseUserReportsRequest * @return [kotlin.collections.List<AdminAbuseUserReports200ResponseInner>]
      */
     @POST("admin/abuse-user-reports")
-    suspend fun adminAbuseUserReports(@Body adminAbuseUserReportsRequest: AdminAbuseUserReportsRequest): Response<kotlin.collections.List<AdminAbuseUserReports200ResponseInner>>
+    suspend fun adminAbuseUserReports(
+        @Body adminAbuseUserReportsRequest: AdminAbuseUserReportsRequest,
+    ): Response<kotlin.collections.List<AdminAbuseUserReports200ResponseInner>>
 
     /**
      * admin/accounts/create
@@ -110,7 +114,9 @@ interface AdminApi {
      * @param adminAccountsCreateRequest * @return [User]
      */
     @POST("admin/accounts/create")
-    suspend fun adminAccountsCreate(@Body adminAccountsCreateRequest: AdminAccountsCreateRequest): Response<User>
+    suspend fun adminAccountsCreate(
+        @Body adminAccountsCreateRequest: AdminAccountsCreateRequest,
+    ): Response<User>
 
     /**
      * admin/accounts/delete
@@ -126,7 +132,9 @@ interface AdminApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("admin/accounts/delete")
-    suspend fun adminAccountsDelete(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun adminAccountsDelete(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/ad/create
@@ -142,7 +150,9 @@ interface AdminApi {
      * @param adminAdCreateRequest * @return [Unit]
      */
     @POST("admin/ad/create")
-    suspend fun adminAdCreate(@Body adminAdCreateRequest: AdminAdCreateRequest): Response<Unit>
+    suspend fun adminAdCreate(
+        @Body adminAdCreateRequest: AdminAdCreateRequest,
+    ): Response<Unit>
 
     /**
      * admin/ad/delete
@@ -158,7 +168,9 @@ interface AdminApi {
      * @param adminAdDeleteRequest * @return [Unit]
      */
     @POST("admin/ad/delete")
-    suspend fun adminAdDelete(@Body adminAdDeleteRequest: AdminAdDeleteRequest): Response<Unit>
+    suspend fun adminAdDelete(
+        @Body adminAdDeleteRequest: AdminAdDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/ad/list
@@ -174,7 +186,9 @@ interface AdminApi {
      * @param adminAdListRequest * @return [Unit]
      */
     @POST("admin/ad/list")
-    suspend fun adminAdList(@Body adminAdListRequest: AdminAdListRequest): Response<Unit>
+    suspend fun adminAdList(
+        @Body adminAdListRequest: AdminAdListRequest,
+    ): Response<Unit>
 
     /**
      * admin/ad/update
@@ -190,7 +204,9 @@ interface AdminApi {
      * @param adminAdUpdateRequest * @return [Unit]
      */
     @POST("admin/ad/update")
-    suspend fun adminAdUpdate(@Body adminAdUpdateRequest: AdminAdUpdateRequest): Response<Unit>
+    suspend fun adminAdUpdate(
+        @Body adminAdUpdateRequest: AdminAdUpdateRequest,
+    ): Response<Unit>
 
     /**
      * admin/announcements/create
@@ -206,7 +222,9 @@ interface AdminApi {
      * @param adminAnnouncementsCreateRequest * @return [AdminAnnouncementsCreate200Response]
      */
     @POST("admin/announcements/create")
-    suspend fun adminAnnouncementsCreate(@Body adminAnnouncementsCreateRequest: AdminAnnouncementsCreateRequest): Response<AdminAnnouncementsCreate200Response>
+    suspend fun adminAnnouncementsCreate(
+        @Body adminAnnouncementsCreateRequest: AdminAnnouncementsCreateRequest,
+    ): Response<AdminAnnouncementsCreate200Response>
 
     /**
      * admin/announcements/delete
@@ -222,7 +240,9 @@ interface AdminApi {
      * @param adminAdDeleteRequest * @return [Unit]
      */
     @POST("admin/announcements/delete")
-    suspend fun adminAnnouncementsDelete(@Body adminAdDeleteRequest: AdminAdDeleteRequest): Response<Unit>
+    suspend fun adminAnnouncementsDelete(
+        @Body adminAdDeleteRequest: AdminAdDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/announcements/list
@@ -238,7 +258,9 @@ interface AdminApi {
      * @param adminAnnouncementsListRequest * @return [kotlin.collections.List<AdminAnnouncementsList200ResponseInner>]
      */
     @POST("admin/announcements/list")
-    suspend fun adminAnnouncementsList(@Body adminAnnouncementsListRequest: AdminAnnouncementsListRequest): Response<kotlin.collections.List<AdminAnnouncementsList200ResponseInner>>
+    suspend fun adminAnnouncementsList(
+        @Body adminAnnouncementsListRequest: AdminAnnouncementsListRequest,
+    ): Response<kotlin.collections.List<AdminAnnouncementsList200ResponseInner>>
 
     /**
      * admin/announcements/update
@@ -254,7 +276,9 @@ interface AdminApi {
      * @param adminAnnouncementsUpdateRequest * @return [Unit]
      */
     @POST("admin/announcements/update")
-    suspend fun adminAnnouncementsUpdate(@Body adminAnnouncementsUpdateRequest: AdminAnnouncementsUpdateRequest): Response<Unit>
+    suspend fun adminAnnouncementsUpdate(
+        @Body adminAnnouncementsUpdateRequest: AdminAnnouncementsUpdateRequest,
+    ): Response<Unit>
 
     /**
      * admin/delete-account
@@ -270,7 +294,9 @@ interface AdminApi {
      * @param adminAccountsDeleteRequest * @return [kotlin.Any]
      */
     @POST("admin/delete-account")
-    suspend fun adminDeleteAccount(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<kotlin.Any>
+    suspend fun adminDeleteAccount(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<kotlin.Any>
 
     /**
      * admin/delete-all-files-of-a-user
@@ -286,7 +312,9 @@ interface AdminApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("admin/delete-all-files-of-a-user")
-    suspend fun adminDeleteAllFilesOfAUser(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun adminDeleteAllFilesOfAUser(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/drive/clean-remote-files
@@ -302,7 +330,9 @@ interface AdminApi {
      * @param body * @return [Unit]
      */
     @POST("admin/drive/clean-remote-files")
-    suspend fun adminDriveCleanRemoteFiles(@Body body: kotlin.Any): Response<Unit>
+    suspend fun adminDriveCleanRemoteFiles(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * admin/drive/cleanup
@@ -318,7 +348,9 @@ interface AdminApi {
      * @param body * @return [Unit]
      */
     @POST("admin/drive/cleanup")
-    suspend fun adminDriveCleanup(@Body body: kotlin.Any): Response<Unit>
+    suspend fun adminDriveCleanup(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * admin/drive/files
@@ -334,7 +366,9 @@ interface AdminApi {
      * @param adminDriveFilesRequest * @return [kotlin.collections.List<DriveFile>]
      */
     @POST("admin/drive/files")
-    suspend fun adminDriveFiles(@Body adminDriveFilesRequest: AdminDriveFilesRequest): Response<kotlin.collections.List<DriveFile>>
+    suspend fun adminDriveFiles(
+        @Body adminDriveFilesRequest: AdminDriveFilesRequest,
+    ): Response<kotlin.collections.List<DriveFile>>
 
     /**
      * admin/drive/show-file
@@ -350,7 +384,9 @@ interface AdminApi {
      * @param adminDriveShowFileRequest * @return [AdminDriveShowFile200Response]
      */
     @POST("admin/drive/show-file")
-    suspend fun adminDriveShowFile(@Body adminDriveShowFileRequest: AdminDriveShowFileRequest): Response<AdminDriveShowFile200Response>
+    suspend fun adminDriveShowFile(
+        @Body adminDriveShowFileRequest: AdminDriveShowFileRequest,
+    ): Response<AdminDriveShowFile200Response>
 
     /**
      * admin/emoji/add
@@ -366,7 +402,9 @@ interface AdminApi {
      * @param adminEmojiAddRequest * @return [Unit]
      */
     @POST("admin/emoji/add")
-    suspend fun adminEmojiAdd(@Body adminEmojiAddRequest: AdminEmojiAddRequest): Response<Unit>
+    suspend fun adminEmojiAdd(
+        @Body adminEmojiAddRequest: AdminEmojiAddRequest,
+    ): Response<Unit>
 
     /**
      * admin/emoji/add-aliases-bulk
@@ -382,7 +420,9 @@ interface AdminApi {
      * @param adminEmojiAddAliasesBulkRequest * @return [Unit]
      */
     @POST("admin/emoji/add-aliases-bulk")
-    suspend fun adminEmojiAddAliasesBulk(@Body adminEmojiAddAliasesBulkRequest: AdminEmojiAddAliasesBulkRequest): Response<Unit>
+    suspend fun adminEmojiAddAliasesBulk(
+        @Body adminEmojiAddAliasesBulkRequest: AdminEmojiAddAliasesBulkRequest,
+    ): Response<Unit>
 
     /**
      * admin/emoji/copy
@@ -398,7 +438,9 @@ interface AdminApi {
      * @param adminEmojiCopyRequest * @return [AdminEmojiCopy200Response]
      */
     @POST("admin/emoji/copy")
-    suspend fun adminEmojiCopy(@Body adminEmojiCopyRequest: AdminEmojiCopyRequest): Response<AdminEmojiCopy200Response>
+    suspend fun adminEmojiCopy(
+        @Body adminEmojiCopyRequest: AdminEmojiCopyRequest,
+    ): Response<AdminEmojiCopy200Response>
 
     /**
      * admin/emoji/delete
@@ -414,7 +456,9 @@ interface AdminApi {
      * @param adminAdDeleteRequest * @return [Unit]
      */
     @POST("admin/emoji/delete")
-    suspend fun adminEmojiDelete(@Body adminAdDeleteRequest: AdminAdDeleteRequest): Response<Unit>
+    suspend fun adminEmojiDelete(
+        @Body adminAdDeleteRequest: AdminAdDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/emoji/delete-bulk
@@ -430,7 +474,9 @@ interface AdminApi {
      * @param adminEmojiDeleteBulkRequest * @return [Unit]
      */
     @POST("admin/emoji/delete-bulk")
-    suspend fun adminEmojiDeleteBulk(@Body adminEmojiDeleteBulkRequest: AdminEmojiDeleteBulkRequest): Response<Unit>
+    suspend fun adminEmojiDeleteBulk(
+        @Body adminEmojiDeleteBulkRequest: AdminEmojiDeleteBulkRequest,
+    ): Response<Unit>
 
     /**
      * admin/emoji/list
@@ -446,7 +492,9 @@ interface AdminApi {
      * @param adminEmojiListRequest * @return [kotlin.collections.List<AdminEmojiList200ResponseInner>]
      */
     @POST("admin/emoji/list")
-    suspend fun adminEmojiList(@Body adminEmojiListRequest: AdminEmojiListRequest): Response<kotlin.collections.List<AdminEmojiList200ResponseInner>>
+    suspend fun adminEmojiList(
+        @Body adminEmojiListRequest: AdminEmojiListRequest,
+    ): Response<kotlin.collections.List<AdminEmojiList200ResponseInner>>
 
     /**
      * admin/emoji/list-remote
@@ -462,7 +510,9 @@ interface AdminApi {
      * @param adminEmojiListRemoteRequest * @return [kotlin.collections.List<AdminEmojiListRemote200ResponseInner>]
      */
     @POST("admin/emoji/list-remote")
-    suspend fun adminEmojiListRemote(@Body adminEmojiListRemoteRequest: AdminEmojiListRemoteRequest): Response<kotlin.collections.List<AdminEmojiListRemote200ResponseInner>>
+    suspend fun adminEmojiListRemote(
+        @Body adminEmojiListRemoteRequest: AdminEmojiListRemoteRequest,
+    ): Response<kotlin.collections.List<AdminEmojiListRemote200ResponseInner>>
 
     /**
      * admin/emoji/remove-aliases-bulk
@@ -478,7 +528,9 @@ interface AdminApi {
      * @param adminEmojiAddAliasesBulkRequest * @return [Unit]
      */
     @POST("admin/emoji/remove-aliases-bulk")
-    suspend fun adminEmojiRemoveAliasesBulk(@Body adminEmojiAddAliasesBulkRequest: AdminEmojiAddAliasesBulkRequest): Response<Unit>
+    suspend fun adminEmojiRemoveAliasesBulk(
+        @Body adminEmojiAddAliasesBulkRequest: AdminEmojiAddAliasesBulkRequest,
+    ): Response<Unit>
 
     /**
      * admin/emoji/set-aliases-bulk
@@ -494,7 +546,9 @@ interface AdminApi {
      * @param adminEmojiAddAliasesBulkRequest * @return [Unit]
      */
     @POST("admin/emoji/set-aliases-bulk")
-    suspend fun adminEmojiSetAliasesBulk(@Body adminEmojiAddAliasesBulkRequest: AdminEmojiAddAliasesBulkRequest): Response<Unit>
+    suspend fun adminEmojiSetAliasesBulk(
+        @Body adminEmojiAddAliasesBulkRequest: AdminEmojiAddAliasesBulkRequest,
+    ): Response<Unit>
 
     /**
      * admin/emoji/set-category-bulk
@@ -510,7 +564,9 @@ interface AdminApi {
      * @param adminEmojiSetCategoryBulkRequest * @return [Unit]
      */
     @POST("admin/emoji/set-category-bulk")
-    suspend fun adminEmojiSetCategoryBulk(@Body adminEmojiSetCategoryBulkRequest: AdminEmojiSetCategoryBulkRequest): Response<Unit>
+    suspend fun adminEmojiSetCategoryBulk(
+        @Body adminEmojiSetCategoryBulkRequest: AdminEmojiSetCategoryBulkRequest,
+    ): Response<Unit>
 
     /**
      * admin/emoji/set-license-bulk
@@ -526,7 +582,9 @@ interface AdminApi {
      * @param adminEmojiSetLicenseBulkRequest * @return [Unit]
      */
     @POST("admin/emoji/set-license-bulk")
-    suspend fun adminEmojiSetLicenseBulk(@Body adminEmojiSetLicenseBulkRequest: AdminEmojiSetLicenseBulkRequest): Response<Unit>
+    suspend fun adminEmojiSetLicenseBulk(
+        @Body adminEmojiSetLicenseBulkRequest: AdminEmojiSetLicenseBulkRequest,
+    ): Response<Unit>
 
     /**
      * admin/emoji/update
@@ -542,7 +600,9 @@ interface AdminApi {
      * @param adminEmojiUpdateRequest * @return [Unit]
      */
     @POST("admin/emoji/update")
-    suspend fun adminEmojiUpdate(@Body adminEmojiUpdateRequest: AdminEmojiUpdateRequest): Response<Unit>
+    suspend fun adminEmojiUpdate(
+        @Body adminEmojiUpdateRequest: AdminEmojiUpdateRequest,
+    ): Response<Unit>
 
     /**
      * admin/federation/delete-all-files
@@ -558,7 +618,9 @@ interface AdminApi {
      * @param adminFederationDeleteAllFilesRequest * @return [Unit]
      */
     @POST("admin/federation/delete-all-files")
-    suspend fun adminFederationDeleteAllFiles(@Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest): Response<Unit>
+    suspend fun adminFederationDeleteAllFiles(
+        @Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest,
+    ): Response<Unit>
 
     /**
      * admin/federation/refresh-remote-instance-metadata
@@ -574,7 +636,9 @@ interface AdminApi {
      * @param adminFederationDeleteAllFilesRequest * @return [Unit]
      */
     @POST("admin/federation/refresh-remote-instance-metadata")
-    suspend fun adminFederationRefreshRemoteInstanceMetadata(@Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest): Response<Unit>
+    suspend fun adminFederationRefreshRemoteInstanceMetadata(
+        @Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest,
+    ): Response<Unit>
 
     /**
      * admin/federation/remove-all-following
@@ -590,7 +654,9 @@ interface AdminApi {
      * @param adminFederationDeleteAllFilesRequest * @return [Unit]
      */
     @POST("admin/federation/remove-all-following")
-    suspend fun adminFederationRemoveAllFollowing(@Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest): Response<Unit>
+    suspend fun adminFederationRemoveAllFollowing(
+        @Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest,
+    ): Response<Unit>
 
     /**
      * admin/federation/update-instance
@@ -606,7 +672,9 @@ interface AdminApi {
      * @param adminFederationUpdateInstanceRequest * @return [Unit]
      */
     @POST("admin/federation/update-instance")
-    suspend fun adminFederationUpdateInstance(@Body adminFederationUpdateInstanceRequest: AdminFederationUpdateInstanceRequest): Response<Unit>
+    suspend fun adminFederationUpdateInstance(
+        @Body adminFederationUpdateInstanceRequest: AdminFederationUpdateInstanceRequest,
+    ): Response<Unit>
 
     /**
      * admin/get-index-stats
@@ -622,7 +690,9 @@ interface AdminApi {
      * @param body * @return [Unit]
      */
     @POST("admin/get-index-stats")
-    suspend fun adminGetIndexStats(@Body body: kotlin.Any): Response<Unit>
+    suspend fun adminGetIndexStats(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * admin/get-table-stats
@@ -638,7 +708,9 @@ interface AdminApi {
      * @param body * @return [kotlin.Any]
      */
     @POST("admin/get-table-stats")
-    suspend fun adminGetTableStats(@Body body: kotlin.Any): Response<kotlin.Any>
+    suspend fun adminGetTableStats(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.Any>
 
     /**
      * admin/get-user-ips
@@ -654,7 +726,9 @@ interface AdminApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("admin/get-user-ips")
-    suspend fun adminGetUserIps(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun adminGetUserIps(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/invite/create
@@ -670,7 +744,9 @@ interface AdminApi {
      * @param adminInviteCreateRequest * @return [kotlin.collections.List<AdminInviteCreate200ResponseInner>]
      */
     @POST("admin/invite/create")
-    suspend fun adminInviteCreate(@Body adminInviteCreateRequest: AdminInviteCreateRequest): Response<kotlin.collections.List<AdminInviteCreate200ResponseInner>>
+    suspend fun adminInviteCreate(
+        @Body adminInviteCreateRequest: AdminInviteCreateRequest,
+    ): Response<kotlin.collections.List<AdminInviteCreate200ResponseInner>>
 
     /**
      * admin/invite/list
@@ -686,7 +762,9 @@ interface AdminApi {
      * @param adminInviteListRequest * @return [kotlin.collections.List<kotlin.Any>]
      */
     @POST("admin/invite/list")
-    suspend fun adminInviteList(@Body adminInviteListRequest: AdminInviteListRequest): Response<kotlin.collections.List<kotlin.Any>>
+    suspend fun adminInviteList(
+        @Body adminInviteListRequest: AdminInviteListRequest,
+    ): Response<kotlin.collections.List<kotlin.Any>>
 
     /**
      * admin/promo/create
@@ -702,7 +780,9 @@ interface AdminApi {
      * @param adminPromoCreateRequest * @return [Unit]
      */
     @POST("admin/promo/create")
-    suspend fun adminPromoCreate(@Body adminPromoCreateRequest: AdminPromoCreateRequest): Response<Unit>
+    suspend fun adminPromoCreate(
+        @Body adminPromoCreateRequest: AdminPromoCreateRequest,
+    ): Response<Unit>
 
     /**
      * admin/queue/clear
@@ -718,7 +798,9 @@ interface AdminApi {
      * @param body * @return [Unit]
      */
     @POST("admin/queue/clear")
-    suspend fun adminQueueClear(@Body body: kotlin.Any): Response<Unit>
+    suspend fun adminQueueClear(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * admin/queue/deliver-delayed
@@ -734,7 +816,9 @@ interface AdminApi {
      * @param body * @return [kotlin.collections.List<kotlin.collections.List<AdminQueueDeliverDelayed200ResponseInnerInner>>]
      */
     @POST("admin/queue/deliver-delayed")
-    suspend fun adminQueueDeliverDelayed(@Body body: kotlin.Any): Response<kotlin.collections.List<kotlin.collections.List<AdminQueueDeliverDelayed200ResponseInnerInner>>>
+    suspend fun adminQueueDeliverDelayed(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<kotlin.collections.List<AdminQueueDeliverDelayed200ResponseInnerInner>>>
 
     /**
      * admin/queue/inbox-delayed
@@ -750,7 +834,9 @@ interface AdminApi {
      * @param body * @return [kotlin.collections.List<kotlin.collections.List<AdminQueueDeliverDelayed200ResponseInnerInner>>]
      */
     @POST("admin/queue/inbox-delayed")
-    suspend fun adminQueueInboxDelayed(@Body body: kotlin.Any): Response<kotlin.collections.List<kotlin.collections.List<AdminQueueDeliverDelayed200ResponseInnerInner>>>
+    suspend fun adminQueueInboxDelayed(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<kotlin.collections.List<AdminQueueDeliverDelayed200ResponseInnerInner>>>
 
     /**
      * admin/queue/promote
@@ -766,7 +852,9 @@ interface AdminApi {
      * @param adminQueuePromoteRequest * @return [Unit]
      */
     @POST("admin/queue/promote")
-    suspend fun adminQueuePromote(@Body adminQueuePromoteRequest: AdminQueuePromoteRequest): Response<Unit>
+    suspend fun adminQueuePromote(
+        @Body adminQueuePromoteRequest: AdminQueuePromoteRequest,
+    ): Response<Unit>
 
     /**
      * admin/queue/stats
@@ -782,7 +870,9 @@ interface AdminApi {
      * @param body * @return [AdminQueueStats200Response]
      */
     @POST("admin/queue/stats")
-    suspend fun adminQueueStats(@Body body: kotlin.Any): Response<AdminQueueStats200Response>
+    suspend fun adminQueueStats(
+        @Body body: kotlin.Any,
+    ): Response<AdminQueueStats200Response>
 
     /**
      * admin/relays/add
@@ -798,7 +888,9 @@ interface AdminApi {
      * @param adminRelaysAddRequest * @return [AdminRelaysAdd200Response]
      */
     @POST("admin/relays/add")
-    suspend fun adminRelaysAdd(@Body adminRelaysAddRequest: AdminRelaysAddRequest): Response<AdminRelaysAdd200Response>
+    suspend fun adminRelaysAdd(
+        @Body adminRelaysAddRequest: AdminRelaysAddRequest,
+    ): Response<AdminRelaysAdd200Response>
 
     /**
      * admin/relays/list
@@ -814,7 +906,9 @@ interface AdminApi {
      * @param body * @return [kotlin.collections.List<AdminRelaysAdd200Response>]
      */
     @POST("admin/relays/list")
-    suspend fun adminRelaysList(@Body body: kotlin.Any): Response<kotlin.collections.List<AdminRelaysAdd200Response>>
+    suspend fun adminRelaysList(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<AdminRelaysAdd200Response>>
 
     /**
      * admin/relays/remove
@@ -830,7 +924,9 @@ interface AdminApi {
      * @param adminRelaysAddRequest * @return [Unit]
      */
     @POST("admin/relays/remove")
-    suspend fun adminRelaysRemove(@Body adminRelaysAddRequest: AdminRelaysAddRequest): Response<Unit>
+    suspend fun adminRelaysRemove(
+        @Body adminRelaysAddRequest: AdminRelaysAddRequest,
+    ): Response<Unit>
 
     /**
      * admin/reset-password
@@ -846,7 +942,9 @@ interface AdminApi {
      * @param adminAccountsDeleteRequest * @return [AdminResetPassword200Response]
      */
     @POST("admin/reset-password")
-    suspend fun adminResetPassword(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<AdminResetPassword200Response>
+    suspend fun adminResetPassword(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<AdminResetPassword200Response>
 
     /**
      * admin/resolve-abuse-user-report
@@ -862,7 +960,9 @@ interface AdminApi {
      * @param adminResolveAbuseUserReportRequest * @return [Unit]
      */
     @POST("admin/resolve-abuse-user-report")
-    suspend fun adminResolveAbuseUserReport(@Body adminResolveAbuseUserReportRequest: AdminResolveAbuseUserReportRequest): Response<Unit>
+    suspend fun adminResolveAbuseUserReport(
+        @Body adminResolveAbuseUserReportRequest: AdminResolveAbuseUserReportRequest,
+    ): Response<Unit>
 
     /**
      * admin/roles/assign
@@ -878,7 +978,9 @@ interface AdminApi {
      * @param adminRolesAssignRequest * @return [Unit]
      */
     @POST("admin/roles/assign")
-    suspend fun adminRolesAssign(@Body adminRolesAssignRequest: AdminRolesAssignRequest): Response<Unit>
+    suspend fun adminRolesAssign(
+        @Body adminRolesAssignRequest: AdminRolesAssignRequest,
+    ): Response<Unit>
 
     /**
      * admin/roles/create
@@ -894,7 +996,9 @@ interface AdminApi {
      * @param adminRolesCreateRequest * @return [Unit]
      */
     @POST("admin/roles/create")
-    suspend fun adminRolesCreate(@Body adminRolesCreateRequest: AdminRolesCreateRequest): Response<Unit>
+    suspend fun adminRolesCreate(
+        @Body adminRolesCreateRequest: AdminRolesCreateRequest,
+    ): Response<Unit>
 
     /**
      * admin/roles/delete
@@ -910,7 +1014,9 @@ interface AdminApi {
      * @param adminRolesDeleteRequest * @return [Unit]
      */
     @POST("admin/roles/delete")
-    suspend fun adminRolesDelete(@Body adminRolesDeleteRequest: AdminRolesDeleteRequest): Response<Unit>
+    suspend fun adminRolesDelete(
+        @Body adminRolesDeleteRequest: AdminRolesDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/roles/list
@@ -926,7 +1032,9 @@ interface AdminApi {
      * @param body * @return [Unit]
      */
     @POST("admin/roles/list")
-    suspend fun adminRolesList(@Body body: kotlin.Any): Response<Unit>
+    suspend fun adminRolesList(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * admin/roles/show
@@ -942,7 +1050,9 @@ interface AdminApi {
      * @param adminRolesDeleteRequest * @return [Unit]
      */
     @POST("admin/roles/show")
-    suspend fun adminRolesShow(@Body adminRolesDeleteRequest: AdminRolesDeleteRequest): Response<Unit>
+    suspend fun adminRolesShow(
+        @Body adminRolesDeleteRequest: AdminRolesDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/roles/unassign
@@ -958,7 +1068,9 @@ interface AdminApi {
      * @param adminRolesUnassignRequest * @return [Unit]
      */
     @POST("admin/roles/unassign")
-    suspend fun adminRolesUnassign(@Body adminRolesUnassignRequest: AdminRolesUnassignRequest): Response<Unit>
+    suspend fun adminRolesUnassign(
+        @Body adminRolesUnassignRequest: AdminRolesUnassignRequest,
+    ): Response<Unit>
 
     /**
      * admin/roles/update
@@ -974,7 +1086,9 @@ interface AdminApi {
      * @param adminRolesUpdateRequest * @return [Unit]
      */
     @POST("admin/roles/update")
-    suspend fun adminRolesUpdate(@Body adminRolesUpdateRequest: AdminRolesUpdateRequest): Response<Unit>
+    suspend fun adminRolesUpdate(
+        @Body adminRolesUpdateRequest: AdminRolesUpdateRequest,
+    ): Response<Unit>
 
     /**
      * admin/roles/update-default-policies
@@ -990,7 +1104,9 @@ interface AdminApi {
      * @param adminRolesUpdateDefaultPoliciesRequest * @return [Unit]
      */
     @POST("admin/roles/update-default-policies")
-    suspend fun adminRolesUpdateDefaultPolicies(@Body adminRolesUpdateDefaultPoliciesRequest: AdminRolesUpdateDefaultPoliciesRequest): Response<Unit>
+    suspend fun adminRolesUpdateDefaultPolicies(
+        @Body adminRolesUpdateDefaultPoliciesRequest: AdminRolesUpdateDefaultPoliciesRequest,
+    ): Response<Unit>
 
     /**
      * admin/roles/users
@@ -1006,7 +1122,9 @@ interface AdminApi {
      * @param adminRolesUsersRequest * @return [Unit]
      */
     @POST("admin/roles/users")
-    suspend fun adminRolesUsers(@Body adminRolesUsersRequest: AdminRolesUsersRequest): Response<Unit>
+    suspend fun adminRolesUsers(
+        @Body adminRolesUsersRequest: AdminRolesUsersRequest,
+    ): Response<Unit>
 
     /**
      * admin/send-email
@@ -1022,7 +1140,9 @@ interface AdminApi {
      * @param adminSendEmailRequest * @return [Unit]
      */
     @POST("admin/send-email")
-    suspend fun adminSendEmail(@Body adminSendEmailRequest: AdminSendEmailRequest): Response<Unit>
+    suspend fun adminSendEmail(
+        @Body adminSendEmailRequest: AdminSendEmailRequest,
+    ): Response<Unit>
 
     /**
      * admin/server-info
@@ -1038,7 +1158,9 @@ interface AdminApi {
      * @param body * @return [AdminServerInfo200Response]
      */
     @POST("admin/server-info")
-    suspend fun adminServerInfo(@Body body: kotlin.Any): Response<AdminServerInfo200Response>
+    suspend fun adminServerInfo(
+        @Body body: kotlin.Any,
+    ): Response<AdminServerInfo200Response>
 
     /**
      * admin/show-moderation-logs
@@ -1054,7 +1176,9 @@ interface AdminApi {
      * @param adminAdListRequest * @return [kotlin.collections.List<AdminShowModerationLogs200ResponseInner>]
      */
     @POST("admin/show-moderation-logs")
-    suspend fun adminShowModerationLogs(@Body adminAdListRequest: AdminAdListRequest): Response<kotlin.collections.List<AdminShowModerationLogs200ResponseInner>>
+    suspend fun adminShowModerationLogs(
+        @Body adminAdListRequest: AdminAdListRequest,
+    ): Response<kotlin.collections.List<AdminShowModerationLogs200ResponseInner>>
 
     /**
      * admin/show-user
@@ -1070,7 +1194,9 @@ interface AdminApi {
      * @param adminAccountsDeleteRequest * @return [kotlin.Any]
      */
     @POST("admin/show-user")
-    suspend fun adminShowUser(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<kotlin.Any>
+    suspend fun adminShowUser(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<kotlin.Any>
 
     /**
      * admin/show-users
@@ -1086,7 +1212,9 @@ interface AdminApi {
      * @param adminShowUsersRequest * @return [kotlin.collections.List<UserDetailed>]
      */
     @POST("admin/show-users")
-    suspend fun adminShowUsers(@Body adminShowUsersRequest: AdminShowUsersRequest): Response<kotlin.collections.List<UserDetailed>>
+    suspend fun adminShowUsers(
+        @Body adminShowUsersRequest: AdminShowUsersRequest,
+    ): Response<kotlin.collections.List<UserDetailed>>
 
     /**
      * admin/suspend-user
@@ -1102,7 +1230,9 @@ interface AdminApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("admin/suspend-user")
-    suspend fun adminSuspendUser(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun adminSuspendUser(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/unsuspend-user
@@ -1118,7 +1248,9 @@ interface AdminApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("admin/unsuspend-user")
-    suspend fun adminUnsuspendUser(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun adminUnsuspendUser(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/update-meta
@@ -1134,7 +1266,9 @@ interface AdminApi {
      * @param adminUpdateMetaRequest * @return [Unit]
      */
     @POST("admin/update-meta")
-    suspend fun adminUpdateMeta(@Body adminUpdateMetaRequest: AdminUpdateMetaRequest): Response<Unit>
+    suspend fun adminUpdateMeta(
+        @Body adminUpdateMetaRequest: AdminUpdateMetaRequest,
+    ): Response<Unit>
 
     /**
      * admin/update-user-note
@@ -1150,5 +1284,7 @@ interface AdminApi {
      * @param adminUpdateUserNoteRequest * @return [Unit]
      */
     @POST("admin/update-user-note")
-    suspend fun adminUpdateUserNote(@Body adminUpdateUserNoteRequest: AdminUpdateUserNoteRequest): Response<Unit>
+    suspend fun adminUpdateUserNote(
+        @Body adminUpdateUserNoteRequest: AdminUpdateUserNoteRequest,
+    ): Response<Unit>
 }

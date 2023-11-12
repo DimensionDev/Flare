@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param inviteId */
 @Serializable
 data class InviteDeleteRequest(
-
     @SerialName(value = "inviteId") val inviteId: kotlin.String,
-
 )

@@ -24,24 +24,15 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class AdminShowUsersRequest(
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
-
     @SerialName(value = "sort") val sort: AdminShowUsersRequest.Sort? = null,
-
     @SerialName(value = "state") val state: AdminShowUsersRequest.State? = State.All,
-
     @SerialName(value = "origin") val origin: AdminShowUsersRequest.Origin? = Origin.Combined,
-
     @SerialName(value = "username") val username: kotlin.String? = null,
-
-    /* The local host is represented with `null`. */
+    // The local host is represented with `null`.
     @SerialName(value = "hostname") val hostname: kotlin.String? = null,
-
 ) {
-
     /**
      * *
      * Values: PlusFollower,MinusFollower,PlusCreatedAt,MinusCreatedAt,PlusUpdatedAt,MinusUpdatedAt,PlusLastActiveDate,MinusLastActiveDate

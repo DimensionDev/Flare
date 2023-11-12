@@ -9,7 +9,7 @@ plugins {
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.skie)
     alias(libs.plugins.compose.jb)
-//    alias(libs.plugins.ktlint)
+    alias(libs.plugins.ktlint)
 }
 
 kotlin {
@@ -156,18 +156,12 @@ tasks.withType<Jar> {
     }
 }
 
-//ksp {
-//    arg("moduleName", project.name)
-//}
-
-//ktlint {
-//    version.set(libs.versions.ktlint)
-//    filter {
-//        exclude { element ->
-//            element.file.path.contains("generated/")
-//        }
-//    }
-//}
+ktlint {
+    version.set(libs.versions.ktlint)
+    filter {
+        exclude { element -> element.file.path.contains("build", ignoreCase = true) }
+    }
+}
 
 skie {
     analytics {

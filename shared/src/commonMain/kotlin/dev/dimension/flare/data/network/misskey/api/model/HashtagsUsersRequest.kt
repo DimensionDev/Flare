@@ -23,19 +23,12 @@ import kotlinx.serialization.Serializable
  * @param tag * @param sort * @param limit * @param state * @param origin */
 @Serializable
 data class HashtagsUsersRequest(
-
     @SerialName(value = "tag") val tag: kotlin.String,
-
     @SerialName(value = "sort") val sort: HashtagsUsersRequest.Sort,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "state") val state: HashtagsUsersRequest.State? = State.All,
-
     @SerialName(value = "origin") val origin: HashtagsUsersRequest.Origin? = Origin.Local,
-
 ) {
-
     /**
      * *
      * Values: PlusFollower,MinusFollower,PlusCreatedAt,MinusCreatedAt,PlusUpdatedAt,MinusUpdatedAt

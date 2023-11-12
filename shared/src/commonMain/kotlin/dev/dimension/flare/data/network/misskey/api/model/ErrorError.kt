@@ -27,14 +27,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ErrorError(
-
-    /* An error code. Unique within the endpoint. */
+    // An error code. Unique within the endpoint.
     @SerialName(value = "code") val code: kotlin.String,
-
-    /* An error message. */
+    // An error message.
     @SerialName(value = "message") val message: kotlin.String,
-
-    /* An error ID. This ID is static. */
+    // An error ID. This ID is static.
     @SerialName(value = "id") val id: kotlin.String,
-
 )

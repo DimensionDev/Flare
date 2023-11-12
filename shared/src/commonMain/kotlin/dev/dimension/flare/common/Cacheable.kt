@@ -26,27 +26,29 @@ class CacheData<T> internal constructor(
     private val cacheFlow by lazy {
         cacheSource.invoke()
     }
-    val refreshState: Flow<LoadState> = refreshFlow
-        .transform {
-            emit(LoadState.Loading)
-            emit(
-                try {
-                    fetchSource.invoke()
-                    LoadState.Success
-                } catch (e: Throwable) {
-                    LoadState.Error(e)
-                },
-            )
-        }
-        .catch { emit(LoadState.Error(it)) }
+    val refreshState: Flow<LoadState> =
+        refreshFlow
+            .transform {
+                emit(LoadState.Loading)
+                emit(
+                    try {
+                        fetchSource.invoke()
+                        LoadState.Success
+                    } catch (e: Throwable) {
+                        LoadState.Error(e)
+                    },
+                )
+            }
+            .catch { emit(LoadState.Error(it)) }
 
-    val data: Flow<CacheState<T>> = cacheFlow
-        .map<T, CacheState<T>> {
-            CacheState.Success(it)
-        }
-        .onStart {
-            emit(CacheState.Empty())
-        }
+    val data: Flow<CacheState<T>> =
+        cacheFlow
+            .map<T, CacheState<T>> {
+                CacheState.Success(it)
+            }
+            .onStart {
+                emit(CacheState.Empty())
+            }
 
     fun refresh() {
         refreshFlow.value++
@@ -55,21 +57,24 @@ class CacheData<T> internal constructor(
 
 sealed class CacheState<T> {
     class Empty<T> : CacheState<T>()
+
     data class Success<T>(val data: T) : CacheState<T>()
 }
 
 sealed interface LoadState {
     data object Loading : LoadState
+
     data object Success : LoadState
+
     data class Error(val error: Throwable) : LoadState
 }
 
-
 @Composable
 fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
-    val state = remember(this) {
-        CacheableState(this)
-    }
+    val state =
+        remember(this) {
+            CacheableState(this)
+        }
 
     LaunchedEffect(state) {
         state.collectData()
@@ -101,10 +106,11 @@ class CacheableState<T>(
 
     internal suspend fun collectData() {
         cacheData.data.collect {
-            data = when (it) {
-                is CacheState.Empty -> null
-                is CacheState.Success -> it.data
-            }
+            data =
+                when (it) {
+                    is CacheState.Empty -> null
+                    is CacheState.Success -> it.data
+                }
         }
     }
 }

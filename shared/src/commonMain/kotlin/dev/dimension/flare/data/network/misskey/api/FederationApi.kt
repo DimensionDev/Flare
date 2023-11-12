@@ -31,7 +31,9 @@ interface FederationApi {
      * @param apGetRequest * @return [kotlin.Any]
      */
     @POST("ap/get")
-    suspend fun apGet(@Body apGetRequest: ApGetRequest): Response<kotlin.Any>
+    suspend fun apGet(
+        @Body apGetRequest: ApGetRequest,
+    ): Response<kotlin.Any>
 
     /**
      * ap/show
@@ -48,7 +50,9 @@ interface FederationApi {
      * @param apGetRequest * @return [ApShow200Response]
      */
     @POST("ap/show")
-    suspend fun apShow(@Body apGetRequest: ApGetRequest): Response<ApShow200Response>
+    suspend fun apShow(
+        @Body apGetRequest: ApGetRequest,
+    ): Response<ApShow200Response>
 
     /**
      * federation/followers
@@ -64,7 +68,9 @@ interface FederationApi {
      * @param federationFollowersRequest * @return [kotlin.collections.List<Following>]
      */
     @POST("federation/followers")
-    suspend fun federationFollowers(@Body federationFollowersRequest: FederationFollowersRequest): Response<kotlin.collections.List<Following>>
+    suspend fun federationFollowers(
+        @Body federationFollowersRequest: FederationFollowersRequest,
+    ): Response<kotlin.collections.List<Following>>
 
     /**
      * federation/following
@@ -80,7 +86,9 @@ interface FederationApi {
      * @param federationFollowersRequest * @return [kotlin.collections.List<Following>]
      */
     @POST("federation/following")
-    suspend fun federationFollowing(@Body federationFollowersRequest: FederationFollowersRequest): Response<kotlin.collections.List<Following>>
+    suspend fun federationFollowing(
+        @Body federationFollowersRequest: FederationFollowersRequest,
+    ): Response<kotlin.collections.List<Following>>
 
     /**
      * federation/instances
@@ -96,7 +104,9 @@ interface FederationApi {
      * @param federationInstancesRequest * @return [kotlin.collections.List<FederationInstance>]
      */
     @POST("federation/instances")
-    suspend fun federationInstances(@Body federationInstancesRequest: FederationInstancesRequest): Response<kotlin.collections.List<FederationInstance>>
+    suspend fun federationInstances(
+        @Body federationInstancesRequest: FederationInstancesRequest,
+    ): Response<kotlin.collections.List<FederationInstance>>
 
     /**
      * federation/show-instance
@@ -112,7 +122,9 @@ interface FederationApi {
      * @param adminFederationDeleteAllFilesRequest * @return [FederationShowInstance200Response]
      */
     @POST("federation/show-instance")
-    suspend fun federationShowInstance(@Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest): Response<FederationShowInstance200Response>
+    suspend fun federationShowInstance(
+        @Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest,
+    ): Response<FederationShowInstance200Response>
 
     /**
      * federation/stats
@@ -128,7 +140,9 @@ interface FederationApi {
      * @param federationStatsRequest * @return [Unit]
      */
     @POST("federation/stats")
-    suspend fun federationStats(@Body federationStatsRequest: FederationStatsRequest): Response<Unit>
+    suspend fun federationStats(
+        @Body federationStatsRequest: FederationStatsRequest,
+    ): Response<Unit>
 
     /**
      * federation/update-remote-user
@@ -144,7 +158,9 @@ interface FederationApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("federation/update-remote-user")
-    suspend fun federationUpdateRemoteUser(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun federationUpdateRemoteUser(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * federation/users
@@ -160,5 +176,7 @@ interface FederationApi {
      * @param federationFollowersRequest * @return [kotlin.collections.List<UserDetailedNotMe>]
      */
     @POST("federation/users")
-    suspend fun federationUsers(@Body federationFollowersRequest: FederationFollowersRequest): Response<kotlin.collections.List<UserDetailedNotMe>>
+    suspend fun federationUsers(
+        @Body federationFollowersRequest: FederationFollowersRequest,
+    ): Response<kotlin.collections.List<UserDetailedNotMe>>
 }

@@ -22,7 +22,9 @@ interface AppApi {
      * @param appCreateRequest * @return [App]
      */
     @POST("app/create")
-    suspend fun appCreate(@Body appCreateRequest: AppCreateRequest): Response<App>
+    suspend fun appCreate(
+        @Body appCreateRequest: AppCreateRequest,
+    ): Response<App>
 
     /**
      * app/show
@@ -38,5 +40,7 @@ interface AppApi {
      * @param appShowRequest * @return [App]
      */
     @POST("app/show")
-    suspend fun appShow(@Body appShowRequest: AppShowRequest): Response<App>
+    suspend fun appShow(
+        @Body appShowRequest: AppShowRequest,
+    ): Response<App>
 }

@@ -23,11 +23,7 @@ import kotlinx.serialization.Serializable
  * @param deliverFailed * @param deliverSucceeded * @param inboxReceived */
 @Serializable
 data class ChartsApRequest200Response(
-
     @SerialName(value = "deliverFailed") val deliverFailed: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "deliverSucceeded") val deliverSucceeded: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "inboxReceived") val inboxReceived: kotlin.collections.List<kotlin.Double>,
-
 )

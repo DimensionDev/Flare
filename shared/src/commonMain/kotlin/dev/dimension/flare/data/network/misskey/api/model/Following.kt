@@ -23,17 +23,10 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param followeeId * @param followerId * @param followee * @param follower */
 @Serializable
 data class Following(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "followeeId") val followeeId: kotlin.String,
-
     @SerialName(value = "followerId") val followerId: kotlin.String,
-
     @SerialName(value = "followee") val followee: UserDetailed? = null,
-
     @SerialName(value = "follower") val follower: UserDetailed? = null,
-
 )

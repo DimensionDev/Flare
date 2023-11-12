@@ -23,67 +23,37 @@ import kotlinx.serialization.Serializable
  * @param name * @param description * @param location * @param birthday * @param lang * @param avatarId * @param bannerId * @param fields * @param isLocked * @param isExplorable * @param hideOnlineStatus * @param publicReactions * @param carefulBot * @param autoAcceptFollowed * @param noCrawle * @param preventAiLearning * @param isBot * @param isCat * @param injectFeaturedNote * @param receiveAnnouncementEmail * @param alwaysMarkNsfw * @param autoSensitive * @param ffVisibility * @param pinnedPageId * @param mutedWords * @param mutedInstances * @param mutingNotificationTypes * @param emailNotificationTypes * @param alsoKnownAs */
 @Serializable
 data class IUpdateRequest(
-
     @SerialName(value = "name") val name: kotlin.String? = null,
-
     @SerialName(value = "description") val description: kotlin.String? = null,
-
     @SerialName(value = "location") val location: kotlin.String? = null,
-
     @SerialName(value = "birthday") val birthday: kotlin.String? = null,
-
     @SerialName(value = "lang") val lang: IUpdateRequest.Lang? = null,
-
     @SerialName(value = "avatarId") val avatarId: kotlin.String? = null,
-
     @SerialName(value = "bannerId") val bannerId: kotlin.String? = null,
-
     @SerialName(value = "fields") val fields: kotlin.collections.List<IUpdateRequestFieldsInner>? = null,
-
     @SerialName(value = "isLocked") val isLocked: kotlin.Boolean? = null,
-
     @SerialName(value = "isExplorable") val isExplorable: kotlin.Boolean? = null,
-
     @SerialName(value = "hideOnlineStatus") val hideOnlineStatus: kotlin.Boolean? = null,
-
     @SerialName(value = "publicReactions") val publicReactions: kotlin.Boolean? = null,
-
     @SerialName(value = "carefulBot") val carefulBot: kotlin.Boolean? = null,
-
     @SerialName(value = "autoAcceptFollowed") val autoAcceptFollowed: kotlin.Boolean? = null,
-
     @SerialName(value = "noCrawle") val noCrawle: kotlin.Boolean? = null,
-
     @SerialName(value = "preventAiLearning") val preventAiLearning: kotlin.Boolean? = null,
-
     @SerialName(value = "isBot") val isBot: kotlin.Boolean? = null,
-
     @SerialName(value = "isCat") val isCat: kotlin.Boolean? = null,
-
     @SerialName(value = "injectFeaturedNote") val injectFeaturedNote: kotlin.Boolean? = null,
-
     @SerialName(value = "receiveAnnouncementEmail") val receiveAnnouncementEmail: kotlin.Boolean? = null,
-
     @SerialName(value = "alwaysMarkNsfw") val alwaysMarkNsfw: kotlin.Boolean? = null,
-
     @SerialName(value = "autoSensitive") val autoSensitive: kotlin.Boolean? = null,
-
     @SerialName(value = "ffVisibility") val ffVisibility: IUpdateRequest.FfVisibility? = null,
-
     @SerialName(value = "pinnedPageId") val pinnedPageId: kotlin.String? = null,
-
     @SerialName(value = "mutedWords") val mutedWords: kotlin.collections.List<kotlin.String>? = null,
-
     @SerialName(value = "mutedInstances") val mutedInstances: kotlin.collections.List<kotlin.String>? = null,
-
-    @SerialName(value = "mutingNotificationTypes") val mutingNotificationTypes: kotlin.collections.List<IUpdateRequest.MutingNotificationTypes>? = null,
-
+    @SerialName(value = "mutingNotificationTypes") val mutingNotificationTypes:
+        kotlin.collections.List<IUpdateRequest.MutingNotificationTypes>? = null,
     @SerialName(value = "emailNotificationTypes") val emailNotificationTypes: kotlin.collections.List<kotlin.String>? = null,
-
     @SerialName(value = "alsoKnownAs") val alsoKnownAs: kotlin.collections.Set<kotlin.String>? = null,
-
 ) {
-
     /**
      * *
      * Values: Null,Ach,Ady,Af,AfMinusNA,AfMinusZA,Ak,Ar,ArMinusAR,ArMinusMA,ArMinusSA,AyMinusBO,Az,AzMinusAZ,BeMinusBY,Bg,BgMinusBG,Bn,BnMinusIN,BnMinusBD,Br,BsMinusBA,Ca,CaMinusES,Cak,CkMinusUS,Cs,CsMinusCZ,Cy,CyMinusGB,Da,DaMinusDK,De,DeMinusAT,DeMinusDE,DeMinusCH,Dsb,El,ElMinusGR,En,EnMinusGB,EnMinusAU,EnMinusCA,EnMinusIE,EnMinusIN,EnMinusPI,EnMinusSG,EnMinusUD,EnMinusUS,EnMinusZA,EnAtPirate,Eo,EoMinusEO,Es,EsMinusAR,EsMinus419,EsMinusCL,EsMinusCO,EsMinusEC,EsMinusES,EsMinusLA,EsMinusNI,EsMinusMX,EsMinusUS,EsMinusVE,Et,EtMinusEE,Eu,EuMinusES,Fa,FaMinusIR,FbMinusLT,Ff,Fi,FiMinusFI,Fo,FoMinusFO,Fr,FrMinusCA,FrMinusFR,FrMinusBE,FrMinusCH,FyMinusNL,Ga,GaMinusIE,Gd,Gl,GlMinusES,GnMinusPY,GuMinusIN,Gv,GxMinusGR,He,HeMinusIL,Hi,HiMinusIN,Hr,HrMinusHR,Hsb,Ht,Hu,HuMinusHU,Hy,HyMinusAM,Id,IdMinusID,Is,IsMinusIS,It,ItMinusIT,Ja,JaMinusJP,JvMinusID,KaMinusGE,KkMinusKZ,Km,Kl,KmMinusKH,Kab,Kn,KnMinusIN,Ko,KoMinusKR,KuMinusTR,Kw,La,LaMinusVA,Lb,LiMinusNL,Lt,LtMinusLT,Lv,LvMinusLV,Mai,MgMinusMG,Mk,MkMinusMK,Ml,MlMinusIN,MnMinusMN,Mr,MrMinusIN,Ms,MsMinusMY,Mt,MtMinusMT,My,No,Nb,NbMinusNO,Ne,NeMinusNP,Nl,NlMinusBE,NlMinusNL,NnMinusNO,Oc,OrMinusIN,Pa,PaMinusIN,Pl,PlMinusPL,PsMinusAF,Pt,PtMinusBR,PtMinusPT,QuMinusPE,RmMinusCH,Ro,RoMinusRO,Ru,RuMinusRU,SaMinusIN,SeMinusNO,Sh,SiMinusLK,Sk,SkMinusSK,Sl,SlMinusSI,SoMinusSO,Sq,SqMinusAL,Sr,SrMinusRS,Su,Sv,SvMinusSE,Sw,SwMinusKE,Ta,TaMinusIN,Te,TeMinusIN,Tg,TgMinusTJ,Th,ThMinusTH,Fil,Tlh,Tr,TrMinusTR,TtMinusRU,Uk,UkMinusUA,Ur,UrMinusPK,Uz,UzMinusUZ,Vi,ViMinusVN,XhMinusZA,Yi,YiMinusDE,Zh,ZhMinusHans,ZhMinusHant,ZhMinusCN,ZhMinusHK,ZhMinusSG,ZhMinusTW,ZuMinusZA

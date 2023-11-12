@@ -5,7 +5,6 @@ import dev.dimension.flare.data.database.app.DbApplication
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.model.PlatformType
 
-
 sealed interface UiApplication {
     val host: String
 
@@ -26,19 +25,22 @@ sealed interface UiApplication {
     companion object {
         fun DbApplication.toUi(): UiApplication {
             return when (platform_type) {
-                PlatformType.Mastodon -> Mastodon(
-                    host = host,
-                    application = credential_json.decodeJson(),
-                )
+                PlatformType.Mastodon ->
+                    Mastodon(
+                        host = host,
+                        application = credential_json.decodeJson(),
+                    )
 
-                PlatformType.Misskey -> Misskey(
-                    host = host,
-                    session = credential_json,
-                )
+                PlatformType.Misskey ->
+                    Misskey(
+                        host = host,
+                        session = credential_json,
+                    )
 
-                PlatformType.Bluesky -> Bluesky(
-                    host = host,
-                )
+                PlatformType.Bluesky ->
+                    Bluesky(
+                        host = host,
+                    )
             }
         }
     }

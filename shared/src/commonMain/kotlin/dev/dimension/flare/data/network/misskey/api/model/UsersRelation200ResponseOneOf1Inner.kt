@@ -23,23 +23,13 @@ import kotlinx.serialization.Serializable
  * @param id * @param isFollowing * @param hasPendingFollowRequestFromYou * @param hasPendingFollowRequestToYou * @param isFollowed * @param isBlocking * @param isBlocked * @param isMuted * @param isRenoteMuted */
 @Serializable
 data class UsersRelation200ResponseOneOf1Inner(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "isFollowing") val isFollowing: kotlin.Boolean,
-
     @SerialName(value = "hasPendingFollowRequestFromYou") val hasPendingFollowRequestFromYou: kotlin.Boolean,
-
     @SerialName(value = "hasPendingFollowRequestToYou") val hasPendingFollowRequestToYou: kotlin.Boolean,
-
     @SerialName(value = "isFollowed") val isFollowed: kotlin.Boolean,
-
     @SerialName(value = "isBlocking") val isBlocking: kotlin.Boolean,
-
     @SerialName(value = "isBlocked") val isBlocked: kotlin.Boolean,
-
     @SerialName(value = "isMuted") val isMuted: kotlin.Boolean,
-
     @SerialName(value = "isRenoteMuted") val isRenoteMuted: kotlin.Boolean,
-
 )

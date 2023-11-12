@@ -21,7 +21,9 @@ interface FriendshipResources {
     ): Account
 
     @GET("api/v1/accounts/relationships")
-    suspend fun showFriendships(@Query("id[]") id: List<String>): List<RelationshipResponse>
+    suspend fun showFriendships(
+        @Query("id[]") id: List<String>,
+    ): List<RelationshipResponse>
 
     @POST("api/v1/accounts/{id}/block")
     suspend fun block(
@@ -34,5 +36,7 @@ interface FriendshipResources {
     ): RelationshipResponse
 
     @POST("api/v1/reports")
-    suspend fun report(@Body data: PostReport)
+    suspend fun report(
+        @Body data: PostReport,
+    )
 }

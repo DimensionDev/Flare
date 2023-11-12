@@ -144,9 +144,7 @@ class ComposePresenter(
             }
         }
     }
-
 }
-
 
 sealed interface VisibilityState
 
@@ -157,7 +155,9 @@ abstract class MastodonVisibilityState(
     val allVisibilities: ImmutableList<UiStatus.Mastodon.Visibility>,
 ) : VisibilityState {
     abstract fun setVisibility(value: UiStatus.Mastodon.Visibility)
+
     abstract fun showVisibilityMenu()
+
     abstract fun hideVisibilityMenu()
 }
 
@@ -169,8 +169,11 @@ abstract class MisskeyVisibilityState(
     val localOnly: Boolean,
 ) : VisibilityState {
     abstract fun setLocalOnly(value: Boolean)
+
     abstract fun setVisibility(value: UiStatus.Misskey.Visibility)
+
     abstract fun showVisibilityMenu()
+
     abstract fun hideVisibilityMenu()
 }
 

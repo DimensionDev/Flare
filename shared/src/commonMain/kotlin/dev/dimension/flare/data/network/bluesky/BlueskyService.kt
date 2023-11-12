@@ -28,22 +28,22 @@ class BlueskyService(
     private val accountKey: MicroBlogKey? = null,
     private val accountQueries: DbAccountQueries? = null,
 ) : BlueskyApi by XrpcBlueskyApi(
-    ktorClient {
-        install(DefaultRequest) {
-            val hostUrl = Url(baseUrl)
-            url.protocol = hostUrl.protocol
-            url.host = hostUrl.host
-            url.port = hostUrl.port
-        }
-        install(XrpcAuthPlugin) {
-            json = JSON
-            this.accountKey = accountKey
-            this.accountQueries = accountQueries
-        }
+        ktorClient {
+            install(DefaultRequest) {
+                val hostUrl = Url(baseUrl)
+                url.protocol = hostUrl.protocol
+                url.host = hostUrl.host
+                url.port = hostUrl.port
+            }
+            install(XrpcAuthPlugin) {
+                json = JSON
+                this.accountKey = accountKey
+                this.accountQueries = accountQueries
+            }
 
-        expectSuccess = false
-    },
-)
+            expectSuccess = false
+        },
+    )
 
 /**
  * Appends the `Authorization` header to XRPC requests, as well as automatically refreshing and
@@ -74,8 +74,9 @@ internal class XrpcAuthPlugin(
         ) {
             scope.plugin(HttpSend).intercept { context ->
                 if (!context.headers.contains(Authorization) && plugin.accountKey != null && plugin.accountQueries != null) {
-                    val account = plugin.accountQueries.get(plugin.accountKey).executeAsOneOrNull()
-                        ?.toUi() as? UiAccount.Bluesky
+                    val account =
+                        plugin.accountQueries.get(plugin.accountKey).executeAsOneOrNull()
+                            ?.toUi() as? UiAccount.Bluesky
                     if (account != null) {
                         context.bearerAuth(account.credential.accessToken)
                     }
@@ -89,13 +90,15 @@ internal class XrpcAuthPlugin(
                 // Cache the response in memory since we will need to decode it potentially more than once.
                 result = result.save()
 
-                val response = runCatching<AtpErrorDescription> {
-                    plugin.json.decodeFromString(result.response.bodyAsText())
-                }
+                val response =
+                    runCatching<AtpErrorDescription> {
+                        plugin.json.decodeFromString(result.response.bodyAsText())
+                    }
 
                 if (response.getOrNull()?.error == "ExpiredToken" && plugin.accountKey != null && plugin.accountQueries != null) {
-                    val account = plugin.accountQueries.get(plugin.accountKey).executeAsOneOrNull()
-                        ?.toUi() as? UiAccount.Bluesky
+                    val account =
+                        plugin.accountQueries.get(plugin.accountKey).executeAsOneOrNull()
+                            ?.toUi() as? UiAccount.Bluesky
                     if (account != null) {
                         val refreshResponse =
                             scope.post("/xrpc/com.atproto.server.refreshSession") {
@@ -106,11 +109,12 @@ internal class XrpcAuthPlugin(
                                 val newAccessToken = refreshed.accessJwt
                                 val newRefreshToken = refreshed.refreshJwt
                                 plugin.accountQueries.setCredential(
-                                    credentialJson = UiAccount.Bluesky.Credential(
-                                        baseUrl = account.credential.baseUrl,
-                                        accessToken = newAccessToken,
-                                        refreshToken = newRefreshToken,
-                                    ).encodeJson(),
+                                    credentialJson =
+                                        UiAccount.Bluesky.Credential(
+                                            baseUrl = account.credential.baseUrl,
+                                            accessToken = newAccessToken,
+                                            refreshToken = newRefreshToken,
+                                        ).encodeJson(),
                                     accountKey = plugin.accountKey,
                                 )
                                 context.headers.remove(Authorization)
@@ -126,10 +130,9 @@ internal class XrpcAuthPlugin(
     }
 }
 
-fun UiAccount.Bluesky.getService(
-    appDatabase: AppDatabase,
-) = BlueskyService(
-    baseUrl = credential.baseUrl,
-    accountKey = accountKey,
-    accountQueries = appDatabase.dbAccountQueries,
-)
+fun UiAccount.Bluesky.getService(appDatabase: AppDatabase) =
+    BlueskyService(
+        baseUrl = credential.baseUrl,
+        accountKey = accountKey,
+        accountQueries = appDatabase.dbAccountQueries,
+    )

@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param id * @param page */
 @Serializable
 data class IPageLikes200ResponseInner(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "page") val page: Page,
-
 )

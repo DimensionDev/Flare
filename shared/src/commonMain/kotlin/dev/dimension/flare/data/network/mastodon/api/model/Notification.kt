@@ -8,11 +8,9 @@ import kotlinx.serialization.Serializable
 data class Notification(
     val id: String? = null,
     val type: NotificationTypes? = null,
-
     @SerialName("created_at")
     @Serializable(with = DateSerializer::class)
     val createdAt: Instant? = null,
-
     val account: Account? = null,
     val status: Status? = null,
 )

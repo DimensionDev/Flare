@@ -23,33 +23,18 @@ import kotlinx.serialization.Serializable
  * @param localTotal * @param localInc * @param localDec * @param localDiffsNormal * @param localDiffsReply * @param localDiffsRenote * @param localDiffsWithFile * @param remoteTotal * @param remoteInc * @param remoteDec * @param remoteDiffsNormal * @param remoteDiffsReply * @param remoteDiffsRenote * @param remoteDiffsWithFile */
 @Serializable
 data class ChartsNotes200Response(
-
     @SerialName(value = "local.total") val localTotal: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "local.inc") val localInc: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "local.dec") val localDec: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "local.diffs.normal") val localDiffsNormal: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "local.diffs.reply") val localDiffsReply: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "local.diffs.renote") val localDiffsRenote: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "local.diffs.withFile") val localDiffsWithFile: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "remote.total") val remoteTotal: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "remote.inc") val remoteInc: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "remote.dec") val remoteDec: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "remote.diffs.normal") val remoteDiffsNormal: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "remote.diffs.reply") val remoteDiffsReply: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "remote.diffs.renote") val remoteDiffsRenote: kotlin.collections.List<kotlin.Double>,
-
     @SerialName(value = "remote.diffs.withFile") val remoteDiffsWithFile: kotlin.collections.List<kotlin.Double>,
-
 )

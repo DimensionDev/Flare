@@ -22,7 +22,9 @@ interface WebhooksApi {
      * @param iwebhooksCreateRequest * @return [Unit]
      */
     @POST("i/webhooks/create")
-    suspend fun iWebhooksCreate(@Body iwebhooksCreateRequest: IWebhooksCreateRequest): Response<Unit>
+    suspend fun iWebhooksCreate(
+        @Body iwebhooksCreateRequest: IWebhooksCreateRequest,
+    ): Response<Unit>
 
     /**
      * i/webhooks/delete
@@ -38,7 +40,9 @@ interface WebhooksApi {
      * @param iwebhooksShowRequest * @return [Unit]
      */
     @POST("i/webhooks/delete")
-    suspend fun iWebhooksDelete(@Body iwebhooksShowRequest: IWebhooksShowRequest): Response<Unit>
+    suspend fun iWebhooksDelete(
+        @Body iwebhooksShowRequest: IWebhooksShowRequest,
+    ): Response<Unit>
 
     /**
      * i/webhooks/list
@@ -54,7 +58,9 @@ interface WebhooksApi {
      * @param body * @return [Unit]
      */
     @POST("i/webhooks/list")
-    suspend fun iWebhooksList(@Body body: kotlin.Any): Response<Unit>
+    suspend fun iWebhooksList(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * i/webhooks/show
@@ -70,7 +76,9 @@ interface WebhooksApi {
      * @param iwebhooksShowRequest * @return [Unit]
      */
     @POST("i/webhooks/show")
-    suspend fun iWebhooksShow(@Body iwebhooksShowRequest: IWebhooksShowRequest): Response<Unit>
+    suspend fun iWebhooksShow(
+        @Body iwebhooksShowRequest: IWebhooksShowRequest,
+    ): Response<Unit>
 
     /**
      * i/webhooks/update
@@ -86,5 +94,7 @@ interface WebhooksApi {
      * @param iwebhooksUpdateRequest * @return [Unit]
      */
     @POST("i/webhooks/update")
-    suspend fun iWebhooksUpdate(@Body iwebhooksUpdateRequest: IWebhooksUpdateRequest): Response<Unit>
+    suspend fun iWebhooksUpdate(
+        @Body iwebhooksUpdateRequest: IWebhooksUpdateRequest,
+    ): Response<Unit>
 }

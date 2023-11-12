@@ -6,7 +6,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 
-object KoinHelper: KoinComponent {
+object KoinHelper : KoinComponent {
     fun start() {
         startKoin {
             modules(appModule())

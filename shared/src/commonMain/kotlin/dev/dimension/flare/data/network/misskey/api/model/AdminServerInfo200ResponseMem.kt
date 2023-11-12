@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param total */
 @Serializable
 data class AdminServerInfo200ResponseMem(
-
     @SerialName(value = "total") val total: kotlin.Double,
-
 )

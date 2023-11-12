@@ -23,11 +23,7 @@ import kotlinx.serialization.Serializable
  * @param to * @param subject * @param text */
 @Serializable
 data class AdminSendEmailRequest(
-
     @SerialName(value = "to") val to: kotlin.String,
-
     @SerialName(value = "subject") val subject: kotlin.String,
-
     @SerialName(value = "text") val text: kotlin.String,
-
 )

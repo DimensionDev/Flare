@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param resolverId */
 @Serializable
 data class AdminAbuseReportResolverDeleteRequest(
-
     @SerialName(value = "resolverId") val resolverId: kotlin.String,
-
 )

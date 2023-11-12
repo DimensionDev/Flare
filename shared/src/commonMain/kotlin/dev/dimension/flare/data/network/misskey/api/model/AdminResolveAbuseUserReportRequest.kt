@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param reportId * @param forward */
 @Serializable
 data class AdminResolveAbuseUserReportRequest(
-
     @SerialName(value = "reportId") val reportId: kotlin.String,
-
     @SerialName(value = "forward") val forward: kotlin.Boolean? = false,
-
 )

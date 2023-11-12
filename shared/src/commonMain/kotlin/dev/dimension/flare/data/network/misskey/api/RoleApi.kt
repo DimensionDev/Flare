@@ -23,7 +23,9 @@ interface RoleApi {
      * @param body * @return [Unit]
      */
     @POST("roles/list")
-    suspend fun rolesList(@Body body: kotlin.Any): Response<Unit>
+    suspend fun rolesList(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 
     /**
      * roles/notes
@@ -39,7 +41,9 @@ interface RoleApi {
      * @param rolesNotesRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("roles/notes")
-    suspend fun rolesNotes(@Body rolesNotesRequest: RolesNotesRequest): Response<kotlin.collections.List<Note>>
+    suspend fun rolesNotes(
+        @Body rolesNotesRequest: RolesNotesRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * roles/show
@@ -55,7 +59,9 @@ interface RoleApi {
      * @param adminRolesDeleteRequest * @return [Unit]
      */
     @POST("roles/show")
-    suspend fun rolesShow(@Body adminRolesDeleteRequest: AdminRolesDeleteRequest): Response<Unit>
+    suspend fun rolesShow(
+        @Body adminRolesDeleteRequest: AdminRolesDeleteRequest,
+    ): Response<Unit>
 
     /**
      * roles/users
@@ -71,5 +77,7 @@ interface RoleApi {
      * @param adminRolesUsersRequest * @return [Unit]
      */
     @POST("roles/users")
-    suspend fun rolesUsers(@Body adminRolesUsersRequest: AdminRolesUsersRequest): Response<Unit>
+    suspend fun rolesUsers(
+        @Body adminRolesUsersRequest: AdminRolesUsersRequest,
+    ): Response<Unit>
 }

@@ -38,7 +38,9 @@ interface DriveApi {
      * @param body * @return [Drive200Response]
      */
     @POST("drive")
-    suspend fun drive(@Body body: kotlin.Any): Response<Drive200Response>
+    suspend fun drive(
+        @Body body: kotlin.Any,
+    ): Response<Drive200Response>
 
     /**
      * drive/files
@@ -54,7 +56,9 @@ interface DriveApi {
      * @param driveFilesRequest * @return [kotlin.collections.List<DriveFile>]
      */
     @POST("drive/files")
-    suspend fun driveFiles(@Body driveFilesRequest: DriveFilesRequest): Response<kotlin.collections.List<DriveFile>>
+    suspend fun driveFiles(
+        @Body driveFilesRequest: DriveFilesRequest,
+    ): Response<kotlin.collections.List<DriveFile>>
 
     /**
      * drive/files/attached-notes
@@ -70,7 +74,9 @@ interface DriveApi {
      * @param driveFilesAttachedNotesRequest * @return [kotlin.collections.List<Note>]
      */
     @POST("drive/files/attached-notes")
-    suspend fun driveFilesAttachedNotes(@Body driveFilesAttachedNotesRequest: DriveFilesAttachedNotesRequest): Response<kotlin.collections.List<Note>>
+    suspend fun driveFilesAttachedNotes(
+        @Body driveFilesAttachedNotesRequest: DriveFilesAttachedNotesRequest,
+    ): Response<kotlin.collections.List<Note>>
 
     /**
      * drive/files/check-existence
@@ -86,7 +92,9 @@ interface DriveApi {
      * @param driveFilesCheckExistenceRequest * @return [kotlin.Boolean]
      */
     @POST("drive/files/check-existence")
-    suspend fun driveFilesCheckExistence(@Body driveFilesCheckExistenceRequest: DriveFilesCheckExistenceRequest): Response<kotlin.Boolean>
+    suspend fun driveFilesCheckExistence(
+        @Body driveFilesCheckExistenceRequest: DriveFilesCheckExistenceRequest,
+    ): Response<kotlin.Boolean>
 
     /**
      * drive/files/create
@@ -113,7 +121,9 @@ interface DriveApi {
 //    suspend fun driveFilesCreate(@Part file: MultipartBody.Part, @Part("folderId") folderId: kotlin.String? = null, @Part("name") name: kotlin.String? = null, @Part("comment") comment: kotlin.String? = null, @Part("isSensitive") isSensitive: kotlin.Boolean? = false, @Part("force") force: kotlin.Boolean? = false): Response<DriveFile>
     @Multipart
     @POST("drive/files/create")
-    suspend fun driveFilesCreate(@Body map: MultiPartFormDataContent): Response<DriveFile>
+    suspend fun driveFilesCreate(
+        @Body map: MultiPartFormDataContent,
+    ): Response<DriveFile>
 
     /**
      * drive/files/delete
@@ -129,7 +139,9 @@ interface DriveApi {
      * @param driveFilesAttachedNotesRequest * @return [Unit]
      */
     @POST("drive/files/delete")
-    suspend fun driveFilesDelete(@Body driveFilesAttachedNotesRequest: DriveFilesAttachedNotesRequest): Response<Unit>
+    suspend fun driveFilesDelete(
+        @Body driveFilesAttachedNotesRequest: DriveFilesAttachedNotesRequest,
+    ): Response<Unit>
 
     /**
      * drive/files/find
@@ -145,7 +157,9 @@ interface DriveApi {
      * @param driveFilesFindRequest * @return [kotlin.collections.List<DriveFile>]
      */
     @POST("drive/files/find")
-    suspend fun driveFilesFind(@Body driveFilesFindRequest: DriveFilesFindRequest): Response<kotlin.collections.List<DriveFile>>
+    suspend fun driveFilesFind(
+        @Body driveFilesFindRequest: DriveFilesFindRequest,
+    ): Response<kotlin.collections.List<DriveFile>>
 
     /**
      * drive/files/find-by-hash
@@ -161,7 +175,9 @@ interface DriveApi {
      * @param driveFilesCheckExistenceRequest * @return [kotlin.collections.List<DriveFile>]
      */
     @POST("drive/files/find-by-hash")
-    suspend fun driveFilesFindByHash(@Body driveFilesCheckExistenceRequest: DriveFilesCheckExistenceRequest): Response<kotlin.collections.List<DriveFile>>
+    suspend fun driveFilesFindByHash(
+        @Body driveFilesCheckExistenceRequest: DriveFilesCheckExistenceRequest,
+    ): Response<kotlin.collections.List<DriveFile>>
 
     /**
      * drive/files/show
@@ -177,7 +193,9 @@ interface DriveApi {
      * @param adminDriveShowFileRequest * @return [DriveFile]
      */
     @POST("drive/files/show")
-    suspend fun driveFilesShow(@Body adminDriveShowFileRequest: AdminDriveShowFileRequest): Response<DriveFile>
+    suspend fun driveFilesShow(
+        @Body adminDriveShowFileRequest: AdminDriveShowFileRequest,
+    ): Response<DriveFile>
 
     /**
      * drive/files/update
@@ -193,7 +211,9 @@ interface DriveApi {
      * @param driveFilesUpdateRequest * @return [DriveFile]
      */
     @POST("drive/files/update")
-    suspend fun driveFilesUpdate(@Body driveFilesUpdateRequest: DriveFilesUpdateRequest): Response<DriveFile>
+    suspend fun driveFilesUpdate(
+        @Body driveFilesUpdateRequest: DriveFilesUpdateRequest,
+    ): Response<DriveFile>
 
     /**
      * drive/files/upload-from-url
@@ -210,7 +230,9 @@ interface DriveApi {
      * @param driveFilesUploadFromUrlRequest * @return [Unit]
      */
     @POST("drive/files/upload-from-url")
-    suspend fun driveFilesUploadFromUrl(@Body driveFilesUploadFromUrlRequest: DriveFilesUploadFromUrlRequest): Response<Unit>
+    suspend fun driveFilesUploadFromUrl(
+        @Body driveFilesUploadFromUrlRequest: DriveFilesUploadFromUrlRequest,
+    ): Response<Unit>
 
     /**
      * drive/folders
@@ -226,7 +248,9 @@ interface DriveApi {
      * @param driveFoldersRequest * @return [kotlin.collections.List<DriveFolder>]
      */
     @POST("drive/folders")
-    suspend fun driveFolders(@Body driveFoldersRequest: DriveFoldersRequest): Response<kotlin.collections.List<DriveFolder>>
+    suspend fun driveFolders(
+        @Body driveFoldersRequest: DriveFoldersRequest,
+    ): Response<kotlin.collections.List<DriveFolder>>
 
     /**
      * drive/folders/create
@@ -243,7 +267,9 @@ interface DriveApi {
      * @param driveFoldersCreateRequest * @return [DriveFolder]
      */
     @POST("drive/folders/create")
-    suspend fun driveFoldersCreate(@Body driveFoldersCreateRequest: DriveFoldersCreateRequest): Response<DriveFolder>
+    suspend fun driveFoldersCreate(
+        @Body driveFoldersCreateRequest: DriveFoldersCreateRequest,
+    ): Response<DriveFolder>
 
     /**
      * drive/folders/delete
@@ -259,7 +285,9 @@ interface DriveApi {
      * @param driveFoldersDeleteRequest * @return [Unit]
      */
     @POST("drive/folders/delete")
-    suspend fun driveFoldersDelete(@Body driveFoldersDeleteRequest: DriveFoldersDeleteRequest): Response<Unit>
+    suspend fun driveFoldersDelete(
+        @Body driveFoldersDeleteRequest: DriveFoldersDeleteRequest,
+    ): Response<Unit>
 
     /**
      * drive/folders/find
@@ -275,7 +303,9 @@ interface DriveApi {
      * @param driveFoldersFindRequest * @return [kotlin.collections.List<DriveFolder>]
      */
     @POST("drive/folders/find")
-    suspend fun driveFoldersFind(@Body driveFoldersFindRequest: DriveFoldersFindRequest): Response<kotlin.collections.List<DriveFolder>>
+    suspend fun driveFoldersFind(
+        @Body driveFoldersFindRequest: DriveFoldersFindRequest,
+    ): Response<kotlin.collections.List<DriveFolder>>
 
     /**
      * drive/folders/show
@@ -291,7 +321,9 @@ interface DriveApi {
      * @param driveFoldersDeleteRequest * @return [DriveFolder]
      */
     @POST("drive/folders/show")
-    suspend fun driveFoldersShow(@Body driveFoldersDeleteRequest: DriveFoldersDeleteRequest): Response<DriveFolder>
+    suspend fun driveFoldersShow(
+        @Body driveFoldersDeleteRequest: DriveFoldersDeleteRequest,
+    ): Response<DriveFolder>
 
     /**
      * drive/folders/update
@@ -307,7 +339,9 @@ interface DriveApi {
      * @param driveFoldersUpdateRequest * @return [DriveFolder]
      */
     @POST("drive/folders/update")
-    suspend fun driveFoldersUpdate(@Body driveFoldersUpdateRequest: DriveFoldersUpdateRequest): Response<DriveFolder>
+    suspend fun driveFoldersUpdate(
+        @Body driveFoldersUpdateRequest: DriveFoldersUpdateRequest,
+    ): Response<DriveFolder>
 
     /**
      * drive/stream
@@ -323,5 +357,7 @@ interface DriveApi {
      * @param driveStreamRequest * @return [kotlin.collections.List<DriveFile>]
      */
     @POST("drive/stream")
-    suspend fun driveStream(@Body driveStreamRequest: DriveStreamRequest): Response<kotlin.collections.List<DriveFile>>
+    suspend fun driveStream(
+        @Body driveStreamRequest: DriveStreamRequest,
+    ): Response<kotlin.collections.List<DriveFile>>
 }

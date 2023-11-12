@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param username * @param password */
 @Serializable
 data class AdminAccountsCreateRequest(
-
     @SerialName(value = "username") val username: kotlin.String,
-
     @SerialName(value = "password") val password: kotlin.String,
-
 )

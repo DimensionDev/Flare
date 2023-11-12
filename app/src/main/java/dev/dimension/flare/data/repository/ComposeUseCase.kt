@@ -15,7 +15,7 @@ import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 private const val CHANNEL_ID = "compose"

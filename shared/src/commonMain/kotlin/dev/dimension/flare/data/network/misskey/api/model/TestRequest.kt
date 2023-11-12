@@ -23,15 +23,9 @@ import kotlinx.serialization.Serializable
  * @param required * @param string * @param default * @param nullableDefault * @param id */
 @Serializable
 data class TestRequest(
-
     @SerialName(value = "required") val required: kotlin.Boolean,
-
     @SerialName(value = "string") val string: kotlin.String? = null,
-
     @SerialName(value = "default") val default: kotlin.String? = "hello",
-
     @SerialName(value = "nullableDefault") val nullableDefault: kotlin.String? = "hello",
-
     @SerialName(value = "id") val id: kotlin.String? = null,
-
 )

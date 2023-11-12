@@ -23,13 +23,8 @@ import kotlinx.serialization.Serializable
  * @param name * @param description * @param bannerId * @param color */
 @Serializable
 data class ChannelsCreateRequest(
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "description") val description: kotlin.String? = null,
-
     @SerialName(value = "bannerId") val bannerId: kotlin.String? = null,
-
     @SerialName(value = "color") val color: kotlin.String? = null,
-
 )

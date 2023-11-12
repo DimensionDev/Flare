@@ -24,22 +24,14 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class UsersRequest(
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
-
     @SerialName(value = "sort") val sort: UsersRequest.Sort? = null,
-
     @SerialName(value = "state") val state: UsersRequest.State? = State.All,
-
     @SerialName(value = "origin") val origin: UsersRequest.Origin? = Origin.Local,
-
-    /* The local host is represented with `null`. */
+    // The local host is represented with `null`.
     @SerialName(value = "hostname") val hostname: kotlin.String? = null,
-
 ) {
-
     /**
      * *
      * Values: PlusFollower,MinusFollower,PlusCreatedAt,MinusCreatedAt,PlusUpdatedAt,MinusUpdatedAt

@@ -23,13 +23,8 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param muteeId * @param mutee */
 @Serializable
 data class RenoteMuting(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "muteeId") val muteeId: kotlin.String,
-
     @SerialName(value = "mutee") val mutee: UserDetailed,
-
 )

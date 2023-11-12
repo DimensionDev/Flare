@@ -28,7 +28,9 @@ interface DefaultApi {
      * @param adminAbuseReportResolverDeleteRequest * @return [Unit]
      */
     @POST("admin/abuse-report-resolver/delete")
-    suspend fun adminAbuseReportResolverDelete(@Body adminAbuseReportResolverDeleteRequest: AdminAbuseReportResolverDeleteRequest): Response<Unit>
+    suspend fun adminAbuseReportResolverDelete(
+        @Body adminAbuseReportResolverDeleteRequest: AdminAbuseReportResolverDeleteRequest,
+    ): Response<Unit>
 
     /**
      * admin/abuse-report-resolver/list
@@ -44,7 +46,9 @@ interface DefaultApi {
      * @param adminAbuseReportResolverListRequest * @return [kotlin.collections.List<AdminAbuseReportResolverCreate200Response>]
      */
     @POST("admin/abuse-report-resolver/list")
-    suspend fun adminAbuseReportResolverList(@Body adminAbuseReportResolverListRequest: AdminAbuseReportResolverListRequest): Response<kotlin.collections.List<AdminAbuseReportResolverCreate200Response>>
+    suspend fun adminAbuseReportResolverList(
+        @Body adminAbuseReportResolverListRequest: AdminAbuseReportResolverListRequest,
+    ): Response<kotlin.collections.List<AdminAbuseReportResolverCreate200Response>>
 
     /**
      * admin/abuse-report-resolver/update
@@ -60,7 +64,9 @@ interface DefaultApi {
      * @param adminAbuseReportResolverUpdateRequest * @return [Unit]
      */
     @POST("admin/abuse-report-resolver/update")
-    suspend fun adminAbuseReportResolverUpdate(@Body adminAbuseReportResolverUpdateRequest: AdminAbuseReportResolverUpdateRequest): Response<Unit>
+    suspend fun adminAbuseReportResolverUpdate(
+        @Body adminAbuseReportResolverUpdateRequest: AdminAbuseReportResolverUpdateRequest,
+    ): Response<Unit>
 
     /**
      * i/claim-achievement
@@ -76,7 +82,9 @@ interface DefaultApi {
      * @param iclaimAchievementRequest * @return [Unit]
      */
     @POST("i/claim-achievement")
-    suspend fun iClaimAchievement(@Body iclaimAchievementRequest: IClaimAchievementRequest): Response<Unit>
+    suspend fun iClaimAchievement(
+        @Body iclaimAchievementRequest: IClaimAchievementRequest,
+    ): Response<Unit>
 
     /**
      * users/achievements
@@ -92,7 +100,9 @@ interface DefaultApi {
      * @param adminAccountsDeleteRequest * @return [Unit]
      */
     @POST("users/achievements")
-    suspend fun usersAchievements(@Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest): Response<Unit>
+    suspend fun usersAchievements(
+        @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * users/lists/create-from-public
@@ -108,7 +118,9 @@ interface DefaultApi {
      * @param usersListsCreateFromPublicRequest * @return [UserList]
      */
     @POST("users/lists/create-from-public")
-    suspend fun usersListsCreateFromPublic(@Body usersListsCreateFromPublicRequest: UsersListsCreateFromPublicRequest): Response<UserList>
+    suspend fun usersListsCreateFromPublic(
+        @Body usersListsCreateFromPublicRequest: UsersListsCreateFromPublicRequest,
+    ): Response<UserList>
 
     /**
      * users/lists/favorite
@@ -124,7 +136,9 @@ interface DefaultApi {
      * @param usersListsDeleteRequest * @return [Unit]
      */
     @POST("users/lists/favorite")
-    suspend fun usersListsFavorite(@Body usersListsDeleteRequest: UsersListsDeleteRequest): Response<Unit>
+    suspend fun usersListsFavorite(
+        @Body usersListsDeleteRequest: UsersListsDeleteRequest,
+    ): Response<Unit>
 
     /**
      * users/lists/unfavorite
@@ -140,5 +154,7 @@ interface DefaultApi {
      * @param usersListsDeleteRequest * @return [Unit]
      */
     @POST("users/lists/unfavorite")
-    suspend fun usersListsUnfavorite(@Body usersListsDeleteRequest: UsersListsDeleteRequest): Response<Unit>
+    suspend fun usersListsUnfavorite(
+        @Body usersListsDeleteRequest: UsersListsDeleteRequest,
+    ): Response<Unit>
 }

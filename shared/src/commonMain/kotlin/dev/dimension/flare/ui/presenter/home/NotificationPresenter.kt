@@ -17,27 +17,27 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toImmutableList
 
 class NotificationPresenter : PresenterBase<NotificationState>() {
-
     @Composable
     override fun body(): NotificationState {
         var type by remember { mutableStateOf(NotificationFilter.All) }
-        val allTypes = activeAccountServicePresenter().map { (service, _) ->
-            service.supportedNotificationFilter.toImmutableList()
-        }
-        val listState = activeAccountServicePresenter().map { (service, account) ->
-            remember(account.accountKey, type) {
-                service.notification(
-                    type = type,
-                )
-            }.collectAsLazyPagingItems()
-        }
+        val allTypes =
+            activeAccountServicePresenter().map { (service, _) ->
+                service.supportedNotificationFilter.toImmutableList()
+            }
+        val listState =
+            activeAccountServicePresenter().map { (service, account) ->
+                remember(account.accountKey, type) {
+                    service.notification(
+                        type = type,
+                    )
+                }.collectAsLazyPagingItems()
+            }
         val refreshing =
             listState is UiState.Loading ||
-                    listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
 
         return object : NotificationState(
             refreshing,
@@ -66,5 +66,6 @@ abstract class NotificationState(
     val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {
     abstract fun refresh()
+
     abstract fun onNotificationTypeChanged(value: NotificationFilter)
 }

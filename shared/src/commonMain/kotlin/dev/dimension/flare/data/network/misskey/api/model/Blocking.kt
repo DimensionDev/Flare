@@ -23,13 +23,8 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param blockeeId * @param blockee */
 @Serializable
 data class Blocking(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "blockeeId") val blockeeId: kotlin.String,
-
     @SerialName(value = "blockee") val blockee: UserDetailed,
-
 )

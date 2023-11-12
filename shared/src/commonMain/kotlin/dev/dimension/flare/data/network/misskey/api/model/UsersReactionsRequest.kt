@@ -23,17 +23,10 @@ import kotlinx.serialization.Serializable
  * @param userId * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
 data class UsersReactionsRequest(
-
     @SerialName(value = "userId") val userId: kotlin.String,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
     @SerialName(value = "sinceDate") val sinceDate: kotlin.Int? = null,
-
     @SerialName(value = "untilDate") val untilDate: kotlin.Int? = null,
-
 )

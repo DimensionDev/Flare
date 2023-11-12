@@ -7,25 +7,18 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Poll(
     val id: String? = null,
-
     @SerialName("expires_at")
     @Serializable(with = DateSerializer::class)
     val expiresAt: Instant? = null,
-
     val expired: Boolean? = null,
     val multiple: Boolean? = null,
-
     @SerialName("votes_count")
     val votesCount: Long? = null,
-
     @SerialName("voters_count")
     val votersCount: Long? = null,
-
     val voted: Boolean? = null,
-
     @SerialName("own_votes")
     val ownVotes: List<Int>? = null,
-
     val options: List<Option>? = null,
     val emojis: List<Emoji>? = null,
 )

@@ -45,7 +45,6 @@ sealed interface StatusContent {
         StatusContent
 }
 
-
 internal inline fun <reified T : StatusContent> updateStatusUseCase(
     statusKey: MicroBlogKey,
     accountKey: MicroBlogKey,

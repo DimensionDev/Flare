@@ -21,7 +21,9 @@ interface FlashsApi {
      * @param flashDeleteRequest * @return [Unit]
      */
     @POST("flash/delete")
-    suspend fun flashDelete(@Body flashDeleteRequest: FlashDeleteRequest): Response<Unit>
+    suspend fun flashDelete(
+        @Body flashDeleteRequest: FlashDeleteRequest,
+    ): Response<Unit>
 
     /**
      * flash/show
@@ -37,5 +39,7 @@ interface FlashsApi {
      * @param flashDeleteRequest * @return [Flash]
      */
     @POST("flash/show")
-    suspend fun flashShow(@Body flashDeleteRequest: FlashDeleteRequest): Response<Flash>
+    suspend fun flashShow(
+        @Body flashDeleteRequest: FlashDeleteRequest,
+    ): Response<Flash>
 }

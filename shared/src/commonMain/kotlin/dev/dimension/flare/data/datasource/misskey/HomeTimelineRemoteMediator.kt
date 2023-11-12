@@ -18,39 +18,40 @@ internal class HomeTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val pagingKey: String,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
-
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
     ): MediatorResult {
         return try {
-            val response = when (loadType) {
-                LoadType.PREPEND -> return MediatorResult.Success(
+            val response =
+                when (loadType) {
+                    LoadType.PREPEND -> return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                    LoadType.REFRESH -> {
+                        service.notesTimeline(
+                            NotesHybridTimelineRequest(
+                                limit = state.config.pageSize,
+                            ),
+                        )
+                    }
+
+                    LoadType.APPEND -> {
+                        val lastItem =
+                            state.lastItemOrNull()
+                                ?: return MediatorResult.Success(
+                                    endOfPaginationReached = true,
+                                )
+                        service.notesTimeline(
+                            NotesHybridTimelineRequest(
+                                limit = state.config.pageSize,
+                                untilId = lastItem.timeline_status_key.id,
+                            ),
+                        )
+                    }
+                }.body() ?: return MediatorResult.Success(
                     endOfPaginationReached = true,
                 )
-                LoadType.REFRESH -> {
-                    service.notesTimeline(
-                        NotesHybridTimelineRequest(
-                            limit = state.config.pageSize,
-                        )
-                    )
-                }
-
-                LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                        ?: return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    service.notesTimeline(
-                        NotesHybridTimelineRequest(
-                            limit = state.config.pageSize,
-                            untilId = lastItem.timeline_status_key.id,
-                        )
-                    )
-                }
-            }.body() ?: return MediatorResult.Success(
-                endOfPaginationReached = true,
-            )
             if (loadType == LoadType.REFRESH) {
                 database.dbPagingTimelineQueries.deletePaging(account.accountKey, pagingKey)
             }
@@ -66,6 +67,6 @@ internal class HomeTimelineRemoteMediator(
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)
-        } 
+        }
     }
 }

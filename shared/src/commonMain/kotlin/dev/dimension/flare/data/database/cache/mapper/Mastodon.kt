@@ -107,26 +107,26 @@ private fun Notification.toDbPagingTimeline(
     return DbPagingTimeline(
         id = 0,
         account_key = accountKey,
-        status_key = MicroBlogKey(
-            this.id ?: throw IllegalStateException("id is null"),
-            user.user_key.host,
-        ),
+        status_key =
+            MicroBlogKey(
+                this.id ?: throw IllegalStateException("id is null"),
+                user.user_key.host,
+            ),
         paging_key = pagingKey,
         sort_id = sortId,
     )
 }
 
-private fun Notification.toDbStatus(
-    accountKey: MicroBlogKey,
-): DbStatus {
+private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     val user =
         this.account?.toDbUser(accountKey.host) ?: throw IllegalStateException("account is null")
     return DbStatus(
         id = 0,
-        status_key = MicroBlogKey(
-            this.id ?: throw IllegalStateException("id is null"),
-            user.user_key.host,
-        ),
+        status_key =
+            MicroBlogKey(
+                this.id ?: throw IllegalStateException("id is null"),
+                user.user_key.host,
+            ),
         platform_type = PlatformType.Mastodon,
         user_key = user.user_key,
         content = StatusContent.MastodonNotification(this),
@@ -150,17 +150,17 @@ internal fun Status.toDbPagingTimeline(
     )
 }
 
-private fun Status.toDbStatus(
-    accountKey: MicroBlogKey,
-): DbStatus {
-    val user = account?.toDbUser(accountKey.host)
-        ?: throw IllegalArgumentException("mastodon Status.user should not be null")
+private fun Status.toDbStatus(accountKey: MicroBlogKey): DbStatus {
+    val user =
+        account?.toDbUser(accountKey.host)
+            ?: throw IllegalArgumentException("mastodon Status.user should not be null")
     return DbStatus(
         id = 0,
-        status_key = MicroBlogKey(
-            id ?: throw IllegalArgumentException("mastodon Status.idStr should not be null"),
-            host = user.user_key.host,
-        ),
+        status_key =
+            MicroBlogKey(
+                id ?: throw IllegalArgumentException("mastodon Status.idStr should not be null"),
+                host = user.user_key.host,
+            ),
         platform_type = PlatformType.Mastodon,
         content = dev.dimension.flare.data.database.cache.model.StatusContent.Mastodon(this),
         user_key = user.user_key,
@@ -168,32 +168,32 @@ private fun Status.toDbStatus(
     )
 }
 
-internal fun Account.toDbUser(
-    host: String,
-): DbUser {
-    val remoteHost = if (acct != null && acct.contains('@')) {
-        acct.substring(acct.indexOf('@') + 1)
-    } else {
-        host
-    }
+internal fun Account.toDbUser(host: String): DbUser {
+    val remoteHost =
+        if (acct != null && acct.contains('@')) {
+            acct.substring(acct.indexOf('@') + 1)
+        } else {
+            host
+        }
     return DbUser(
-        user_key = MicroBlogKey(
-            id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
-            host = host,
-        ),
+        user_key =
+            MicroBlogKey(
+                id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
+                host = host,
+            ),
         platform_type = PlatformType.Mastodon,
-        name = displayName
-            ?: throw IllegalArgumentException("mastodon Account.displayName should not be null"),
-        handle = username
-            ?: throw IllegalArgumentException("mastodon Account.username should not be null"),
+        name =
+            displayName
+                ?: throw IllegalArgumentException("mastodon Account.displayName should not be null"),
+        handle =
+            username
+                ?: throw IllegalArgumentException("mastodon Account.username should not be null"),
         content = dev.dimension.flare.data.database.cache.model.UserContent.Mastodon(this),
         host = remoteHost,
     )
 }
 
-internal fun List<Emoji>.toDb(
-    host: String,
-): DbEmoji {
+internal fun List<Emoji>.toDb(host: String): DbEmoji {
     return DbEmoji(
         host = host,
         content = EmojiContent.Mastodon(this),

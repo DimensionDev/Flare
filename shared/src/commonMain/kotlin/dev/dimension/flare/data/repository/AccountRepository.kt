@@ -50,7 +50,7 @@ class AccountRepository(
     fun setActiveAccount(accountKey: MicroBlogKey) {
         appDatabase.dbAccountQueries.setLastActive(
             Clock.System.now().toEpochMilliseconds(),
-            accountKey
+            accountKey,
         )
     }
 
@@ -66,9 +66,7 @@ class AccountRepository(
 object NoActiveAccountException : Exception("No active account.")
 
 @Composable
-internal fun activeAccountPresenter(
-    repository: AccountRepository = rememberKoinInject()
-): State<UiState<UiAccount>> {
+internal fun activeAccountPresenter(repository: AccountRepository = rememberKoinInject()): State<UiState<UiAccount>> {
     return remember(repository) {
         repository.activeAccount
             .map {
@@ -90,9 +88,7 @@ internal fun activeAccountServicePresenter(): UiState<Pair<MicroblogDataSource, 
 }
 
 @Composable
-internal fun accountServiceProvider(
-    account: UiAccount,
-): MicroblogDataSource {
+internal fun accountServiceProvider(account: UiAccount): MicroblogDataSource {
     return remember(account.accountKey) {
         when (account) {
             is UiAccount.Mastodon -> {
@@ -117,9 +113,7 @@ internal fun accountServiceProvider(
 }
 
 @Composable
-internal fun allAccountsPresenter(
-    repository: AccountRepository = rememberKoinInject()
-): State<UiState<ImmutableList<UiAccount>>> {
+internal fun allAccountsPresenter(repository: AccountRepository = rememberKoinInject()): State<UiState<ImmutableList<UiAccount>>> {
     return remember(repository) {
         repository.allAccounts
             .map {

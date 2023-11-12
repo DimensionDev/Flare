@@ -20,7 +20,9 @@ interface NotificationsApi {
      * @param notificationsCreateRequest * @return [Unit]
      */
     @POST("notifications/create")
-    suspend fun notificationsCreate(@Body notificationsCreateRequest: NotificationsCreateRequest): Response<Unit>
+    suspend fun notificationsCreate(
+        @Body notificationsCreateRequest: NotificationsCreateRequest,
+    ): Response<Unit>
 
     /**
      * notifications/mark-all-as-read
@@ -36,5 +38,7 @@ interface NotificationsApi {
      * @param body * @return [Unit]
      */
     @POST("notifications/mark-all-as-read")
-    suspend fun notificationsMarkAllAsRead(@Body body: kotlin.Any): Response<Unit>
+    suspend fun notificationsMarkAllAsRead(
+        @Body body: kotlin.Any,
+    ): Response<Unit>
 }

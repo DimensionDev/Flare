@@ -36,18 +36,23 @@ class BlueskyDataSource(
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
-    override fun homeTimeline(pageSize: Int, pagingKey: String): Flow<PagingData<UiStatus>> =
+
+    override fun homeTimeline(
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = HomeTimelineRemoteMediator(
-                account.getService(appDatabase),
-                account.accountKey,
-                database,
-                pagingKey,
-            ),
+            mediator =
+                HomeTimelineRemoteMediator(
+                    account.getService(appDatabase),
+                    account.accountKey,
+                    database,
+                    pagingKey,
+                ),
         )
 
     override fun notification(
@@ -60,16 +65,18 @@ class BlueskyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = when (type) {
-                NotificationFilter.All -> NotificationRemoteMediator(
-                    account.getService(appDatabase),
-                    account.accountKey,
-                    database,
-                    pagingKey,
-                )
+            mediator =
+                when (type) {
+                    NotificationFilter.All ->
+                        NotificationRemoteMediator(
+                            account.getService(appDatabase),
+                            account.accountKey,
+                            database,
+                            pagingKey,
+                        )
 
-                else -> throw IllegalArgumentException("Unsupported notification filter")
-            },
+                    else -> throw IllegalArgumentException("Unsupported notification filter")
+                },
         )
 
     override val supportedNotificationFilter: List<NotificationFilter>
@@ -79,10 +86,11 @@ class BlueskyDataSource(
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
-                val user = account.getService(appDatabase)
-                    .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = name)))
-                    .requireResponse()
-                    .toDbUser(account.accountKey.host)
+                val user =
+                    account.getService(appDatabase)
+                        .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = name)))
+                        .requireResponse()
+                        .toDbUser(account.accountKey.host)
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,
@@ -104,10 +112,11 @@ class BlueskyDataSource(
     override fun userById(id: String): CacheData<UiUser> {
         return Cacheable(
             fetchSource = {
-                val user = account.getService(appDatabase)
-                    .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = id)))
-                    .requireResponse()
-                    .toDbUser(account.accountKey.host)
+                val user =
+                    account.getService(appDatabase)
+                        .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = id)))
+                        .requireResponse()
+                        .toDbUser(account.accountKey.host)
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,
@@ -148,13 +157,14 @@ class BlueskyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = UserTimelineRemoteMediator(
-                account.getService(appDatabase),
-                account.accountKey,
-                database,
-                userKey,
-                pagingKey,
-            ),
+            mediator =
+                UserTimelineRemoteMediator(
+                    account.getService(appDatabase),
+                    account.accountKey,
+                    database,
+                    userKey,
+                    pagingKey,
+                ),
         )
 
     override fun context(
@@ -167,30 +177,35 @@ class BlueskyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = StatusDetailRemoteMediator(
-                statusKey,
-                account.getService(appDatabase),
-                account.accountKey,
-                database,
-                pagingKey,
-                statusOnly = false,
-            ),
+            mediator =
+                StatusDetailRemoteMediator(
+                    statusKey,
+                    account.getService(appDatabase),
+                    account.accountKey,
+                    database,
+                    pagingKey,
+                    statusOnly = false,
+                ),
         )
 
-    override fun status(statusKey: MicroBlogKey, pagingKey: String): Flow<PagingData<UiStatus>> =
+    override fun status(
+        statusKey: MicroBlogKey,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> =
         timelinePager(
             pageSize = 1,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
-            mediator = StatusDetailRemoteMediator(
-                statusKey,
-                account.getService(appDatabase),
-                account.accountKey,
-                database,
-                pagingKey,
-                statusOnly = true,
-            ),
+            mediator =
+                StatusDetailRemoteMediator(
+                    statusKey,
+                    account.getService(appDatabase),
+                    account.accountKey,
+                    database,
+                    pagingKey,
+                    statusOnly = true,
+                ),
         )
 
     data class BlueskyComposeData(
@@ -202,111 +217,117 @@ class BlueskyDataSource(
         val language: List<String> = listOf("en"),
         val medias: List<FileItem> = emptyList(),
     ) : ComposeData
-    override suspend fun compose(data: ComposeData, progress: (ComposeProgress) -> Unit) {
+
+    override suspend fun compose(
+        data: ComposeData,
+        progress: (ComposeProgress) -> Unit,
+    ) {
         require(data is BlueskyComposeData)
         val maxProgress = data.medias.size + 1
         val service = data.account.getService(appDatabase)
-        val mediaBlob = data.medias.mapIndexedNotNull { index, item ->
-            service.uploadBlob(item.readBytes()).also {
-                progress(ComposeProgress(index + 1, maxProgress))
-            }.maybeResponse()
-        }.map {
-            it.blob
-        }
+        val mediaBlob =
+            data.medias.mapIndexedNotNull { index, item ->
+                service.uploadBlob(item.readBytes()).also {
+                    progress(ComposeProgress(index + 1, maxProgress))
+                }.maybeResponse()
+            }.map {
+                it.blob
+            }
         service.createRecord(
             CreateRecordRequest(
                 repo = AtIdentifier(data.account.accountKey.id),
                 collection = Nsid("app.bsky.feed.post"),
-                record = buildJsonObject {
-                    put("\$type", "app.bsky.feed.post")
-                    put("createdAt", Clock.System.now().toString())
-                    put("text", data.content)
-                    if (data.quoteId != null) {
-                        val item =
-                            service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(data.quoteId))))
-                                .maybeResponse()
-                                ?.posts
-                                ?.firstOrNull()
-                        if (item != null) {
+                record =
+                    buildJsonObject {
+                        put("\$type", "app.bsky.feed.post")
+                        put("createdAt", Clock.System.now().toString())
+                        put("text", data.content)
+                        if (data.quoteId != null) {
+                            val item =
+                                service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(data.quoteId))))
+                                    .maybeResponse()
+                                    ?.posts
+                                    ?.firstOrNull()
+                            if (item != null) {
+                                put(
+                                    "embed",
+                                    buildJsonObject {
+                                        put("\$type", "app.bsky.embed.record")
+                                        put(
+                                            "record",
+                                            buildJsonObject {
+                                                put("cid", item.cid.cid)
+                                                put("uri", item.uri.atUri)
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                        if (data.inReplyToID != null) {
+                            val item =
+                                service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(data.inReplyToID))))
+                                    .maybeResponse()
+                                    ?.posts
+                                    ?.firstOrNull()
+                            if (item != null) {
+                                put(
+                                    "reply",
+                                    buildJsonObject {
+                                        put(
+                                            "parent",
+                                            buildJsonObject {
+                                                put("cid", item.cid.cid)
+                                                put("uri", item.uri.atUri)
+                                            },
+                                        )
+                                        put(
+                                            "root",
+                                            buildJsonObject {
+                                                item.record.jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
+                                                    ?.jsonObjectOrNull?.let { root ->
+                                                        put("cid", root["cid"]?.jsonPrimitive?.content)
+                                                        put("uri", root["uri"]?.jsonPrimitive?.content)
+                                                    } ?: run {
+                                                    put("cid", item.cid.cid)
+                                                    put("uri", item.uri.atUri)
+                                                }
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                        if (mediaBlob.any()) {
                             put(
                                 "embed",
                                 buildJsonObject {
-                                    put("\$type", "app.bsky.embed.record")
+                                    put("\$type", "app.bsky.embed.images")
                                     put(
-                                        "record",
-                                        buildJsonObject {
-                                            put("cid", item.cid.cid)
-                                            put("uri", item.uri.atUri)
-                                        },
-                                    )
-                                },
-                            )
-                        }
-                    }
-                    if (data.inReplyToID != null) {
-                        val item =
-                            service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(data.inReplyToID))))
-                                .maybeResponse()
-                                ?.posts
-                                ?.firstOrNull()
-                        if (item != null) {
-                            put(
-                                "reply",
-                                buildJsonObject {
-                                    put(
-                                        "parent",
-                                        buildJsonObject {
-                                            put("cid", item.cid.cid)
-                                            put("uri", item.uri.atUri)
-                                        },
-                                    )
-                                    put(
-                                        "root",
-                                        buildJsonObject {
-                                            item.record.jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
-                                                ?.jsonObjectOrNull?.let { root ->
-                                                    put("cid", root["cid"]?.jsonPrimitive?.content)
-                                                    put("uri", root["uri"]?.jsonPrimitive?.content)
-                                                } ?: run {
-                                                put("cid", item.cid.cid)
-                                                put("uri", item.uri.atUri)
+                                        "images",
+                                        buildJsonArray {
+                                            mediaBlob.forEach { blob ->
+                                                add(
+                                                    buildJsonObject {
+                                                        put("image", blob.encodeJson().decodeJson())
+                                                        put("alt", "")
+                                                    },
+                                                )
                                             }
                                         },
                                     )
                                 },
                             )
                         }
-                    }
-                    if (mediaBlob.any()) {
                         put(
-                            "embed",
-                            buildJsonObject {
-                                put("\$type", "app.bsky.embed.images")
-                                put(
-                                    "images",
-                                    buildJsonArray {
-                                        mediaBlob.forEach { blob ->
-                                            add(
-                                                buildJsonObject {
-                                                    put("image", blob.encodeJson().decodeJson())
-                                                    put("alt", "")
-                                                },
-                                            )
-                                        }
-                                    },
-                                )
+                            "langs",
+                            buildJsonArray {
+                                data.language.forEach { lang ->
+                                    add(lang)
+                                }
                             },
                         )
-                    }
-                    put(
-                        "langs",
-                        buildJsonArray {
-                            data.language.forEach { lang ->
-                                add(lang)
-                            }
-                        },
-                    )
-                },
+                    },
             ),
         )
     }

@@ -22,18 +22,18 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 
 class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
-
     @Composable
     override fun body(): HomeTimelineState {
-        val listState = activeAccountServicePresenter().map { (service, account) ->
-            remember(account.accountKey) {
-                service.homeTimeline()
-            }.collectAsLazyPagingItems()
-        }
+        val listState =
+            activeAccountServicePresenter().map { (service, account) ->
+                remember(account.accountKey) {
+                    service.homeTimeline()
+                }.collectAsLazyPagingItems()
+            }
         var showNewToots by remember { mutableStateOf(false) }
         val refreshing =
             listState is UiState.Loading ||
-                    listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
         if (listState is UiState.Success && listState.data.itemCount > 0) {
             LaunchedEffect(Unit) {
                 snapshotFlow { listState.data.peek(0)?.statusKey }
@@ -49,7 +49,7 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
         return object : HomeTimelineState(
             refreshing,
             listState,
-            showNewToots
+            showNewToots,
         ) {
             override fun refresh() {
                 listState.onSuccess {
@@ -60,7 +60,6 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
             override fun onNewTootsShown() {
                 showNewToots = false
             }
-
         }
     }
 }
@@ -76,17 +75,18 @@ abstract class HomeTimelineState(
     abstract fun onNewTootsShown()
 
     companion object {
-        val Empty = object : HomeTimelineState(
-            refreshing = false,
-            listState = UiState.Loading(),
-            showNewToots = false,
-        ) {
-            override fun refresh() {
-            }
+        val Empty =
+            object : HomeTimelineState(
+                refreshing = false,
+                listState = UiState.Loading(),
+                showNewToots = false,
+            ) {
+                override fun refresh() {
+                }
 
-            override fun onNewTootsShown() {
+                override fun onNewTootsShown() {
+                }
             }
-        }
     }
 }
 
@@ -101,14 +101,17 @@ class CounterPresenter : PresenterBase<CounterState>() {
         }
     }
 }
+
 abstract class CounterState(
-    val count: String
+    val count: String,
 ) {
     abstract fun increment()
+
     companion object {
-        val Empty = object : CounterState("0") {
-            override fun increment() {
+        val Empty =
+            object : CounterState("0") {
+                override fun increment() {
+                }
             }
-        }
     }
 }

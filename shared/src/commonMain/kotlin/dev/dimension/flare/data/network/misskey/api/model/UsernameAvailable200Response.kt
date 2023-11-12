@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param available */
 @Serializable
 data class UsernameAvailable200Response(
-
     @SerialName(value = "available") val available: kotlin.Boolean,
-
 )

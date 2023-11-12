@@ -23,15 +23,10 @@ import kotlinx.serialization.Serializable
  * @param span * @param limit * @param offset */
 @Serializable
 data class ChartsActiveUsersRequest(
-
     @SerialName(value = "span") val span: ChartsActiveUsersRequest.Span,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 30,
-
     @SerialName(value = "offset") val offset: kotlin.Int? = null,
-
 ) {
-
     /**
      * *
      * Values: Day,Hour

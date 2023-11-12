@@ -23,21 +23,13 @@ import kotlinx.serialization.Serializable
  * @param webhookId * @param name * @param url * @param secret * @param on * @param active */
 @Serializable
 data class IWebhooksUpdateRequest(
-
     @SerialName(value = "webhookId") val webhookId: kotlin.String,
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "url") val url: kotlin.String,
-
     @SerialName(value = "secret") val secret: kotlin.String,
-
     @SerialName(value = "on") val on: kotlin.collections.List<IWebhooksUpdateRequest.On>,
-
     @SerialName(value = "active") val active: kotlin.Boolean,
-
 ) {
-
     /**
      * *
      * Values: Mention,Unfollow,Follow,Followed,Note,Reply,Renote,Reaction

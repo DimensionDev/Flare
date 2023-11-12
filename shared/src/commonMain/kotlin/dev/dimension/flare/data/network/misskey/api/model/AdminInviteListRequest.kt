@@ -23,17 +23,11 @@ import kotlinx.serialization.Serializable
  * @param limit * @param offset * @param type * @param sort */
 @Serializable
 data class AdminInviteListRequest(
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 30,
-
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
-
     @SerialName(value = "type") val type: AdminInviteListRequest.Type? = Type.All,
-
     @SerialName(value = "sort") val sort: AdminInviteListRequest.Sort? = null,
-
 ) {
-
     /**
      * *
      * Values: Unused,Used,Expired,All

@@ -23,9 +23,6 @@ import kotlinx.serialization.Serializable
  * @param listId * @param forPublic */
 @Serializable
 data class UsersListsShowRequest(
-
     @SerialName(value = "listId") val listId: kotlin.String,
-
     @SerialName(value = "forPublic") val forPublic: kotlin.Boolean? = false,
-
 )

@@ -14,12 +14,12 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 class HomePresenter : PresenterBase<HomeState>() {
     @Composable
     override fun body(): HomeState {
-        val user = activeAccountServicePresenter().flatMap { (service, account) ->
-            remember(account.accountKey) {
-                service.userById(account.accountKey.id)
-            }.collectAsState().toUi()
-        }
-
+        val user =
+            activeAccountServicePresenter().flatMap { (service, account) ->
+                remember(account.accountKey) {
+                    service.userById(account.accountKey.id)
+                }.collectAsState().toUi()
+            }
 
         return object : HomeState(
             user = user,

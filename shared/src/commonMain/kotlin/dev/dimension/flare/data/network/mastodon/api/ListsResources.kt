@@ -19,7 +19,9 @@ interface ListsResources {
     suspend fun lists(): List<MastodonList>
 
     @POST("api/v1/lists")
-    suspend fun createList(@Body postList: PostList): MastodonList
+    suspend fun createList(
+        @Body postList: PostList,
+    ): MastodonList
 
     @PUT("api/v1/lists/{id}")
     suspend fun updateList(
@@ -28,7 +30,9 @@ interface ListsResources {
     ): MastodonList
 
     @DELETE("api/v1/lists/{id}")
-    suspend fun deleteList(@Path("id") id: String): Response<String>
+    suspend fun deleteList(
+        @Path("id") id: String,
+    ): Response<String>
 
     @GET("api/v1/lists/{id}/accounts")
     suspend fun listMembers(

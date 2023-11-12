@@ -23,15 +23,9 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param expiresAt * @param muteeId * @param mutee */
 @Serializable
 data class Muting(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "expiresAt") val expiresAt: kotlin.String? = null,
-
     @SerialName(value = "muteeId") val muteeId: kotlin.String,
-
     @SerialName(value = "mutee") val mutee: UserDetailed,
-
 )

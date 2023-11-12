@@ -14,52 +14,59 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
-sealed class UiState<T: Any> {
-    data class Success<T: Any>(val data: T) : UiState<T>()
-    data class Error<T: Any>(val throwable: Throwable) : UiState<T>()
-    class Loading<T: Any> : UiState<T>()
+sealed class UiState<T : Any> {
+    data class Success<T : Any>(val data: T) : UiState<T>()
+
+    data class Error<T : Any>(val throwable: Throwable) : UiState<T>()
+
+    class Loading<T : Any> : UiState<T>()
 }
 
-internal fun <T: Any> Flow<T>.toUiState(): Flow<UiState<T>> = map<T, UiState<T>> { UiState.Success(it) }
-    .onStart { emit(UiState.Loading()) }
-    .catch { emit(UiState.Error(it)) }
+internal fun <T : Any> Flow<T>.toUiState(): Flow<UiState<T>> =
+    map<T, UiState<T>> { UiState.Success(it) }
+        .onStart { emit(UiState.Loading()) }
+        .catch { emit(UiState.Error(it)) }
 
-
-inline fun <T: Any, R: Any> UiState<T>.map(transform: (T) -> R): UiState<R> = when (this) {
-    is UiState.Success -> UiState.Success(transform(data))
-    is UiState.Error -> UiState.Error(throwable)
-    is UiState.Loading -> UiState.Loading()
-}
-
-inline fun <T: Any, R: Any> UiState<T>.flatMap(transform: (T) -> UiState<R>): UiState<R> = when (this) {
-    is UiState.Success -> transform(data)
-    is UiState.Error -> UiState.Error(throwable)
-    is UiState.Loading -> UiState.Loading()
-}
-
-inline fun <T: Any> UiState<T>.onSuccess(action: (T) -> Unit): UiState<T> = apply {
-    if (this is UiState.Success) {
-        action(data)
+inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
+    when (this) {
+        is UiState.Success -> UiState.Success(transform(data))
+        is UiState.Error -> UiState.Error(throwable)
+        is UiState.Loading -> UiState.Loading()
     }
-}
 
-inline fun <T: Any> UiState<T>.onError(action: (Throwable) -> Unit): UiState<T> = apply {
-    if (this is UiState.Error) {
-        action(throwable)
+inline fun <T : Any, R : Any> UiState<T>.flatMap(transform: (T) -> UiState<R>): UiState<R> =
+    when (this) {
+        is UiState.Success -> transform(data)
+        is UiState.Error -> UiState.Error(throwable)
+        is UiState.Loading -> UiState.Loading()
     }
-}
 
-inline fun <T: Any> UiState<T>.onLoading(action: () -> Unit): UiState<T> = apply {
-    if (this is UiState.Loading) {
-        action()
+inline fun <T : Any> UiState<T>.onSuccess(action: (T) -> Unit): UiState<T> =
+    apply {
+        if (this is UiState.Success) {
+            action(data)
+        }
     }
-}
+
+inline fun <T : Any> UiState<T>.onError(action: (Throwable) -> Unit): UiState<T> =
+    apply {
+        if (this is UiState.Error) {
+            action(throwable)
+        }
+    }
+
+inline fun <T : Any> UiState<T>.onLoading(action: () -> Unit): UiState<T> =
+    apply {
+        if (this is UiState.Loading) {
+            action()
+        }
+    }
 
 @Composable
-internal fun <T: Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
+internal fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
     remember(this) { toUiState() }.collectAsState(initial)
 
-fun <T: Any> CacheableState<T>.toUi(): UiState<T> {
+fun <T : Any> CacheableState<T>.toUi(): UiState<T> {
     return data?.let {
         UiState.Success(it)
     } ?: run {
@@ -71,7 +78,7 @@ fun <T: Any> CacheableState<T>.toUi(): UiState<T> {
     }
 }
 
-internal fun <T: Any> CacheData<T>.toUi(): Flow<UiState<T>> {
+internal fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> {
     return combine(data, refreshState) { data, refresh ->
         if (data is CacheState.Success) {
             UiState.Success(data.data)

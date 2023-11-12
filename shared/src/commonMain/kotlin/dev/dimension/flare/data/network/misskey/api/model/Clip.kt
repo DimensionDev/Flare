@@ -23,25 +23,14 @@ import kotlinx.serialization.Serializable
  * @param id * @param createdAt * @param lastClippedAt * @param userId * @param user * @param name * @param description * @param isPublic * @param favoritedCount * @param isFavorited */
 @Serializable
 data class Clip(
-
     @SerialName(value = "id") val id: kotlin.String,
-
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-
     @SerialName(value = "lastClippedAt") val lastClippedAt: kotlin.String? = null,
-
     @SerialName(value = "userId") val userId: kotlin.String,
-
     @SerialName(value = "user") val user: UserLite,
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "description") val description: kotlin.String? = null,
-
     @SerialName(value = "isPublic") val isPublic: kotlin.Boolean,
-
     @SerialName(value = "favoritedCount") val favoritedCount: kotlin.Double,
-
     @SerialName(value = "isFavorited") val isFavorited: kotlin.Boolean? = null,
-
 )

@@ -66,7 +66,6 @@ sealed class UiUser {
         val relation: UiRelation.Misskey,
         internal val accountHost: String,
     ) : UiUser() {
-
         override val nameElement by lazy {
             parseName(name, accountHost)
         }
@@ -76,6 +75,7 @@ sealed class UiUser {
         }
 
         override val handle = "@$handleInternal@$remoteHost"
+
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
@@ -98,7 +98,6 @@ sealed class UiUser {
         val relation: UiRelation.Bluesky,
         internal val accountHost: String,
     ) : UiUser() {
-
         override val nameElement by lazy {
             Element("span").apply {
                 children.add(Text(name))
@@ -109,6 +108,7 @@ sealed class UiUser {
             parseDescription(description, accountHost)
         }
         override val handle: String = "@$handleInternal"
+
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
@@ -121,16 +121,15 @@ sealed class UiUser {
     }
 }
 
-
-
 private fun parseNote(account: Account): Element? {
     val emoji = account.emojis.orEmpty()
     var content = account.note.orEmpty()
     emoji.forEach {
-        content = content.replace(
-            ":${it.shortcode}:",
-            "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
-        )
+        content =
+            content.replace(
+                ":${it.shortcode}:",
+                "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
+            )
     }
     return Ktml.parse(content) as? Element
 }
@@ -139,10 +138,11 @@ private fun parseName(status: Account): Element {
     val emoji = status.emojis.orEmpty()
     var content = status.displayName.orEmpty().ifEmpty { status.username.orEmpty() }
     emoji.forEach {
-        content = content.replace(
-            ":${it.shortcode}:",
-            "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
-        )
+        content =
+            content.replace(
+                ":${it.shortcode}:",
+                "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
+            )
     }
     return Ktml.parse(content) as? Element ?: Element("body")
 }
@@ -156,7 +156,6 @@ private fun parseName(
     }
     return misskeyParser.parse(name).toHtml(accountHost) as? Element ?: Element("body")
 }
-
 
 private fun parseDescription(
     description: String?,

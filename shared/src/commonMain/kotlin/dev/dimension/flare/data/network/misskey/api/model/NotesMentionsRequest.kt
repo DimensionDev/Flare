@@ -23,15 +23,9 @@ import kotlinx.serialization.Serializable
  * @param following * @param limit * @param sinceId * @param untilId * @param visibility */
 @Serializable
 data class NotesMentionsRequest(
-
     @SerialName(value = "following") val following: kotlin.Boolean? = false,
-
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
-
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,
-
     @SerialName(value = "visibility") val visibility: kotlin.String? = null,
-
 )

@@ -15,37 +15,59 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 
 interface StatusResources {
     @POST("api/v1/statuses/{id}/favourite")
-    suspend fun favourite(@Path("id") id: String): Status
+    suspend fun favourite(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/unfavourite")
-    suspend fun unfavourite(@Path("id") id: String): Status
+    suspend fun unfavourite(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/reblog")
-    suspend fun reblog(@Path("id") id: String): Status
+    suspend fun reblog(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/unreblog")
-    suspend fun unreblog(@Path("id") id: String): Status
+    suspend fun unreblog(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/bookmark")
-    suspend fun bookmark(@Path("id") id: String): Status
+    suspend fun bookmark(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/unbookmark")
-    suspend fun unbookmark(@Path("id") id: String): Status
+    suspend fun unbookmark(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/mute")
-    suspend fun mute(@Path("id") id: String): Status
+    suspend fun mute(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/unmute")
-    suspend fun unmute(@Path("id") id: String): Status
+    suspend fun unmute(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/pin")
-    suspend fun pin(@Path("id") id: String): Status
+    suspend fun pin(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses/{id}/unpin")
-    suspend fun unpin(@Path("id") id: String): Status
+    suspend fun unpin(
+        @Path("id") id: String,
+    ): Status
 
     @DELETE("api/v1/statuses/{id}")
-    suspend fun delete(@Path("id") id: String): Status
+    suspend fun delete(
+        @Path("id") id: String,
+    ): Status
 
     @POST("api/v1/statuses")
     suspend fun post(
@@ -56,8 +78,13 @@ interface StatusResources {
 
     @Multipart
     @POST("api/v1/media")
-    suspend fun upload(@Body map: MultiPartFormDataContent): UploadResponse
+    suspend fun upload(
+        @Body map: MultiPartFormDataContent,
+    ): UploadResponse
 
     @POST("api/v1/polls/{id}/votes")
-    suspend fun vote(@Path("id") id: String, @Body data: PostVote): Poll
+    suspend fun vote(
+        @Path("id") id: String,
+        @Body data: PostVote,
+    ): Poll
 }

@@ -25,7 +25,9 @@ interface PagesApi {
      * @param pagesCreateRequest * @return [Page]
      */
     @POST("pages/create")
-    suspend fun pagesCreate(@Body pagesCreateRequest: PagesCreateRequest): Response<Page>
+    suspend fun pagesCreate(
+        @Body pagesCreateRequest: PagesCreateRequest,
+    ): Response<Page>
 
     /**
      * pages/delete
@@ -41,7 +43,9 @@ interface PagesApi {
      * @param pagesDeleteRequest * @return [Unit]
      */
     @POST("pages/delete")
-    suspend fun pagesDelete(@Body pagesDeleteRequest: PagesDeleteRequest): Response<Unit>
+    suspend fun pagesDelete(
+        @Body pagesDeleteRequest: PagesDeleteRequest,
+    ): Response<Unit>
 
     /**
      * pages/featured
@@ -57,7 +61,9 @@ interface PagesApi {
      * @param body * @return [kotlin.collections.List<Page>]
      */
     @POST("pages/featured")
-    suspend fun pagesFeatured(@Body body: kotlin.Any): Response<kotlin.collections.List<Page>>
+    suspend fun pagesFeatured(
+        @Body body: kotlin.Any,
+    ): Response<kotlin.collections.List<Page>>
 
     /**
      * pages/like
@@ -73,7 +79,9 @@ interface PagesApi {
      * @param pagesDeleteRequest * @return [Unit]
      */
     @POST("pages/like")
-    suspend fun pagesLike(@Body pagesDeleteRequest: PagesDeleteRequest): Response<Unit>
+    suspend fun pagesLike(
+        @Body pagesDeleteRequest: PagesDeleteRequest,
+    ): Response<Unit>
 
     /**
      * pages/show
@@ -89,7 +97,9 @@ interface PagesApi {
      * @param pagesShowRequest * @return [Page]
      */
     @POST("pages/show")
-    suspend fun pagesShow(@Body pagesShowRequest: PagesShowRequest): Response<Page>
+    suspend fun pagesShow(
+        @Body pagesShowRequest: PagesShowRequest,
+    ): Response<Page>
 
     /**
      * pages/unlike
@@ -105,7 +115,9 @@ interface PagesApi {
      * @param pagesDeleteRequest * @return [Unit]
      */
     @POST("pages/unlike")
-    suspend fun pagesUnlike(@Body pagesDeleteRequest: PagesDeleteRequest): Response<Unit>
+    suspend fun pagesUnlike(
+        @Body pagesDeleteRequest: PagesDeleteRequest,
+    ): Response<Unit>
 
     /**
      * pages/update
@@ -122,5 +134,7 @@ interface PagesApi {
      * @param pagesUpdateRequest * @return [Unit]
      */
     @POST("pages/update")
-    suspend fun pagesUpdate(@Body pagesUpdateRequest: PagesUpdateRequest): Response<Unit>
+    suspend fun pagesUpdate(
+        @Body pagesUpdateRequest: PagesUpdateRequest,
+    ): Response<Unit>
 }

@@ -23,7 +23,5 @@ import kotlinx.serialization.Serializable
  * @param url */
 @Serializable
 data class FetchRssRequest(
-
     @SerialName(value = "url") val url: kotlin.String,
-
 )

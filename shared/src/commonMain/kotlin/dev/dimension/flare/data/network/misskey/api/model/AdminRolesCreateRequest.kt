@@ -23,37 +23,21 @@ import kotlinx.serialization.Serializable
  * @param name * @param description * @param color * @param iconUrl * @param target * @param condFormula * @param isPublic * @param isModerator * @param isAdministrator * @param asBadge * @param canEditMembersByModerator * @param displayOrder * @param policies * @param isExplorable */
 @Serializable
 data class AdminRolesCreateRequest(
-
     @SerialName(value = "name") val name: kotlin.String,
-
     @SerialName(value = "description") val description: kotlin.String,
-
     @SerialName(value = "color") val color: kotlin.String? = null,
-
     @SerialName(value = "iconUrl") val iconUrl: kotlin.String? = null,
-
     @SerialName(value = "target") val target: AdminRolesCreateRequest.Target,
-
     @SerialName(value = "condFormula") val condFormula: kotlin.String,
-
     @SerialName(value = "isPublic") val isPublic: kotlin.Boolean,
-
     @SerialName(value = "isModerator") val isModerator: kotlin.Boolean,
-
     @SerialName(value = "isAdministrator") val isAdministrator: kotlin.Boolean,
-
     @SerialName(value = "asBadge") val asBadge: kotlin.Boolean,
-
     @SerialName(value = "canEditMembersByModerator") val canEditMembersByModerator: kotlin.Boolean,
-
     @SerialName(value = "displayOrder") val displayOrder: kotlin.Double,
-
     @SerialName(value = "policies") val policies: kotlin.String,
-
     @SerialName(value = "isExplorable") val isExplorable: kotlin.Boolean? = false,
-
 ) {
-
     /**
      * *
      * Values: Manual,Conditional

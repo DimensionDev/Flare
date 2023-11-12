@@ -23,13 +23,8 @@ import kotlinx.serialization.Serializable
  * @param title * @param summary * @param script * @param permissions */
 @Serializable
 data class FlashCreateRequest(
-
     @SerialName(value = "title") val title: kotlin.String,
-
     @SerialName(value = "summary") val summary: kotlin.String,
-
     @SerialName(value = "script") val script: kotlin.String,
-
     @SerialName(value = "permissions") val permissions: kotlin.collections.List<kotlin.String>,
-
 )

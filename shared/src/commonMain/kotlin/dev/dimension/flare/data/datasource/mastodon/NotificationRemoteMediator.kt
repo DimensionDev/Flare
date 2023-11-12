@@ -22,26 +22,28 @@ internal class NotificationRemoteMediator(
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
     ): MediatorResult {
         return try {
-            val response = when (loadType) {
-                LoadType.REFRESH, LoadType.PREPEND -> {
-                    val firstItem = state.firstItemOrNull()
-                    service.notification(
-                        limit = state.config.pageSize,
-                        min_id = firstItem?.timeline_status_key?.id,
-                    )
-                }
-
-                LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                        ?: return MediatorResult.Success(
-                            endOfPaginationReached = true,
+            val response =
+                when (loadType) {
+                    LoadType.REFRESH, LoadType.PREPEND -> {
+                        val firstItem = state.firstItemOrNull()
+                        service.notification(
+                            limit = state.config.pageSize,
+                            min_id = firstItem?.timeline_status_key?.id,
                         )
-                    service.notification(
-                        limit = state.config.pageSize,
-                        max_id = lastItem.timeline_status_key.id,
-                    )
+                    }
+
+                    LoadType.APPEND -> {
+                        val lastItem =
+                            state.lastItemOrNull()
+                                ?: return MediatorResult.Success(
+                                    endOfPaginationReached = true,
+                                )
+                        service.notification(
+                            limit = state.config.pageSize,
+                            max_id = lastItem.timeline_status_key.id,
+                        )
+                    }
                 }
-            }
 
             Mastodon.save(
                 database = database,
@@ -55,6 +57,6 @@ internal class NotificationRemoteMediator(
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)
-        } 
+        }
     }
 }

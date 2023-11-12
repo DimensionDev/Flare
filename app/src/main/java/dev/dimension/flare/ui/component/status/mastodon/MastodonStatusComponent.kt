@@ -109,7 +109,9 @@ internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget ultricies ultrices, nisl nisl aliquet nisl, nec aliquam nisl nisl nec.",
+            text =
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget ultricies" +
+                    " ultrices, nisl nisl aliquet nisl, nec aliquam nisl nisl nec.",
             modifier =
                 Modifier
                     .placeholder(true),

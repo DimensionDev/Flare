@@ -39,37 +39,42 @@ internal class StatusDetailRemoteMediator(
                             account_key = account.accountKey,
                             status_key = statusKey,
                             paging_key = pagingKey,
-                            sort_id = 0
+                            sort_id = 0,
                         )
                 }
             }
-            val result = if (statusOnly) {
-                val current = service.notesShow(
-                    IPinRequest(noteId = statusKey.id),
-                ).body()
-                listOf(current)
-            } else {
-                val current = if (loadType == LoadType.REFRESH) {
-                    service.notesShow(
-                        IPinRequest(noteId = statusKey.id),
-                    ).body()
+            val result =
+                if (statusOnly) {
+                    val current =
+                        service.notesShow(
+                            IPinRequest(noteId = statusKey.id),
+                        ).body()
+                    listOf(current)
                 } else {
-                    null
-                }
-                val lastItem = state.lastItemOrNull()
-                    ?: return MediatorResult.Success(
-                        endOfPaginationReached = true,
-                    )
-                val children = service.notesChildren(
-                    NotesChildrenRequest(
-                        noteId = statusKey.id,
-                        untilId = lastItem.timeline_status_key.id,
-                        limit = state.config.pageSize,
-                    ),
-                ).body().orEmpty()
-                listOfNotNull(current?.reply, current) + children
+                    val current =
+                        if (loadType == LoadType.REFRESH) {
+                            service.notesShow(
+                                IPinRequest(noteId = statusKey.id),
+                            ).body()
+                        } else {
+                            null
+                        }
+                    val lastItem =
+                        state.lastItemOrNull()
+                            ?: return MediatorResult.Success(
+                                endOfPaginationReached = true,
+                            )
+                    val children =
+                        service.notesChildren(
+                            NotesChildrenRequest(
+                                noteId = statusKey.id,
+                                untilId = lastItem.timeline_status_key.id,
+                                limit = state.config.pageSize,
+                            ),
+                        ).body().orEmpty()
+                    listOfNotNull(current?.reply, current) + children
 //                context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
-            }.filterNotNull()
+                }.filterNotNull()
             Misskey.save(
                 database = database,
                 accountKey = account.accountKey,
@@ -81,6 +86,6 @@ internal class StatusDetailRemoteMediator(
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)
-        } 
+        }
     }
 }

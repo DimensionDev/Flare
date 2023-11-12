@@ -24,10 +24,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class UsersUpdateMemoRequest(
-
     @SerialName(value = "userId") val userId: kotlin.String,
-
-    /* A personal memo for the target user. If null or empty, delete the memo. */
+    // A personal memo for the target user. If null or empty, delete the memo.
     @SerialName(value = "memo") val memo: kotlin.String?,
-
 )

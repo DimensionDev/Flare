@@ -11,12 +11,9 @@ import io.ktor.http.*
 import kotlinx.coroutines.launch
 import org.koin.compose.rememberKoinInject
 
-
-
 class BlueskyLoginPresenter(
     private val toHome: () -> Unit,
-): PresenterBase<BlueskyLoginState>() {
-
+) : PresenterBase<BlueskyLoginState>() {
     @Composable
     override fun body(): BlueskyLoginState {
         var error by remember { mutableStateOf<Throwable?>(null) }
@@ -26,9 +23,13 @@ class BlueskyLoginPresenter(
 
         return object : BlueskyLoginState(
             loading,
-            error
+            error,
         ) {
-            override fun login(baseUrl: String, username: String, password: String) {
+            override fun login(
+                baseUrl: String,
+                username: String,
+                password: String,
+            ) {
                 scope.launch {
                     loading = true
                     error = null
@@ -57,27 +58,31 @@ class BlueskyLoginPresenter(
     ) {
         val service = BlueskyService(baseUrl)
         // check if username is email
-        val response = if (username.contains("@")) {
-            service.createSession(CreateSessionRequest(username, password))
-        } else {
-            val server = service.describeServer()
-            val actualUserName = server.maybeResponse()?.availableUserDomains?.firstOrNull()?.let {
-                "$username$it"
-            } ?: username
-            service.createSession(CreateSessionRequest(actualUserName, password))
-        }.requireResponse()
+        val response =
+            if (username.contains("@")) {
+                service.createSession(CreateSessionRequest(username, password))
+            } else {
+                val server = service.describeServer()
+                val actualUserName =
+                    server.maybeResponse()?.availableUserDomains?.firstOrNull()?.let {
+                        "$username$it"
+                    } ?: username
+                service.createSession(CreateSessionRequest(actualUserName, password))
+            }.requireResponse()
         accountRepository.addAccount(
             UiAccount.Bluesky(
-                credential = UiAccount.Bluesky.Credential(
-                    baseUrl = baseUrl,
-                    accessToken = response.accessJwt,
-                    refreshToken = response.refreshJwt,
-                ),
-                accountKey = MicroBlogKey(
-                    id = response.did.did,
-                    host = Url(baseUrl).host,
-                ),
-            )
+                credential =
+                    UiAccount.Bluesky.Credential(
+                        baseUrl = baseUrl,
+                        accessToken = response.accessJwt,
+                        refreshToken = response.refreshJwt,
+                    ),
+                accountKey =
+                    MicroBlogKey(
+                        id = response.did.did,
+                        host = Url(baseUrl).host,
+                    ),
+            ),
         )
     }
 }
@@ -86,5 +91,9 @@ abstract class BlueskyLoginState(
     val loading: Boolean,
     val error: Throwable?,
 ) {
-    abstract fun login(baseUrl: String, username: String, password: String)
+    abstract fun login(
+        baseUrl: String,
+        username: String,
+        password: String,
+    )
 }

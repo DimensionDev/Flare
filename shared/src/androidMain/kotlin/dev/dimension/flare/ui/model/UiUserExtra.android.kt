@@ -15,66 +15,75 @@ val UiUser.descriptionDirection get() = extra.descriptionDirection
 
 internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
     return when (user) {
-        is UiUser.Mastodon -> UiUserExtra(
-            nameDirection = if (Bidi(
-                    user.name,
-                    Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                ).baseIsLeftToRight()
-            ) {
-                LayoutDirection.Ltr
-            } else {
-                LayoutDirection.Rtl
-            },
-            descriptionDirection = if (Bidi(
-                    user.raw.note ?: "",
-                    Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                ).baseIsLeftToRight()
-            ) {
-                LayoutDirection.Ltr
-            } else {
-                LayoutDirection.Rtl
-            },
-        )
-        is UiUser.Misskey -> UiUserExtra(
-            nameDirection = if (Bidi(
-                    user.name,
-                    Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                ).baseIsLeftToRight()
-            ) {
-                LayoutDirection.Ltr
-            } else {
-                LayoutDirection.Rtl
-            },
-            descriptionDirection = if (Bidi(
-                    user.description ?: "",
-                    Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                ).baseIsLeftToRight()
-            ) {
-                LayoutDirection.Ltr
-            } else {
-                LayoutDirection.Rtl
-            },
-        )
+        is UiUser.Mastodon ->
+            UiUserExtra(
+                nameDirection =
+                    if (Bidi(
+                            user.name,
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
+                descriptionDirection =
+                    if (Bidi(
+                            user.raw.note ?: "",
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
+            )
+        is UiUser.Misskey ->
+            UiUserExtra(
+                nameDirection =
+                    if (Bidi(
+                            user.name,
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
+                descriptionDirection =
+                    if (Bidi(
+                            user.description ?: "",
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
+            )
 
-        is UiUser.Bluesky -> UiUserExtra(
-            nameDirection = if (Bidi(
-                    user.name,
-                    Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                ).baseIsLeftToRight()
-            ) {
-                LayoutDirection.Ltr
-            } else {
-                LayoutDirection.Rtl
-            },
-            descriptionDirection = if (Bidi(
-                    user.description ?: "",
-                    Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT
-                ).baseIsLeftToRight()
-            ) {
-                LayoutDirection.Ltr
-            } else {
-                LayoutDirection.Rtl
-            },
-        )
+        is UiUser.Bluesky ->
+            UiUserExtra(
+                nameDirection =
+                    if (Bidi(
+                            user.name,
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
+                descriptionDirection =
+                    if (Bidi(
+                            user.description ?: "",
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
+            )
     }
 }

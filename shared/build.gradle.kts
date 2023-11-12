@@ -13,7 +13,7 @@ plugins {
 }
 
 kotlin {
-    targetHierarchy.default {
+    applyDefaultHierarchyTemplate {
         common {
             group("nonAndroid") {
                 withApple()
@@ -21,7 +21,7 @@ kotlin {
             }
             group("nonJvm") {
                 withApple()
-                withAndroid()
+                withAndroidTarget()
             }
         }
     }
@@ -39,6 +39,7 @@ kotlin {
         }
     }
 
+    // export as jar for ikvm
     jvm {
         compilations.all {
             kotlinOptions {
@@ -93,6 +94,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(libs.sqldelight.jvm.driver)
+                // DO NOT upgrade the version since jvm target should be 1.8, ikvm only supports 1.8
                 implementation("org.xerial:sqlite-jdbc:3.39.2.0")
                 implementation("io.ktor:ktor-client-okhttp:${libs.versions.ktor.get()}")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${libs.versions.kotlinx.coroutines.get()}")

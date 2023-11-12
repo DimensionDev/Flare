@@ -146,6 +146,7 @@ android {
     }
 }
 
+// to include all dependencies in the jar
 tasks.withType<Jar> {
     doFirst {
         configurations["jvmCompileClasspath"].forEach { file ->

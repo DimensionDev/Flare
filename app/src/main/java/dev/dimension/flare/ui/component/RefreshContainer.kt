@@ -9,10 +9,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun RefreshContainer(
+    @Suppress("UNUSED_PARAMETER")
     refreshing: Boolean,
+    @Suppress("UNUSED_PARAMETER")
     onRefresh: () -> Unit,
     content: @Composable BoxScope.() -> Unit,
     modifier: Modifier = Modifier,
+    @Suppress("UNUSED_PARAMETER")
     indicatorPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     Box(

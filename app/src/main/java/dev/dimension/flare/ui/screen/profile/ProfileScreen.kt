@@ -28,7 +28,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -141,7 +140,7 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
@@ -175,7 +174,7 @@ private fun ProfileLoadingScreen(onBack: () -> Unit) {
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
@@ -550,7 +549,7 @@ private object ProfileHeaderConstants {
 }
 
 @Composable
-private fun ProfileHeaderError(modifier: Modifier = Modifier) {
+private fun ProfileHeaderError() {
 }
 
 @Composable

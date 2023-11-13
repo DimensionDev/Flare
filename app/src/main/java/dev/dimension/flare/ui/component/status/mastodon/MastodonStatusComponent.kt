@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lock
@@ -148,7 +149,6 @@ internal fun MastodonStatusComponent(
         )
         StatusContentComponent(
             data = actualData,
-            event = event,
         )
         if (data.media.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -159,7 +159,6 @@ internal fun MastodonStatusComponent(
         }
         StatusCardComponent(
             data = actualData,
-            event = event,
         )
         StatusFooterComponent(
             data = data,
@@ -171,7 +170,6 @@ internal fun MastodonStatusComponent(
 @Composable
 private fun StatusCardComponent(
     data: UiStatus.Mastodon,
-    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -233,7 +231,7 @@ private fun StatusFooterComponent(
             LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
         ) {
             StatusActionButton(
-                icon = Icons.Default.Reply,
+                icon = Icons.AutoMirrored.Filled.Reply,
                 text = actualData.matrices.humanizedReplyCount,
                 modifier =
                     Modifier
@@ -293,7 +291,6 @@ private fun StatusFooterComponent(
 @Composable
 private fun StatusContentComponent(
     data: UiStatus.Mastodon,
-    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     // TODO: not a best way to handle this
@@ -335,7 +332,6 @@ private fun StatusContentComponent(
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusPollComponent(
                         data = it,
-                        event = event,
                     )
                 }
             }
@@ -346,7 +342,6 @@ private fun StatusContentComponent(
 @Composable
 private fun StatusPollComponent(
     data: UiStatus.Mastodon.Poll,
-    event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -372,7 +367,7 @@ private fun StatusPollComponent(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
-                    progress = option.percentage,
+                    progress = { option.percentage },
                     modifier =
                         Modifier
                             .fillMaxWidth()

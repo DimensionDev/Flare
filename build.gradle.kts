@@ -18,9 +18,10 @@ allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
             jvmTarget = "17"
-//            allWarningsAsErrors = true
+            allWarningsAsErrors = true
             freeCompilerArgs = freeCompilerArgs + listOf(
-                "-Xcontext-receivers"
+                "-Xcontext-receivers",
+                "-Xexpect-actual-classes"
             )
         }
     }

@@ -73,12 +73,12 @@ object NoActiveAccountException : Exception("No active account.")
 internal fun activeAccountPresenter(repository: AccountRepository = rememberKoinInject()): State<UiState<UiAccount>> {
     return remember(repository) {
         repository.activeAccount
-            .map {
+            .map<UiAccount?, UiState<UiAccount>> {
                 if (it == null) {
                     UiState.Error(NoActiveAccountException)
                 } else {
                     UiState.Success(it)
-                } as UiState<UiAccount>
+                }
             }
     }.collectAsState(initial = UiState.Loading())
 }

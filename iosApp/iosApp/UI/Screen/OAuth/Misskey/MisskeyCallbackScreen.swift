@@ -43,7 +43,7 @@ class MisskeyCallbackViewModel : MoleculeViewModelProto {
     
     init(session: String?, toHome: @escaping () -> Void) {
         self.presenter = MisskeyCallbackPresenter(session: session, toHome: toHome)
-        self.model = presenter.models.value!
+        self.model = presenter.models.value
     }
 }
 

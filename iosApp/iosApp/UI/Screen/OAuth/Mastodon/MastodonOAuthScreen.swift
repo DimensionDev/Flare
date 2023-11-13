@@ -60,7 +60,7 @@ class MastodonOAuthViewModel {
     func confirm() async {
         do {
             error = nil
-            let result = try await shared.MastodonCallbackPresenterKt.mastodonLoginUseCase(domain: instanceURL) { url in
+            let result = try await shared.MastodonCallbackPresenterKt.mastodonLoginUseCase(domain: instanceURL, applicationRepository: KoinHelper.shared.applicationRepository) { url in
                 guard let url = URL(string: url) else {
                     self.error = "url is not vaild"
                     return

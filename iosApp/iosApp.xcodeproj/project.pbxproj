@@ -29,7 +29,6 @@
 		060D00C42AC414400087427A /* MastodonCallbackScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C32AC414400087427A /* MastodonCallbackScreen.swift */; };
 		060D00C62AC41D050087427A /* MisskeyCallbackScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C52AC41D050087427A /* MisskeyCallbackScreen.swift */; };
 		0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */; };
-		064E893B2AC52C4D00F30759 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
 		066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */; };
 		067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 067D89762AD25C1700F8F932 /* MarkdownUI */; };
@@ -45,8 +44,8 @@
 		06AD156B2AC3F454000DC865 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156A2AC3F454000DC865 /* Route.swift */; };
 		06AD156F2AC400A0000DC865 /* MastodonOAuthScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156E2AC400A0000DC865 /* MastodonOAuthScreen.swift */; };
 		06C433AB2AC13B550022B819 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C433AA2AC13B550022B819 /* ContentView.swift */; };
-		06D5C9142AC3BB09007439D5 /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9132AC3BB09007439D5 /* MoleculeViewModelBase.swift */; };
 		06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */; };
+		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,11 +85,11 @@
 		06AD156A2AC3F454000DC865 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
 		06AD156E2AC400A0000DC865 /* MastodonOAuthScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonOAuthScreen.swift; sourceTree = "<group>"; };
 		06C433AA2AC13B550022B819 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		06D5C9132AC3BB09007439D5 /* MoleculeViewModelBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoleculeViewModelBase.swift; sourceTree = "<group>"; };
 		06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSelectScreen.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoleculeViewModelBase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,7 +97,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				064E893B2AC52C4D00F30759 /* (null) in Frameworks */,
 				067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -256,6 +254,7 @@
 				7555FF7D242A565900829871 /* iosApp */,
 				7555FF7C242A565900829871 /* Products */,
 				42799AB246E5F90AF97AA0EF /* Frameworks */,
+				B62B28B1E5833D550BCF0975 /* xcschemes */,
 			);
 			sourceTree = "<group>";
 		};
@@ -275,8 +274,8 @@
 				7555FF8C242A565B00829871 /* Info.plist */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				06C433AA2AC13B550022B819 /* ContentView.swift */,
-				06D5C9132AC3BB09007439D5 /* MoleculeViewModelBase.swift */,
 				060D00C12AC407DF0087427A /* FlareApp.swift */,
+				B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -287,6 +286,14 @@
 				AB3632DC29227652001CCB65 /* Config.xcconfig */,
 			);
 			path = Configuration;
+			sourceTree = "<group>";
+		};
+		B62B28B1E5833D550BCF0975 /* xcschemes */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = xcschemes;
+			path = iosApp.xcodeproj/project.xcworkspace/xcuserdata/tlaster.xcuserdatad/xcschemes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -409,7 +416,6 @@
 				068D2E0B2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift in Sources */,
 				06AD156F2AC400A0000DC865 /* MastodonOAuthScreen.swift in Sources */,
 				067D898E2AD3F52100F8F932 /* MastodonStatusComponent.swift in Sources */,
-				06D5C9142AC3BB09007439D5 /* MoleculeViewModelBase.swift in Sources */,
 				060501BC2ACA985B00DBCCEB /* StatusTimelineBuilder.swift in Sources */,
 				060501BE2ACAC4ED00DBCCEB /* NotificationScreen.swift in Sources */,
 				06AD156B2AC3F454000DC865 /* Route.swift in Sources */,
@@ -423,6 +429,7 @@
 				060501C82ACD09B800DBCCEB /* UserAvatar.swift in Sources */,
 				060881BA2ADE555D001AAD2F /* SettingsScreen.swift in Sources */,
 				060881B12AD91B40001AAD2F /* MastodonNotificationComponent.swift in Sources */,
+				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

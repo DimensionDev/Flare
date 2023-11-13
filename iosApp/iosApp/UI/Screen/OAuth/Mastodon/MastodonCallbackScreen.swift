@@ -43,7 +43,7 @@ class MastodonCallbackViewModel: MoleculeViewModelProto {
     
     init(code: String, toHome: @escaping () -> Void) {
         self.presenter = MastodonCallbackPresenter(code: code, toHome: toHome)
-        self.model = presenter.models.value!
+        self.model = presenter.models.value
     }
 }
 

@@ -4,7 +4,7 @@ import shared
 @main
 struct FlareApp: SwiftUI.App {
     init() {
-        KojectHelper.shared.start()
+        KoinHelper.shared.start()
     }
     
     var body: some Scene {

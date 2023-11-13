@@ -56,7 +56,7 @@ class MisskeyOAuthViewModel {
     var error: String? = nil
     
     func confirm() {
-        shared.MisskeyCallbackPresenterKt.misskeyLoginUseCase(host: instanceURL) { url in
+        shared.MisskeyCallbackPresenterKt.misskeyLoginUseCase(host: instanceURL, applicationRepository: KoinHelper.shared.applicationRepository) { url in
             guard let url = URL(string: url) else {
                 self.error = "url is not vaild"
                 return

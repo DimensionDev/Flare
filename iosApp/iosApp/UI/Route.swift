@@ -73,7 +73,7 @@ class RouterViewModel : MoleculeViewModelProto {
     
     init() {
         presenter = SplashPresenter(toHome: {}, toLogin: {})
-        model = presenter.models.value!
+        model = presenter.models.value
     }
 }
 

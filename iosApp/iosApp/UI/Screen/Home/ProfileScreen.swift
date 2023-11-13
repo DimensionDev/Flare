@@ -99,7 +99,7 @@ class ProfileViewModel: MoleculeViewModelProto {
     
     init(userKey: MicroBlogKey?) {
         self.presenter = ProfilePresenter(userKey: userKey)
-        self.model = presenter.models.value!
+        self.model = presenter.models.value
     }
 }
 

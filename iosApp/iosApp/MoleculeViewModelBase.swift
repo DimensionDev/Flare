@@ -11,7 +11,7 @@ class MoleculeViewModelBase<Model, Presenter: PresenterBase<Model>>: MoleculeVie
     var model: Model
     
     init() {
-        model = presenter.models.value!
+        model = presenter.models.value
     }
 }
 
@@ -26,7 +26,7 @@ extension MoleculeViewModelProto {
     @MainActor
     func activate() async {
         for await model in presenter.models {
-            self.model = model!
+            self.model = model
         }
     }
 }

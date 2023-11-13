@@ -77,7 +77,7 @@ class BlueskyLoginViewModel : MoleculeViewModelProto {
     
     init(toHome: @escaping () -> Void) {
         self.presenter = BlueskyLoginPresenter(toHome: toHome)
-        self.model = presenter.models.value!
+        self.model = presenter.models.value
     }
 }
 

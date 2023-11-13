@@ -66,7 +66,7 @@ class MastodonCallbackPresenter(
                 baseUrl = "https://$host/",
                 client_name = "Flare",
                 website = "https://github.com/DimensionDev/Flare",
-                redirect_uri = AppDeepLink.Callback.Mastodon,
+                redirect_uri = AppDeepLink.Callback.MASTODON,
             )
         val accessTokenResponse = service.getAccessToken(code, application.application)
         requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
@@ -113,7 +113,7 @@ suspend fun mastodonLoginUseCase(
                 baseUrl = baseUrl.toString(),
                 client_name = "Flare",
                 website = "https://github.com/DimensionDev/Flare",
-                redirect_uri = AppDeepLink.Callback.Mastodon,
+                redirect_uri = AppDeepLink.Callback.MASTODON,
             )
 
         val application =

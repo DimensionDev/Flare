@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -87,7 +88,7 @@ internal fun MastodonLoginScreen(onBack: () -> Unit = {}) {
                             onClick = onBack,
                         ) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }

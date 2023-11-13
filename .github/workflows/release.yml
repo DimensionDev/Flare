@@ -11,6 +11,11 @@ on:
     paths-ignore:
       - '**.md'
       - '**.yml'
+  pull_request:
+    branches:
+      - master
+      - release
+      - develop
 
 jobs:
   release-android:
@@ -45,7 +50,7 @@ jobs:
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
-        run: ./gradlew assembleRelease bundleRelease
+        run: ./gradlew assembleRelease bundleRelease check lint --stacktrace
 
       # Archive android artifacts
       - name: Archive android artifacts Product

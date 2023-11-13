@@ -21,7 +21,7 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
             },
         descriptionMarkdown =
             when (user) {
-                is UiUser.Mastodon -> user.descriptionElement?.toMarkdown()
+                is UiUser.Mastodon -> user.descriptionElement.toMarkdown()
                 is UiUser.Misskey -> user.descriptionElement?.toMarkdown()
                 is UiUser.Bluesky -> user.descriptionElement?.toMarkdown()
             },

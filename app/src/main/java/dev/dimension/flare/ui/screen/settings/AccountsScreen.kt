@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,7 +66,7 @@ internal fun AccountsScreen(
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
-                                Icons.Default.ArrowBack,
+                                Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }

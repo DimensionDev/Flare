@@ -31,10 +31,10 @@ data class AdminAbuseReportResolverUpdateRequest(
 //    @SerialName(value = "expiresAt") val expiresAt: AdminAbuseReportResolverUpdateRequest.ExpiresAt? = null,
     @SerialName(value = "forward") val forward: kotlin.Boolean? = null,
 ) {
-    /**
-     * *
-     * Values: _1hour,_12hours,_1day,_1week,_1month,_3months,_6months,_1year,Indefinitely
-     */
+//    /**
+//     * *
+//     * Values: _1hour,_12hours,_1day,_1week,_1month,_3months,_6months,_1year,Indefinitely
+//     */
 //    @Serializable
 //    enum class ExpiresAt(val value: kotlin.String) {
 //        @SerialName(value = "1hour")

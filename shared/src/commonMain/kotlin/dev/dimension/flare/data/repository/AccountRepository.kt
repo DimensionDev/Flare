@@ -1,6 +1,10 @@
 package dev.dimension.flare.data.repository
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
@@ -69,12 +73,12 @@ object NoActiveAccountException : Exception("No active account.")
 internal fun activeAccountPresenter(repository: AccountRepository = rememberKoinInject()): State<UiState<UiAccount>> {
     return remember(repository) {
         repository.activeAccount
-            .map {
+            .map<UiAccount?, UiState<UiAccount>> {
                 if (it == null) {
                     UiState.Error(NoActiveAccountException)
                 } else {
                     UiState.Success(it)
-                } as UiState<UiAccount>
+                }
             }
     }.collectAsState(initial = UiState.Loading())
 }

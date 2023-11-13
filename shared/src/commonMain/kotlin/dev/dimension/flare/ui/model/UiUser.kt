@@ -121,7 +121,7 @@ sealed class UiUser {
     }
 }
 
-private fun parseNote(account: Account): Element? {
+private fun parseNote(account: Account): Element {
     val emoji = account.emojis.orEmpty()
     var content = account.note.orEmpty()
     emoji.forEach {
@@ -131,7 +131,7 @@ private fun parseNote(account: Account): Element? {
                 "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
             )
     }
-    return Ktml.parse(content) as? Element
+    return Ktml.parse(content)
 }
 
 private fun parseName(status: Account): Element {

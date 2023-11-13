@@ -91,24 +91,17 @@ internal fun MisskeyNotificationComponent(
         Notification.Type.AchievementEarned ->
             MisskeyAchievementEarnedNotificationComponent(
                 data = data,
-                event = event,
                 modifier = modifier,
             )
         Notification.Type.App ->
             MisskeyAppNotificationComponent(
-                data = data,
-                event = event,
                 modifier = modifier,
             )
     }
 }
 
 @Composable
-private fun MisskeyAppNotificationComponent(
-    data: UiStatus.MisskeyNotification,
-    event: MisskeyStatusEvent,
-    modifier: Modifier = Modifier,
-) {
+private fun MisskeyAppNotificationComponent(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
     ) {
@@ -119,7 +112,6 @@ private fun MisskeyAppNotificationComponent(
 @Composable
 private fun MisskeyAchievementEarnedNotificationComponent(
     data: UiStatus.MisskeyNotification,
-    event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(

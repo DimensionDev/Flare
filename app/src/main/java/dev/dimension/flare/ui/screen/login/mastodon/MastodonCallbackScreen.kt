@@ -45,7 +45,7 @@ fun MastodonCallbackScreenPreview() {
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "${AppDeepLink.Callback.Mastodon}?code={code}",
+            uriPattern = "${AppDeepLink.Callback.MASTODON}?code={code}",
         ),
     ],
 )

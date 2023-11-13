@@ -100,12 +100,10 @@ internal fun MastodonProfileHeader(
                         .padding(horizontal = screenHorizontalPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                user.descriptionElement?.let {
-                    HtmlText2(
-                        element = it,
-                        layoutDirection = user.descriptionDirection,
-                    )
-                }
+                HtmlText2(
+                    element = user.descriptionElement,
+                    layoutDirection = user.descriptionDirection,
+                )
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),

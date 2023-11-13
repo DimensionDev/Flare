@@ -45,12 +45,12 @@ struct RouterView : View {
 
                     }
                     .onOpenURL { url in
-                        if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Mastodon)) {
+                        if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON)) {
                             if let range = url.absoluteString.range(of: "code=") {
                                 let code = url.absoluteString.suffix(from: range.upperBound)
                                 sheetRouter.navigate(to: .mastodonCallback(code: String(code)))
                             }
-                        } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.Misskey)) {
+                        } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY)) {
                             if let range = url.absoluteString.range(of: "session=") {
                                 let session = url.absoluteString.suffix(from: range.upperBound)
                                 sheetRouter.navigate(to: .misskeyCallback(session: String(session)))

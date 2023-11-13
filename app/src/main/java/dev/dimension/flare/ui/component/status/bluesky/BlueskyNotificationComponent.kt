@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Reply
@@ -81,7 +82,7 @@ internal fun BlueskyNotificationComponent(
                 data = data,
                 event = event,
                 modifier = modifier,
-                icon = Icons.Default.Reply,
+                icon = Icons.AutoMirrored.Filled.Reply,
                 text = stringResource(id = R.string.misskey_notification_item_replied_to_you),
             )
         }

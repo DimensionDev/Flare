@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Lock
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -101,7 +101,6 @@ internal fun MisskeyStatusComponent(
         )
         StatusContentComponent(
             data = actualData,
-            event = event,
         )
         if (actualData.media.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -157,7 +156,7 @@ private fun StatusFooterComponent(
             LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
         ) {
             StatusActionButton(
-                icon = Icons.Default.Reply,
+                icon = Icons.AutoMirrored.Filled.Reply,
                 text = actualData.matrices.humanizedReplyCount,
                 modifier =
                     Modifier
@@ -284,7 +283,6 @@ private fun StatusReactionComponent(
 @Composable
 private fun StatusContentComponent(
     data: UiStatus.Misskey,
-    event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     // TODO: not a best way to handle this
@@ -326,7 +324,6 @@ private fun StatusContentComponent(
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusPollComponent(
                         data = it,
-                        event = event,
                     )
                 }
             }
@@ -337,7 +334,6 @@ private fun StatusContentComponent(
 @Composable
 private fun StatusPollComponent(
     data: UiStatus.Misskey.Poll,
-    event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -363,7 +359,7 @@ private fun StatusPollComponent(
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
-                    progress = option.percentage,
+                    progress = { option.percentage },
                     modifier =
                         Modifier
                             .fillMaxWidth()

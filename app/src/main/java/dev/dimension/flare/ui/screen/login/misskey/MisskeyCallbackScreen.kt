@@ -46,7 +46,7 @@ fun MisskeyCallbackScreenPreview() {
 @Destination(
     deepLinks = [
         DeepLink(
-            uriPattern = "${AppDeepLink.Callback.Misskey}?session={session}",
+            uriPattern = "${AppDeepLink.Callback.MISSKEY}?session={session}",
         ),
     ],
 )

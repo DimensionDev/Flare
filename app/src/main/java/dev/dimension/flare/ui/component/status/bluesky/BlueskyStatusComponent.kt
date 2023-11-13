@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
@@ -79,7 +80,6 @@ internal fun BlueskyStatusComponent(
         )
         StatusContentComponent(
             data = data,
-            event = event,
         )
         if (data.medias.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
@@ -127,7 +127,6 @@ private fun StatusHeaderComponent(
 @Composable
 private fun StatusContentComponent(
     data: UiStatus.Bluesky,
-    event: BlueskyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -163,7 +162,7 @@ private fun StatusFooterComponent(
             LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
         ) {
             StatusActionButton(
-                icon = Icons.Default.Reply,
+                icon = Icons.AutoMirrored.Filled.Reply,
                 text = data.matrices.humanizedReplyCount,
                 modifier =
                     Modifier

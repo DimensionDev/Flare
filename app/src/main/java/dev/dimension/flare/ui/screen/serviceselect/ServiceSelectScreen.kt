@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,9 +59,6 @@ fun ServiceSelectRoute(navigator: DestinationsNavigator) {
         toMastodon = {
             navigator.navigate(MastodonLoginRouteDestination)
         },
-        toPasskey = {
-//            navigator.navigate(PasskeyLoginRouteDestination)
-        },
         toMisskey = {
             navigator.navigate(MisskeyLoginRouteDestination)
         },
@@ -75,7 +73,6 @@ fun ServiceSelectRoute(navigator: DestinationsNavigator) {
 @Composable
 fun ServiceSelectScreen(
     toMastodon: () -> Unit,
-    toPasskey: () -> Unit,
     toMisskey: () -> Unit,
     toBluesky: () -> Unit,
     modifier: Modifier = Modifier,
@@ -97,7 +94,7 @@ fun ServiceSelectScreen(
                             onClick = onBack,
                         ) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
@@ -301,13 +298,12 @@ private fun serviceSelectPresenter(activityContext: Context) =
                             listOf(getPasswordOption, getPublicKeyCredentialOption),
                         )
 
-                    val result =
-                        runCatching {
-                            credentialManager.getCredential(
-                                context = activityContext,
-                                request = getCredRequest,
-                            )
-                        }
+                    runCatching {
+                        credentialManager.getCredential(
+                            context = activityContext,
+                            request = getCredRequest,
+                        )
+                    }
                     loading = false
                 }
             }

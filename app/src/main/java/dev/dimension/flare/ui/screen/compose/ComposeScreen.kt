@@ -46,6 +46,8 @@ import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.foundation.text2.input.textAsFlow
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -284,7 +286,7 @@ private fun ComposeScreen(
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
@@ -301,7 +303,7 @@ private fun ComposeScreen(
                             },
                             enabled = state.canSend,
                         ) {
-                            Icon(imageVector = Icons.Default.Send, contentDescription = null)
+                            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null)
                         }
                     },
                 )

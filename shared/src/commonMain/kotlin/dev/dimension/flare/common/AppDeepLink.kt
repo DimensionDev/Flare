@@ -3,37 +3,37 @@ package dev.dimension.flare.common
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.encodeURLQueryComponent
 
-const val AppSchema = "flare"
+const val APPSCHEMA = "flare"
 
 object AppDeepLink {
     object Callback {
-        const val Mastodon = "$AppSchema://Callback/SignIn/Mastodon"
-        const val Misskey = "$AppSchema://Callback/SignIn/Misskey"
+        const val MASTODON = "$APPSCHEMA://Callback/SignIn/Mastodon"
+        const val MISSKEY = "$APPSCHEMA://Callback/SignIn/Misskey"
     }
 
     object Search {
-        const val route = "$AppSchema://Search/{keyword}"
+        const val ROUTE = "$APPSCHEMA://Search/{keyword}"
 
-        operator fun invoke(keyword: String) = "$AppSchema://Search/${keyword.encodeURLQueryComponent()}"
+        operator fun invoke(keyword: String) = "$APPSCHEMA://Search/${keyword.encodeURLQueryComponent()}"
     }
 
     object Profile {
-        const val route = "$AppSchema://Profile/{userKey}"
+        const val ROUTE = "$APPSCHEMA://Profile/{userKey}"
 
-        operator fun invoke(userKey: MicroBlogKey) = "$AppSchema://Profile/$userKey"
+        operator fun invoke(userKey: MicroBlogKey) = "$APPSCHEMA://Profile/$userKey"
     }
 
     object ProfileWithNameAndHost {
-        const val route = "$AppSchema://ProfileWithNameAndHost/{userName}/{host}"
+        const val ROUTE = "$APPSCHEMA://ProfileWithNameAndHost/{userName}/{host}"
 
         operator fun invoke(
             userName: String,
             host: String,
-        ) = "$AppSchema://ProfileWithNameAndHost/${userName.encodeURLQueryComponent()}/$host"
+        ) = "$APPSCHEMA://ProfileWithNameAndHost/${userName.encodeURLQueryComponent()}/$host"
     }
 
     fun parse(url: String): DeeplinkEvent? {
-        val uri = url.removePrefix("$AppSchema://")
+        val uri = url.removePrefix("$APPSCHEMA://")
         return when {
             uri.startsWith("Search/") -> {
                 val keyword = uri.substringAfter("Search/")

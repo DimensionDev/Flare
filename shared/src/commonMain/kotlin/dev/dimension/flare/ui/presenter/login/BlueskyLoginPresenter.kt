@@ -1,13 +1,18 @@
 package dev.dimension.flare.ui.presenter.login
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import com.atproto.server.CreateSessionRequest
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
-import io.ktor.http.*
+import io.ktor.http.Url
 import kotlinx.coroutines.launch
 import org.koin.compose.rememberKoinInject
 

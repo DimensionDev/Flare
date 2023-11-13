@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PostList(
     val title: String? = null,
-    val replies_policy: String? = null, // Enumerable oneOf followed list none. Defaults to list.
+    // Enumerable oneOf followed list none. Defaults to list.
+    val replies_policy: String? = null,
 )

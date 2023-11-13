@@ -96,26 +96,26 @@ interface DriveApi {
         @Body driveFilesCheckExistenceRequest: DriveFilesCheckExistenceRequest,
     ): Response<kotlin.Boolean>
 
-    /**
-     * drive/files/create
-     * Upload a new drive file.  **Credential required**: *Yes* / **Permission**: *write:drive*
-     * Responses:
-     *  - 200: OK (with results)
-     *  - 400: Client error
-     *  - 401: Authentication error
-     *  - 403: Forbidden error
-     *  - 418: I'm Ai
-     *  - 429: To many requests
-     *  - 500: Internal server error
-     *
-     * @param file The file contents.
-     * @param folderId  (optional)
-     * @param name  (optional)
-     * @param comment  (optional)
-     * @param isSensitive  (optional, default to false)
-     * @param force  (optional, default to false)
-     * @return [DriveFile]
-     */
+//    /**
+//     * drive/files/create
+//     * Upload a new drive file.  **Credential required**: *Yes* / **Permission**: *write:drive*
+//     * Responses:
+//     *  - 200: OK (with results)
+//     *  - 400: Client error
+//     *  - 401: Authentication error
+//     *  - 403: Forbidden error
+//     *  - 418: I'm Ai
+//     *  - 429: To many requests
+//     *  - 500: Internal server error
+//     *
+//     * @param file The file contents.
+//     * @param folderId  (optional)
+//     * @param name  (optional)
+//     * @param comment  (optional)
+//     * @param isSensitive  (optional, default to false)
+//     * @param force  (optional, default to false)
+//     * @return [DriveFile]
+//     */
 //    @Multipart
 //    @POST("drive/files/create")
 //    suspend fun driveFilesCreate(@Part file: MultipartBody.Part, @Part("folderId") folderId: kotlin.String? = null, @Part("name") name: kotlin.String? = null, @Part("comment") comment: kotlin.String? = null, @Part("isSensitive") isSensitive: kotlin.Boolean? = false, @Part("force") force: kotlin.Boolean? = false): Response<DriveFile>

@@ -13,12 +13,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 
-fun <T> Cacheable(
-    fetchSource: suspend () -> Unit,
-    cacheSource: () -> Flow<T>,
-) = CacheData(fetchSource, cacheSource)
+typealias Cacheable<T> = CacheData<T>
 
-class CacheData<T> internal constructor(
+class CacheData<T>(
     private val fetchSource: suspend () -> Unit,
     private val cacheSource: () -> Flow<T>,
 ) {

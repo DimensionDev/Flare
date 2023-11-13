@@ -1,6 +1,11 @@
 package dev.dimension.flare.ui.presenter.login
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.benasher44.uuid.uuid4
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
@@ -96,7 +101,7 @@ fun misskeyLoginUseCase(
             MisskeyOauthService(
                 host = host,
                 name = "Flare",
-                callback = AppDeepLink.Callback.Misskey,
+                callback = AppDeepLink.Callback.MISSKEY,
                 session = session,
             )
         applicationRepository.addApplication(

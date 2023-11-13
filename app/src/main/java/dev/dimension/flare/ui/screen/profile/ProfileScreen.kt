@@ -91,7 +91,7 @@ import kotlin.math.max
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
         DeepLink(
-            uriPattern = AppDeepLink.ProfileWithNameAndHost.route,
+            uriPattern = AppDeepLink.ProfileWithNameAndHost.ROUTE,
         ),
     ],
 )
@@ -223,7 +223,7 @@ private fun profileWithUserNameAndHostPresenter(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
         DeepLink(
-            uriPattern = AppDeepLink.Profile.route,
+            uriPattern = AppDeepLink.Profile.ROUTE,
         ),
     ],
 )

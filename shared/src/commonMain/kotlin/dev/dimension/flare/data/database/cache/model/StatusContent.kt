@@ -33,11 +33,11 @@ sealed interface StatusContent {
 
     @Serializable
     @SerialName("bluesky")
-    data class Bluesky(val data: PostView) : StatusContent
+    data class Bluesky(val data: PostView, val reason: FeedViewPostReasonUnion?) : StatusContent
 
-    @Serializable
-    @SerialName("bluesky-reason")
-    data class BlueskyReason(val reason: FeedViewPostReasonUnion, val data: PostView) : StatusContent
+//    @Serializable
+//    @SerialName("bluesky-reason")
+//    data class BlueskyReason(val reason: FeedViewPostReasonUnion, val data: PostView) : StatusContent
 
     @Serializable
     @SerialName("bluesky-notification")

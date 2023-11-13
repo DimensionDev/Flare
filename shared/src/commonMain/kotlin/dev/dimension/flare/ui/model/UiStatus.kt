@@ -304,6 +304,8 @@ sealed class UiStatus {
         val card: UiCard?,
         val matrices: Matrices,
         val reaction: Reaction,
+        val cid: String,
+        val uri: String,
     ) : UiStatus() {
         val humanizedTime by lazy {
             indexedAt.humanize()
@@ -323,9 +325,17 @@ sealed class UiStatus {
         }
 
         data class Reaction(
-            val liked: Boolean,
-            val reposted: Boolean,
-        )
+            val repostUri: String?,
+            val likedUri: String?,
+        ) {
+            val liked by lazy {
+                likedUri != null
+            }
+
+            val reposted by lazy {
+                repostUri != null
+            }
+        }
 
         override val itemKey: String by lazy {
             statusKey.toString() + repostBy?.let { "_reblog_${it.userKey}" }.orEmpty()

@@ -4,9 +4,11 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.feed.GetPostsQueryParams
+import app.bsky.feed.ViewerState
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.repo.CreateRecordRequest
+import com.atproto.repo.DeleteRecordRequest
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
@@ -16,6 +18,8 @@ import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.ComposeProgress
 import dev.dimension.flare.data.datasource.MicroblogDataSource
@@ -349,5 +353,231 @@ class BlueskyDataSource(
                     },
             ),
         )
+    }
+
+    suspend fun reblog(data: UiStatus.Bluesky) {
+        updateStatusUseCase<StatusContent.Bluesky>(
+            statusKey = data.statusKey,
+            accountKey = account.accountKey,
+            cacheDatabase = database,
+        ) { content ->
+            val uri =
+                if (data.reaction.reposted) {
+                    null
+                } else {
+                    AtUri("")
+                }
+            val count =
+                if (data.reaction.reposted) {
+                    (content.data.repostCount ?: 0) - 1
+                } else {
+                    (content.data.repostCount ?: 0) + 1
+                }.coerceAtLeast(0)
+            content.copy(
+                data =
+                    content.data.copy(
+                        viewer =
+                            content.data.viewer?.copy(
+                                repost = uri,
+                            ) ?: ViewerState(
+                                repost = uri,
+                            ),
+                        repostCount = count,
+                    ),
+            )
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            if (data.reaction.reposted && data.reaction.repostUri != null) {
+                service.deleteRecord(
+                    DeleteRecordRequest(
+                        repo = AtIdentifier(account.accountKey.id),
+                        collection = Nsid("app.bsky.feed.repost"),
+                        rkey = data.reaction.repostUri.substringAfterLast('/'),
+                    ),
+                )
+            } else {
+                val result =
+                    service.createRecord(
+                        CreateRecordRequest(
+                            repo = AtIdentifier(account.accountKey.id),
+                            collection = Nsid("app.bsky.feed.repost"),
+                            record =
+                                buildJsonObject {
+                                    put("\$type", "app.bsky.feed.repost")
+                                    put("createdAt", Clock.System.now().toString())
+                                    put(
+                                        "subject",
+                                        buildJsonObject {
+                                            put("cid", data.cid)
+                                            put("uri", data.uri)
+                                        },
+                                    )
+                                },
+                        ),
+                    ).requireResponse()
+                updateStatusUseCase<StatusContent.Bluesky>(
+                    statusKey = data.statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                ) { content ->
+                    content.copy(
+                        data =
+                            content.data.copy(
+                                viewer =
+                                    content.data.viewer?.copy(
+                                        repost = AtUri(result.uri.atUri),
+                                    ) ?: ViewerState(
+                                        repost = AtUri(result.uri.atUri),
+                                    ),
+                            ),
+                    )
+                }
+            }
+        }.onFailure {
+            updateStatusUseCase<StatusContent.Bluesky>(
+                statusKey = data.statusKey,
+                accountKey = account.accountKey,
+                cacheDatabase = database,
+            ) { content ->
+                val uri =
+                    if (data.reaction.reposted) {
+                        AtUri(data.reaction.repostUri ?: "")
+                    } else {
+                        null
+                    }
+                val count =
+                    if (data.reaction.reposted) {
+                        (content.data.repostCount ?: 0) + 1
+                    } else {
+                        (content.data.repostCount ?: 0) - 1
+                    }.coerceAtLeast(0)
+                content.copy(
+                    data =
+                        content.data.copy(
+                            viewer =
+                                content.data.viewer?.copy(
+                                    repost = uri,
+                                ) ?: ViewerState(
+                                    repost = uri,
+                                ),
+                            repostCount = count,
+                        ),
+                )
+            }
+        }
+    }
+
+    suspend fun like(data: UiStatus.Bluesky) {
+        updateStatusUseCase<StatusContent.Bluesky>(
+            statusKey = data.statusKey,
+            accountKey = account.accountKey,
+            cacheDatabase = database,
+        ) { content ->
+            val uri =
+                if (data.reaction.liked) {
+                    null
+                } else {
+                    AtUri("")
+                }
+            val count =
+                if (data.reaction.liked) {
+                    (content.data.likeCount ?: 0) - 1
+                } else {
+                    (content.data.likeCount ?: 0) + 1
+                }.coerceAtLeast(0)
+            content.copy(
+                data =
+                    content.data.copy(
+                        viewer =
+                            content.data.viewer?.copy(
+                                like = uri,
+                            ) ?: ViewerState(
+                                like = uri,
+                            ),
+                        likeCount = count,
+                    ),
+            )
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            if (data.reaction.liked && data.reaction.likedUri != null) {
+                service.deleteRecord(
+                    DeleteRecordRequest(
+                        repo = AtIdentifier(account.accountKey.id),
+                        collection = Nsid("app.bsky.feed.like"),
+                        rkey = data.reaction.likedUri.substringAfterLast('/'),
+                    ),
+                )
+            } else {
+                val result =
+                    service.createRecord(
+                        CreateRecordRequest(
+                            repo = AtIdentifier(account.accountKey.id),
+                            collection = Nsid("app.bsky.feed.like"),
+                            record =
+                                buildJsonObject {
+                                    put("\$type", "app.bsky.feed.like")
+                                    put("createdAt", Clock.System.now().toString())
+                                    put(
+                                        "subject",
+                                        buildJsonObject {
+                                            put("cid", data.cid)
+                                            put("uri", data.uri)
+                                        },
+                                    )
+                                },
+                        ),
+                    ).requireResponse()
+                updateStatusUseCase<StatusContent.Bluesky>(
+                    statusKey = data.statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                ) { content ->
+                    content.copy(
+                        data =
+                            content.data.copy(
+                                viewer =
+                                    content.data.viewer?.copy(
+                                        like = AtUri(result.uri.atUri),
+                                    ) ?: ViewerState(
+                                        like = AtUri(result.uri.atUri),
+                                    ),
+                            ),
+                    )
+                }
+            }
+        }.onFailure {
+            updateStatusUseCase<StatusContent.Bluesky>(
+                statusKey = data.statusKey,
+                accountKey = account.accountKey,
+                cacheDatabase = database,
+            ) { content ->
+                val uri =
+                    if (data.reaction.liked) {
+                        AtUri(data.reaction.likedUri ?: "")
+                    } else {
+                        null
+                    }
+                val count =
+                    if (data.reaction.liked) {
+                        (content.data.likeCount ?: 0) + 1
+                    } else {
+                        (content.data.likeCount ?: 0) - 1
+                    }.coerceAtLeast(0)
+                content.copy(
+                    data =
+                        content.data.copy(
+                            viewer =
+                                content.data.viewer?.copy(
+                                    like = uri,
+                                ) ?: ViewerState(
+                                    like = uri,
+                                ),
+                            likeCount = count,
+                        ),
+                )
+            }
+        }
     }
 }

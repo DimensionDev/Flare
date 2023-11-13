@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
@@ -45,12 +46,14 @@ import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun BlueskyStatusComponent(
@@ -280,6 +283,7 @@ internal interface BlueskyStatusEvent {
 
 internal class DefaultBlueskyStatusEvent(
     private val context: Context,
+    private val accountRepository: AccountRepository,
     private val scope: CoroutineScope,
 ) : BlueskyStatusEvent {
     override fun onStatusClick(data: UiStatus.Bluesky) {
@@ -331,9 +335,19 @@ internal class DefaultBlueskyStatusEvent(
     }
 
     override fun onReblogClick(data: UiStatus.Bluesky) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.Bluesky ?: return@launch
+            account.dataSource.reblog(data)
+        }
     }
 
     override fun onLikeClick(data: UiStatus.Bluesky) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.Bluesky ?: return@launch
+            account.dataSource.like(data)
+        }
     }
 
     override fun onMoreClick(data: UiStatus.Bluesky) {

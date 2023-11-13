@@ -29,17 +29,19 @@ internal fun DbPagingTimelineWithStatusView.toUi(): UiStatus {
                 accountKey = timeline_account_key,
             )
         is StatusContent.Bluesky ->
-            status.data.toUi(
-                accountKey = timeline_account_key,
-            )
+            if (status.reason != null) {
+                status.reason.toUi(
+                    accountKey = timeline_account_key,
+                    data = status.data,
+                )
+            } else {
+                status.data.toUi(
+                    accountKey = timeline_account_key,
+                )
+            }
         is StatusContent.BlueskyNotification ->
             status.data.toUi(
                 accountKey = timeline_account_key,
-            )
-        is StatusContent.BlueskyReason ->
-            status.reason.toUi(
-                accountKey = timeline_account_key,
-                data = status.data,
             )
     }
 }

@@ -20,6 +20,6 @@ class MastodonMappingTest {
                 it.toDbPagingTimeline(accountKey, pagingKey)
             }
         Assert.assertNotNull(timeline)
-        Assert.assertEquals("105853517700650526", timeline?.get(0)?.status?.status?.data?.statusKey?.id)
+        Assert.assertEquals("105853517700650526", timeline?.get(0)?.status_key?.id)
     }
 }

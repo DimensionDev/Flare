@@ -616,4 +616,20 @@ class BlueskyDataSource(
             }
         }
     }
+
+    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
+        runCatching {
+            val service = account.getService(appDatabase)
+            service.deleteRecord(
+                DeleteRecordRequest(
+                    repo = AtIdentifier(account.accountKey.id),
+                    collection = Nsid("app.bsky.feed.post"),
+                    rkey = statusKey.id.substringAfterLast('/'),
+                ),
+            )
+            // delete status from cache
+            database.dbStatusQueries.delete(status_key = statusKey, account_key = account.accountKey)
+            database.dbPagingTimelineQueries.deleteStatus(account_key = account.accountKey, status_key = statusKey)
+        }
+    }
 }

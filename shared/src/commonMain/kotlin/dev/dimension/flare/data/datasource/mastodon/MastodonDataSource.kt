@@ -404,4 +404,13 @@ class MastodonDataSource(
             )
         }
     }
+
+    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
+        runCatching {
+            service.delete(statusKey.id)
+            // delete status from cache
+            database.dbStatusQueries.delete(status_key = statusKey, account_key = account.accountKey)
+            database.dbPagingTimelineQueries.deleteStatus(account_key = account.accountKey, status_key = statusKey)
+        }
+    }
 }

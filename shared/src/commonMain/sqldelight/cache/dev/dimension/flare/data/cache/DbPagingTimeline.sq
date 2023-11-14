@@ -36,6 +36,9 @@ DELETE FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :
 deletePaging:
 DELETE FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key;
 
+deleteStatus:
+DELETE FROM DbPagingTimeline WHERE account_key = :account_key AND status_key = :status_key;
+
 existsPaging:
 SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key);
 

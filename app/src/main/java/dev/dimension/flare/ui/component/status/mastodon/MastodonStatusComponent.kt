@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
@@ -38,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -219,6 +222,7 @@ private fun StatusFooterComponent(
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    var showMoreMenu by remember { mutableStateOf(false) }
     val actualData = data.reblogStatus ?: data
     Row(
         modifier =
@@ -281,7 +285,49 @@ private fun StatusFooterComponent(
                 icon = Icons.Default.MoreHoriz,
                 text = null,
                 onClicked = {
-                    event.onMoreClick(data)
+                    showMoreMenu = true
+                },
+                content = {
+                    DropdownMenu(
+                        expanded = showMoreMenu,
+                        onDismissRequest = { showMoreMenu = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                if (actualData.reaction.bookmarked) {
+                                    Text(text = stringResource(id = R.string.mastodon_item_unbookmark))
+                                } else {
+                                    Text(text = stringResource(id = R.string.mastodon_item_bookmark))
+                                }
+                            },
+                            onClick = {
+                                showMoreMenu = false
+                                event.onBookmarkClick(actualData)
+                            },
+                        )
+
+                        if (actualData.isFromMe) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(text = stringResource(id = R.string.mastodon_item_delete))
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    event.onDeleteClick(actualData)
+                                },
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(text = stringResource(id = R.string.mastodon_item_report))
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    event.onReportClick(actualData)
+                                },
+                            )
+                        }
+                    }
                 },
             )
         }
@@ -451,8 +497,6 @@ internal interface MastodonStatusEvent {
 
     fun onStatusClick(status: UiStatus.Mastodon)
 
-    fun onStatusLongClick(status: UiStatus.Mastodon)
-
     fun onReplyClick(status: UiStatus.Mastodon)
 
     fun onReblogClick(status: UiStatus.Mastodon)
@@ -463,9 +507,9 @@ internal interface MastodonStatusEvent {
 
     fun onMediaClick(media: UiMedia)
 
-    fun onShowMoreClick(status: UiStatus.Mastodon)
+    fun onDeleteClick(status: UiStatus.Mastodon)
 
-    fun onMoreClick(status: UiStatus.Mastodon)
+    fun onReportClick(status: UiStatus.Mastodon)
 }
 
 internal class DefaultMastodonStatusEvent(
@@ -488,9 +532,6 @@ internal class DefaultMastodonStatusEvent(
             )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
-    }
-
-    override fun onStatusLongClick(status: UiStatus.Mastodon) {
     }
 
     override fun onReplyClick(status: UiStatus.Mastodon) {
@@ -520,6 +561,11 @@ internal class DefaultMastodonStatusEvent(
     }
 
     override fun onBookmarkClick(status: UiStatus.Mastodon) {
+        scope.launch {
+            val account =
+                accountRepository.get(status.accountKey) as? UiAccount.Mastodon ?: return@launch
+            account.dataSource.bookmark(status)
+        }
     }
 
     override fun onMediaClick(media: UiMedia) {
@@ -534,9 +580,31 @@ internal class DefaultMastodonStatusEvent(
         }
     }
 
-    override fun onShowMoreClick(status: UiStatus.Mastodon) {
+    override fun onDeleteClick(status: UiStatus.Mastodon) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(status.statusKey)
+                        .deeplink(),
+                ),
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
-    override fun onMoreClick(status: UiStatus.Mastodon) {
+    override fun onReportClick(status: UiStatus.Mastodon) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.MastodonReportRouteDestination(
+                        userKey = status.user.userKey,
+                        statusKey = status.statusKey,
+                    ).deeplink(),
+                ),
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 }

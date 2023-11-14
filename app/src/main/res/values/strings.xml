@@ -158,4 +158,11 @@
 
     <string name="delete_status_title">Delete</string>
     <string name="delete_status_message">Are you sure you want to delete this?</string>
+
+    <string name="mastodon_item_unbookmark">Unbookmark</string>
+    <string name="mastodon_item_bookmark">Bookmark</string>
+    <string name="mastodon_item_delete">Delete</string>
+    <string name="mastodon_item_report">Report</string>
+    <string name="mastodon_report_title">Report</string>
+    <string name="mastodon_report_description">Are you sure you want to report this?</string>
 </resources>

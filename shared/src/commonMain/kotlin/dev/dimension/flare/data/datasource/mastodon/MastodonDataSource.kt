@@ -20,6 +20,7 @@ import dev.dimension.flare.data.datasource.NotificationFilter
 import dev.dimension.flare.data.datasource.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
+import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
@@ -411,6 +412,58 @@ class MastodonDataSource(
             // delete status from cache
             database.dbStatusQueries.delete(status_key = statusKey, account_key = account.accountKey)
             database.dbPagingTimelineQueries.deleteStatus(account_key = account.accountKey, status_key = statusKey)
+        }
+    }
+
+    suspend fun bookmark(status: UiStatus.Mastodon) {
+        updateStatusUseCase<StatusContent.Mastodon>(
+            statusKey = status.statusKey,
+            accountKey = status.accountKey,
+            cacheDatabase = database,
+            update = {
+                it.copy(
+                    data =
+                        it.data.copy(
+                            bookmarked = !status.reaction.bookmarked,
+                        ),
+                )
+            },
+        )
+
+        runCatching {
+            if (status.reaction.bookmarked) {
+                service.unbookmark(status.statusKey.id)
+            } else {
+                service.bookmark(status.statusKey.id)
+            }
+        }.onFailure {
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = status.statusKey,
+                accountKey = status.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                bookmarked = status.reaction.bookmarked,
+                            ),
+                    )
+                },
+            )
+        }
+    }
+
+    suspend fun report(
+        userKey: MicroBlogKey,
+        statusKey: MicroBlogKey?,
+    ) {
+        runCatching {
+            service.report(
+                PostReport(
+                    accountId = userKey.id,
+                    statusIds = statusKey?.let { listOf(it.id) },
+                ),
+            )
         }
     }
 }

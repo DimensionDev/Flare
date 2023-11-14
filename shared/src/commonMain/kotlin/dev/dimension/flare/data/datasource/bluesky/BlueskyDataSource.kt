@@ -7,8 +7,12 @@ import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.ViewerState
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
+import com.atproto.moderation.CreateReportRequest
+import com.atproto.moderation.CreateReportRequestSubjectUnion
+import com.atproto.moderation.Token
 import com.atproto.repo.CreateRecordRequest
 import com.atproto.repo.DeleteRecordRequest
+import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
@@ -35,6 +39,7 @@ import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -51,6 +56,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import sh.christian.ozone.api.AtIdentifier
 import sh.christian.ozone.api.AtUri
+import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Nsid
 
 @OptIn(ExperimentalPagingApi::class)
@@ -353,6 +359,36 @@ class BlueskyDataSource(
                     },
             ),
         )
+    }
+
+    suspend fun report(
+        data: UiStatus.Bluesky,
+        reason: BlueskyReportStatusState.ReportReason,
+    ) {
+        runCatching {
+            val service = account.getService(appDatabase)
+            service.createReport(
+                CreateReportRequest(
+                    reasonType =
+                        when (reason) {
+                            BlueskyReportStatusState.ReportReason.Spam -> Token.REASON_SPAM
+                            BlueskyReportStatusState.ReportReason.Violation -> Token.REASON_VIOLATION
+                            BlueskyReportStatusState.ReportReason.Misleading -> Token.REASON_MISLEADING
+                            BlueskyReportStatusState.ReportReason.Sexual -> Token.REASON_SEXUAL
+                            BlueskyReportStatusState.ReportReason.Rude -> Token.REASON_RUDE
+                            BlueskyReportStatusState.ReportReason.Other -> Token.REASON_OTHER
+                        },
+                    subject =
+                        CreateReportRequestSubjectUnion.RepoStrongRef(
+                            value =
+                                StrongRef(
+                                    uri = AtUri(data.uri),
+                                    cid = Cid(data.cid),
+                                ),
+                        ),
+                ),
+            )
+        }
     }
 
     suspend fun reblog(data: UiStatus.Bluesky) {

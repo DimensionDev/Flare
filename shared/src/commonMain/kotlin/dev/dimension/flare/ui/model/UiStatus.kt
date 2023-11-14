@@ -314,6 +314,10 @@ sealed class UiStatus {
             misskeyParser.parse(content).toHtml(accountKey.host)
         }
 
+        val isFromMe by lazy {
+            user.userKey == accountKey
+        }
+
         data class Matrices(
             val replyCount: Long,
             val likeCount: Long,

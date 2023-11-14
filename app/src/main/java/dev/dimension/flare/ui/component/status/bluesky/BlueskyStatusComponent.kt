@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Reply
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -50,6 +52,8 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
+import dev.dimension.flare.ui.screen.destinations.BlueskyReportStatusRouteDestination
+import dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.coroutines.CoroutineScope
@@ -154,6 +158,9 @@ private fun StatusFooterComponent(
     var showRenoteMenu by remember {
         mutableStateOf(false)
     }
+    var showMoreMenu by remember {
+        mutableStateOf(false)
+    }
     Row(
         modifier =
             modifier
@@ -256,7 +263,51 @@ private fun StatusFooterComponent(
                 icon = Icons.Default.MoreHoriz,
                 text = null,
                 onClicked = {
-                    event.onMoreClick(data)
+                    showMoreMenu = true
+                },
+                content = {
+                    DropdownMenu(
+                        expanded = showMoreMenu,
+                        onDismissRequest = { showMoreMenu = false },
+                    ) {
+                        if (!data.isFromMe) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(id = R.string.blusky_item_action_report),
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Report,
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    event.onReportClick(data)
+                                },
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(id = R.string.blusky_item_action_delete),
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    event.onDeleteClick(data)
+                                },
+                            )
+                        }
+                    }
                 },
             )
         }
@@ -278,7 +329,9 @@ internal interface BlueskyStatusEvent {
 
     fun onLikeClick(data: UiStatus.Bluesky)
 
-    fun onMoreClick(data: UiStatus.Bluesky)
+    fun onReportClick(data: UiStatus.Bluesky)
+
+    fun onDeleteClick(data: UiStatus.Bluesky)
 }
 
 internal class DefaultBlueskyStatusEvent(
@@ -350,7 +403,30 @@ internal class DefaultBlueskyStatusEvent(
         }
     }
 
-    override fun onMoreClick(data: UiStatus.Bluesky) {
+    override fun onReportClick(data: UiStatus.Bluesky) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    BlueskyReportStatusRouteDestination(data.statusKey)
+                        .deeplink(),
+                ),
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
+    override fun onDeleteClick(data: UiStatus.Bluesky) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    DeleteStatusConfirmRouteDestination(data.statusKey)
+                        .deeplink(),
+                ),
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
     override fun onQuoteClick(data: UiStatus.Bluesky) {

@@ -8,8 +8,6 @@ import dev.dimension.flare.ui.component.status.mastodon.DefaultMastodonStatusEve
 import dev.dimension.flare.ui.component.status.mastodon.MastodonStatusEvent
 import dev.dimension.flare.ui.component.status.misskey.DefaultMisskeyStatusEvent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.binds
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.withOptions
@@ -26,7 +24,6 @@ val androidModule =
         singleOf(::DefaultMastodonStatusEvent) withOptions {
             binds(listOf(MastodonStatusEvent::class))
         }
-        single { CoroutineScope(Dispatchers.IO) }
         singleOf(::ComposeUseCase)
         singleOf(::StatusEvent)
     }

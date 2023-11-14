@@ -2,6 +2,8 @@
 <resources>
     <string name="login_button">登录</string>
     <string name="navigate_back">返回</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
 
     <string name="home_tab_home_title">首页</string>
     <string name="home_tab_notifications_title">通知</string>

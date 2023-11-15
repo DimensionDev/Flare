@@ -15,7 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.plusAssign
+import com.google.accompanist.navigation.material.BottomSheetNavigator
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
+import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
@@ -24,17 +28,20 @@ import dev.dimension.flare.ui.screen.NavGraphs
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
 
+    @OptIn(ExperimentalMaterialNavigationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         setContent {
-            val navController = rememberNavController()
+            val bottomSheetNavigator = rememberBottomSheetNavigator()
+            val navController = rememberNavController(bottomSheetNavigator)
             LaunchedEffect(Unit) {
                 this@MainActivity.navController = navController
             }
             Content(
                 navController = navController,
+                bottomSheetNavigator = bottomSheetNavigator,
             )
         }
     }
@@ -50,42 +57,47 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun Content(
+    bottomSheetNavigator: BottomSheetNavigator,
+    navController: NavHostController,
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
 ) {
-    DestinationsNavHost(
-        navGraph = NavGraphs.root,
-        modifier = modifier,
-        navController = navController,
-        engine =
-            rememberAnimatedNavHostEngine(
-                rootDefaultAnimations =
-                    RootNavGraphDefaultAnimations(
-                        enterTransition = {
-                            slideIntoContainer(
-                                AnimatedContentTransitionScope.SlideDirection.Left,
-                                initialOffset = { it / 4 },
-                            ) + fadeIn()
-                        },
-                        exitTransition = {
-                            slideOutOfContainer(
-                                AnimatedContentTransitionScope.SlideDirection.Left,
-                                targetOffset = { it / 4 },
-                            ) + fadeOut()
-                        },
-                        popEnterTransition = {
-                            slideIntoContainer(
-                                AnimatedContentTransitionScope.SlideDirection.Right,
-                                initialOffset = { it / 4 },
-                            ) + fadeIn()
-                        },
-                        popExitTransition = {
-                            slideOutOfContainer(
-                                AnimatedContentTransitionScope.SlideDirection.Right,
-                                targetOffset = { it / 4 },
-                            ) + fadeOut()
-                        },
-                    ),
-            ),
-    )
+    ModalBottomSheetLayout(
+        bottomSheetNavigator = bottomSheetNavigator,
+    ) {
+        DestinationsNavHost(
+            navGraph = NavGraphs.root,
+            modifier = modifier,
+            navController = navController,
+            engine =
+                rememberAnimatedNavHostEngine(
+                    rootDefaultAnimations =
+                        RootNavGraphDefaultAnimations(
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    initialOffset = { it / 4 },
+                                ) + fadeIn()
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
+                                    targetOffset = { it / 4 },
+                                ) + fadeOut()
+                            },
+                            popEnterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    initialOffset = { it / 4 },
+                                ) + fadeIn()
+                            },
+                            popExitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    targetOffset = { it / 4 },
+                                ) + fadeOut()
+                            },
+                        ),
+                ),
+        )
+    }
 }

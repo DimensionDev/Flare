@@ -70,7 +70,7 @@ class MastodonCallbackPresenter(
             )
         val accessTokenResponse = service.getAccessToken(code, application.application)
         requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
-        val user = service.verifyCredentials(accessToken = accessTokenResponse.accessToken)
+        val user = service.verify(accessToken = accessTokenResponse.accessToken)
         val id = user.id
         requireNotNull(id) { "Invalid user id" }
         accountRepository.addAccount(

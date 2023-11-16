@@ -44,10 +44,7 @@ class MisskeyOauthService(
     private val callback: String? = null,
     private val permission: List<String> = defaultPermission,
     private val session: String = uuid4().toString(),
-) {
-    private val authResources: AuthResources by lazy {
-        ktorfit("https://$host/").create()
-    }
+): AuthResources by ktorfit("https://$host/").create() {
 
     fun getAuthorizeUrl(): String {
         val url =
@@ -70,6 +67,6 @@ class MisskeyOauthService(
     }
 
     suspend fun check(): MiAuthCheckResponse {
-        return authResources.check(session)
+        return check(session)
     }
 }

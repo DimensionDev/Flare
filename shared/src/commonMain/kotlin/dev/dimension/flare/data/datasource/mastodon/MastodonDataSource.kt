@@ -329,9 +329,9 @@ class MastodonDataSource(
 
         runCatching {
             if (status.reaction.liked) {
-                service.favourite(status.statusKey.id)
-            } else {
                 service.unfavourite(status.statusKey.id)
+            } else {
+                service.favourite(status.statusKey.id)
             }
         }.onFailure {
             updateStatusUseCase<StatusContent.Mastodon>(
@@ -350,6 +350,17 @@ class MastodonDataSource(
                                         it.data.favouritesCount?.minus(1)
                                     },
                             ),
+                    )
+                },
+            )
+        }.onSuccess { result ->
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = status.statusKey,
+                accountKey = status.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data = result,
                     )
                 },
             )
@@ -403,6 +414,17 @@ class MastodonDataSource(
                     )
                 },
             )
+        }.onSuccess { result ->
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = status.statusKey,
+                accountKey = status.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data = result,
+                    )
+                },
+            )
         }
     }
 
@@ -447,6 +469,17 @@ class MastodonDataSource(
                             it.data.copy(
                                 bookmarked = status.reaction.bookmarked,
                             ),
+                    )
+                },
+            )
+        }.onSuccess { result ->
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = status.statusKey,
+                accountKey = status.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data = result,
                     )
                 },
             )

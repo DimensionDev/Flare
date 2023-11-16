@@ -31,7 +31,9 @@ class MisskeyReactionPresenter(
             }
         val data =
             service.flatMap {
-                it.emoji().collectAsState().toUi()
+                remember(it) {
+                    it.emoji()
+                }.collectAsState().toUi()
             }
 
         val status =

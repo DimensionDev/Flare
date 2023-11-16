@@ -117,6 +117,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.component.status.mastodon.VisibilityIcon
 import dev.dimension.flare.ui.model.UiAccount
@@ -132,7 +133,6 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
 import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
 import dev.dimension.flare.ui.presenter.compose.VisibilityState
-import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.rememberKoinInject
@@ -148,7 +148,9 @@ fun ComposeScreenPreview() {
     ComposeScreen(onBack = {})
 }
 
-@Destination
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 @Composable
 fun ComposeRoute(navigator: DestinationsNavigator) {
     ComposeScreen(
@@ -164,6 +166,7 @@ fun ComposeRoute(navigator: DestinationsNavigator) {
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
     ],
+    wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun ReplyRoute(
@@ -184,6 +187,7 @@ fun ReplyRoute(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
     ],
+    wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun Quote(
@@ -275,416 +279,414 @@ private fun ComposeScreen(
             },
         )
 
-    FlareTheme {
-        Scaffold(
-            modifier = modifier,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(text = stringResource(id = R.string.compose_title))
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                if (permissionState.status.isGranted) {
-                                    state.send()
-                                    onBack.invoke()
-                                } else {
-                                    permissionState.launchPermissionRequest()
-                                }
-                            },
-                            enabled = state.canSend,
-                        ) {
-                            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null)
-                        }
-                    },
-                )
-            },
-            bottomBar = {
-                Surface(
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(id = R.string.compose_title))
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            if (permissionState.status.isGranted) {
+                                state.send()
+                                onBack.invoke()
+                            } else {
+                                permissionState.launchPermissionRequest()
+                            }
+                        },
+                        enabled = state.canSend,
+                    ) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null)
+                    }
+                },
+            )
+        },
+        bottomBar = {
+            Surface(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+                tonalElevation = 3.dp,
+            ) {
+                Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth(),
-                    tonalElevation = 3.dp,
+                            .navigationBarsPadding(),
                 ) {
+                    Row(
+                        modifier = Modifier,
+                    ) {
+                        IconButton(
+                            onClick = {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageAndVideo,
+                                    ),
+                                )
+                            },
+                            enabled = state.canMedia,
+                        ) {
+                            Icon(imageVector = Icons.Default.Image, contentDescription = null)
+                        }
+                        state.pollState.onSuccess {
+                            IconButton(
+                                onClick = {
+                                    it.togglePoll()
+                                },
+                                enabled = state.canPoll,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Poll,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                        state.state.visibilityState.onSuccess { visibilityState ->
+                            when (visibilityState) {
+                                is MastodonVisibilityState ->
+                                    MastodonVisibilityContent(
+                                        visibilityState,
+                                    )
+
+                                is MisskeyVisibilityState ->
+                                    MisskeyVisibilityContent(
+                                        visibilityState,
+                                    )
+                            }
+                        }
+                        state.contentWarningState.onSuccess {
+                            IconButton(
+                                onClick = {
+                                    it.toggle()
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                        state.state.emojiState.onSuccess {
+                            val isImeVisible = WindowInsets.isImeVisible
+                            IconButton(
+                                onClick = {
+                                    if (isImeVisible) {
+                                        keyboardController?.hide()
+                                    } else {
+                                        keyboardController?.show()
+                                    }
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.EmojiEmotions,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                    }
+
+                    state.state.emojiState.onSuccess { emojis ->
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(imeHeight()),
+                        ) {
+                            if (!WindowInsets.isImeVisible) {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Adaptive(48.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth(),
+                                    contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    items(emojis) { emoji ->
+                                        NetworkImage(
+                                            model = emoji.url,
+                                            contentDescription = emoji.shortcode,
+                                            contentScale = ContentScale.Fit,
+                                            modifier =
+                                                Modifier
+                                                    .size(48.dp)
+                                                    .clickable {
+                                                        state.selectEmoji(emoji)
+                                                    },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }.onError {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .imePadding(),
+                        )
+                    }.onLoading {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .imePadding(),
+                        )
+                    }
+                }
+            }
+        },
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .padding(it)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            state.contentWarningState.onSuccess {
+                AnimatedVisibility(it.enabled) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        TextField2(
+                            state = it.textFieldState,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(
+                                        focusRequester = contentWarningFocusRequester,
+                                    ),
+                            colors =
+                                TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent,
+                                    errorIndicatorColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                ),
+                            placeholder = {
+                                Text(text = stringResource(id = R.string.compose_content_warning_hint))
+                            },
+                        )
+                        HorizontalDivider()
+                    }
+                }
+            }
+            TextField2(
+                state = state.textFieldState,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .focusRequester(
+                            focusRequester = focusRequester,
+                        ),
+                colors =
+                    TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        errorIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                    ),
+                placeholder = {
+                    Text(text = stringResource(id = R.string.compose_hint))
+                },
+            )
+            if (state.mediaState.medias.isNotEmpty()) {
+                Row(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding)
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    state.mediaState.medias.forEach { uri ->
+                        Box {
+                            NetworkImage(
+                                model = uri,
+                                contentDescription = null,
+                                modifier =
+                                    Modifier
+                                        .size(128.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                            )
+                            IconButton(
+                                onClick = {
+                                    state.mediaState.removeMedia(uri)
+                                },
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopEnd)
+                                        .background(
+                                            color = Color.Black.copy(alpha = 0.3f),
+                                            shape = CircleShape,
+                                        ),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                    }
+                }
+                val sensitiveInteractionSource = remember { MutableInteractionSource() }
+                Row(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding)
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = sensitiveInteractionSource,
+                                indication = null,
+                            ) {
+                                state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
+                            },
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = state.mediaState.isMediaSensitive,
+                        onCheckedChange = { state.mediaState.setMediaSensitive(it) },
+                        interactionSource = sensitiveInteractionSource,
+                    )
+                    Text(text = stringResource(id = R.string.compose_media_sensitive))
+                }
+            }
+            state.pollState.onSuccess { pollState ->
+                if (pollState.enabled) {
                     Column(
                         modifier =
                             Modifier
-                                .navigationBarsPadding(),
+                                .padding(horizontal = screenHorizontalPadding)
+                                .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Row(
-                            modifier = Modifier,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            IconButton(
+                            SingleChoiceSegmentedButtonRow(
+                                modifier =
+                                    Modifier
+                                        .weight(1f),
+                            ) {
+                                SegmentedButton(
+                                    selected = pollState.pollSingleChoice,
+                                    onClick = {
+                                        pollState.setPollSingleChoice(true)
+                                    },
+                                    shape =
+                                        SegmentedButtonDefaults.itemShape(
+                                            index = 0,
+                                            count = 2,
+                                        ),
+                                ) {
+                                    Text(text = stringResource(id = R.string.compose_poll_single_choice))
+                                }
+                                SegmentedButton(
+                                    selected = !pollState.pollSingleChoice,
+                                    onClick = {
+                                        pollState.setPollSingleChoice(false)
+                                    },
+                                    shape =
+                                        SegmentedButtonDefaults.itemShape(
+                                            index = 1,
+                                            count = 2,
+                                        ),
+                                ) {
+                                    Text(text = stringResource(id = R.string.compose_poll_multiple_choice))
+                                }
+                            }
+                            FilledTonalIconButton(
                                 onClick = {
-                                    photoPickerLauncher.launch(
-                                        PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.ImageAndVideo,
-                                        ),
-                                    )
+                                    pollState.addPollOption()
                                 },
-                                enabled = state.canMedia,
+                                enabled = pollState.canAddPollOption,
                             ) {
-                                Icon(imageVector = Icons.Default.Image, contentDescription = null)
-                            }
-                            state.pollState.onSuccess {
-                                IconButton(
-                                    onClick = {
-                                        it.togglePoll()
-                                    },
-                                    enabled = state.canPoll,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Poll,
-                                        contentDescription = null,
-                                    )
-                                }
-                            }
-                            state.state.visibilityState.onSuccess { visibilityState ->
-                                when (visibilityState) {
-                                    is MastodonVisibilityState ->
-                                        MastodonVisibilityContent(
-                                            visibilityState,
-                                        )
-
-                                    is MisskeyVisibilityState ->
-                                        MisskeyVisibilityContent(
-                                            visibilityState,
-                                        )
-                                }
-                            }
-                            state.contentWarningState.onSuccess {
-                                IconButton(
-                                    onClick = {
-                                        it.toggle()
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Warning,
-                                        contentDescription = null,
-                                    )
-                                }
-                            }
-                            state.state.emojiState.onSuccess {
-                                val isImeVisible = WindowInsets.isImeVisible
-                                IconButton(
-                                    onClick = {
-                                        if (isImeVisible) {
-                                            keyboardController?.hide()
-                                        } else {
-                                            keyboardController?.show()
-                                        }
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.EmojiEmotions,
-                                        contentDescription = null,
-                                    )
-                                }
-                            }
-                        }
-
-                        state.state.emojiState.onSuccess { emojis ->
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(imeHeight()),
-                            ) {
-                                if (!WindowInsets.isImeVisible) {
-                                    LazyVerticalGrid(
-                                        columns = GridCells.Adaptive(48.dp),
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth(),
-                                        contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    ) {
-                                        items(emojis) { emoji ->
-                                            NetworkImage(
-                                                model = emoji.url,
-                                                contentDescription = emoji.shortcode,
-                                                contentScale = ContentScale.Fit,
-                                                modifier =
-                                                    Modifier
-                                                        .size(48.dp)
-                                                        .clickable {
-                                                            state.selectEmoji(emoji)
-                                                        },
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }.onError {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .imePadding(),
-                            )
-                        }.onLoading {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .imePadding(),
-                            )
-                        }
-                    }
-                }
-            },
-        ) {
-            Column(
-                modifier =
-                    Modifier
-                        .padding(it)
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                state.contentWarningState.onSuccess {
-                    AnimatedVisibility(it.enabled) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            TextField2(
-                                state = it.textFieldState,
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .focusRequester(
-                                            focusRequester = contentWarningFocusRequester,
-                                        ),
-                                colors =
-                                    TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.Transparent,
-                                        unfocusedContainerColor = Color.Transparent,
-                                        disabledIndicatorColor = Color.Transparent,
-                                        errorIndicatorColor = Color.Transparent,
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                    ),
-                                placeholder = {
-                                    Text(text = stringResource(id = R.string.compose_content_warning_hint))
-                                },
-                            )
-                            HorizontalDivider()
-                        }
-                    }
-                }
-                TextField2(
-                    state = state.textFieldState,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .focusRequester(
-                                focusRequester = focusRequester,
-                            ),
-                    colors =
-                        TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            errorIndicatorColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                        ),
-                    placeholder = {
-                        Text(text = stringResource(id = R.string.compose_hint))
-                    },
-                )
-                if (state.mediaState.medias.isNotEmpty()) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .padding(horizontal = screenHorizontalPadding)
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        state.mediaState.medias.forEach { uri ->
-                            Box {
-                                NetworkImage(
-                                    model = uri,
+                                Icon(
+                                    imageVector = Icons.Default.Add,
                                     contentDescription = null,
-                                    modifier =
-                                        Modifier
-                                            .size(128.dp)
-                                            .clip(RoundedCornerShape(8.dp)),
+                                    modifier = Modifier.size(16.dp),
                                 )
-                                IconButton(
-                                    onClick = {
-                                        state.mediaState.removeMedia(uri)
-                                    },
-                                    modifier =
-                                        Modifier
-                                            .align(Alignment.TopEnd)
-                                            .background(
-                                                color = Color.Black.copy(alpha = 0.3f),
-                                                shape = CircleShape,
-                                            ),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = null,
-                                    )
-                                }
                             }
                         }
-                    }
-                    val sensitiveInteractionSource = remember { MutableInteractionSource() }
-                    Row(
-                        modifier =
-                            Modifier
-                                .padding(horizontal = screenHorizontalPadding)
-                                .fillMaxWidth()
-                                .clickable(
-                                    interactionSource = sensitiveInteractionSource,
-                                    indication = null,
-                                ) {
-                                    state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
+                        pollState.options.forEachIndexed { index, textFieldState ->
+                            PollOption(
+                                textFieldState = textFieldState,
+                                index = index,
+                                onRemove = {
+                                    pollState.removePollOption(index)
                                 },
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(
-                            checked = state.mediaState.isMediaSensitive,
-                            onCheckedChange = { state.mediaState.setMediaSensitive(it) },
-                            interactionSource = sensitiveInteractionSource,
-                        )
-                        Text(text = stringResource(id = R.string.compose_media_sensitive))
-                    }
-                }
-                state.pollState.onSuccess { pollState ->
-                    if (pollState.enabled) {
-                        Column(
+                            )
+                        }
+                        FilledTonalButton(
+                            onClick = {
+                                pollState.setShowExpirationMenu(true)
+                            },
                             modifier =
                                 Modifier
-                                    .padding(horizontal = screenHorizontalPadding)
-                                    .fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    .align(Alignment.End),
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                SingleChoiceSegmentedButtonRow(
-                                    modifier =
-                                        Modifier
-                                            .weight(1f),
-                                ) {
-                                    SegmentedButton(
-                                        selected = pollState.pollSingleChoice,
-                                        onClick = {
-                                            pollState.setPollSingleChoice(true)
-                                        },
-                                        shape =
-                                            SegmentedButtonDefaults.itemShape(
-                                                index = 0,
-                                                count = 2,
-                                            ),
-                                    ) {
-                                        Text(text = stringResource(id = R.string.compose_poll_single_choice))
-                                    }
-                                    SegmentedButton(
-                                        selected = !pollState.pollSingleChoice,
-                                        onClick = {
-                                            pollState.setPollSingleChoice(false)
-                                        },
-                                        shape =
-                                            SegmentedButtonDefaults.itemShape(
-                                                index = 1,
-                                                count = 2,
-                                            ),
-                                    ) {
-                                        Text(text = stringResource(id = R.string.compose_poll_multiple_choice))
-                                    }
-                                }
-                                FilledTonalIconButton(
-                                    onClick = {
-                                        pollState.addPollOption()
-                                    },
-                                    enabled = pollState.canAddPollOption,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                }
-                            }
-                            pollState.options.forEachIndexed { index, textFieldState ->
-                                PollOption(
-                                    textFieldState = textFieldState,
-                                    index = index,
-                                    onRemove = {
-                                        pollState.removePollOption(index)
-                                    },
-                                )
-                            }
-                            FilledTonalButton(
-                                onClick = {
-                                    pollState.setShowExpirationMenu(true)
+                            Text(
+                                text =
+                                    stringResource(
+                                        id = R.string.compose_poll_expiration_at,
+                                        stringResource(id = pollState.expiredAt.textId),
+                                    ),
+                            )
+                            DropdownMenu(
+                                expanded = pollState.showExpirationMenu,
+                                onDismissRequest = {
+                                    pollState.setShowExpirationMenu(false)
                                 },
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.End),
+                                properties = PopupProperties(focusable = false),
                             ) {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            id = R.string.compose_poll_expiration_at,
-                                            stringResource(id = pollState.expiredAt.textId),
-                                        ),
-                                )
-                                DropdownMenu(
-                                    expanded = pollState.showExpirationMenu,
-                                    onDismissRequest = {
-                                        pollState.setShowExpirationMenu(false)
-                                    },
-                                    properties = PopupProperties(focusable = false),
-                                ) {
-                                    PollExpiration.entries.forEach { expiration ->
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                pollState.setExpiredAt(expiration)
-                                                pollState.setShowExpirationMenu(false)
-                                            },
-                                            text = {
-                                                Text(text = stringResource(id = expiration.textId))
-                                            },
-                                        )
-                                    }
+                                PollExpiration.entries.forEach { expiration ->
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            pollState.setExpiredAt(expiration)
+                                            pollState.setShowExpirationMenu(false)
+                                        },
+                                        text = {
+                                            Text(text = stringResource(id = expiration.textId))
+                                        },
+                                    )
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                state.state.replyState?.let { replyState ->
-                    replyState.onSuccess { state ->
-                        if (state.itemCount > 0) {
-                            val item = state[0]
-                            if (item != null) {
-                                UiStatusQuoted(
-                                    status = item,
-                                    onMediaClick = {},
-                                    modifier =
-                                        Modifier
-                                            .padding(horizontal = screenHorizontalPadding)
-                                            .fillMaxWidth(),
-                                )
-                            }
+            state.state.replyState?.let { replyState ->
+                replyState.onSuccess { state ->
+                    if (state.itemCount > 0) {
+                        val item = state[0]
+                        if (item != null) {
+                            UiStatusQuoted(
+                                status = item,
+                                onMediaClick = {},
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .fillMaxWidth(),
+                            )
                         }
                     }
                 }

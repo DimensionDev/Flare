@@ -8,9 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -31,12 +31,18 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
                 }.collectAsLazyPagingItems()
             }
         var showNewToots by remember { mutableStateOf(false) }
-        val refreshing =
-            listState is UiState.Loading ||
-                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+//        val refreshing =
+//            listState is UiState.Loading ||
+//                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
         if (listState is UiState.Success && listState.data.itemCount > 0) {
             LaunchedEffect(Unit) {
-                snapshotFlow { listState.data.peek(0)?.statusKey }
+                snapshotFlow {
+                    if (listState.data.itemCount > 0) {
+                        listState.data.peek(0)?.statusKey
+                    } else {
+                        null
+                    }
+                }
                     .mapNotNull { it }
                     .distinctUntilChanged()
                     .drop(1)
@@ -47,13 +53,12 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
         }
 
         return object : HomeTimelineState(
-            refreshing,
             listState,
             showNewToots,
         ) {
-            override fun refresh() {
+            override suspend fun refresh() {
                 listState.onSuccess {
-                    it.refresh()
+                    it.refreshSuspend()
                 }
             }
 
@@ -66,22 +71,20 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
 
 @Immutable
 abstract class HomeTimelineState(
-    val refreshing: Boolean,
     val listState: UiState<LazyPagingItems<UiStatus>>,
     val showNewToots: Boolean,
 ) {
-    abstract fun refresh()
+    abstract suspend fun refresh()
 
     abstract fun onNewTootsShown()
 
     companion object {
         val Empty =
             object : HomeTimelineState(
-                refreshing = false,
                 listState = UiState.Loading(),
                 showNewToots = false,
             ) {
-                override fun refresh() {
+                override suspend fun refresh() {
                 }
 
                 override fun onNewTootsShown() {

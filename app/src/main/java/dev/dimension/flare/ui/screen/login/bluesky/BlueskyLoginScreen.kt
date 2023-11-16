@@ -46,14 +46,16 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.login.BlueskyLoginPresenter
 import dev.dimension.flare.ui.screen.destinations.BlueskyLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
-import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
-@Destination
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 fun BlueskyLoginRoute(navigator: DestinationsNavigator) {
     BlueskyLoginScreen(
         onBack = navigator::navigateUp,
@@ -80,145 +82,143 @@ private fun BlueskyLoginScreen(
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
-    FlareTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBack,
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                )
-            },
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack,
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
+                    }
+                },
+            )
+        },
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             Column(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+                        .fillMaxWidth()
+                        .weight(0.8f),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
             ) {
-                Column(
+                Text(
+                    text = stringResource(id = R.string.bluesky_login_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Text(
+                    text = stringResource(id = R.string.bluesky_login_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(2f)
+                        .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedTextField2(
+                    state = state.baseUrl,
+                    label = {
+                        Text(text = stringResource(id = R.string.bluesky_login_base_url_hint))
+                    },
+                    enabled = !state.state.loading,
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .weight(0.8f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.bluesky_login_title),
-                        style = MaterialTheme.typography.headlineMedium,
-                    )
-                    Text(
-                        text = stringResource(id = R.string.bluesky_login_message),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(2f)
-                            .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedTextField2(
-                        state = state.baseUrl,
-                        label = {
-                            Text(text = stringResource(id = R.string.bluesky_login_base_url_hint))
-                        },
-                        enabled = !state.state.loading,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .focusRequester(
-                                    focusRequester = focusRequester,
-                                ),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                        trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    state.setDropdown(!state.showDropdown)
-                                },
+                            .focusRequester(
+                                focusRequester = focusRequester,
+                            ),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                state.setDropdown(!state.showDropdown)
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = stringResource(id = R.string.navigate_back),
+                            )
+                            DropdownMenu(
+                                expanded = state.showDropdown,
+                                onDismissRequest = { state.setDropdown(false) },
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = stringResource(id = R.string.navigate_back),
-                                )
-                                DropdownMenu(
-                                    expanded = state.showDropdown,
-                                    onDismissRequest = { state.setDropdown(false) },
-                                ) {
-                                    KnownInstance.entries.forEach {
-                                        DropdownMenuItem(
-                                            text = { Text(text = it.url) },
-                                            onClick = { state.selectBaseUrl(it.url) },
-                                        )
-                                    }
+                                KnownInstance.entries.forEach {
+                                    DropdownMenuItem(
+                                        text = { Text(text = it.url) },
+                                        onClick = { state.selectBaseUrl(it.url) },
+                                    )
                                 }
                             }
-                        },
-                    )
-                    OutlinedTextField2(
-                        state = state.username,
-                        label = {
-                            Text(text = stringResource(id = R.string.bluesky_login_username_hint))
-                        },
-                        enabled = !state.state.loading,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .focusRequester(
-                                    focusRequester = focusRequester,
-                                ),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                    )
-                    OutlinedSecureTextField2(
-                        state = state.password,
-                        label = {
-                            Text(text = stringResource(id = R.string.bluesky_login_password_hint))
-                        },
-                        enabled = !state.state.loading,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth(),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                        onSubmit = {
-                            state.state.login(
-                                state.baseUrl.text.toString(),
-                                state.username.text.toString(),
-                                state.password.text.toString(),
-                            )
-                            true
-                        },
-                    )
-                    Button(
-                        onClick = {
-                            state.state.login(
-                                state.baseUrl.text.toString(),
-                                state.username.text.toString(),
-                                state.password.text.toString(),
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(text = stringResource(id = R.string.login_button))
-                    }
-                    state.state.error?.let { error ->
-                        Text(text = error.toString())
-                    }
+                        }
+                    },
+                )
+                OutlinedTextField2(
+                    state = state.username,
+                    label = {
+                        Text(text = stringResource(id = R.string.bluesky_login_username_hint))
+                    },
+                    enabled = !state.state.loading,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .focusRequester(
+                                focusRequester = focusRequester,
+                            ),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                )
+                OutlinedSecureTextField2(
+                    state = state.password,
+                    label = {
+                        Text(text = stringResource(id = R.string.bluesky_login_password_hint))
+                    },
+                    enabled = !state.state.loading,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    onSubmit = {
+                        state.state.login(
+                            state.baseUrl.text.toString(),
+                            state.username.text.toString(),
+                            state.password.text.toString(),
+                        )
+                        true
+                    },
+                )
+                Button(
+                    onClick = {
+                        state.state.login(
+                            state.baseUrl.text.toString(),
+                            state.username.text.toString(),
+                            state.password.text.toString(),
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(text = stringResource(id = R.string.login_button))
+                }
+                state.state.error?.let { error ->
+                    Text(text = error.toString())
                 }
             }
         }

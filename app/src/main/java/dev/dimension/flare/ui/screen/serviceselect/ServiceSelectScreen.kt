@@ -45,15 +45,17 @@ import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.screen.destinations.BlueskyLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MastodonLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MisskeyLoginRouteDestination
-import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 
 @Composable
-@Destination
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 fun ServiceSelectRoute(navigator: DestinationsNavigator) {
     ServiceSelectScreen(
         toMastodon = {
@@ -82,175 +84,173 @@ fun ServiceSelectScreen(
     val state by producePresenter {
         serviceSelectPresenter(activityContext = view.context)
     }
-    FlareTheme {
-        Scaffold(
-            modifier = modifier,
-            topBar = {
-                TopAppBar(
-                    title = {
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBack,
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                )
-            },
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack,
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
+                    }
+                },
+            )
+        },
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .padding(it + PaddingValues(horizontal = screenHorizontalPadding))
+                    .fillMaxSize(),
         ) {
-            Box(
+            Column(
                 modifier =
                     Modifier
-                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding))
                         .fillMaxSize(),
             ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxSize(),
+                            .fillMaxWidth()
+                            .weight(0.8f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 ) {
-                    Column(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(0.8f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.service_select_welcome_title),
-                            style = MaterialTheme.typography.headlineMedium,
-                        )
-                        Text(
-                            text = stringResource(id = R.string.service_select_welcome_message),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        )
+                    Text(
+                        text = stringResource(id = R.string.service_select_welcome_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.service_select_welcome_message),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                }
+                LazyVerticalGrid(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(2f)
+                            .padding(horizontal = 16.dp),
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.CenterHorizontally,
+                        ),
+                    verticalArrangement =
+                        Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.Top,
+                        ),
+                    columns = GridCells.Adaptive(112.dp),
+                ) {
+                    item {
+                        Card(
+                            onClick = {
+                                state.launchPasskey()
+                            },
+                            modifier =
+                                Modifier
+                                    .aspectRatio(1f),
+                            enabled = state.loading.not(),
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement =
+                                    Arrangement.spacedBy(
+                                        8.dp,
+                                        Alignment.CenterVertically,
+                                    ),
+                            ) {
+                                Text(text = stringResource(id = R.string.service_select_passkey))
+                            }
+                        }
                     }
-                    LazyVerticalGrid(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(2f)
-                                .padding(horizontal = 16.dp),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(
-                                8.dp,
-                                Alignment.CenterHorizontally,
-                            ),
-                        verticalArrangement =
-                            Arrangement.spacedBy(
-                                8.dp,
-                                Alignment.Top,
-                            ),
-                        columns = GridCells.Adaptive(112.dp),
-                    ) {
-                        item {
-                            Card(
-                                onClick = {
-                                    state.launchPasskey()
-                                },
-                                modifier =
-                                    Modifier
-                                        .aspectRatio(1f),
-                                enabled = state.loading.not(),
+                    item {
+                        Card(
+                            onClick = toMastodon,
+                            modifier =
+                                Modifier
+                                    .aspectRatio(1f),
+                            enabled = state.loading.not(),
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement =
+                                    Arrangement.spacedBy(
+                                        8.dp,
+                                        Alignment.CenterVertically,
+                                    ),
                             ) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement =
-                                        Arrangement.spacedBy(
-                                            8.dp,
-                                            Alignment.CenterVertically,
-                                        ),
-                                ) {
-                                    Text(text = stringResource(id = R.string.service_select_passkey))
-                                }
+                                NetworkImage(
+                                    model = "https://joinmastodon.org/logos/logo-purple.svg",
+                                    contentDescription = "Mastodon Logo",
+                                    modifier = Modifier.size(64.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                                Text(text = stringResource(id = R.string.service_select_mastodon))
                             }
                         }
-                        item {
-                            Card(
-                                onClick = toMastodon,
-                                modifier =
-                                    Modifier
-                                        .aspectRatio(1f),
-                                enabled = state.loading.not(),
+                    }
+                    item {
+                        Card(
+                            onClick = toMisskey,
+                            enabled = state.loading.not(),
+                            modifier =
+                                Modifier
+                                    .aspectRatio(1f),
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement =
+                                    Arrangement.spacedBy(
+                                        8.dp,
+                                        Alignment.CenterVertically,
+                                    ),
                             ) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement =
-                                        Arrangement.spacedBy(
-                                            8.dp,
-                                            Alignment.CenterVertically,
-                                        ),
-                                ) {
-                                    NetworkImage(
-                                        model = "https://joinmastodon.org/logos/logo-purple.svg",
-                                        contentDescription = "Mastodon Logo",
-                                        modifier = Modifier.size(64.dp),
-                                        contentScale = ContentScale.Fit,
-                                    )
-                                    Text(text = stringResource(id = R.string.service_select_mastodon))
-                                }
+                                NetworkImage(
+                                    model = "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png",
+                                    contentDescription = "Misskey Logo",
+                                    modifier = Modifier.size(64.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                                Text(text = stringResource(id = R.string.service_select_misskey))
                             }
                         }
-                        item {
-                            Card(
-                                onClick = toMisskey,
-                                enabled = state.loading.not(),
-                                modifier =
-                                    Modifier
-                                        .aspectRatio(1f),
+                    }
+                    item {
+                        Card(
+                            onClick = toBluesky,
+                            enabled = state.loading.not(),
+                            modifier =
+                                Modifier
+                                    .aspectRatio(1f),
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement =
+                                    Arrangement.spacedBy(
+                                        8.dp,
+                                        Alignment.CenterVertically,
+                                    ),
                             ) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement =
-                                        Arrangement.spacedBy(
-                                            8.dp,
-                                            Alignment.CenterVertically,
-                                        ),
-                                ) {
-                                    NetworkImage(
-                                        model = "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png",
-                                        contentDescription = "Misskey Logo",
-                                        modifier = Modifier.size(64.dp),
-                                        contentScale = ContentScale.Fit,
-                                    )
-                                    Text(text = stringResource(id = R.string.service_select_misskey))
-                                }
-                            }
-                        }
-                        item {
-                            Card(
-                                onClick = toBluesky,
-                                enabled = state.loading.not(),
-                                modifier =
-                                    Modifier
-                                        .aspectRatio(1f),
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement =
-                                        Arrangement.spacedBy(
-                                            8.dp,
-                                            Alignment.CenterVertically,
-                                        ),
-                                ) {
-                                    NetworkImage(
-                                        model = "https://blueskyweb.xyz/images/apple-touch-icon.png",
-                                        contentDescription = "Bluesky Logo",
-                                        modifier = Modifier.size(64.dp),
-                                        contentScale = ContentScale.Fit,
-                                    )
-                                    Text(text = stringResource(id = R.string.service_select_bluesky))
-                                }
+                                NetworkImage(
+                                    model = "https://blueskyweb.xyz/images/apple-touch-icon.png",
+                                    contentDescription = "Bluesky Logo",
+                                    modifier = Modifier.size(64.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                                Text(text = stringResource(id = R.string.service_select_bluesky))
                             }
                         }
                     }

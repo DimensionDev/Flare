@@ -2,9 +2,9 @@ package dev.dimension.flare.ui.presenter.status
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
@@ -24,17 +24,16 @@ class StatusPresenter(
                     service.context(statusKey)
                 }.collectAsLazyPagingItems()
             }
-        val refreshing =
-            listState is UiState.Loading ||
-                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+//        val refreshing =
+//            listState is UiState.Loading ||
+//                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
 
         return object : StatusState(
             listState,
-            refreshing,
         ) {
-            override fun refresh() {
+            override suspend fun refresh() {
                 listState.onSuccess {
-                    it.refresh()
+                    it.refreshSuspend()
                 }
             }
         }
@@ -43,7 +42,6 @@ class StatusPresenter(
 
 abstract class StatusState(
     val listState: UiState<LazyPagingItems<UiStatus>>,
-    val refreshing: Boolean,
 ) {
-    abstract fun refresh()
+    abstract suspend fun refresh()
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,10 +27,10 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import dev.dimension.flare.ui.theme.FlareTheme
 import org.koin.compose.rememberKoinInject
 
 @Composable
@@ -41,6 +40,7 @@ import org.koin.compose.rememberKoinInject
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
     ],
+    wrappers = [ThemeWrapper::class],
 )
 fun StatusRoute(
     statusKey: MicroBlogKey,
@@ -61,44 +61,41 @@ internal fun StatusScreen(
     val state by producePresenter(statusKey.toString()) {
         statusPresenter(statusKey)
     }
-    FlareTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(text = stringResource(id = R.string.status_title))
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                )
-            },
-        ) {
-            val listState = rememberLazyListState()
-            RefreshContainer(
-                modifier = Modifier.padding(it),
-                refreshing = state.state.refreshing,
-                onRefresh = state.state::refresh,
-                content = {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        with(state.state.listState) {
-                            with(state.statusEvent) {
-                                status()
-                            }
-                        }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(id = R.string.status_title))
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
                     }
                 },
             )
-        }
+        },
+    ) {
+        val listState = rememberLazyListState()
+        RefreshContainer(
+            modifier = Modifier.padding(it),
+            onRefresh = state.state::refresh,
+            content = {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    with(state.state.listState) {
+                        with(state.statusEvent) {
+                            status()
+                        }
+                    }
+                }
+            },
+        )
     }
 }
 

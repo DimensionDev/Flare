@@ -11,18 +11,22 @@ import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
 
 @Composable
 @Destination(
+    style = DestinationStyle.Dialog::class,
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
     ],
+    wrappers = [ThemeWrapper::class],
 )
 fun MisskeyReportRoute(
     navigator: DestinationsNavigator,

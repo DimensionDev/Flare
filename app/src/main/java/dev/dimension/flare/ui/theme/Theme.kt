@@ -39,7 +39,7 @@ fun FlareTheme(
             else -> LightColorScheme
         }
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (!view.isInEditMode && view.context is Activity) {
         SideEffect {
             val window = (view.context as Activity).window
 //            window.statusBarColor = colorScheme.background.toArgb()

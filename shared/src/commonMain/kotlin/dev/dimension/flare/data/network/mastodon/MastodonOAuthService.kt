@@ -18,8 +18,7 @@ class MastodonOAuthService(
             MastodonAuthScope.Follow,
             MastodonAuthScope.Push,
         ),
-): MastodonOAuthResources by ktorfit(baseUrl).create() {
-
+) : MastodonOAuthResources by ktorfit(baseUrl).create() {
     suspend fun createApplication() =
         createApplication(
             client_name = client_name,

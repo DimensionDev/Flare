@@ -1,7 +1,7 @@
 import dev.dimension.flare.data.database.cache.model.EmojiContent;
 
 CREATE TABLE IF NOT EXISTS DbEmoji (
-    host TEXT NOT NULL,
+    host TEXT NOT NULL PRIMARY KEY,
     content TEXT AS EmojiContent NOT NULL
 );
 

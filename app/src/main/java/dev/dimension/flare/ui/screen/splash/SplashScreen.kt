@@ -15,14 +15,16 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.splash.SplashPresenter
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SplashRouteDestination
-import dev.dimension.flare.ui.theme.FlareTheme
 
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
-@Destination
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 @Composable
 fun SplashRoute(
     navigator: DestinationsNavigator,
@@ -56,20 +58,18 @@ internal fun SplashScreen(
             toLogin,
         ).invoke()
     }
-    FlareTheme {
-        Scaffold {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(it),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = null,
-                )
-            }
+    Scaffold {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = null,
+            )
         }
     }
 }

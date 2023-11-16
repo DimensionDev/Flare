@@ -156,4 +156,10 @@
     <string name="delete_status_title">删除</string>
     <string name="delete_status_message">您确定要删除此内容吗？</string>
 
+    <string name="mastodon_item_unbookmark">取消书签</string>
+    <string name="mastodon_item_bookmark">添加书签</string>
+    <string name="mastodon_item_delete">删除</string>
+    <string name="mastodon_item_report">举报</string>
+    <string name="mastodon_report_title">举报</string>
+    <string name="mastodon_report_description">您确定要举报此内容吗？</string>
 </resources>

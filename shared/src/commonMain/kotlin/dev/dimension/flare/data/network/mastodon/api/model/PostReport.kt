@@ -10,4 +10,5 @@ data class PostReport(
     @SerialName("status_ids")
     val statusIds: List<String>? = null,
     val comment: String? = null,
+    val forward: Boolean? = null,
 )

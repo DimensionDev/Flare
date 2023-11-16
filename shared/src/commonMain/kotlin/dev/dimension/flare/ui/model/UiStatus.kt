@@ -159,6 +159,10 @@ sealed class UiStatus {
             parseContent(raw, accountKey.host)
         }
 
+        val isFromMe by lazy {
+            user.userKey == accountKey
+        }
+
         data class Reaction(
             val liked: Boolean,
             val reblogged: Boolean,

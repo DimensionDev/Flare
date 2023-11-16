@@ -7,8 +7,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 
-
-suspend fun <T: Any> LazyPagingItems<T>.refreshSuspend() {
+suspend fun <T : Any> LazyPagingItems<T>.refreshSuspend() {
     refresh()
     snapshotFlow { loadState }
         .distinctUntilChanged()

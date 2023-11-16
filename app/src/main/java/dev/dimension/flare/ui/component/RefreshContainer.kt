@@ -36,9 +36,10 @@ fun RefreshContainer(
     ) {
         content.invoke(this)
         PullToRefreshContainer(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(indicatorPadding),
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(indicatorPadding),
             state = refreshState,
         )
     }

@@ -196,7 +196,7 @@ fun FeedViewPost.toDbStatus(accountKey: MicroBlogKey): DbStatus {
                     ),
                 platform_type = PlatformType.Bluesky,
                 user_key = user.user_key,
-                content = StatusContent.BlueskyReason(data, post),
+                content = StatusContent.Bluesky(post, data),
                 account_key = accountKey,
                 id = 0,
             )
@@ -219,7 +219,7 @@ private fun PostView.toDbStatus(accountKey: MicroBlogKey): DbStatus {
                 host = user.user_key.host,
             ),
         platform_type = PlatformType.Bluesky,
-        content = StatusContent.Bluesky(this),
+        content = StatusContent.Bluesky(this, null),
         user_key = user.user_key,
         account_key = accountKey,
         id = 0,

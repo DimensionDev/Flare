@@ -21,3 +21,6 @@ SELECT * FROM DbStatus WHERE status_key = :status_key AND account_key = :account
 
 update:
 UPDATE DbStatus SET content = :content WHERE status_key = :status_key AND account_key = :account_key;
+
+delete:
+DELETE FROM DbStatus WHERE status_key = :status_key AND account_key = :account_key;

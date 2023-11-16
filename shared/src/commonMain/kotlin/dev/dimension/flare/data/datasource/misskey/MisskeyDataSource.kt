@@ -15,6 +15,7 @@ import dev.dimension.flare.data.datasource.ComposeProgress
 import dev.dimension.flare.data.datasource.MicroblogDataSource
 import dev.dimension.flare.data.datasource.NotificationFilter
 import dev.dimension.flare.data.datasource.timelinePager
+import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
@@ -322,5 +323,19 @@ class MisskeyDataSource(
                 noteId = status.statusKey.id,
             ),
         )
+    }
+
+    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
+        runCatching {
+            service.notesDelete(
+                IPinRequest(
+                    noteId = statusKey.id,
+                ),
+            )
+
+            // delete status from cache
+            database.dbStatusQueries.delete(status_key = statusKey, account_key = account.accountKey)
+            database.dbPagingTimelineQueries.deleteStatus(account_key = account.accountKey, status_key = statusKey)
+        }
     }
 }

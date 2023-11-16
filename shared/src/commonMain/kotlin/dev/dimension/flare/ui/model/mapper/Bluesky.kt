@@ -48,8 +48,8 @@ internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
             card = findCard(this),
             reaction =
                 UiStatus.Bluesky.Reaction(
-                    liked = viewer?.like?.atUri != null,
-                    reposted = viewer?.repost?.atUri != null,
+                    repostUri = viewer?.repost?.atUri,
+                    likedUri = viewer?.like?.atUri,
                 ),
             matrices =
                 UiStatus.Bluesky.Matrices(
@@ -57,6 +57,8 @@ internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
                     likeCount = likeCount ?: 0,
                     repostCount = repostCount ?: 0,
                 ),
+            cid = cid.cid,
+            uri = uri.atUri,
         )
     }
 }
@@ -92,8 +94,8 @@ internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
         card = findCard(this),
         reaction =
             UiStatus.Bluesky.Reaction(
-                liked = viewer?.like?.atUri != null,
-                reposted = viewer?.repost?.atUri != null,
+                repostUri = viewer?.repost?.atUri,
+                likedUri = viewer?.like?.atUri,
             ),
         matrices =
             UiStatus.Bluesky.Matrices(
@@ -101,6 +103,8 @@ internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
                 likeCount = likeCount ?: 0,
                 repostCount = repostCount ?: 0,
             ),
+        cid = cid.cid,
+        uri = uri.atUri,
     )
 }
 
@@ -218,10 +222,11 @@ private fun toUi(
                         }
                     }.firstOrNull(),
                 user = record.value.author.toUi(accountKey.host),
+                // TODO: add reaction
                 reaction =
                     UiStatus.Bluesky.Reaction(
-                        liked = false,
-                        reposted = false,
+                        repostUri = null,
+                        likedUri = null,
                     ),
                 matrices =
                     UiStatus.Bluesky.Matrices(
@@ -229,6 +234,8 @@ private fun toUi(
                         likeCount = 0,
                         repostCount = 0,
                     ),
+                cid = record.value.cid.cid,
+                uri = record.value.uri.atUri,
             )
 
         else -> null

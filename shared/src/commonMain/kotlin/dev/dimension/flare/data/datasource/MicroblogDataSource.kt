@@ -62,6 +62,8 @@ interface MicroblogDataSource {
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     )
+
+    suspend fun deleteStatus(statusKey: MicroBlogKey)
 }
 
 data class ComposeProgress(

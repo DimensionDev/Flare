@@ -2,6 +2,8 @@
 <resources>
     <string name="login_button">登录</string>
     <string name="navigate_back">返回</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
 
     <string name="home_tab_home_title">首页</string>
     <string name="home_tab_notifications_title">通知</string>
@@ -131,4 +133,27 @@
 
     <string name="blusky_item_action_repost">转发</string>
     <string name="blusky_item_action_quote">引用</string>
+    <string name="blusky_item_action_report">举报</string>
+    <string name="blusky_item_action_delete">删除</string>
+
+    <string name="report_title">举报</string>
+    <string name="report_description">这篇帖子有什么问题？</string>
+
+    <string name="report_reason_spam_title">垃圾信息</string>
+    <string name="report_reason_violation_title">违法违规</string>
+    <string name="report_reason_misleading_title">误导</string>
+    <string name="report_reason_sexual_title">不良性内容</string>
+    <string name="report_reason_rude_title">反社会行为</string>
+    <string name="report_reason_other_title">其他</string>
+
+    <string name="report_reason_spam_description">过多的提及或回复</string>
+    <string name="report_reason_violation_description">明显违反法律或服务条款</string>
+    <string name="report_reason_misleading_description">这篇帖子具有误导性</string>
+    <string name="report_reason_sexual_description">未标明的裸露或色情内容</string>
+    <string name="report_reason_rude_description">骚扰、恶作剧或不宽容行为</string>
+    <string name="report_reason_other_description">这些选项中未包含的问题</string>
+
+    <string name="delete_status_title">删除</string>
+    <string name="delete_status_message">您确定要删除此内容吗？</string>
+
 </resources>

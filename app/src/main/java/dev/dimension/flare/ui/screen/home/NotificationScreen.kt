@@ -41,7 +41,6 @@ fun NotificationScreen(
     RefreshContainer(
         indicatorPadding = contentPadding,
         modifier = modifier,
-        refreshing = state.state.refreshing,
         onRefresh = state.state::refresh,
         content = {
             LazyColumn(

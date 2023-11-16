@@ -6,9 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.NotificationFilter
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.ui.model.UiState
@@ -35,19 +35,18 @@ class NotificationPresenter : PresenterBase<NotificationState>() {
                     )
                 }.collectAsLazyPagingItems()
             }
-        val refreshing =
-            listState is UiState.Loading ||
-                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
+//        val refreshing =
+//            listState is UiState.Loading ||
+//                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
 
         return object : NotificationState(
-            refreshing,
             listState,
             type,
             allTypes,
         ) {
-            override fun refresh() {
+            override suspend fun refresh() {
                 listState.onSuccess {
-                    it.refresh()
+                    it.refreshSuspend()
                 }
             }
 
@@ -60,12 +59,11 @@ class NotificationPresenter : PresenterBase<NotificationState>() {
 
 @Immutable
 abstract class NotificationState(
-    val refreshing: Boolean = false,
     val listState: UiState<LazyPagingItems<UiStatus>>,
     val notificationType: NotificationFilter,
     val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {
-    abstract fun refresh()
+    abstract suspend fun refresh()
 
     abstract fun onNotificationTypeChanged(value: NotificationFilter)
 }

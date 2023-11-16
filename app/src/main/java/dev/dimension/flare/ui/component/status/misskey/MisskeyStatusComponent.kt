@@ -145,6 +145,9 @@ private fun StatusFooterComponent(
     var showRenoteMenu by remember {
         mutableStateOf(false)
     }
+    var showMoreMenu by remember {
+        mutableStateOf(false)
+    }
     Row(
         modifier =
             modifier
@@ -235,7 +238,48 @@ private fun StatusFooterComponent(
                 icon = Icons.Default.MoreHoriz,
                 text = null,
                 onClicked = {
-                    event.onMoreClick(data)
+                    showMoreMenu = true
+                },
+                content = {
+                    DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
+                        if (actualData.isFromMe) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(id = R.string.misskey_item_action_delete),
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Remove,
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    event.onDeleteClick(actualData)
+                                },
+                            )
+                        } else {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(id = R.string.misskey_item_action_report),
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Remove,
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    showMoreMenu = false
+                                    event.onReportClick(actualData)
+                                },
+                            )
+                        }
+                    }
                 },
             )
         }
@@ -458,7 +502,9 @@ internal interface MisskeyStatusEvent {
 
     fun onAddReactionClick(data: UiStatus.Misskey)
 
-    fun onMoreClick(data: UiStatus.Misskey)
+    fun onDeleteClick(data: UiStatus.Misskey)
+
+    fun onReportClick(data: UiStatus.Misskey)
 }
 
 internal class DefaultMisskeyStatusEvent(
@@ -505,6 +551,14 @@ internal class DefaultMisskeyStatusEvent(
         data: UiStatus.Misskey,
         reaction: UiStatus.Misskey.EmojiReaction,
     ) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.Misskey ?: return@launch
+            runCatching {
+                account.dataSource.react(data, reaction.name)
+            }.onFailure {
+            }
+        }
     }
 
     override fun onReplyClick(data: UiStatus.Misskey) {
@@ -544,8 +598,44 @@ internal class DefaultMisskeyStatusEvent(
     }
 
     override fun onAddReactionClick(data: UiStatus.Misskey) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.MisskeyReactionRouteDestination(
+                        statusKey = data.statusKey,
+                    ).deeplink(),
+                ),
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
-    override fun onMoreClick(data: UiStatus.Misskey) {
+    override fun onDeleteClick(data: UiStatus.Misskey) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(data.statusKey)
+                        .deeplink(),
+                ),
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
+    override fun onReportClick(data: UiStatus.Misskey) {
+        val intent =
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(
+                    dev.dimension.flare.ui.screen.destinations.MisskeyReportRouteDestination(
+                        userKey = data.user.userKey,
+                        statusKey = data.statusKey,
+                    ).deeplink(),
+                ),
+            )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 }

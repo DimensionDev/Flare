@@ -10,6 +10,8 @@ import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.ComposeProgress
 import dev.dimension.flare.data.datasource.MicroblogDataSource
@@ -19,6 +21,7 @@ import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
+import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -336,6 +339,94 @@ class MisskeyDataSource(
             // delete status from cache
             database.dbStatusQueries.delete(status_key = statusKey, account_key = account.accountKey)
             database.dbPagingTimelineQueries.deleteStatus(account_key = account.accountKey, status_key = statusKey)
+        }
+    }
+
+    suspend fun react(
+        status: UiStatus.Misskey,
+        reaction: String,
+    ) {
+        val hasReacted = status.reaction.myReaction != null
+        updateStatusUseCase<StatusContent.Misskey>(
+            status.statusKey,
+            account.accountKey,
+            database,
+        ) {
+            it.copy(
+                data =
+                    it.data.copy(
+                        myReaction = if (hasReacted) null else reaction,
+                        reactions =
+                            it.data.reactions.toMutableMap().apply {
+                                if (hasReacted) {
+                                    remove(reaction)
+                                } else {
+                                    put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
+                                }
+                            },
+                    ),
+            )
+        }
+        runCatching {
+            if (hasReacted) {
+                service.notesReactionsDelete(
+                    IPinRequest(
+                        noteId = status.statusKey.id,
+                    ),
+                )
+            } else {
+                service.notesReactionsCreate(
+                    NotesReactionsCreateRequest(
+                        noteId = status.statusKey.id,
+                        reaction = reaction,
+                    ),
+                )
+            }
+        }.onFailure {
+            updateStatusUseCase<StatusContent.Misskey>(
+                status.statusKey,
+                account.accountKey,
+                database,
+            ) {
+                it.copy(
+                    data =
+                        it.data.copy(
+                            myReaction = if (hasReacted) reaction else null,
+                            reactions =
+                                it.data.reactions.toMutableMap().apply {
+                                    if (hasReacted) {
+                                        put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
+                                    } else {
+                                        remove(reaction)
+                                    }
+                                },
+                        ),
+                )
+            }
+        }
+    }
+
+    suspend fun report(
+        userKey: MicroBlogKey,
+        statusKey: MicroBlogKey?,
+    ) {
+        runCatching {
+            val comment =
+                statusKey?.let {
+                    service.notesShow(
+                        IPinRequest(
+                            noteId = it.id,
+                        ),
+                    ).body()?.url
+                }?.let {
+                    "Note: $it"
+                }
+            service.usersReportAbuse(
+                dev.dimension.flare.data.network.misskey.api.model.UsersReportAbuseRequest(
+                    userId = userKey.id,
+                    comment = comment ?: "",
+                ),
+            )
         }
     }
 }

@@ -27,11 +27,11 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.login.MisskeyCallbackPresenter
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MisskeyCallbackRouteDestination
-import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Preview
@@ -49,6 +49,7 @@ fun MisskeyCallbackScreenPreview() {
             uriPattern = "${AppDeepLink.Callback.MISSKEY}?session={session}",
         ),
     ],
+    wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun MisskeyCallbackRoute(
@@ -78,54 +79,52 @@ internal fun MisskeyCallbackScreen(
             toHome = toHome,
         )
     }
-    FlareTheme {
-        Scaffold {
+    Scaffold {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
             Column(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+                        .fillMaxWidth()
+                        .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
             ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.misskey_login_title),
-                        style = MaterialTheme.typography.headlineMedium,
-                    )
-                    Text(
-                        text = stringResource(id = R.string.mastodon_login_verify_message),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(2f)
-                            .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    when (val data = state) {
-                        is UiState.Error -> {
-                            Text(text = data.throwable.message ?: "Unknown error")
-                        }
-
-                        is UiState.Loading -> {
-                            CircularProgressIndicator()
-                        }
-
-                        is UiState.Success -> Unit
+                Text(
+                    text = stringResource(id = R.string.misskey_login_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Text(
+                    text = stringResource(id = R.string.mastodon_login_verify_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(2f)
+                        .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                when (val data = state) {
+                    is UiState.Error -> {
+                        Text(text = data.throwable.message ?: "Unknown error")
                     }
+
+                    is UiState.Loading -> {
+                        CircularProgressIndicator()
+                    }
+
+                    is UiState.Success -> Unit
                 }
             }
         }

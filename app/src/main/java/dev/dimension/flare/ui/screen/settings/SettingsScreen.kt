@@ -8,7 +8,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,10 +21,12 @@ import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.screen.destinations.AccountsRouteDestination
-import dev.dimension.flare.ui.theme.FlareTheme
 
-@Destination
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 @Composable
 fun SettingsRoute(navigator: DestinationsNavigator) {
     SettingsScreen(
@@ -42,46 +43,44 @@ internal fun SettingsScreen(
     onBack: () -> Unit,
     toAccounts: () -> Unit,
 ) {
-    FlareTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(text = stringResource(id = R.string.settings_title))
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                )
-            },
-        ) {
-            Column(
-                modifier =
-                    Modifier
-                        .padding(it)
-                        .verticalScroll(rememberScrollState()),
-            ) {
-                ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(id = R.string.settings_accounts_title))
-                    },
-                    leadingContent = {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(id = R.string.settings_title))
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = null,
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
                         )
+                    }
+                },
+            )
+        },
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .padding(it)
+                    .verticalScroll(rememberScrollState()),
+        ) {
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.settings_accounts_title))
+                },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = null,
+                    )
+                },
+                modifier =
+                    Modifier.clickable {
+                        toAccounts.invoke()
                     },
-                    modifier =
-                        Modifier.clickable {
-                            toAccounts.invoke()
-                        },
-                )
-            }
+            )
         }
     }
 }

@@ -16,7 +16,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.presenter.status.action.MastodonReportPresenter
+import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
 
 @Composable
 @Destination(
@@ -28,12 +28,12 @@ import dev.dimension.flare.ui.presenter.status.action.MastodonReportPresenter
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun MastodonReportRoute(
+fun MisskeyReportRoute(
     navigator: DestinationsNavigator,
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
 ) {
-    MastodonReportDialog(
+    MisskeyReportDialog(
         statusKey = statusKey,
         userKey = userKey,
         onBack = {
@@ -43,51 +43,63 @@ fun MastodonReportRoute(
 }
 
 @Composable
-fun MastodonReportDialog(
+fun MisskeyReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter("${userKey}_$statusKey") {
-        mastodonReportPresenter(userKey, statusKey)
+    val state by producePresenter("${userKey}_${statusKey ?: ""}") {
+        misskeyReportPresenter(
+            userKey,
+            statusKey,
+        )
     }
 
     AlertDialog(
+        title = {
+            Text(
+                text = stringResource(R.string.report_title),
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.report_description),
+            )
+        },
         onDismissRequest = onBack,
         confirmButton = {
             TextButton(
                 onClick = {
                     state.report()
-                    onBack.invoke()
+                    onBack()
                 },
             ) {
-                Text(stringResource(R.string.confirm))
+                Text(
+                    text = stringResource(R.string.confirm),
+                )
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onBack,
             ) {
-                Text(stringResource(R.string.cancel))
+                Text(
+                    text = stringResource(R.string.cancel),
+                )
             }
-        },
-        title = {
-            Text(stringResource(R.string.mastodon_report_title))
-        },
-        text = {
-            Text(stringResource(R.string.mastodon_report_description))
         },
     )
 }
 
 @Composable
-private fun mastodonReportPresenter(
+private fun misskeyReportPresenter(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
 ) = run {
-    val state =
-        remember(userKey, statusKey) {
-            MastodonReportPresenter(userKey, statusKey)
-        }.invoke()
-    state
+    remember(userKey, statusKey) {
+        MisskeyReportPresenter(
+            userKey,
+            statusKey,
+        )
+    }.invoke()
 }

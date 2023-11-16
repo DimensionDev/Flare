@@ -65,6 +65,7 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
@@ -77,7 +78,6 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
-import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.ktml.dom.Element
 import org.koin.compose.rememberKoinInject
@@ -93,6 +93,7 @@ import kotlin.math.max
             uriPattern = AppDeepLink.ProfileWithNameAndHost.ROUTE,
         ),
     ],
+    wrappers = [ThemeWrapper::class],
 )
 fun ProfileWithUserNameAndHostRoute(
     userName: String,
@@ -130,33 +131,31 @@ fun ProfileWithUserNameAndHostRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileErrorScreen(onBack: () -> Unit) {
-    FlareTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(text = "Error")
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                )
-            },
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Error")
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
+                    }
+                },
+            )
+        },
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+            contentAlignment = Alignment.Center,
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(it),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = "Error")
-            }
+            Text(text = "Error")
         }
     }
 }
@@ -164,36 +163,34 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileLoadingScreen(onBack: () -> Unit) {
-    FlareTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(text = "Loading...")
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                )
-            },
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Loading...")
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
+                    }
+                },
+            )
+        },
+    ) {
+        LazyColumn(
+            contentPadding = it,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            LazyColumn(
-                contentPadding = it,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                item {
-                    ProfileHeaderLoading()
-                }
-                items(5) {
-                    StatusPlaceholder(
-                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                    )
-                }
+            item {
+                ProfileHeaderLoading()
+            }
+            items(5) {
+                StatusPlaceholder(
+                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                )
             }
         }
     }
@@ -253,126 +250,123 @@ fun ProfileScreen(
     }
     val listState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    FlareTheme {
-        Scaffold(
-            modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentWindowInsets =
-                ScaffoldDefaults
-                    .contentWindowInsets.exclude(WindowInsets.statusBars),
-            topBar = {
-                if (showTopBar) {
-                    val titleAlpha by remember {
-                        derivedStateOf {
-                            if (listState.firstVisibleItemIndex > 0 || listState.layoutInfo.visibleItemsInfo.isEmpty()) {
-                                1f
-                            } else {
-                                max(
-                                    0f,
-                                    (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.toFloat()),
-                                )
-                            }
+    Scaffold(
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets =
+            ScaffoldDefaults
+                .contentWindowInsets.exclude(WindowInsets.statusBars),
+        topBar = {
+            if (showTopBar) {
+                val titleAlpha by remember {
+                    derivedStateOf {
+                        if (listState.firstVisibleItemIndex > 0 || listState.layoutInfo.visibleItemsInfo.isEmpty()) {
+                            1f
+                        } else {
+                            max(
+                                0f,
+                                (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.toFloat()),
+                            )
                         }
                     }
-                    Box {
-                        Column(
+                }
+                Box {
+                    Column(
+                        modifier =
+                            Modifier
+                                .graphicsLayer {
+                                    alpha = titleAlpha
+                                },
+                    ) {
+                        Spacer(
                             modifier =
                                 Modifier
-                                    .graphicsLayer {
-                                        alpha = titleAlpha
-                                    },
-                        ) {
-                            Spacer(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .windowInsetsTopHeight(WindowInsets.statusBars)
-                                        .background(
-                                            color =
-                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                    3.dp,
-                                                ),
-                                        ),
-                            )
-                            Spacer(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(64.dp)
-                                        .background(
-                                            color =
-                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                    3.dp,
-                                                ),
-                                        ),
-                            )
-                        }
-                        TopAppBar(
-                            title = {
-                                state.state.userState.onSuccess {
-                                    HtmlText2(
-                                        element = it.nameElement,
-                                        modifier =
-                                            Modifier.graphicsLayer {
-                                                alpha = titleAlpha
-                                            },
-                                    )
-                                }
-                            },
-                            colors =
-                                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                    containerColor = Color.Transparent,
-                                ),
-                            modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
-                            scrollBehavior = scrollBehavior,
-                            navigationIcon = {
-                                IconButton(onClick = onBack) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                                        contentDescription = stringResource(id = R.string.navigate_back),
-                                    )
-                                }
-                            },
-                            actions = {
-                                state.state.userState.onSuccess {
-                                    IconButton(onClick = { /*TODO*/ }) {
-                                        Icon(
-                                            imageVector = Icons.Default.MoreVert,
-                                            contentDescription = null,
-                                        )
-                                    }
-                                }
-                            },
+                                    .fillMaxWidth()
+                                    .windowInsetsTopHeight(WindowInsets.statusBars)
+                                    .background(
+                                        color =
+                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                3.dp,
+                                            ),
+                                    ),
                         )
+                        Spacer(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(64.dp)
+                                    .background(
+                                        color =
+                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                3.dp,
+                                            ),
+                                    ),
+                        )
+                    }
+                    TopAppBar(
+                        title = {
+                            state.state.userState.onSuccess {
+                                HtmlText2(
+                                    element = it.nameElement,
+                                    modifier =
+                                        Modifier.graphicsLayer {
+                                            alpha = titleAlpha
+                                        },
+                                )
+                            }
+                        },
+                        colors =
+                            TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                containerColor = Color.Transparent,
+                            ),
+                        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+                        scrollBehavior = scrollBehavior,
+                        navigationIcon = {
+                            IconButton(onClick = onBack) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                                    contentDescription = stringResource(id = R.string.navigate_back),
+                                )
+                            }
+                        },
+                        actions = {
+                            state.state.userState.onSuccess {
+                                IconButton(onClick = { /*TODO*/ }) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = null,
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
+            }
+        },
+    ) {
+        RefreshContainer(
+            modifier = Modifier.fillMaxSize(),
+            onRefresh = state.state::refresh,
+            indicatorPadding = it + contentPadding,
+            content = {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    state = listState,
+                    contentPadding = contentPadding,
+                ) {
+                    item {
+                        ProfileHeader(
+                            state.state.userState,
+                            state.state.relationState,
+                        )
+                    }
+                    with(state.state.listState) {
+                        with(state.statusEvent) {
+                            status()
+                        }
                     }
                 }
             },
-        ) {
-            RefreshContainer(
-                modifier = Modifier.fillMaxSize(),
-                refreshing = state.state.refreshing,
-                onRefresh = state.state::refresh,
-                indicatorPadding = it + contentPadding,
-                content = {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        state = listState,
-                        contentPadding = contentPadding,
-                    ) {
-                        item {
-                            ProfileHeader(
-                                state.state.userState,
-                                state.state.relationState,
-                            )
-                        }
-                        with(state.state.listState) {
-                            with(state.statusEvent) {
-                                status()
-                            }
-                        }
-                    }
-                },
-            )
-        }
+        )
     }
 }
 

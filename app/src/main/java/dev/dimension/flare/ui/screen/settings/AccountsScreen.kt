@@ -6,7 +6,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +26,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
@@ -34,10 +34,11 @@ import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
-import dev.dimension.flare.ui.theme.FlareTheme
 
 @Composable
-@Destination
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 fun AccountsRoute(navigator: DestinationsNavigator) {
     AccountsScreen(
         onBack = navigator::navigateUp,
@@ -56,55 +57,53 @@ internal fun AccountsScreen(
     val state by producePresenter {
         accountsPresenter()
     }
-    FlareTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(text = stringResource(id = R.string.settings_accounts_title))
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                toLogin.invoke()
-                            },
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = null)
-                        }
-                    },
-                )
-            },
-        ) {
-            LazyColumn(
-                contentPadding = it,
-            ) {
-                when (val accountState = state.accounts) {
-                    // TODO: show error
-                    is UiState.Error -> Unit
-                    is UiState.Loading -> {
-                        items(3) {
-                            AccountItemLoadingPlaceholder()
-                        }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(id = R.string.settings_accounts_title))
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
                     }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            toLogin.invoke()
+                        },
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+                },
+            )
+        },
+    ) {
+        LazyColumn(
+            contentPadding = it,
+        ) {
+            when (val accountState = state.accounts) {
+                // TODO: show error
+                is UiState.Error -> Unit
+                is UiState.Loading -> {
+                    items(3) {
+                        AccountItemLoadingPlaceholder()
+                    }
+                }
 
-                    is UiState.Success -> {
-                        items(accountState.data.size) { index ->
-                            AccountItem(
-                                userState = accountState.data[index],
-                                activeAccount = state.activeAccount,
-                                onClick = {
-                                    state.setActiveAccount(it)
-                                },
-                            )
-                        }
+                is UiState.Success -> {
+                    items(accountState.data.size) { index ->
+                        AccountItem(
+                            userState = accountState.data[index],
+                            activeAccount = state.activeAccount,
+                            onClick = {
+                                state.setActiveAccount(it)
+                            },
+                        )
                     }
                 }
             }

@@ -11,7 +11,6 @@ import androidx.compose.foundation.text2.input.TextFieldLineLimits
 import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,13 +41,15 @@ import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedTextField2
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.login.misskeyLoginUseCase
-import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import org.koin.compose.rememberKoinInject
 
-@Destination
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 @Composable
 fun MisskeyLoginRoute(navigator: DestinationsNavigator) {
     MisskeyLoginScreen(
@@ -74,84 +75,82 @@ fun MisskeyLoginScreen(
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
-    FlareTheme {
-        Scaffold(
-            modifier = modifier,
-            topBar = {
-                TopAppBar(
-                    title = {
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBack,
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                    },
-                )
-            },
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = {
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack,
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
+                    }
+                },
+            )
+        },
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             Column(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding)),
+                        .fillMaxWidth()
+                        .weight(0.8f),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
             ) {
-                Column(
+                Text(
+                    text = stringResource(id = R.string.misskey_login_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Text(
+                    text = stringResource(id = R.string.misskey_login_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(2f)
+                        .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedTextField2(
+                    state = state.hostTextState,
+                    label = {
+                        Text(text = stringResource(id = R.string.misskey_login_hint))
+                    },
+                    enabled = !state.loading,
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .weight(0.8f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                            .focusRequester(
+                                focusRequester = focusRequester,
+                            ),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                )
+                Button(
+                    onClick = state::login,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.misskey_login_title),
-                        style = MaterialTheme.typography.headlineMedium,
-                    )
-                    Text(
-                        text = stringResource(id = R.string.misskey_login_message),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                    )
+                    Text(text = stringResource(id = R.string.login_button))
                 }
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(2f)
-                            .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedTextField2(
-                        state = state.hostTextState,
-                        label = {
-                            Text(text = stringResource(id = R.string.misskey_login_hint))
-                        },
-                        enabled = !state.loading,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .focusRequester(
-                                    focusRequester = focusRequester,
-                                ),
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                    )
-                    Button(
-                        onClick = state::login,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(text = stringResource(id = R.string.login_button))
-                    }
-                    state.error?.let { error ->
-                        Text(text = error)
-                    }
+                state.error?.let { error ->
+                    Text(text = error)
                 }
             }
         }

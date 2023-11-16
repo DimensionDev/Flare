@@ -165,4 +165,7 @@
     <string name="mastodon_item_report">Report</string>
     <string name="mastodon_report_title">Report</string>
     <string name="mastodon_report_description">Are you sure you want to report this?</string>
+
+    <string name="misskey_item_action_delete">Delete</string>
+    <string name="misskey_item_action_report">Report</string>
 </resources>

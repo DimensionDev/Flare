@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.ComposeData
+import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import kotlinx.coroutines.CoroutineScope
@@ -75,17 +76,15 @@ private fun composeUseCase(
                         }
                     }
 
-                else -> Unit
-
-//                is ComposeData.Bluesky -> blueskyComposeUseCase(
-//                    data = data,
-//                    context = context,
-//                ) { current, max ->
-//                    if (notificationManager.areNotificationsEnabled()) {
-//                        builder = builder.setProgress(max, current, false)
-//                        notificationManager.notify(notificationId, builder.build())
-//                    }
-//                }
+                is BlueskyDataSource.BlueskyComposeData ->
+                    data.account.dataSource.compose(
+                        data = data,
+                    ) { (current, max) ->
+                        if (notificationManager.areNotificationsEnabled()) {
+                            builder = builder.setProgress(max, current, false)
+                            notificationManager.notify(notificationId, builder.build())
+                        }
+                    }
             }
         }.onSuccess {
             if (notificationManager.areNotificationsEnabled()) {

@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.misskey.api
 
 import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.Headers
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AdminInviteCreate200ResponseInner
 import dev.dimension.flare.data.network.misskey.api.model.AdminMeta200Response
@@ -89,6 +90,7 @@ interface MetaApi {
      * @param body * @return [Emojis200Response]
      */
     @POST("emojis")
+    @Headers(value = ["Content-Type: "])
     suspend fun emojis(): Response<Emojis200Response>
 
     /**

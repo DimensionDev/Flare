@@ -58,13 +58,13 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.home.HomePresenter
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.profile.ProfileScreen
-import dev.dimension.flare.ui.theme.FlareTheme
 import kotlin.math.roundToInt
 
 sealed class Screen(
@@ -97,7 +97,9 @@ fun HomeScreenPreview() {
     )
 }
 
-@Destination
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 @Composable
 fun HomeRoute(navigator: DestinationsNavigator) {
     HomeScreen(
@@ -153,166 +155,164 @@ fun HomeScreen(
             }
         }
 
-    FlareTheme {
-        Scaffold(
-            modifier =
-                modifier
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
-                    .nestedScroll(nestedScrollConnection),
-            floatingActionButton = {
-                AnimatedVisibility(
-                    currentScreen == Screen.HomeTimeline && bottomBarOffsetHeightPx > -(bottomBarHeightPx / 2),
-                    enter = scaleIn(),
-                    exit = scaleOut(),
-                    modifier =
-                        Modifier
-                            .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+    Scaffold(
+        modifier =
+            modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .nestedScroll(nestedScrollConnection),
+        floatingActionButton = {
+            AnimatedVisibility(
+                currentScreen == Screen.HomeTimeline && bottomBarOffsetHeightPx > -(bottomBarHeightPx / 2),
+                enter = scaleIn(),
+                exit = scaleOut(),
+                modifier =
+                    Modifier
+                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        toCompose.invoke()
+                    },
                 ) {
-                    FloatingActionButton(
-                        onClick = {
-                            toCompose.invoke()
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                    )
                 }
-            },
-            topBar = {
-                TopAppBar(
-                    title = {
-                        currentScreen?.let {
-                            AnimatedContent(
-                                targetState = it,
-                                label = "Title",
+            }
+        },
+        topBar = {
+            TopAppBar(
+                title = {
+                    currentScreen?.let {
+                        AnimatedContent(
+                            targetState = it,
+                            label = "Title",
 //                                transitionSpec = {
 //                                    slideInVertically { it } togetherWith slideOutVertically { -it }
 //                                }
-                            ) {
-                                Text(text = stringResource(id = it.title))
-                            }
+                        ) {
+                            Text(text = stringResource(id = it.title))
                         }
-                    },
-                    scrollBehavior = scrollBehavior,
-                    navigationIcon = {
-                        when (val user = state.user) {
-                            is UiState.Error -> Unit
-                            is UiState.Loading -> {
-                                IconButton(
-                                    onClick = {
-                                    },
-                                ) {
-                                    Icon(
-                                        Icons.Default.AccountCircle,
-                                        contentDescription = null,
-                                        modifier = Modifier.placeholder(true, shape = CircleShape),
-                                    )
-                                }
-                            }
-
-                            is UiState.Success -> {
-                                IconButton(
-                                    onClick = {
-                                    },
-                                ) {
-                                    NetworkImage(
-                                        model = user.data.avatarUrl,
-                                        contentDescription = null,
-                                        modifier =
-                                            Modifier
-                                                .size(24.dp)
-                                                .clip(CircleShape),
-                                    )
-                                }
-                            }
-                        }
-                    },
-                    actions = {
-                        currentScreen?.let {
-                            AnimatedContent(targetState = it, label = "Actions") {
-                                when (it) {
-                                    Screen.HomeTimeline -> {
-                                        IconButton(
-                                            onClick = {
-                                            },
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Search,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                    }
-
-                                    Screen.Me -> {
-                                        IconButton(
-                                            onClick = {
-                                                toSettings.invoke()
-                                            },
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Settings,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                    }
-
-                                    Screen.Notification -> Unit
-                                }
-                            }
-                        }
-                    },
-                )
-            },
-            bottomBar = {
-                NavigationBar(
-                    modifier =
-                        Modifier
-                            .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
-                ) {
-                    items.forEach { screen ->
-                        NavigationBarItem(
-                            icon = { Icon(screen.icon, contentDescription = null) },
-                            label = { Text(stringResource(id = screen.title)) },
-                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                        )
                     }
-                }
-            },
-        ) { contentPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = Screen.HomeTimeline.route,
+                },
+                scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    when (val user = state.user) {
+                        is UiState.Error -> Unit
+                        is UiState.Loading -> {
+                            IconButton(
+                                onClick = {
+                                },
+                            ) {
+                                Icon(
+                                    Icons.Default.AccountCircle,
+                                    contentDescription = null,
+                                    modifier = Modifier.placeholder(true, shape = CircleShape),
+                                )
+                            }
+                        }
+
+                        is UiState.Success -> {
+                            IconButton(
+                                onClick = {
+                                },
+                            ) {
+                                NetworkImage(
+                                    model = user.data.avatarUrl,
+                                    contentDescription = null,
+                                    modifier =
+                                        Modifier
+                                            .size(24.dp)
+                                            .clip(CircleShape),
+                                )
+                            }
+                        }
+                    }
+                },
+                actions = {
+                    currentScreen?.let {
+                        AnimatedContent(targetState = it, label = "Actions") {
+                            when (it) {
+                                Screen.HomeTimeline -> {
+                                    IconButton(
+                                        onClick = {
+                                        },
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Search,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                }
+
+                                Screen.Me -> {
+                                    IconButton(
+                                        onClick = {
+                                            toSettings.invoke()
+                                        },
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Settings,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                }
+
+                                Screen.Notification -> Unit
+                            }
+                        }
+                    }
+                },
+            )
+        },
+        bottomBar = {
+            NavigationBar(
                 modifier =
                     Modifier
-                        .consumeWindowInsets(WindowInsets.systemBars),
+                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
             ) {
-                composable(Screen.HomeTimeline.route) {
-                    HomeTimelineScreen(contentPadding)
+                items.forEach { screen ->
+                    NavigationBarItem(
+                        icon = { Icon(screen.icon, contentDescription = null) },
+                        label = { Text(stringResource(id = screen.title)) },
+                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                        onClick = {
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                    )
                 }
-                composable(Screen.Notification.route) {
-                    NotificationScreen(contentPadding)
-                }
-                composable(Screen.Me.route) {
-                    when (state.user) {
-                        is UiState.Error -> Unit
-                        is UiState.Loading -> Unit
-                        is UiState.Success ->
-                            ProfileScreen(
-                                showTopBar = false,
-                                contentPadding = contentPadding,
-                            )
-                    }
+            }
+        },
+    ) { contentPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Screen.HomeTimeline.route,
+            modifier =
+                Modifier
+                    .consumeWindowInsets(WindowInsets.systemBars),
+        ) {
+            composable(Screen.HomeTimeline.route) {
+                HomeTimelineScreen(contentPadding)
+            }
+            composable(Screen.Notification.route) {
+                NotificationScreen(contentPadding)
+            }
+            composable(Screen.Me.route) {
+                when (state.user) {
+                    is UiState.Error -> Unit
+                    is UiState.Loading -> Unit
+                    is UiState.Success ->
+                        ProfileScreen(
+                            showTopBar = false,
+                            contentPadding = contentPadding,
+                        )
                 }
             }
         }

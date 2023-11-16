@@ -60,7 +60,6 @@ internal fun HomeTimelineScreen(contentPadding: PaddingValues) {
             Modifier
                 .fillMaxSize(),
         onRefresh = state.state::refresh,
-        refreshing = state.state.refreshing,
         indicatorPadding = contentPadding,
         content = {
             LazyColumn(

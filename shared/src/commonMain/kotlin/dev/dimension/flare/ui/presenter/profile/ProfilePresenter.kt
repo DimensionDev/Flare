@@ -2,10 +2,10 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
@@ -44,24 +44,23 @@ class ProfilePresenter(
                 }.collectAsUiState().value.flatMap { it }
             }
 
-        val refreshing =
-            userState is UiState.Loading ||
-                userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
-                listState is UiState.Loading ||
-                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
+//        val refreshing =
+//            userState is UiState.Loading ||
+//                userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
+//                listState is UiState.Loading ||
+//                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
 
         return object : ProfileState(
-            refreshing,
             userState.flatMap { it.toUi() },
             listState,
             relationState,
         ) {
-            override fun refresh() {
+            override suspend fun refresh() {
                 userState.onSuccess {
                     it.refresh()
                 }
                 listState.onSuccess {
-                    it.refresh()
+                    it.refreshSuspend()
                 }
             }
         }
@@ -69,12 +68,11 @@ class ProfilePresenter(
 }
 
 abstract class ProfileState(
-    val refreshing: Boolean,
     val userState: UiState<UiUser>,
     val listState: UiState<LazyPagingItems<UiStatus>>,
     val relationState: UiState<UiRelation>,
 ) {
-    abstract fun refresh()
+    abstract suspend fun refresh()
 }
 
 class ProfileWithUserNameAndHostPresenter(

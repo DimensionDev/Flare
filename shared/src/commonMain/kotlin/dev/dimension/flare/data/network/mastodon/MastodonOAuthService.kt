@@ -18,13 +18,10 @@ class MastodonOAuthService(
             MastodonAuthScope.Follow,
             MastodonAuthScope.Push,
         ),
-) {
-    private val resources: MastodonOAuthResources by lazy {
-        ktorfit(baseUrl).create()
-    }
+): MastodonOAuthResources by ktorfit(baseUrl).create() {
 
     suspend fun createApplication() =
-        resources.createApplication(
+        createApplication(
             client_name = client_name,
             redirect_uris = redirect_uri,
             scopes = scopes.joinToString(" ") { it.value },
@@ -45,7 +42,7 @@ class MastodonOAuthService(
     suspend fun getAccessToken(
         code: String,
         response: CreateApplicationResponse,
-    ) = resources.requestToken(
+    ) = requestToken(
         client_id = response.clientID,
         client_secret = response.clientSecret,
         redirect_uri = response.redirectURI,
@@ -54,5 +51,5 @@ class MastodonOAuthService(
         grant_type = "authorization_code",
     )
 
-    suspend fun verifyCredentials(accessToken: String) = resources.verifyCredentials(accessToken = "Bearer $accessToken")
+    suspend fun verify(accessToken: String) = verifyCredentials(accessToken = "Bearer $accessToken")
 }

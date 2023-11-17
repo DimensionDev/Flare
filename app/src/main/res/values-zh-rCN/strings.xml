@@ -30,6 +30,8 @@
     <string name="profile_header_button_follow">关注</string>
     <string name="profile_header_button_following">正在关注</string>
     <string name="profile_header_button_requested">已申请</string>
+    <string name="profile_header_button_blocked">已屏蔽</string>
+
     <string name="compose_poll_expiration_at">截止日期：%1$s</string>
     <string name="compose_poll_expiration_5_minutes">5 分钟后</string>
     <string name="compose_poll_expiration_30_minutes">30 分钟后</string>
@@ -165,4 +167,10 @@
 
     <string name="misskey_item_action_delete">删除</string>
     <string name="misskey_item_action_report">举报</string>
+
+    <string name="user_report">举报 %1$s</string>
+    <string name="user_block">屏蔽 %1$s</string>
+    <string name="user_unblock">取消屏蔽 %1$s</string>
+    <string name="user_mute">静音 %1$s</string>
+    <string name="user_unmute">取消静音 %1$s</string>
 </resources>

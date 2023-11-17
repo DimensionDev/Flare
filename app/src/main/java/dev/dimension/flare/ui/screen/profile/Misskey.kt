@@ -2,11 +2,13 @@ package dev.dimension.flare.ui.screen.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -77,6 +79,7 @@ internal fun MisskeyProfileHeader(
                                     text =
                                         stringResource(
                                             when {
+                                                data.blocking -> R.string.profile_header_button_blocked
                                                 data.following -> R.string.profile_header_button_following
                                                 data.hasPendingFollowRequestFromYou -> R.string.profile_header_button_requested
                                                 else -> R.string.profile_header_button_follow
@@ -138,5 +141,34 @@ internal fun MisskeyProfileHeader(
             }
         },
         modifier = modifier,
+    )
+}
+
+@Composable
+internal fun ColumnScope.MisskeyUserMenu(
+    user: UiUser,
+    relation: UiRelation.Misskey,
+    onBlockClick: () -> Unit,
+    onMuteClick: () -> Unit,
+) {
+    DropdownMenuItem(
+        text = {
+            if (relation.muted) {
+                Text(text = stringResource(R.string.user_unmute, user.handle))
+            } else {
+                Text(text = stringResource(R.string.user_mute, user.handle))
+            }
+        },
+        onClick = onMuteClick,
+    )
+    DropdownMenuItem(
+        text = {
+            if (relation.blocking) {
+                Text(text = stringResource(R.string.user_unblock, user.handle))
+            } else {
+                Text(text = stringResource(R.string.user_block, user.handle))
+            }
+        },
+        onClick = onBlockClick,
     )
 }

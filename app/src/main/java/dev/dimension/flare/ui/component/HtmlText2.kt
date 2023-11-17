@@ -99,6 +99,7 @@ fun HtmlText2(
             ) {
                 with(element) {
                     RenderElement(context)
+                    context.RenderTextAndReset()
                 }
             }
         }

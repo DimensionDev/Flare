@@ -497,6 +497,7 @@ class MisskeyDataSource(
         runCatching {
             service.blockingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
+            it.printStackTrace()
             MemCacheable.updateWith<UiRelation.Misskey>(
                 key = key,
             ) {

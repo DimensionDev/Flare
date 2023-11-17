@@ -592,7 +592,7 @@ class MastodonDataSource(
             )
         }
         runCatching {
-            service.mute(userKey.id)
+            service.muteUser(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation.Mastodon>(
                 key = key,
@@ -614,7 +614,7 @@ class MastodonDataSource(
             )
         }
         runCatching {
-            service.unmute(userKey.id)
+            service.unmuteUser(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation.Mastodon>(
                 key = key,

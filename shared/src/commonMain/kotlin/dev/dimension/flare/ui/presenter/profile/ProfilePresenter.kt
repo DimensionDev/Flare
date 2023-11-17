@@ -57,10 +57,15 @@ class ProfilePresenter(
 //                listState is UiState.Loading ||
 //                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
         val scope = rememberKoinInject<CoroutineScope>()
+        val isMe =
+            accountServiceState.map {
+                it.second.accountKey == userKey
+            }
         return object : ProfileState(
             userState.flatMap { it.toUi() },
             listState,
             relationState,
+            isMe = isMe,
         ) {
             override suspend fun refresh() {
                 userState.onSuccess {
@@ -84,6 +89,57 @@ class ProfilePresenter(
                         }
                     }
                 }
+            }
+
+            override fun block(
+                user: UiUser,
+                data: UiRelation,
+            ) {
+                scope.launch {
+                    accountServiceState.onSuccess { (service, _) ->
+                        when (data) {
+                            is UiRelation.Bluesky -> {
+                                require(service is BlueskyDataSource)
+                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                            }
+                            is UiRelation.Mastodon -> {
+                                require(service is MastodonDataSource)
+                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                            }
+                            is UiRelation.Misskey -> {
+                                require(service is MisskeyDataSource)
+                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun mute(
+                user: UiUser,
+                data: UiRelation,
+            ) {
+                scope.launch {
+                    accountServiceState.onSuccess { (service, _) ->
+                        when (data) {
+                            is UiRelation.Bluesky -> {
+                                require(service is BlueskyDataSource)
+                                if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
+                            }
+                            is UiRelation.Mastodon -> {
+                                require(service is MastodonDataSource)
+                                if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
+                            }
+                            is UiRelation.Misskey -> {
+                                require(service is MisskeyDataSource)
+                                if (data.muted) service.unmute(user.userKey) else service.mute(user.userKey)
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun report(user: UiUser) {
             }
         }
     }
@@ -131,6 +187,7 @@ abstract class ProfileState(
     val userState: UiState<UiUser>,
     val listState: UiState<LazyPagingItems<UiStatus>>,
     val relationState: UiState<UiRelation>,
+    val isMe: UiState<Boolean>,
 ) {
     abstract suspend fun refresh()
 
@@ -138,6 +195,18 @@ abstract class ProfileState(
         user: UiUser,
         data: UiRelation,
     )
+
+    abstract fun block(
+        user: UiUser,
+        data: UiRelation,
+    )
+
+    abstract fun mute(
+        user: UiUser,
+        data: UiRelation,
+    )
+
+    abstract fun report(user: UiUser)
 }
 
 class ProfileWithUserNameAndHostPresenter(

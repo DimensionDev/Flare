@@ -76,6 +76,7 @@ kotlin {
                 implementation(libs.ktml)
                 implementation(libs.mfm.multiplatform)
                 api(libs.bluesky)
+                implementation(libs.twitter.parser)
             }
         }
         val androidMain by getting {

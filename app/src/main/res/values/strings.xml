@@ -169,4 +169,10 @@
 
     <string name="misskey_item_action_delete">Delete</string>
     <string name="misskey_item_action_report">Report</string>
+
+    <string name="user_report">Report %1$s</string>
+    <string name="user_block">Block %1$s</string>
+    <string name="user_unblock">Unblock %1$s</string>
+    <string name="user_mute">Mute %1$s</string>
+    <string name="user_unmute">Unmute %1$s</string>
 </resources>

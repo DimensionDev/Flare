@@ -23,6 +23,7 @@
     <string name="profile_header_button_follow">Follow</string>
     <string name="profile_header_button_following">Following</string>
     <string name="profile_header_button_requested">Requested</string>
+    <string name="profile_header_button_blocked">Blocked</string>
 
     <string name="compose_title">Compose</string>
     <string name="compose_hint">What\'s happening?</string>

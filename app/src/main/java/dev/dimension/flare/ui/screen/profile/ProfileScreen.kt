@@ -357,6 +357,7 @@ fun ProfileScreen(
                         ProfileHeader(
                             state.state.userState,
                             state.state.relationState,
+                            onFollowClick = state.state::follow,
                         )
                     }
                     with(state.state.listState) {
@@ -374,6 +375,7 @@ fun ProfileScreen(
 private fun ProfileHeader(
     userState: UiState<UiUser>,
     relationState: UiState<UiRelation>,
+    onFollowClick: (UiUser, UiRelation) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
@@ -404,6 +406,7 @@ private fun ProfileHeader(
                 ProfileHeaderSuccess(
                     user = state.data,
                     relationState = relationState,
+                    onFollowClick = onFollowClick,
                 )
             }
         }
@@ -414,6 +417,7 @@ private fun ProfileHeader(
 private fun ProfileHeaderSuccess(
     user: UiUser,
     relationState: UiState<UiRelation>,
+    onFollowClick: (UiUser, UiRelation) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (user) {
@@ -422,6 +426,9 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
             )
         }
 
@@ -430,6 +437,9 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
             )
         }
 
@@ -438,6 +448,9 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
             )
     }
 }

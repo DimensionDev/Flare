@@ -66,7 +66,7 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
             UiUserExtra(
                 nameDirection =
                     if (Bidi(
-                            user.name,
+                            user.displayName,
                             Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
                         ).baseIsLeftToRight()
                     ) {

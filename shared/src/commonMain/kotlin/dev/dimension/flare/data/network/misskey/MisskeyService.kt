@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.misskey
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.misskey.api.AccountApi
 import dev.dimension.flare.data.network.misskey.api.DriveApi
+import dev.dimension.flare.data.network.misskey.api.FollowingApi
 import dev.dimension.flare.data.network.misskey.api.MetaApi
 import dev.dimension.flare.data.network.misskey.api.NotesApi
 import dev.dimension.flare.data.network.misskey.api.ReactionsApi
@@ -42,7 +43,8 @@ class MisskeyService(
     NotesApi by config(baseUrl, token).create(),
     AccountApi by config(baseUrl, token).create(),
     DriveApi by config(baseUrl, token).create(),
-    ReactionsApi by config(baseUrl, token).create() {
+    ReactionsApi by config(baseUrl, token).create(),
+    FollowingApi by config(baseUrl, token).create() {
     suspend fun upload(
         data: ByteArray,
         name: String,

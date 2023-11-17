@@ -56,3 +56,14 @@ internal inline fun <reified T : StatusContent> updateStatusUseCase(
         cacheDatabase.dbStatusQueries.update(update(status.content), statusKey, accountKey)
     }
 }
+
+internal inline fun <reified T : UserContent> updateUserUseCase(
+    userKey: MicroBlogKey,
+    cacheDatabase: CacheDatabase,
+    update: (content: T) -> T,
+) {
+    val user = cacheDatabase.dbUserQueries.findByKey(userKey).executeAsOneOrNull()
+    if (user != null && user.content is T) {
+        cacheDatabase.dbUserQueries.update(update(user.content), userKey)
+    }
+}

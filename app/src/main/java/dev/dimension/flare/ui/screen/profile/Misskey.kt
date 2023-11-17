@@ -28,6 +28,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 internal fun MisskeyProfileHeader(
     user: UiUser.Misskey,
     relationState: UiState<UiRelation>,
+    onFollowClick: (UiRelation.Misskey) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CommonProfileHeader(
@@ -51,7 +52,9 @@ internal fun MisskeyProfileHeader(
                 is UiState.Error -> Unit
                 is UiState.Loading -> {
                     FilledTonalButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            // No-op
+                        },
                         modifier =
                             Modifier.placeholder(
                                 true,
@@ -64,22 +67,25 @@ internal fun MisskeyProfileHeader(
 
                 is UiState.Success -> {
                     when (val data = relationState.data) {
-                        is UiRelation.Mastodon -> {
+                        is UiRelation.Misskey -> {
                             FilledTonalButton(
-                                onClick = { /*TODO*/ },
+                                onClick = {
+                                    onFollowClick.invoke(data)
+                                },
                             ) {
                                 Text(
                                     text =
                                         stringResource(
                                             when {
                                                 data.following -> R.string.profile_header_button_following
-                                                data.requested -> R.string.profile_header_button_requested
+                                                data.hasPendingFollowRequestFromYou -> R.string.profile_header_button_requested
                                                 else -> R.string.profile_header_button_follow
                                             },
                                         ),
                                 )
                             }
                         }
+
                         else -> Unit
                     }
                 }

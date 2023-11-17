@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS DbUser (
     name TEXT NOT NULL,
     handle TEXT NOT NULL,
     host TEXT NOT NULL,
-    content TEXT AS UserContent NOT NULL
+    content TEXT AS UserContent NOT NULL,
+    UNIQUE (handle, host, platform_type)
 );
 
 
@@ -16,7 +17,7 @@ insert:
 INSERT OR REPLACE INTO DbUser (user_key, platform_type, name, handle, host, content) VALUES (:user_key, :platform_type, :name, :handle, :host, :content);
 
 update:
-UPDATE DbUser SET platform_type = :platform_type, name = :name, handle = :handle, host = :host, content = :content WHERE user_key = :user_key;
+UPDATE DbUser SET content = :content WHERE user_key = :user_key;
 
 findByKeys:
 SELECT * FROM DbUser WHERE user_key IN :user_keys;
@@ -25,4 +26,4 @@ findByKey:
 SELECT * FROM DbUser WHERE user_key = :user_key;
 
 findByHandleAndHost:
-SELECT * FROM DbUser WHERE handle = :handle AND host = :host;
+SELECT * FROM DbUser WHERE handle = :handle AND host = :host AND platform_type = :platform_type;

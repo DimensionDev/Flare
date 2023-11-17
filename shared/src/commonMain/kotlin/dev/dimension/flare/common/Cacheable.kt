@@ -9,13 +9,56 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 
-typealias Cacheable<T> = CacheData<T>
+class Cacheable<T>(
+    fetchSource: suspend () -> Unit,
+    cacheSource: () -> Flow<T>,
+) : CacheData<T>(
+        fetchSource = fetchSource,
+        cacheSource = cacheSource,
+    )
 
-class CacheData<T>(
+@Suppress("UNCHECKED_CAST")
+class MemCacheable<T>(
+    private val key: String,
+    fetchSource: suspend () -> T,
+) : CacheData<T>(
+        fetchSource = {
+            val value = fetchSource.invoke()
+            update(key, value)
+        },
+        cacheSource = {
+            caches.getOrPut(key) {
+                MutableStateFlow(null)
+            }.filterNotNull() as Flow<T>
+        },
+    ) {
+    companion object {
+        private val caches = mutableMapOf<String, MutableStateFlow<Any?>>()
+
+        fun <T> update(
+            key: String,
+            value: T,
+        ) {
+            caches[key]?.value = value
+        }
+
+        fun <T> updateWith(
+            key: String,
+            update: (T) -> T,
+        ) {
+            if (caches.containsKey(key)) {
+                caches[key]?.value = update(caches[key]?.value as T)
+            }
+        }
+    }
+}
+
+sealed class CacheData<T>(
     private val fetchSource: suspend () -> Unit,
     private val cacheSource: () -> Flow<T>,
 ) {

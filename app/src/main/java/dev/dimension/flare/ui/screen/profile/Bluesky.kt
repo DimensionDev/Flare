@@ -28,6 +28,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 internal fun BlueskyProfileHeader(
     user: UiUser.Bluesky,
     relationState: UiState<UiRelation>,
+    onFollowClick: (UiRelation.Bluesky) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CommonProfileHeader(
@@ -40,7 +41,9 @@ internal fun BlueskyProfileHeader(
                 is UiState.Error -> Unit
                 is UiState.Loading -> {
                     FilledTonalButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            // No-op
+                        },
                         modifier =
                             Modifier.placeholder(
                                 true,
@@ -55,13 +58,16 @@ internal fun BlueskyProfileHeader(
                     when (val data = relationState.data) {
                         is UiRelation.Bluesky -> {
                             FilledTonalButton(
-                                onClick = { /*TODO*/ },
+                                onClick = {
+                                    onFollowClick.invoke(data)
+                                },
                             ) {
                                 Text(
                                     text =
                                         stringResource(
                                             when {
-                                                data.isFollowing -> R.string.profile_header_button_following
+                                                data.following -> R.string.profile_header_button_following
+                                                data.blocking -> R.string.profile_header_button_blocked
                                                 else -> R.string.profile_header_button_follow
                                             },
                                         ),

@@ -34,6 +34,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 internal fun MastodonProfileHeader(
     user: UiUser.Mastodon,
     relationState: UiState<UiRelation>,
+    onFollowClick: (UiRelation.Mastodon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CommonProfileHeader(
@@ -58,7 +59,9 @@ internal fun MastodonProfileHeader(
                 is UiState.Error -> Unit
                 is UiState.Loading -> {
                     FilledTonalButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            // No-op
+                        },
                         modifier =
                             Modifier.placeholder(
                                 true,
@@ -73,7 +76,9 @@ internal fun MastodonProfileHeader(
                     when (val data = relationState.data) {
                         is UiRelation.Mastodon -> {
                             FilledTonalButton(
-                                onClick = { /*TODO*/ },
+                                onClick = {
+                                    onFollowClick.invoke(data)
+                                },
                             ) {
                                 Text(
                                     text =
@@ -87,6 +92,7 @@ internal fun MastodonProfileHeader(
                                 )
                             }
                         }
+
                         else -> Unit
                     }
                 }

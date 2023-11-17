@@ -10,7 +10,12 @@ struct HomeTimelineScreen: View {
         }
         .listStyle(.plain)
         .refreshable {
-            viewModel.model.refresh()
+            do {
+                try await viewModel.model.refresh()
+            } catch {
+                
+            }
+            
         }
         .activateViewModel(viewModel: viewModel)
     }

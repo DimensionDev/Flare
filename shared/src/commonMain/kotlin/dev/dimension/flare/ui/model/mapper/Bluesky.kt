@@ -249,7 +249,7 @@ internal fun ProfileViewDetailed.toUi(accountHost: String): UiUser =
                 id = did.did,
                 host = accountHost,
             ),
-        name = displayName.orEmpty(),
+        displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
         avatarUrl = avatar.orEmpty(),
         bannerUrl = banner,
@@ -262,10 +262,10 @@ internal fun ProfileViewDetailed.toUi(accountHost: String): UiUser =
             ),
         relation =
             UiRelation.Bluesky(
-                following = viewer?.following?.atUri,
-                followedBy = viewer?.followedBy?.atUri,
-                blocked = viewer?.blockedBy ?: false,
-                muted = viewer?.muted ?: false,
+                following = viewer?.following?.atUri != null,
+                isFans = viewer?.followedBy?.atUri != null,
+                blocking = viewer?.blockedBy ?: false,
+                muting = viewer?.muted ?: false,
             ),
         accountHost = accountHost,
     )
@@ -277,7 +277,7 @@ internal fun ProfileViewBasic.toUi(accountHost: String): UiUser.Bluesky {
                 id = did.did,
                 host = accountHost,
             ),
-        name = displayName.orEmpty(),
+        displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
         avatarUrl = avatar.orEmpty(),
         bannerUrl = null,
@@ -290,10 +290,10 @@ internal fun ProfileViewBasic.toUi(accountHost: String): UiUser.Bluesky {
             ),
         relation =
             UiRelation.Bluesky(
-                following = viewer?.following?.atUri,
-                followedBy = viewer?.followedBy?.atUri,
-                blocked = viewer?.blockedBy ?: false,
-                muted = viewer?.muted ?: false,
+                following = viewer?.following?.atUri != null,
+                isFans = viewer?.followedBy?.atUri != null,
+                blocking = viewer?.blockedBy ?: false,
+                muting = viewer?.muted ?: false,
             ),
         accountHost = accountHost,
     )
@@ -306,7 +306,7 @@ internal fun ProfileView.toUi(accountHost: String): UiUser.Bluesky {
                 id = did.did,
                 host = accountHost,
             ),
-        name = displayName.orEmpty(),
+        displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
         avatarUrl = avatar.orEmpty(),
         bannerUrl = null,
@@ -319,10 +319,10 @@ internal fun ProfileView.toUi(accountHost: String): UiUser.Bluesky {
             ),
         relation =
             UiRelation.Bluesky(
-                following = viewer?.following?.atUri,
-                followedBy = viewer?.followedBy?.atUri,
-                blocked = viewer?.blockedBy ?: false,
-                muted = viewer?.muted ?: false,
+                following = viewer?.following?.atUri != null,
+                isFans = viewer?.followedBy?.atUri != null,
+                blocking = viewer?.blockedBy ?: false,
+                muting = viewer?.muted ?: false,
             ),
         accountHost = accountHost,
     )

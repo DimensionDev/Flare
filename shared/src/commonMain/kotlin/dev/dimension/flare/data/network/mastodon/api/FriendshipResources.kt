@@ -35,6 +35,16 @@ interface FriendshipResources {
         @Path(value = "id") id: String,
     ): RelationshipResponse
 
+    @POST("api/v1/accounts/{id}/mute")
+    suspend fun muteUser(
+        @Path(value = "id") id: String,
+    ): RelationshipResponse
+
+    @POST("api/v1/accounts/{id}/unmute")
+    suspend fun unmuteUser(
+        @Path(value = "id") id: String,
+    ): RelationshipResponse
+
     @POST("api/v1/reports")
     suspend fun report(
         @Body data: PostReport,

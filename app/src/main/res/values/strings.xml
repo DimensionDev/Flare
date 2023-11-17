@@ -23,6 +23,7 @@
     <string name="profile_header_button_follow">Follow</string>
     <string name="profile_header_button_following">Following</string>
     <string name="profile_header_button_requested">Requested</string>
+    <string name="profile_header_button_blocked">Blocked</string>
 
     <string name="compose_title">Compose</string>
     <string name="compose_hint">What\'s happening?</string>
@@ -168,4 +169,10 @@
 
     <string name="misskey_item_action_delete">Delete</string>
     <string name="misskey_item_action_report">Report</string>
+
+    <string name="user_report">Report %1$s</string>
+    <string name="user_block">Block %1$s</string>
+    <string name="user_unblock">Unblock %1$s</string>
+    <string name="user_mute">Mute %1$s</string>
+    <string name="user_unmute">Unmute %1$s</string>
 </resources>

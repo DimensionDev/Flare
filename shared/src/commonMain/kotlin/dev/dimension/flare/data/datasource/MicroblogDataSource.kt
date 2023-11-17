@@ -11,6 +11,7 @@ import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -22,6 +23,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 interface MicroblogDataSource {
+    val account: UiAccount
+
     fun homeTimeline(
         pageSize: Int = 20,
         pagingKey: String = "home",
@@ -117,3 +120,5 @@ internal fun timelinePager(
         }
     }
 }
+
+fun MicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:${account.accountKey}:$userKey"

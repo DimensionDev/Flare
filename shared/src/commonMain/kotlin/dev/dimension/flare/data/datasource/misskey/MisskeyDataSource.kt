@@ -7,6 +7,7 @@ import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
@@ -16,20 +17,23 @@ import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.ComposeProgress
 import dev.dimension.flare.data.datasource.MicroblogDataSource
 import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.datasource.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.timelinePager
+import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
+import dev.dimension.flare.data.network.misskey.api.model.MuteCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.toImmutableList
@@ -42,7 +46,7 @@ import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
 class MisskeyDataSource(
-    private val account: UiAccount.Misskey,
+    override val account: UiAccount.Misskey,
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
     private val service by lazy {
@@ -129,7 +133,7 @@ class MisskeyDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host).asFlow()
+                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Misskey).asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi() }
             },
@@ -164,15 +168,22 @@ class MisskeyDataSource(
     }
 
     override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        return userById(userKey.id).toUi().map {
-            it.flatMap {
-                if (it is UiUser.Misskey) {
-                    UiState.Success(it.relation)
-                } else {
-                    UiState.Error(IllegalStateException("User is not a Misskey user"))
+        return MemCacheable<UiRelation>(
+            relationKeyWithUserKey(userKey),
+        ) {
+            service
+                .usersShow(UsersShowRequest(userId = userKey.id))
+                .body()!!
+                .toDbUser(account.accountKey.host)
+                .toUi()
+                .let {
+                    if (it is UiUser.Misskey) {
+                        it.relation
+                    } else {
+                        throw IllegalStateException("User is not a Misskey user")
+                    }
                 }
-            }
-        }
+        }.toUi()
     }
 
     override fun userTimeline(
@@ -427,6 +438,139 @@ class MisskeyDataSource(
                     comment = comment ?: "",
                 ),
             )
+        }
+    }
+
+    suspend fun unfollow(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Misskey>(
+            key = key,
+        ) {
+            it.copy(
+                following = false,
+            )
+        }
+        runCatching {
+            service.followingDelete(AdminAccountsDeleteRequest(userId = userKey.id))
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Misskey>(
+                key = key,
+            ) {
+                it.copy(
+                    following = true,
+                )
+            }
+        }
+    }
+
+    suspend fun follow(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Misskey>(
+            key = key,
+        ) {
+            it.copy(
+                following = true,
+            )
+        }
+        runCatching {
+            service.followingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Misskey>(
+                key = key,
+            ) {
+                it.copy(
+                    following = false,
+                )
+            }
+        }
+    }
+
+    suspend fun block(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Misskey>(
+            key = key,
+        ) {
+            it.copy(
+                blocking = true,
+            )
+        }
+        runCatching {
+            service.blockingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
+        }.onFailure {
+            it.printStackTrace()
+            MemCacheable.updateWith<UiRelation.Misskey>(
+                key = key,
+            ) {
+                it.copy(
+                    blocking = false,
+                )
+            }
+        }
+    }
+
+    suspend fun unblock(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Misskey>(
+            key = key,
+        ) {
+            it.copy(
+                blocking = false,
+            )
+        }
+        runCatching {
+            service.blockingDelete(AdminAccountsDeleteRequest(userId = userKey.id))
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Misskey>(
+                key = key,
+            ) {
+                it.copy(
+                    blocking = true,
+                )
+            }
+        }
+    }
+
+    suspend fun mute(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Misskey>(
+            key = key,
+        ) {
+            it.copy(
+                muted = true,
+            )
+        }
+        runCatching {
+            service.muteCreate(MuteCreateRequest(userId = userKey.id))
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Misskey>(
+                key = key,
+            ) {
+                it.copy(
+                    muted = false,
+                )
+            }
+        }
+    }
+
+    suspend fun unmute(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Misskey>(
+            key = key,
+        ) {
+            it.copy(
+                muted = false,
+            )
+        }
+        runCatching {
+            service.muteDelete(AdminAccountsDeleteRequest(userId = userKey.id))
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Misskey>(
+                key = key,
+            ) {
+                it.copy(
+                    muted = true,
+                )
+            }
         }
     }
 }

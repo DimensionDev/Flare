@@ -5,6 +5,8 @@ import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.ViewerState
+import app.bsky.graph.MuteActorRequest
+import app.bsky.graph.UnmuteActorRequest
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.moderation.CreateReportRequest
@@ -16,6 +18,7 @@ import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.common.jsonObjectOrNull
@@ -28,15 +31,16 @@ import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.ComposeProgress
 import dev.dimension.flare.data.datasource.MicroblogDataSource
 import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.datasource.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.timelinePager
 import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
@@ -44,7 +48,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.add
@@ -61,7 +64,7 @@ import sh.christian.ozone.api.Nsid
 
 @OptIn(ExperimentalPagingApi::class)
 class BlueskyDataSource(
-    private val account: UiAccount.Bluesky,
+    override val account: UiAccount.Bluesky,
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
@@ -130,7 +133,7 @@ class BlueskyDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host)
+                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Bluesky)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .mapNotNull { it.toUi() }
@@ -165,15 +168,22 @@ class BlueskyDataSource(
     }
 
     override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        return userById(userKey.id).toUi().map {
-            it.flatMap {
-                if (it is UiUser.Misskey) {
-                    UiState.Success(it.relation)
-                } else {
-                    UiState.Error(IllegalStateException("User is not a Misskey user"))
+        return MemCacheable<UiRelation>(
+            relationKeyWithUserKey(userKey),
+        ) {
+            account.getService(appDatabase)
+                .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = userKey.id)))
+                .requireResponse()
+                .toDbUser(account.accountKey.host)
+                .toUi()
+                .let {
+                    if (it is UiUser.Bluesky) {
+                        it.relation
+                    } else {
+                        throw IllegalStateException("User is not a Misskey user")
+                    }
                 }
-            }
-        }
+        }.toUi()
     }
 
     override fun userTimeline(
@@ -630,6 +640,192 @@ class BlueskyDataSource(
             // delete status from cache
             database.dbStatusQueries.delete(status_key = statusKey, account_key = account.accountKey)
             database.dbPagingTimelineQueries.deleteStatus(account_key = account.accountKey, status_key = statusKey)
+        }
+    }
+
+    suspend fun unfollow(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Bluesky>(
+            key = key,
+        ) {
+            it.copy(
+                following = false,
+            )
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            val user =
+                service.getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = userKey.id)))
+                    .requireResponse()
+
+            val followRepo = user.viewer?.following?.atUri
+            if (followRepo != null) {
+                service.deleteRecord(
+                    DeleteRecordRequest(
+                        repo = AtIdentifier(account.accountKey.id),
+                        collection = Nsid("app.bsky.graph.follow"),
+                        rkey = followRepo.substringAfterLast('/'),
+                    ),
+                )
+            }
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Bluesky>(
+                key = key,
+            ) {
+                it.copy(
+                    following = true,
+                )
+            }
+        }
+    }
+
+    suspend fun follow(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Bluesky>(
+            key = key,
+        ) {
+            it.copy(
+                following = true,
+            )
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            service.createRecord(
+                CreateRecordRequest(
+                    repo = AtIdentifier(account.accountKey.id),
+                    collection = Nsid("app.bsky.graph.follow"),
+                    record =
+                        buildJsonObject {
+                            put("\$type", "app.bsky.graph.follow")
+                            put("createdAt", Clock.System.now().toString())
+                            put("subject", userKey.id)
+                        },
+                ),
+            )
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Bluesky>(
+                key = key,
+            ) {
+                it.copy(
+                    following = false,
+                )
+            }
+        }
+    }
+
+    suspend fun block(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Bluesky>(
+            key = key,
+        ) {
+            it.copy(
+                blocking = true,
+            )
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            service.createRecord(
+                CreateRecordRequest(
+                    repo = AtIdentifier(account.accountKey.id),
+                    collection = Nsid("app.bsky.graph.block"),
+                    record =
+                        buildJsonObject {
+                            put("\$type", "app.bsky.graph.block")
+                            put("createdAt", Clock.System.now().toString())
+                            put("subject", userKey.id)
+                        },
+                ),
+            )
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Bluesky>(
+                key = key,
+            ) {
+                it.copy(
+                    blocking = false,
+                )
+            }
+        }
+    }
+
+    suspend fun unblock(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Bluesky>(
+            key = key,
+        ) {
+            it.copy(
+                blocking = false,
+            )
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            val user =
+                service.getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = userKey.id)))
+                    .requireResponse()
+
+            val blockRepo = user.viewer?.blocking?.atUri
+            if (blockRepo != null) {
+                service.deleteRecord(
+                    DeleteRecordRequest(
+                        repo = AtIdentifier(account.accountKey.id),
+                        collection = Nsid("app.bsky.graph.block"),
+                        rkey = blockRepo.substringAfterLast('/'),
+                    ),
+                )
+            }
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Bluesky>(
+                key = key,
+            ) {
+                it.copy(
+                    blocking = true,
+                )
+            }
+        }
+    }
+
+    suspend fun mute(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Bluesky>(
+            key = key,
+        ) {
+            it.copy(
+                muting = true,
+            )
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            service.muteActor(MuteActorRequest(actor = AtIdentifier(userKey.id)))
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Bluesky>(
+                key = key,
+            ) {
+                it.copy(
+                    muting = false,
+                )
+            }
+        }
+    }
+
+    suspend fun unmute(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Bluesky>(
+            key = key,
+        ) {
+            it.copy(
+                muting = false,
+            )
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            service.unmuteActor(UnmuteActorRequest(actor = AtIdentifier(userKey.id)))
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Bluesky>(
+                key = key,
+            ) {
+                it.copy(
+                    muting = true,
+                )
+            }
         }
     }
 }

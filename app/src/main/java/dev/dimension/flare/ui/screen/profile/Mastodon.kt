@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +36,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 internal fun MastodonProfileHeader(
     user: UiUser.Mastodon,
     relationState: UiState<UiRelation>,
+    onFollowClick: (UiRelation.Mastodon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CommonProfileHeader(
@@ -58,7 +61,9 @@ internal fun MastodonProfileHeader(
                 is UiState.Error -> Unit
                 is UiState.Loading -> {
                     FilledTonalButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            // No-op
+                        },
                         modifier =
                             Modifier.placeholder(
                                 true,
@@ -73,12 +78,15 @@ internal fun MastodonProfileHeader(
                     when (val data = relationState.data) {
                         is UiRelation.Mastodon -> {
                             FilledTonalButton(
-                                onClick = { /*TODO*/ },
+                                onClick = {
+                                    onFollowClick.invoke(data)
+                                },
                             ) {
                                 Text(
                                     text =
                                         stringResource(
                                             when {
+                                                data.blocking -> R.string.profile_header_button_blocked
                                                 data.following -> R.string.profile_header_button_following
                                                 data.requested -> R.string.profile_header_button_requested
                                                 else -> R.string.profile_header_button_follow
@@ -87,6 +95,7 @@ internal fun MastodonProfileHeader(
                                 )
                             }
                         }
+
                         else -> Unit
                     }
                 }
@@ -137,5 +146,34 @@ internal fun MastodonProfileHeader(
             }
         },
         modifier = modifier,
+    )
+}
+
+@Composable
+internal fun ColumnScope.MastodonUserMenu(
+    user: UiUser,
+    relation: UiRelation.Mastodon,
+    onBlockClick: () -> Unit,
+    onMuteClick: () -> Unit,
+) {
+    DropdownMenuItem(
+        text = {
+            if (relation.muting) {
+                Text(text = stringResource(R.string.user_unmute, user.handle))
+            } else {
+                Text(text = stringResource(R.string.user_mute, user.handle))
+            }
+        },
+        onClick = onMuteClick,
+    )
+    DropdownMenuItem(
+        text = {
+            if (relation.blocking) {
+                Text(text = stringResource(R.string.user_unblock, user.handle))
+            } else {
+                Text(text = stringResource(R.string.user_block, user.handle))
+            }
+        },
+        onClick = onBlockClick,
     )
 }

@@ -57,7 +57,7 @@ data class UserDetailedNotMe(
     @SerialName(value = "pinnedNoteIds") val pinnedNoteIds: kotlin.collections.List<kotlin.String>,
     @SerialName(value = "pinnedNotes") val pinnedNotes: kotlin.collections.List<@Contextual Note>,
     @SerialName(value = "pinnedPageId") val pinnedPageId: kotlin.String? = null,
-    @SerialName(value = "pinnedPage") val pinnedPage: Page,
+    @SerialName(value = "pinnedPage") val pinnedPage: Page? = null,
     @SerialName(value = "publicReactions") val publicReactions: kotlin.Boolean,
     @SerialName(value = "twoFactorEnabled") val twoFactorEnabled: kotlin.Boolean = false,
     @SerialName(value = "usePasswordLessLogin") val usePasswordLessLogin: kotlin.Boolean = false,

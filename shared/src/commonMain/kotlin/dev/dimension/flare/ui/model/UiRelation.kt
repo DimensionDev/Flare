@@ -21,12 +21,9 @@ sealed interface UiRelation {
     ) : UiRelation
 
     data class Bluesky(
-        val following: String?,
-        val followedBy: String?,
-        val blocked: Boolean,
-        val muted: Boolean,
-    ) : UiRelation {
-        val isFans = followedBy.isNullOrEmpty().not()
-        val isFollowing = following.isNullOrEmpty().not()
-    }
+        val isFans: Boolean,
+        val following: Boolean,
+        val blocking: Boolean,
+        val muting: Boolean,
+    ) : UiRelation
 }

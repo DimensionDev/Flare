@@ -111,7 +111,6 @@ dependencies {
     ksp(libs.ktorfit.ksp)
     implementation(libs.bundles.coil)
     implementation(libs.bundles.ktor)
-    implementation(libs.twitter.parser)
     implementation(libs.material.icons.extended)
     implementation(libs.molecule.runtime)
     implementation(libs.ktml)

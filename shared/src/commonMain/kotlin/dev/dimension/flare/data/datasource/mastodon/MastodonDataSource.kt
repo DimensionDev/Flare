@@ -8,6 +8,7 @@ import com.benasher44.uuid.uuid4
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
@@ -17,6 +18,7 @@ import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.ComposeProgress
 import dev.dimension.flare.data.datasource.MicroblogDataSource
 import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.datasource.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
@@ -24,24 +26,25 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
 class MastodonDataSource(
-    private val account: UiAccount.Mastodon,
+    override val account: UiAccount.Mastodon,
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
     private val service by lazy {
@@ -124,7 +127,7 @@ class MastodonDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host).asFlow()
+                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Mastodon).asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi() }
             },
@@ -154,20 +157,11 @@ class MastodonDataSource(
     }
 
     override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        return flow {
-            if (userKey == account.accountKey) {
-                emit(UiState.Error(Exception("Cannot follow self")))
-            } else {
-                try {
-                    emit(
-                        service.showFriendships(listOf(userKey.id)).first().toUi()
-                            .let { UiState.Success(it) },
-                    )
-                } catch (e: Exception) {
-                    emit(UiState.Error(e))
-                }
-            }
-        }
+        return MemCacheable<UiRelation>(
+            relationKeyWithUserKey(userKey),
+        ) {
+            service.showFriendships(listOf(userKey.id)).first().toUi()
+        }.toUi()
     }
 
     override fun userTimeline(
@@ -497,6 +491,138 @@ class MastodonDataSource(
                     statusIds = statusKey?.let { listOf(it.id) },
                 ),
             )
+        }
+    }
+
+    suspend fun unfollow(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Mastodon>(
+            key = key,
+        ) {
+            it.copy(
+                following = false,
+            )
+        }
+        runCatching {
+            service.unfollow(userKey.id)
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Mastodon>(
+                key = key,
+            ) {
+                it.copy(
+                    following = true,
+                )
+            }
+        }
+    }
+
+    suspend fun follow(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Mastodon>(
+            key = key,
+        ) {
+            it.copy(
+                following = true,
+            )
+        }
+        runCatching {
+            service.follow(userKey.id)
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Mastodon>(
+                key = key,
+            ) {
+                it.copy(
+                    following = false,
+                )
+            }
+        }
+    }
+
+    suspend fun block(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Mastodon>(
+            key = key,
+        ) {
+            it.copy(
+                blocking = true,
+            )
+        }
+        runCatching {
+            service.block(userKey.id)
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Mastodon>(
+                key = key,
+            ) {
+                it.copy(
+                    blocking = false,
+                )
+            }
+        }
+    }
+
+    suspend fun unblock(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Mastodon>(
+            key = key,
+        ) {
+            it.copy(
+                blocking = false,
+            )
+        }
+        runCatching {
+            service.unblock(userKey.id)
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Mastodon>(
+                key = key,
+            ) {
+                it.copy(
+                    blocking = true,
+                )
+            }
+        }
+    }
+
+    suspend fun mute(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Mastodon>(
+            key = key,
+        ) {
+            it.copy(
+                muting = true,
+            )
+        }
+        runCatching {
+            service.muteUser(userKey.id)
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Mastodon>(
+                key = key,
+            ) {
+                it.copy(
+                    muting = false,
+                )
+            }
+        }
+    }
+
+    suspend fun unmute(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Mastodon>(
+            key = key,
+        ) {
+            it.copy(
+                muting = false,
+            )
+        }
+        runCatching {
+            service.unmuteUser(userKey.id)
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Mastodon>(
+                key = key,
+            ) {
+                it.copy(
+                    muting = true,
+                )
+            }
         }
     }
 }

@@ -89,7 +89,7 @@ sealed class UiUser {
 
     data class Bluesky(
         override val userKey: MicroBlogKey,
-        val name: String,
+        val displayName: String,
         val handleInternal: String,
         override val avatarUrl: String,
         val bannerUrl: String?,
@@ -100,7 +100,7 @@ sealed class UiUser {
     ) : UiUser() {
         override val nameElement by lazy {
             Element("span").apply {
-                children.add(Text(name))
+                children.add(Text(displayName))
             }
         }
 

@@ -29,6 +29,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,7 +44,9 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -329,12 +333,75 @@ fun ProfileScreen(
                             }
                         },
                         actions = {
-                            state.state.userState.onSuccess {
-                                IconButton(onClick = { /*TODO*/ }) {
+                            state.state.userState.onSuccess { user ->
+                                IconButton(onClick = {
+                                    state.setShowMoreMenus(true)
+                                }) {
                                     Icon(
                                         imageVector = Icons.Default.MoreVert,
                                         contentDescription = null,
                                     )
+                                }
+                                DropdownMenu(
+                                    expanded = state.showMoreMenus,
+                                    onDismissRequest = { state.setShowMoreMenus(false) },
+                                ) {
+                                    state.state.isMe.onSuccess { isMe ->
+                                        if (!isMe) {
+                                            state.state.relationState.onSuccess { relation ->
+                                                when (relation) {
+                                                    is UiRelation.Bluesky ->
+                                                        BlueskyUserMenu(
+                                                            user = user,
+                                                            relation = relation,
+                                                            onBlockClick = {
+                                                                state.setShowMoreMenus(false)
+                                                                state.state.block(user, relation)
+                                                            },
+                                                            onMuteClick = {
+                                                                state.setShowMoreMenus(false)
+                                                                state.state.mute(user, relation)
+                                                            },
+                                                        )
+                                                    is UiRelation.Mastodon ->
+                                                        MastodonUserMenu(
+                                                            user = user,
+                                                            relation = relation,
+                                                            onBlockClick = {
+                                                                state.setShowMoreMenus(false)
+                                                                state.state.block(user, relation)
+                                                            },
+                                                            onMuteClick = {
+                                                                state.setShowMoreMenus(false)
+                                                                state.state.mute(user, relation)
+                                                            },
+                                                        )
+                                                    is UiRelation.Misskey ->
+                                                        MisskeyUserMenu(
+                                                            user = user,
+                                                            relation = relation,
+                                                            onBlockClick = {
+                                                                state.setShowMoreMenus(false)
+                                                                state.state.block(user, relation)
+                                                            },
+                                                            onMuteClick = {
+                                                                state.setShowMoreMenus(false)
+                                                                state.state.mute(user, relation)
+                                                            },
+                                                        )
+                                                }
+                                            }
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(text = stringResource(id = R.string.user_report, user.handle))
+                                                },
+                                                onClick = {
+                                                    state.setShowMoreMenus(false)
+                                                    state.state.report(user)
+                                                },
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         },
@@ -357,6 +424,7 @@ fun ProfileScreen(
                         ProfileHeader(
                             state.state.userState,
                             state.state.relationState,
+                            onFollowClick = state.state::follow,
                         )
                     }
                     with(state.state.listState) {
@@ -374,6 +442,7 @@ fun ProfileScreen(
 private fun ProfileHeader(
     userState: UiState<UiUser>,
     relationState: UiState<UiRelation>,
+    onFollowClick: (UiUser, UiRelation) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
@@ -404,6 +473,7 @@ private fun ProfileHeader(
                 ProfileHeaderSuccess(
                     user = state.data,
                     relationState = relationState,
+                    onFollowClick = onFollowClick,
                 )
             }
         }
@@ -414,6 +484,7 @@ private fun ProfileHeader(
 private fun ProfileHeaderSuccess(
     user: UiUser,
     relationState: UiState<UiRelation>,
+    onFollowClick: (UiUser, UiRelation) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (user) {
@@ -422,6 +493,9 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
             )
         }
 
@@ -430,6 +504,9 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
             )
         }
 
@@ -438,6 +515,9 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
             )
     }
 }
@@ -631,8 +711,16 @@ private fun profilePresenter(
                 userKey = userKey,
             )
         }.invoke()
+    var showMoreMenus by remember {
+        mutableStateOf(false)
+    }
     object {
         val state = state
         val statusEvent = statusEvent
+        val showMoreMenus = showMoreMenus
+
+        fun setShowMoreMenus(value: Boolean) {
+            showMoreMenus = value
+        }
     }
 }

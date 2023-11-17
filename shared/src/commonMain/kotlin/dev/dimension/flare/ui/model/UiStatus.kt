@@ -36,9 +36,21 @@ import moe.tlaster.mfm.parser.tree.SearchNode
 import moe.tlaster.mfm.parser.tree.SmallNode
 import moe.tlaster.mfm.parser.tree.StrikeNode
 import moe.tlaster.mfm.parser.tree.UrlNode
+import moe.tlaster.twitter.parser.CashTagToken
+import moe.tlaster.twitter.parser.EmojiToken
+import moe.tlaster.twitter.parser.HashTagToken
+import moe.tlaster.twitter.parser.StringToken
+import moe.tlaster.twitter.parser.Token
+import moe.tlaster.twitter.parser.TwitterParser
+import moe.tlaster.twitter.parser.UrlToken
+import moe.tlaster.twitter.parser.UserNameToken
 
 internal val misskeyParser by lazy {
     MFMParser()
+}
+
+internal val blueskyParser by lazy {
+    TwitterParser(enableDotInUserName = true)
 }
 
 expect class UiStatusExtra
@@ -322,7 +334,7 @@ sealed class UiStatus {
             indexedAt.humanize()
         }
         val contentToken by lazy {
-            misskeyParser.parse(content).toHtml(accountKey.host)
+            blueskyParser.parse(content).toHtml(accountKey.host)
         }
 
         val isFromMe by lazy {
@@ -370,6 +382,42 @@ sealed class UiStatus {
         val humanizedTime by lazy {
             indexedAt.humanize()
         }
+    }
+}
+
+private fun List<Token>.toHtml(host: String): Element {
+    val body = Element("body")
+    forEach {
+        body.children.add(it.toHtml(host))
+    }
+    return body
+}
+
+private fun Token.toHtml(host: String): Node {
+    return when (this) {
+        is CashTagToken ->
+            Element("a").apply {
+                attributes["href"] = AppDeepLink.Search("$$value")
+                children.add(Text("$$value"))
+            }
+        // not supported
+        is EmojiToken -> Text(value)
+        is HashTagToken ->
+            Element("a").apply {
+                attributes["href"] = AppDeepLink.Search("#$value")
+                children.add(Text("#$value"))
+            }
+        is StringToken -> Text(value)
+        is UrlToken ->
+            Element("a").apply {
+                attributes["href"] = value
+                children.add(Text(value))
+            }
+        is UserNameToken ->
+            Element("a").apply {
+                attributes["href"] = AppDeepLink.ProfileWithNameAndHost(value, host)
+                children.add(Text(value))
+            }
     }
 }
 

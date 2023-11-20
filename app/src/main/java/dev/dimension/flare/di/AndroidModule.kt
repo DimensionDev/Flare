@@ -1,6 +1,6 @@
 package dev.dimension.flare.di
 
-import dev.dimension.flare.data.repository.ComposeUseCase
+import dev.dimension.flare.data.repository.ComposeNotifyUseCase
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusEvent
 import dev.dimension.flare.ui.component.status.bluesky.DefaultBlueskyStatusEvent
@@ -24,6 +24,6 @@ val androidModule =
         singleOf(::DefaultMastodonStatusEvent) withOptions {
             binds(listOf(MastodonStatusEvent::class))
         }
-        singleOf(::ComposeUseCase)
+        singleOf(::ComposeNotifyUseCase)
         singleOf(::StatusEvent)
     }

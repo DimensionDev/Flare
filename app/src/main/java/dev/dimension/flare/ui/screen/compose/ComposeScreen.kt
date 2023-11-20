@@ -49,12 +49,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Poll
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -111,7 +109,7 @@ import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.repository.ComposeUseCase
+import dev.dimension.flare.data.repository.ComposeNotifyUseCase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
@@ -868,7 +866,7 @@ private fun PollOption(
 private fun composePresenter(
     context: Context,
     status: ComposeStatus? = null,
-    composeUseCase: ComposeUseCase = rememberKoinInject(),
+    composeUseCase: ComposeNotifyUseCase = rememberKoinInject(),
 ) = run {
     val state =
         remember(status) {

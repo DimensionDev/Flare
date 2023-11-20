@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -52,12 +53,16 @@ class ComposePresenter(
                     ?: UiState.Error(IllegalStateException("Emoji not supported"))
             }
 
-        return ComposeState(
+        return object : ComposeState(
             account = account,
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
-        )
+        ) {
+            override fun send(data: ComposeData) {
+
+            }
+        }
     }
 
     @Composable
@@ -190,9 +195,11 @@ sealed interface ComposeStatus {
 }
 
 @Immutable
-data class ComposeState(
+abstract class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
     val replyState: UiState<LazyPagingItems<UiStatus>>?,
     val emojiState: UiState<ImmutableList<UiEmoji>>,
-)
+) {
+    abstract fun send(data: ComposeData)
+}

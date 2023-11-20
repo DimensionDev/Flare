@@ -1,21 +1,135 @@
 import Foundation
+import PhotosUI
+import SwiftUI
 import shared
 
 @Observable
-class ComposeViewModel {
-    let status: ComposeStatus?
+class ComposeViewModel: MoleculeViewModelProto {
+    typealias Model = ComposeState
+    typealias Presenter = ComposePresenter
+    let presenter: ComposePresenter
+    var model: ComposeState
+
     var text = ""
     var cw = ""
     var enableCW = false
+    var pollViewModel = PollViewModel()
+    var mediaViewModel = MediaViewModel()
+
     init(status: ComposeStatus?) {
-        self.status = status
+        presenter = ComposePresenter(status: status)
+        model = presenter.models.value
     }
+
     func toggleCW() {
         enableCW = !enableCW
     }
+
+    func togglePoll() {
+        if pollViewModel.enabled {
+            pollViewModel = PollViewModel()
+        } else {
+            pollViewModel.enabled = true
+        }
+    }
 }
 
-enum ComposeStatus {
-    case quote(key: MicroBlogKey)
-    case reply(key: MicroBlogKey)
+@Observable
+class MediaViewModel {
+    var selectedItems: [PhotosPickerItem] = []
+    var items: [MediaItem] = []
+    var sensitive = false
+    func update() {
+        if selectedItems.count > 4 {
+            selectedItems = Array(selectedItems[(selectedItems.count - 4)...(selectedItems.count - 1)])
+        } else {
+            selectedItems = selectedItems
+        }
+        items = selectedItems.map { item in
+            MediaItem(item: item)
+        }
+    }
+
+    func remove(item: MediaItem) {
+        if let index = items.firstIndex(of: item) {
+            items.remove(at: index)
+            selectedItems.remove(at: index)
+        }
+    }
+}
+
+@Observable
+class MediaItem: Equatable {
+    static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
+        lhs.item == rhs.item
+    }
+
+    let item: PhotosPickerItem
+    var image: UIImage? = nil
+    init(item: PhotosPickerItem) {
+        self.item = item
+        item.loadTransferable(type: Data.self) { result in
+            do {
+                if let data = try result.get() {
+                    if let uiImage = UIImage(data: data) {
+                        DispatchQueue.main.async {
+                            self.image = uiImage
+                        }
+                    }
+                }
+            } catch {
+            }
+        }
+    }
+}
+
+@Observable
+class PollViewModel {
+    var enabled = false
+    var pollType = ComposePollType.single
+    var choices: [PollChoice] = [PollChoice(), PollChoice()]
+    var expired = ComposePollExpired.minutes5
+    let allExpiration = [
+        ComposePollExpired.minutes5,
+        ComposePollExpired.minutes30,
+        ComposePollExpired.hours1,
+        ComposePollExpired.hours6,
+        ComposePollExpired.hours12,
+        ComposePollExpired.days1,
+        ComposePollExpired.days3,
+        ComposePollExpired.days7,
+    ]
+    func add() {
+        if choices.count < 4 {
+            choices.append(PollChoice())
+        }
+    }
+    func remove(choice: PollChoice) {
+        if choices.count > 2 {
+            choices.removeAll { c in
+                c.id == choice.id
+            }
+        }
+    }
+}
+
+@Observable
+class PollChoice: Identifiable {
+    var text = ""
+}
+
+enum ComposePollType {
+    case single
+    case multiple
+}
+
+enum ComposePollExpired: String {
+    case minutes5
+    case minutes30
+    case hours1
+    case hours6
+    case hours12
+    case days1
+    case days3
+    case days7
 }

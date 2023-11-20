@@ -60,7 +60,6 @@ class ComposePresenter(
             emojiState = emojiState,
         ) {
             override fun send(data: ComposeData) {
-
             }
         }
     }

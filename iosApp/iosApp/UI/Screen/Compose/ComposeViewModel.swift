@@ -15,8 +15,10 @@ class ComposeViewModel: MoleculeViewModelProto {
     var enableCW = false
     var pollViewModel = PollViewModel()
     var mediaViewModel = MediaViewModel()
+    var status: ComposeStatus?
 
     init(status: ComposeStatus?) {
+        self.status = status
         presenter = ComposePresenter(status: status)
         model = presenter.models.value
     }
@@ -32,6 +34,71 @@ class ComposeViewModel: MoleculeViewModelProto {
             pollViewModel.enabled = true
         }
     }
+    
+    func send(account: UiAccount) {
+        let data = switch onEnum(of: account) {
+        case .bluesky(let bluesky):
+            BlueskyDataSource.BlueskyComposeData(account: bluesky, content: text, inReplyToID: getReplyId(), quoteId: getQuoteId(), language: ["en"], medias: getMedia())
+        case .mastodon(let mastodon):
+            MastodonDataSource.MastodonComposeData(account: mastodon, content: text, visibility: getMastodonVisibility(), inReplyToID: getReplyId(), medias: getMedia(), sensitive: mediaViewModel.sensitive, spoilerText: cw, poll: getMastodonPoll())
+        case .misskey(let misskey):
+            MisskeyDataSource.MisskeyComposeData(account: misskey, content: text, visibility: getMisskeyVisibility(), inReplyToID: getReplyId(), renoteId: getQuoteId(), medias: getMedia(), sensitive: mediaViewModel.sensitive, spoilerText: cw, poll: getMisskeyPoll(), localOnly: false)
+        }
+        model.send(data: data as! ComposeData_)
+    }
+    
+    func getMedia() -> [FileItem] {
+        return mediaViewModel.items.map { item in FileItem(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!)) }
+    }
+    
+    func getQuoteId() -> String? {
+        return if let data = status, case .quote(let quote) = onEnum(of: data) {
+            quote.statusKey.id
+        } else {
+            nil
+        }
+    }
+    
+    func getReplyId() -> String? {
+        return if let data = status, case .reply(let reply) = onEnum(of: data) {
+            reply.statusKey.id
+        } else {
+            nil
+        }
+    }
+    
+    func getMastodonVisibility() -> UiStatus.Mastodon.MastodonVisibility {
+        return if case .success(let data) = onEnum(of: model.visibilityState), let state = data.data as? MastodonVisibilityState {
+            state.visibility
+        } else {
+            UiStatus.Mastodon.MastodonVisibility.public_
+        }
+    }
+    
+    func getMastodonPoll() -> MastodonDataSource.MastodonComposeDataPoll? {
+        if pollViewModel.enabled {
+            MastodonDataSource.MastodonComposeDataPoll(options: pollViewModel.choices.map { item in item.text }, expiresIn: pollViewModel.expired.inWholeMilliseconds, multiple: pollViewModel.pollType == ComposePollType.multiple)
+        } else {
+            nil
+        }
+    }
+    
+    func getMisskeyVisibility() -> UiStatus.Misskey.MisskeyVisibility {
+        return if case .success(let data) = onEnum(of: model.visibilityState), let state = data.data as? MisskeyVisibilityState {
+            state.visibility
+        } else {
+            UiStatus.Misskey.MisskeyVisibility.public_
+        }
+    }
+    
+    func getMisskeyPoll() -> MisskeyDataSource.MisskeyComposeDataPoll? {
+        if pollViewModel.enabled {
+            MisskeyDataSource.MisskeyComposeDataPoll(options: pollViewModel.choices.map { item in item.text }, expiredAfter: pollViewModel.expired.inWholeMilliseconds, multiple: pollViewModel.pollType == ComposePollType.multiple)
+        } else {
+            nil
+        }
+    }
+
 }
 
 @Observable
@@ -66,6 +133,7 @@ class MediaItem: Equatable {
 
     let item: PhotosPickerItem
     var image: UIImage? = nil
+    var data: Data? = nil
     init(item: PhotosPickerItem) {
         self.item = item
         item.loadTransferable(type: Data.self) { result in
@@ -73,6 +141,7 @@ class MediaItem: Equatable {
                 if let data = try result.get() {
                     if let uiImage = UIImage(data: data) {
                         DispatchQueue.main.async {
+                            self.data = data
                             self.image = uiImage
                         }
                     }
@@ -132,4 +201,26 @@ enum ComposePollExpired: String {
     case days1
     case days3
     case days7
+
+    var inWholeMilliseconds: Int64 {
+        switch self {
+        case .minutes5:
+            return 5 * 60 * 1000
+        case .minutes30:
+            return 30 * 60 * 1000
+        case .hours1:
+            return 1 * 60 * 60 * 1000
+        case .hours6:
+            return 6 * 60 * 60 * 1000
+        case .hours12:
+            return 12 * 60 * 60 * 1000
+        case .days1:
+            return 24 * 60 * 60 * 1000
+        case .days3:
+            return 3 * 24 * 60 * 60 * 1000
+        case .days7:
+            return 7 * 24 * 60 * 60 * 1000
+        }
+    }
 }
+

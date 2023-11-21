@@ -270,7 +270,7 @@ class MisskeyDataSource(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     ) {
-        require(data is MissKeyComposeData)
+        require(data is MisskeyComposeData)
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias.mapIndexed { index, item ->
@@ -312,7 +312,7 @@ class MisskeyDataSource(
         progress(ComposeProgress(maxProgress, maxProgress))
     }
 
-    data class MissKeyComposeData(
+    data class MisskeyComposeData(
         val account: UiAccount.Misskey,
         val content: String,
         val visibility: UiStatus.Misskey.Visibility = UiStatus.Misskey.Visibility.Public,

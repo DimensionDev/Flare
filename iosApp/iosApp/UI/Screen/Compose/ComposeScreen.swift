@@ -132,7 +132,7 @@ struct ComposeScreen: View {
                                 Image(systemName: "photo")
                             }
                         }
-                        if viewModel.mediaViewModel.selectedItems.count == 0 {
+                        if viewModel.mediaViewModel.selectedItems.count == 0, case .success(let canPoll) = onEnum(of: viewModel.model.canPoll), canPoll.data == KotlinBoolean(bool: true) {
                             Button(action: {
                                 withAnimation {
                                     viewModel.togglePoll()
@@ -141,8 +141,8 @@ struct ComposeScreen: View {
                                 Image(systemName: "list.bullet")
                             })
                         }
-                        if case .success(let data) = onEnum(of: viewModel.model.visibilityState) {
-                            switch onEnum(of: data.data) {
+                        if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
+                            switch onEnum(of: visibilityState.data) {
                             case .misskeyVisibilityState(let misskeyVisibility):
                                 Menu {
                                     ForEach(misskeyVisibility.allVisibilities, id: \.self) { visibility in
@@ -171,16 +171,20 @@ struct ComposeScreen: View {
                                 }
                             }
                         }
-                        Button(action: {
-                            withAnimation {
-                                viewModel.toggleCW()
-                            }
-                        }, label: {
-                            Image(systemName: "exclamationmark.triangle")
-                        })
-                        Button(action: {}, label: {
-                            Image(systemName: "face.smiling")
-                        })
+                        if case .success(let canCW) = onEnum(of: viewModel.model.canCW), canCW.data == KotlinBoolean(bool: true) {
+                            Button(action: {
+                                withAnimation {
+                                    viewModel.toggleCW()
+                                }
+                            }, label: {
+                                Image(systemName: "exclamationmark.triangle")
+                            })
+                        }
+                        if case .success(_) = onEnum(of: viewModel.model.emojiState) {
+                            Button(action: {}, label: {
+                                Image(systemName: "face.smiling")
+                            })
+                        }
                         Spacer()
                     }
                 }

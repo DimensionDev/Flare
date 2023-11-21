@@ -25,7 +25,7 @@ class ComposeUseCase(
                             },
                         )
 
-                    is MisskeyDataSource.MissKeyComposeData ->
+                    is MisskeyDataSource.MisskeyComposeData ->
                         data.account.dataSource.compose(
                             data = data,
                             progress = {

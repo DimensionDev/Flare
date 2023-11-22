@@ -5,10 +5,34 @@ import NetworkImage
 struct MediaComponent: View {
     let medias: [UiMedia]
     var body: some View {
-        // TODO: keep media aspect ratio when only 1 media
-        AdaptiveGrid {
-            ForEach(1...medias.count, id: \.self) { index in
-                MediaItemComponent(media: medias[index - 1])
+        let columns = if medias.count == 1 {
+            [GridItem(.flexible())]
+        } else if medias.count < 5 {
+            [GridItem(.flexible()), GridItem(.flexible())]
+        } else {
+            [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
+
+        }
+        LazyVGrid(columns: columns, spacing: 4) {
+            if medias.count == 1 {
+                switch onEnum(of: medias[0]) {
+                case .image(let image):
+                    MediaItemComponent(media: medias[0])
+                        .aspectRatio(.init(image.aspectRatio), contentMode: .fill)
+                case .video(let video):
+                    MediaItemComponent(media: medias[0])
+                        .aspectRatio(.init(video.aspectRatio), contentMode: .fill)
+                case .gif(let gif):
+                    MediaItemComponent(media: medias[0])
+                        .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
+                case .audio(_):
+                    MediaItemComponent(media: medias[0])
+                }
+            } else {
+                ForEach(1...medias.count, id: \.self) { index in
+                    MediaItemComponent(media: medias[index - 1])
+                        .aspectRatio(1, contentMode: .fill)
+                }
             }
         }
     }
@@ -36,7 +60,9 @@ struct MediaItemComponent: View {
                     }
                 }
             }
-        }.clipped()
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .clipped()
     }
 }
 

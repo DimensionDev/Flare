@@ -46,6 +46,7 @@
 		06C433AB2AC13B550022B819 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C433AA2AC13B550022B819 /* ContentView.swift */; };
 		06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */; };
 		B62B213A8296FC2A13CAE4D7 /* KotlinByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */; };
+		B62B2D085825C9FFC6B5910D /* QuotedStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2A7A1854BBDB3B808C73 /* QuotedStatus.swift */; };
 		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +92,7 @@
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoleculeViewModelBase.swift; sourceTree = "<group>"; };
+		B62B2A7A1854BBDB3B808C73 /* QuotedStatus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuotedStatus.swift; sourceTree = "<group>"; };
 		B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KotlinByteArray.swift; path = Common/KotlinByteArray.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -129,6 +131,7 @@
 				060881B62ADE4F44001AAD2F /* MisskeyNotificationComponent.swift */,
 				068D2E0A2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift */,
 				068D2E0C2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift */,
+				B62B2A7A1854BBDB3B808C73 /* QuotedStatus.swift */,
 			);
 			path = Status;
 			sourceTree = "<group>";
@@ -434,6 +437,7 @@
 				060881B12AD91B40001AAD2F /* MastodonNotificationComponent.swift in Sources */,
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
 				B62B213A8296FC2A13CAE4D7 /* KotlinByteArray.swift in Sources */,
+				B62B2D085825C9FFC6B5910D /* QuotedStatus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

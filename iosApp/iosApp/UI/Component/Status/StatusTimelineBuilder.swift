@@ -23,7 +23,7 @@ func StatusTimelineBuilder(data: Paging_compose_commonLazyPagingItems<UiStatus>)
                         BlueskyNotificationComponent(data: blueskyNotification)
                     }
                 } else {
-                    CommonStatusComponent(content: "haha", avatar: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", name: "hahaname", handle: "haha.haha", userKey: MicroBlogKey(id: "", host: ""), medias: [], timestamp: 1696838289, headerTrailing: {EmptyView()})
+                    CommonStatusComponent(content: "haha",user: UiUser.Bluesky(userKey: MicroBlogKey(id: "", host: ""), displayName: "hahaname", handleInternal: "haha.haha", avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", bannerUrl: nil, description: nil, matrices: UiUser.BlueskyMatrices(fansCount: 0, followsCount: 0, statusesCount: 0), relation: UiRelationBluesky(isFans: false, following: false, blocking: false, muting: false), accountHost: ""), medias: [], timestamp: 1696838289, headerTrailing: {EmptyView()})
                         .redacted(reason: .placeholder)
                 }
             }.onAppear {

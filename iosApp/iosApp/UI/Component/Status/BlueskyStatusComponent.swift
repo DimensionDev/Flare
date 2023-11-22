@@ -11,9 +11,14 @@ struct BlueskyStatusComponent: View {
             CommonStatusComponent(content: bluesky.extra.contentMarkdown, user: bluesky.user, medias: bluesky.medias, timestamp: bluesky.indexedAt.epochSeconds) {
                 EmptyView()
             }
-
             if let card = bluesky.card {
                 LinkPreview(card: card)
+            }
+            if !bluesky.medias.isEmpty {
+                MediaComponent(medias: bluesky.medias)
+            }
+            if let quote = bluesky.quote {
+                QuotedStatus(data: quote)
             }
             Spacer()
                 .frame(height: 8)
@@ -35,6 +40,12 @@ struct BlueskyStatusComponent: View {
                             Text(humanizedReblogCount)
                         }
                     }
+                    .if(bluesky.reaction.reposted) { view in
+                        view.foregroundStyle(.link)
+                    }
+                }
+                .if(!bluesky.reaction.reposted) { view in
+                    view.opacity(0.6)
                 }
                 Spacer()
                 Button(action: {}) {
@@ -44,15 +55,39 @@ struct BlueskyStatusComponent: View {
                             Text(humanizedFavouriteCount)
                         }
                     }
+                    .if(bluesky.reaction.liked) { view in
+                        view.foregroundStyle(.red, .red)
+                    }
+                }
+                .if(!bluesky.reaction.liked) { view in
+                    view.opacity(0.6)
                 }
                 Spacer()
-                Button(action: {}) {
-                    Image(systemName: "ellipsis")
+
+                Menu {
+                    if bluesky.isFromMe {
+                        Button(role: .destructive,action: {
+
+                        }, label: {
+                            Label("Delete Toot", systemImage: "trash")
+                        })
+                    } else {
+                        Button(action: {
+
+                        }, label: {
+                            Label("Report", systemImage: "exclamationmark.shield")
+                        })
+                    }
+                } label: {
+                    Label(
+                        title: { EmptyView() },
+                        icon: { Image(systemName: "ellipsis") }
+                    )
+                    .opacity(0.6)
                 }
             }
             .buttonStyle(.borderless)
             .tint(.primary)
-            .opacity(0.6)
             .font(.caption)
         }
     }

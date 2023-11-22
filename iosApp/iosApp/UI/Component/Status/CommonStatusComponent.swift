@@ -4,7 +4,6 @@ import shared
 import NetworkImage
 
 struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
-    @Environment(\.openURL) private var openURL
     let content: String
     let user: UiUser
     let medias: [UiMedia]

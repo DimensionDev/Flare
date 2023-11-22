@@ -13,7 +13,7 @@ struct MediaComponent: View {
             [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
 
         }
-        LazyVGrid(columns: columns, spacing: 4) {
+        LazyVGrid(columns: columns) {
             if medias.count == 1 {
                 switch onEnum(of: medias[0]) {
                 case .image(let image):

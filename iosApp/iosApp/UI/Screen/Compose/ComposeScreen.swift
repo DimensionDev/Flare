@@ -238,7 +238,7 @@ struct ComposeScreen: View {
                 })
             }
             ToolbarItem(placement: .cancellationAction) {
-                Button(action: {
+                Button(role: .cancel, action: {
                     onBack()
                 }, label: {
                     Image(systemName: "xmark")

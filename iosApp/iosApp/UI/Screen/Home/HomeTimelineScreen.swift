@@ -1,6 +1,5 @@
 import SwiftUI
 import shared
-import RichText
 
 struct HomeTimelineScreen: View {
     @State var viewModel = TimelineViewModel()

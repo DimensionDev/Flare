@@ -13,6 +13,11 @@ struct MisskeyStatusComponent: View {
             CommonStatusComponent(content: actual.extra.contentMarkdown, user: actual.user, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
                 MisskeyVisibilityIcon(visibility: actual.visibility)
             })
+
+            if let quote = misskey.quote {
+                QuotedStatus(data: quote)
+            }
+
             if misskey.reaction.emojiReactions.count > 0 {
                 ScrollView(.horizontal) {
                     LazyHStack {
@@ -40,25 +45,64 @@ struct MisskeyStatusComponent: View {
                     }
                 }
                 Spacer()
-                Button(action: {}) {
-                    HStack {
-                        Image(systemName: "arrow.left.arrow.right")
-                        if let humanizedReNoteCount = actual.matrices.humanizedReNoteCount {
-                            Text(humanizedReNoteCount)
+                Menu(content: {
+                    Button(action: {
+
+                    }, label: {
+                        Label("Renote", systemImage: "arrow.left.arrow.right")
+                    })
+                    Button(action: {
+
+                    }, label: {
+                        Label("Quote", systemImage: "quote.bubble.fill")
+                    })
+                }, label: {
+                    Label(
+                        title: { EmptyView() },
+                        icon: {
+                            if (actual.canRenote) {
+                                Image(systemName: "arrow.left.arrow.right")
+                            } else {
+                                Image(systemName: "slash.circle")
+                            }
                         }
+                    )
+                })
+                .disabled(!actual.canRenote)
+                Spacer()
+                Button(action: {
+
+                }) {
+                    if actual.reaction.myReaction != nil {
+                        Image(systemName: "minus")
+                    } else {
+                        Image(systemName: "plus")
                     }
                 }
                 Spacer()
-                Button(action: {}) {
-                    HStack {
-                        Image(systemName: "star")
+
+                Menu {
+                    if actual.isFromMe {
+                        Button(role: .destructive, action: {
+
+                        }, label: {
+                            Label("Delete Note", systemImage: "trash")
+                        })
+                    } else {
+                        Button(action: {
+
+                        }, label: {
+                            Label("Report", systemImage: "exclamationmark.shield")
+                        })
                     }
-                }
-                Spacer()
-                Button(action: {}) {
-                    Image(systemName: "ellipsis")
+                } label: {
+                    Label(
+                        title: { EmptyView() },
+                        icon: { Image(systemName: "ellipsis") }
+                    )
                 }
             }
+            .foregroundStyle(.primary)
             .buttonStyle(.borderless)
             .tint(.primary)
             .opacity(0.6)

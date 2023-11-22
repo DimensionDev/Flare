@@ -5,6 +5,7 @@ import dev.dimension.flare.data.database.provideCacheDatabase
 import dev.dimension.flare.data.database.provideVersionDatabase
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
+import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -19,4 +20,5 @@ val commonModule =
         single { provideCacheDatabase(get(), get()) }
         singleOf(::ApplicationRepository)
         single { CoroutineScope(Dispatchers.IO) }
+        singleOf(::ComposeUseCase)
     }

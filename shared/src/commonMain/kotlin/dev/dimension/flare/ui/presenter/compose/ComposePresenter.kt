@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -24,6 +25,7 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import org.koin.compose.rememberKoinInject
 
 class ComposePresenter(
     private val status: ComposeStatus? = null,
@@ -31,6 +33,7 @@ class ComposePresenter(
     @Composable
     override fun body(): ComposeState {
         val account by activeAccountPresenter()
+        val composeUseCase: ComposeUseCase = rememberKoinInject()
         val visibilityState =
             account.flatMap {
                 when (it) {
@@ -52,12 +55,26 @@ class ComposePresenter(
                     ?: UiState.Error(IllegalStateException("Emoji not supported"))
             }
 
-        return ComposeState(
+        return object : ComposeState(
             account = account,
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
-        )
+            canPoll =
+                account.map {
+                    it is UiAccount.Misskey || it is UiAccount.Mastodon
+                },
+            canCW =
+                account.map {
+                    it is UiAccount.Misskey || it is UiAccount.Mastodon
+                },
+        ) {
+            override fun send(data: ComposeData) {
+                composeUseCase.invoke(data) {
+                    // TODO: show notification
+                }
+            }
+        }
     }
 
     @Composable
@@ -190,9 +207,13 @@ sealed interface ComposeStatus {
 }
 
 @Immutable
-data class ComposeState(
+abstract class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
     val replyState: UiState<LazyPagingItems<UiStatus>>?,
     val emojiState: UiState<ImmutableList<UiEmoji>>,
-)
+    val canPoll: UiState<Boolean>,
+    val canCW: UiState<Boolean>,
+) {
+    abstract fun send(data: ComposeData)
+}

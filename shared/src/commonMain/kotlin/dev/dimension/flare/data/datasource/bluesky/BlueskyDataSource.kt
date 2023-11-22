@@ -250,7 +250,6 @@ class BlueskyDataSource(
     data class BlueskyComposeData(
         val account: UiAccount.Bluesky,
         val content: String,
-        val visibility: UiStatus.Misskey.Visibility = UiStatus.Misskey.Visibility.Public,
         val inReplyToID: String? = null,
         val quoteId: String? = null,
         val language: List<String> = listOf("en"),

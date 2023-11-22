@@ -10,7 +10,7 @@ struct MastodonStatusComponent: View {
             if mastodon.reblogStatus != nil {
                 StatusRetweetHeaderComponent(iconSystemName: "arrow.left.arrow.right", nameMarkdown: mastodon.user.extra.nameMarkdown, text: "boosted a status")
             }
-            CommonStatusComponent(content: actual.extra.contentMarkdown, avatar: actual.user.avatarUrl, name: actual.user.extra.nameMarkdown, handle: actual.user.handle, userKey: actual.user.userKey, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
+            CommonStatusComponent(content: actual.extra.contentMarkdown, user: actual.user, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
                 MastodonVisibilityIcon(visibility: actual.visibility)
             })
             if let card = mastodon.card {

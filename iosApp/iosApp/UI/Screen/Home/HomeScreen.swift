@@ -61,7 +61,9 @@ struct HomeScreen: View {
         }
         .sheet(isPresented: $showCompose, content: {
             NavigationStack {
-                ComposeScreen()
+                ComposeScreen(onBack: {
+                    showCompose = false
+                })
             }
         })
         .sheet(isPresented: $showSettings, content: {

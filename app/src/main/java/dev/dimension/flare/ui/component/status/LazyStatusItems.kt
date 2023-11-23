@@ -21,10 +21,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
 import dev.dimension.flare.R
+import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusComponent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusEvent
@@ -43,7 +43,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-context(LazyListScope, UiState<LazyPagingItems<UiStatus>>, StatusEvent)
+context(LazyListScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent)
 internal fun status() {
     onSuccess { lazyPagingItems ->
         if (

@@ -6,9 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.common.LazyPagingItemsProxy
+import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.NotificationFilter
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.ui.model.UiState
@@ -33,7 +32,7 @@ class NotificationPresenter : PresenterBase<NotificationState>() {
                     service.notification(
                         type = type,
                     )
-                }.collectAsLazyPagingItems()
+                }.collectPagingProxy()
             }
 //        val refreshing =
 //            listState is UiState.Loading ||
@@ -59,7 +58,7 @@ class NotificationPresenter : PresenterBase<NotificationState>() {
 
 @Immutable
 abstract class NotificationState(
-    val listState: UiState<LazyPagingItems<UiStatus>>,
+    val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
     val notificationType: NotificationFilter,
     val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {

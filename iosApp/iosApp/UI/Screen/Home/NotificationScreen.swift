@@ -18,7 +18,7 @@ struct NotificationScreen: View {
                     .pickerStyle(.segmented)
                 }
             }
-            StatusTimelineStateBuilder(data: viewModel.model.listState)
+            StatusTimelineComponent(data: viewModel.model.listState)
         }.listStyle(.plain).refreshable {
             do {
                 try await viewModel.model.refresh()

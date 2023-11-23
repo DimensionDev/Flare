@@ -12,7 +12,7 @@ struct ProfileScreen: View {
         List {
             ProfileHeader(user: viewModel.model.userState, relation: viewModel.model.relationState)
                 .listRowInsets(EdgeInsets())
-            StatusTimelineStateBuilder(data: viewModel.model.listState)
+            StatusTimelineComponent(data: viewModel.model.listState)
         }
         .listStyle(.plain)
         .edgesIgnoringSafeArea(.top)

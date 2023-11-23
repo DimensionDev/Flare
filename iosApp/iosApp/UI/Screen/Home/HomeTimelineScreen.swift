@@ -5,7 +5,7 @@ struct HomeTimelineScreen: View {
     @State var viewModel = TimelineViewModel()
     var body: some View {
         List {
-            StatusTimelineStateBuilder(data: viewModel.model.listState)
+            StatusTimelineComponent(data: viewModel.model.listState)
         }
         .listStyle(.plain)
         .refreshable {

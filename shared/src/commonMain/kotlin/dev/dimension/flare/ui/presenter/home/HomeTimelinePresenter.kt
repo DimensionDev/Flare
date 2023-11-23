@@ -8,9 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.common.LazyPagingItemsProxy
+import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -28,7 +27,7 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
             activeAccountServicePresenter().map { (service, account) ->
                 remember(account.accountKey) {
                     service.homeTimeline()
-                }.collectAsLazyPagingItems()
+                }.collectPagingProxy()
             }
         var showNewToots by remember { mutableStateOf(false) }
 //        val refreshing =
@@ -71,7 +70,7 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
 
 @Immutable
 abstract class HomeTimelineState(
-    val listState: UiState<LazyPagingItems<UiStatus>>,
+    val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
     val showNewToots: Boolean,
 ) {
     abstract suspend fun refresh()

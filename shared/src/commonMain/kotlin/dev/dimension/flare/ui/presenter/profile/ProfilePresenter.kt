@@ -2,10 +2,9 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
@@ -42,7 +41,7 @@ class ProfilePresenter(
             accountServiceState.map { (service, account) ->
                 remember(account.accountKey, userKey) {
                     service.userTimeline(userKey ?: account.accountKey)
-                }.collectAsLazyPagingItems()
+                }.collectPagingProxy()
             }
         val relationState =
             accountServiceState.flatMap { (service, account) ->
@@ -51,11 +50,6 @@ class ProfilePresenter(
                 }.collectAsUiState().value.flatMap { it }
             }
 
-//        val refreshing =
-//            userState is UiState.Loading ||
-//                userState is UiState.Success && userState.data.refreshState is dev.dimension.flare.common.LoadState.Loading ||
-//                listState is UiState.Loading ||
-//                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading
         val scope = rememberKoinInject<CoroutineScope>()
         val isMe =
             accountServiceState.map {
@@ -185,7 +179,7 @@ class ProfilePresenter(
 
 abstract class ProfileState(
     val userState: UiState<UiUser>,
-    val listState: UiState<LazyPagingItems<UiStatus>>,
+    val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,
 ) {

@@ -30,9 +30,6 @@ class HomeTimelinePresenter : PresenterBase<HomeTimelineState>() {
                 }.collectPagingProxy()
             }
         var showNewToots by remember { mutableStateOf(false) }
-//        val refreshing =
-//            listState is UiState.Loading ||
-//                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
         if (listState is UiState.Success && listState.data.itemCount > 0) {
             LaunchedEffect(Unit) {
                 snapshotFlow {

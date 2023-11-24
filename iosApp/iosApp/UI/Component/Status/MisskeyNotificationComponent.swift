@@ -3,6 +3,7 @@ import shared
 
 struct MisskeyNotificationComponent: View {
     let data: UiStatus.MisskeyNotification
+    let event: MisskeyStatusEvent
     var body: some View {
         VStack {
             switch data.type {
@@ -30,7 +31,7 @@ struct MisskeyNotificationComponent: View {
                 StatusRetweetHeaderComponent(iconSystemName: "app", nameMarkdown: data.user?.extra.nameMarkdown, text: "app notification")
             }
             if let note = data.note {
-                MisskeyStatusComponent(misskey: note)
+                MisskeyStatusComponent(misskey: note, event: event)
             }
             if let user = data.user {
                 if [shared.Notification_.Type_.follow, shared.Notification_.Type_.followrequestaccepted, shared.Notification_.Type_.receivefollowrequest].contains(data.type) {

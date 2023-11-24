@@ -4,6 +4,7 @@ import shared
 
 struct MastodonStatusComponent: View {
     let mastodon: UiStatus.Mastodon
+    let event: MastodonStatusEvent
     var body: some View {
         let actual = mastodon.reblogStatus ?? mastodon
         VStack(alignment: .leading) {
@@ -12,7 +13,7 @@ struct MastodonStatusComponent: View {
             }
             CommonStatusComponent(content: actual.extra.contentMarkdown, user: actual.user, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
                 MastodonVisibilityIcon(visibility: actual.visibility)
-            })
+            }, onMediaClick: { media in event.onMediaClick(media: media) })
             if let card = mastodon.card {
                 LinkPreview(card: card)
             }
@@ -20,6 +21,7 @@ struct MastodonStatusComponent: View {
                 .frame(height: 8)
             HStack {
                 Button(action: {
+                    event.onReplyClick(status: actual)
                 }) {
                     HStack {
                         Image(systemName: "arrowshape.turn.up.left")
@@ -30,7 +32,9 @@ struct MastodonStatusComponent: View {
                 }
                 .opacity(0.6)
                 Spacer()
-                Button(action: {}) {
+                Button(action: {
+                    event.onReblogClick(status: actual)
+                }) {
                     HStack {
                         if actual.canReblog {
                             Image(systemName: "arrow.left.arrow.right")
@@ -50,7 +54,9 @@ struct MastodonStatusComponent: View {
                 }
                 .disabled(!actual.canReblog)
                 Spacer()
-                Button(action: {}) {
+                Button(action: {
+                    event.onLikeClick(status: actual)
+                }) {
                     HStack {
                         Image(systemName: "star")
                         if let humanizedFavouriteCount = actual.matrices.humanizedFavouriteCount {
@@ -64,11 +70,11 @@ struct MastodonStatusComponent: View {
                 .if(!actual.reaction.liked) { view in
                     view.opacity(0.6)
                 }
-
                 Spacer()
-
                 Menu {
-                    Button(action: {}, label: {
+                    Button(action: {
+                        event.onBookmarkClick(status: actual)
+                    }, label: {
                         if actual.reaction.bookmarked {
                             Label("Remove bookmark", systemImage: "bookmark.slash")
                         } else {
@@ -77,13 +83,13 @@ struct MastodonStatusComponent: View {
                     })
                     if actual.isFromMe {
                         Button(role: .destructive,action: {
-
+                            event.onDeleteClick(status: actual)
                         }, label: {
                             Label("Delete Toot", systemImage: "trash")
                         })
                     } else {
                         Button(action: {
-
+                            event.onReportClick(status: actual)
                         }, label: {
                             Label("Report", systemImage: "exclamationmark.shield")
                         })
@@ -102,4 +108,15 @@ struct MastodonStatusComponent: View {
             .font(.caption)
         }
     }
+}
+
+
+protocol MastodonStatusEvent {
+    func onReplyClick(status: UiStatus.Mastodon)
+    func onReblogClick(status: UiStatus.Mastodon)
+    func onLikeClick(status: UiStatus.Mastodon)
+    func onBookmarkClick(status: UiStatus.Mastodon)
+    func onMediaClick(media: UiMedia)
+    func onDeleteClick(status: UiStatus.Mastodon)
+    func onReportClick(status: UiStatus.Mastodon)
 }

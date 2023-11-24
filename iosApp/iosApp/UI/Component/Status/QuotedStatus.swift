@@ -4,13 +4,14 @@ import MarkdownUI
 
 struct QuotedStatus: View {
     let data: UiStatus
+    let onMediaClick: (UiMedia) -> Void
     var body: some View {
         switch onEnum(of: data) {
-        case .mastodon(let mastodon): QuotedContent(content: mastodon.content, user: mastodon.user, medias: mastodon.media, timestamp: mastodon.createdAt.epochSeconds)
+        case .mastodon(let mastodon): QuotedContent(content: mastodon.content, user: mastodon.user, medias: mastodon.media, timestamp: mastodon.createdAt.epochSeconds, onMediaClick: onMediaClick)
         case .mastodonNotification(_): EmptyView()
-        case .misskey(let misskey): QuotedContent(content: misskey.content, user: misskey.user, medias: misskey.media, timestamp: misskey.createdAt.epochSeconds)
+        case .misskey(let misskey): QuotedContent(content: misskey.content, user: misskey.user, medias: misskey.media, timestamp: misskey.createdAt.epochSeconds, onMediaClick: onMediaClick)
         case .misskeyNotification(_): EmptyView()
-        case .bluesky(let bluesky): QuotedContent(content: bluesky.content, user: bluesky.user, medias: bluesky.medias, timestamp: bluesky.indexedAt.epochSeconds)
+        case .bluesky(let bluesky): QuotedContent(content: bluesky.content, user: bluesky.user, medias: bluesky.medias, timestamp: bluesky.indexedAt.epochSeconds, onMediaClick: onMediaClick)
         case .blueskyNotification(_): EmptyView()
         }
     }
@@ -21,7 +22,7 @@ private struct QuotedContent: View {
     let user: UiUser
     let medias: [UiMedia]
     let timestamp: Int64
-    
+    let onMediaClick: (UiMedia) -> Void
 
     var body: some View {
         VStack {
@@ -42,7 +43,7 @@ private struct QuotedContent: View {
             if !medias.isEmpty {
                 Spacer()
                     .frame(height: 8)
-                MediaComponent(medias: medias)
+                MediaComponent(medias: medias, onMediaClick: onMediaClick)
             }
         }
     }

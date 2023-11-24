@@ -3,6 +3,7 @@ import shared
 
 struct ProfileScreen: View {
     @State var viewModel: ProfileViewModel
+    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     
     init(userKey: MicroBlogKey?) {
         viewModel = ProfileViewModel(userKey: userKey)
@@ -12,7 +13,7 @@ struct ProfileScreen: View {
         List {
             ProfileHeader(user: viewModel.model.userState, relation: viewModel.model.relationState)
                 .listRowInsets(EdgeInsets())
-            StatusTimelineComponent(data: viewModel.model.listState)
+            StatusTimelineComponent(data: viewModel.model.listState, mastodonEvent: statusEvent, misskeyEvent: statusEvent, blueskyEvent: statusEvent)
         }
         .listStyle(.plain)
         .edgesIgnoringSafeArea(.top)

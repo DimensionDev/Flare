@@ -5,6 +5,7 @@ struct HomeScreen: View {
     @State var viewModel = HomeViewModel()
     @State var showSettings = false
     @State var showCompose = false
+    @State var statusEvent = StatusEvent()
     var body: some View {
         TabView {
             TabItem {
@@ -70,12 +71,12 @@ struct HomeScreen: View {
             HomeSheetContent()
         })
         .activateViewModel(viewModel: viewModel)
+        .environment(statusEvent)
     }
 }
 
 @Observable
 class HomeViewModel : MoleculeViewModelBase<HomeState, HomePresenter> {
-    
 }
 
 struct HomeSheetContent: View {

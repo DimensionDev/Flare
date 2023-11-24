@@ -4,6 +4,7 @@ import NetworkImage
 
 struct MisskeyStatusComponent: View {
     let misskey: UiStatus.Misskey
+    let event: MisskeyStatusEvent
     var body: some View {
         VStack {
             let actual = misskey.renote ?? misskey
@@ -12,10 +13,10 @@ struct MisskeyStatusComponent: View {
             }
             CommonStatusComponent(content: actual.extra.contentMarkdown, user: actual.user, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
                 MisskeyVisibilityIcon(visibility: actual.visibility)
-            })
+            }, onMediaClick: { media in event.onMediaClick(media: media) })
 
             if let quote = misskey.quote {
-                QuotedStatus(data: quote)
+                QuotedStatus(data: quote, onMediaClick: event.onMediaClick)
             }
 
             if misskey.reaction.emojiReactions.count > 0 {
@@ -23,10 +24,15 @@ struct MisskeyStatusComponent: View {
                     LazyHStack {
                         ForEach(1...misskey.reaction.emojiReactions.count, id: \.self) { index in
                             let reaction = misskey.reaction.emojiReactions[index - 1]
-                            HStack {
-                                NetworkImage(url: URL(string: reaction.url))
-                                Text(reaction.humanizedCount)
-                            }
+                            Button(action: {
+                                event.onReactionClick(data: actual, reaction: reaction)
+                            }, label: {
+                                HStack {
+                                    NetworkImage(url: URL(string: reaction.url))
+                                    Text(reaction.humanizedCount)
+                                }
+                            })
+                            .buttonStyle(.borderless)
                         }
                     }
                 }
@@ -36,6 +42,7 @@ struct MisskeyStatusComponent: View {
                 .frame(height: 8)
             HStack {
                 Button(action: {
+                    event.onReplyClick(data: actual)
                 }) {
                     HStack {
                         Image(systemName: "arrowshape.turn.up.left")
@@ -47,12 +54,12 @@ struct MisskeyStatusComponent: View {
                 Spacer()
                 Menu(content: {
                     Button(action: {
-
+                        event.onReblogClick(data: actual)
                     }, label: {
                         Label("Renote", systemImage: "arrow.left.arrow.right")
                     })
                     Button(action: {
-
+                        event.onQuoteClick(data: actual)
                     }, label: {
                         Label("Quote", systemImage: "quote.bubble.fill")
                     })
@@ -71,7 +78,7 @@ struct MisskeyStatusComponent: View {
                 .disabled(!actual.canRenote)
                 Spacer()
                 Button(action: {
-
+                    event.onAddReactionClick(data: actual)
                 }) {
                     if actual.reaction.myReaction != nil {
                         Image(systemName: "minus")
@@ -84,13 +91,13 @@ struct MisskeyStatusComponent: View {
                 Menu {
                     if actual.isFromMe {
                         Button(role: .destructive, action: {
-
+                            event.onDeleteClick(data: actual)
                         }, label: {
                             Label("Delete Note", systemImage: "trash")
                         })
                     } else {
                         Button(action: {
-
+                            event.onReportClick(data: actual)
                         }, label: {
                             Label("Report", systemImage: "exclamationmark.shield")
                         })
@@ -109,4 +116,15 @@ struct MisskeyStatusComponent: View {
             .font(.caption)
         }
     }
+}
+
+protocol MisskeyStatusEvent {
+    func onMediaClick(media: UiMedia)
+    func onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.MisskeyEmojiReaction)
+    func onReplyClick(data: UiStatus.Misskey)
+    func onReblogClick(data: UiStatus.Misskey)
+    func onQuoteClick(data: UiStatus.Misskey)
+    func onAddReactionClick(data: UiStatus.Misskey)
+    func onDeleteClick(data: UiStatus.Misskey)
+    func onReportClick(data: UiStatus.Misskey)
 }

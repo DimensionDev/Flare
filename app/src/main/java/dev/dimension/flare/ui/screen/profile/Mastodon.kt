@@ -37,6 +37,7 @@ internal fun MastodonProfileHeader(
     user: UiUser.Mastodon,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiRelation.Mastodon) -> Unit,
+    isMe: UiState<Boolean>,
     modifier: Modifier = Modifier,
 ) {
     CommonProfileHeader(
@@ -57,46 +58,50 @@ internal fun MastodonProfileHeader(
             }
         },
         headerTrailing = {
-            when (relationState) {
-                is UiState.Error -> Unit
-                is UiState.Loading -> {
-                    FilledTonalButton(
-                        onClick = {
-                            // No-op
-                        },
-                        modifier =
-                            Modifier.placeholder(
-                                true,
-                                shape = ButtonDefaults.filledTonalShape,
-                            ),
-                    ) {
-                        Text(text = stringResource(R.string.profile_header_button_follow))
-                    }
-                }
-
-                is UiState.Success -> {
-                    when (val data = relationState.data) {
-                        is UiRelation.Mastodon -> {
+            isMe.onSuccess {
+                if (!it) {
+                    when (relationState) {
+                        is UiState.Error -> Unit
+                        is UiState.Loading -> {
                             FilledTonalButton(
                                 onClick = {
-                                    onFollowClick.invoke(data)
+                                    // No-op
                                 },
+                                modifier =
+                                    Modifier.placeholder(
+                                        true,
+                                        shape = ButtonDefaults.filledTonalShape,
+                                    ),
                             ) {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            when {
-                                                data.blocking -> R.string.profile_header_button_blocked
-                                                data.following -> R.string.profile_header_button_following
-                                                data.requested -> R.string.profile_header_button_requested
-                                                else -> R.string.profile_header_button_follow
-                                            },
-                                        ),
-                                )
+                                Text(text = stringResource(R.string.profile_header_button_follow))
                             }
                         }
 
-                        else -> Unit
+                        is UiState.Success -> {
+                            when (val data = relationState.data) {
+                                is UiRelation.Mastodon -> {
+                                    FilledTonalButton(
+                                        onClick = {
+                                            onFollowClick.invoke(data)
+                                        },
+                                    ) {
+                                        Text(
+                                            text =
+                                                stringResource(
+                                                    when {
+                                                        data.blocking -> R.string.profile_header_button_blocked
+                                                        data.following -> R.string.profile_header_button_following
+                                                        data.requested -> R.string.profile_header_button_requested
+                                                        else -> R.string.profile_header_button_follow
+                                                    },
+                                                ),
+                                        )
+                                    }
+                                }
+
+                                else -> Unit
+                            }
+                        }
                     }
                 }
             }

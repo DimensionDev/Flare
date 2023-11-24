@@ -53,7 +53,7 @@ class ProfilePresenter(
         val scope = rememberKoinInject<CoroutineScope>()
         val isMe =
             accountServiceState.map {
-                it.second.accountKey == userKey
+                it.second.accountKey == userKey || userKey == null
             }
         return object : ProfileState(
             userState.flatMap { it.toUi() },

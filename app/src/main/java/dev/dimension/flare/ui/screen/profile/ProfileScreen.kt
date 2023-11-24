@@ -226,6 +226,7 @@ private fun profileWithUserNameAndHostPresenter(
             uriPattern = AppDeepLink.Profile.ROUTE,
         ),
     ],
+    wrappers = [ThemeWrapper::class],
 )
 fun ProfileRoute(
     userKey: MicroBlogKey,
@@ -425,6 +426,7 @@ fun ProfileScreen(
                             state.state.userState,
                             state.state.relationState,
                             onFollowClick = state.state::follow,
+                            isMe = state.state.isMe,
                         )
                     }
                     with(state.state.listState) {
@@ -443,6 +445,7 @@ private fun ProfileHeader(
     userState: UiState<UiUser>,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiUser, UiRelation) -> Unit,
+    isMe: UiState<Boolean>,
     modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
@@ -474,6 +477,7 @@ private fun ProfileHeader(
                     user = state.data,
                     relationState = relationState,
                     onFollowClick = onFollowClick,
+                    isMe = isMe,
                 )
             }
         }
@@ -485,6 +489,7 @@ private fun ProfileHeaderSuccess(
     user: UiUser,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiUser, UiRelation) -> Unit,
+    isMe: UiState<Boolean>,
     modifier: Modifier = Modifier,
 ) {
     when (user) {
@@ -493,6 +498,7 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                isMe = isMe,
                 onFollowClick = {
                     onFollowClick(user, it)
                 },
@@ -504,6 +510,7 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                isMe = isMe,
                 onFollowClick = {
                     onFollowClick(user, it)
                 },
@@ -515,6 +522,7 @@ private fun ProfileHeaderSuccess(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,
+                isMe = isMe,
                 onFollowClick = {
                     onFollowClick(user, it)
                 },

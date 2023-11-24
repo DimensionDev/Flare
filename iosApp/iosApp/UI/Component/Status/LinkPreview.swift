@@ -7,7 +7,7 @@ struct LinkPreview: View {
         Link(destination: URL(string: card.url)!) {
             HStack {
                 if let media = card.media {
-                    MediaItemComponent(media: media)
+                    MediaItemComponent(media: media, onMediaClick: {})
                         .frame(width: 64, height: 64)
                 }
                 VStack(alignment: .leading) {

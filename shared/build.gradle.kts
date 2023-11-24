@@ -19,10 +19,6 @@ kotlin {
                 withApple()
                 withJvm()
             }
-            group("nonJvm") {
-                withApple()
-                withAndroidTarget()
-            }
         }
     }
 
@@ -77,6 +73,7 @@ kotlin {
                 implementation(libs.mfm.multiplatform)
                 api(libs.bluesky)
                 implementation(libs.twitter.parser)
+                implementation(libs.molecule.runtime)
             }
         }
         val androidMain by getting {
@@ -99,11 +96,6 @@ kotlin {
                 implementation("org.xerial:sqlite-jdbc:3.39.2.0")
                 implementation("io.ktor:ktor-client-okhttp:${libs.versions.ktor.get()}")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${libs.versions.kotlinx.coroutines.get()}")
-            }
-        }
-        val nonJvmMain by getting {
-            dependencies {
-                implementation(libs.molecule.runtime)
             }
         }
     }

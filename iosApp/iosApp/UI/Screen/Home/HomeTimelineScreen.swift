@@ -1,12 +1,12 @@
 import SwiftUI
 import shared
-import RichText
 
 struct HomeTimelineScreen: View {
     @State var viewModel = TimelineViewModel()
+    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     var body: some View {
         List {
-            StatusTimelineStateBuilder(data: viewModel.model.listState)
+            StatusTimelineComponent(data: viewModel.model.listState, mastodonEvent: statusEvent, misskeyEvent: statusEvent, blueskyEvent: statusEvent)
         }
         .listStyle(.plain)
         .refreshable {
@@ -28,4 +28,3 @@ class TimelineViewModel: MoleculeViewModelBase<HomeTimelineState, HomeTimelinePr
 #Preview {
     HomeTimelineScreen()
 }
-

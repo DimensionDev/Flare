@@ -8,12 +8,12 @@ struct ComposeScreen: View {
     @FocusState private var keyboardFocused: Bool
     @FocusState private var cwKeyboardFocused: Bool
     let onBack: () -> Void
-
+    
     init(onBack: @escaping () -> Void, status: ComposeStatus? = nil) {
         self.onBack = onBack
         viewModel = ComposeViewModel(status: status)
     }
-
+    
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
@@ -23,13 +23,13 @@ struct ComposeScreen: View {
                             TextField(text: $viewModel.cw) {
                                 Text("Content Warning")
                             }
-                    .focused($cwKeyboardFocused)
+                            .focused($cwKeyboardFocused)
                         }
                         TextField(text: $viewModel.text) {
                             Text("What's happening?")
                         }
-                .focused($keyboardFocused)
-                .onAppear {
+                        .focused($keyboardFocused)
+                        .onAppear {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                                 keyboardFocused = true
                             }
@@ -50,10 +50,10 @@ struct ComposeScreen: View {
                                                 })
                                             } label: {
                                                 Image(uiImage: image)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 128, height: 128)
-                                            .cornerRadius(8)
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 128, height: 128)
+                                                    .cornerRadius(8)
                                             }
                                         }
                                     }
@@ -67,11 +67,11 @@ struct ComposeScreen: View {
                             HStack {
                                 Picker("NotificationType", selection: $viewModel.pollViewModel.pollType) {
                                     Text("Single Choice")
-                                .tag(ComposePollType.single)
+                                        .tag(ComposePollType.single)
                                     Text("Multiple Choice")
-                                .tag(ComposePollType.multiple)
+                                        .tag(ComposePollType.multiple)
                                 }
-                        .pickerStyle(.segmented)
+                                .pickerStyle(.segmented)
                                 Button {
                                     withAnimation {
                                         viewModel.pollViewModel.add()
@@ -82,18 +82,18 @@ struct ComposeScreen: View {
                             }
                             ForEach($viewModel.pollViewModel.choices) { $choice in
                                 HStack {
-                                TextField(text: $choice.text) {
-                                    Text("option")
-                                }
-                                    Button {
-                                    withAnimation {
-                                        viewModel.pollViewModel.remove(choice: choice)
+                                    TextField(text: $choice.text) {
+                                        Text("option")
                                     }
-                                } label: {
-                                    Image(systemName: "delete.left")
+                                    Button {
+                                        withAnimation {
+                                            viewModel.pollViewModel.remove(choice: choice)
+                                        }
+                                    } label: {
+                                        Image(systemName: "delete.left")
+                                    }
+                                    .disabled(viewModel.pollViewModel.choices.count <= 2)
                                 }
-                            .disabled(viewModel.pollViewModel.choices.count <= 2)
-                            }
                             }
                             HStack {
                                 Spacer()
@@ -111,14 +111,14 @@ struct ComposeScreen: View {
                                 }
                             }
                         }
-
+                        
                         if let replyState = viewModel.model.replyState, case .success(let reply) = onEnum(of: replyState), reply.data.itemCount > 0, let replyStatus = reply.data.get(index: 0) {
-                            QuotedStatus(data: replyStatus)
+                            QuotedStatus(data: replyStatus, onMediaClick: { _ in })
                         }
                     }
                 }
                 Spacer()
-
+                
                 HStack {
                     if !viewModel.pollViewModel.enabled {
                         PhotosPicker(selection: Binding(get: {
@@ -238,7 +238,7 @@ struct ComposeScreen: View {
                 })
             }
             ToolbarItem(placement: .cancellationAction) {
-                Button(action: {
+                Button(role: .cancel, action: {
                     onBack()
                 }, label: {
                     Image(systemName: "xmark")

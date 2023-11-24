@@ -6,9 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
@@ -81,11 +81,11 @@ class ComposePresenter(
     private fun statusPresenter(
         account: UiAccount,
         status: ComposeStatus,
-    ): LazyPagingItems<UiStatus> {
+    ): LazyPagingItemsProxy<UiStatus> {
         val service = accountServiceProvider(account = account)
         return remember(account.accountKey) {
             service.status(status.statusKey)
-        }.collectAsLazyPagingItems()
+        }.collectPagingProxy()
     }
 
     @Composable
@@ -210,7 +210,7 @@ sealed interface ComposeStatus {
 abstract class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
-    val replyState: UiState<LazyPagingItems<UiStatus>>?,
+    val replyState: UiState<LazyPagingItemsProxy<UiStatus>>?,
     val emojiState: UiState<ImmutableList<UiEmoji>>,
     val canPoll: UiState<Boolean>,
     val canCW: UiState<Boolean>,

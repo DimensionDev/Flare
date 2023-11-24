@@ -3,6 +3,7 @@ import shared
 
 struct NotificationScreen: View {
     @State var viewModel = NotificationViewModel()
+    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     var body: some View {
         List {
             if case .success(let data) = onEnum(of: viewModel.model.allTypes) {
@@ -18,7 +19,7 @@ struct NotificationScreen: View {
                     .pickerStyle(.segmented)
                 }
             }
-            StatusTimelineStateBuilder(data: viewModel.model.listState)
+            StatusTimelineComponent(data: viewModel.model.listState, mastodonEvent: statusEvent, misskeyEvent: statusEvent, blueskyEvent: statusEvent)
         }.listStyle(.plain).refreshable {
             do {
                 try await viewModel.model.refresh()
@@ -36,8 +37,4 @@ class NotificationViewModel: MoleculeViewModelBase<NotificationState, Notificati
             model.onNotificationTypeChanged(value: newValue)
         }
     }
-}
-
-#Preview {
-    NotificationScreen()
 }

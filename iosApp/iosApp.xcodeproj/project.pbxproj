@@ -46,6 +46,7 @@
 		06C433AB2AC13B550022B819 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C433AA2AC13B550022B819 /* ContentView.swift */; };
 		06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */; };
 		B62B213A8296FC2A13CAE4D7 /* KotlinByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */; };
+		B62B238878D4BA843A1BB66F /* ViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2CF30DB9A3370D1BB87E /* ViewExt.swift */; };
 		B62B2D085825C9FFC6B5910D /* QuotedStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2A7A1854BBDB3B808C73 /* QuotedStatus.swift */; };
 		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
 /* End PBXBuildFile section */
@@ -94,6 +95,7 @@
 		B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoleculeViewModelBase.swift; sourceTree = "<group>"; };
 		B62B2A7A1854BBDB3B808C73 /* QuotedStatus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuotedStatus.swift; sourceTree = "<group>"; };
 		B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KotlinByteArray.swift; path = Common/KotlinByteArray.swift; sourceTree = "<group>"; };
+		B62B2CF30DB9A3370D1BB87E /* ViewExt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ViewExt.swift; path = Common/ViewExt.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -260,6 +262,7 @@
 				7555FF7C242A565900829871 /* Products */,
 				42799AB246E5F90AF97AA0EF /* Frameworks */,
 				B62B28B1E5833D550BCF0975 /* xcschemes */,
+				B62B22CA4B519C99939D2770 /* xcdebugger */,
 			);
 			sourceTree = "<group>";
 		};
@@ -282,6 +285,7 @@
 				060D00C12AC407DF0087427A /* FlareApp.swift */,
 				B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */,
 				B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */,
+				B62B2CF30DB9A3370D1BB87E /* ViewExt.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -292,6 +296,14 @@
 				AB3632DC29227652001CCB65 /* Config.xcconfig */,
 			);
 			path = Configuration;
+			sourceTree = "<group>";
+		};
+		B62B22CA4B519C99939D2770 /* xcdebugger */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = xcdebugger;
+			path = iosApp.xcodeproj/xcuserdata/tlaster.xcuserdatad/xcdebugger;
 			sourceTree = "<group>";
 		};
 		B62B28B1E5833D550BCF0975 /* xcschemes */ = {
@@ -352,6 +364,7 @@
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
 				067D89752AD25C1700F8F932 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				0641D85E2B0DFD3800029CA1 /* XCRemoteSwiftPackageReference "RichText" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -438,6 +451,7 @@
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
 				B62B213A8296FC2A13CAE4D7 /* KotlinByteArray.swift in Sources */,
 				B62B2D085825C9FFC6B5910D /* QuotedStatus.swift in Sources */,
+				B62B238878D4BA843A1BB66F /* ViewExt.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,6 +678,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0641D85E2B0DFD3800029CA1 /* XCRemoteSwiftPackageReference "RichText" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/NuPlay/RichText.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.3.0;
+			};
+		};
 		067D89752AD25C1700F8F932 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";

@@ -143,7 +143,7 @@
     <string name="report_title">Report</string>
     <string name="report_description">What\'s the issue with this post?</string>
 
-    <string name="report_reason_spam_title">Span</string>
+    <string name="report_reason_spam_title">Spam</string>
     <string name="report_reason_violation_title">Illegal and Urgent</string>
     <string name="report_reason_misleading_title">Misleading</string>
     <string name="report_reason_sexual_title">Unwanted Sexual Content</string>

@@ -175,6 +175,10 @@ sealed class UiStatus {
             user.userKey == accountKey
         }
 
+        val canReblog by lazy {
+            visibility == Visibility.Public || visibility == Visibility.Unlisted
+        }
+
         data class Reaction(
             val liked: Boolean,
             val reblogged: Boolean,
@@ -246,6 +250,10 @@ sealed class UiStatus {
 
         val isFromMe by lazy {
             user.userKey == accountKey
+        }
+
+        val canRenote by lazy {
+            visibility != Visibility.Specified
         }
 
         data class Reaction(

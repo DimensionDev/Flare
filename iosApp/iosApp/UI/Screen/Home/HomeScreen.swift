@@ -5,6 +5,7 @@ struct HomeScreen: View {
     @State var viewModel = HomeViewModel()
     @State var showSettings = false
     @State var showCompose = false
+    @State var statusEvent = StatusEvent()
     var body: some View {
         TabView {
             TabItem {
@@ -69,13 +70,30 @@ struct HomeScreen: View {
         .sheet(isPresented: $showSettings, content: {
             HomeSheetContent()
         })
+        .sheet(isPresented: Binding(
+            get: {statusEvent.composeStatus != nil},
+            set: { value in
+                if !value {
+                    statusEvent.composeStatus = nil
+                }
+            }
+        )
+        ) {
+            if let status = statusEvent.composeStatus {
+                NavigationStack {
+                    ComposeScreen(onBack: {
+                        statusEvent.composeStatus = nil
+                    }, status: status)
+                }
+            }
+        }
         .activateViewModel(viewModel: viewModel)
+        .environment(statusEvent)
     }
 }
 
 @Observable
 class HomeViewModel : MoleculeViewModelBase<HomeState, HomePresenter> {
-    
 }
 
 struct HomeSheetContent: View {
@@ -109,10 +127,6 @@ struct HomeSheetContent: View {
     }
 }
 
-#Preview {
-    HomeSheetContent()
-}
-
 struct TabItem<Content: View>: View {
     @Bindable var router = Router<TabDestination>()
     let content: () -> Content
@@ -140,6 +154,130 @@ struct TabItem<Content: View>: View {
     }
 }
 
-#Preview {
-    HomeScreen()
+@Observable
+class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
+    let accountRepository = KoinHelper.shared.accountRepository
+    var composeStatus: ComposeStatus? = nil
+
+    func onReplyClick(status: UiStatus.Mastodon) {
+        composeStatus = ComposeStatusReply(statusKey: status.statusKey)
+    }
+
+    func onReblogClick(status: UiStatus.Mastodon) {
+        Task {
+            if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
+                try? await account.dataSource.reblog(status: status)
+            }
+        }
+    }
+
+    func onLikeClick(status: UiStatus.Mastodon) {
+        Task {
+            if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
+                try? await account.dataSource.like(status: status)
+            }
+        }
+    }
+
+    func onBookmarkClick(status: UiStatus.Mastodon) {
+        Task {
+            if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
+                try? await account.dataSource.bookmark(status: status)
+            }
+        }
+    }
+
+    func onMediaClick(media: UiMedia) {
+    }
+
+    func onReportClick(status: UiStatus.Mastodon) {
+        Task {
+            if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
+                try? await account.dataSource.report(userKey: status.user
+                    .userKey, statusKey: status.statusKey)
+            }
+        }
+    }
+
+    func onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.MisskeyEmojiReaction) {
+        Task {
+            if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
+                try? await account.dataSource.react(status: data, reaction: reaction.name)
+            }
+        }
+    }
+
+    func onReplyClick(data: UiStatus.Misskey) {
+        composeStatus = ComposeStatusReply(statusKey: data.statusKey)
+    }
+
+    func onReblogClick(data: UiStatus.Misskey) {
+        Task {
+            if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
+                try? await account.dataSource.renote(status: data)
+            }
+        }
+    }
+
+    func onQuoteClick(data: UiStatus.Misskey) {
+        composeStatus = ComposeStatusQuote(statusKey: data.statusKey)
+    }
+
+    func onAddReactionClick(data: UiStatus.Misskey) {
+    }
+
+    func onReportClick(data: UiStatus.Misskey) {
+        Task {
+            if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
+                try? await account.dataSource.report(userKey: data.user.userKey, statusKey: data.statusKey)
+            }
+        }
+    }
+
+    func onReplyClick(data: UiStatus.Bluesky) {
+        composeStatus = ComposeStatusReply(statusKey: data.statusKey)
+    }
+
+    func onReblogClick(data: UiStatus.Bluesky) {
+        Task {
+            if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
+                try? await account.dataSource.reblog(data: data)
+            }
+        }
+    }
+
+    func onQuoteClick(data: UiStatus.Bluesky) {
+        composeStatus = ComposeStatusQuote(statusKey: data.statusKey)
+    }
+
+    func onLikeClick(data: UiStatus.Bluesky) {
+        Task {
+            if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
+                try? await account.dataSource.like(data: data)
+            }
+        }
+    }
+
+    func onReportClick(data: UiStatus.Bluesky, reason: BlueskyReportStatusStateReportReason) {
+        Task {
+            if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
+                try? await account.dataSource.report(data: data, reason: reason)
+            }
+        }
+    }
+
+    func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
+        Task {
+            if let account = accountRepository.get(accountKey: accountKey) {
+                switch onEnum(of: account) {
+                case .bluesky(let bluesky):
+                    try? await bluesky.dataSource.deleteStatus(statusKey: statusKey)
+                case .mastodon(let mastodon):
+                    try? await mastodon.dataSource.deleteStatus(statusKey: statusKey)
+                case .misskey(let misskey):
+                    try? await misskey.dataSource.deleteStatus(statusKey: statusKey)
+                }
+            }
+        }
+    }
 }

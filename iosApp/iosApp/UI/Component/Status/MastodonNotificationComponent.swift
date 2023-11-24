@@ -3,6 +3,7 @@ import shared
 
 struct MastodonNotificationComponent: View {
     let data: UiStatus.MastodonNotification
+    let event: MastodonStatusEvent
     var body: some View {
         VStack {
             switch data.type {
@@ -24,7 +25,7 @@ struct MastodonNotificationComponent: View {
                 StatusRetweetHeaderComponent(iconSystemName: "pencil", nameMarkdown: data.user.extra.nameMarkdown, text: "updated a status")
             }
             if let status = data.status {
-                MastodonStatusComponent(mastodon: status)
+                MastodonStatusComponent(mastodon: status, event: event)
             }
             if [NotificationTypes.follow, NotificationTypes.followrequest].contains(data.type) {
                 HStack {

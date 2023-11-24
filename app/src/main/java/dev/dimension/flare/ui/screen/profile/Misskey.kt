@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.descriptionDirection
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @OptIn(ExperimentalLayoutApi::class)

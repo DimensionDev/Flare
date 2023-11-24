@@ -2,6 +2,8 @@ import SwiftUI
 import shared
 
 struct BlueskyStatusComponent: View {
+    @State var showDeleteAlert = false
+    @State var showReportAlert = false
     let bluesky: UiStatus.Bluesky
     let event: BlueskyStatusEvent
     var body: some View {
@@ -75,13 +77,13 @@ struct BlueskyStatusComponent: View {
                 Menu {
                     if bluesky.isFromMe {
                         Button(role: .destructive,action: {
-                            event.onDeleteClick(data: bluesky)
+                            showDeleteAlert = true
                         }, label: {
                             Label("Delete Toot", systemImage: "trash")
                         })
                     } else {
                         Button(action: {
-                            event.onReportClick(data: bluesky)
+                            showReportAlert = true
                         }, label: {
                             Label("Report", systemImage: "exclamationmark.shield")
                         })
@@ -98,6 +100,52 @@ struct BlueskyStatusComponent: View {
             .tint(.primary)
             .font(.caption)
         }
+        .alert("Delete Status", isPresented: $showDeleteAlert, actions: {
+            Button(role: .cancel) {
+                showDeleteAlert = false
+            } label: {
+                Text("Cancel")
+            }
+            Button(role: .destructive) {
+                event.onDeleteClick(accountKey: bluesky.accountKey, statusKey: bluesky.statusKey)
+                showDeleteAlert = false
+            } label: {
+                Text("Delete")
+            }
+        }, message: {
+            Text("Confirm delete this status?")
+        })
+        .confirmationDialog("Report Status", isPresented: $showReportAlert) {
+            Button("Spam") {
+                event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.spam)
+                showReportAlert = false
+            }
+            Button("Illegal and Urgent") {
+                event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.violation)
+                showReportAlert = false
+            }
+            Button("Misleading") {
+                event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.misleading)
+                showReportAlert = false
+            }
+            Button("Unwanted Sexual Content") {
+                event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.sexual)
+                showReportAlert = false
+            }
+            Button("Anti-Social Behavior") {
+                event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.rude)
+                showReportAlert = false
+            }
+            Button("Other") {
+                event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.other)
+                showReportAlert = false
+            }
+            Button("Cancel", role: .cancel) {
+                showReportAlert = false
+            }
+        } message: {
+            Text("What's the issue with the post")
+        }
     }
 }
 
@@ -107,6 +155,6 @@ protocol BlueskyStatusEvent {
     func onReblogClick(data: UiStatus.Bluesky)
     func onQuoteClick(data: UiStatus.Bluesky)
     func onLikeClick(data: UiStatus.Bluesky)
-    func onReportClick(data: UiStatus.Bluesky)
-    func onDeleteClick(data: UiStatus.Bluesky)
+    func onReportClick(data: UiStatus.Bluesky, reason: BlueskyReportStatusStateReportReason)
+    func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey)
 }

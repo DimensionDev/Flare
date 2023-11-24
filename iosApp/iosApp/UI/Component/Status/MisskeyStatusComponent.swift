@@ -3,11 +3,13 @@ import shared
 import NetworkImage
 
 struct MisskeyStatusComponent: View {
+    @State var showDeleteAlert = false
+    @State var showReportAlert = false
     let misskey: UiStatus.Misskey
     let event: MisskeyStatusEvent
     var body: some View {
+        let actual = misskey.renote ?? misskey
         VStack {
-            let actual = misskey.renote ?? misskey
             if misskey.renote != nil {
                 StatusRetweetHeaderComponent(iconSystemName: "arrow.left.arrow.right", nameMarkdown: misskey.user.extra.nameMarkdown, text: "boosted a status")
             }
@@ -91,13 +93,13 @@ struct MisskeyStatusComponent: View {
                 Menu {
                     if actual.isFromMe {
                         Button(role: .destructive, action: {
-                            event.onDeleteClick(data: actual)
+                            showDeleteAlert = true
                         }, label: {
                             Label("Delete Note", systemImage: "trash")
                         })
                     } else {
                         Button(action: {
-                            event.onReportClick(data: actual)
+                            showReportAlert = true
                         }, label: {
                             Label("Report", systemImage: "exclamationmark.shield")
                         })
@@ -115,6 +117,36 @@ struct MisskeyStatusComponent: View {
             .opacity(0.6)
             .font(.caption)
         }
+            .alert("Delete Status", isPresented: $showDeleteAlert, actions: {
+                Button(role: .cancel) {
+                    showDeleteAlert = false
+                } label: {
+                    Text("Cancel")
+                }
+                Button(role: .destructive) {
+                    event.onDeleteClick(accountKey: actual.accountKey, statusKey: actual.statusKey)
+                    showDeleteAlert = false
+                } label: {
+                    Text("Delete")
+                }
+            }, message: {
+                Text("Confirm delete this status?")
+            })
+            .alert("Report Status", isPresented: $showReportAlert, actions: {
+                Button(role: .cancel) {
+                    showReportAlert = false
+                } label: {
+                    Text("Cancel")
+                }
+                Button(role: .destructive) {
+                    event.onReportClick(data: actual)
+                    showReportAlert = false
+                } label: {
+                    Text("Report")
+                }
+            }, message: {
+                Text("Confirm report this status?")
+            })
     }
 }
 
@@ -125,6 +157,6 @@ protocol MisskeyStatusEvent {
     func onReblogClick(data: UiStatus.Misskey)
     func onQuoteClick(data: UiStatus.Misskey)
     func onAddReactionClick(data: UiStatus.Misskey)
-    func onDeleteClick(data: UiStatus.Misskey)
+    func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey)
     func onReportClick(data: UiStatus.Misskey)
 }

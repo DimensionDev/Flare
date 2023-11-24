@@ -3,8 +3,12 @@ import MarkdownUI
 import shared
 
 struct MastodonStatusComponent: View {
+    @State var showDeleteAlert = false
+    @State var showReportAlert = false
+
     let mastodon: UiStatus.Mastodon
     let event: MastodonStatusEvent
+
     var body: some View {
         let actual = mastodon.reblogStatus ?? mastodon
         VStack(alignment: .leading) {
@@ -83,13 +87,13 @@ struct MastodonStatusComponent: View {
                     })
                     if actual.isFromMe {
                         Button(role: .destructive,action: {
-                            event.onDeleteClick(status: actual)
+                            showDeleteAlert = true
                         }, label: {
                             Label("Delete Toot", systemImage: "trash")
                         })
                     } else {
                         Button(action: {
-                            event.onReportClick(status: actual)
+                            showReportAlert = true
                         }, label: {
                             Label("Report", systemImage: "exclamationmark.shield")
                         })
@@ -107,6 +111,36 @@ struct MastodonStatusComponent: View {
             .tint(.primary)
             .font(.caption)
         }
+        .alert("Delete Toot", isPresented: $showDeleteAlert, actions: {
+            Button(role: .cancel) {
+                showDeleteAlert = false
+            } label: {
+                Text("Cancel")
+            }
+            Button(role: .destructive) {
+                event.onDeleteClick(accountKey: mastodon.accountKey, statusKey: actual.statusKey)
+                showDeleteAlert = false
+            } label: {
+                Text("Delete")
+            }
+        }, message: {
+            Text("Confirm delete this toot?")
+        })
+        .alert("Report Toot", isPresented: $showReportAlert, actions: {
+            Button(role: .cancel) {
+                showReportAlert = false
+            } label: {
+                Text("Cancel")
+            }
+            Button(role: .destructive) {
+                event.onReportClick(status: actual)
+                showReportAlert = false
+            } label: {
+                Text("Report")
+            }
+        }, message: {
+            Text("Confirm report this toot?")
+        })
     }
 }
 
@@ -117,6 +151,6 @@ protocol MastodonStatusEvent {
     func onLikeClick(status: UiStatus.Mastodon)
     func onBookmarkClick(status: UiStatus.Mastodon)
     func onMediaClick(media: UiMedia)
-    func onDeleteClick(status: UiStatus.Mastodon)
+    func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey)
     func onReportClick(status: UiStatus.Mastodon)
 }

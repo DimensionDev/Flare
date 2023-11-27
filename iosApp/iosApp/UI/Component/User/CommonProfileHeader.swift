@@ -111,7 +111,10 @@ struct CommonProfileHeader<HeaderTrailing, HandleTrailing, Content>: View where 
 #Preview {
     List {
         CommonProfileHeader(bannerUrl: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500", avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", displayName: "test", handle: "test@test.test", description: "tefewfewfewfewfewst", headerTrailing: {
-            Text("header")
+            Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
+                Text("header")
+            })
+            .buttonStyle(.borderless)
         }, handleTrailing: {
             Text("handle")
         }, content: {

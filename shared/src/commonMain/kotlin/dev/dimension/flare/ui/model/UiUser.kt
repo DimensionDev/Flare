@@ -20,6 +20,10 @@ sealed class UiUser {
         createUiUserExtra(this)
     }
 
+    val itemKey by lazy {
+        userKey.toString()
+    }
+
     data class Mastodon(
         override val userKey: MicroBlogKey,
         val name: String,

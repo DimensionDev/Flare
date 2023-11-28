@@ -9,6 +9,7 @@
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Me</string>
+    <string name="home_tab_discover_title">Discover</string>
 
     <string name="home_timeline_new_toots">New toots</string>
 
@@ -175,4 +176,9 @@
     <string name="user_unblock">Unblock %1$s</string>
     <string name="user_mute">Mute %1$s</string>
     <string name="user_unmute">Unmute %1$s</string>
+
+    <string name="discover_search_placeholder">Search</string>
+    <string name="discover_users">Recommend Users</string>
+    <string name="discover_status">Trending Toots</string>
+    <string name="discover_hashtags">Trending Hashtags</string>
 </resources>

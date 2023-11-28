@@ -5,8 +5,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -35,6 +37,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -56,6 +59,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -63,6 +67,7 @@ import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.home.HomePresenter
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
+import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.profile.ProfileScreen
 import kotlin.math.roundToInt
@@ -78,6 +83,9 @@ sealed class Screen(
     data object Notification :
         Screen("Notification", R.string.home_tab_notifications_title, Icons.Default.Notifications)
 
+    data object Discover :
+        Screen("Discover", R.string.home_tab_discover_title, Icons.Default.Search)
+
     data object Me : Screen("Me", R.string.home_tab_me_title, Icons.Default.AccountCircle)
 }
 
@@ -85,6 +93,7 @@ private val items =
     listOf(
         Screen.HomeTimeline,
         Screen.Notification,
+        Screen.Discover,
         Screen.Me,
     )
 
@@ -94,6 +103,7 @@ fun HomeScreenPreview() {
     HomeScreen(
         toCompose = {},
         toSettings = {},
+        toUser = {},
     )
 }
 
@@ -109,6 +119,9 @@ fun HomeRoute(navigator: DestinationsNavigator) {
         toSettings = {
             navigator.navigate(SettingsRouteDestination)
         },
+        toUser = {
+            navigator.navigate(ProfileRouteDestination(it))
+        },
     )
 }
 
@@ -117,6 +130,7 @@ fun HomeRoute(navigator: DestinationsNavigator) {
 fun HomeScreen(
     toCompose: () -> Unit,
     toSettings: () -> Unit,
+    toUser: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by producePresenter {
@@ -182,89 +196,100 @@ fun HomeScreen(
             }
         },
         topBar = {
-            TopAppBar(
-                title = {
-                    currentScreen?.let {
-                        AnimatedContent(
-                            targetState = it,
-                            label = "Title",
+            if (currentScreen == Screen.Discover) {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    DiscoverSearch(user = state.user)
+                }
+            } else {
+                TopAppBar(
+                    title = {
+                        currentScreen?.let {
+                            AnimatedContent(
+                                targetState = it,
+                                label = "Title",
 //                                transitionSpec = {
 //                                    slideInVertically { it } togetherWith slideOutVertically { -it }
 //                                }
-                        ) {
-                            Text(text = stringResource(id = it.title))
-                        }
-                    }
-                },
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    when (val user = state.user) {
-                        is UiState.Error -> Unit
-                        is UiState.Loading -> {
-                            IconButton(
-                                onClick = {
-                                },
                             ) {
-                                Icon(
-                                    Icons.Default.AccountCircle,
-                                    contentDescription = null,
-                                    modifier = Modifier.placeholder(true, shape = CircleShape),
-                                )
+                                Text(text = stringResource(id = it.title))
                             }
                         }
-
-                        is UiState.Success -> {
-                            IconButton(
-                                onClick = {
-                                },
-                            ) {
-                                NetworkImage(
-                                    model = user.data.avatarUrl,
-                                    contentDescription = null,
-                                    modifier =
-                                        Modifier
-                                            .size(24.dp)
-                                            .clip(CircleShape),
-                                )
-                            }
-                        }
-                    }
-                },
-                actions = {
-                    currentScreen?.let {
-                        AnimatedContent(targetState = it, label = "Actions") {
-                            when (it) {
-                                Screen.HomeTimeline -> {
-                                    IconButton(
-                                        onClick = {
-                                        },
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Search,
-                                            contentDescription = null,
-                                        )
-                                    }
+                    },
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        when (val user = state.user) {
+                            is UiState.Error -> Unit
+                            is UiState.Loading -> {
+                                IconButton(
+                                    onClick = {
+                                    },
+                                ) {
+                                    Icon(
+                                        Icons.Default.AccountCircle,
+                                        contentDescription = null,
+                                        modifier = Modifier.placeholder(true, shape = CircleShape),
+                                    )
                                 }
+                            }
 
-                                Screen.Me -> {
-                                    IconButton(
-                                        onClick = {
-                                            toSettings.invoke()
-                                        },
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Settings,
-                                            contentDescription = null,
-                                        )
-                                    }
+                            is UiState.Success -> {
+                                IconButton(
+                                    onClick = {
+                                    },
+                                ) {
+                                    NetworkImage(
+                                        model = user.data.avatarUrl,
+                                        contentDescription = null,
+                                        modifier =
+                                            Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape),
+                                    )
                                 }
-
-                                Screen.Notification -> Unit
                             }
                         }
-                    }
-                },
-            )
+                    },
+                    actions = {
+                        currentScreen?.let {
+                            AnimatedContent(targetState = it, label = "Actions") {
+                                when (it) {
+                                    Screen.HomeTimeline -> {
+                                        IconButton(
+                                            onClick = {
+                                            },
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Search,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    }
+
+                                    Screen.Me -> {
+                                        IconButton(
+                                            onClick = {
+                                                toSettings.invoke()
+                                            },
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Settings,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    }
+
+                                    else -> Unit
+                                }
+                            }
+                        }
+                    },
+                )
+            }
         },
         bottomBar = {
             NavigationBar(
@@ -314,6 +339,12 @@ fun HomeScreen(
                             contentPadding = contentPadding,
                         )
                 }
+            }
+            composable(Screen.Discover.route) {
+                DiscoverScreen(
+                    contentPadding,
+                    onUserClick = toUser,
+                )
             }
         }
     }

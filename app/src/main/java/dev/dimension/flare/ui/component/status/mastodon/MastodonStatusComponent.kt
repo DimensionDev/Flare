@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -79,38 +78,7 @@ internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .placeholder(true),
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = "Placeholder",
-                    modifier =
-                        Modifier
-                            .placeholder(true),
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "username@Placeholder",
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier =
-                        Modifier
-                            .alpha(MediumAlpha)
-                            .placeholder(true),
-                )
-            }
-        }
+        UserPlaceholder()
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text =
@@ -120,6 +88,42 @@ internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
                 Modifier
                     .placeholder(true),
         )
+    }
+}
+
+@Composable
+internal fun UserPlaceholder(modifier: Modifier = Modifier) {
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .placeholder(true),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(
+                text = "Placeholder",
+                modifier =
+                    Modifier
+                        .placeholder(true),
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "username@Placeholder",
+                style = MaterialTheme.typography.bodySmall,
+                modifier =
+                    Modifier
+                        .alpha(MediumAlpha)
+                        .placeholder(true),
+            )
+        }
     }
 }
 

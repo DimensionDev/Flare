@@ -635,7 +635,7 @@ private fun ProfileHeaderError() {
 }
 
 @Composable
-private fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
+internal fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
     val statusBarHeight =
         with(LocalDensity.current) {
             WindowInsets.statusBars.getTop(this).toDp()

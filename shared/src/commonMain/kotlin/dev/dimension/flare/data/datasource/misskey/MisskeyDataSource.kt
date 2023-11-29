@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
@@ -572,5 +574,41 @@ class MisskeyDataSource(
                 )
             }
         }
+    }
+
+    override fun searchStatus(
+        query: String,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                SearchStatusRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    query,
+                ),
+        )
+    }
+
+    override fun searchUser(
+        query: String,
+        pageSize: Int,
+    ): Flow<PagingData<UiUser>> {
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            SearchUserPagingSource(
+                service,
+                account.accountKey,
+                query,
+            )
+        }.flow
     }
 }

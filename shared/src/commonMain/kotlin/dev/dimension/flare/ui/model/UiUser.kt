@@ -15,7 +15,9 @@ sealed class UiUser {
     abstract val userKey: MicroBlogKey
     abstract val handle: String
     abstract val avatarUrl: String
+    abstract val bannerUrl: String?
     abstract val nameElement: Element
+    abstract val descriptionElement: Element?
     val extra by lazy {
         createUiUserExtra(this)
     }
@@ -30,7 +32,7 @@ sealed class UiUser {
         val handleInternal: String,
         val remoteHost: String,
         override val avatarUrl: String,
-        val bannerUrl: String?,
+        override val bannerUrl: String?,
         val description: String?,
         val matrices: Matrices,
         val locked: Boolean,
@@ -41,7 +43,7 @@ sealed class UiUser {
             parseName(raw)
         }
 
-        val descriptionElement by lazy {
+        override val descriptionElement by lazy {
             parseNote(raw)
         }
 
@@ -62,7 +64,7 @@ sealed class UiUser {
         val handleInternal: String,
         val remoteHost: String,
         override val avatarUrl: String,
-        val bannerUrl: String?,
+        override val bannerUrl: String?,
         val description: String?,
         val matrices: Matrices,
         val isCat: Boolean,
@@ -74,7 +76,7 @@ sealed class UiUser {
             parseName(name, accountHost)
         }
 
-        val descriptionElement by lazy {
+        override val descriptionElement by lazy {
             parseDescription(description, accountHost)
         }
 
@@ -96,7 +98,7 @@ sealed class UiUser {
         val displayName: String,
         val handleInternal: String,
         override val avatarUrl: String,
-        val bannerUrl: String?,
+        override val bannerUrl: String?,
         val description: String?,
         val matrices: Matrices,
         val relation: UiRelation.Bluesky,
@@ -108,7 +110,7 @@ sealed class UiUser {
             }
         }
 
-        val descriptionElement by lazy {
+        override val descriptionElement by lazy {
             parseDescription(description, accountHost)
         }
         override val handle: String = "@$handleInternal"

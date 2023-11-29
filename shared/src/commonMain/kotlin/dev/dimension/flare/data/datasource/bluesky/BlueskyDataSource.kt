@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.feed.GetPostsQueryParams
@@ -180,7 +182,7 @@ class BlueskyDataSource(
                     if (it is UiUser.Bluesky) {
                         it.relation
                     } else {
-                        throw IllegalStateException("User is not a Misskey user")
+                        throw IllegalStateException("User is not a Bluesky user")
                     }
                 }
         }.toUi()
@@ -826,5 +828,43 @@ class BlueskyDataSource(
                 )
             }
         }
+    }
+
+    override fun searchStatus(
+        query: String,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> {
+        val service = account.getService(appDatabase)
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                SearchStatusRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    query,
+                ),
+        )
+    }
+
+    override fun searchUser(
+        query: String,
+        pageSize: Int,
+    ): Flow<PagingData<UiUser>> {
+        val service = account.getService(appDatabase)
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            SearchUserPagingSource(
+                service,
+                account.accountKey,
+                query,
+            )
+        }.flow
     }
 }

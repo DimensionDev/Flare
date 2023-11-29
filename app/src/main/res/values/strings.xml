@@ -181,4 +181,7 @@
     <string name="discover_users">Recommend Users</string>
     <string name="discover_status">Trending Toots</string>
     <string name="discover_hashtags">Trending Hashtags</string>
+
+    <string name="search_users">Users</string>
+    <string name="search_status">Status</string>
 </resources>

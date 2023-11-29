@@ -67,6 +67,17 @@ interface MicroblogDataSource {
     )
 
     suspend fun deleteStatus(statusKey: MicroBlogKey)
+
+    fun searchStatus(
+        query: String,
+        pageSize: Int = 20,
+        pagingKey: String = "search_$query",
+    ): Flow<PagingData<UiStatus>>
+
+    fun searchUser(
+        query: String,
+        pageSize: Int = 20,
+    ): Flow<PagingData<UiUser>>
 }
 
 data class ComposeProgress(

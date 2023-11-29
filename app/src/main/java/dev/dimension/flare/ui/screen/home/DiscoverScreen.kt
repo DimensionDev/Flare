@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -37,38 +38,47 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.StatusEvent
-import dev.dimension.flare.ui.component.status.StatusItem
-import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.mastodon.UserPlaceholder
+import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
+import dev.dimension.flare.ui.presenter.home.SearchPresenter
+import dev.dimension.flare.ui.presenter.home.SearchState
+import dev.dimension.flare.ui.screen.profile.CommonProfileHeader
+import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.koin.compose.rememberKoinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun DiscoverSearch(user: UiState<UiUser>) {
     val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     SearchBar(
         query = state.query,
         onQueryChange = { state.setQuery(it) },
-        onSearch = { state.setSearching(false) },
+        onSearch = {
+            state.search(it)
+            keyboardController?.hide()
+        },
         active = state.isSearching,
         onActiveChange = { state.setSearching(it) },
         placeholder = {
@@ -76,7 +86,8 @@ internal fun DiscoverSearch(user: UiState<UiUser>) {
         },
         trailingIcon = {
             IconButton(onClick = {
-                state.setSearching(false)
+                state.search(state.query)
+                keyboardController?.hide()
             }) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -113,18 +124,95 @@ internal fun DiscoverSearch(user: UiState<UiUser>) {
             }
         },
     ) {
+        if (state.query.isNotEmpty()) {
+            LazyColumn {
+                state.user.onSuccess { users ->
+                    if (users.loadState.refresh is LoadState.Loading || users.itemCount > 0) {
+                        stickyHeader {
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = stringResource(R.string.search_users))
+                                },
+                            )
+                        }
+                    }
+                    item {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                        ) {
+                            users.onLoading {
+                                items(10) {
+                                    ProfileHeaderLoading(
+                                        modifier = Modifier.width(256.dp),
+                                    )
+                                }
+                            }.onSuccess {
+                                items(users.itemCount) {
+                                    val item = users[it]
+                                    Card {
+                                        if (item == null) {
+                                            ProfileHeaderLoading(
+                                                modifier = Modifier.fillParentMaxWidth(0.8f),
+                                            )
+                                        } else {
+                                            CommonProfileHeader(
+                                                bannerUrl = item.bannerUrl,
+                                                avatarUrl = item.avatarUrl,
+                                                displayName = item.nameElement,
+                                                handle = item.handle,
+                                                content = {
+                                                    item.descriptionElement?.let {
+                                                        HtmlText2(
+                                                            element = it,
+                                                            maxLines = 2,
+                                                            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                                                        )
+                                                    }
+                                                },
+                                                modifier = Modifier.fillParentMaxWidth(0.8f),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                state.status.onSuccess {
+                    stickyHeader {
+                        ListItem(
+                            headlineContent = {
+                                Text(text = stringResource(R.string.search_status))
+                            },
+                        )
+                    }
+                    with(state.status) {
+                        with(state.statusEvent) {
+                            status()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun discoverSearchPresenter() =
+private fun discoverSearchPresenter(statusEvent: StatusEvent = rememberKoinInject()) =
     run {
         var query by remember { mutableStateOf("") }
         var isSearching by remember { mutableStateOf(false) }
+        val state =
+            remember {
+                SearchPresenter()
+            }.invoke()
 
-        object {
+        object : SearchState by state {
             val query = query
             val isSearching = isSearching
+            val statusEvent = statusEvent
 
             fun setSearching(new: Boolean) {
                 isSearching = new
@@ -164,7 +252,7 @@ internal fun DiscoverScreen(
             },
             content = {
                 LazyColumn(
-                    contentPadding = it + PaddingValues(horizontal = screenHorizontalPadding),
+                    contentPadding = it,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     state.users.onSuccess { users ->
@@ -181,6 +269,7 @@ internal fun DiscoverScreen(
                                 rows = GridCells.Fixed(2),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                             ) {
                                 users.onSuccess {
                                     items(
@@ -222,54 +311,6 @@ internal fun DiscoverScreen(
                             }
                         }
                     }
-                    state.status.onSuccess { status ->
-                        stickyHeader {
-                            ListItem(
-                                headlineContent = {
-                                    Text(text = stringResource(R.string.discover_status))
-                                },
-                            )
-                        }
-                        item {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                status.onSuccess {
-                                    with(status) {
-                                        with(state.statusEvent) {
-                                            items(
-                                                itemCount,
-                                                key =
-                                                    itemKey {
-                                                        it.itemKey
-                                                    },
-                                                contentType =
-                                                    itemContentType {
-                                                        it.itemType
-                                                    },
-                                            ) {
-                                                Card(
-                                                    modifier = Modifier.width(256.dp).height(192.dp),
-                                                ) {
-                                                    StatusItem(it, horizontalPadding = 0.dp)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }.onLoading {
-                                    items(10) {
-                                        Card(
-                                            modifier = Modifier.width(256.dp),
-                                        ) {
-                                            StatusPlaceholder(
-                                                modifier = Modifier.padding(),
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                     state.hashtags.onSuccess { hashtags ->
                         stickyHeader {
                             ListItem(
@@ -278,26 +319,67 @@ internal fun DiscoverScreen(
                                 },
                             )
                         }
-                        hashtags.onSuccess {
-                            items(
-                                hashtags.itemCount,
+                        item {
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                             ) {
-                                val hashtag = hashtags[it]
-                                if (hashtag != null) {
-                                    Text(text = hashtag.hashtag)
-                                } else {
-                                    Text(
-                                        text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry",
-                                        modifier = Modifier.placeholder(true),
-                                    )
+                                hashtags.onSuccess {
+                                    items(
+                                        hashtags.itemCount,
+                                    ) {
+                                        val hashtag = hashtags[it]
+                                        Card(
+                                            modifier = Modifier.width(192.dp),
+                                        ) {
+                                            Box(
+                                                modifier =
+                                                    Modifier
+                                                        .padding(8.dp)
+                                                        .height(48.dp),
+                                            ) {
+                                                if (hashtag != null) {
+                                                    Text(text = hashtag.hashtag)
+                                                } else {
+                                                    Text(
+                                                        text = "Lorem Ipsum is simply dummy text",
+                                                        modifier = Modifier.placeholder(true),
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }.onLoading {
+                                    items(10) {
+                                        Card(
+                                            modifier = Modifier.width(192.dp),
+                                        ) {
+                                            Box(
+                                                modifier = Modifier.padding(8.dp),
+                                            ) {
+                                                Text(
+                                                    text = "Lorem Ipsum is simply dummy text",
+                                                    modifier = Modifier.placeholder(true),
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                        }.onLoading {
-                            items(10) {
-                                Text(
-                                    text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry",
-                                    modifier = Modifier.placeholder(true),
-                                )
+                        }
+                    }
+
+                    state.status.onSuccess {
+                        stickyHeader {
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = stringResource(R.string.discover_status))
+                                },
+                            )
+                        }
+                        with(state.status) {
+                            with(state.statusEvent) {
+                                status()
                             }
                         }
                     }

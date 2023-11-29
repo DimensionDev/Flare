@@ -668,4 +668,40 @@ class MastodonDataSource(
             )
         }.flow
     }
+
+    override fun searchStatus(
+        query: String,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                SearchStatusPagingSource(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    query,
+                ),
+        )
+    }
+
+    override fun searchUser(
+        query: String,
+        pageSize: Int,
+    ): Flow<PagingData<UiUser>> {
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            SearchUserPagingSource(
+                service,
+                account.accountKey,
+                query,
+            )
+        }.flow
+    }
 }

@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.misskey.api
 
 import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Hashtag
 import dev.dimension.flare.data.network.misskey.api.model.HashtagsListRequest
@@ -9,7 +10,7 @@ import dev.dimension.flare.data.network.misskey.api.model.HashtagsSearchRequest
 import dev.dimension.flare.data.network.misskey.api.model.HashtagsShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.HashtagsTrend200ResponseInner
 import dev.dimension.flare.data.network.misskey.api.model.HashtagsUsersRequest
-import dev.dimension.flare.data.network.misskey.api.model.UserDetailed
+import dev.dimension.flare.data.network.misskey.api.model.User
 
 interface HashtagsApi {
     /**
@@ -79,10 +80,8 @@ interface HashtagsApi {
      *
      * @param body * @return [kotlin.collections.List<HashtagsTrend200ResponseInner>]
      */
-    @POST("hashtags/trend")
-    suspend fun hashtagsTrend(
-        @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<HashtagsTrend200ResponseInner>>
+    @GET("hashtags/trend")
+    suspend fun hashtagsTrend(): Response<kotlin.collections.List<HashtagsTrend200ResponseInner>>
 
     /**
      * hashtags/users
@@ -100,5 +99,5 @@ interface HashtagsApi {
     @POST("hashtags/users")
     suspend fun hashtagsUsers(
         @Body hashtagsUsersRequest: HashtagsUsersRequest,
-    ): Response<kotlin.collections.List<UserDetailed>>
+    ): Response<kotlin.collections.List<User>>
 }

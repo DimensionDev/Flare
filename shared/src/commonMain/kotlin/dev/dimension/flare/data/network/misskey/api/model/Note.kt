@@ -49,7 +49,7 @@ data class Note(
     @SerialName(value = "tags") val tags: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "poll") val poll: Poll? = null,
     @SerialName(value = "channelId") val channelId: kotlin.String? = null,
-    @SerialName(value = "channel") val channel: kotlin.collections.List<NoteChannelInner>? = null,
+//    @SerialName(value = "channel") val channel: kotlin.collections.List<NoteChannelInner>? = null,
     @SerialName(value = "localOnly") val localOnly: kotlin.Boolean? = null,
     @SerialName(value = "uri") val uri: kotlin.String? = null,
     @SerialName(value = "url") val url: kotlin.String? = null,

@@ -32,6 +32,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -608,6 +609,46 @@ class MisskeyDataSource(
                 service,
                 account.accountKey,
                 query,
+            )
+        }.flow
+    }
+
+    fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUser>> {
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            TrendsUserPagingSource(
+                service,
+                account.accountKey,
+            )
+        }.flow
+    }
+
+    fun discoverStatus(
+        pageSize: Int = 20,
+        pagingKey: String = "discover_status",
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                DiscoverStatusRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
+    }
+
+    fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>> {
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            TrendHashtagPagingSource(
+                service,
             )
         }.flow
     }

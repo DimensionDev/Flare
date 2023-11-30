@@ -29,8 +29,18 @@ data class Page(
     @SerialName(value = "title") val title: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "summary") val summary: kotlin.String? = null,
-    @SerialName(value = "content") val content: kotlin.collections.List<String>,
-    @SerialName(value = "variables") val variables: kotlin.collections.List<String>,
+    @SerialName(value = "content") val content: kotlin.collections.List<PageContent>,
+    @SerialName(value = "variables") val variables: kotlin.collections.List<PageContent>,
     @SerialName(value = "userId") val userId: kotlin.String,
     @SerialName(value = "user") val user: UserLite,
+)
+
+@Serializable
+data class PageContent(
+    @SerialName(value = "id") val id: kotlin.String? = null,
+    @SerialName(value = "type") val type: String? = null,
+    @SerialName(value = "text") val text: kotlin.String? = null,
+    @SerialName(value = "value") val value: kotlin.String? = null,
+    @SerialName(value = "name") val name: kotlin.String? = null,
+    @SerialName(value = "args") val args: kotlin.collections.List<PageContent>? = null,
 )

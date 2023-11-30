@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -72,12 +73,17 @@ import org.koin.compose.rememberKoinInject
 internal fun DiscoverSearch(user: UiState<UiUser>) {
     val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    BackHandler(enabled = state.isSearching) {
+        state.setSearching(false)
+        state.setQuery("")
+    }
     SearchBar(
         query = state.query,
         onQueryChange = { state.setQuery(it) },
         onSearch = {
             state.search(it)
             keyboardController?.hide()
+            state.setCommited(true)
         },
         active = state.isSearching,
         onActiveChange = { state.setSearching(it) },
@@ -88,6 +94,7 @@ internal fun DiscoverSearch(user: UiState<UiUser>) {
             IconButton(onClick = {
                 state.search(state.query)
                 keyboardController?.hide()
+                state.setCommited(true)
             }) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -100,6 +107,7 @@ internal fun DiscoverSearch(user: UiState<UiUser>) {
                 if (it) {
                     IconButton(onClick = {
                         state.setSearching(false)
+                        state.setQuery("")
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -124,8 +132,10 @@ internal fun DiscoverSearch(user: UiState<UiUser>) {
             }
         },
     ) {
-        if (state.query.isNotEmpty()) {
-            LazyColumn {
+        if (state.commited) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 state.user.onSuccess { users ->
                     if (users.loadState.refresh is LoadState.Loading || users.itemCount > 0) {
                         stickyHeader {
@@ -204,12 +214,14 @@ private fun discoverSearchPresenter(statusEvent: StatusEvent = rememberKoinInjec
     run {
         var query by remember { mutableStateOf("") }
         var isSearching by remember { mutableStateOf(false) }
+        var commited by remember { mutableStateOf(false) }
         val state =
             remember {
                 SearchPresenter()
             }.invoke()
 
         object : SearchState by state {
+            val commited = commited
             val query = query
             val isSearching = isSearching
             val statusEvent = statusEvent
@@ -220,6 +232,10 @@ private fun discoverSearchPresenter(statusEvent: StatusEvent = rememberKoinInjec
 
             fun setQuery(new: String) {
                 query = new
+            }
+
+            fun setCommited(new: Boolean) {
+                commited = new
             }
         }
     }

@@ -24,6 +24,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class NotesFeaturedRequest(
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
-    @SerialName(value = "offset") val offset: kotlin.Int? = 0,
+    @SerialName(value = "untilId") val untilId: kotlin.String? = null,
     @SerialName(value = "channelId") val channelId: kotlin.String? = null,
 )

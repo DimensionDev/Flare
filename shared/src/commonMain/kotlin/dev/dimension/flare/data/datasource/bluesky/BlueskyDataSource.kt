@@ -867,4 +867,16 @@ class BlueskyDataSource(
             )
         }.flow
     }
+
+    fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUser>> {
+        val service = account.getService(appDatabase)
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            TrendsUserPagingSource(
+                service,
+                account.accountKey,
+            )
+        }.flow
+    }
 }

@@ -157,7 +157,7 @@ internal fun MastodonStatusComponent(
         StatusContentComponent(
             data = actualData,
         )
-        if (data.media.isNotEmpty()) {
+        if (actualData.media.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusMediaComponent(
                 data = actualData.media,

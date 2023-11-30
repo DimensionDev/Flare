@@ -136,6 +136,7 @@ fun HomeScreen(
     val state by producePresenter {
         homePresenter()
     }
+    val discoverSearchState by producePresenter("discoverSearchPresenter") { discoverSearchPresenter() }
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -203,7 +204,7 @@ fun HomeScreen(
                             .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    DiscoverSearch(user = state.user)
+                    DiscoverSearch(user = state.user, state = discoverSearchState)
                 }
             } else {
                 TopAppBar(
@@ -344,6 +345,12 @@ fun HomeScreen(
                 DiscoverScreen(
                     contentPadding,
                     onUserClick = toUser,
+                    onHashtagClick = {
+                        discoverSearchState.setQuery(it)
+                        discoverSearchState.search(it)
+                        discoverSearchState.setSearching(true)
+                        discoverSearchState.setCommited(true)
+                    },
                 )
             }
         }

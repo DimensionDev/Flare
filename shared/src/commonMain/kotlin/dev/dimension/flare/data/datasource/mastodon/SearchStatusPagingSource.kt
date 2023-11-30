@@ -33,12 +33,20 @@ internal class SearchStatusPagingSource(
                             endOfPaginationReached = true,
                         )
                     }
+
                     LoadType.REFRESH -> {
-                        service.searchV2(
-                            query = query,
-                            limit = state.config.pageSize,
-                            type = "statuses",
-                        )
+                        if (query.startsWith("#")) {
+                            service.hashtagTimeline(
+                                hashtag = query.removePrefix("#"),
+                                limit = state.config.pageSize,
+                            )
+                        } else {
+                            service.searchV2(
+                                query = query,
+                                limit = state.config.pageSize,
+                                type = "statuses",
+                            ).statuses
+                        }
                     }
 
                     LoadType.APPEND -> {
@@ -47,14 +55,22 @@ internal class SearchStatusPagingSource(
                                 ?: return MediatorResult.Success(
                                     endOfPaginationReached = true,
                                 )
-                        service.searchV2(
-                            query = query,
-                            limit = state.config.pageSize,
-                            max_id = lastItem.timeline_status_key.id,
-                            type = "statuses",
-                        )
+                        if (query.startsWith("#")) {
+                            service.hashtagTimeline(
+                                hashtag = query.removePrefix("#"),
+                                limit = state.config.pageSize,
+                                max_id = lastItem.timeline_status_key.id,
+                            )
+                        } else {
+                            service.searchV2(
+                                query = query,
+                                limit = state.config.pageSize,
+                                max_id = lastItem.timeline_status_key.id,
+                                type = "statuses",
+                            ).statuses
+                        }
                     }
-                }.statuses ?: emptyList()
+                } ?: emptyList()
 
             Mastodon.save(
                 database = database,

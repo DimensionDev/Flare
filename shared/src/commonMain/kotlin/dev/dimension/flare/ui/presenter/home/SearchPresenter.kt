@@ -14,11 +14,13 @@ import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 
-class SearchPresenter : PresenterBase<SearchState>() {
+class SearchPresenter(
+    private val initialQuery: String = "",
+) : PresenterBase<SearchState>() {
     @Composable
     override fun body(): SearchState {
         val accountState = activeAccountServicePresenter()
-        var query by remember { mutableStateOf("") }
+        var query by remember { mutableStateOf(initialQuery) }
 
         val user =
             accountState.map { (service, account) ->

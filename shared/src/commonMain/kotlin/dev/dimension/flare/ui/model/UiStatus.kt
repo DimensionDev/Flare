@@ -465,7 +465,7 @@ private fun replaceMentionAndHashtag(
                 node.attributes["href"] = AppDeepLink.Profile(userKey = MicroBlogKey(id, host))
             }
         } else if (node.innerText.startsWith("#")) {
-            node.attributes["href"] = AppDeepLink.Search(node.innerText.trimStart('#'))
+            node.attributes["href"] = AppDeepLink.Search(node.innerText)
         }
         node.children.forEach { replaceMentionAndHashtag(mentions, it, host) }
     }
@@ -582,7 +582,7 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
 
         is HashtagNode -> {
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search(tag)
+                attributes["href"] = AppDeepLink.Search("#$tag")
                 children.add(Text("#$tag"))
             }
         }

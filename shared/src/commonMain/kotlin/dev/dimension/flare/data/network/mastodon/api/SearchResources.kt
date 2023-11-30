@@ -11,6 +11,7 @@ interface SearchResources {
         @Query("account_id") account_id: String? = null,
         @Query("max_id") max_id: String? = null,
         @Query("min_id") min_id: String? = null,
+        // accounts, hashtags, statuses
         @Query("type") type: String? = null,
         @Query("exclude_unreviewed") exclude_unreviewed: Boolean? = null,
         @Query("resolve") resolve: Boolean? = null,

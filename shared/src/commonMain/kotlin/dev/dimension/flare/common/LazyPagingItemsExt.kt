@@ -35,6 +35,34 @@ fun <T : Any> Flow<PagingData<T>>.collectPagingProxy(): LazyPagingItemsProxy<T> 
     )
 }
 
+inline fun <reified T : Any> LazyPagingItemsProxy<T>.onLoading(block: () -> Unit): LazyPagingItemsProxy<T> {
+    if (loadState.refresh is LoadState.Loading && itemCount == 0) {
+        block()
+    }
+    return this
+}
+
+inline fun <reified T : Any> LazyPagingItemsProxy<T>.onError(block: (Throwable) -> Unit): LazyPagingItemsProxy<T> {
+    if (loadState.refresh is LoadState.Error && itemCount == 0) {
+        block((loadState.refresh as LoadState.Error).error)
+    }
+    return this
+}
+
+inline fun <reified T : Any> LazyPagingItemsProxy<T>.onEmpty(block: () -> Unit): LazyPagingItemsProxy<T> {
+    if (loadState.refresh is LoadState.NotLoading && itemCount == 0) {
+        block()
+    }
+    return this
+}
+
+inline fun <reified T : Any> LazyPagingItemsProxy<T>.onSuccess(block: () -> Unit): LazyPagingItemsProxy<T> {
+    if (itemCount > 0) {
+        block()
+    }
+    return this
+}
+
 // for iOS, collectAsLazyPagingItems does not trigger PresenterBase to emit new state when LazyPagingItems changes itself
 @Immutable
 data class LazyPagingItemsProxy<T : Any>(

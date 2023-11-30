@@ -8,6 +8,7 @@
     <string name="home_tab_home_title">首页</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
+    <string name="home_tab_discover_title">发现</string>
 
     <string name="home_timeline_new_toots">有新嘟文</string>
 
@@ -173,4 +174,13 @@
     <string name="user_unblock">取消屏蔽 %1$s</string>
     <string name="user_mute">静音 %1$s</string>
     <string name="user_unmute">取消静音 %1$s</string>
+
+    <string name="discover_search_placeholder">搜索</string>
+    <string name="discover_users">推荐用户</string>
+    <string name="discover_status">热门嘟嘟</string>
+    <string name="discover_hashtags">热门话题标签</string>
+
+    <string name="search_users">用户</string>
+    <string name="search_status">状态</string>
+
 </resources>

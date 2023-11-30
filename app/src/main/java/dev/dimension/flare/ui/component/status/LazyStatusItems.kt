@@ -15,14 +15,14 @@ import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import app.cash.paging.compose.itemContentType
-import app.cash.paging.compose.itemKey
 import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
@@ -116,74 +116,8 @@ internal fun status() {
                 }
             }
         } else {
-            items(
-                lazyPagingItems.itemCount,
-                key =
-                    lazyPagingItems.itemKey {
-                        it.itemKey
-                    },
-                contentType =
-                    lazyPagingItems.itemContentType {
-                        it.itemType
-                    },
-            ) {
-                Column {
-                    when (val item = lazyPagingItems[it]) {
-                        is UiStatus.Mastodon ->
-                            MastodonStatusComponent(
-                                data = item,
-                                event = mastodonStatusEvent,
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                            )
-
-                        is UiStatus.MastodonNotification ->
-                            MastodonNotificationComponent(
-                                data = item,
-                                event = mastodonStatusEvent,
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                            )
-
-                        null -> {
-                            StatusPlaceholder(
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        is UiStatus.Misskey ->
-                            MisskeyStatusComponent(
-                                data = item,
-                                event = misskeyStatusEvent,
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                            )
-
-                        is UiStatus.MisskeyNotification ->
-                            MisskeyNotificationComponent(
-                                data = item,
-                                event = misskeyStatusEvent,
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                            )
-
-                        is UiStatus.Bluesky ->
-                            BlueskyStatusComponent(
-                                data = item,
-                                event = blueskyStatusEvent,
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                            )
-                        is UiStatus.BlueskyNotification ->
-                            BlueskyNotificationComponent(
-                                data = item,
-                                event = blueskyStatusEvent,
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                            )
-                    }
-                    // draw divider
-                    if (it != lazyPagingItems.itemCount - 1) {
-                        HorizontalDivider(
-                            modifier = Modifier.alpha(DisabledAlpha),
-                        )
-                    }
-                }
+            with(lazyPagingItems) {
+                statusItems()
             }
             if (lazyPagingItems.itemCount > 0) {
                 when (lazyPagingItems.loadState.append) {
@@ -254,6 +188,88 @@ internal fun status() {
         }
     }
     onError {
+    }
+}
+
+context(LazyListScope, LazyPagingItemsProxy<UiStatus>, StatusEvent)
+private fun statusItems() {
+    items(
+        itemCount,
+        key =
+            itemKey {
+                it.itemKey
+            },
+        contentType =
+            itemContentType {
+                it.itemType
+            },
+    ) {
+        Column {
+            StatusItem(it)
+            if (it != itemCount - 1) {
+                HorizontalDivider(
+                    modifier = Modifier.alpha(DisabledAlpha),
+                )
+            }
+        }
+    }
+}
+
+context(LazyListScope, LazyPagingItemsProxy<UiStatus>, StatusEvent)
+@Composable
+internal fun StatusItem(
+    index: Int,
+    horizontalPadding: Dp = screenHorizontalPadding,
+) {
+    when (val item = get(index)) {
+        is UiStatus.Mastodon ->
+            MastodonStatusComponent(
+                data = item,
+                event = mastodonStatusEvent,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+
+        is UiStatus.MastodonNotification ->
+            MastodonNotificationComponent(
+                data = item,
+                event = mastodonStatusEvent,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+
+        null -> {
+            StatusPlaceholder(
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        is UiStatus.Misskey ->
+            MisskeyStatusComponent(
+                data = item,
+                event = misskeyStatusEvent,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+
+        is UiStatus.MisskeyNotification ->
+            MisskeyNotificationComponent(
+                data = item,
+                event = misskeyStatusEvent,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+
+        is UiStatus.Bluesky ->
+            BlueskyStatusComponent(
+                data = item,
+                event = blueskyStatusEvent,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+
+        is UiStatus.BlueskyNotification ->
+            BlueskyNotificationComponent(
+                data = item,
+                event = blueskyStatusEvent,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
     }
 }
 

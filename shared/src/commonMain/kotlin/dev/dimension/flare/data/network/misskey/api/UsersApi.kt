@@ -12,6 +12,7 @@ import dev.dimension.flare.data.network.misskey.api.model.MyAppsRequest
 import dev.dimension.flare.data.network.misskey.api.model.Note
 import dev.dimension.flare.data.network.misskey.api.model.NoteReaction
 import dev.dimension.flare.data.network.misskey.api.model.Page
+import dev.dimension.flare.data.network.misskey.api.model.PinnedUsersRequest
 import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserDetailed
 import dev.dimension.flare.data.network.misskey.api.model.UsernameAvailable200Response
@@ -65,7 +66,7 @@ interface UsersApi {
      */
     @POST("pinned-users")
     suspend fun pinnedUsers(
-        @Body body: kotlin.Any,
+        @Body body: PinnedUsersRequest,
     ): Response<kotlin.collections.List<UserDetailed>>
 
     /**

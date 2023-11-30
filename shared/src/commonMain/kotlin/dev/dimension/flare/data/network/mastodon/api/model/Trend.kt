@@ -22,3 +22,9 @@ data class TrendHistory(
     @SerialName("uses")
     val uses: String? = null,
 )
+
+@Serializable
+data class Suggestions(
+    val source: String? = null,
+    val account: Account? = null,
+)

@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
@@ -30,6 +32,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -572,5 +575,81 @@ class MisskeyDataSource(
                 )
             }
         }
+    }
+
+    override fun searchStatus(
+        query: String,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                SearchStatusRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    query,
+                ),
+        )
+    }
+
+    override fun searchUser(
+        query: String,
+        pageSize: Int,
+    ): Flow<PagingData<UiUser>> {
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            SearchUserPagingSource(
+                service,
+                account.accountKey,
+                query,
+            )
+        }.flow
+    }
+
+    fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUser>> {
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            TrendsUserPagingSource(
+                service,
+                account.accountKey,
+            )
+        }.flow
+    }
+
+    fun discoverStatus(
+        pageSize: Int = 20,
+        pagingKey: String = "discover_status",
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+                DiscoverStatusRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
+    }
+
+    fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>> {
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            TrendHashtagPagingSource(
+                service,
+            )
+        }.flow
     }
 }

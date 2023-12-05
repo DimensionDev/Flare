@@ -42,6 +42,20 @@ internal class NotificationRemoteMediator(
                                 ?: return MediatorResult.Success(
                                     endOfPaginationReached = true,
                                 )
+                        val items = database.dbPagingTimelineQueries.getPaging(
+                            account_key = account.accountKey,
+                            paging_key = pagingKey,
+                            limit = 100,
+                            offset = 0,
+                        ).executeAsList()
+                        val items2 = database.dbPagingTimelineQueries.getPage(
+                            account_key = account.accountKey,
+                            paging_key = pagingKey,
+                            limit = 100,
+                            offset = 0,
+                        ).executeAsList()
+                        require(items.isNotEmpty())
+                        require(items2.isNotEmpty())
                         service.iNotifications(
                             INotificationsRequest(
                                 limit = state.config.pageSize,
@@ -55,14 +69,12 @@ internal class NotificationRemoteMediator(
             if (loadType == LoadType.REFRESH) {
                 database.dbPagingTimelineQueries.deletePaging(account.accountKey, pagingKey)
             }
-
             Misskey.save(
                 database = database,
                 accountKey = account.accountKey,
                 pagingKey = pagingKey,
                 data = response,
             )
-
             MediatorResult.Success(
                 endOfPaginationReached = response.isEmpty(),
             )

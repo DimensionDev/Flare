@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
@@ -20,15 +19,12 @@ class HomePresenter : PresenterBase<HomeState>() {
                     service.userById(account.accountKey.id)
                 }.collectAsState().toUi()
             }
-
-        return object : HomeState(
-            user = user,
-        ) {
+        return object : HomeState {
+            override val user = user
         }
     }
 }
 
-@Immutable
-abstract class HomeState(
-    val user: UiState<UiUser>,
-)
+interface HomeState {
+    val user: UiState<UiUser>
+}

@@ -28,7 +28,6 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
@@ -99,10 +98,19 @@ internal fun AccountsScreen(
                     items(accountState.data.size) { index ->
                         AccountItem(
                             userState = accountState.data[index],
-                            activeAccount = state.activeAccount,
                             onClick = {
                                 state.setActiveAccount(it)
                             },
+                            trailingContent = { user ->
+                                state.activeAccount.onSuccess {
+                                    RadioButton(
+                                        selected = it.accountKey == user.userKey,
+                                        onClick = {
+                                            state.setActiveAccount(user.userKey)
+                                        },
+                                    )
+                                }
+                            }
                         )
                     }
                 }
@@ -112,11 +120,11 @@ internal fun AccountsScreen(
 }
 
 @Composable
-private fun AccountItem(
+fun AccountItem(
     userState: UiState<UiUser>,
-    activeAccount: UiState<UiAccount>,
     onClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
+    trailingContent: @Composable (UiUser) -> Unit = { },
 ) {
     when (userState) {
         // TODO: show error
@@ -128,28 +136,21 @@ private fun AccountItem(
         is UiState.Success -> {
             ListItem(
                 headlineContent = {
-                    HtmlText2(element = userState.data.nameElement)
+                    HtmlText2(element = userState.data.nameElement, maxLines = 1)
                 },
                 modifier =
-                    modifier
-                        .clickable {
-                            onClick.invoke(userState.data.userKey)
-                        },
+                modifier
+                    .clickable {
+                        onClick.invoke(userState.data.userKey)
+                    },
                 leadingContent = {
                     AvatarComponent(data = userState.data.avatarUrl)
                 },
                 trailingContent = {
-                    activeAccount.onSuccess {
-                        RadioButton(
-                            selected = it.accountKey == userState.data.userKey,
-                            onClick = {
-                                onClick.invoke(userState.data.userKey)
-                            },
-                        )
-                    }
+                    trailingContent.invoke(userState.data)
                 },
                 supportingContent = {
-                    Text(text = userState.data.handle)
+                    Text(text = userState.data.handle, maxLines = 1)
                 },
             )
         }

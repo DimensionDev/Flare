@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -68,7 +67,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.home.HomePresenter
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
-import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
+import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.screen.profile.ProfileScreen
 import kotlin.math.roundToInt
 
@@ -102,8 +101,8 @@ private val items =
 fun HomeScreenPreview() {
     HomeScreen(
         toCompose = {},
-        toSettings = {},
         toUser = {},
+        toQuickMenu = {},
     )
 }
 
@@ -116,12 +115,12 @@ fun HomeRoute(navigator: DestinationsNavigator) {
         toCompose = {
             navigator.navigate(ComposeRouteDestination)
         },
-        toSettings = {
-            navigator.navigate(SettingsRouteDestination)
-        },
         toUser = {
             navigator.navigate(ProfileRouteDestination(it))
         },
+        toQuickMenu = {
+            navigator.navigate(QuickMenuDialogRouteDestination)
+        }
     )
 }
 
@@ -129,8 +128,8 @@ fun HomeRoute(navigator: DestinationsNavigator) {
 @Composable
 fun HomeScreen(
     toCompose: () -> Unit,
-    toSettings: () -> Unit,
     toUser: (MicroBlogKey) -> Unit,
+    toQuickMenu: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by producePresenter {
@@ -172,17 +171,17 @@ fun HomeScreen(
 
     Scaffold(
         modifier =
-            modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .nestedScroll(nestedScrollConnection),
+        modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .nestedScroll(nestedScrollConnection),
         floatingActionButton = {
             AnimatedVisibility(
                 currentScreen == Screen.HomeTimeline && bottomBarOffsetHeightPx > -(bottomBarHeightPx / 2),
                 enter = scaleIn(),
                 exit = scaleOut(),
                 modifier =
-                    Modifier
-                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                Modifier
+                    .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
             ) {
                 FloatingActionButton(
                     onClick = {
@@ -200,11 +199,11 @@ fun HomeScreen(
             if (currentScreen == Screen.Discover) {
                 Box(
                     modifier =
-                        Modifier
-                            .fillMaxWidth(),
+                    Modifier
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    DiscoverSearch(user = state.user, state = discoverSearchState)
+                    DiscoverSearch(user = state.user, state = discoverSearchState, onAccountClick = toQuickMenu)
                 }
             } else {
                 TopAppBar(
@@ -213,9 +212,6 @@ fun HomeScreen(
                             AnimatedContent(
                                 targetState = it,
                                 label = "Title",
-//                                transitionSpec = {
-//                                    slideInVertically { it } togetherWith slideOutVertically { -it }
-//                                }
                             ) {
                                 Text(text = stringResource(id = it.title))
                             }
@@ -240,51 +236,16 @@ fun HomeScreen(
 
                             is UiState.Success -> {
                                 IconButton(
-                                    onClick = {
-                                    },
+                                    onClick = toQuickMenu,
                                 ) {
                                     NetworkImage(
                                         model = user.data.avatarUrl,
                                         contentDescription = null,
                                         modifier =
-                                            Modifier
-                                                .size(24.dp)
-                                                .clip(CircleShape),
+                                        Modifier
+                                            .size(24.dp)
+                                            .clip(CircleShape),
                                     )
-                                }
-                            }
-                        }
-                    },
-                    actions = {
-                        currentScreen?.let {
-                            AnimatedContent(targetState = it, label = "Actions") {
-                                when (it) {
-                                    Screen.HomeTimeline -> {
-                                        IconButton(
-                                            onClick = {
-                                            },
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Search,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                    }
-
-                                    Screen.Me -> {
-                                        IconButton(
-                                            onClick = {
-                                                toSettings.invoke()
-                                            },
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Settings,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                    }
-
-                                    else -> Unit
                                 }
                             }
                         }
@@ -295,8 +256,8 @@ fun HomeScreen(
         bottomBar = {
             NavigationBar(
                 modifier =
-                    Modifier
-                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                Modifier
+                    .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
             ) {
                 items.forEach { screen ->
                     NavigationBarItem(
@@ -321,8 +282,8 @@ fun HomeScreen(
             navController = navController,
             startDestination = Screen.HomeTimeline.route,
             modifier =
-                Modifier
-                    .consumeWindowInsets(WindowInsets.systemBars),
+            Modifier
+                .consumeWindowInsets(WindowInsets.systemBars),
         ) {
             composable(Screen.HomeTimeline.route) {
                 HomeTimelineScreen(contentPadding)

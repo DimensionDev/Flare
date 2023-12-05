@@ -61,7 +61,6 @@ internal class HomeTimelineRemoteMediator(
                 pagingKey = pagingKey,
                 data = response,
             )
-
             MediatorResult.Success(
                 endOfPaginationReached = response.isEmpty(),
             )

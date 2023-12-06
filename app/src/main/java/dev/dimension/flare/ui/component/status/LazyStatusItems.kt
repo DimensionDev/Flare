@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusComponent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusEvent
@@ -35,6 +36,7 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.onError
@@ -205,7 +207,8 @@ private fun statusItems() {
             },
     ) {
         Column {
-            StatusItem(it)
+            val item = get(it)
+            StatusItem(item, this@StatusEvent)
             if (it != itemCount - 1) {
                 HorizontalDivider(
                     modifier = Modifier.alpha(DisabledAlpha),
@@ -215,24 +218,24 @@ private fun statusItems() {
     }
 }
 
-context(LazyListScope, LazyPagingItemsProxy<UiStatus>, StatusEvent)
 @Composable
 internal fun StatusItem(
-    index: Int,
+    item: UiStatus?,
+    event: StatusEvent,
     horizontalPadding: Dp = screenHorizontalPadding,
 ) {
-    when (val item = get(index)) {
+    when (item) {
         is UiStatus.Mastodon ->
             MastodonStatusComponent(
                 data = item,
-                event = mastodonStatusEvent,
+                event = event.mastodonStatusEvent,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.MastodonNotification ->
             MastodonNotificationComponent(
                 data = item,
-                event = mastodonStatusEvent,
+                event = event.mastodonStatusEvent,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
@@ -246,28 +249,28 @@ internal fun StatusItem(
         is UiStatus.Misskey ->
             MisskeyStatusComponent(
                 data = item,
-                event = misskeyStatusEvent,
+                event = event.misskeyStatusEvent,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.MisskeyNotification ->
             MisskeyNotificationComponent(
                 data = item,
-                event = misskeyStatusEvent,
+                event = event.misskeyStatusEvent,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.Bluesky ->
             BlueskyStatusComponent(
                 data = item,
-                event = blueskyStatusEvent,
+                event = event.blueskyStatusEvent,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.BlueskyNotification ->
             BlueskyNotificationComponent(
                 data = item,
-                event = blueskyStatusEvent,
+                event = event.blueskyStatusEvent,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
     }
@@ -277,4 +280,66 @@ internal data class StatusEvent(
     val mastodonStatusEvent: MastodonStatusEvent,
     val misskeyStatusEvent: MisskeyStatusEvent,
     val blueskyStatusEvent: BlueskyStatusEvent,
-)
+) {
+    companion object {
+        val empty =
+            StatusEvent(
+                mastodonStatusEvent = EmptyStatusEvent,
+                misskeyStatusEvent = EmptyStatusEvent,
+                blueskyStatusEvent = EmptyStatusEvent,
+            )
+    }
+}
+
+internal data object EmptyStatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
+    override fun onStatusClick(data: UiStatus.Bluesky) = Unit
+
+    override fun onStatusClick(data: UiStatus.Misskey) = Unit
+
+    override fun onReactionClick(
+        data: UiStatus.Misskey,
+        reaction: UiStatus.Misskey.EmojiReaction,
+    ) = Unit
+
+    override fun onReplyClick(data: UiStatus.Misskey) = Unit
+
+    override fun onReblogClick(data: UiStatus.Misskey) = Unit
+
+    override fun onQuoteClick(data: UiStatus.Misskey) = Unit
+
+    override fun onAddReactionClick(data: UiStatus.Misskey) = Unit
+
+    override fun onDeleteClick(data: UiStatus.Misskey) = Unit
+
+    override fun onReportClick(data: UiStatus.Misskey) = Unit
+
+    override fun onStatusClick(status: UiStatus.Mastodon) = Unit
+
+    override fun onReplyClick(status: UiStatus.Mastodon) = Unit
+
+    override fun onReblogClick(status: UiStatus.Mastodon) = Unit
+
+    override fun onLikeClick(status: UiStatus.Mastodon) = Unit
+
+    override fun onBookmarkClick(status: UiStatus.Mastodon) = Unit
+
+    override fun onMediaClick(media: UiMedia) = Unit
+
+    override fun onUserClick(userKey: MicroBlogKey) = Unit
+
+    override fun onDeleteClick(status: UiStatus.Mastodon) = Unit
+
+    override fun onReportClick(status: UiStatus.Mastodon) = Unit
+
+    override fun onReplyClick(data: UiStatus.Bluesky) = Unit
+
+    override fun onReblogClick(data: UiStatus.Bluesky) = Unit
+
+    override fun onQuoteClick(data: UiStatus.Bluesky) = Unit
+
+    override fun onLikeClick(data: UiStatus.Bluesky) = Unit
+
+    override fun onReportClick(data: UiStatus.Bluesky) = Unit
+
+    override fun onDeleteClick(data: UiStatus.Bluesky) = Unit
+}

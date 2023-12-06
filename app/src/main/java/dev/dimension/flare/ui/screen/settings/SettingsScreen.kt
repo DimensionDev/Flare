@@ -33,6 +33,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.screen.destinations.AboutRouteDestination
 import dev.dimension.flare.ui.screen.destinations.AccountsRouteDestination
+import dev.dimension.flare.ui.screen.destinations.AppearanceRouteDestination
 
 @Destination(
     wrappers = [ThemeWrapper::class],
@@ -44,7 +45,9 @@ fun SettingsRoute(navigator: DestinationsNavigator) {
         toAccounts = {
             navigator.navigate(AccountsRouteDestination)
         },
-        toAppearance = {},
+        toAppearance = {
+            navigator.navigate(AppearanceRouteDestination)
+        },
         toNotifications = {},
         toStorage = {},
         toAbout = {

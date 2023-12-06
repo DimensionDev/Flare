@@ -198,4 +198,37 @@
 
     <string name="settings_about_description">The ultimate next generation open-sourced AI powered decentralized social network client for Android.</string>
     <string name="settings_about_source_code">Source code</string>
+
+    <string name="settings_appearance_generic">Generic</string>
+
+    <string name="settings_appearance_show_actions">Show actions</string>
+    <string name="settings_appearance_show_actions_description">Show actions on the bottom of the status</string>
+    <string name="settings_appearance_show_media">Show media</string>
+    <string name="settings_appearance_show_media_description">Show media in the status</string>
+    <string name="settings_appearance_show_numbers">Show numbers</string>
+    <string name="settings_appearance_show_numbers_description">Show numbers on the bottom of the status</string>
+    <string name="settings_appearance_show_cw_img">Show CW image</string>
+    <string name="settings_appearance_show_cw_img_description">Always show content warning image in the status</string>
+    <string name="settings_appearance_enable_swipe">Enable swipe gestures</string>
+    <string name="settings_appearance_enable_swipe_description">Enable swipe gestures on status</string>
+    <string name="settings_appearance_avatar_shape">Avatar shape</string>
+    <string name="settings_appearance_avatar_shape_description">Change the shape of the avatar</string>
+    <string name="settings_appearance_avatar_shape_round">Round</string>
+    <string name="settings_appearance_avatar_shape_square">Square</string>
+    <string name="settings_appearance_swipe_left">Swipe left</string>
+    <string name="settings_appearance_swipe_left_description">Action to perform when swiping left on a status</string>
+    <string name="settings_appearance_swipe_right">Swipe right</string>
+    <string name="settings_appearance_swipe_right_description">Action to perform when swiping right on a status</string>
+    <string name="settings_appearance_theme">Theme</string>
+    <string name="settings_appearance_theme_description">Change the theme of the app</string>
+    <string name="settings_appearance_theme_light">Light</string>
+    <string name="settings_appearance_theme_dark">Dark</string>
+    <string name="settings_appearance_theme_auto">Auto</string>
+    <string name="settings_appearance_dynamic_theme">Dynamic theme</string>
+    <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
+    <string name="settings_appearance_show_link_previews">Show link previews</string>
+    <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
+
+    <string name="settings_appearance_mastodon_show_visibility">Show visibility</string>
+    <string name="settings_appearance_mastodon_show_visibility_description">Show visibility in the status</string>
 </resources>

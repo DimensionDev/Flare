@@ -168,7 +168,7 @@ sealed class UiStatus {
         }
 
         val contentToken by lazy {
-            parseContent(raw, accountKey.host)
+            parseContent(raw, accountKey.host, content)
         }
 
         val isFromMe by lazy {
@@ -432,11 +432,11 @@ private fun Token.toHtml(host: String): Node {
 private fun parseContent(
     status: Status,
     host: String,
+    text: String,
 ): Element {
     val emoji = status.emojis.orEmpty()
     val mentions = status.mentions.orEmpty()
-//    val tags = status.tags.orEmpty()
-    var content = status.content.orEmpty()
+    var content = text
     emoji.forEach {
         content =
             content.replace(

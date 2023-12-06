@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.DropdownMenu
@@ -319,7 +318,7 @@ internal interface BlueskyStatusEvent {
 
     fun onUserClick(userKey: MicroBlogKey)
 
-    fun onMediaClick(uiMedia: UiMedia)
+    fun onMediaClick(media: UiMedia)
 
     fun onReplyClick(data: UiStatus.Bluesky)
 
@@ -359,13 +358,13 @@ internal class DefaultBlueskyStatusEvent(
         context.startActivity(intent)
     }
 
-    override fun onMediaClick(uiMedia: UiMedia) {
-        if (uiMedia is UiMedia.Image) {
+    override fun onMediaClick(media: UiMedia) {
+        if (media is UiMedia.Image) {
             val intent =
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(
-                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(uiMedia.url)
+                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url)
                             .deeplink(),
                     ),
                 )

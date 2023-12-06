@@ -83,7 +83,15 @@
     <string name="mastodon_visibility_private_description">Only followers can see this toot</string>
     <string name="mastodon_visibility_direct_description">Only mentioned users can see this toot</string>
 
-    <string name="settings_accounts_title">Accounts</string>
+    <string name="settings_accounts_title">Account Management</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_notifications_title">Notifications</string>
+    <string name="settings_notifications_subtitle">Customize how Flare notifies you</string>
+    <string name="settings_storage_title">Storage</string>
+    <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_subtitle">Learn more about Flare</string>
 
     <string name="status_loadmore_end">No more toots</string>
     <string name="status_loadmore_error">Error loading more toots</string>
@@ -187,4 +195,7 @@
 
     <string name="quick_menu_title">Quick menu</string>
     <string name="quick_menu_add_account">Add account</string>
+
+    <string name="settings_about_description">The ultimate next generation open-sourced AI powered decentralized social network client for Android.</string>
+    <string name="settings_about_source_code">Source code</string>
 </resources>

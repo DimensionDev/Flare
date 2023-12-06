@@ -31,22 +31,24 @@ class QuickMenuPresenter : PresenterBase<QuickMenuState>() {
                 }.collectAsState().toUi()
             }
         val accounts by allAccountsPresenter()
-        val allUsers = accounts.flatMap { data ->
-            user.map { current ->
-                data.filter {
-                    it.accountKey != current.userKey
-                }.map {
-                    val service = accountServiceProvider(account = it)
-                    remember(it.accountKey) {
-                        service.userById(it.accountKey.id)
-                    }.collectAsState().toUi()
-                }.toImmutableList().toImmutableListWrapper()
+        val allUsers =
+            accounts.flatMap { data ->
+                user.map { current ->
+                    data.filter {
+                        it.accountKey != current.userKey
+                    }.map {
+                        val service = accountServiceProvider(account = it)
+                        remember(it.accountKey) {
+                            service.userById(it.accountKey.id)
+                        }.collectAsState().toUi()
+                    }.toImmutableList().toImmutableListWrapper()
+                }
             }
-        }
 
         return object : QuickMenuState {
             override val user = user
             override val allUsers = allUsers
+
             override fun setActiveAccount(accountKey: MicroBlogKey) {
                 accountRepository.setActiveAccount(accountKey)
             }
@@ -57,5 +59,6 @@ class QuickMenuPresenter : PresenterBase<QuickMenuState>() {
 interface QuickMenuState {
     val user: UiState<UiUser>
     val allUsers: UiState<ImmutableListWrapper<UiState<UiUser>>>
+
     fun setActiveAccount(accountKey: MicroBlogKey)
 }

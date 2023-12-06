@@ -110,7 +110,7 @@ internal fun AccountsScreen(
                                         },
                                     )
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -125,6 +125,12 @@ fun AccountItem(
     onClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
     trailingContent: @Composable (UiUser) -> Unit = { },
+    headlineContent: @Composable (UiUser) -> Unit = {
+        HtmlText2(element = it.nameElement, maxLines = 1)
+    },
+    supportingContent: @Composable (UiUser) -> Unit = {
+        Text(text = it.handle, maxLines = 1)
+    },
 ) {
     when (userState) {
         // TODO: show error
@@ -136,13 +142,13 @@ fun AccountItem(
         is UiState.Success -> {
             ListItem(
                 headlineContent = {
-                    HtmlText2(element = userState.data.nameElement, maxLines = 1)
+                    headlineContent.invoke(userState.data)
                 },
                 modifier =
-                modifier
-                    .clickable {
-                        onClick.invoke(userState.data.userKey)
-                    },
+                    modifier
+                        .clickable {
+                            onClick.invoke(userState.data.userKey)
+                        },
                 leadingContent = {
                     AvatarComponent(data = userState.data.avatarUrl)
                 },
@@ -150,7 +156,7 @@ fun AccountItem(
                     trailingContent.invoke(userState.data)
                 },
                 supportingContent = {
-                    Text(text = userState.data.handle, maxLines = 1)
+                    supportingContent.invoke(userState.data)
                 },
             )
         }

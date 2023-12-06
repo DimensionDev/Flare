@@ -64,7 +64,7 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.presenter.home.HomePresenter
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
@@ -120,7 +120,7 @@ fun HomeRoute(navigator: DestinationsNavigator) {
         },
         toQuickMenu = {
             navigator.navigate(QuickMenuDialogRouteDestination)
-        }
+        },
     )
 }
 
@@ -171,17 +171,17 @@ fun HomeScreen(
 
     Scaffold(
         modifier =
-        modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .nestedScroll(nestedScrollConnection),
+            modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .nestedScroll(nestedScrollConnection),
         floatingActionButton = {
             AnimatedVisibility(
                 currentScreen == Screen.HomeTimeline && bottomBarOffsetHeightPx > -(bottomBarHeightPx / 2),
                 enter = scaleIn(),
                 exit = scaleOut(),
                 modifier =
-                Modifier
-                    .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                    Modifier
+                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
             ) {
                 FloatingActionButton(
                     onClick = {
@@ -199,8 +199,8 @@ fun HomeScreen(
             if (currentScreen == Screen.Discover) {
                 Box(
                     modifier =
-                    Modifier
-                        .fillMaxWidth(),
+                        Modifier
+                            .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     DiscoverSearch(user = state.user, state = discoverSearchState, onAccountClick = toQuickMenu)
@@ -242,9 +242,9 @@ fun HomeScreen(
                                         model = user.data.avatarUrl,
                                         contentDescription = null,
                                         modifier =
-                                        Modifier
-                                            .size(24.dp)
-                                            .clip(CircleShape),
+                                            Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape),
                                     )
                                 }
                             }
@@ -256,8 +256,8 @@ fun HomeScreen(
         bottomBar = {
             NavigationBar(
                 modifier =
-                Modifier
-                    .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                    Modifier
+                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
             ) {
                 items.forEach { screen ->
                     NavigationBarItem(
@@ -282,8 +282,8 @@ fun HomeScreen(
             navController = navController,
             startDestination = Screen.HomeTimeline.route,
             modifier =
-            Modifier
-                .consumeWindowInsets(WindowInsets.systemBars),
+                Modifier
+                    .consumeWindowInsets(WindowInsets.systemBars),
         ) {
             composable(Screen.HomeTimeline.route) {
                 HomeTimelineScreen(contentPadding)
@@ -321,5 +321,5 @@ fun HomeScreen(
 @Composable
 private fun homePresenter() =
     run {
-        remember { HomePresenter() }.invoke()
+        remember { ActiveAccountPresenter() }.invoke()
     }

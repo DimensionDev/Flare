@@ -114,7 +114,7 @@ internal fun SearchScreen(
         searchUsers = state.user,
         searchStatus = state.status,
         statusEvent = state.statusEvent,
-        onAccountClick = onAccountClick
+        onAccountClick = onAccountClick,
     )
 }
 
@@ -155,7 +155,7 @@ internal fun DiscoverSearch(
         searchUsers = state.user,
         searchStatus = state.status,
         statusEvent = state.statusEvent,
-        onAccountClick = onAccountClick
+        onAccountClick = onAccountClick,
     )
 }
 

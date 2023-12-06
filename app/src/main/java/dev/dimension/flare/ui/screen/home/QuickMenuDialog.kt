@@ -41,15 +41,12 @@ import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.settings.AccountItem
 
-
 @Destination(
     style = DestinationStyle.Dialog::class,
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-fun QuickMenuDialogRoute(
-    navigator: DestinationsNavigator,
-) {
+fun QuickMenuDialogRoute(navigator: DestinationsNavigator) {
     QuickMenuDialog(
         toSettings = {
             navigator.navigate(SettingsRouteDestination)
@@ -98,17 +95,19 @@ private fun QuickMenuDialog(
 }
 
 @Composable
-private fun quickMenuPresenter() = run {
-    val state = remember { QuickMenuPresenter() }.invoke()
-    var expanded by remember { mutableStateOf(false) }
-    object : QuickMenuState by state {
-        val expanded: Boolean
-            get() = expanded
-        fun setExpanded(value: Boolean) {
-            expanded = value
+private fun quickMenuPresenter() =
+    run {
+        val state = remember { QuickMenuPresenter() }.invoke()
+        var expanded by remember { mutableStateOf(false) }
+        object : QuickMenuState by state {
+            val expanded: Boolean
+                get() = expanded
+
+            fun setExpanded(value: Boolean) {
+                expanded = value
+            }
         }
     }
-}
 
 @Composable
 private fun AccountQuickMenu(
@@ -122,8 +121,9 @@ private fun AccountQuickMenu(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier
-            .padding(16.dp),
+        modifier =
+            modifier
+                .padding(16.dp),
         shape = MaterialTheme.shapes.large,
     ) {
         ListItem(
@@ -148,7 +148,7 @@ private fun AccountQuickMenu(
                         contentDescription = null,
                     )
                 }
-            }
+            },
         )
         allAccounts.onSuccess { allUsers ->
             if (expanded) {
@@ -172,10 +172,11 @@ private fun AccountQuickMenu(
                                 contentDescription = null,
                             )
                         },
-                        modifier = Modifier
-                            .clickable {
-                                onAddAccountClick.invoke()
-                            },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    onAddAccountClick.invoke()
+                                },
                     )
                 }
             }
@@ -192,11 +193,11 @@ private fun AccountQuickMenu(
                     contentDescription = null,
                 )
             },
-            modifier = Modifier
-                .clickable {
-                    onSettingsClick.invoke()
-                },
+            modifier =
+                Modifier
+                    .clickable {
+                        onSettingsClick.invoke()
+                    },
         )
-
     }
 }

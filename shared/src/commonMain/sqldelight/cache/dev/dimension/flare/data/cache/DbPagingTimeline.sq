@@ -47,6 +47,3 @@ SELECT COUNT(*) FROM DbPagingTimeline WHERE account_key = :account_key AND pagin
 
 getPage:
 SELECT * FROM DbPagingTimelineWithStatusView WHERE timeline_account_key = :account_key AND timeline_paging_key = :paging_key ORDER BY timeline_sort_id DESC LIMIT :limit OFFSET :offset;
-
-getPaging:
-SELECT * FROM DbPagingTimeline WHERE account_key = :account_key AND paging_key = :paging_key ORDER BY sort_id DESC LIMIT :limit OFFSET :offset;

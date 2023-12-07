@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HtmlText2
@@ -64,6 +65,7 @@ internal fun BlueskyStatusComponent(
     event: BlueskyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val appearanceSettings = LocalAppearanceSettings.current
     Column(
         modifier =
             Modifier
@@ -87,7 +89,7 @@ internal fun BlueskyStatusComponent(
         StatusContentComponent(
             data = data,
         )
-        if (data.medias.isNotEmpty()) {
+        if (data.medias.isNotEmpty() && appearanceSettings.showMedia) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusMediaComponent(
                 data = data.medias,
@@ -102,10 +104,14 @@ internal fun BlueskyStatusComponent(
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        StatusFooterComponent(
-            data = data,
-            event = event,
-        )
+        if (appearanceSettings.showActions) {
+            StatusFooterComponent(
+                data = data,
+                event = event,
+            )
+        } else {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 

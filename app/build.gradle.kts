@@ -123,6 +123,8 @@ dependencies {
     implementation(libs.zoomable)
     implementation(libs.bundles.compose.richtext)
     implementation(libs.composeIcons.fontAwesome)
+    implementation(libs.datastore)
+    implementation(libs.kotlinx.serialization.protobuf)
 
     implementation(projects.shared)
 
@@ -141,3 +143,4 @@ ktlint {
         exclude { element -> element.file.path.contains("build", ignoreCase = true) }
     }
 }
+

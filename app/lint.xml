@@ -1,0 +1,3 @@
+<issue id="ComposeCompositionLocalUsage">
+    <option name="allowed-composition-locals" value="LocalAppearanceSettings" />
+</issue>

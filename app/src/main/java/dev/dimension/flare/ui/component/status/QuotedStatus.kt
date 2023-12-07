@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
@@ -140,7 +141,7 @@ internal fun QuotedStatus(
                 }
                 HtmlText2(element = contentElement, layoutDirection = contentLayoutDirection)
             }
-            if (medias != null) {
+            if (medias != null && LocalAppearanceSettings.current.showMedia) {
                 AdaptiveGrid(
                     modifier =
                         Modifier

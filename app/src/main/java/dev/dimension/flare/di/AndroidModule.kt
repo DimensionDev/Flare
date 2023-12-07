@@ -1,6 +1,7 @@
 package dev.dimension.flare.di
 
 import dev.dimension.flare.data.repository.ComposeNotifyUseCase
+import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusEvent
 import dev.dimension.flare.ui.component.status.bluesky.DefaultBlueskyStatusEvent
@@ -26,4 +27,5 @@ val androidModule =
         }
         singleOf(::ComposeNotifyUseCase)
         singleOf(::StatusEvent)
+        singleOf(::SettingsRepository)
     }

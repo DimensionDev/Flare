@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.EmojiImage
@@ -79,6 +80,7 @@ internal fun MisskeyStatusComponent(
     modifier: Modifier = Modifier,
 ) {
     val actualData = data.renote ?: data
+    val appearanceSettings = LocalAppearanceSettings.current
     Column(
         modifier =
             Modifier
@@ -102,7 +104,7 @@ internal fun MisskeyStatusComponent(
         StatusContentComponent(
             data = actualData,
         )
-        if (actualData.media.isNotEmpty()) {
+        if (actualData.media.isNotEmpty() && appearanceSettings.showMedia) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusMediaComponent(
                 data = actualData.media,
@@ -121,17 +123,21 @@ internal fun MisskeyStatusComponent(
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        if (actualData.reaction.emojiReactions.isNotEmpty()) {
+        if (actualData.reaction.emojiReactions.isNotEmpty() && appearanceSettings.misskey.showReaction) {
             Spacer(modifier = Modifier.height(8.dp))
             StatusReactionComponent(
                 data = actualData,
                 event = event,
             )
         }
-        StatusFooterComponent(
-            data = data,
-            event = event,
-        )
+        if (appearanceSettings.showActions) {
+            StatusFooterComponent(
+                data = data,
+                event = event,
+            )
+        } else {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 
@@ -428,14 +434,16 @@ private fun StatusHeaderComponent(
         onUserClick = { event.onUserClick(it) },
         modifier = modifier,
     ) {
-        VisibilityIcon(
-            visibility = data.visibility,
-            modifier =
-                Modifier
-                    .size(14.dp)
-                    .alpha(MediumAlpha),
-        )
-        Spacer(modifier = Modifier.width(4.dp))
+        if (LocalAppearanceSettings.current.misskey.showVisibility) {
+            VisibilityIcon(
+                visibility = data.visibility,
+                modifier =
+                    Modifier
+                        .size(14.dp)
+                        .alpha(MediumAlpha),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
         Text(
             text = data.humanizedTime,
             style = MaterialTheme.typography.bodySmall,

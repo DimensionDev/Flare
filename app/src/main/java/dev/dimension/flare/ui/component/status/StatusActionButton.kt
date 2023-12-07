@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 
 @Composable
 internal fun StatusActionButton(
@@ -33,6 +34,7 @@ internal fun StatusActionButton(
     content: @Composable RowScope.() -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val appearanceSettings = LocalAppearanceSettings.current
     Row(
         modifier =
             modifier
@@ -60,7 +62,7 @@ internal fun StatusActionButton(
                     .size(16.dp),
             tint = color,
         )
-        if (!text.isNullOrEmpty()) {
+        if (!text.isNullOrEmpty() && appearanceSettings.showNumbers) {
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = text,

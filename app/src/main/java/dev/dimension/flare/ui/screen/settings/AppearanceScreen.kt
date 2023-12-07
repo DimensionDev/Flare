@@ -6,12 +6,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -184,8 +186,10 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                                 when (appearanceSettings.theme) {
                                     Theme.LIGHT ->
                                         Text(text = stringResource(id = R.string.settings_appearance_theme_light))
+
                                     Theme.SYSTEM ->
                                         Text(text = stringResource(id = R.string.settings_appearance_theme_auto))
+
                                     Theme.DARK ->
                                         Text(text = stringResource(id = R.string.settings_appearance_theme_dark))
                                 }
@@ -314,6 +318,7 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                                 when (appearanceSettings.avatarShape) {
                                     AvatarShape.CIRCLE ->
                                         Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_round))
+
                                     AvatarShape.SQUARE ->
                                         Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_square))
                                 }
@@ -497,51 +502,316 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                         }
                     },
             )
-            ListItem(
-                headlineContent = {
-                    Text(text = stringResource(id = R.string.settings_appearance_swipe_left))
-                },
-                supportingContent = {
-                    Text(text = stringResource(id = R.string.settings_appearance_swipe_left_description))
-                },
-                trailingContent = {
-                    TextButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.Replay,
-                            contentDescription = null,
-                        )
-                        Text(text = "Retoot")
-                    }
-                },
-            )
-
-            ListItem(
-                headlineContent = {
-                    Text(text = stringResource(id = R.string.settings_appearance_swipe_right))
-                },
-                supportingContent = {
-                    Text(text = stringResource(id = R.string.settings_appearance_swipe_right_description))
-                },
-                trailingContent = {
-                    TextButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.Replay,
-                            contentDescription = null,
-                        )
-                        Text(text = "Like")
-                    }
-                },
-            )
 
             state.user.onSuccess { user ->
+                AnimatedVisibility(appearanceSettings.swipeGestures) {
+                    var showMenu by remember { mutableStateOf(false) }
+                    ListItem(
+                        modifier =
+                            Modifier.clickable {
+                                showMenu = true
+                            },
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_swipe_left))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_swipe_left_description))
+                        },
+                        trailingContent = {
+                            val icon =
+                                when (user) {
+                                    is UiUser.Bluesky ->
+                                        appearanceSettings.bluesky.swipeLeft.icon
+
+                                    is UiUser.Mastodon ->
+                                        appearanceSettings.mastodon.swipeLeft.icon
+
+                                    is UiUser.Misskey ->
+                                        appearanceSettings.misskey.swipeLeft.icon
+                                }
+                            val textId =
+                                when (user) {
+                                    is UiUser.Bluesky ->
+                                        appearanceSettings.bluesky.swipeLeft.id
+
+                                    is UiUser.Mastodon ->
+                                        appearanceSettings.mastodon.swipeLeft.id
+
+                                    is UiUser.Misskey ->
+                                        appearanceSettings.misskey.swipeLeft.id
+                                }
+                            TextButton(onClick = {
+                                showMenu = true
+                            }) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = stringResource(id = textId),
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = stringResource(id = textId))
+                            }
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false },
+                            ) {
+                                when (user) {
+                                    is UiUser.Bluesky ->
+                                        AppearanceSettings.Bluesky.SwipeActions.entries.forEach {
+                                            DropdownMenuItem(
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = it.icon,
+                                                        contentDescription = stringResource(id = it.id),
+                                                    )
+                                                },
+                                                text = {
+                                                    Text(text = stringResource(id = it.id))
+                                                },
+                                                onClick = {
+                                                    state.updateSettings {
+                                                        copy(
+                                                            bluesky =
+                                                                bluesky.copy(
+                                                                    swipeLeft = it,
+                                                                ),
+                                                        )
+                                                    }
+                                                    showMenu = false
+                                                },
+                                                trailingIcon = {
+                                                    Checkbox(
+                                                        checked = appearanceSettings.bluesky.swipeLeft == it,
+                                                        onCheckedChange = null,
+                                                    )
+                                                },
+                                            )
+                                        }
+
+                                    is UiUser.Mastodon ->
+                                        AppearanceSettings.Mastodon.SwipeActions.entries.forEach {
+                                            DropdownMenuItem(
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = it.icon,
+                                                        contentDescription = stringResource(id = it.id),
+                                                    )
+                                                },
+                                                text = {
+                                                    Text(text = stringResource(id = it.id))
+                                                },
+                                                onClick = {
+                                                    state.updateSettings {
+                                                        copy(
+                                                            mastodon =
+                                                                mastodon.copy(
+                                                                    swipeLeft = it,
+                                                                ),
+                                                        )
+                                                    }
+                                                    showMenu = false
+                                                },
+                                                trailingIcon = {
+                                                    Checkbox(
+                                                        checked = appearanceSettings.mastodon.swipeLeft == it,
+                                                        onCheckedChange = null,
+                                                    )
+                                                },
+                                            )
+                                        }
+
+                                    is UiUser.Misskey ->
+                                        AppearanceSettings.Misskey.SwipeActions.entries.forEach {
+                                            DropdownMenuItem(
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = it.icon,
+                                                        contentDescription = stringResource(id = it.id),
+                                                    )
+                                                },
+                                                text = {
+                                                    Text(text = stringResource(id = it.id))
+                                                },
+                                                onClick = {
+                                                    state.updateSettings {
+                                                        copy(
+                                                            misskey =
+                                                                misskey.copy(
+                                                                    swipeLeft = it,
+                                                                ),
+                                                        )
+                                                    }
+                                                    showMenu = false
+                                                },
+                                                trailingIcon = {
+                                                    Checkbox(
+                                                        checked = appearanceSettings.misskey.swipeLeft == it,
+                                                        onCheckedChange = null,
+                                                    )
+                                                },
+                                            )
+                                        }
+                                }
+                            }
+                        },
+                    )
+                }
+
+                AnimatedVisibility(appearanceSettings.swipeGestures) {
+                    var showMenu by remember { mutableStateOf(false) }
+                    ListItem(
+                        modifier =
+                            Modifier.clickable {
+                                showMenu = true
+                            },
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_swipe_right))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_swipe_right_description))
+                        },
+                        trailingContent = {
+                            val icon =
+                                when (user) {
+                                    is UiUser.Bluesky ->
+                                        appearanceSettings.bluesky.swipeRight.icon
+
+                                    is UiUser.Mastodon ->
+                                        appearanceSettings.mastodon.swipeRight.icon
+
+                                    is UiUser.Misskey ->
+                                        appearanceSettings.misskey.swipeRight.icon
+                                }
+                            val textId =
+                                when (user) {
+                                    is UiUser.Bluesky ->
+                                        appearanceSettings.bluesky.swipeRight.id
+
+                                    is UiUser.Mastodon ->
+                                        appearanceSettings.mastodon.swipeRight.id
+
+                                    is UiUser.Misskey ->
+                                        appearanceSettings.misskey.swipeRight.id
+                                }
+                            TextButton(onClick = {
+                                showMenu = true
+                            }) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = stringResource(id = textId),
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = stringResource(id = textId))
+                            }
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false },
+                            ) {
+                                when (user) {
+                                    is UiUser.Bluesky ->
+                                        AppearanceSettings.Bluesky.SwipeActions.entries.forEach {
+                                            DropdownMenuItem(
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = it.icon,
+                                                        contentDescription = stringResource(id = it.id),
+                                                    )
+                                                },
+                                                text = {
+                                                    Text(text = stringResource(id = it.id))
+                                                },
+                                                onClick = {
+                                                    state.updateSettings {
+                                                        copy(
+                                                            bluesky =
+                                                                bluesky.copy(
+                                                                    swipeRight = it,
+                                                                ),
+                                                        )
+                                                    }
+                                                    showMenu = false
+                                                },
+                                                trailingIcon = {
+                                                    Checkbox(
+                                                        checked = appearanceSettings.bluesky.swipeRight == it,
+                                                        onCheckedChange = null,
+                                                    )
+                                                },
+                                            )
+                                        }
+
+                                    is UiUser.Mastodon ->
+                                        AppearanceSettings.Mastodon.SwipeActions.entries.forEach {
+                                            DropdownMenuItem(
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = it.icon,
+                                                        contentDescription = stringResource(id = it.id),
+                                                    )
+                                                },
+                                                text = {
+                                                    Text(text = stringResource(id = it.id))
+                                                },
+                                                onClick = {
+                                                    state.updateSettings {
+                                                        copy(
+                                                            mastodon =
+                                                                mastodon.copy(
+                                                                    swipeRight = it,
+                                                                ),
+                                                        )
+                                                    }
+                                                    showMenu = false
+                                                },
+                                                trailingIcon = {
+                                                    Checkbox(
+                                                        checked = appearanceSettings.mastodon.swipeRight == it,
+                                                        onCheckedChange = null,
+                                                    )
+                                                },
+                                            )
+                                        }
+
+                                    is UiUser.Misskey ->
+                                        AppearanceSettings.Misskey.SwipeActions.entries.forEach {
+                                            DropdownMenuItem(
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = it.icon,
+                                                        contentDescription = stringResource(id = it.id),
+                                                    )
+                                                },
+                                                text = {
+                                                    Text(text = stringResource(id = it.id))
+                                                },
+                                                onClick = {
+                                                    state.updateSettings {
+                                                        copy(
+                                                            misskey =
+                                                                misskey.copy(
+                                                                    swipeRight = it,
+                                                                ),
+                                                        )
+                                                    }
+                                                    showMenu = false
+                                                },
+                                                trailingIcon = {
+                                                    Checkbox(
+                                                        checked = appearanceSettings.misskey.swipeRight == it,
+                                                        onCheckedChange = null,
+                                                    )
+                                                },
+                                            )
+                                        }
+                                }
+                            }
+                        },
+                    )
+                }
+
                 ListItem(
                     headlineContent = {
                         when (user) {
-                            is UiUser.Bluesky ->
-                                Text(
-                                    text = "Bluesky",
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
+                            is UiUser.Bluesky -> Unit
 
                             is UiUser.Mastodon ->
                                 Text(
@@ -559,7 +829,7 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                 )
 
                 when (user) {
-                    is UiUser.Bluesky -> BlueskyAppearance(state, appearanceSettings)
+                    is UiUser.Bluesky -> Unit
                     is UiUser.Mastodon -> MastodonAppearance(state, appearanceSettings)
                     is UiUser.Misskey -> MisskeyAppearance(state, appearanceSettings)
                 }
@@ -568,12 +838,12 @@ private fun AppearanceScreen(onBack: () -> Unit) {
     }
 }
 
-@Composable
-private fun ColumnScope.BlueskyAppearance(
-    state: AppearanceState,
-    appearanceSettings: AppearanceSettings,
-) {
-}
+// @Composable
+// private fun ColumnScope.BlueskyAppearance(
+//    state: AppearanceState,
+//    appearanceSettings: AppearanceSettings,
+// ) {
+// }
 
 @Composable
 private fun ColumnScope.MastodonAppearance(

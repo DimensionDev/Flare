@@ -236,4 +236,11 @@
     <string name="settings_appearance_misskey_show_visibility_description">Show visibility in the status</string>
     <string name="settings_appearance_misskey_show_reaction">Show reaction</string>
     <string name="settings_appearance_misskey_show_reaction_description">Show reaction in the status</string>
+
+    <string name="swipe_action_nothing">Nothing</string>
+    <string name="swipe_action_reply">Reply</string>
+    <string name="swipe_action_reblog">Reblog</string>
+    <string name="swipe_action_renote">Renote</string>
+    <string name="swipe_action_favourite">Favourite</string>
+    <string name="swipe_action_bookmark">Bookmark</string>
 </resources>

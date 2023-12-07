@@ -1,10 +1,19 @@
 package dev.dimension.flare.data.model
 
 import android.content.Context
+import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HideSource
+import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
+import dev.dimension.flare.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -38,12 +47,15 @@ data class AppearanceSettings(
         val swipeLeft: SwipeActions = SwipeActions.REPLY,
         val swipeRight: SwipeActions = SwipeActions.NONE,
     ) {
-        enum class SwipeActions {
-            NONE,
-            REPLY,
-            REBLOG,
-            FAVOURITE,
-            BOOKMARK,
+        enum class SwipeActions(
+            @StringRes val id: Int,
+            val icon: ImageVector,
+        ) {
+            NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
+            REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
+            REBLOG(R.string.swipe_action_reblog, Icons.Default.SyncAlt),
+            FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
+            BOOKMARK(R.string.swipe_action_bookmark, Icons.Default.Bookmark),
         }
     }
 
@@ -54,11 +66,14 @@ data class AppearanceSettings(
         val swipeLeft: SwipeActions = SwipeActions.REPLY,
         val swipeRight: SwipeActions = SwipeActions.NONE,
     ) {
-        enum class SwipeActions {
-            NONE,
-            REPLY,
-            RENOTE,
-            FAVOURITE,
+        enum class SwipeActions(
+            @StringRes val id: Int,
+            val icon: ImageVector,
+        ) {
+            NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
+            REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
+            RENOTE(R.string.swipe_action_renote, Icons.Default.SyncAlt),
+            FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
         }
     }
 
@@ -67,11 +82,14 @@ data class AppearanceSettings(
         val swipeLeft: SwipeActions = SwipeActions.REPLY,
         val swipeRight: SwipeActions = SwipeActions.NONE,
     ) {
-        enum class SwipeActions {
-            NONE,
-            REPLY,
-            REBLOG,
-            FAVOURITE,
+        enum class SwipeActions(
+            @StringRes val id: Int,
+            val icon: ImageVector,
+        ) {
+            NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
+            REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
+            REBLOG(R.string.swipe_action_reblog, Icons.Default.SyncAlt),
+            FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
         }
     }
 }

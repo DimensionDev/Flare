@@ -190,6 +190,7 @@ internal fun MisskeyStatusComponent(
                 StatusMediaComponent(
                     data = actualData.media,
                     onMediaClick = event::onMediaClick,
+                    sensitive = actualData.sensitive,
                 )
             }
 //        StatusCardComponent(

@@ -271,6 +271,7 @@ internal fun MastodonStatusComponent(
                 StatusMediaComponent(
                     data = actualData.media,
                     onMediaClick = event::onMediaClick,
+                    sensitive = actualData.sensitive,
                 )
             }
             if (appearanceSettings.showLinkPreview) {

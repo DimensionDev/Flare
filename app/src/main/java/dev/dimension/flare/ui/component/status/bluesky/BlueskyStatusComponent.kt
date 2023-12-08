@@ -178,6 +178,7 @@ internal fun BlueskyStatusComponent(
                 StatusMediaComponent(
                     data = data.medias,
                     onMediaClick = event::onMediaClick,
+                    sensitive = false,
                 )
             }
             data.quote?.let { quote ->

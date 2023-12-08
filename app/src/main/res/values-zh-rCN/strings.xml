@@ -242,4 +242,11 @@
     <string name="swipe_action_favourite">收藏</string>
     <string name="swipe_action_bookmark">书签</string>
 
+    <string name="settings_storage_clear_image_cache">清除图片缓存</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB的图片将被删除</string>
+
+    <string name="settings_storage_clear_database">清除缓存数据库</string>
+    <string name="settings_storage_clear_database_description">%1$s个用户，%2$s个状态将被删除</string>
+
+
 </resources>

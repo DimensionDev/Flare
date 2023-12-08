@@ -244,4 +244,10 @@
     <string name="swipe_action_renote">Renote</string>
     <string name="swipe_action_favourite">Favourite</string>
     <string name="swipe_action_bookmark">Bookmark</string>
+
+    <string name="settings_storage_clear_image_cache">Clear image cache</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
+
+    <string name="settings_storage_clear_database">Clear cache database</string>
+    <string name="settings_storage_clear_database_description">%1$s users, %2$s statuses will be removed</string>
 </resources>

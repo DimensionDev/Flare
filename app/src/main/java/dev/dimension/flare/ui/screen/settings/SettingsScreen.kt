@@ -8,7 +8,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +33,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.screen.destinations.AboutRouteDestination
 import dev.dimension.flare.ui.screen.destinations.AccountsRouteDestination
 import dev.dimension.flare.ui.screen.destinations.AppearanceRouteDestination
+import dev.dimension.flare.ui.screen.destinations.StorageRouteDestination
 
 @Destination(
     wrappers = [ThemeWrapper::class],
@@ -49,7 +49,9 @@ fun SettingsRoute(navigator: DestinationsNavigator) {
             navigator.navigate(AppearanceRouteDestination)
         },
         toNotifications = {},
-        toStorage = {},
+        toStorage = {
+            navigator.navigate(StorageRouteDestination)
+        },
         toAbout = {
             navigator.navigate(AboutRouteDestination)
         },
@@ -118,24 +120,24 @@ internal fun SettingsScreen(
                         toAppearance.invoke()
                     },
             )
-            ListItem(
-                headlineContent = {
-                    Text(text = stringResource(id = R.string.settings_notifications_title))
-                },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = null,
-                    )
-                },
-                supportingContent = {
-                    Text(text = stringResource(id = R.string.settings_notifications_subtitle))
-                },
-                modifier =
-                    Modifier.clickable {
-                        toNotifications.invoke()
-                    },
-            )
+//            ListItem(
+//                headlineContent = {
+//                    Text(text = stringResource(id = R.string.settings_notifications_title))
+//                },
+//                leadingContent = {
+//                    Icon(
+//                        imageVector = Icons.Default.Notifications,
+//                        contentDescription = null,
+//                    )
+//                },
+//                supportingContent = {
+//                    Text(text = stringResource(id = R.string.settings_notifications_subtitle))
+//                },
+//                modifier =
+//                    Modifier.clickable {
+//                        toNotifications.invoke()
+//                    },
+//            )
             ListItem(
                 headlineContent = {
                     Text(text = stringResource(id = R.string.settings_storage_title))

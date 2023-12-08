@@ -30,8 +30,8 @@ fun <T : Any> Flow<PagingData<T>>.collectPagingProxy(): LazyPagingItemsProxy<T> 
     val data = collectAsLazyPagingItems()
     return LazyPagingItemsProxy(
         data = data,
-        itemCount = data.itemCount,
-        loadState = data.loadState,
+        itemCountInternal = data.itemCount,
+        loadStateInternal = data.loadState,
     )
 }
 
@@ -67,9 +67,14 @@ inline fun <reified T : Any> LazyPagingItemsProxy<T>.onSuccess(block: () -> Unit
 @Immutable
 data class LazyPagingItemsProxy<T : Any>(
     val data: LazyPagingItems<T>,
-    val itemCount: Int = data.itemCount,
-    val loadState: CombinedLoadStates = data.loadState,
+    private val itemCountInternal: Int = data.itemCount,
+    private val loadStateInternal: CombinedLoadStates = data.loadState,
 ) {
+    val itemCount: Int
+        get() = data.itemCount
+    val loadState: CombinedLoadStates
+        get() = data.loadState
+
     operator fun get(index: Int): T? = data.get(index)
 
     fun peek(index: Int): T? = data.peek(index)

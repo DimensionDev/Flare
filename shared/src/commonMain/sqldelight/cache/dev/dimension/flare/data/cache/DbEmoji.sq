@@ -2,7 +2,8 @@ import dev.dimension.flare.data.database.cache.model.EmojiContent;
 
 CREATE TABLE IF NOT EXISTS DbEmoji (
     host TEXT NOT NULL PRIMARY KEY,
-    content TEXT AS EmojiContent NOT NULL
+    content TEXT AS EmojiContent NOT NULL,
+    UNIQUE(host)
 );
 
 insert:
@@ -10,3 +11,6 @@ INSERT OR REPLACE INTO DbEmoji (host, content) VALUES (:host, :content);
 
 get:
 SELECT * FROM DbEmoji WHERE host = :host;
+
+clear:
+DELETE FROM DbEmoji;

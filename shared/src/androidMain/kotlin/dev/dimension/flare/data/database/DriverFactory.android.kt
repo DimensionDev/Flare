@@ -1,10 +1,12 @@
 package dev.dimension.flare.data.database
 
 import android.content.Context
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+
 
 internal actual class DriverFactory(
     private val context: Context,
@@ -13,6 +15,7 @@ internal actual class DriverFactory(
         schema: SqlSchema<QueryResult.Value<Unit>>,
         name: String,
     ): SqlDriver {
+        SupportSQLiteOpenHelper.Configuration.builder(context)
         return AndroidSqliteDriver(schema, context, name)
     }
 

@@ -2,8 +2,8 @@ package dev.dimension.flare.molecule
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.cash.molecule.AndroidUiDispatcher
@@ -41,5 +41,5 @@ private fun <T> createPresenter(
             PresenterHolder<T>(body)
         },
 ): State<T> {
-    return holder.state.collectAsState()
+    return holder.state.collectAsStateWithLifecycle()
 }

@@ -25,7 +25,16 @@ internal class MentionRemoteMediator(
         return try {
             val response =
                 when (loadType) {
-                    LoadType.REFRESH, LoadType.PREPEND -> {
+                    LoadType.REFRESH -> {
+                        database.transaction {
+                            database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        }
+                        service.notification(
+                            limit = state.config.pageSize,
+                            exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
+                        )
+                    }
+                    LoadType.PREPEND -> {
                         val firstItem = state.firstItemOrNull()
                         service.notification(
                             limit = state.config.pageSize,

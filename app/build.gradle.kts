@@ -1,6 +1,5 @@
 import java.util.Properties
 
-@Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,7 +18,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: 1
-        versionName = System.getenv("BUILD_VERSION")?.toString()
+        versionName = System.getenv("BUILD_VERSION")?.toString() ?: "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -28,7 +27,6 @@ android {
 
         packaging {
             resources {
-                excludes.add("META-INF/versions/9/previous-compilation-data.bin") // <-- This?
                 excludes.add("/META-INF/{AL2.0,LGPL2.1}")
                 excludes.add("DebugProbesKt.bin")
             }
@@ -79,6 +77,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.compose.complier.get()
@@ -94,6 +93,7 @@ dependencies {
 
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.runtime.compose)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
@@ -101,6 +101,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+    implementation(libs.material3WindowSizeClass)
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)
     implementation(libs.bundles.navigation)
@@ -122,6 +123,9 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.zoomable)
     implementation(libs.bundles.compose.richtext)
+    implementation(libs.composeIcons.fontAwesome)
+    implementation(libs.datastore)
+    implementation(libs.kotlinx.serialization.protobuf)
 
     implementation(projects.shared)
 
@@ -140,3 +144,4 @@ ktlint {
         exclude { element -> element.file.path.contains("build", ignoreCase = true) }
     }
 }
+

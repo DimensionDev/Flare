@@ -11,7 +11,7 @@ espresso-core = "3.5.1"
 lifecycle-runtime-ktx = "2.6.2"
 activity-compose = "1.8.1"
 compose-bom = "2023.12.00-alpha03"
-compose-complier = "1.5.5-dev-k1.9.21-163bb051fe5"
+compose-complier = "1.5.6"
 ksp = "1.9.21-1.0.15"
 cash-paging = "3.3.0-alpha02-0.4.0"
 room = "2.6.1"
@@ -19,7 +19,7 @@ paging = "3.3.0-alpha02"
 navigation = "2.7.5"
 kotlinx-datetime = "0.5.0"
 kotlinx-collections-immutable = "0.3.6"
-kotlinx-serialization-json = "1.6.2"
+kotlinx-serialization = "1.6.2"
 coil = "2.5.0"
 ktorfit = "1.10.2"
 ktor = "2.3.6"
@@ -49,6 +49,7 @@ kotlinpoet = "1.15.2"
 kotlinx-coroutines = "1.7.3"
 koin = "3.5.1"
 koin-annotation = "1.3.0"
+composeIcons = "1.1.0"
 
 [libraries]
 bluesky = { module = "moe.tlaster:bluesky", version.ref = "bluesky" }
@@ -58,6 +59,7 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 ktml = { group = "moe.tlaster", name = "ktml", version.ref = "ktml" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
+lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "dev.chrisbanes.compose", name = "compose-bom", version.ref = "compose-bom" }
 paging-compose-common = { module = "app.cash.paging:paging-compose-common", version.ref = "cash-paging" }
@@ -71,6 +73,7 @@ ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
+material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
@@ -79,11 +82,14 @@ room-paging = { group = "androidx.room", name = "room-paging", version.ref = "ro
 paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+composeIcons-fontAwesome = { module = "br.com.devsrsouza.compose.icons:font-awesome", version.ref = "composeIcons" }
+datastore = { group = "androidx.datastore", name = "datastore", version = "1.0.0" }
 
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-protobuf = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-protobuf", version.ref = "kotlinx-serialization" }
 
 koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 koin-core = { group = "io.insert-koin", name = "koin-core" }

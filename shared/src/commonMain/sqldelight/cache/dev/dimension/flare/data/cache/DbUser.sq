@@ -27,3 +27,9 @@ SELECT * FROM DbUser WHERE user_key = :user_key;
 
 findByHandleAndHost:
 SELECT * FROM DbUser WHERE handle = :handle AND host = :host AND platform_type = :platform_type;
+
+count:
+SELECT COUNT(*) FROM DbUser;
+
+clear:
+DELETE FROM DbUser;

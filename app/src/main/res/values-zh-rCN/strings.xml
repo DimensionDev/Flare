@@ -84,12 +84,21 @@
     <string name="mastodon_visibility_private_description">只有关注你的人可以看到这条嘟文</string>
     <string name="mastodon_visibility_direct_description">只有提到的人可以看到这条嘟文</string>
 
-    <string name="settings_accounts_title">账号</string>
+    <string name="settings_accounts_title">账号管理</string>
+    <string name="settings_appearance_title">外观</string>
+    <string name="settings_appearance_subtitle">自定义Flare的外观和感觉</string>
+    <string name="settings_notifications_title">通知</string>
+    <string name="settings_notifications_subtitle">自定义Flare如何通知您</string>
+    <string name="settings_storage_title">存储</string>
+    <string name="settings_storage_subtitle">管理Flare的存储</string>
+    <string name="settings_about_title">关于</string>
+    <string name="settings_about_subtitle">了解更多关于Flare的信息</string>
 
     <string name="status_loadmore_end">没有更多嘟文了</string>
     <string name="status_loadmore_error">加载失败</string>
     <string name="status_loadmore_error_retry">重试</string>
     <string name="status_empty">这里什么都没有</string>
+    <string name="status_sensitive_media">敏感内容</string>
 
     <string name="service_select_welcome_title">欢迎使用 Flare</string>
     <string name="service_select_welcome_message">Flare 是一个 Android 平台社交客户端。\n请先选择一个服务来开始。</string>
@@ -182,5 +191,62 @@
 
     <string name="search_users">用户</string>
     <string name="search_status">状态</string>
+
+    <string name="quick_menu_title">快捷菜单</string>
+    <string name="quick_menu_add_account">添加账户</string>
+
+    <string name="settings_about_description">下一代终极开源、由AI驱动的去中心化社交网络客户端，专为安卓系统设计。</string>
+    <string name="settings_about_source_code">源代码</string>
+    <string name="settings_appearance_generic">通用</string>
+
+    <string name="settings_appearance_show_actions">显示操作</string>
+    <string name="settings_appearance_show_actions_description">在状态的底部显示操作</string>
+    <string name="settings_appearance_show_media">显示媒体</string>
+    <string name="settings_appearance_show_media_description">在状态中显示媒体</string>
+    <string name="settings_appearance_show_numbers">显示数字</string>
+    <string name="settings_appearance_show_numbers_description">在状态的底部显示数字</string>
+    <string name="settings_appearance_show_cw_img">显示敏感内容</string>
+    <string name="settings_appearance_show_cw_img_description">始终在状态中显示敏感内容</string>
+    <string name="settings_appearance_enable_swipe">启用滑动手势</string>
+    <string name="settings_appearance_enable_swipe_description">在状态上启用滑动手势</string>
+    <string name="settings_appearance_avatar_shape">头像形状</string>
+    <string name="settings_appearance_avatar_shape_description">更改头像的形状</string>
+    <string name="settings_appearance_avatar_shape_round">圆形</string>
+    <string name="settings_appearance_avatar_shape_square">方形</string>
+    <string name="settings_appearance_swipe_left">向左滑动</string>
+    <string name="settings_appearance_swipe_left_description">在状态上向左滑动时执行的操作</string>
+    <string name="settings_appearance_swipe_right">向右滑动</string>
+    <string name="settings_appearance_swipe_right_description">在状态上向右滑动时执行的操作</string>
+    <string name="settings_appearance_theme">主题</string>
+    <string name="settings_appearance_theme_description">更改应用的主题</string>
+    <string name="settings_appearance_theme_light">浅色</string>
+    <string name="settings_appearance_theme_dark">深色</string>
+    <string name="settings_appearance_theme_auto">自动</string>
+    <string name="settings_appearance_dynamic_theme">动态主题</string>
+    <string name="settings_appearance_dynamic_theme_description">根据设备的壁纸更改应用的主题</string>
+    <string name="settings_appearance_show_link_previews">显示链接预览</string>
+    <string name="settings_appearance_show_link_previews_description">在状态中显示链接预览</string>
+
+    <string name="settings_appearance_mastodon_show_visibility">显示可见性</string>
+    <string name="settings_appearance_mastodon_show_visibility_description">在状态中显示可见性</string>
+
+    <string name="settings_appearance_misskey_show_visibility">显示可见性</string>
+    <string name="settings_appearance_misskey_show_visibility_description">在状态中显示可见性</string>
+    <string name="settings_appearance_misskey_show_reaction">显示数字</string>
+    <string name="settings_appearance_misskey_show_reaction_description">在状态中显示数字</string>
+
+    <string name="swipe_action_nothing">无操作</string>
+    <string name="swipe_action_reply">回复</string>
+    <string name="swipe_action_reblog">转发</string>
+    <string name="swipe_action_renote">转贴</string>
+    <string name="swipe_action_favourite">收藏</string>
+    <string name="swipe_action_bookmark">书签</string>
+
+    <string name="settings_storage_clear_image_cache">清除图片缓存</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB的图片将被删除</string>
+
+    <string name="settings_storage_clear_database">清除缓存数据库</string>
+    <string name="settings_storage_clear_database_description">%1$s个用户，%2$s个状态将被删除</string>
+
 
 </resources>

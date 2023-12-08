@@ -24,7 +24,16 @@ internal class NotificationRemoteMediator(
         return try {
             val response =
                 when (loadType) {
-                    LoadType.REFRESH, LoadType.PREPEND -> {
+                    LoadType.REFRESH -> {
+                        database.transaction {
+                            database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        }
+                        service.notification(
+                            limit = state.config.pageSize,
+                        )
+                    }
+
+                    LoadType.PREPEND -> {
                         val firstItem = state.firstItemOrNull()
                         service.notification(
                             limit = state.config.pageSize,

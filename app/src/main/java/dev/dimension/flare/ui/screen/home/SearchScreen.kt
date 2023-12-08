@@ -53,6 +53,7 @@ import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
+import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.screen.profile.CommonProfileHeader
 import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -78,6 +79,9 @@ fun SearchRoute(
     SearchScreen(
         initialQuery = keyword,
         onBack = { navigator.navigateUp() },
+        onAccountClick = {
+            navigator.navigate(QuickMenuDialogRouteDestination)
+        },
     )
 }
 
@@ -85,6 +89,7 @@ fun SearchRoute(
 internal fun SearchScreen(
     initialQuery: String,
     onBack: () -> Unit,
+    onAccountClick: () -> Unit,
 ) {
     val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter(initialQuery.decodeURLQueryComponent()) }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -109,6 +114,7 @@ internal fun SearchScreen(
         searchUsers = state.user,
         searchStatus = state.status,
         statusEvent = state.statusEvent,
+        onAccountClick = onAccountClick,
     )
 }
 
@@ -116,6 +122,7 @@ internal fun SearchScreen(
 internal fun DiscoverSearch(
     user: UiState<UiUser>,
     state: DiscoverSearchState,
+    onAccountClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     BackHandler(enabled = state.isSearching) {
@@ -148,6 +155,7 @@ internal fun DiscoverSearch(
         searchUsers = state.user,
         searchStatus = state.status,
         statusEvent = state.statusEvent,
+        onAccountClick = onAccountClick,
     )
 }
 
@@ -161,6 +169,7 @@ private fun SearchContent(
     active: Boolean,
     onActiveChange: (Boolean) -> Unit,
     onBack: () -> Unit,
+    onAccountClick: () -> Unit,
     committed: Boolean,
     searchUsers: UiState<LazyPagingItemsProxy<UiUser>>,
     searchStatus: UiState<LazyPagingItemsProxy<UiStatus>>,
@@ -201,6 +210,7 @@ private fun SearchContent(
                 } else {
                     user?.onSuccess {
                         IconButton(onClick = {
+                            onAccountClick.invoke()
                         }) {
                             NetworkImage(
                                 model = it.avatarUrl,

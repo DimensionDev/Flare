@@ -88,29 +88,3 @@ abstract class HomeTimelineState(
             }
     }
 }
-
-class CounterPresenter : PresenterBase<CounterState>() {
-    @Composable
-    override fun body(): CounterState {
-        var count by remember { mutableStateOf(0) }
-        return object : CounterState(count.toString()) {
-            override fun increment() {
-                count++
-            }
-        }
-    }
-}
-
-abstract class CounterState(
-    val count: String,
-) {
-    abstract fun increment()
-
-    companion object {
-        val Empty =
-            object : CounterState("0") {
-                override fun increment() {
-                }
-            }
-    }
-}

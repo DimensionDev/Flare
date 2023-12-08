@@ -24,3 +24,9 @@ UPDATE DbStatus SET content = :content WHERE status_key = :status_key AND accoun
 
 delete:
 DELETE FROM DbStatus WHERE status_key = :status_key AND account_key = :account_key;
+
+count:
+SELECT COUNT(*) FROM DbStatus;
+
+clear:
+DELETE FROM DbStatus;

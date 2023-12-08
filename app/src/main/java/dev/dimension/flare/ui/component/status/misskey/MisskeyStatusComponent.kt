@@ -4,12 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,19 +33,24 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Card
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,11 +61,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.model.AppearanceSettings
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.OptionalSwipeToDismissBox
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
@@ -69,68 +79,168 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MisskeyStatusComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
-    val actualData = data.renote ?: data
-    Column(
-        modifier =
-            Modifier
-                .clickable {
-                    event.onStatusClick(data)
+    val currentData by rememberUpdatedState(data)
+    val actualData by rememberUpdatedState(newValue = data.renote ?: data)
+    val appearanceSettings = LocalAppearanceSettings.current
+    val dismissState =
+        rememberDismissState(
+            confirmValueChange = {
+                when (it) {
+                    DismissValue.DismissedToEnd -> appearanceSettings.misskey.swipeRight
+                    DismissValue.DismissedToStart -> appearanceSettings.misskey.swipeLeft
+                    else -> null
+                }?.let {
+                    when (it) {
+                        AppearanceSettings.Misskey.SwipeActions.NONE -> Unit
+                        AppearanceSettings.Misskey.SwipeActions.REPLY ->
+                            event.onReplyClick(currentData)
+                        AppearanceSettings.Misskey.SwipeActions.RENOTE ->
+                            event.onReblogClick(currentData)
+                        AppearanceSettings.Misskey.SwipeActions.FAVOURITE ->
+                            event.onAddReactionClick(currentData)
+                    }
                 }
-                .then(modifier),
+                false
+            },
+        )
+
+    OptionalSwipeToDismissBox(
+        state = dismissState,
+        enabled =
+            appearanceSettings.swipeGestures &&
+                (
+                    appearanceSettings.misskey.swipeLeft != AppearanceSettings.Misskey.SwipeActions.NONE ||
+                        appearanceSettings.misskey.swipeRight != AppearanceSettings.Misskey.SwipeActions.NONE
+                ),
+        backgroundContent = {
+            val alignment =
+                when (dismissState.dismissDirection) {
+                    DismissDirection.StartToEnd -> Alignment.CenterStart
+                    DismissDirection.EndToStart -> Alignment.CenterEnd
+                    null -> Alignment.Center
+                }
+            val action =
+                when (dismissState.dismissDirection) {
+                    DismissDirection.StartToEnd -> appearanceSettings.misskey.swipeRight
+                    DismissDirection.EndToStart -> appearanceSettings.misskey.swipeLeft
+                    null -> null
+                }
+            if (action != null) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = screenHorizontalPadding),
+                    contentAlignment = alignment,
+                ) {
+                    StatusSwipeButton(
+                        action = action,
+                    )
+                }
+            }
+        },
+        directions =
+            setOf(
+                if (appearanceSettings.misskey.swipeLeft != AppearanceSettings.Misskey.SwipeActions.NONE) {
+                    DismissDirection.EndToStart
+                } else {
+                    null
+                },
+                if (appearanceSettings.misskey.swipeRight != AppearanceSettings.Misskey.SwipeActions.NONE) {
+                    DismissDirection.StartToEnd
+                } else {
+                    null
+                },
+            ).filterNotNull().toSet(),
     ) {
-        if (data.renote != null) {
-            StatusRetweetHeaderComponent(
-                icon = Icons.Default.SyncAlt,
-                user = data.user,
-                text = stringResource(id = R.string.mastodon_item_reblogged_status),
+        Column(
+            modifier =
+                Modifier
+                    .clickable {
+                        event.onStatusClick(data)
+                    }
+                    .background(MaterialTheme.colorScheme.background)
+                    .then(modifier),
+        ) {
+            if (data.renote != null) {
+                StatusRetweetHeaderComponent(
+                    icon = Icons.Default.SyncAlt,
+                    user = data.user,
+                    text = stringResource(id = R.string.mastodon_item_reblogged_status),
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            StatusHeaderComponent(
+                data = actualData,
+                event = event,
             )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        StatusHeaderComponent(
-            data = actualData,
-            event = event,
-        )
-        StatusContentComponent(
-            data = actualData,
-        )
-        if (actualData.media.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            StatusMediaComponent(
-                data = actualData.media,
-                onMediaClick = event::onMediaClick,
+            StatusContentComponent(
+                data = actualData,
             )
-        }
+            if (actualData.media.isNotEmpty() && appearanceSettings.showMedia) {
+                Spacer(modifier = Modifier.height(8.dp))
+                StatusMediaComponent(
+                    data = actualData.media,
+                    onMediaClick = event::onMediaClick,
+                    sensitive = actualData.sensitive,
+                )
+            }
 //        StatusCardComponent(
 //            data = actualData,
 //            event = event
 //        )
-        actualData.quote?.let { quote ->
-            Spacer(modifier = Modifier.height(8.dp))
-            UiStatusQuoted(
-                status = quote,
-                onMediaClick = event::onMediaClick,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            actualData.quote?.let { quote ->
+                Spacer(modifier = Modifier.height(8.dp))
+                UiStatusQuoted(
+                    status = quote,
+                    onMediaClick = event::onMediaClick,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (actualData.reaction.emojiReactions.isNotEmpty() && appearanceSettings.misskey.showReaction) {
+                Spacer(modifier = Modifier.height(8.dp))
+                StatusReactionComponent(
+                    data = actualData,
+                    event = event,
+                )
+            }
+            if (appearanceSettings.showActions) {
+                StatusFooterComponent(
+                    data = data,
+                    event = event,
+                )
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
-        if (actualData.reaction.emojiReactions.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            StatusReactionComponent(
-                data = actualData,
-                event = event,
-            )
-        }
-        StatusFooterComponent(
-            data = data,
-            event = event,
+    }
+}
+
+@Composable
+private fun StatusSwipeButton(
+    action: AppearanceSettings.Misskey.SwipeActions,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            imageVector = action.icon,
+            contentDescription = stringResource(id = action.id),
+            modifier = Modifier.size(36.dp),
+        )
+        Text(
+            text = stringResource(id = action.id),
+            style = MaterialTheme.typography.titleMedium,
         )
     }
 }
@@ -428,14 +538,16 @@ private fun StatusHeaderComponent(
         onUserClick = { event.onUserClick(it) },
         modifier = modifier,
     ) {
-        VisibilityIcon(
-            visibility = data.visibility,
-            modifier =
-                Modifier
-                    .size(14.dp)
-                    .alpha(MediumAlpha),
-        )
-        Spacer(modifier = Modifier.width(4.dp))
+        if (LocalAppearanceSettings.current.misskey.showVisibility) {
+            VisibilityIcon(
+                visibility = data.visibility,
+                modifier =
+                    Modifier
+                        .size(14.dp)
+                        .alpha(MediumAlpha),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
         Text(
             text = data.humanizedTime,
             style = MaterialTheme.typography.bodySmall,

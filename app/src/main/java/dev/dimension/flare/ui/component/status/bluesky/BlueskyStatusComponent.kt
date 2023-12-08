@@ -3,13 +3,17 @@ package dev.dimension.flare.ui.component.status.bluesky
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Delete
@@ -17,20 +21,24 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,10 +48,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.model.AppearanceSettings
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.OptionalSwipeToDismissBox
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusMediaComponent
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
@@ -56,56 +67,157 @@ import dev.dimension.flare.ui.screen.destinations.BlueskyReportStatusRouteDestin
 import dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun BlueskyStatusComponent(
     data: UiStatus.Bluesky,
     event: BlueskyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier =
-            Modifier
-                .clickable {
-                    event.onStatusClick(data)
+    val currentData by rememberUpdatedState(data)
+    val appearanceSettings = LocalAppearanceSettings.current
+
+    val dismissState =
+        rememberDismissState(
+            confirmValueChange = {
+                when (it) {
+                    DismissValue.DismissedToEnd -> appearanceSettings.bluesky.swipeRight
+                    DismissValue.DismissedToStart -> appearanceSettings.bluesky.swipeLeft
+                    else -> null
+                }?.let {
+                    when (it) {
+                        AppearanceSettings.Bluesky.SwipeActions.NONE -> Unit
+                        AppearanceSettings.Bluesky.SwipeActions.REPLY ->
+                            event.onReplyClick(currentData)
+                        AppearanceSettings.Bluesky.SwipeActions.REBLOG ->
+                            event.onReblogClick(currentData)
+                        AppearanceSettings.Bluesky.SwipeActions.FAVOURITE ->
+                            event.onLikeClick(currentData)
+                    }
                 }
-                .then(modifier),
+                false
+            },
+        )
+
+    OptionalSwipeToDismissBox(
+        state = dismissState,
+        enabled =
+            appearanceSettings.swipeGestures &&
+                (
+                    appearanceSettings.bluesky.swipeLeft != AppearanceSettings.Bluesky.SwipeActions.NONE ||
+                        appearanceSettings.bluesky.swipeRight != AppearanceSettings.Bluesky.SwipeActions.NONE
+                ),
+        backgroundContent = {
+            val alignment =
+                when (dismissState.dismissDirection) {
+                    DismissDirection.StartToEnd -> Alignment.CenterStart
+                    DismissDirection.EndToStart -> Alignment.CenterEnd
+                    null -> Alignment.Center
+                }
+            val action =
+                when (dismissState.dismissDirection) {
+                    DismissDirection.StartToEnd -> appearanceSettings.bluesky.swipeRight
+                    DismissDirection.EndToStart -> appearanceSettings.bluesky.swipeLeft
+                    null -> null
+                }
+            if (action != null) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = screenHorizontalPadding),
+                    contentAlignment = alignment,
+                ) {
+                    StatusSwipeButton(
+                        action = action,
+                    )
+                }
+            }
+        },
+        directions =
+            setOf(
+                if (appearanceSettings.bluesky.swipeLeft != AppearanceSettings.Bluesky.SwipeActions.NONE) {
+                    DismissDirection.EndToStart
+                } else {
+                    null
+                },
+                if (appearanceSettings.bluesky.swipeRight != AppearanceSettings.Bluesky.SwipeActions.NONE) {
+                    DismissDirection.StartToEnd
+                } else {
+                    null
+                },
+            ).filterNotNull().toSet(),
     ) {
-        if (data.repostBy != null) {
-            StatusRetweetHeaderComponent(
-                icon = Icons.Default.SyncAlt,
-                user = data.repostBy,
-                text = stringResource(id = R.string.mastodon_item_reblogged_status),
+        Column(
+            modifier =
+                Modifier
+                    .clickable {
+                        event.onStatusClick(data)
+                    }
+                    .background(MaterialTheme.colorScheme.background)
+                    .then(modifier),
+        ) {
+            if (data.repostBy != null) {
+                StatusRetweetHeaderComponent(
+                    icon = Icons.Default.SyncAlt,
+                    user = data.repostBy,
+                    text = stringResource(id = R.string.mastodon_item_reblogged_status),
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            StatusHeaderComponent(
+                data = data,
+                event = event,
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            StatusContentComponent(
+                data = data,
+            )
+            if (data.medias.isNotEmpty() && appearanceSettings.showMedia) {
+                Spacer(modifier = Modifier.height(8.dp))
+                StatusMediaComponent(
+                    data = data.medias,
+                    onMediaClick = event::onMediaClick,
+                    sensitive = false,
+                )
+            }
+            data.quote?.let { quote ->
+                Spacer(modifier = Modifier.height(8.dp))
+                UiStatusQuoted(
+                    status = quote,
+                    onMediaClick = event::onMediaClick,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (appearanceSettings.showActions) {
+                StatusFooterComponent(
+                    data = data,
+                    event = event,
+                )
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
-        StatusHeaderComponent(
-            data = data,
-            event = event,
+    }
+}
+
+@Composable
+private fun StatusSwipeButton(
+    action: AppearanceSettings.Bluesky.SwipeActions,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            imageVector = action.icon,
+            contentDescription = stringResource(id = action.id),
+            modifier = Modifier.size(36.dp),
         )
-        StatusContentComponent(
-            data = data,
-        )
-        if (data.medias.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            StatusMediaComponent(
-                data = data.medias,
-                onMediaClick = event::onMediaClick,
-            )
-        }
-        data.quote?.let { quote ->
-            Spacer(modifier = Modifier.height(8.dp))
-            UiStatusQuoted(
-                status = quote,
-                onMediaClick = event::onMediaClick,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        StatusFooterComponent(
-            data = data,
-            event = event,
+        Text(
+            text = stringResource(id = action.id),
+            style = MaterialTheme.typography.titleMedium,
         )
     }
 }
@@ -319,7 +431,7 @@ internal interface BlueskyStatusEvent {
 
     fun onUserClick(userKey: MicroBlogKey)
 
-    fun onMediaClick(uiMedia: UiMedia)
+    fun onMediaClick(media: UiMedia)
 
     fun onReplyClick(data: UiStatus.Bluesky)
 
@@ -359,13 +471,13 @@ internal class DefaultBlueskyStatusEvent(
         context.startActivity(intent)
     }
 
-    override fun onMediaClick(uiMedia: UiMedia) {
-        if (uiMedia is UiMedia.Image) {
+    override fun onMediaClick(media: UiMedia) {
+        if (media is UiMedia.Image) {
             val intent =
                 Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse(
-                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(uiMedia.url)
+                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url)
                             .deeplink(),
                     ),
                 )

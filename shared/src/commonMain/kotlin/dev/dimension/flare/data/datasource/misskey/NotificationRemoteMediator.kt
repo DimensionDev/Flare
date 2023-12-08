@@ -55,14 +55,12 @@ internal class NotificationRemoteMediator(
             if (loadType == LoadType.REFRESH) {
                 database.dbPagingTimelineQueries.deletePaging(account.accountKey, pagingKey)
             }
-
             Misskey.save(
                 database = database,
                 accountKey = account.accountKey,
                 pagingKey = pagingKey,
                 data = response,
             )
-
             MediatorResult.Success(
                 endOfPaginationReached = response.isEmpty(),
             )

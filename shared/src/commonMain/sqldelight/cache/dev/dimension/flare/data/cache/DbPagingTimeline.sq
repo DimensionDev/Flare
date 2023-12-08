@@ -24,7 +24,7 @@ user.host AS user_host,
 user.content AS user_content
 FROM DbPagingTimeline AS timeline
 JOIN DbStatus status ON timeline.status_key = status.status_key AND timeline.account_key = status.account_key
-JOIN DbUser user ON status.user_key = user.user_key;
+LEFT JOIN DbUser user ON status.user_key = user.user_key;
 
 insert:
 INSERT OR REPLACE INTO DbPagingTimeline (account_key, paging_key, status_key, sort_id)
@@ -47,3 +47,6 @@ SELECT COUNT(*) FROM DbPagingTimeline WHERE account_key = :account_key AND pagin
 
 getPage:
 SELECT * FROM DbPagingTimelineWithStatusView WHERE timeline_account_key = :account_key AND timeline_paging_key = :paging_key ORDER BY timeline_sort_id DESC LIMIT :limit OFFSET :offset;
+
+clear:
+DELETE FROM DbPagingTimeline;

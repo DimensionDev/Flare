@@ -14,6 +14,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.halilibo.richtext.ui.material3.SetupMaterial3RichText
+import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.Theme
 
 private val DarkColorScheme =
     darkColorScheme()
@@ -23,9 +25,9 @@ private val LightColorScheme =
 
 @Composable
 fun FlareTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = LocalAppearanceSettings.current.dynamicTheme,
     content: @Composable () -> Unit,
 ) {
     val colorScheme =
@@ -57,4 +59,10 @@ fun FlareTheme(
             }
         },
     )
+}
+
+@Composable
+private fun isDarkTheme(): Boolean {
+    return LocalAppearanceSettings.current.theme == Theme.DARK ||
+        (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
 }

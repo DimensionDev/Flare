@@ -60,6 +60,7 @@ abstract class AccountsState(
     abstract fun removeAccount(accountKey: MicroBlogKey)
 }
 
+@Immutable
 data class ImmutableListWrapper<T : Any>(
     private val data: ImmutableList<T>,
 ) {

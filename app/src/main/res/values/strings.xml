@@ -83,12 +83,21 @@
     <string name="mastodon_visibility_private_description">Only followers can see this toot</string>
     <string name="mastodon_visibility_direct_description">Only mentioned users can see this toot</string>
 
-    <string name="settings_accounts_title">Accounts</string>
+    <string name="settings_accounts_title">Account Management</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_notifications_title">Notifications</string>
+    <string name="settings_notifications_subtitle">Customize how Flare notifies you</string>
+    <string name="settings_storage_title">Storage</string>
+    <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_subtitle">Learn more about Flare</string>
 
     <string name="status_loadmore_end">No more toots</string>
     <string name="status_loadmore_error">Error loading more toots</string>
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="status_empty">Nothing to see here</string>
+    <string name="status_sensitive_media">Sensitive media</string>
 
     <string name="service_select_welcome_title">Welcome to Flare</string>
     <string name="service_select_welcome_message">Flare is a social network client for Android.\nTo get started, please select a service to connect to.</string>
@@ -184,4 +193,61 @@
 
     <string name="search_users">Users</string>
     <string name="search_status">Status</string>
+
+    <string name="quick_menu_title">Quick menu</string>
+    <string name="quick_menu_add_account">Add account</string>
+
+    <string name="settings_about_description">The ultimate next generation open-sourced AI powered decentralized social network client for Android.</string>
+    <string name="settings_about_source_code">Source code</string>
+
+    <string name="settings_appearance_generic">Generic</string>
+
+    <string name="settings_appearance_show_actions">Show actions</string>
+    <string name="settings_appearance_show_actions_description">Show actions on the bottom of the status</string>
+    <string name="settings_appearance_show_media">Show media</string>
+    <string name="settings_appearance_show_media_description">Show media in the status</string>
+    <string name="settings_appearance_show_numbers">Show numbers</string>
+    <string name="settings_appearance_show_numbers_description">Show numbers on the bottom of the status</string>
+    <string name="settings_appearance_show_cw_img">Show sensitive content</string>
+    <string name="settings_appearance_show_cw_img_description">Always show sensitive content in the status</string>
+    <string name="settings_appearance_enable_swipe">Enable swipe gestures</string>
+    <string name="settings_appearance_enable_swipe_description">Enable swipe gestures on status</string>
+    <string name="settings_appearance_avatar_shape">Avatar shape</string>
+    <string name="settings_appearance_avatar_shape_description">Change the shape of the avatar</string>
+    <string name="settings_appearance_avatar_shape_round">Round</string>
+    <string name="settings_appearance_avatar_shape_square">Square</string>
+    <string name="settings_appearance_swipe_left">Swipe left</string>
+    <string name="settings_appearance_swipe_left_description">Action to perform when swiping left on a status</string>
+    <string name="settings_appearance_swipe_right">Swipe right</string>
+    <string name="settings_appearance_swipe_right_description">Action to perform when swiping right on a status</string>
+    <string name="settings_appearance_theme">Theme</string>
+    <string name="settings_appearance_theme_description">Change the theme of the app</string>
+    <string name="settings_appearance_theme_light">Light</string>
+    <string name="settings_appearance_theme_dark">Dark</string>
+    <string name="settings_appearance_theme_auto">Auto</string>
+    <string name="settings_appearance_dynamic_theme">Dynamic theme</string>
+    <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
+    <string name="settings_appearance_show_link_previews">Show link previews</string>
+    <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
+
+    <string name="settings_appearance_mastodon_show_visibility">Show visibility</string>
+    <string name="settings_appearance_mastodon_show_visibility_description">Show visibility in the status</string>
+
+    <string name="settings_appearance_misskey_show_visibility">Show visibility</string>
+    <string name="settings_appearance_misskey_show_visibility_description">Show visibility in the status</string>
+    <string name="settings_appearance_misskey_show_reaction">Show reaction</string>
+    <string name="settings_appearance_misskey_show_reaction_description">Show reaction in the status</string>
+
+    <string name="swipe_action_nothing">Nothing</string>
+    <string name="swipe_action_reply">Reply</string>
+    <string name="swipe_action_reblog">Reblog</string>
+    <string name="swipe_action_renote">Renote</string>
+    <string name="swipe_action_favourite">Favourite</string>
+    <string name="swipe_action_bookmark">Bookmark</string>
+
+    <string name="settings_storage_clear_image_cache">Clear image cache</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
+
+    <string name="settings_storage_clear_database">Clear cache database</string>
+    <string name="settings_storage_clear_database_description">%1$s users, %2$s statuses will be removed</string>
 </resources>

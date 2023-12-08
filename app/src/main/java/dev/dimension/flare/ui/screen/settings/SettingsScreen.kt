@@ -48,7 +48,6 @@ fun SettingsRoute(navigator: DestinationsNavigator) {
         toAppearance = {
             navigator.navigate(AppearanceRouteDestination)
         },
-        toNotifications = {},
         toStorage = {
             navigator.navigate(StorageRouteDestination)
         },
@@ -64,7 +63,6 @@ internal fun SettingsScreen(
     onBack: () -> Unit,
     toAccounts: () -> Unit,
     toAppearance: () -> Unit,
-    toNotifications: () -> Unit,
     toStorage: () -> Unit,
     toAbout: () -> Unit,
 ) {

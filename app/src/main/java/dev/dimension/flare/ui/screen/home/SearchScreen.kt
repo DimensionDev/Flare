@@ -51,6 +51,8 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
 import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
@@ -85,6 +87,22 @@ fun SearchRoute(
     )
 }
 
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+@Composable
+fun DiscoverSearchRoute(
+    navigator: DestinationsNavigator,
+) {
+    val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter() }
+    DiscoverSearch(
+        state = state,
+        onAccountClick = {
+            navigator.navigate(QuickMenuDialogRouteDestination)
+        },
+    )
+}
+
 @Composable
 internal fun SearchScreen(
     initialQuery: String,
@@ -111,7 +129,7 @@ internal fun SearchScreen(
         },
         onBack = onBack,
         committed = true,
-        searchUsers = state.user,
+        searchUsers = state.users,
         searchStatus = state.status,
         statusEvent = state.statusEvent,
         onAccountClick = onAccountClick,
@@ -120,7 +138,6 @@ internal fun SearchScreen(
 
 @Composable
 internal fun DiscoverSearch(
-    user: UiState<UiUser>,
     state: DiscoverSearchState,
     onAccountClick: () -> Unit,
 ) {
@@ -131,7 +148,7 @@ internal fun DiscoverSearch(
     }
 
     SearchContent(
-        user = user,
+        user = state.user,
         query = state.query,
         onQueryChange = { state.setQuery(it) },
         onSearch = {
@@ -152,7 +169,7 @@ internal fun DiscoverSearch(
             state.setQuery("")
         },
         committed = state.commited,
-        searchUsers = state.user,
+        searchUsers = state.users,
         searchStatus = state.status,
         statusEvent = state.statusEvent,
         onAccountClick = onAccountClick,
@@ -309,6 +326,7 @@ internal fun discoverSearchPresenter(
     statusEvent: StatusEvent = rememberKoinInject(),
 ): DiscoverSearchState =
     run {
+        val activeAccount = remember { ActiveAccountPresenter() }.invoke()
         var query by remember { mutableStateOf(initialSearch ?: "") }
         var isSearching by remember { mutableStateOf(false) }
         var commited by remember { mutableStateOf(initialSearch != null) }
@@ -317,7 +335,7 @@ internal fun discoverSearchPresenter(
                 SearchPresenter(initialSearch ?: "")
             }.invoke()
 
-        object : DiscoverSearchState, SearchState by state {
+        object : DiscoverSearchState, SearchState by state, ActiveAccountState by activeAccount {
             override val commited = commited
             override val query = query
             override val isSearching = isSearching
@@ -337,7 +355,7 @@ internal fun discoverSearchPresenter(
         }
     }
 
-internal interface DiscoverSearchState : SearchState {
+internal interface DiscoverSearchState : SearchState, ActiveAccountState {
     val commited: Boolean
     val isSearching: Boolean
     val statusEvent: StatusEvent

@@ -83,9 +83,9 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlin.math.max
 import moe.tlaster.ktml.dom.Element
 import org.koin.compose.rememberKoinInject
-import kotlin.math.max
 
 @Composable
 @Destination(
@@ -130,6 +130,15 @@ fun ProfileWithUserNameAndHostRoute(
             },
         )
     }
+}
+@Composable
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+internal fun MeRoute(
+    navigator: DestinationsNavigator
+) {
+    ProfileRoute(null, navigator)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -229,7 +238,7 @@ private fun profileWithUserNameAndHostPresenter(
     wrappers = [ThemeWrapper::class],
 )
 fun ProfileRoute(
-    userKey: MicroBlogKey,
+    userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
 ) {
     ProfileScreen(

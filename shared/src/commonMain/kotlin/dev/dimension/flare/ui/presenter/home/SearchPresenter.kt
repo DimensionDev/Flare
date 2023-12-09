@@ -38,7 +38,7 @@ class SearchPresenter(
             }
 
         return object : SearchState {
-            override val user = user
+            override val users = user
             override val status = status
 
             override fun search(new: String) {
@@ -49,7 +49,7 @@ class SearchPresenter(
 }
 
 interface SearchState {
-    val user: UiState<LazyPagingItemsProxy<UiUser>>
+    val users: UiState<LazyPagingItemsProxy<UiUser>>
     val status: UiState<LazyPagingItemsProxy<UiStatus>>
 
     fun search(new: String)

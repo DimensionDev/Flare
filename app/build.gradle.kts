@@ -126,6 +126,8 @@ dependencies {
     implementation(libs.composeIcons.fontAwesome)
     implementation(libs.datastore)
     implementation(libs.kotlinx.serialization.protobuf)
+    implementation(libs.material3.adaptive.navigation.suite)
+    implementation(libs.material3.adaptive)
 
     implementation(projects.shared)
 

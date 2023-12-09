@@ -26,15 +26,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import kotlinx.coroutines.launch
 import org.koin.compose.rememberKoinInject
+
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+@Composable
+internal fun HomeRoute() {
+    HomeTimelineScreen(
+        contentPadding = PaddingValues(),
+    )
+}
 
 @Composable
 internal fun HomeTimelineScreen(contentPadding: PaddingValues) {
@@ -57,8 +69,8 @@ internal fun HomeTimelineScreen(contentPadding: PaddingValues) {
     val scope = rememberCoroutineScope()
     RefreshContainer(
         modifier =
-            Modifier
-                .fillMaxSize(),
+        Modifier
+            .fillMaxSize(),
         onRefresh = state.state::refresh,
         indicatorPadding = contentPadding,
         content = {

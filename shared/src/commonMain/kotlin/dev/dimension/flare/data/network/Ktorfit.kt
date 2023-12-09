@@ -35,7 +35,11 @@ internal fun ktorfit(
 
 internal fun ktorClient(
     authorization: Authorization? = null,
-    config: HttpClientConfig<*>.() -> Unit = {},
+    config: HttpClientConfig<*>.() -> Unit = {
+        install(ContentNegotiation) {
+            json(JSON)
+        }
+    },
 ) = HttpClient {
     if (authorization != null) {
         install(AuthorizationPlugin) {

@@ -17,10 +17,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.NotificationFilter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
@@ -28,9 +30,19 @@ import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.koin.compose.rememberKoinInject
 
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+@Composable
+internal fun NotificationRoute() {
+    NotificationScreen(
+        contentPadding = PaddingValues(),
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen(
+internal fun NotificationScreen(
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {

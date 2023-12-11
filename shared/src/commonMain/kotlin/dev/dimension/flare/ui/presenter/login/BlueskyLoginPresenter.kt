@@ -26,10 +26,10 @@ class BlueskyLoginPresenter(
         var loading by remember { mutableStateOf(false) }
         val accountRepository: AccountRepository = rememberKoinInject()
 
-        return object : BlueskyLoginState(
-            loading,
-            error,
-        ) {
+        return object : BlueskyLoginState {
+            override val loading = loading
+            override val error = error
+
             override fun login(
                 baseUrl: String,
                 username: String,
@@ -92,11 +92,11 @@ class BlueskyLoginPresenter(
     }
 }
 
-abstract class BlueskyLoginState(
-    val loading: Boolean,
-    val error: Throwable?,
-) {
-    abstract fun login(
+interface BlueskyLoginState {
+    val loading: Boolean
+    val error: Throwable?
+
+    fun login(
         baseUrl: String,
         username: String,
         password: String,

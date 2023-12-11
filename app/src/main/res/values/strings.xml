@@ -250,4 +250,8 @@
 
     <string name="settings_storage_clear_database">Clear cache database</string>
     <string name="settings_storage_clear_database_description">%1$s users, %2$s statuses will be removed</string>
+
+    <string name="service_select_instance_input_placeholder">Instance URL</string>
+    <string name="service_select_next_button">Next</string>
+    <string name="service_select_empty_message">No instances found</string>
 </resources>

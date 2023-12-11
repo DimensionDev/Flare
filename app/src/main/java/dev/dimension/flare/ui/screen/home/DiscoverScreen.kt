@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -22,17 +23,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.StatusEvent
@@ -41,8 +46,43 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
+import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
+import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.koin.compose.rememberKoinInject
+
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+@Composable
+internal fun DiscoverRoute(navigator: DestinationsNavigator) {
+    val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter() }
+    Scaffold(
+        topBar = {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                DiscoverSearch(
+                    state = state,
+                    onAccountClick = {
+                        navigator.navigate(QuickMenuDialogRouteDestination)
+                    },
+                )
+            }
+        },
+    ) {
+        DiscoverScreen(
+            contentPadding = it,
+            onUserClick = { navigator.navigate(ProfileRouteDestination(it)) },
+            onHashtagClick = {
+                state.commitSearch(it)
+            },
+        )
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

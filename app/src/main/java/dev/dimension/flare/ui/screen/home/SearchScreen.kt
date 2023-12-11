@@ -6,11 +6,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -27,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,8 +39,8 @@ import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
-import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
@@ -81,22 +78,6 @@ fun SearchRoute(
     SearchScreen(
         initialQuery = keyword,
         onBack = { navigator.navigateUp() },
-        onAccountClick = {
-            navigator.navigate(QuickMenuDialogRouteDestination)
-        },
-    )
-}
-
-@Destination(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-fun DiscoverSearchRoute(
-    navigator: DestinationsNavigator,
-) {
-    val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter() }
-    DiscoverSearch(
-        state = state,
         onAccountClick = {
             navigator.navigate(QuickMenuDialogRouteDestination)
         },
@@ -204,13 +185,12 @@ private fun SearchContent(
             Text(text = stringResource(R.string.discover_search_placeholder))
         },
         trailingIcon = {
-            IconButton(onClick = {
-                onSearch.invoke(query)
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                )
+            user?.onSuccess {
+                IconButton(onClick = {
+                    onAccountClick.invoke()
+                }) {
+                    AvatarComponent(it.avatarUrl, size = 30.dp)
+                }
             }
         },
         leadingIcon = {
@@ -225,20 +205,10 @@ private fun SearchContent(
                         )
                     }
                 } else {
-                    user?.onSuccess {
-                        IconButton(onClick = {
-                            onAccountClick.invoke()
-                        }) {
-                            NetworkImage(
-                                model = it.avatarUrl,
-                                contentDescription = null,
-                                modifier =
-                                    Modifier
-                                        .size(24.dp)
-                                        .clip(CircleShape),
-                            )
-                        }
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                    )
                 }
             }
         },
@@ -352,6 +322,13 @@ internal fun discoverSearchPresenter(
             override fun setCommited(new: Boolean) {
                 commited = new
             }
+
+            override fun commitSearch(value: String) {
+                commited = true
+                query = value
+                isSearching = true
+                search(value)
+            }
         }
     }
 
@@ -366,4 +343,6 @@ internal interface DiscoverSearchState : SearchState, ActiveAccountState {
     fun setQuery(new: String)
 
     fun setCommited(new: Boolean)
+
+    fun commitSearch(value: String)
 }

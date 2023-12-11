@@ -14,35 +14,52 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiInstance> {
         return try {
-            val instances = runCatching {
-                JoinMastodonService.servers().map {
+            val instances =
+                runCatching {
+                    JoinMastodonService.servers().map {
+                        UiInstance(
+                            name = it.domain,
+                            description = it.description,
+                            iconUrl = null,
+                            domain = it.domain,
+                            type = PlatformType.Mastodon,
+                            bannerUrl = it.proxiedThumbnail,
+                            usersCount = it.totalUsers,
+                        )
+                    }
+                }.getOrDefault(emptyList()) +
+                    runCatching {
+                        JoinMisskeyService.instances().instancesInfos.map {
+                            UiInstance(
+                                name = it.name,
+                                description = it.description,
+                                iconUrl = it.meta.iconURL,
+                                domain = it.url,
+                                type = PlatformType.Misskey,
+                                bannerUrl = it.meta.bannerURL,
+                                usersCount = it.stats.usersCount,
+                            )
+                        }
+                    }.getOrDefault(emptyList())
+            val bsky =
+                listOf(
                     UiInstance(
-                        name = it.domain,
-                        description = it.description,
-                        iconUrl = null,
-                        domain = it.domain,
-                        type = PlatformType.Mastodon,
-                        bannerUrl = it.proxiedThumbnail,
-                        usersCount = it.totalUsers,
-                    )
-                }
-            }.getOrDefault(emptyList()) + runCatching {
-                JoinMisskeyService.instances().instancesInfos.map {
-                    UiInstance(
-                        name = it.name,
-                        description = it.description,
-                        iconUrl = it.meta.iconURL,
-                        domain = it.url,
-                        type = PlatformType.Misskey,
-                        bannerUrl = it.meta.bannerURL,
-                        usersCount = it.stats.usersCount,
-                    )
-                }
-            }.getOrDefault(emptyList())
+                        name = "Bluesky",
+                        description =
+                            "The web. Email. RSS feeds. XMPP chats. " +
+                                "What all these technologies had in common is they allowed people to freely interact " +
+                                "and create content, without a single intermediary.",
+                        iconUrl = "https://blueskyweb.xyz/images/apple-touch-icon.png",
+                        domain = "bsky.social",
+                        type = PlatformType.Bluesky,
+                        bannerUrl = null,
+                        usersCount = 0,
+                    ),
+                )
             LoadResult.Page(
-                data = instances.sortedByDescending { it.usersCount },
+                data = bsky + instances.sortedByDescending { it.usersCount },
                 prevKey = null,
-                nextKey = null
+                nextKey = null,
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

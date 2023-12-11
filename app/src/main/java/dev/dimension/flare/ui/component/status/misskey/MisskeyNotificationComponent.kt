@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
@@ -129,6 +130,7 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
     event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
     ) {
@@ -147,7 +149,7 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
                     modifier =
                         Modifier
                             .clickable {
-                                event.onUserClick(user.userKey)
+                                event.onUserClick(user.userKey, uriHandler)
                             },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -162,7 +164,7 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
                         modifier =
                             Modifier
                                 .clickable {
-                                    event.onUserClick(user.userKey)
+                                    event.onUserClick(user.userKey, uriHandler)
                                 },
                     )
                     Text(
@@ -172,7 +174,7 @@ private fun MisskeyFollowRequestAcceptedNotificationComponent(
                             Modifier
                                 .alpha(MediumAlpha)
                                 .clickable {
-                                    event.onUserClick(user.userKey)
+                                    event.onUserClick(user.userKey, uriHandler)
                                 },
                     )
                 }
@@ -187,6 +189,7 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
     event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
     ) {
@@ -205,7 +208,7 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
                     modifier =
                         Modifier
                             .clickable {
-                                event.onUserClick(user.userKey)
+                                event.onUserClick(user.userKey, uriHandler)
                             },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -220,7 +223,7 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
                         modifier =
                             Modifier
                                 .clickable {
-                                    event.onUserClick(user.userKey)
+                                    event.onUserClick(user.userKey, uriHandler)
                                 },
                     )
                     Text(
@@ -230,7 +233,7 @@ private fun MisskeyReceiveFollowRequestNotificationComponent(
                             Modifier
                                 .alpha(MediumAlpha)
                                 .clickable {
-                                    event.onUserClick(user.userKey)
+                                    event.onUserClick(user.userKey, uriHandler)
                                 },
                     )
                 }
@@ -360,6 +363,7 @@ private fun MisskeyFollowNotificationComponent(
     event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
     ) {
@@ -378,7 +382,7 @@ private fun MisskeyFollowNotificationComponent(
                     modifier =
                         Modifier
                             .clickable {
-                                event.onUserClick(user.userKey)
+                                event.onUserClick(user.userKey, uriHandler)
                             },
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -393,7 +397,7 @@ private fun MisskeyFollowNotificationComponent(
                         modifier =
                             Modifier
                                 .clickable {
-                                    event.onUserClick(user.userKey)
+                                    event.onUserClick(user.userKey, uriHandler)
                                 },
                     )
                     Text(
@@ -403,7 +407,7 @@ private fun MisskeyFollowNotificationComponent(
                             Modifier
                                 .alpha(MediumAlpha)
                                 .clickable {
-                                    event.onUserClick(user.userKey)
+                                    event.onUserClick(user.userKey, uriHandler)
                                 },
                     )
                 }

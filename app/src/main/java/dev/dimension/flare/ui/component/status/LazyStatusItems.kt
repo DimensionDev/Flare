@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -292,30 +293,57 @@ internal data class StatusEvent(
 }
 
 internal data object EmptyStatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
-    override fun onStatusClick(data: UiStatus.Bluesky) = Unit
+    override fun onStatusClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onStatusClick(data: UiStatus.Misskey) = Unit
+    override fun onStatusClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) = Unit
 
     override fun onReactionClick(
         data: UiStatus.Misskey,
         reaction: UiStatus.Misskey.EmojiReaction,
     ) = Unit
 
-    override fun onReplyClick(data: UiStatus.Misskey) = Unit
+    override fun onReplyClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) = Unit
 
     override fun onReblogClick(data: UiStatus.Misskey) = Unit
 
-    override fun onQuoteClick(data: UiStatus.Misskey) = Unit
+    override fun onQuoteClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onAddReactionClick(data: UiStatus.Misskey) = Unit
+    override fun onAddReactionClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onDeleteClick(data: UiStatus.Misskey) = Unit
+    override fun onDeleteClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onReportClick(data: UiStatus.Misskey) = Unit
+    override fun onReportClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onStatusClick(status: UiStatus.Mastodon) = Unit
+    override fun onStatusClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onReplyClick(status: UiStatus.Mastodon) = Unit
+    override fun onReplyClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) = Unit
 
     override fun onReblogClick(status: UiStatus.Mastodon) = Unit
 
@@ -323,23 +351,47 @@ internal data object EmptyStatusEvent : MastodonStatusEvent, MisskeyStatusEvent,
 
     override fun onBookmarkClick(status: UiStatus.Mastodon) = Unit
 
-    override fun onMediaClick(media: UiMedia) = Unit
+    override fun onMediaClick(
+        media: UiMedia,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onUserClick(userKey: MicroBlogKey) = Unit
+    override fun onUserClick(
+        userKey: MicroBlogKey,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onDeleteClick(status: UiStatus.Mastodon) = Unit
+    override fun onDeleteClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onReportClick(status: UiStatus.Mastodon) = Unit
+    override fun onReportClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onReplyClick(data: UiStatus.Bluesky) = Unit
+    override fun onReplyClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) = Unit
 
     override fun onReblogClick(data: UiStatus.Bluesky) = Unit
 
-    override fun onQuoteClick(data: UiStatus.Bluesky) = Unit
+    override fun onQuoteClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) = Unit
 
     override fun onLikeClick(data: UiStatus.Bluesky) = Unit
 
-    override fun onReportClick(data: UiStatus.Bluesky) = Unit
+    override fun onReportClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) = Unit
 
-    override fun onDeleteClick(data: UiStatus.Bluesky) = Unit
+    override fun onDeleteClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) = Unit
 }

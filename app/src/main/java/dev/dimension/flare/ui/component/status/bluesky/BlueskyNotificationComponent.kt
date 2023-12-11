@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.bsky.notification.ListNotificationsReason
@@ -107,6 +107,7 @@ private fun NotificationComponent(
     event: BlueskyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
     ) {
@@ -124,7 +125,7 @@ private fun NotificationComponent(
                 modifier =
                     Modifier
                         .clickable {
-                            event.onUserClick(data.user.userKey)
+                            event.onUserClick(data.user.userKey, uriHandler)
                         },
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -139,7 +140,7 @@ private fun NotificationComponent(
                     modifier =
                         Modifier
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(data.user.userKey, uriHandler)
                             },
                 )
                 Text(
@@ -149,7 +150,7 @@ private fun NotificationComponent(
                         Modifier
                             .alpha(MediumAlpha)
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(data.user.userKey, uriHandler)
                             },
                 )
             }

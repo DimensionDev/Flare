@@ -1,8 +1,5 @@
 package dev.dimension.flare.ui.component.status.misskey
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +54,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
@@ -77,7 +76,6 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
-import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
@@ -90,6 +88,7 @@ internal fun MisskeyStatusComponent(
     event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     val currentData by rememberUpdatedState(data)
     val actualData by rememberUpdatedState(newValue = data.renote ?: data)
     val appearanceSettings = LocalAppearanceSettings.current
@@ -104,11 +103,13 @@ internal fun MisskeyStatusComponent(
                     when (it) {
                         AppearanceSettings.Misskey.SwipeActions.NONE -> Unit
                         AppearanceSettings.Misskey.SwipeActions.REPLY ->
-                            event.onReplyClick(currentData)
+                            event.onReplyClick(currentData, uriHandler)
+
                         AppearanceSettings.Misskey.SwipeActions.RENOTE ->
                             event.onReblogClick(currentData)
+
                         AppearanceSettings.Misskey.SwipeActions.FAVOURITE ->
-                            event.onAddReactionClick(currentData)
+                            event.onAddReactionClick(currentData, uriHandler)
                     }
                 }
                 false
@@ -165,7 +166,7 @@ internal fun MisskeyStatusComponent(
             modifier =
                 Modifier
                     .clickable {
-                        event.onStatusClick(data)
+                        event.onStatusClick(data, uriHandler)
                     }
                     .background(MaterialTheme.colorScheme.background)
                     .then(modifier),
@@ -189,7 +190,9 @@ internal fun MisskeyStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
                 StatusMediaComponent(
                     data = actualData.media,
-                    onMediaClick = event::onMediaClick,
+                    onMediaClick = {
+                        event.onMediaClick(it, uriHandler)
+                    },
                     sensitive = actualData.sensitive,
                 )
             }
@@ -201,7 +204,9 @@ internal fun MisskeyStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
                 UiStatusQuoted(
                     status = quote,
-                    onMediaClick = event::onMediaClick,
+                    onMediaClick = {
+                        event.onMediaClick(it, uriHandler)
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -251,6 +256,7 @@ private fun StatusFooterComponent(
     event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     val actualData = data.renote ?: data
     var showRenoteMenu by remember {
         mutableStateOf(false)
@@ -275,7 +281,7 @@ private fun StatusFooterComponent(
                     Modifier
                         .weight(1f),
                 onClicked = {
-                    event.onReplyClick(actualData)
+                    event.onReplyClick(actualData, uriHandler)
                 },
             )
             StatusActionButton(
@@ -323,7 +329,7 @@ private fun StatusFooterComponent(
                             },
                             onClick = {
                                 showRenoteMenu = false
-                                event.onQuoteClick(actualData)
+                                event.onQuoteClick(actualData, uriHandler)
                             },
                         )
                     }
@@ -341,7 +347,7 @@ private fun StatusFooterComponent(
                     Modifier
                         .weight(1f),
                 onClicked = {
-                    event.onAddReactionClick(actualData)
+                    event.onAddReactionClick(actualData, uriHandler)
                 },
             )
             StatusActionButton(
@@ -367,7 +373,7 @@ private fun StatusFooterComponent(
                                 },
                                 onClick = {
                                     showMoreMenu = false
-                                    event.onDeleteClick(actualData)
+                                    event.onDeleteClick(actualData, uriHandler)
                                 },
                             )
                         } else {
@@ -385,7 +391,7 @@ private fun StatusFooterComponent(
                                 },
                                 onClick = {
                                     showMoreMenu = false
-                                    event.onReportClick(actualData)
+                                    event.onReportClick(actualData, uriHandler)
                                 },
                             )
                         }
@@ -533,9 +539,10 @@ private fun StatusHeaderComponent(
     event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     CommonStatusHeaderComponent(
         data = data.user,
-        onUserClick = { event.onUserClick(it) },
+        onUserClick = { event.onUserClick(it, uriHandler) },
         modifier = modifier,
     ) {
         if (LocalAppearanceSettings.current.misskey.showVisibility) {
@@ -595,67 +602,87 @@ internal fun VisibilityIcon(
 }
 
 internal interface MisskeyStatusEvent {
-    fun onStatusClick(data: UiStatus.Misskey)
+    fun onStatusClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    )
 
-    fun onUserClick(userKey: MicroBlogKey)
+    fun onUserClick(
+        userKey: MicroBlogKey,
+        uriHandler: UriHandler,
+    )
 
-    fun onMediaClick(media: UiMedia)
+    fun onMediaClick(
+        media: UiMedia,
+        uriHandler: UriHandler,
+    )
 
     fun onReactionClick(
         data: UiStatus.Misskey,
         reaction: UiStatus.Misskey.EmojiReaction,
     )
 
-    fun onReplyClick(data: UiStatus.Misskey)
+    fun onReplyClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    )
 
     fun onReblogClick(data: UiStatus.Misskey)
 
-    fun onQuoteClick(data: UiStatus.Misskey)
+    fun onQuoteClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    )
 
-    fun onAddReactionClick(data: UiStatus.Misskey)
+    fun onAddReactionClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    )
 
-    fun onDeleteClick(data: UiStatus.Misskey)
+    fun onDeleteClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    )
 
-    fun onReportClick(data: UiStatus.Misskey)
+    fun onReportClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    )
 }
 
 internal class DefaultMisskeyStatusEvent(
-    private val context: Context,
     private val scope: CoroutineScope,
     private val accountRepository: AccountRepository,
 ) : MisskeyStatusEvent {
-    override fun onStatusClick(data: UiStatus.Misskey) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onStatusClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 
-    override fun onUserClick(userKey: MicroBlogKey) {
-        val intent =
-            Intent(Intent.ACTION_VIEW, Uri.parse(ProfileRouteDestination(userKey).deeplink()))
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onUserClick(
+        userKey: MicroBlogKey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination(userKey)
+                .deeplink(),
+        )
     }
 
-    override fun onMediaClick(media: UiMedia) {
+    override fun onMediaClick(
+        media: UiMedia,
+        uriHandler: UriHandler,
+    ) {
         if (media is UiMedia.Image) {
-            val intent =
-                Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse(
-                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url)
-                            .deeplink(),
-                    ),
-                )
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            uriHandler.openUri(
+                dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url)
+                    .deeplink(),
+            )
         }
     }
 
@@ -673,17 +700,14 @@ internal class DefaultMisskeyStatusEvent(
         }
     }
 
-    override fun onReplyClick(data: UiStatus.Misskey) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onReplyClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 
     override fun onReblogClick(data: UiStatus.Misskey) {
@@ -696,58 +720,46 @@ internal class DefaultMisskeyStatusEvent(
         }
     }
 
-    override fun onQuoteClick(data: UiStatus.Misskey) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onQuoteClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 
-    override fun onAddReactionClick(data: UiStatus.Misskey) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.MisskeyReactionRouteDestination(
-                        statusKey = data.statusKey,
-                    ).deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onAddReactionClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.MisskeyReactionRouteDestination(
+                statusKey = data.statusKey,
+            ).deeplink(),
+        )
     }
 
-    override fun onDeleteClick(data: UiStatus.Misskey) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onDeleteClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 
-    override fun onReportClick(data: UiStatus.Misskey) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.MisskeyReportRouteDestination(
-                        userKey = data.user.userKey,
-                        statusKey = data.statusKey,
-                    ).deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onReportClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.MisskeyReportRouteDestination(
+                userKey = data.user.userKey,
+                statusKey = data.statusKey,
+            ).deeplink(),
+        )
     }
 }

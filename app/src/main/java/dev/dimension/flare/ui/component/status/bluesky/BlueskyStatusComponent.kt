@@ -1,8 +1,5 @@
 package dev.dimension.flare.ui.component.status.bluesky
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -44,6 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
@@ -80,6 +79,7 @@ internal fun BlueskyStatusComponent(
 ) {
     val currentData by rememberUpdatedState(data)
     val appearanceSettings = LocalAppearanceSettings.current
+    val uriHandler = LocalUriHandler.current
 
     val dismissState =
         rememberDismissState(
@@ -92,9 +92,11 @@ internal fun BlueskyStatusComponent(
                     when (it) {
                         AppearanceSettings.Bluesky.SwipeActions.NONE -> Unit
                         AppearanceSettings.Bluesky.SwipeActions.REPLY ->
-                            event.onReplyClick(currentData)
+                            event.onReplyClick(currentData, uriHandler)
+
                         AppearanceSettings.Bluesky.SwipeActions.REBLOG ->
                             event.onReblogClick(currentData)
+
                         AppearanceSettings.Bluesky.SwipeActions.FAVOURITE ->
                             event.onLikeClick(currentData)
                     }
@@ -153,7 +155,7 @@ internal fun BlueskyStatusComponent(
             modifier =
                 Modifier
                     .clickable {
-                        event.onStatusClick(data)
+                        event.onStatusClick(data, uriHandler)
                     }
                     .background(MaterialTheme.colorScheme.background)
                     .then(modifier),
@@ -177,7 +179,9 @@ internal fun BlueskyStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
                 StatusMediaComponent(
                     data = data.medias,
-                    onMediaClick = event::onMediaClick,
+                    onMediaClick = {
+                        event.onMediaClick(it, uriHandler)
+                    },
                     sensitive = false,
                 )
             }
@@ -185,7 +189,9 @@ internal fun BlueskyStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
                 UiStatusQuoted(
                     status = quote,
-                    onMediaClick = event::onMediaClick,
+                    onMediaClick = {
+                        event.onMediaClick(it, uriHandler)
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -228,9 +234,10 @@ private fun StatusHeaderComponent(
     event: BlueskyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     CommonStatusHeaderComponent(
         data = data.user,
-        onUserClick = { event.onUserClick(it) },
+        onUserClick = { event.onUserClick(it, uriHandler) },
         modifier = modifier,
     ) {
         Text(
@@ -267,6 +274,7 @@ private fun StatusFooterComponent(
     event: BlueskyStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     var showRenoteMenu by remember {
         mutableStateOf(false)
     }
@@ -290,7 +298,7 @@ private fun StatusFooterComponent(
                     Modifier
                         .weight(1f),
                 onClicked = {
-                    event.onReplyClick(data)
+                    event.onReplyClick(data, uriHandler)
                 },
             )
             StatusActionButton(
@@ -344,7 +352,7 @@ private fun StatusFooterComponent(
                             },
                             onClick = {
                                 showRenoteMenu = false
-                                event.onQuoteClick(data)
+                                event.onQuoteClick(data, uriHandler)
                             },
                         )
                     }
@@ -397,7 +405,7 @@ private fun StatusFooterComponent(
                                 },
                                 onClick = {
                                     showMoreMenu = false
-                                    event.onReportClick(data)
+                                    event.onReportClick(data, uriHandler)
                                 },
                             )
                         } else {
@@ -415,7 +423,7 @@ private fun StatusFooterComponent(
                                 },
                                 onClick = {
                                     showMoreMenu = false
-                                    event.onDeleteClick(data)
+                                    event.onDeleteClick(data, uriHandler)
                                 },
                             )
                         }
@@ -427,76 +435,89 @@ private fun StatusFooterComponent(
 }
 
 internal interface BlueskyStatusEvent {
-    fun onStatusClick(data: UiStatus.Bluesky)
+    fun onStatusClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    )
 
-    fun onUserClick(userKey: MicroBlogKey)
+    fun onUserClick(
+        userKey: MicroBlogKey,
+        uriHandler: UriHandler,
+    )
 
-    fun onMediaClick(media: UiMedia)
+    fun onMediaClick(
+        media: UiMedia,
+        uriHandler: UriHandler,
+    )
 
-    fun onReplyClick(data: UiStatus.Bluesky)
+    fun onReplyClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    )
 
     fun onReblogClick(data: UiStatus.Bluesky)
 
-    fun onQuoteClick(data: UiStatus.Bluesky)
+    fun onQuoteClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    )
 
     fun onLikeClick(data: UiStatus.Bluesky)
 
-    fun onReportClick(data: UiStatus.Bluesky)
+    fun onReportClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    )
 
-    fun onDeleteClick(data: UiStatus.Bluesky)
+    fun onDeleteClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    )
 }
 
 internal class DefaultBlueskyStatusEvent(
-    private val context: Context,
     private val accountRepository: AccountRepository,
     private val scope: CoroutineScope,
 ) : BlueskyStatusEvent {
-    override fun onStatusClick(data: UiStatus.Bluesky) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onStatusClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 
-    override fun onUserClick(userKey: MicroBlogKey) {
-        val intent =
-            Intent(Intent.ACTION_VIEW, Uri.parse(ProfileRouteDestination(userKey).deeplink()))
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onUserClick(
+        userKey: MicroBlogKey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            ProfileRouteDestination(userKey).deeplink(),
+        )
     }
 
-    override fun onMediaClick(media: UiMedia) {
+    override fun onMediaClick(
+        media: UiMedia,
+        uriHandler: UriHandler,
+    ) {
         if (media is UiMedia.Image) {
-            val intent =
-                Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse(
-                        dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url)
-                            .deeplink(),
-                    ),
-                )
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            uriHandler.openUri(
+                dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url)
+                    .deeplink(),
+            )
         }
     }
 
-    override fun onReplyClick(data: UiStatus.Bluesky) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onReplyClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 
     override fun onReblogClick(data: UiStatus.Bluesky) {
@@ -515,42 +536,33 @@ internal class DefaultBlueskyStatusEvent(
         }
     }
 
-    override fun onReportClick(data: UiStatus.Bluesky) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    BlueskyReportStatusRouteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onReportClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            BlueskyReportStatusRouteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 
-    override fun onDeleteClick(data: UiStatus.Bluesky) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    DeleteStatusConfirmRouteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onDeleteClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            DeleteStatusConfirmRouteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 
-    override fun onQuoteClick(data: UiStatus.Bluesky) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onQuoteClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 }

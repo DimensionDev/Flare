@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
@@ -152,6 +153,7 @@ private fun MastodonFollowRequestNotificationComponent(
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
     ) {
@@ -169,7 +171,7 @@ private fun MastodonFollowRequestNotificationComponent(
                 modifier =
                     Modifier
                         .clickable {
-                            event.onUserClick(data.user.userKey)
+                            event.onUserClick(data.user.userKey, uriHandler)
                         },
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -184,7 +186,7 @@ private fun MastodonFollowRequestNotificationComponent(
                     modifier =
                         Modifier
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(data.user.userKey, uriHandler)
                             },
                 )
                 Text(
@@ -194,7 +196,7 @@ private fun MastodonFollowRequestNotificationComponent(
                         Modifier
                             .alpha(MediumAlpha)
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(data.user.userKey, uriHandler)
                             },
                 )
             }
@@ -281,6 +283,7 @@ private fun MastodonFollowNotificationComponent(
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
     ) {
@@ -298,7 +301,7 @@ private fun MastodonFollowNotificationComponent(
                 modifier =
                     Modifier
                         .clickable {
-                            event.onUserClick(data.user.userKey)
+                            event.onUserClick(data.user.userKey, uriHandler)
                         },
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -313,7 +316,7 @@ private fun MastodonFollowNotificationComponent(
                     modifier =
                         Modifier
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(data.user.userKey, uriHandler)
                             },
                 )
                 Text(
@@ -323,7 +326,7 @@ private fun MastodonFollowNotificationComponent(
                         Modifier
                             .alpha(MediumAlpha)
                             .clickable {
-                                event.onUserClick(data.user.userKey)
+                                event.onUserClick(data.user.userKey, uriHandler)
                             },
                 )
             }

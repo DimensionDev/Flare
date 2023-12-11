@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.icons.Icons
@@ -12,9 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigation.suite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -28,7 +34,6 @@ import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 import com.ramcosta.composedestinations.spec.NavGraphSpec
 import com.ramcosta.composedestinations.utils.composable
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.appCurrentDestinationAsState
 import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
@@ -109,23 +114,43 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                     composable(it.direction) {
                         val bottomSheetNavigator = rememberBottomSheetNavigator()
                         val innerNavController = rememberNavController(bottomSheetNavigator)
-                        ModalBottomSheetLayout(
-                            bottomSheetNavigator = bottomSheetNavigator,
+                        val uriHandler = LocalUriHandler.current
+                        CompositionLocalProvider(
+                            LocalUriHandler provides
+                                remember {
+                                    ProxyUriHandler(
+                                        navController = innerNavController,
+                                        actualUriHandler = uriHandler,
+                                    )
+                                },
                         ) {
-                            // TODO: not working
-                            OnNewIntent {
-                                innerNavController.handleDeepLink(it)
+                            ModalBottomSheetLayout(
+                                bottomSheetNavigator = bottomSheetNavigator,
+                            ) {
+                                DestinationsNavHost(
+                                    navController = innerNavController,
+                                    navGraph = it.navGraph,
+                                    engine = rememberAnimatedNavHostEngine(),
+                                    startRoute = it.direction,
+                                )
                             }
-                            DestinationsNavHost(
-                                navController = innerNavController,
-                                navGraph = it.navGraph,
-                                engine = rememberAnimatedNavHostEngine(),
-                                startRoute = it.direction,
-                            )
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+private class ProxyUriHandler(
+    private val navController: NavController,
+    private val actualUriHandler: UriHandler,
+) : UriHandler {
+    override fun openUri(uri: String) {
+        if (uri.startsWith("flare://")) {
+            navController.navigate(Uri.parse(uri))
+        } else {
+            actualUriHandler.openUri(uri)
         }
     }
 }

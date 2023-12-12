@@ -67,6 +67,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -125,11 +127,11 @@ import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
 import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
 import dev.dimension.flare.ui.presenter.compose.VisibilityState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.toImmutableList
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
-import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
@@ -273,10 +275,11 @@ private fun ComposeScreen(
     Column(
         modifier =
             modifier
-                .background(MaterialTheme.colorScheme.background, shape = MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp), shape = MaterialTheme.shapes.large)
                 .clip(MaterialTheme.shapes.large),
     ) {
         TopAppBar(
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             title = {
                 Text(text = stringResource(id = R.string.compose_title))
             },
@@ -362,65 +365,67 @@ private fun ComposeScreen(
                 },
             )
             AnimatedVisibility(state.mediaState.medias.isNotEmpty()) {
-                Row(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = screenHorizontalPadding)
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    state.mediaState.medias.forEach { uri ->
-                        Box {
-                            NetworkImage(
-                                model = uri,
-                                contentDescription = null,
-                                modifier =
-                                    Modifier
-                                        .size(128.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
-                            )
-                            IconButton(
-                                onClick = {
-                                    state.mediaState.removeMedia(uri)
-                                },
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.TopEnd)
-                                        .background(
-                                            color = Color.Black.copy(alpha = 0.3f),
-                                            shape = CircleShape,
-                                        ),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
+                Column {
+                    Row(
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding)
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        state.mediaState.medias.forEach { uri ->
+                            Box {
+                                NetworkImage(
+                                    model = uri,
                                     contentDescription = null,
+                                    modifier =
+                                        Modifier
+                                            .size(128.dp)
+                                            .clip(RoundedCornerShape(8.dp)),
                                 )
+                                IconButton(
+                                    onClick = {
+                                        state.mediaState.removeMedia(uri)
+                                    },
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopEnd)
+                                            .background(
+                                                color = Color.Black.copy(alpha = 0.3f),
+                                                shape = CircleShape,
+                                            ),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = null,
+                                    )
+                                }
                             }
                         }
                     }
-                }
-                val sensitiveInteractionSource = remember { MutableInteractionSource() }
-                Row(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = screenHorizontalPadding)
-                            .fillMaxWidth()
-                            .clickable(
-                                interactionSource = sensitiveInteractionSource,
-                                indication = null,
-                            ) {
-                                state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
-                            },
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = state.mediaState.isMediaSensitive,
-                        onCheckedChange = { state.mediaState.setMediaSensitive(it) },
-                        interactionSource = sensitiveInteractionSource,
-                    )
-                    Text(text = stringResource(id = R.string.compose_media_sensitive))
+                    val sensitiveInteractionSource = remember { MutableInteractionSource() }
+                    Row(
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding)
+                                .fillMaxWidth()
+                                .clickable(
+                                    interactionSource = sensitiveInteractionSource,
+                                    indication = null,
+                                ) {
+                                    state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
+                                },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(
+                            checked = state.mediaState.isMediaSensitive,
+                            onCheckedChange = { state.mediaState.setMediaSensitive(it) },
+                            interactionSource = sensitiveInteractionSource,
+                        )
+                        Text(text = stringResource(id = R.string.compose_media_sensitive))
+                    }
                 }
             }
             state.pollState.onSuccess { pollState ->
@@ -554,7 +559,7 @@ private fun ComposeScreen(
             modifier =
                 Modifier
                     .fillMaxWidth(),
-            tonalElevation = 3.dp,
+            tonalElevation = 8.dp,
         ) {
             Column(
                 modifier =

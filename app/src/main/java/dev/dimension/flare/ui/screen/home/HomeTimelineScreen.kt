@@ -11,10 +11,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -32,14 +36,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
+import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import kotlinx.coroutines.launch
 import org.koin.compose.rememberKoinInject
 
@@ -48,13 +57,29 @@ import org.koin.compose.rememberKoinInject
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun HomeRoute() {
-    HomeTimelineScreen()
+internal fun HomeRoute(
+    navigator: DestinationsNavigator,
+    drawerState: DrawerState,
+) {
+    val scope = rememberCoroutineScope()
+    HomeTimelineScreen(
+        toCompose = {
+            navigator.navigate(ComposeRouteDestination)
+        },
+        toQuickMenu = {
+            scope.launch {
+                drawerState.open()
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun HomeTimelineScreen() {
+internal fun HomeTimelineScreen(
+    toCompose: () -> Unit,
+    toQuickMenu: () -> Unit,
+) {
     val state by producePresenter {
         homeTimelinePresenter()
     }
@@ -79,7 +104,26 @@ internal fun HomeTimelineScreen() {
                     Text(text = stringResource(id = R.string.home_tab_home_title))
                 },
                 scrollBehavior = topAppBarScrollBehavior,
+                navigationIcon = {
+                    state.user.onSuccess {
+                        IconButton(
+                            onClick = toQuickMenu,
+                        ) {
+                            AvatarComponent(it.avatarUrl, size = 24.dp)
+                        }
+                    }
+                },
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = toCompose,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                )
+            }
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
@@ -135,7 +179,8 @@ internal fun HomeTimelineScreen() {
 private fun homeTimelinePresenter(statusEvent: StatusEvent = rememberKoinInject()) =
     run {
         val state = remember { HomeTimelinePresenter() }.invoke()
-        object {
+        val accountState = remember { ActiveAccountPresenter() }.invoke()
+        object : ActiveAccountState by accountState {
             val state = state
             val statusEvent = statusEvent
         }

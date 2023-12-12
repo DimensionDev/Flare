@@ -8,13 +8,18 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigation.suite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteScaffold
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
@@ -29,6 +34,7 @@ import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
+import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 import com.ramcosta.composedestinations.spec.NavGraphSpec
@@ -40,7 +46,9 @@ import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.NotificationRouteDestination
+import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
+import kotlinx.coroutines.launch
 
 sealed class Screen(
     val navGraph: NavGraphSpec,
@@ -63,9 +71,21 @@ sealed class Screen(
         Screen(NavGraphs.root, DiscoverRouteDestination, R.string.home_tab_discover_title, Icons.Default.Search)
 
     data object Me : Screen(NavGraphs.root, MeRouteDestination, R.string.home_tab_me_title, Icons.Default.AccountCircle)
+
+    data object Settings :
+        Screen(NavGraphs.root, SettingsRouteDestination, R.string.settings_title, Icons.Default.Settings)
 }
 
-private val items =
+private val allScreens =
+    listOf(
+        Screen.HomeTimeline,
+        Screen.Notification,
+        Screen.Discover,
+        Screen.Me,
+        Screen.Settings,
+    )
+
+private val menuItems =
     listOf(
         Screen.HomeTimeline,
         Screen.Notification,
@@ -83,56 +103,75 @@ fun HomeScreen(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val currentDestination =
         navController.appCurrentDestinationAsState().value
-            ?: items.first().direction.route
+            ?: allScreens.first().direction.route
     FlareTheme {
-        NavigationSuiteScaffold(
-            modifier = modifier,
-            navigationSuiteItems = {
-                items.forEach { destination ->
-                    item(
-                        selected = currentDestination == destination.direction,
-                        onClick = {
-                            navController.navigate(destination.direction) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(destination.icon, contentDescription = stringResource(destination.title)) },
-                        label = { Text(stringResource(destination.title)) },
-                    )
-                }
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scope = rememberCoroutineScope()
+        ModalNavigationDrawer(
+            drawerContent = {
+                HomeDrawerContent(
+                    toSettings = {
+                        navController.navigate(SettingsRouteDestination)
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                )
             },
+            drawerState = drawerState,
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = Screen.HomeTimeline.direction.route,
+            NavigationSuiteScaffold(
+                modifier = modifier,
+                navigationSuiteItems = {
+                    menuItems.forEach { destination ->
+                        item(
+                            selected = currentDestination == destination.direction,
+                            onClick = {
+                                navController.navigate(destination.direction) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = { Icon(destination.icon, contentDescription = stringResource(destination.title)) },
+                            label = { Text(stringResource(destination.title)) },
+                        )
+                    }
+                },
             ) {
-                items.forEach {
-                    composable(it.direction) {
-                        val bottomSheetNavigator = rememberBottomSheetNavigator()
-                        val innerNavController = rememberNavController(bottomSheetNavigator)
-                        val uriHandler = LocalUriHandler.current
-                        CompositionLocalProvider(
-                            LocalUriHandler provides
-                                remember {
-                                    ProxyUriHandler(
-                                        navController = innerNavController,
-                                        actualUriHandler = uriHandler,
-                                    )
-                                },
-                        ) {
-                            ModalBottomSheetLayout(
-                                bottomSheetNavigator = bottomSheetNavigator,
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.HomeTimeline.direction.route,
+                ) {
+                    allScreens.forEach {
+                        composable(it.direction) {
+                            val bottomSheetNavigator = rememberBottomSheetNavigator()
+                            val innerNavController = rememberNavController(bottomSheetNavigator)
+                            val uriHandler = LocalUriHandler.current
+                            CompositionLocalProvider(
+                                LocalUriHandler provides
+                                    remember {
+                                        ProxyUriHandler(
+                                            navController = innerNavController,
+                                            actualUriHandler = uriHandler,
+                                        )
+                                    },
                             ) {
-                                DestinationsNavHost(
-                                    navController = innerNavController,
-                                    navGraph = it.navGraph,
-                                    engine = rememberAnimatedNavHostEngine(),
-                                    startRoute = it.direction,
-                                )
+                                ModalBottomSheetLayout(
+                                    bottomSheetNavigator = bottomSheetNavigator,
+                                ) {
+                                    DestinationsNavHost(
+                                        navController = innerNavController,
+                                        navGraph = it.navGraph,
+                                        engine = rememberAnimatedNavHostEngine(),
+                                        startRoute = it.direction,
+                                        dependenciesContainerBuilder = {
+                                            dependency(drawerState)
+                                        },
+                                    )
+                                }
                             }
                         }
                     }

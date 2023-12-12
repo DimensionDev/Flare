@@ -14,6 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Flare"
         android:enableOnBackInvokedCallback="true"
+        android:windowSoftInputMode="adjustResize"
         tools:targetApi="tiramisu"
         android:name=".App">
         <activity

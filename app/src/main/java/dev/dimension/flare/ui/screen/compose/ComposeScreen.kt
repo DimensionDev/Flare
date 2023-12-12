@@ -25,17 +25,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -44,9 +40,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text2.input.TextFieldState
 import androidx.compose.foundation.text2.input.textAsFlow
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -54,6 +48,8 @@ import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Poll
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -64,7 +60,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -76,11 +71,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -89,11 +84,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavBackStackEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -123,7 +118,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -131,12 +125,11 @@ import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
 import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
 import dev.dimension.flare.ui.presenter.compose.VisibilityState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlinx.collections.immutable.toImmutableList
-import kotlin.math.max
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
@@ -145,6 +138,7 @@ fun ComposeScreenPreview() {
 }
 
 @Destination(
+    style = DestinationStyle.Dialog::class,
     wrappers = [ThemeWrapper::class],
 )
 @Composable
@@ -157,6 +151,7 @@ fun ComposeRoute(navigator: DestinationsNavigator) {
 }
 
 @Destination(
+    style = DestinationStyle.Dialog::class,
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
@@ -178,6 +173,7 @@ fun ReplyRoute(
 }
 
 @Destination(
+    style = DestinationStyle.Dialog::class,
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
@@ -230,6 +226,7 @@ object ComposeTransitions : DestinationStyle.Animated {
     ExperimentalFoundationApi::class,
     ExperimentalLayoutApi::class,
     ExperimentalPermissionsApi::class,
+    ExperimentalComposeUiApi::class,
 )
 @Composable
 private fun ComposeScreen(
@@ -241,7 +238,6 @@ private fun ComposeScreen(
     val state by producePresenter {
         composePresenter(context, status)
     }
-    val keyboardController = LocalSoftwareKeyboardController.current
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(4),
@@ -274,181 +270,44 @@ private fun ComposeScreen(
                 }
             },
         )
-
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.compose_title))
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.navigate_back),
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            if (permissionState.status.isGranted) {
-                                state.send()
-                                onBack.invoke()
-                            } else {
-                                permissionState.launchPermissionRequest()
-                            }
-                        },
-                        enabled = state.canSend,
-                    ) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null)
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            Surface(
-                modifier =
-                    Modifier
-                        .fillMaxWidth(),
-                tonalElevation = 3.dp,
-            ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .navigationBarsPadding(),
-                ) {
-                    Row(
-                        modifier = Modifier,
-                    ) {
-                        IconButton(
-                            onClick = {
-                                photoPickerLauncher.launch(
-                                    PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageAndVideo,
-                                    ),
-                                )
-                            },
-                            enabled = state.canMedia,
-                        ) {
-                            Icon(imageVector = Icons.Default.Image, contentDescription = null)
-                        }
-                        state.pollState.onSuccess {
-                            IconButton(
-                                onClick = {
-                                    it.togglePoll()
-                                },
-                                enabled = state.canPoll,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Poll,
-                                    contentDescription = null,
-                                )
-                            }
-                        }
-                        state.state.visibilityState.onSuccess { visibilityState ->
-                            when (visibilityState) {
-                                is MastodonVisibilityState ->
-                                    MastodonVisibilityContent(
-                                        visibilityState,
-                                    )
-
-                                is MisskeyVisibilityState ->
-                                    MisskeyVisibilityContent(
-                                        visibilityState,
-                                    )
-                            }
-                        }
-                        state.contentWarningState.onSuccess {
-                            IconButton(
-                                onClick = {
-                                    it.toggle()
-                                },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = null,
-                                )
-                            }
-                        }
-                        state.state.emojiState.onSuccess {
-                            val isImeVisible = WindowInsets.isImeVisible
-                            IconButton(
-                                onClick = {
-                                    if (isImeVisible) {
-                                        keyboardController?.hide()
-                                    } else {
-                                        keyboardController?.show()
-                                    }
-                                },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.EmojiEmotions,
-                                    contentDescription = null,
-                                )
-                            }
-                        }
-                    }
-
-                    state.state.emojiState.onSuccess { emojis ->
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(imeHeight()),
-                        ) {
-                            if (!WindowInsets.isImeVisible) {
-                                LazyVerticalGrid(
-                                    columns = GridCells.Adaptive(48.dp),
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth(),
-                                    contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                ) {
-                                    items(emojis) { emoji ->
-                                        NetworkImage(
-                                            model = emoji.url,
-                                            contentDescription = emoji.shortcode,
-                                            contentScale = ContentScale.Fit,
-                                            modifier =
-                                                Modifier
-                                                    .size(48.dp)
-                                                    .clickable {
-                                                        state.selectEmoji(emoji)
-                                                    },
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }.onError {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .imePadding(),
-                        )
-                    }.onLoading {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .imePadding(),
-                        )
-                    }
-                }
-            }
-        },
+    Column(
+        modifier =
+            modifier
+                .background(MaterialTheme.colorScheme.background, shape = MaterialTheme.shapes.large)
+                .clip(MaterialTheme.shapes.large),
     ) {
+        TopAppBar(
+            title = {
+                Text(text = stringResource(id = R.string.compose_title))
+            },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(id = R.string.navigate_back),
+                    )
+                }
+            },
+            actions = {
+                IconButton(
+                    onClick = {
+                        if (permissionState.status.isGranted) {
+                            state.send()
+                            onBack.invoke()
+                        } else {
+                            permissionState.launchPermissionRequest()
+                        }
+                    },
+                    enabled = state.canSend,
+                ) {
+                    Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null)
+                }
+            },
+        )
         Column(
-            modifier =
-                Modifier
-                    .padding(it)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
+//            modifier =
+//                Modifier
+//                    .padding(it),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             state.contentWarningState.onSuccess {
@@ -502,7 +361,7 @@ private fun ComposeScreen(
                     Text(text = stringResource(id = R.string.compose_hint))
                 },
             )
-            if (state.mediaState.medias.isNotEmpty()) {
+            AnimatedVisibility(state.mediaState.medias.isNotEmpty()) {
                 Row(
                     modifier =
                         Modifier
@@ -565,7 +424,7 @@ private fun ComposeScreen(
                 }
             }
             state.pollState.onSuccess { pollState ->
-                if (pollState.enabled) {
+                AnimatedVisibility(pollState.enabled) {
                     Column(
                         modifier =
                             Modifier
@@ -683,6 +542,130 @@ private fun ComposeScreen(
                                         .padding(horizontal = screenHorizontalPadding)
                                         .fillMaxWidth(),
                             )
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Surface(
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
+            tonalElevation = 3.dp,
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .navigationBarsPadding(),
+            ) {
+                Row(
+                    modifier = Modifier,
+                ) {
+                    IconButton(
+                        onClick = {
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageAndVideo,
+                                ),
+                            )
+                        },
+                        enabled = state.canMedia,
+                    ) {
+                        Icon(imageVector = Icons.Default.Image, contentDescription = null)
+                    }
+                    state.pollState.onSuccess {
+                        IconButton(
+                            onClick = {
+                                it.togglePoll()
+                            },
+                            enabled = state.canPoll,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Poll,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                    state.state.visibilityState.onSuccess { visibilityState ->
+                        when (visibilityState) {
+                            is MastodonVisibilityState ->
+                                MastodonVisibilityContent(
+                                    visibilityState,
+                                )
+
+                            is MisskeyVisibilityState ->
+                                MisskeyVisibilityContent(
+                                    visibilityState,
+                                )
+                        }
+                    }
+                    state.contentWarningState.onSuccess {
+                        IconButton(
+                            onClick = {
+                                it.toggle()
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                    state.state.emojiState.onSuccess { emojis ->
+                        IconButton(
+                            onClick = {
+                                state.setShowEmojiMenu(!state.showEmojiMenu)
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.EmojiEmotions,
+                                contentDescription = null,
+                            )
+                            if (state.showEmojiMenu) {
+                                Popup(
+                                    onDismissRequest = {
+                                        state.setShowEmojiMenu(false)
+                                    },
+                                    offset =
+                                        IntOffset(
+                                            x = 0,
+                                            y =
+                                                with(LocalDensity.current) {
+                                                    48.dp.roundToPx()
+                                                },
+                                        ),
+                                    properties = PopupProperties(usePlatformDefaultWidth = true),
+                                ) {
+                                    Card(
+                                        modifier = Modifier.sizeIn(maxHeight = 256.dp, maxWidth = 384.dp),
+                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
+                                    ) {
+                                        LazyVerticalGrid(
+                                            columns = GridCells.Adaptive(36.dp),
+                                            contentPadding = PaddingValues(8.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        ) {
+                                            items(emojis) { emoji ->
+                                                NetworkImage(
+                                                    model = emoji.url,
+                                                    contentDescription = emoji.shortcode,
+                                                    contentScale = ContentScale.Fit,
+                                                    modifier =
+                                                        Modifier
+                                                            .size(36.dp)
+                                                            .clickable {
+                                                                state.selectEmoji(emoji)
+                                                            },
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -819,19 +802,6 @@ private fun MastodonVisibilityContent(visibilityState: MastodonVisibilityState) 
     }
 }
 
-@Composable
-private fun imeHeight(): Dp {
-    var height by remember { mutableIntStateOf(0) }
-    val imeHeight = WindowInsets.ime.getBottom(LocalDensity.current)
-    val navigationBarHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current)
-    LaunchedEffect(imeHeight) {
-        height = max(height, imeHeight - navigationBarHeight)
-    }
-    return with(LocalDensity.current) {
-        height.toDp()
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PollOption(
@@ -927,6 +897,7 @@ private fun composePresenter(
         remember(mediaState, pollState) {
             mediaState.medias.size < 4 && !(pollState is UiState.Success && pollState.data.enabled)
         }
+    var showEmojiMenu by remember { mutableStateOf(false) }
     object {
         val textFieldState = textFieldState
         val canSend = canSend
@@ -941,6 +912,12 @@ private fun composePresenter(
             textFieldState.edit {
                 append(" :${emoji.shortcode}: ")
             }
+        }
+
+        val showEmojiMenu = showEmojiMenu
+
+        fun setShowEmojiMenu(value: Boolean) {
+            showEmojiMenu = value
         }
 
         @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)

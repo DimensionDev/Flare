@@ -24,7 +24,8 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -71,6 +72,7 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
+import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
@@ -261,7 +263,7 @@ fun ProfileScreen(
     val state by producePresenter(key = userKey.toString()) {
         profilePresenter(userKey)
     }
-    val listState = rememberLazyListState()
+    val listState = rememberLazyStaggeredGridState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -277,7 +279,7 @@ fun ProfileScreen(
                         } else {
                             max(
                                 0f,
-                                (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.toFloat()),
+                                (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.height.toFloat()),
                             )
                         }
                     }
@@ -424,12 +426,13 @@ fun ProfileScreen(
             onRefresh = state.state::refresh,
             indicatorPadding = it + contentPadding,
             content = {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                LazyStatusVerticalStaggeredGrid(
                     state = listState,
                     contentPadding = contentPadding,
                 ) {
-                    item {
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
                         ProfileHeader(
                             state.state.userState,
                             state.state.relationState,

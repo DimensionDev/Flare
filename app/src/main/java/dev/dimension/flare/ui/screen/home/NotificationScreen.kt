@@ -1,10 +1,8 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -19,13 +17,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.NotificationFilter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
@@ -47,7 +45,6 @@ internal fun NotificationScreen(modifier: Modifier = Modifier) {
     val state by producePresenter {
         notificationPresenter()
     }
-    val listState = rememberLazyListState()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         topBar = {
@@ -65,15 +62,14 @@ internal fun NotificationScreen(modifier: Modifier = Modifier) {
             modifier = modifier,
             onRefresh = state.state::refresh,
             content = {
-                LazyColumn(
-                    state = listState,
+                LazyStatusVerticalStaggeredGrid(
                     contentPadding = contentPadding,
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     state.state.allTypes.onSuccess {
                         if (it.size > 1) {
-                            item {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
                                 SingleChoiceSegmentedButtonRow(
                                     modifier =
                                         Modifier

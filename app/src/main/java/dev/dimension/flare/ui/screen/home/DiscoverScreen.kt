@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material3.Card
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
@@ -40,6 +40,7 @@ import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
@@ -112,19 +113,22 @@ internal fun DiscoverScreen(
             onRefresh = {
             },
             content = {
-                LazyColumn(
+                LazyStatusVerticalStaggeredGrid(
                     contentPadding = it,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     state.users.onSuccess { users ->
-                        stickyHeader {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             ListItem(
                                 headlineContent = {
                                     Text(text = stringResource(R.string.discover_users))
                                 },
                             )
                         }
-                        item {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             LazyHorizontalGrid(
                                 modifier = Modifier.height(128.dp),
                                 rows = GridCells.Fixed(2),
@@ -173,14 +177,18 @@ internal fun DiscoverScreen(
                         }
                     }
                     state.hashtags.onSuccess { hashtags ->
-                        stickyHeader {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             ListItem(
                                 headlineContent = {
                                     Text(text = stringResource(R.string.discover_hashtags))
                                 },
                             )
                         }
-                        item {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
@@ -236,7 +244,9 @@ internal fun DiscoverScreen(
                     }
 
                     state.status.onSuccess {
-                        stickyHeader {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             ListItem(
                                 headlineContent = {
                                     Text(text = stringResource(R.string.discover_status))

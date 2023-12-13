@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoodBad
 import androidx.compose.material.icons.outlined.EmojiEmotions
@@ -46,7 +47,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-context(LazyListScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent)
+context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent)
 internal fun status() {
     onSuccess { lazyPagingItems ->
         if (
@@ -73,11 +74,12 @@ internal fun status() {
             ) &&
             lazyPagingItems.itemCount == 0
         ) {
-            item {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillParentMaxSize()
                             .clickable {
                                 lazyPagingItems.retry()
                             },
@@ -96,11 +98,12 @@ internal fun status() {
                 }
             }
         } else if (lazyPagingItems.itemCount == 0) {
-            item {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillParentMaxSize()
                             .clickable {
                                 lazyPagingItems.refresh()
                             },
@@ -125,7 +128,9 @@ internal fun status() {
             if (lazyPagingItems.itemCount > 0) {
                 when (lazyPagingItems.loadState.append) {
                     is LoadState.Error ->
-                        item {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             Column(
                                 modifier =
                                     Modifier
@@ -158,7 +163,9 @@ internal fun status() {
                         }
 
                     is LoadState.NotLoading ->
-                        item {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             Column(
                                 modifier =
                                     Modifier
@@ -194,7 +201,7 @@ internal fun status() {
     }
 }
 
-context(LazyListScope, LazyPagingItemsProxy<UiStatus>, StatusEvent)
+context(LazyStaggeredGridScope, LazyPagingItemsProxy<UiStatus>, StatusEvent)
 private fun statusItems() {
     items(
         itemCount,

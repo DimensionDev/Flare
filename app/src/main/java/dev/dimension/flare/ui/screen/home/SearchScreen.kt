@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -42,6 +42,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
@@ -214,12 +215,12 @@ private fun SearchContent(
         },
     ) {
         if (committed) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+            LazyStatusVerticalStaggeredGrid {
                 searchUsers.onSuccess { users ->
                     if (users.loadState.refresh is LoadState.Loading || users.itemCount > 0) {
-                        stickyHeader {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             ListItem(
                                 headlineContent = {
                                     Text(text = stringResource(R.string.search_users))
@@ -227,7 +228,9 @@ private fun SearchContent(
                             )
                         }
                     }
-                    item {
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
@@ -272,7 +275,9 @@ private fun SearchContent(
                 }
 
                 searchStatus.onSuccess {
-                    stickyHeader {
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
                         ListItem(
                             headlineContent = {
                                 Text(text = stringResource(R.string.search_status))

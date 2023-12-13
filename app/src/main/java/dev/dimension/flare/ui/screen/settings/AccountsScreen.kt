@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -38,7 +37,7 @@ import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
-fun AccountsRoute(navigator: DestinationsNavigator) {
+internal fun AccountsRoute(navigator: ProxyDestinationsNavigator) {
     AccountsScreen(
         onBack = navigator::navigateUp,
         toLogin = {

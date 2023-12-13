@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
@@ -69,7 +68,7 @@ import org.koin.compose.rememberKoinInject
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-fun AppearanceRoute(navigator: DestinationsNavigator) {
+internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
     AppearanceScreen(
         onBack = navigator::navigateUp,
     )

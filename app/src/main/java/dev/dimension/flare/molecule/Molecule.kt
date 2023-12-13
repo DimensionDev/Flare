@@ -2,6 +2,7 @@ package dev.dimension.flare.molecule
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.currentCompositeKeyHash
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -37,7 +38,7 @@ private fun <T> createPresenter(
     body: @Composable () -> T,
     key: String? = null,
     holder: PresenterHolder<T> =
-        viewModel(key = key) {
+        viewModel(key = key + currentCompositeKeyHash.toString()) {
             PresenterHolder<T>(body)
         },
 ): State<T> {

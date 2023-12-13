@@ -38,11 +38,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.google.accompanist.navigation.material.ModalBottomSheetLayout
-import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
+import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
@@ -123,8 +122,6 @@ private val menuItems =
     )
 
 @OptIn(
-    ExperimentalMaterialNavigationApi::class,
-    ExperimentalAnimationApi::class,
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
     ExperimentalMaterial3AdaptiveApi::class,
 )
@@ -211,40 +208,45 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 ) {
                     allScreens.forEach {
                         composable(it.direction) {
-                            val bottomSheetNavigator = rememberBottomSheetNavigator()
-                            val innerNavController = rememberNavController(bottomSheetNavigator)
-                            val uriHandler = LocalUriHandler.current
-                            CompositionLocalProvider(
-                                LocalUriHandler provides
-                                    remember {
-                                        ProxyUriHandler(
-                                            navController = innerNavController,
-                                            actualUriHandler = uriHandler,
-                                        )
-                                    },
-                            ) {
-                                ModalBottomSheetLayout(
-                                    bottomSheetNavigator = bottomSheetNavigator,
-                                ) {
-                                    DestinationsNavHost(
-                                        navController = innerNavController,
-                                        navGraph = it.navGraph,
-                                        engine =
-                                            rememberAnimatedNavHostEngine(
-                                                rootDefaultAnimations = RootNavGraphDefaultAnimations.ACCOMPANIST_FADING,
-                                            ),
-                                        startRoute = it.direction,
-                                        dependenciesContainerBuilder = {
-                                            dependency(drawerState)
-                                        },
-                                    )
-                                }
+                            Router(it.navGraph, it.direction) {
+                                dependency(drawerState)
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
+internal fun Router(
+    navGraph: NavGraphSpec,
+    direction: DirectionDestinationSpec,
+    dependenciesContainerBuilder: @Composable DependenciesContainerBuilder<*>.() -> Unit = {},
+) {
+    val innerNavController = rememberNavController()
+    val uriHandler = LocalUriHandler.current
+    CompositionLocalProvider(
+        LocalUriHandler provides
+            remember {
+                ProxyUriHandler(
+                    navController = innerNavController,
+                    actualUriHandler = uriHandler,
+                )
+            },
+    ) {
+        DestinationsNavHost(
+            navController = innerNavController,
+            navGraph = navGraph,
+            engine =
+                rememberAnimatedNavHostEngine(
+                    rootDefaultAnimations = RootNavGraphDefaultAnimations.ACCOMPANIST_FADING,
+                ),
+            startRoute = direction,
+            dependenciesContainerBuilder = dependenciesContainerBuilder,
+        )
     }
 }
 

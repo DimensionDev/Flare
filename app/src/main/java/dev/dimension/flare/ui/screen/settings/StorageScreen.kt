@@ -26,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import coil.annotation.ExperimentalCoilApi
 import coil.imageLoader
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -37,7 +36,7 @@ import dev.dimension.flare.ui.presenter.settings.StorageState
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-fun StorageRoute(navigator: DestinationsNavigator) {
+internal fun StorageRoute(navigator: ProxyDestinationsNavigator) {
     StorageScreen(
         onBack = navigator::navigateUp,
     )

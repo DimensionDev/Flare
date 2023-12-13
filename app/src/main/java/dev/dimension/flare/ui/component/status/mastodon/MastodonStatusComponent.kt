@@ -1,8 +1,5 @@
 package dev.dimension.flare.ui.component.status.mastodon
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,6 +52,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
@@ -167,6 +165,7 @@ internal fun MastodonStatusComponent(
     modifier: Modifier = Modifier,
 ) {
     val actualData by rememberUpdatedState(newValue = data.reblogStatus ?: data)
+    val uriHandler = LocalUriHandler.current
 
     val appearanceSettings = LocalAppearanceSettings.current
     val dismissState =
@@ -188,7 +187,7 @@ internal fun MastodonStatusComponent(
                             event.onBookmarkClick(actualData)
 
                         AppearanceSettings.Mastodon.SwipeActions.REPLY ->
-                            event.onReplyClick(actualData)
+                            event.onReplyClick(actualData, uriHandler)
 
                         AppearanceSettings.Mastodon.SwipeActions.NONE -> Unit
                     }
@@ -246,7 +245,7 @@ internal fun MastodonStatusComponent(
             modifier =
                 Modifier
                     .clickable {
-                        event.onStatusClick(data)
+                        event.onStatusClick(data, uriHandler)
                     }
                     .background(MaterialTheme.colorScheme.background)
                     .then(modifier),
@@ -270,7 +269,9 @@ internal fun MastodonStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
                 StatusMediaComponent(
                     data = actualData.media,
-                    onMediaClick = event::onMediaClick,
+                    onMediaClick = {
+                        event.onMediaClick(it, uriHandler)
+                    },
                     sensitive = actualData.sensitive,
                 )
             }
@@ -345,6 +346,7 @@ private fun StatusFooterComponent(
 ) {
     var showMoreMenu by remember { mutableStateOf(false) }
     val actualData = data.reblogStatus ?: data
+    val uriHandler = LocalUriHandler.current
     Row(
         modifier =
             modifier
@@ -362,7 +364,7 @@ private fun StatusFooterComponent(
                     Modifier
                         .weight(1f),
                 onClicked = {
-                    event.onReplyClick(actualData)
+                    event.onReplyClick(actualData, uriHandler)
                 },
             )
             StatusActionButton(
@@ -434,7 +436,7 @@ private fun StatusFooterComponent(
                                 },
                                 onClick = {
                                     showMoreMenu = false
-                                    event.onDeleteClick(actualData)
+                                    event.onDeleteClick(actualData, uriHandler)
                                 },
                             )
                         } else {
@@ -444,7 +446,7 @@ private fun StatusFooterComponent(
                                 },
                                 onClick = {
                                     showMoreMenu = false
-                                    event.onReportClick(actualData)
+                                    event.onReportClick(actualData, uriHandler)
                                 },
                             )
                         }
@@ -554,9 +556,10 @@ private fun StatusHeaderComponent(
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     CommonStatusHeaderComponent(
         data = data.user,
-        onUserClick = { event.onUserClick(it) },
+        onUserClick = { event.onUserClick(it, uriHandler) },
         modifier = modifier,
     ) {
         if (LocalAppearanceSettings.current.mastodon.showVisibility) {
@@ -616,11 +619,20 @@ internal fun VisibilityIcon(
 }
 
 internal interface MastodonStatusEvent {
-    fun onUserClick(userKey: MicroBlogKey)
+    fun onUserClick(
+        userKey: MicroBlogKey,
+        uriHandler: UriHandler,
+    )
 
-    fun onStatusClick(status: UiStatus.Mastodon)
+    fun onStatusClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    )
 
-    fun onReplyClick(status: UiStatus.Mastodon)
+    fun onReplyClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    )
 
     fun onReblogClick(status: UiStatus.Mastodon)
 
@@ -628,43 +640,45 @@ internal interface MastodonStatusEvent {
 
     fun onBookmarkClick(status: UiStatus.Mastodon)
 
-    fun onMediaClick(media: UiMedia)
+    fun onMediaClick(
+        media: UiMedia,
+        uriHandler: UriHandler,
+    )
 
-    fun onDeleteClick(status: UiStatus.Mastodon)
+    fun onDeleteClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    )
 
-    fun onReportClick(status: UiStatus.Mastodon)
+    fun onReportClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    )
 }
 
 internal class DefaultMastodonStatusEvent(
-    private val context: Context,
     private val scope: CoroutineScope,
     private val accountRepository: AccountRepository,
 ) : MastodonStatusEvent {
-    override fun onUserClick(userKey: MicroBlogKey) {
-        val intent =
-            Intent(Intent.ACTION_VIEW, Uri.parse(ProfileRouteDestination(userKey).deeplink()))
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onUserClick(
+        userKey: MicroBlogKey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(ProfileRouteDestination(userKey).deeplink())
     }
 
-    override fun onStatusClick(status: UiStatus.Mastodon) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(StatusRouteDestination(status.statusKey).deeplink()),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onStatusClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(StatusRouteDestination(status.statusKey).deeplink())
     }
 
-    override fun onReplyClick(status: UiStatus.Mastodon) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(ReplyRouteDestination(status.statusKey).deeplink()),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onReplyClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(ReplyRouteDestination(status.statusKey).deeplink())
     }
 
     override fun onReblogClick(status: UiStatus.Mastodon) {
@@ -691,43 +705,35 @@ internal class DefaultMastodonStatusEvent(
         }
     }
 
-    override fun onMediaClick(media: UiMedia) {
+    override fun onMediaClick(
+        media: UiMedia,
+        uriHandler: UriHandler,
+    ) {
         if (media is UiMedia.Image) {
-            val intent =
-                Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse(MediaRouteDestination(media.url).deeplink()),
-                )
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            uriHandler.openUri(MediaRouteDestination(media.url).deeplink())
         }
     }
 
-    override fun onDeleteClick(status: UiStatus.Mastodon) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(status.statusKey)
-                        .deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onDeleteClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(
+                status.statusKey,
+            ).deeplink(),
+        )
     }
 
-    override fun onReportClick(status: UiStatus.Mastodon) {
-        val intent =
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(
-                    dev.dimension.flare.ui.screen.destinations.MastodonReportRouteDestination(
-                        userKey = status.user.userKey,
-                        statusKey = status.statusKey,
-                    ).deeplink(),
-                ),
-            )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
+    override fun onReportClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.MastodonReportRouteDestination(
+                userKey = status.user.userKey,
+                statusKey = status.statusKey,
+            ).deeplink(),
+        )
     }
 }

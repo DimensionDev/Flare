@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.status.action
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -17,7 +16,7 @@ import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyleBottomSheet
+import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
@@ -26,7 +25,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
 
 @Destination(
-    style = DestinationStyleBottomSheet::class,
+    style = DestinationStyle.Dialog::class,
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
@@ -35,7 +34,7 @@ import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-fun ColumnScope.MisskeyReactionRoute(
+fun MisskeyReactionRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
 ) {
@@ -48,7 +47,7 @@ fun ColumnScope.MisskeyReactionRoute(
 }
 
 @Composable
-fun ColumnScope.MisskeyReactionSheet(
+fun MisskeyReactionSheet(
     statusKey: MicroBlogKey,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,

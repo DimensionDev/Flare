@@ -7,14 +7,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material3.Card
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
@@ -22,27 +23,67 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
+import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
+import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.koin.compose.rememberKoinInject
+
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+@Composable
+internal fun DiscoverRoute(navigator: DestinationsNavigator) {
+    val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter() }
+    Scaffold(
+        topBar = {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                DiscoverSearch(
+                    state = state,
+                    onAccountClick = {
+                        navigator.navigate(QuickMenuDialogRouteDestination)
+                    },
+                )
+            }
+        },
+    ) {
+        DiscoverScreen(
+            contentPadding = it,
+            onUserClick = { navigator.navigate(ProfileRouteDestination(it)) },
+            onHashtagClick = {
+                state.commitSearch(it)
+            },
+        )
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -72,19 +113,22 @@ internal fun DiscoverScreen(
             onRefresh = {
             },
             content = {
-                LazyColumn(
+                LazyStatusVerticalStaggeredGrid(
                     contentPadding = it,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     state.users.onSuccess { users ->
-                        stickyHeader {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             ListItem(
                                 headlineContent = {
                                     Text(text = stringResource(R.string.discover_users))
                                 },
                             )
                         }
-                        item {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             LazyHorizontalGrid(
                                 modifier = Modifier.height(128.dp),
                                 rows = GridCells.Fixed(2),
@@ -133,14 +177,18 @@ internal fun DiscoverScreen(
                         }
                     }
                     state.hashtags.onSuccess { hashtags ->
-                        stickyHeader {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             ListItem(
                                 headlineContent = {
                                     Text(text = stringResource(R.string.discover_hashtags))
                                 },
                             )
                         }
-                        item {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
@@ -196,7 +244,9 @@ internal fun DiscoverScreen(
                     }
 
                     state.status.onSuccess {
-                        stickyHeader {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
                             ListItem(
                                 headlineContent = {
                                     Text(text = stringResource(R.string.discover_status))

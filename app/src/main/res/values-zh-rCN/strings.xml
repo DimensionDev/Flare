@@ -249,4 +249,7 @@
     <string name="settings_storage_clear_database_description">%1$s个用户，%2$s个状态将被删除</string>
 
 
+    <string name="service_select_instance_input_placeholder">实例地址</string>
+    <string name="service_select_next_button">下一步</string>
+    <string name="service_select_empty_message">没有找到实例</string>
 </resources>

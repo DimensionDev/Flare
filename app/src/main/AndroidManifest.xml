@@ -12,8 +12,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Flare"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
         android:enableOnBackInvokedCallback="true"
+        android:windowSoftInputMode="adjustResize"
         tools:targetApi="tiramisu"
         android:name=".App">
         <activity

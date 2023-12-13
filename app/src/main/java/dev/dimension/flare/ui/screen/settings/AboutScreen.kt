@@ -25,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.brands.Github
@@ -38,7 +37,7 @@ import dev.dimension.flare.ui.theme.MediumAlpha
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-fun AboutRoute(navigator: DestinationsNavigator) {
+internal fun AboutRoute(navigator: ProxyDestinationsNavigator) {
     AboutScreen(
         onBack = navigator::navigateUp,
     )

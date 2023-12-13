@@ -3,6 +3,9 @@ package dev.dimension.flare.ui.screen.home
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
@@ -11,13 +14,17 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigation.suite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteType
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -28,11 +35,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
@@ -40,8 +49,8 @@ import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 import com.ramcosta.composedestinations.spec.NavGraphSpec
 import com.ramcosta.composedestinations.utils.composable
 import dev.dimension.flare.R
+import dev.dimension.flare.ui.component.OptionalModalNavigationDrawer
 import dev.dimension.flare.ui.screen.NavGraphs
-import dev.dimension.flare.ui.screen.appCurrentDestinationAsState
 import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MeRouteDestination
@@ -57,7 +66,12 @@ sealed class Screen(
     val icon: ImageVector,
 ) {
     data object HomeTimeline :
-        Screen(NavGraphs.root, HomeRouteDestination, R.string.home_tab_home_title, Icons.Default.Home)
+        Screen(
+            NavGraphs.root,
+            HomeRouteDestination,
+            R.string.home_tab_home_title,
+            Icons.Default.Home,
+        )
 
     data object Notification :
         Screen(
@@ -68,12 +82,27 @@ sealed class Screen(
         )
 
     data object Discover :
-        Screen(NavGraphs.root, DiscoverRouteDestination, R.string.home_tab_discover_title, Icons.Default.Search)
+        Screen(
+            NavGraphs.root,
+            DiscoverRouteDestination,
+            R.string.home_tab_discover_title,
+            Icons.Default.Search,
+        )
 
-    data object Me : Screen(NavGraphs.root, MeRouteDestination, R.string.home_tab_me_title, Icons.Default.AccountCircle)
+    data object Me : Screen(
+        NavGraphs.root,
+        MeRouteDestination,
+        R.string.home_tab_me_title,
+        Icons.Default.AccountCircle,
+    )
 
     data object Settings :
-        Screen(NavGraphs.root, SettingsRouteDestination, R.string.settings_title, Icons.Default.Settings)
+        Screen(
+            NavGraphs.root,
+            SettingsRouteDestination,
+            R.string.settings_title,
+            Icons.Default.Settings,
+        )
 }
 
 private val allScreens =
@@ -97,35 +126,56 @@ private val menuItems =
     ExperimentalMaterialNavigationApi::class,
     ExperimentalAnimationApi::class,
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
+    ExperimentalMaterial3AdaptiveApi::class,
 )
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    val currentDestination =
-        navController.appCurrentDestinationAsState().value
-            ?: allScreens.first().direction.route
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     FlareTheme {
+        val layoutType =
+            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
+                currentWindowAdaptiveInfo(),
+            )
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
-        ModalNavigationDrawer(
+        OptionalModalNavigationDrawer(
             drawerContent = {
                 HomeDrawerContent(
-                    toSettings = {
-                        navController.navigate(SettingsRouteDestination)
+                    currentRoute = currentRoute,
+                    navigateTo = {
                         scope.launch {
                             drawerState.close()
+                        }
+                        navController.navigate(it) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
                     },
                 )
             },
             drawerState = drawerState,
+            enable = layoutType == NavigationSuiteType.NavigationBar,
         ) {
             NavigationSuiteScaffold(
                 modifier = modifier,
+                layoutType = layoutType,
                 navigationSuiteItems = {
-                    menuItems.forEach { destination ->
+                    val items =
+                        if (layoutType == NavigationSuiteType.NavigationBar) {
+                            menuItems
+                        } else {
+                            allScreens
+                        }
+                    items.forEach { destination ->
+                        val selected = currentRoute == destination.direction.route
                         item(
-                            selected = currentDestination == destination.direction,
+                            selected = selected,
                             onClick = {
                                 navController.navigate(destination.direction) {
                                     popUpTo(navController.graph.findStartDestination().id) {
@@ -135,7 +185,12 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                                     restoreState = true
                                 }
                             },
-                            icon = { Icon(destination.icon, contentDescription = stringResource(destination.title)) },
+                            icon = {
+                                Icon(
+                                    destination.icon,
+                                    contentDescription = stringResource(destination.title),
+                                )
+                            },
                             label = { Text(stringResource(destination.title)) },
                         )
                     }
@@ -144,6 +199,15 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 NavHost(
                     navController = navController,
                     startDestination = Screen.HomeTimeline.direction.route,
+                    // NavigationSuiteScaffold should have consumed the insets, but it doesn't
+                    modifier =
+                        Modifier.let {
+                            if (layoutType == NavigationSuiteType.NavigationBar) {
+                                it.consumeWindowInsets(WindowInsets.navigationBars)
+                            } else {
+                                it
+                            }
+                        },
                 ) {
                     allScreens.forEach {
                         composable(it.direction) {
@@ -165,7 +229,10 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                                     DestinationsNavHost(
                                         navController = innerNavController,
                                         navGraph = it.navGraph,
-                                        engine = rememberAnimatedNavHostEngine(),
+                                        engine =
+                                            rememberAnimatedNavHostEngine(
+                                                rootDefaultAnimations = RootNavGraphDefaultAnimations.ACCOMPANIST_FADING,
+                                            ),
                                         startRoute = it.direction,
                                         dependenciesContainerBuilder = {
                                             dependency(drawerState)

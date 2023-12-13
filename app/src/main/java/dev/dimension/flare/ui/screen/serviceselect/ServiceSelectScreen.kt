@@ -102,7 +102,7 @@ fun ServiceSelectScreen(
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
-        serviceSelectPresenter(uriHandler::openUri)
+        serviceSelectPresenter(uriHandler::openUri, onBack)
     }
     FlareTheme {
         Scaffold(
@@ -318,7 +318,11 @@ fun ServiceSelectScreen(
                                 .weight(1f)
                                 .padding(horizontal = 16.dp),
                         columns = StaggeredGridCells.Adaptive(300.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(
+                                8.dp,
+                                Alignment.CenterHorizontally,
+                            ),
                         verticalItemSpacing = 8.dp,
                     ) {
                         state.instances.onSuccess {
@@ -406,7 +410,9 @@ private fun ServiceSelectItem(
                     modifier = Modifier.placeholder(instance == null),
                 )
                 Text(
-                    text = instance?.description ?: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    text =
+                        instance?.description
+                            ?: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.placeholder(instance == null),
                     maxLines = 3,
@@ -419,53 +425,55 @@ private fun ServiceSelectItem(
 
 @OptIn(ExperimentalFoundationApi::class, FlowPreview::class)
 @Composable
-private fun serviceSelectPresenter(launchUrl: (String) -> Unit) =
-    run {
-        val instanceInputState = rememberTextFieldState()
-        val nodeInfoState = remember { NodeInfoPresenter() }.invoke()
-        LaunchedEffect(Unit) {
-            instanceInputState
-                .textAsFlow()
-                .distinctUntilChanged()
-                .debounce(666L)
-                .collect {
-                    nodeInfoState.setFilter(it.toString())
-                }
+private fun serviceSelectPresenter(
+    launchUrl: (String) -> Unit,
+    onBack: (() -> Unit)?,
+) = run {
+    val instanceInputState = rememberTextFieldState()
+    val nodeInfoState = remember { NodeInfoPresenter() }.invoke()
+    LaunchedEffect(Unit) {
+        instanceInputState
+            .textAsFlow()
+            .distinctUntilChanged()
+            .debounce(666L)
+            .collect {
+                nodeInfoState.setFilter(it.toString())
+            }
+    }
+    val blueskyLoginState = blueskyLoginPresenter(onBack)
+    val mastodonLoginState = mastodonLoginPresenter(launchUrl, onBack)
+    val misskeyLoginState = misskeyLoginPresenter(launchUrl, onBack)
+    object : NodeInfoState by nodeInfoState {
+        val instanceInputState = instanceInputState
+        val blueskyLoginState = blueskyLoginState
+        val mastodonLoginState = mastodonLoginState
+        val misskeyLoginState = misskeyLoginState
+        val loading =
+            blueskyLoginState.loading ||
+                mastodonLoginState.loading ||
+                mastodonLoginState.resumedState is UiState.Loading ||
+                misskeyLoginState.loading ||
+                misskeyLoginState.resumedState is UiState.Loading
+
+        fun selectInstance(instance: UiInstance) {
+            instanceInputState.edit {
+                replace(0, instanceInputState.text.length, instance.domain)
+            }
+            nodeInfoState.setFilter(instance.domain)
         }
-        val blueskyLoginState = blueskyLoginPresenter()
-        val mastodonLoginState = mastodonLoginPresenter(launchUrl)
-        val misskeyLoginState = misskeyLoginPresenter(launchUrl)
-        object : NodeInfoState by nodeInfoState {
-            val instanceInputState = instanceInputState
-            val blueskyLoginState = blueskyLoginState
-            val mastodonLoginState = mastodonLoginState
-            val misskeyLoginState = misskeyLoginState
-            val loading =
-                blueskyLoginState.loading ||
-                    mastodonLoginState.loading ||
-                    mastodonLoginState.resumedState is UiState.Loading ||
-                    misskeyLoginState.loading ||
-                    misskeyLoginState.resumedState is UiState.Loading
 
-            fun selectInstance(instance: UiInstance) {
-                instanceInputState.edit {
-                    replace(0, instanceInputState.text.length, instance.domain)
-                }
-                nodeInfoState.setFilter(instance.domain)
+        fun clearInstance() {
+            instanceInputState.edit {
+                replace(0, instanceInputState.text.length, "")
             }
-
-            fun clearInstance() {
-                instanceInputState.edit {
-                    replace(0, instanceInputState.text.length, "")
-                }
-                nodeInfoState.setFilter("")
-            }
+            nodeInfoState.setFilter("")
         }
     }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun blueskyLoginPresenter() =
+private fun blueskyLoginPresenter(onBack: (() -> Unit)?) =
     run {
         val username = rememberTextFieldState()
         val password = rememberTextFieldState()
@@ -476,7 +484,9 @@ private fun blueskyLoginPresenter() =
         }
         val state =
             remember {
-                BlueskyLoginPresenter({})
+                BlueskyLoginPresenter {
+                    onBack?.invoke()
+                }
             }.invoke()
         object : BlueskyLoginState by state {
             val username = username
@@ -486,81 +496,85 @@ private fun blueskyLoginPresenter() =
     }
 
 @Composable
-private fun mastodonLoginPresenter(launchUrl: (String) -> Unit) =
-    run {
-        val applicationRepository: ApplicationRepository = rememberKoinInject()
-        var loading by remember { mutableStateOf(false) }
-        var error by remember { mutableStateOf<String?>(null) }
-        val scope = rememberCoroutineScope()
-        var code by remember { mutableStateOf<String?>(null) }
-        val resumedState =
-            code?.let {
-                remember {
-                    MastodonCallbackPresenter(code = code, toHome = {})
-                }.invoke()
-            }
-        object {
-            val loading = loading
-            val error = error
-            val resumedState = resumedState
-
-            fun login(host: String) {
-                scope.launch {
-                    loading = true
-                    error = null
-                    mastodonLoginUseCase(
-                        domain = host,
-                        applicationRepository = applicationRepository,
-                        launchOAuth = launchUrl,
-                    ).onFailure {
-                        error = it.message
-                        loading = false
-                    }
-                }
-            }
-
-            fun resume(url: String) {
-                code = url.substringAfter("code=")
-            }
+private fun mastodonLoginPresenter(
+    launchUrl: (String) -> Unit,
+    onBack: (() -> Unit)?,
+) = run {
+    val applicationRepository: ApplicationRepository = rememberKoinInject()
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    var code by remember { mutableStateOf<String?>(null) }
+    val resumedState =
+        code?.let {
+            remember {
+                MastodonCallbackPresenter(code = code, toHome = { onBack?.invoke() })
+            }.invoke()
         }
-    }
+    object {
+        val loading = loading
+        val error = error
+        val resumedState = resumedState
 
-@Composable
-private fun misskeyLoginPresenter(launchUrl: (String) -> Unit) =
-    run {
-        val applicationRepository: ApplicationRepository = rememberKoinInject()
-        var loading by remember { mutableStateOf(false) }
-        var error by remember { mutableStateOf<String?>(null) }
-        val scope = rememberCoroutineScope()
-        var session by remember { mutableStateOf<String?>(null) }
-        val resumedState =
-            session?.let {
-                remember {
-                    MisskeyCallbackPresenter(session = session, toHome = {})
-                }.invoke()
-            }
-        object {
-            val loading = loading
-            val error = error
-            val resumedState = resumedState
-
-            fun login(host: String) {
-                scope.launch {
-                    loading = true
-                    error = null
-                    misskeyLoginUseCase(
-                        host = host,
-                        applicationRepository = applicationRepository,
-                        launchOAuth = launchUrl,
-                    ).onFailure {
-                        error = it.message
-                    }
+        fun login(host: String) {
+            scope.launch {
+                loading = true
+                error = null
+                mastodonLoginUseCase(
+                    domain = host,
+                    applicationRepository = applicationRepository,
+                    launchOAuth = launchUrl,
+                ).onFailure {
+                    error = it.message
                     loading = false
                 }
             }
+        }
 
-            fun resume(url: String) {
-                session = url.substringAfter("session=")
-            }
+        fun resume(url: String) {
+            code = url.substringAfter("code=")
         }
     }
+}
+
+@Composable
+private fun misskeyLoginPresenter(
+    launchUrl: (String) -> Unit,
+    onBack: (() -> Unit)?,
+) = run {
+    val applicationRepository: ApplicationRepository = rememberKoinInject()
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    var session by remember { mutableStateOf<String?>(null) }
+    val resumedState =
+        session?.let {
+            remember {
+                MisskeyCallbackPresenter(session = session, toHome = { onBack?.invoke() })
+            }.invoke()
+        }
+    object {
+        val loading = loading
+        val error = error
+        val resumedState = resumedState
+
+        fun login(host: String) {
+            scope.launch {
+                loading = true
+                error = null
+                misskeyLoginUseCase(
+                    host = host,
+                    applicationRepository = applicationRepository,
+                    launchOAuth = launchUrl,
+                ).onFailure {
+                    error = it.message
+                }
+                loading = false
+            }
+        }
+
+        fun resume(url: String) {
+            session = url.substringAfter("session=")
+        }
+    }
+}

@@ -21,15 +21,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +45,10 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -83,11 +90,13 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
+import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.ktml.dom.Element
 import org.koin.compose.rememberKoinInject
 import kotlin.math.max
+import kotlin.reflect.KFunction1
 
 @Composable
 @Destination(
@@ -250,7 +259,7 @@ fun ProfileRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
@@ -265,6 +274,7 @@ fun ProfileScreen(
     }
     val listState = rememberLazyStaggeredGridState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val windowInfo = currentWindowAdaptiveInfo()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets =
@@ -274,7 +284,10 @@ fun ProfileScreen(
             if (showTopBar) {
                 val titleAlpha by remember {
                     derivedStateOf {
-                        if (listState.firstVisibleItemIndex > 0 || listState.layoutInfo.visibleItemsInfo.isEmpty()) {
+                        if (listState.firstVisibleItemIndex > 0 ||
+                            listState.layoutInfo.visibleItemsInfo.isEmpty() ||
+                            windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact
+                        ) {
                             1f
                         } else {
                             max(
@@ -285,37 +298,39 @@ fun ProfileScreen(
                     }
                 }
                 Box {
-                    Column(
-                        modifier =
-                            Modifier
-                                .graphicsLayer {
-                                    alpha = titleAlpha
-                                },
-                    ) {
-                        Spacer(
+                    if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                        Column(
                             modifier =
                                 Modifier
-                                    .fillMaxWidth()
-                                    .windowInsetsTopHeight(WindowInsets.statusBars)
-                                    .background(
-                                        color =
-                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                3.dp,
-                                            ),
-                                    ),
-                        )
-                        Spacer(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(64.dp)
-                                    .background(
-                                        color =
-                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                3.dp,
-                                            ),
-                                    ),
-                        )
+                                    .graphicsLayer {
+                                        alpha = titleAlpha
+                                    },
+                        ) {
+                            Spacer(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                                        .background(
+                                            color =
+                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                    3.dp,
+                                                ),
+                                        ),
+                            )
+                            Spacer(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(64.dp)
+                                        .background(
+                                            color =
+                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                    3.dp,
+                                                ),
+                                        ),
+                            )
+                        }
                     }
                     TopAppBar(
                         title = {
@@ -330,10 +345,21 @@ fun ProfileScreen(
                             }
                         },
                         colors =
-                            TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = Color.Transparent,
-                            ),
-                        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+                            if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                                TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                    containerColor = Color.Transparent,
+                                )
+                            } else {
+                                TopAppBarDefaults.centerAlignedTopAppBarColors()
+                            },
+                        modifier =
+                            Modifier.let {
+                                if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                                    it.windowInsetsPadding(WindowInsets.statusBars)
+                                } else {
+                                    it
+                                }
+                            },
                         scrollBehavior = scrollBehavior,
                         navigationIcon = {
                             IconButton(onClick = onBack) {
@@ -344,76 +370,12 @@ fun ProfileScreen(
                             }
                         },
                         actions = {
-                            state.state.userState.onSuccess { user ->
-                                IconButton(onClick = {
-                                    state.setShowMoreMenus(true)
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        contentDescription = null,
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = state.showMoreMenus,
-                                    onDismissRequest = { state.setShowMoreMenus(false) },
-                                ) {
-                                    state.state.isMe.onSuccess { isMe ->
-                                        if (!isMe) {
-                                            state.state.relationState.onSuccess { relation ->
-                                                when (relation) {
-                                                    is UiRelation.Bluesky ->
-                                                        BlueskyUserMenu(
-                                                            user = user,
-                                                            relation = relation,
-                                                            onBlockClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.block(user, relation)
-                                                            },
-                                                            onMuteClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.mute(user, relation)
-                                                            },
-                                                        )
-                                                    is UiRelation.Mastodon ->
-                                                        MastodonUserMenu(
-                                                            user = user,
-                                                            relation = relation,
-                                                            onBlockClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.block(user, relation)
-                                                            },
-                                                            onMuteClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.mute(user, relation)
-                                                            },
-                                                        )
-                                                    is UiRelation.Misskey ->
-                                                        MisskeyUserMenu(
-                                                            user = user,
-                                                            relation = relation,
-                                                            onBlockClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.block(user, relation)
-                                                            },
-                                                            onMuteClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.mute(user, relation)
-                                                            },
-                                                        )
-                                                }
-                                            }
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(text = stringResource(id = R.string.user_report, user.handle))
-                                                },
-                                                onClick = {
-                                                    state.setShowMoreMenus(false)
-                                                    state.state.report(user)
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
+                            if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                                ProfileMenu(
+                                    profileState = state.state,
+                                    setShowMoreMenus = state::setShowMoreMenus,
+                                    showMoreMenus = state.showMoreMenus,
+                                )
                             }
                         },
                     )
@@ -421,33 +383,158 @@ fun ProfileScreen(
             }
         },
     ) {
-        RefreshContainer(
-            modifier = Modifier.fillMaxSize(),
-            onRefresh = state.state::refresh,
-            indicatorPadding = it + contentPadding,
-            content = {
-                LazyStatusVerticalStaggeredGrid(
-                    state = listState,
-                    contentPadding = contentPadding,
+        Row {
+            if (windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact) {
+                Card(
+                    modifier =
+                        Modifier
+                            .verticalScroll(rememberScrollState())
+                            .width(432.dp)
+                            .padding(it + PaddingValues(horizontal = 16.dp)),
                 ) {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
+                    ProfileHeader(
+                        state.state.userState,
+                        state.state.relationState,
+                        onFollowClick = state.state::follow,
+                        isMe = state.state.isMe,
+                        menu = {
+                            ProfileMenu(
+                                profileState = state.state,
+                                setShowMoreMenus = state::setShowMoreMenus,
+                                showMoreMenus = state.showMoreMenus,
+                            )
+                        },
+                        expandMatrices = true,
+                    )
+                }
+            }
+            RefreshContainer(
+                modifier = Modifier.fillMaxSize(),
+                onRefresh = state.state::refresh,
+                indicatorPadding = it + contentPadding,
+                content = {
+                    LazyStatusVerticalStaggeredGrid(
+                        state = listState,
+                        contentPadding =
+                            contentPadding +
+                                if (windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact) {
+                                    it
+                                } else {
+                                    PaddingValues(0.dp)
+                                },
                     ) {
-                        ProfileHeader(
-                            state.state.userState,
-                            state.state.relationState,
-                            onFollowClick = state.state::follow,
-                            isMe = state.state.isMe,
-                        )
-                    }
-                    with(state.state.listState) {
-                        with(state.statusEvent) {
-                            status()
+                        if (windowInfo.windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact) {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ProfileHeader(
+                                    state.state.userState,
+                                    state.state.relationState,
+                                    onFollowClick = state.state::follow,
+                                    isMe = state.state.isMe,
+                                    menu = {
+                                        Spacer(modifier = Modifier.width(screenHorizontalPadding))
+                                    },
+                                    expandMatrices = false,
+                                )
+                            }
+                        }
+                        with(state.state.listState) {
+                            with(state.statusEvent) {
+                                status()
+                            }
                         }
                     }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileMenu(
+    profileState: ProfileState,
+    setShowMoreMenus: KFunction1<Boolean, Unit>,
+    showMoreMenus: Boolean,
+) {
+    profileState.userState.onSuccess { user ->
+        IconButton(onClick = {
+            setShowMoreMenus(true)
+        }) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = null,
+            )
+        }
+        DropdownMenu(
+            expanded = showMoreMenus,
+            onDismissRequest = { setShowMoreMenus(false) },
+        ) {
+            profileState.isMe.onSuccess { isMe ->
+                if (!isMe) {
+                    profileState.relationState.onSuccess { relation ->
+                        when (relation) {
+                            is UiRelation.Bluesky ->
+                                BlueskyUserMenu(
+                                    user = user,
+                                    relation = relation,
+                                    onBlockClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.block(user, relation)
+                                    },
+                                    onMuteClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.mute(user, relation)
+                                    },
+                                )
+
+                            is UiRelation.Mastodon ->
+                                MastodonUserMenu(
+                                    user = user,
+                                    relation = relation,
+                                    onBlockClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.block(user, relation)
+                                    },
+                                    onMuteClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.mute(user, relation)
+                                    },
+                                )
+
+                            is UiRelation.Misskey ->
+                                MisskeyUserMenu(
+                                    user = user,
+                                    relation = relation,
+                                    onBlockClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.block(user, relation)
+                                    },
+                                    onMuteClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.mute(user, relation)
+                                    },
+                                )
+                        }
+                    }
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text =
+                                    stringResource(
+                                        id = R.string.user_report,
+                                        user.handle,
+                                    ),
+                            )
+                        },
+                        onClick = {
+                            setShowMoreMenus(false)
+                            profileState.report(user)
+                        },
+                    )
                 }
-            },
-        )
+            }
+        }
     }
 }
 
@@ -457,6 +544,8 @@ private fun ProfileHeader(
     relationState: UiState<UiRelation>,
     onFollowClick: (UiUser, UiRelation) -> Unit,
     isMe: UiState<Boolean>,
+    menu: @Composable RowScope.() -> Unit,
+    expandMatrices: Boolean,
     modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
@@ -489,6 +578,8 @@ private fun ProfileHeader(
                     relationState = relationState,
                     onFollowClick = onFollowClick,
                     isMe = isMe,
+                    menu = menu,
+                    expandMatrices = expandMatrices,
                 )
             }
         }
@@ -501,7 +592,9 @@ private fun ProfileHeaderSuccess(
     relationState: UiState<UiRelation>,
     onFollowClick: (UiUser, UiRelation) -> Unit,
     isMe: UiState<Boolean>,
+    menu: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
+    expandMatrices: Boolean = false,
 ) {
     when (user) {
         is UiUser.Mastodon -> {
@@ -513,6 +606,8 @@ private fun ProfileHeaderSuccess(
                 onFollowClick = {
                     onFollowClick(user, it)
                 },
+                menu = menu,
+                expandMatrices = expandMatrices,
             )
         }
 
@@ -525,6 +620,8 @@ private fun ProfileHeaderSuccess(
                 onFollowClick = {
                     onFollowClick(user, it)
                 },
+                menu = menu,
+                expandMatrices = expandMatrices,
             )
         }
 
@@ -537,6 +634,8 @@ private fun ProfileHeaderSuccess(
                 onFollowClick = {
                     onFollowClick(user, it)
                 },
+                menu = menu,
+                expandMatrices = expandMatrices,
             )
     }
 }
@@ -548,7 +647,7 @@ internal fun CommonProfileHeader(
     displayName: Element,
     handle: String,
     modifier: Modifier = Modifier,
-    headerTrailing: @Composable () -> Unit = {},
+    headerTrailing: @Composable RowScope.() -> Unit = {},
     handleTrailing: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
@@ -575,7 +674,13 @@ internal fun CommonProfileHeader(
                         .fillMaxWidth()
                         .height(actualBannerHeight),
             )
-        }
+        } ?: Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(actualBannerHeight)
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)),
+        )
         // avatar
         Column(
             modifier =
@@ -587,7 +692,7 @@ internal fun CommonProfileHeader(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = screenHorizontalPadding),
+                        .padding(start = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
@@ -620,7 +725,7 @@ internal fun CommonProfileHeader(
                         handleTrailing.invoke(this)
                     }
                 }
-                Box(
+                Row(
                     modifier =
                         Modifier
                             .padding(top = actualBannerHeight),

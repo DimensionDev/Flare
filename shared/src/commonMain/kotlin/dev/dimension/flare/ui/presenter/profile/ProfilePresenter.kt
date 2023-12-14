@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.paging.flatMap
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.collectPagingProxy
@@ -10,6 +11,7 @@ import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -20,7 +22,9 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.compose.rememberKoinInject
 
@@ -43,6 +47,24 @@ class ProfilePresenter(
                     service.userTimeline(userKey ?: account.accountKey)
                 }.collectPagingProxy()
             }
+        val mediaState =
+            accountServiceState.map { (service, account) ->
+                remember(account.accountKey, userKey) {
+                    service.userTimeline(userKey ?: account.accountKey, mediaOnly = true)
+                        .map {
+                            it.flatMap {
+                                when (it) {
+                                    is UiStatus.Bluesky -> it.medias
+                                    is UiStatus.BlueskyNotification -> persistentListOf()
+                                    is UiStatus.Mastodon -> it.media
+                                    is UiStatus.MastodonNotification -> persistentListOf()
+                                    is UiStatus.Misskey -> it.media
+                                    is UiStatus.MisskeyNotification -> persistentListOf()
+                                }
+                            }
+                        }
+                }.collectPagingProxy()
+            }
         val relationState =
             accountServiceState.flatMap { (service, account) ->
                 remember(account.accountKey, userKey) {
@@ -56,9 +78,10 @@ class ProfilePresenter(
                 it.second.accountKey == userKey || userKey == null
             }
         return object : ProfileState(
-            userState.flatMap { it.toUi() },
-            listState,
-            relationState,
+            userState = userState.flatMap { it.toUi() },
+            listState = listState,
+            mediaState = mediaState,
+            relationState = relationState,
             isMe = isMe,
         ) {
             override suspend fun refresh() {
@@ -180,6 +203,7 @@ class ProfilePresenter(
 abstract class ProfileState(
     val userState: UiState<UiUser>,
     val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
+    val mediaState: UiState<LazyPagingItemsProxy<UiMedia>>,
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,
 ) {

@@ -14,7 +14,9 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 
@@ -177,6 +179,7 @@ internal fun UserLite.toUi(accountHost: String): UiUser.Misskey {
                 hasPendingFollowRequestToYou = false,
             ),
         accountHost = accountHost,
+        fields = persistentMapOf(),
     )
 }
 
@@ -218,6 +221,10 @@ internal fun User.toUi(accountHost: String): UiUser.Misskey {
                 hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false,
             ),
         accountHost = accountHost,
+        fields =
+            fields.map {
+                it.name to it.value
+            }.filter { it.first.isNotEmpty() }.toMap().toPersistentMap(),
     )
 }
 

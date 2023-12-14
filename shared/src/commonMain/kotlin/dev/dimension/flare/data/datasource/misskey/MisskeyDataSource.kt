@@ -192,6 +192,7 @@ class MisskeyDataSource(
     override fun userTimeline(
         userKey: MicroBlogKey,
         pageSize: Int,
+        mediaOnly: Boolean,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
@@ -206,6 +207,7 @@ class MisskeyDataSource(
                     userKey,
                     database,
                     pagingKey,
+                    onlyMedia = mediaOnly,
                 ),
         )
     }

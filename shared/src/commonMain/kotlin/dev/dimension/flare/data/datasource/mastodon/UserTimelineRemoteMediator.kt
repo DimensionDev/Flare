@@ -17,6 +17,7 @@ internal class UserTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
     private val pagingKey: String,
+    private val onlyMedia: Boolean,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
     override suspend fun load(
         loadType: LoadType,
@@ -29,6 +30,7 @@ internal class UserTimelineRemoteMediator(
                         service.userTimeline(
                             user_id = userKey.id,
                             limit = state.config.pageSize,
+                            only_media = onlyMedia,
                         )
 
                     LoadType.PREPEND -> {
@@ -37,6 +39,7 @@ internal class UserTimelineRemoteMediator(
                             user_id = userKey.id,
                             limit = state.config.pageSize,
                             min_id = firstItem?.timeline_status_key?.id,
+                            only_media = onlyMedia,
                         )
                     }
 
@@ -50,6 +53,7 @@ internal class UserTimelineRemoteMediator(
                             user_id = userKey.id,
                             limit = state.config.pageSize,
                             max_id = lastItem.timeline_status_key.id,
+                            only_media = onlyMedia,
                         )
                     }
                 }

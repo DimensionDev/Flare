@@ -39,6 +39,7 @@ interface TimelineResources {
         @Query("exclude_replies") exclude_replies: Boolean? = null,
         @Query("limit") limit: Int? = null,
         @Query("pinned") pinned: Boolean? = null,
+        @Query("only_media") only_media: Boolean? = null,
     ): List<Status>
 
     @GET("api/v1/favourites")

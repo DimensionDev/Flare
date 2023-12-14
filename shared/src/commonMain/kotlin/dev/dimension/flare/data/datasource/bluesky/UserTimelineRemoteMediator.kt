@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
+import app.bsky.feed.GetAuthorFeedFilter
 import app.bsky.feed.GetAuthorFeedQueryParams
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -19,6 +20,7 @@ internal class UserTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val userKey: MicroBlogKey,
     private val pagingKey: String,
+    private val onlyMedia: Boolean,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
     var cursor: String? = null
 
@@ -34,6 +36,12 @@ internal class UserTimelineRemoteMediator(
                             GetAuthorFeedQueryParams(
                                 limit = state.config.pageSize.toLong(),
                                 actor = AtIdentifier(userKey.id),
+                                filter =
+                                    if (onlyMedia) {
+                                        GetAuthorFeedFilter.POSTS_WITH_MEDIA
+                                    } else {
+                                        null
+                                    },
                             ),
                         ).maybeResponse()
 
@@ -49,6 +57,12 @@ internal class UserTimelineRemoteMediator(
                                 limit = state.config.pageSize.toLong(),
                                 cursor = cursor,
                                 actor = AtIdentifier(userKey.id),
+                                filter =
+                                    if (onlyMedia) {
+                                        GetAuthorFeedFilter.POSTS_WITH_MEDIA
+                                    } else {
+                                        null
+                                    },
                             ),
                         ).maybeResponse()
                     }

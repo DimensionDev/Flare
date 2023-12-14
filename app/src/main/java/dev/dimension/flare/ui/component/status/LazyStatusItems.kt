@@ -50,78 +50,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent)
 internal fun status() {
     onSuccess { lazyPagingItems ->
-        if (
-            (
-                lazyPagingItems.loadState.refresh == LoadState.Loading ||
-                    lazyPagingItems.loadState.prepend == LoadState.Loading
-            ) &&
-            lazyPagingItems.itemCount == 0
-        ) {
-            items(10) {
-                Column {
-                    StatusPlaceholder(
-                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider(
-                        modifier = Modifier.alpha(DisabledAlpha),
-                    )
-                }
-            }
-        } else if ((
-                lazyPagingItems.loadState.refresh is LoadState.Error ||
-                    lazyPagingItems.loadState.prepend is LoadState.Error
-            ) &&
-            lazyPagingItems.itemCount == 0
-        ) {
-            item(
-                span = StaggeredGridItemSpan.FullLine,
-            ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .clickable {
-                                lazyPagingItems.retry()
-                            },
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoodBad,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                    )
-                    Text(
-                        text = stringResource(id = R.string.status_loadmore_error_retry),
-                        modifier = Modifier.padding(16.dp),
-                    )
-                }
-            }
-        } else if (lazyPagingItems.itemCount == 0) {
-            item(
-                span = StaggeredGridItemSpan.FullLine,
-            ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .clickable {
-                                lazyPagingItems.refresh()
-                            },
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.EmojiEmotions,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                    )
-                    Text(
-                        text = stringResource(id = R.string.status_empty),
-                        modifier = Modifier.padding(16.dp),
-                    )
-                }
-            }
-        } else {
+        if (lazyPagingItems.itemCount > 0) {
             with(lazyPagingItems) {
                 statusItems()
             }
@@ -180,6 +109,73 @@ internal fun status() {
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
+                }
+            }
+        } else if (
+            lazyPagingItems.loadState.refresh == LoadState.Loading ||
+            lazyPagingItems.loadState.prepend == LoadState.Loading ||
+            lazyPagingItems.loadState.append == LoadState.Loading
+        ) {
+            items(10) {
+                Column {
+                    StatusPlaceholder(
+                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(
+                        modifier = Modifier.alpha(DisabledAlpha),
+                    )
+                }
+            }
+        } else if (
+            lazyPagingItems.loadState.refresh is LoadState.Error ||
+            lazyPagingItems.loadState.prepend is LoadState.Error
+        ) {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .clickable {
+                                lazyPagingItems.retry()
+                            },
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoodBad,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Text(
+                        text = stringResource(id = R.string.status_loadmore_error_retry),
+                        modifier = Modifier.padding(16.dp),
+                    )
+                }
+            }
+        } else {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .clickable {
+                                lazyPagingItems.refresh()
+                            },
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.EmojiEmotions,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Text(
+                        text = stringResource(id = R.string.status_empty),
+                        modifier = Modifier.padding(16.dp),
+                    )
                 }
             }
         }

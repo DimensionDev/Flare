@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.MatricesDisplay
+import dev.dimension.flare.ui.component.UserFields
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -121,6 +122,9 @@ internal fun MastodonProfileHeader(
                 HtmlText2(
                     element = user.descriptionElement,
                     layoutDirection = user.descriptionDirection,
+                )
+                UserFields(
+                    fields = user.fieldsParsed,
                 )
                 MatricesDisplay(
                     matrices =

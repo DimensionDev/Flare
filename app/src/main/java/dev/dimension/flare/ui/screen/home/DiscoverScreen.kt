@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,6 +32,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onLoading
+import dev.dimension.flare.common.onNotEmptyOrLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -85,7 +85,6 @@ internal fun DiscoverRoute(navigator: DestinationsNavigator) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun DiscoverScreen(
     contentPadding: PaddingValues,
@@ -117,14 +116,16 @@ internal fun DiscoverScreen(
                     contentPadding = it,
                 ) {
                     state.users.onSuccess { users ->
-                        item(
-                            span = StaggeredGridItemSpan.FullLine,
-                        ) {
-                            ListItem(
-                                headlineContent = {
-                                    Text(text = stringResource(R.string.discover_users))
-                                },
-                            )
+                        users.onNotEmptyOrLoading {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(text = stringResource(R.string.discover_users))
+                                    },
+                                )
+                            }
                         }
                         item(
                             span = StaggeredGridItemSpan.FullLine,
@@ -177,14 +178,16 @@ internal fun DiscoverScreen(
                         }
                     }
                     state.hashtags.onSuccess { hashtags ->
-                        item(
-                            span = StaggeredGridItemSpan.FullLine,
-                        ) {
-                            ListItem(
-                                headlineContent = {
-                                    Text(text = stringResource(R.string.discover_hashtags))
-                                },
-                            )
+                        hashtags.onNotEmptyOrLoading {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(text = stringResource(R.string.discover_hashtags))
+                                    },
+                                )
+                            }
                         }
                         item(
                             span = StaggeredGridItemSpan.FullLine,
@@ -244,18 +247,20 @@ internal fun DiscoverScreen(
                     }
 
                     state.status.onSuccess {
-                        item(
-                            span = StaggeredGridItemSpan.FullLine,
-                        ) {
-                            ListItem(
-                                headlineContent = {
-                                    Text(text = stringResource(R.string.discover_status))
-                                },
-                            )
-                        }
-                        with(state.status) {
-                            with(state.statusEvent) {
-                                status()
+                        it.onNotEmptyOrLoading {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(text = stringResource(R.string.discover_status))
+                                    },
+                                )
+                            }
+                            with(state.status) {
+                                with(state.statusEvent) {
+                                    status()
+                                }
                             }
                         }
                     }

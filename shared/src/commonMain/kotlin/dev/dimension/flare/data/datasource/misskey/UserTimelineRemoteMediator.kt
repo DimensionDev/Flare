@@ -19,6 +19,7 @@ internal class UserTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val database: CacheDatabase,
     private val pagingKey: String,
+    private val onlyMedia: Boolean,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
     override suspend fun load(
         loadType: LoadType,
@@ -30,12 +31,24 @@ internal class UserTimelineRemoteMediator(
                     LoadType.PREPEND -> return MediatorResult.Success(
                         endOfPaginationReached = true,
                     )
+
                     LoadType.REFRESH -> {
                         service.usersNotes(
                             UsersNotesRequest(
                                 userId = userKey.id,
                                 limit = state.config.pageSize,
-                            ),
+                            ).let {
+                                if (onlyMedia) {
+                                    it.copy(
+                                        withFiles = true,
+                                        withRenotes = false,
+                                        withReplies = false,
+                                        withChannelNotes = true,
+                                    )
+                                } else {
+                                    it
+                                }
+                            },
                         )
                     }
 
@@ -50,7 +63,18 @@ internal class UserTimelineRemoteMediator(
                                 userId = userKey.id,
                                 limit = state.config.pageSize,
                                 untilId = lastItem.timeline_status_key.id,
-                            ),
+                            ).let {
+                                if (onlyMedia) {
+                                    it.copy(
+                                        withFiles = true,
+                                        withRenotes = false,
+                                        withReplies = false,
+                                        withChannelNotes = true,
+                                    )
+                                } else {
+                                    it
+                                }
+                            },
                         )
                     }
                 }.body() ?: return MediatorResult.Success(

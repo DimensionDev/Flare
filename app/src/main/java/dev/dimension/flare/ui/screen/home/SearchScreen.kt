@@ -247,7 +247,7 @@ private fun SearchContent(
                                     Card {
                                         if (item == null) {
                                             ProfileHeaderLoading(
-                                                modifier = Modifier.fillParentMaxWidth(0.8f),
+                                                modifier = Modifier.width(256.dp),
                                             )
                                         } else {
                                             CommonProfileHeader(
@@ -264,7 +264,7 @@ private fun SearchContent(
                                                         )
                                                     }
                                                 },
-                                                modifier = Modifier.fillParentMaxWidth(0.8f),
+                                                modifier = Modifier.width(256.dp),
                                             )
                                         }
                                     }

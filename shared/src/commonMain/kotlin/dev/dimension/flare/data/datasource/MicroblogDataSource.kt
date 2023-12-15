@@ -47,7 +47,8 @@ interface MicroblogDataSource {
     fun userTimeline(
         userKey: MicroBlogKey,
         pageSize: Int = 20,
-        pagingKey: String = "user_$userKey",
+        mediaOnly: Boolean = false,
+        pagingKey: String = "user_${userKey}_${if (mediaOnly) "media" else "all"}",
     ): Flow<PagingData<UiStatus>>
 
     fun context(

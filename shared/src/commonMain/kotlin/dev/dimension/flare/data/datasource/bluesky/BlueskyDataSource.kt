@@ -191,6 +191,7 @@ class BlueskyDataSource(
     override fun userTimeline(
         userKey: MicroBlogKey,
         pageSize: Int,
+        mediaOnly: Boolean,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> =
         timelinePager(
@@ -205,6 +206,7 @@ class BlueskyDataSource(
                     database,
                     userKey,
                     pagingKey,
+                    onlyMedia = mediaOnly,
                 ),
         )
 

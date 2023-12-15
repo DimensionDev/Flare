@@ -620,52 +620,54 @@ private fun ComposeScreen(
                         }
                     }
                     state.state.emojiState.onSuccess { emojis ->
-                        IconButton(
-                            onClick = {
-                                state.setShowEmojiMenu(!state.showEmojiMenu)
-                            },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.EmojiEmotions,
-                                contentDescription = null,
-                            )
-                            if (state.showEmojiMenu) {
-                                Popup(
-                                    onDismissRequest = {
-                                        state.setShowEmojiMenu(false)
-                                    },
-                                    offset =
-                                        IntOffset(
-                                            x = 0,
-                                            y =
-                                                with(LocalDensity.current) {
-                                                    48.dp.roundToPx()
-                                                },
-                                        ),
-                                    properties = PopupProperties(usePlatformDefaultWidth = true),
-                                ) {
-                                    Card(
-                                        modifier = Modifier.sizeIn(maxHeight = 256.dp, maxWidth = 384.dp),
-                                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
+                        if (emojis.isNotEmpty()) {
+                            IconButton(
+                                onClick = {
+                                    state.setShowEmojiMenu(!state.showEmojiMenu)
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.EmojiEmotions,
+                                    contentDescription = null,
+                                )
+                                if (state.showEmojiMenu) {
+                                    Popup(
+                                        onDismissRequest = {
+                                            state.setShowEmojiMenu(false)
+                                        },
+                                        offset =
+                                            IntOffset(
+                                                x = 0,
+                                                y =
+                                                    with(LocalDensity.current) {
+                                                        48.dp.roundToPx()
+                                                    },
+                                            ),
+                                        properties = PopupProperties(usePlatformDefaultWidth = true),
                                     ) {
-                                        LazyVerticalGrid(
-                                            columns = GridCells.Adaptive(36.dp),
-                                            contentPadding = PaddingValues(8.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        Card(
+                                            modifier = Modifier.sizeIn(maxHeight = 256.dp, maxWidth = 384.dp),
+                                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
                                         ) {
-                                            items(emojis) { emoji ->
-                                                NetworkImage(
-                                                    model = emoji.url,
-                                                    contentDescription = emoji.shortcode,
-                                                    contentScale = ContentScale.Fit,
-                                                    modifier =
-                                                        Modifier
-                                                            .size(36.dp)
-                                                            .clickable {
-                                                                state.selectEmoji(emoji)
-                                                            },
-                                                )
+                                            LazyVerticalGrid(
+                                                columns = GridCells.Adaptive(36.dp),
+                                                contentPadding = PaddingValues(8.dp),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                            ) {
+                                                items(emojis) { emoji ->
+                                                    NetworkImage(
+                                                        model = emoji.url,
+                                                        contentDescription = emoji.shortcode,
+                                                        contentScale = ContentScale.Fit,
+                                                        modifier =
+                                                            Modifier
+                                                                .size(36.dp)
+                                                                .clickable {
+                                                                    state.selectEmoji(emoji)
+                                                                },
+                                                    )
+                                                }
                                             }
                                         }
                                     }

@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.model
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toPersistentMap
 import moe.tlaster.ktml.Ktml
 import moe.tlaster.ktml.dom.Element
 import moe.tlaster.ktml.dom.Text
@@ -36,11 +38,18 @@ sealed class UiUser {
         val description: String?,
         val matrices: Matrices,
         val locked: Boolean,
+        val fields: ImmutableMap<String, String>,
         internal val raw: dev.dimension.flare.data.network.mastodon.api.model.Account,
     ) : UiUser() {
         override val handle = "@$handleInternal@$remoteHost"
         override val nameElement by lazy {
             parseName(raw)
+        }
+
+        val fieldsParsed by lazy {
+            fields.map { (key, value) ->
+                key to Ktml.parse(value)
+            }.toMap().toPersistentMap()
         }
 
         override val descriptionElement by lazy {
@@ -70,10 +79,17 @@ sealed class UiUser {
         val isCat: Boolean,
         val isBot: Boolean,
         val relation: UiRelation.Misskey,
+        val fields: ImmutableMap<String, String>,
         internal val accountHost: String,
     ) : UiUser() {
         override val nameElement by lazy {
             parseName(name, accountHost)
+        }
+
+        val fieldsParsed by lazy {
+            fields.map { (key, value) ->
+                key to misskeyParser.parse(value).toHtml(accountHost)
+            }.toMap().toPersistentMap()
         }
 
         override val descriptionElement by lazy {

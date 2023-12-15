@@ -11,6 +11,9 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,7 +31,9 @@ import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.NotificationPresenter
+import dev.dimension.flare.ui.presenter.home.NotificationState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.ImmutableList
 import org.koin.compose.rememberKoinInject
 
 @Destination(
@@ -39,12 +44,13 @@ internal fun NotificationRoute() {
     NotificationScreen()
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 internal fun NotificationScreen(modifier: Modifier = Modifier) {
     val state by producePresenter {
         notificationPresenter()
     }
+    val windowInfo = currentWindowAdaptiveInfo()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         topBar = {
@@ -53,6 +59,15 @@ internal fun NotificationScreen(modifier: Modifier = Modifier) {
                     Text(text = stringResource(id = R.string.home_tab_notifications_title))
                 },
                 scrollBehavior = topAppBarScrollBehavior,
+                actions = {
+                    if (windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact) {
+                        state.state.allTypes.onSuccess {
+                            if (it.size > 1) {
+                                NotificationFilterSelector(it, state.state)
+                            }
+                        }
+                    }
+                },
             )
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
@@ -65,32 +80,17 @@ internal fun NotificationScreen(modifier: Modifier = Modifier) {
                 LazyStatusVerticalStaggeredGrid(
                     contentPadding = contentPadding,
                 ) {
-                    state.state.allTypes.onSuccess {
-                        if (it.size > 1) {
-                            item(
-                                span = StaggeredGridItemSpan.FullLine,
-                            ) {
-                                SingleChoiceSegmentedButtonRow(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxSize()
-                                            .padding(horizontal = screenHorizontalPadding),
+                    if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                        state.state.allTypes.onSuccess {
+                            if (it.size > 1) {
+                                item(
+                                    span = StaggeredGridItemSpan.FullLine,
                                 ) {
-                                    it.forEachIndexed { index, notificationType ->
-                                        SegmentedButton(
-                                            selected = state.state.notificationType == notificationType,
-                                            onClick = {
-                                                state.state.onNotificationTypeChanged(notificationType)
-                                            },
-                                            shape =
-                                                SegmentedButtonDefaults.itemShape(
-                                                    index = index,
-                                                    count = it.size,
-                                                ),
-                                        ) {
-                                            Text(text = stringResource(id = notificationType.title))
-                                        }
-                                    }
+                                    NotificationFilterSelector(
+                                        it,
+                                        state.state,
+                                        modifier = Modifier.fillMaxSize().padding(horizontal = screenHorizontalPadding),
+                                    )
                                 }
                             }
                         }
@@ -103,6 +103,34 @@ internal fun NotificationScreen(modifier: Modifier = Modifier) {
                 }
             },
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotificationFilterSelector(
+    filters: ImmutableList<NotificationFilter>,
+    notificationState: NotificationState,
+    modifier: Modifier = Modifier,
+) {
+    SingleChoiceSegmentedButtonRow(
+        modifier = modifier,
+    ) {
+        filters.forEachIndexed { index, notificationType ->
+            SegmentedButton(
+                selected = notificationState.notificationType == notificationType,
+                onClick = {
+                    notificationState.onNotificationTypeChanged(notificationType)
+                },
+                shape =
+                    SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = filters.size,
+                    ),
+            ) {
+                Text(text = stringResource(id = notificationType.title))
+            }
+        }
     }
 }
 

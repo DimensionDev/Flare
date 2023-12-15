@@ -3,8 +3,7 @@ package dev.dimension.flare.ui.screen.profile
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,15 +13,17 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.MatricesDisplay
+import dev.dimension.flare.ui.component.UserFields
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -31,15 +32,17 @@ import dev.dimension.flare.ui.model.descriptionDirection
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.persistentMapOf
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun MastodonProfileHeader(
     user: UiUser.Mastodon,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiRelation.Mastodon) -> Unit,
     isMe: UiState<Boolean>,
+    menu: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
+    expandMatrices: Boolean = false,
 ) {
     CommonProfileHeader(
         bannerUrl = user.bannerUrl,
@@ -106,6 +109,7 @@ internal fun MastodonProfileHeader(
                     }
                 }
             }
+            menu.invoke(this)
         },
         content = {
             Column(
@@ -119,36 +123,20 @@ internal fun MastodonProfileHeader(
                     element = user.descriptionElement,
                     layoutDirection = user.descriptionDirection,
                 )
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text =
-                            stringResource(
-                                R.string.profile_header_toots_count,
-                                user.matrices.statusesCountHumanized,
-                            ),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Text(
-                        text =
-                            stringResource(
-                                R.string.profile_header_following_count,
-                                user.matrices.followsCountHumanized,
-                            ),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Text(
-                        text =
-                            stringResource(
-                                R.string.profile_header_fans_count,
-                                user.matrices.fansCountHumanized,
-                            ),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
+                UserFields(
+                    fields = user.fieldsParsed,
+                )
+                MatricesDisplay(
+                    matrices =
+                        remember(user.matrices) {
+                            persistentMapOf(
+                                R.string.profile_header_toots_count to user.matrices.statusesCountHumanized,
+                                R.string.profile_header_following_count to user.matrices.followsCountHumanized,
+                                R.string.profile_header_fans_count to user.matrices.fansCountHumanized,
+                            )
+                        },
+                    expanded = expandMatrices,
+                )
             }
         },
         modifier = modifier,

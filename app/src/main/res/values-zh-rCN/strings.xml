@@ -252,4 +252,6 @@
     <string name="service_select_instance_input_placeholder">实例地址</string>
     <string name="service_select_next_button">下一步</string>
     <string name="service_select_empty_message">没有找到实例</string>
+
+    <string name="media_viewer_title">媒体查看器</string>
 </resources>

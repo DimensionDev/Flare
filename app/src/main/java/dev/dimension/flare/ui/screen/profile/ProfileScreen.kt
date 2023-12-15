@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,18 +24,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +50,10 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -56,6 +68,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
@@ -63,9 +76,12 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.common.LazyPagingItemsProxy
+import dev.dimension.flare.common.onNotEmptyOrLoading
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
@@ -73,9 +89,11 @@ import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
@@ -83,11 +101,14 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
+import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.ktml.dom.Element
 import org.koin.compose.rememberKoinInject
 import kotlin.math.max
+import kotlin.math.min
+import kotlin.reflect.KFunction1
 
 @Composable
 @Destination(
@@ -117,6 +138,9 @@ fun ProfileWithUserNameAndHostRoute(
             userKey = it.userKey,
             onBack = {
                 navigator.navigateUp()
+            },
+            onMediaClick = {
+                navigator.navigate(dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(it.userKey))
             },
         )
     }.onLoading {
@@ -247,16 +271,19 @@ fun ProfileRoute(
         onBack = {
             navigator.navigateUp()
         },
+        onMediaClick = {
+            navigator.navigate(dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(userKey))
+        },
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun ProfileScreen(
-    modifier: Modifier = Modifier,
+private fun ProfileScreen(
     // null means current user
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
+    onMediaClick: () -> Unit = {},
     showTopBar: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -265,8 +292,9 @@ fun ProfileScreen(
     }
     val listState = rememberLazyStaggeredGridState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val windowInfo = currentWindowAdaptiveInfo()
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets =
             ScaffoldDefaults
                 .contentWindowInsets.exclude(WindowInsets.statusBars),
@@ -274,7 +302,10 @@ fun ProfileScreen(
             if (showTopBar) {
                 val titleAlpha by remember {
                     derivedStateOf {
-                        if (listState.firstVisibleItemIndex > 0 || listState.layoutInfo.visibleItemsInfo.isEmpty()) {
+                        if (listState.firstVisibleItemIndex > 0 ||
+                            listState.layoutInfo.visibleItemsInfo.isEmpty() ||
+                            windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact
+                        ) {
                             1f
                         } else {
                             max(
@@ -285,37 +316,39 @@ fun ProfileScreen(
                     }
                 }
                 Box {
-                    Column(
-                        modifier =
-                            Modifier
-                                .graphicsLayer {
-                                    alpha = titleAlpha
-                                },
-                    ) {
-                        Spacer(
+                    if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                        Column(
                             modifier =
                                 Modifier
-                                    .fillMaxWidth()
-                                    .windowInsetsTopHeight(WindowInsets.statusBars)
-                                    .background(
-                                        color =
-                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                3.dp,
-                                            ),
-                                    ),
-                        )
-                        Spacer(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(64.dp)
-                                    .background(
-                                        color =
-                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                3.dp,
-                                            ),
-                                    ),
-                        )
+                                    .graphicsLayer {
+                                        alpha = titleAlpha
+                                    },
+                        ) {
+                            Spacer(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                                        .background(
+                                            color =
+                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                    3.dp,
+                                                ),
+                                        ),
+                            )
+                            Spacer(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(64.dp)
+                                        .background(
+                                            color =
+                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                    3.dp,
+                                                ),
+                                        ),
+                            )
+                        }
                     }
                     TopAppBar(
                         title = {
@@ -330,10 +363,21 @@ fun ProfileScreen(
                             }
                         },
                         colors =
-                            TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = Color.Transparent,
-                            ),
-                        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
+                            if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                                TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                    containerColor = Color.Transparent,
+                                )
+                            } else {
+                                TopAppBarDefaults.centerAlignedTopAppBarColors()
+                            },
+                        modifier =
+                            Modifier.let {
+                                if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                                    it.windowInsetsPadding(WindowInsets.statusBars)
+                                } else {
+                                    it
+                                }
+                            },
                         scrollBehavior = scrollBehavior,
                         navigationIcon = {
                             IconButton(onClick = onBack) {
@@ -344,76 +388,12 @@ fun ProfileScreen(
                             }
                         },
                         actions = {
-                            state.state.userState.onSuccess { user ->
-                                IconButton(onClick = {
-                                    state.setShowMoreMenus(true)
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        contentDescription = null,
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = state.showMoreMenus,
-                                    onDismissRequest = { state.setShowMoreMenus(false) },
-                                ) {
-                                    state.state.isMe.onSuccess { isMe ->
-                                        if (!isMe) {
-                                            state.state.relationState.onSuccess { relation ->
-                                                when (relation) {
-                                                    is UiRelation.Bluesky ->
-                                                        BlueskyUserMenu(
-                                                            user = user,
-                                                            relation = relation,
-                                                            onBlockClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.block(user, relation)
-                                                            },
-                                                            onMuteClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.mute(user, relation)
-                                                            },
-                                                        )
-                                                    is UiRelation.Mastodon ->
-                                                        MastodonUserMenu(
-                                                            user = user,
-                                                            relation = relation,
-                                                            onBlockClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.block(user, relation)
-                                                            },
-                                                            onMuteClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.mute(user, relation)
-                                                            },
-                                                        )
-                                                    is UiRelation.Misskey ->
-                                                        MisskeyUserMenu(
-                                                            user = user,
-                                                            relation = relation,
-                                                            onBlockClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.block(user, relation)
-                                                            },
-                                                            onMuteClick = {
-                                                                state.setShowMoreMenus(false)
-                                                                state.state.mute(user, relation)
-                                                            },
-                                                        )
-                                                }
-                                            }
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(text = stringResource(id = R.string.user_report, user.handle))
-                                                },
-                                                onClick = {
-                                                    state.setShowMoreMenus(false)
-                                                    state.state.report(user)
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
+                            if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                                ProfileMenu(
+                                    profileState = state.state,
+                                    setShowMoreMenus = state::setShowMoreMenus,
+                                    showMoreMenus = state.showMoreMenus,
+                                )
                             }
                         },
                     )
@@ -421,33 +401,188 @@ fun ProfileScreen(
             }
         },
     ) {
-        RefreshContainer(
-            modifier = Modifier.fillMaxSize(),
-            onRefresh = state.state::refresh,
-            indicatorPadding = it + contentPadding,
-            content = {
-                LazyStatusVerticalStaggeredGrid(
-                    state = listState,
-                    contentPadding = contentPadding,
+        Row {
+            if (windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact) {
+                Column(
+                    modifier =
+                        Modifier
+                            .verticalScroll(rememberScrollState())
+                            .width(432.dp)
+                            .padding(it + PaddingValues(horizontal = 16.dp)),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
+                    Card {
                         ProfileHeader(
                             state.state.userState,
                             state.state.relationState,
                             onFollowClick = state.state::follow,
                             isMe = state.state.isMe,
+                            menu = {
+                                ProfileMenu(
+                                    profileState = state.state,
+                                    setShowMoreMenus = state::setShowMoreMenus,
+                                    showMoreMenus = state.showMoreMenus,
+                                )
+                            },
+                            expandMatrices = true,
                         )
                     }
-                    with(state.state.listState) {
-                        with(state.statusEvent) {
-                            status()
-                        }
+                    Card {
+                        ProfileMeidasPreview(
+                            mediaState = state.state.mediaState,
+                            orientation = Orientation.Vertical,
+                            modifier =
+                                Modifier.clickable {
+                                    onMediaClick.invoke()
+                                },
+                        )
                     }
                 }
-            },
-        )
+            }
+            RefreshContainer(
+                modifier = Modifier.fillMaxSize(),
+                onRefresh = state.state::refresh,
+                indicatorPadding = it + contentPadding,
+                content = {
+                    LazyStatusVerticalStaggeredGrid(
+                        state = listState,
+                        contentPadding =
+                            contentPadding +
+                                if (windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact) {
+                                    it
+                                } else {
+                                    PaddingValues(0.dp)
+                                },
+                    ) {
+                        if (windowInfo.windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact) {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ProfileHeader(
+                                    state.state.userState,
+                                    state.state.relationState,
+                                    onFollowClick = state.state::follow,
+                                    isMe = state.state.isMe,
+                                    menu = {
+                                        Spacer(modifier = Modifier.width(screenHorizontalPadding))
+                                    },
+                                    expandMatrices = false,
+                                )
+                            }
+                            item {
+                                ProfileMeidasPreview(
+                                    mediaState = state.state.mediaState,
+                                    orientation = Orientation.Horizontal,
+                                    modifier =
+                                        Modifier.clickable {
+                                            onMediaClick.invoke()
+                                        },
+                                )
+                            }
+                            state.state.mediaState.onSuccess {
+                                it.onNotEmptyOrLoading {
+                                    item {
+                                        HorizontalDivider()
+                                    }
+                                }
+                            }
+                        }
+                        with(state.state.listState) {
+                            with(state.statusEvent) {
+                                status()
+                            }
+                        }
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileMenu(
+    profileState: ProfileState,
+    setShowMoreMenus: KFunction1<Boolean, Unit>,
+    showMoreMenus: Boolean,
+) {
+    profileState.userState.onSuccess { user ->
+        IconButton(onClick = {
+            setShowMoreMenus(true)
+        }) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = null,
+            )
+        }
+        DropdownMenu(
+            expanded = showMoreMenus,
+            onDismissRequest = { setShowMoreMenus(false) },
+        ) {
+            profileState.isMe.onSuccess { isMe ->
+                if (!isMe) {
+                    profileState.relationState.onSuccess { relation ->
+                        when (relation) {
+                            is UiRelation.Bluesky ->
+                                BlueskyUserMenu(
+                                    user = user,
+                                    relation = relation,
+                                    onBlockClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.block(user, relation)
+                                    },
+                                    onMuteClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.mute(user, relation)
+                                    },
+                                )
+
+                            is UiRelation.Mastodon ->
+                                MastodonUserMenu(
+                                    user = user,
+                                    relation = relation,
+                                    onBlockClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.block(user, relation)
+                                    },
+                                    onMuteClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.mute(user, relation)
+                                    },
+                                )
+
+                            is UiRelation.Misskey ->
+                                MisskeyUserMenu(
+                                    user = user,
+                                    relation = relation,
+                                    onBlockClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.block(user, relation)
+                                    },
+                                    onMuteClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.mute(user, relation)
+                                    },
+                                )
+                        }
+                    }
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text =
+                                    stringResource(
+                                        id = R.string.user_report,
+                                        user.handle,
+                                    ),
+                            )
+                        },
+                        onClick = {
+                            setShowMoreMenus(false)
+                            profileState.report(user)
+                        },
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -457,6 +592,8 @@ private fun ProfileHeader(
     relationState: UiState<UiRelation>,
     onFollowClick: (UiUser, UiRelation) -> Unit,
     isMe: UiState<Boolean>,
+    menu: @Composable RowScope.() -> Unit,
+    expandMatrices: Boolean,
     modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
@@ -489,6 +626,8 @@ private fun ProfileHeader(
                     relationState = relationState,
                     onFollowClick = onFollowClick,
                     isMe = isMe,
+                    menu = menu,
+                    expandMatrices = expandMatrices,
                 )
             }
         }
@@ -501,7 +640,9 @@ private fun ProfileHeaderSuccess(
     relationState: UiState<UiRelation>,
     onFollowClick: (UiUser, UiRelation) -> Unit,
     isMe: UiState<Boolean>,
+    menu: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
+    expandMatrices: Boolean = false,
 ) {
     when (user) {
         is UiUser.Mastodon -> {
@@ -513,6 +654,8 @@ private fun ProfileHeaderSuccess(
                 onFollowClick = {
                     onFollowClick(user, it)
                 },
+                menu = menu,
+                expandMatrices = expandMatrices,
             )
         }
 
@@ -525,6 +668,8 @@ private fun ProfileHeaderSuccess(
                 onFollowClick = {
                     onFollowClick(user, it)
                 },
+                menu = menu,
+                expandMatrices = expandMatrices,
             )
         }
 
@@ -537,6 +682,8 @@ private fun ProfileHeaderSuccess(
                 onFollowClick = {
                     onFollowClick(user, it)
                 },
+                menu = menu,
+                expandMatrices = expandMatrices,
             )
     }
 }
@@ -548,7 +695,7 @@ internal fun CommonProfileHeader(
     displayName: Element,
     handle: String,
     modifier: Modifier = Modifier,
-    headerTrailing: @Composable () -> Unit = {},
+    headerTrailing: @Composable RowScope.() -> Unit = {},
     handleTrailing: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
@@ -575,7 +722,13 @@ internal fun CommonProfileHeader(
                         .fillMaxWidth()
                         .height(actualBannerHeight),
             )
-        }
+        } ?: Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(actualBannerHeight)
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)),
+        )
         // avatar
         Column(
             modifier =
@@ -587,7 +740,7 @@ internal fun CommonProfileHeader(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = screenHorizontalPadding),
+                        .padding(start = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
@@ -620,7 +773,7 @@ internal fun CommonProfileHeader(
                         handleTrailing.invoke(this)
                     }
                 }
-                Box(
+                Row(
                     modifier =
                         Modifier
                             .padding(top = actualBannerHeight),
@@ -713,6 +866,137 @@ internal fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.placeholder(true),
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileMeidasPreview(
+    mediaState: UiState<LazyPagingItemsProxy<UiMedia>>,
+    orientation: Orientation,
+    modifier: Modifier = Modifier,
+) {
+    when (orientation) {
+        Orientation.Vertical -> {
+            AdaptiveGrid(
+                modifier = modifier,
+                content = {
+                    mediaState.onSuccess { media ->
+                        if (media.itemCount > 0) {
+                            val count = min(6, media.itemCount)
+                            repeat(count) {
+                                val item = media[it]
+                                if (item == null) {
+                                    Box(
+                                        modifier =
+                                            Modifier.aspectRatio(1f)
+                                                .placeholder(true),
+                                    )
+                                } else {
+                                    Box {
+                                        MediaItem(
+                                            media = item,
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                        if (it == count - 1) {
+                                            Box(
+                                                modifier =
+                                                    Modifier
+                                                        .matchParentSize()
+                                                        .background(
+                                                            color =
+                                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                                    3.dp,
+                                                                ).copy(alpha = 0.25f),
+                                                        ),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.mastodon_item_show_more),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    textAlign = TextAlign.Center,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }.onLoading {
+                        repeat(6) {
+                            Box(
+                                modifier =
+                                    Modifier.aspectRatio(1f)
+                                        .fillMaxSize()
+                                        .placeholder(true),
+                            )
+                        }
+                    }
+                },
+            )
+        }
+
+        Orientation.Horizontal -> {
+            LazyRow(
+                modifier = modifier,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+            ) {
+                mediaState.onSuccess { media ->
+                    if (media.itemCount > 0) {
+                        val count = min(6, media.itemCount)
+                        items(count) {
+                            val item = media[it]
+                            if (item == null) {
+                                Box(
+                                    modifier =
+                                        Modifier.aspectRatio(1f)
+                                            .size(64.dp)
+                                            .placeholder(true),
+                                )
+                            } else {
+                                Box {
+                                    MediaItem(
+                                        media = item,
+                                        modifier = Modifier.size(64.dp),
+                                    )
+                                    if (it == count - 1) {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .matchParentSize()
+                                                    .background(
+                                                        color =
+                                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                                3.dp,
+                                                            ).copy(alpha = 0.25f),
+                                                    ),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.mastodon_item_show_more),
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                textAlign = TextAlign.Center,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }.onLoading {
+                    items(6) {
+                        Box(
+                            modifier =
+                                Modifier.aspectRatio(1f)
+                                    .size(64.dp)
+                                    .placeholder(true),
+                        )
+                    }
                 }
             }
         }

@@ -34,4 +34,7 @@ data class UsersNotesRequest(
     @SerialName(value = "withFiles") val withFiles: kotlin.Boolean? = false,
     @SerialName(value = "fileType") val fileType: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "excludeNsfw") val excludeNsfw: kotlin.Boolean? = false,
+    @SerialName(value = "withChannelNotes") val withChannelNotes: kotlin.Boolean? = false,
+    @SerialName(value = "withRenotes") val withRenotes: kotlin.Boolean? = false,
+    @SerialName(value = "withReplies") val withReplies: kotlin.Boolean? = false,
 )

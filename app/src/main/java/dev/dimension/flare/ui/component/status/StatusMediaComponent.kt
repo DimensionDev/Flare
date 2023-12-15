@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
@@ -141,24 +143,34 @@ fun MediaItem(
     media: UiMedia,
     modifier: Modifier = Modifier,
 ) {
-    when (media) {
-        is UiMedia.Image -> {
-            NetworkImage(
-                model = media.url,
-                contentDescription = media.description,
-                modifier = modifier.aspectRatio(media.aspectRatio),
-            )
-        }
+    Box(
+        modifier =
+            modifier
+                .clipToBounds(),
+    ) {
+        when (media) {
+            is UiMedia.Image -> {
+                NetworkImage(
+                    model = media.url,
+                    contentDescription = media.description,
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f),
+                )
+            }
 
-        is UiMedia.Video -> {
-            NetworkImage(
-                model = media.thumbnailUrl,
-                contentDescription = media.description,
-                modifier = modifier.aspectRatio(media.aspectRatio),
-            )
-        }
+            is UiMedia.Video -> {
+                NetworkImage(
+                    model = media.thumbnailUrl,
+                    contentDescription = media.description,
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f),
+                )
+            }
 
-        is UiMedia.Audio -> Unit
-        is UiMedia.Gif -> Unit
+            is UiMedia.Audio -> Unit
+            is UiMedia.Gif -> Unit
+        }
     }
 }

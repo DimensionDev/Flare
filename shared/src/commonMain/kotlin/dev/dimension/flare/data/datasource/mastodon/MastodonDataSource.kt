@@ -170,6 +170,7 @@ class MastodonDataSource(
     override fun userTimeline(
         userKey: MicroBlogKey,
         pageSize: Int,
+        mediaOnly: Boolean,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> =
         timelinePager(
@@ -184,6 +185,7 @@ class MastodonDataSource(
                     account.accountKey,
                     userKey,
                     pagingKey,
+                    onlyMedia = mediaOnly,
                 ),
         )
 

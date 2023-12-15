@@ -41,9 +41,7 @@ fun AdaptiveGrid(
                 val itemSize = (constraints.maxWidth - space * (columns - 1)) / columns
                 val itemConstraints =
                     constraints.copy(
-                        minWidth = itemSize,
                         maxWidth = itemSize,
-                        minHeight = itemSize,
                         maxHeight = itemSize,
                     )
                 val placeables =
@@ -57,7 +55,7 @@ fun AdaptiveGrid(
                     var row = 0
                     var column = 0
                     placeables.forEach { placeable ->
-                        placeable.place(
+                        placeable.placeRelative(
                             x = column * itemSize + column * space,
                             y = row * itemSize + row * space,
                         )

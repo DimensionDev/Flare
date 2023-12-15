@@ -17,7 +17,9 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Instant
 
 internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus {
@@ -138,8 +140,8 @@ private fun Attachment.toUi(): UiMedia? {
                 url = url.orEmpty(),
                 previewUrl = previewURL.orEmpty(),
                 description = description,
-                width = meta?.width?.toFloat() ?: 0f,
-                height = meta?.height?.toFloat() ?: 0f,
+                width = meta?.width?.toFloat() ?: meta?.original?.width?.toFloat() ?: 0f,
+                height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
             )
 
         MediaType.GifV ->
@@ -200,6 +202,10 @@ internal fun Account.toUi(host: String): UiUser.Mastodon {
         locked = locked ?: false,
         handleInternal = username.orEmpty(),
         remoteHost = remoteHost,
+        fields =
+            fields?.map {
+                it.name.orEmpty() to it.value.orEmpty()
+            }?.filter { it.first.isNotEmpty() }?.toMap()?.toPersistentMap() ?: persistentMapOf(),
         raw = this,
     )
 }

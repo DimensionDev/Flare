@@ -56,6 +56,13 @@ inline fun <reified T : Any> LazyPagingItemsProxy<T>.onEmpty(block: () -> Unit):
     return this
 }
 
+inline fun <reified T : Any> LazyPagingItemsProxy<T>.onNotEmptyOrLoading(block: () -> Unit): LazyPagingItemsProxy<T> {
+    if (itemCount > 0 || loadState.refresh is LoadState.Loading) {
+        block()
+    }
+    return this
+}
+
 inline fun <reified T : Any> LazyPagingItemsProxy<T>.onSuccess(block: () -> Unit): LazyPagingItemsProxy<T> {
     if (itemCount > 0) {
         block()

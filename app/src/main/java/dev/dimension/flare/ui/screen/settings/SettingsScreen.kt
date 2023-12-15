@@ -142,7 +142,7 @@ private fun settingsPanelPresenter() =
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal class ProxyDestinationsNavigator(
-    private val scaffoldNavigator: ThreePaneScaffoldNavigator<ListDetailPaneScaffoldRole>,
+    private val scaffoldNavigator: ThreePaneScaffoldNavigator,
     private val navigator: DestinationsNavigator,
     private val navigateBack: () -> Unit,
 ) : DestinationsNavigator by navigator {

@@ -20,16 +20,15 @@ import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -82,11 +81,11 @@ internal fun BlueskyStatusComponent(
     val uriHandler = LocalUriHandler.current
 
     val dismissState =
-        rememberDismissState(
+        rememberSwipeToDismissState(
             confirmValueChange = {
                 when (it) {
-                    DismissValue.DismissedToEnd -> appearanceSettings.bluesky.swipeRight
-                    DismissValue.DismissedToStart -> appearanceSettings.bluesky.swipeLeft
+                    SwipeToDismissValue.StartToEnd -> appearanceSettings.bluesky.swipeRight
+                    SwipeToDismissValue.EndToStart -> appearanceSettings.bluesky.swipeLeft
                     else -> null
                 }?.let {
                     when (it) {
@@ -116,15 +115,15 @@ internal fun BlueskyStatusComponent(
         backgroundContent = {
             val alignment =
                 when (dismissState.dismissDirection) {
-                    DismissDirection.StartToEnd -> Alignment.CenterStart
-                    DismissDirection.EndToStart -> Alignment.CenterEnd
-                    null -> Alignment.Center
+                    SwipeToDismissValue.StartToEnd -> Alignment.CenterStart
+                    SwipeToDismissValue.EndToStart -> Alignment.CenterEnd
+                    SwipeToDismissValue.Settled -> Alignment.Center
                 }
             val action =
                 when (dismissState.dismissDirection) {
-                    DismissDirection.StartToEnd -> appearanceSettings.bluesky.swipeRight
-                    DismissDirection.EndToStart -> appearanceSettings.bluesky.swipeLeft
-                    null -> null
+                    SwipeToDismissValue.StartToEnd -> appearanceSettings.bluesky.swipeRight
+                    SwipeToDismissValue.EndToStart -> appearanceSettings.bluesky.swipeLeft
+                    SwipeToDismissValue.Settled -> null
                 }
             if (action != null) {
                 Box(
@@ -137,19 +136,8 @@ internal fun BlueskyStatusComponent(
                 }
             }
         },
-        directions =
-            setOf(
-                if (appearanceSettings.bluesky.swipeLeft != AppearanceSettings.Bluesky.SwipeActions.NONE) {
-                    DismissDirection.EndToStart
-                } else {
-                    null
-                },
-                if (appearanceSettings.bluesky.swipeRight != AppearanceSettings.Bluesky.SwipeActions.NONE) {
-                    DismissDirection.StartToEnd
-                } else {
-                    null
-                },
-            ).filterNotNull().toSet(),
+        enableDismissFromEndToStart = appearanceSettings.bluesky.swipeLeft != AppearanceSettings.Bluesky.SwipeActions.NONE,
+        enableDismissFromStartToEnd = appearanceSettings.bluesky.swipeRight != AppearanceSettings.Bluesky.SwipeActions.NONE,
     ) {
         Column(
             modifier =

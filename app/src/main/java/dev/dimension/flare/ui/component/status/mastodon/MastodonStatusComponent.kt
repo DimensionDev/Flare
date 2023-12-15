@@ -26,8 +26,6 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.Card
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,9 +33,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -169,11 +168,11 @@ internal fun MastodonStatusComponent(
 
     val appearanceSettings = LocalAppearanceSettings.current
     val dismissState =
-        rememberDismissState(
+        rememberSwipeToDismissState(
             confirmValueChange = {
                 when (it) {
-                    DismissValue.DismissedToEnd -> appearanceSettings.mastodon.swipeRight
-                    DismissValue.DismissedToStart -> appearanceSettings.mastodon.swipeLeft
+                    SwipeToDismissValue.StartToEnd -> appearanceSettings.mastodon.swipeRight
+                    SwipeToDismissValue.EndToStart -> appearanceSettings.mastodon.swipeLeft
                     else -> null
                 }?.let {
                     when (it) {
@@ -206,15 +205,15 @@ internal fun MastodonStatusComponent(
         backgroundContent = {
             val alignment =
                 when (dismissState.dismissDirection) {
-                    DismissDirection.StartToEnd -> Alignment.CenterStart
-                    DismissDirection.EndToStart -> Alignment.CenterEnd
-                    null -> Alignment.Center
+                    SwipeToDismissValue.StartToEnd -> Alignment.CenterStart
+                    SwipeToDismissValue.EndToStart -> Alignment.CenterEnd
+                    SwipeToDismissValue.Settled -> Alignment.Center
                 }
             val action =
                 when (dismissState.dismissDirection) {
-                    DismissDirection.StartToEnd -> appearanceSettings.mastodon.swipeRight
-                    DismissDirection.EndToStart -> appearanceSettings.mastodon.swipeLeft
-                    null -> null
+                    SwipeToDismissValue.StartToEnd -> appearanceSettings.mastodon.swipeRight
+                    SwipeToDismissValue.EndToStart -> appearanceSettings.mastodon.swipeLeft
+                    SwipeToDismissValue.Settled -> null
                 }
             if (action != null) {
                 Box(
@@ -227,19 +226,8 @@ internal fun MastodonStatusComponent(
                 }
             }
         },
-        directions =
-            setOf(
-                if (appearanceSettings.mastodon.swipeLeft != AppearanceSettings.Mastodon.SwipeActions.NONE) {
-                    DismissDirection.EndToStart
-                } else {
-                    null
-                },
-                if (appearanceSettings.mastodon.swipeRight != AppearanceSettings.Mastodon.SwipeActions.NONE) {
-                    DismissDirection.StartToEnd
-                } else {
-                    null
-                },
-            ).filterNotNull().toSet(),
+        enableDismissFromEndToStart = appearanceSettings.mastodon.swipeLeft != AppearanceSettings.Mastodon.SwipeActions.NONE,
+        enableDismissFromStartToEnd = appearanceSettings.mastodon.swipeRight != AppearanceSettings.Mastodon.SwipeActions.NONE,
     ) {
         Column(
             modifier =

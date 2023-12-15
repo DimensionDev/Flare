@@ -29,12 +29,13 @@ internal class HomeTimelineRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        database.transaction {
-                            database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                        }
                         service.homeTimeline(
                             limit = state.config.pageSize,
-                        )
+                        ).also {
+                            database.transaction {
+                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                            }
+                        }
                     }
                     LoadType.PREPEND -> {
                         val firstItem = state.firstItemOrNull()

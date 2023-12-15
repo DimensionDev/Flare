@@ -24,9 +24,6 @@ internal class SearchStatusRemoteMediator(
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
     ): MediatorResult {
         return try {
-            if (loadType == LoadType.REFRESH) {
-                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-            }
             val response =
                 when (loadType) {
                     LoadType.PREPEND -> {
@@ -40,7 +37,9 @@ internal class SearchStatusRemoteMediator(
                                 query = query,
                                 limit = state.config.pageSize,
                             ),
-                        )
+                        ).also {
+                            database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        }
                     }
 
                     LoadType.APPEND -> {

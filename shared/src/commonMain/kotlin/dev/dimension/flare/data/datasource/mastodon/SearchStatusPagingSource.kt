@@ -23,9 +23,6 @@ internal class SearchStatusPagingSource(
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
     ): MediatorResult {
         return try {
-            if (loadType == LoadType.REFRESH) {
-                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-            }
             val response =
                 when (loadType) {
                     LoadType.PREPEND -> {
@@ -46,6 +43,8 @@ internal class SearchStatusPagingSource(
                                 limit = state.config.pageSize,
                                 type = "statuses",
                             ).statuses
+                        }.also {
+                            database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
                         }
                     }
 

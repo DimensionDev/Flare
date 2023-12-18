@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.status
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,6 +81,7 @@ internal fun StatusScreen(
             onRefresh = state.state::refresh,
             content = {
                 LazyStatusVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(1),
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     with(state.state.listState) {

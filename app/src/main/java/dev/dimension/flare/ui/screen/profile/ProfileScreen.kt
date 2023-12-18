@@ -293,6 +293,7 @@ private fun ProfileScreen(
     val listState = rememberLazyStaggeredGridState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val windowInfo = currentWindowAdaptiveInfo()
+    val bigScreen = windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Medium
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets =
@@ -304,7 +305,7 @@ private fun ProfileScreen(
                     derivedStateOf {
                         if (listState.firstVisibleItemIndex > 0 ||
                             listState.layoutInfo.visibleItemsInfo.isEmpty() ||
-                            windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact
+                            bigScreen
                         ) {
                             1f
                         } else {
@@ -316,7 +317,7 @@ private fun ProfileScreen(
                     }
                 }
                 Box {
-                    if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                    if (!bigScreen) {
                         Column(
                             modifier =
                                 Modifier
@@ -363,7 +364,7 @@ private fun ProfileScreen(
                             }
                         },
                         colors =
-                            if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                            if (!bigScreen) {
                                 TopAppBarDefaults.centerAlignedTopAppBarColors(
                                     containerColor = Color.Transparent,
                                 )
@@ -372,7 +373,7 @@ private fun ProfileScreen(
                             },
                         modifier =
                             Modifier.let {
-                                if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                                if (!bigScreen) {
                                     it.windowInsetsPadding(WindowInsets.statusBars)
                                 } else {
                                     it
@@ -388,7 +389,7 @@ private fun ProfileScreen(
                             }
                         },
                         actions = {
-                            if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                            if (!bigScreen) {
                                 ProfileMenu(
                                     profileState = state.state,
                                     setShowMoreMenus = state::setShowMoreMenus,
@@ -402,7 +403,7 @@ private fun ProfileScreen(
         },
     ) {
         Row {
-            if (windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact) {
+            if (bigScreen) {
                 Column(
                     modifier =
                         Modifier
@@ -448,13 +449,13 @@ private fun ProfileScreen(
                         state = listState,
                         contentPadding =
                             contentPadding +
-                                if (windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact) {
+                                if (bigScreen) {
                                     it
                                 } else {
                                     PaddingValues(0.dp)
                                 },
                     ) {
-                        if (windowInfo.windowSizeClass.widthSizeClass <= WindowWidthSizeClass.Compact) {
+                        if (!bigScreen) {
                             item(
                                 span = StaggeredGridItemSpan.FullLine,
                             ) {

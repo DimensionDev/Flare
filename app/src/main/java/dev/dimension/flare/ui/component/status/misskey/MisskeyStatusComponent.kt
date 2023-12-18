@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -39,7 +40,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -138,7 +138,10 @@ internal fun MisskeyStatusComponent(
                 }
             if (action != null) {
                 Box(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = screenHorizontalPadding),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = screenHorizontalPadding),
                     contentAlignment = alignment,
                 ) {
                     StatusSwipeButton(
@@ -345,7 +348,10 @@ private fun StatusFooterComponent(
                     showMoreMenu = true
                 },
                 content = {
-                    DropdownMenu(expanded = showMoreMenu, onDismissRequest = { showMoreMenu = false }) {
+                    DropdownMenu(
+                        expanded = showMoreMenu,
+                        onDismissRequest = { showMoreMenu = false },
+                    ) {
                         if (actualData.isFromMe) {
                             DropdownMenuItem(
                                 text = {
@@ -442,19 +448,27 @@ private fun StatusContentComponent(
     ) {
         data.contentWarningText?.let {
             if (it.isNotEmpty()) {
-                Text(
-                    text = it,
-                )
-                TextButton(
-                    onClick = {
-                        expanded = !expanded
-                    },
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .alpha(MediumAlpha)
+                            .clickable {
+                                expanded = !expanded
+                            },
                 ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = stringResource(id = R.string.mastodon_item_content_warning),
+                        modifier =
+                            Modifier
+                                .size(12.dp)
+                                .alpha(MediumAlpha),
+                    )
                     Text(
-                        text =
-                            stringResource(
-                                if (expanded) R.string.mastodon_item_show_less else R.string.mastodon_item_show_more,
-                            ),
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
@@ -700,7 +714,8 @@ internal class DefaultMisskeyStatusEvent(
 
     override fun onReblogClick(data: UiStatus.Misskey) {
         scope.launch {
-            val account = accountRepository.get(data.accountKey) as? UiAccount.Misskey ?: return@launch
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.Misskey ?: return@launch
             runCatching {
                 account.dataSource.renote(data)
             }.onFailure {

@@ -440,9 +440,27 @@ private fun serviceSelectPresenter(
                 nodeInfoState.setFilter(it.toString())
             }
     }
-    val blueskyLoginState = blueskyLoginPresenter(onBack)
-    val mastodonLoginState = mastodonLoginPresenter(launchUrl, onBack)
-    val misskeyLoginState = misskeyLoginPresenter(launchUrl, onBack)
+    val blueskyLoginState =
+        blueskyLoginPresenter(onBack = {
+            instanceInputState.edit {
+                replace(0, instanceInputState.text.length, "")
+            }
+            onBack?.invoke()
+        })
+    val mastodonLoginState =
+        mastodonLoginPresenter(launchUrl, onBack = {
+            instanceInputState.edit {
+                replace(0, instanceInputState.text.length, "")
+            }
+            onBack?.invoke()
+        })
+    val misskeyLoginState =
+        misskeyLoginPresenter(launchUrl, onBack = {
+            instanceInputState.edit {
+                replace(0, instanceInputState.text.length, "")
+            }
+            onBack?.invoke()
+        })
     object : NodeInfoState by nodeInfoState {
         val instanceInputState = instanceInputState
         val blueskyLoginState = blueskyLoginState
@@ -508,7 +526,15 @@ private fun mastodonLoginPresenter(
     val resumedState =
         code?.let {
             remember {
-                MastodonCallbackPresenter(code = code, toHome = { onBack?.invoke() })
+                MastodonCallbackPresenter(
+                    code = code,
+                    toHome = {
+                        code = null
+                        loading = false
+                        error = null
+                        onBack?.invoke()
+                    },
+                )
             }.invoke()
         }
     object {
@@ -550,7 +576,15 @@ private fun misskeyLoginPresenter(
     val resumedState =
         session?.let {
             remember {
-                MisskeyCallbackPresenter(session = session, toHome = { onBack?.invoke() })
+                MisskeyCallbackPresenter(
+                    session = session,
+                    toHome = {
+                        session = null
+                        loading = false
+                        error = null
+                        onBack?.invoke()
+                    },
+                )
             }.invoke()
         }
     object {

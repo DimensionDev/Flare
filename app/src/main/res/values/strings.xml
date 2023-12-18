@@ -256,4 +256,7 @@
     <string name="service_select_empty_message">No instances found</string>
 
     <string name="media_viewer_title">Media viewer</string>
+
+    <string name="mastodon_item_content_warning">Content warning</string>
+    <string name="settings_accounts_remove">Remove</string>
 </resources>

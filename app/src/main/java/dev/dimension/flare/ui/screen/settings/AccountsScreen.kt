@@ -1,6 +1,10 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -10,15 +14,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberSwipeToDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
@@ -29,6 +38,7 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
@@ -95,22 +105,58 @@ internal fun AccountsScreen(
 
                 is UiState.Success -> {
                     items(accountState.data.size) { index ->
-                        AccountItem(
-                            userState = accountState.data[index],
-                            onClick = {
-                                state.setActiveAccount(it)
-                            },
-                            trailingContent = { user ->
-                                state.activeAccount.onSuccess {
-                                    RadioButton(
-                                        selected = it.accountKey == user.userKey,
-                                        onClick = {
-                                            state.setActiveAccount(user.userKey)
+                        val data = accountState.data[index]
+                        data.onSuccess { user ->
+                            SwipeToDismissBox(
+                                state =
+                                    rememberSwipeToDismissState(
+                                        confirmValueChange = {
+                                            if (it == SwipeToDismissValue.EndToStart) {
+                                                state.removeAccount(user.userKey)
+                                                true
+                                            } else {
+                                                false
+                                            }
                                         },
-                                    )
-                                }
-                            },
-                        )
+                                    ),
+                                backgroundContent = {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .background(color = MaterialTheme.colorScheme.error)
+                                                .padding(16.dp),
+                                        contentAlignment = androidx.compose.ui.Alignment.CenterEnd,
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.settings_accounts_remove),
+                                            color = MaterialTheme.colorScheme.onError,
+                                        )
+                                    }
+                                },
+                                enableDismissFromStartToEnd = false,
+                            ) {
+                                AccountItem(
+                                    modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                                    userState = data,
+                                    onClick = {
+                                        state.setActiveAccount(it)
+                                    },
+                                    trailingContent = { user ->
+                                        state.activeAccount.onSuccess {
+                                            RadioButton(
+                                                selected = it.accountKey == user.userKey,
+                                                onClick = {
+                                                    state.setActiveAccount(user.userKey)
+                                                },
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                        }.onLoading {
+                            AccountItemLoadingPlaceholder()
+                        }
                     }
                 }
             }

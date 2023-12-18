@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -21,14 +22,18 @@ fun AppContainer() {
         SplashPresenter({}, {}).invoke()
     }
     val settingsRepository = rememberKoinInject<SettingsRepository>()
-    val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(AppearanceSettings())
+    val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
+        AppearanceSettings(),
+    )
     CompositionLocalProvider(
         LocalAppearanceSettings provides appearanceSettings,
     ) {
-        when (state) {
-            SplashType.Splash -> SplashScreen()
-            SplashType.Login -> ServiceSelectScreen()
-            SplashType.Home -> HomeScreen()
+        AnimatedContent(targetState = state, label = "AppContainer") {
+            when (it) {
+                SplashType.Splash -> SplashScreen()
+                SplashType.Login -> ServiceSelectScreen()
+                SplashType.Home -> HomeScreen()
+            }
         }
     }
 }

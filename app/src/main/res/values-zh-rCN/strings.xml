@@ -254,4 +254,7 @@
     <string name="service_select_empty_message">没有找到实例</string>
 
     <string name="media_viewer_title">媒体查看器</string>
+
+    <string name="mastodon_item_content_warning">内容警告</string>
+    <string name="settings_accounts_remove">删除账户</string>
 </resources>

@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
@@ -34,20 +36,22 @@ import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-fun MisskeyReactionRoute(
+internal fun MisskeyReactionRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
 ) {
-    MisskeyReactionSheet(
-        statusKey = statusKey,
-        onBack = {
-            navigator.navigateUp()
-        },
-    )
+    Dialog(onDismissRequest = navigator::navigateUp) {
+        Card {
+            MisskeyReactionSheet(
+                statusKey = statusKey,
+                onBack = navigator::navigateUp,
+            )
+        }
+    }
 }
 
 @Composable
-fun MisskeyReactionSheet(
+private fun MisskeyReactionSheet(
     statusKey: MicroBlogKey,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,

@@ -283,6 +283,7 @@
 				B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */,
 				B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */,
 				B62B2CF30DB9A3370D1BB87E /* ViewExt.swift */,
+				B62B2291B79CA2EBCE71D4A8 /* AppIcon.appiconset */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -293,6 +294,14 @@
 				AB3632DC29227652001CCB65 /* Config.xcconfig */,
 			);
 			path = Configuration;
+			sourceTree = "<group>";
+		};
+		B62B2291B79CA2EBCE71D4A8 /* AppIcon.appiconset */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = AppIcon.appiconset;
+			path = Assets.xcassets/AppIcon.appiconset;
 			sourceTree = "<group>";
 		};
 		B62B22CA4B519C99939D2770 /* xcdebugger */ = {
@@ -576,6 +585,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
@@ -586,6 +596,7 @@
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\n",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Flare;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -615,6 +626,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
@@ -625,6 +637,7 @@
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\n",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Flare;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

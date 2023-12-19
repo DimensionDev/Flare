@@ -257,4 +257,7 @@
 
     <string name="mastodon_item_content_warning">内容警告</string>
     <string name="settings_accounts_remove">删除账户</string>
+
+    <string name="media_menu_save">保存</string>
+    <string name="media_save_success">图片已保存到下载文件夹</string>
 </resources>

@@ -31,7 +31,7 @@ struct ProfileScreen: View {
                                 MisskeyMenu(relation: misskeyRelation, onMuteClick: { viewModel.model.mute(user: user.data, data: relation.data) }, onBlockClick: { viewModel.model.block(user: user.data, data: relation.data) })
                             }
                         }
-                        Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
+                        Button(action: { viewModel.model.report(user: user.data) }, label: {
                             Label("Report", systemImage: "exclamationmark.bubble")
                         })
                     }

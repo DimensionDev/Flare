@@ -19,13 +19,13 @@ struct MisskeyNotificationComponent: View {
                 StatusRetweetHeaderComponent(iconSystemName: "arrowshape.turn.up.left", nameMarkdown: data.user?.extra.nameMarkdown, text: "quoted your note")
             case .reaction:
                 StatusRetweetHeaderComponent(iconSystemName: "star", nameMarkdown: data.user?.extra.nameMarkdown, text: "react your note")
-            case .pollended:
+            case .pollEnded:
                 StatusRetweetHeaderComponent(iconSystemName: "list.bullet", nameMarkdown: nil, text: "A poll you were participating in has ended")
-            case .receivefollowrequest:
+            case .receiveFollowRequest:
                 StatusRetweetHeaderComponent(iconSystemName: "person.badge.plus", nameMarkdown: data.user?.extra.nameMarkdown, text: "request to follow you")
-            case .followrequestaccepted:
+            case .followRequestAccepted:
                 StatusRetweetHeaderComponent(iconSystemName: "person.badge.plus", nameMarkdown: data.user?.extra.nameMarkdown, text: "accepted your follow")
-            case .achievementearned:
+            case .achievementEarned:
                 StatusRetweetHeaderComponent(iconSystemName: "star", nameMarkdown: nil, text: "You have earn a new achievement")
             case .app:
                 StatusRetweetHeaderComponent(iconSystemName: "app", nameMarkdown: data.user?.extra.nameMarkdown, text: "app notification")
@@ -34,7 +34,7 @@ struct MisskeyNotificationComponent: View {
                 MisskeyStatusComponent(misskey: note, event: event)
             }
             if let user = data.user {
-                if [shared.Notification_.Type_.follow, shared.Notification_.Type_.followrequestaccepted, shared.Notification_.Type_.receivefollowrequest].contains(data.type) {
+                if [shared.Notification_.Type_.follow, shared.Notification_.Type_.followRequestAccepted, shared.Notification_.Type_.receiveFollowRequest].contains(data.type) {
                     HStack {
                         UserComponent(user: user)
                         Spacer()

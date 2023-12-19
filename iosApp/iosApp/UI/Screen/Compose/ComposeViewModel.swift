@@ -87,7 +87,7 @@ class ComposeViewModel: MoleculeViewModelProto {
         return if case .success(let data) = onEnum(of: model.visibilityState), let state = data.data as? MastodonVisibilityState {
             state.visibility
         } else {
-            UiStatus.Mastodon.MastodonVisibility.public_
+            UiStatus.Mastodon.MastodonVisibility.public
         }
     }
 
@@ -105,7 +105,7 @@ class ComposeViewModel: MoleculeViewModelProto {
         return if case .success(let data) = onEnum(of: model.visibilityState), let state = data.data as? MisskeyVisibilityState {
             state.visibility
         } else {
-            UiStatus.Misskey.MisskeyVisibility.public_
+            UiStatus.Misskey.MisskeyVisibility.public
         }
     }
 

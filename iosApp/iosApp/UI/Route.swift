@@ -127,11 +127,11 @@ extension View {
             case let .profile(userKey):
                 ProfileScreen(userKey: MicroBlogKey.companion.valueOf(str: userKey))
             case let .statusDetail(statusKey):
-                ContentView()
+                Text("todo")
             case let .profileWithUserNameAndHost(userName, host):
-                ContentView()
+                Text("todo")
             case let .search(data):
-                ContentView()
+                Text("todo")
             }
         }
     }

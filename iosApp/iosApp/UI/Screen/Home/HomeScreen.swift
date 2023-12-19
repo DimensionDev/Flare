@@ -93,7 +93,7 @@ struct HomeScreen: View {
 }
 
 @Observable
-class HomeViewModel : MoleculeViewModelBase<HomeState, HomePresenter> {
+class HomeViewModel : MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
 }
 
 struct HomeSheetContent: View {

@@ -11,7 +11,7 @@ struct MastodonNotificationComponent: View {
                 StatusRetweetHeaderComponent(iconSystemName: "star", nameMarkdown: data.user.extra.nameMarkdown, text: "favourited your status")
             case .follow:
                 StatusRetweetHeaderComponent(iconSystemName: "person.badge.plus", nameMarkdown: data.user.extra.nameMarkdown, text: "followed you")
-            case .followrequest:
+            case .followRequest:
                 StatusRetweetHeaderComponent(iconSystemName: "person.badge.plus", nameMarkdown: data.user.extra.nameMarkdown, text: "request to follow you")
             case .mention:
                 StatusRetweetHeaderComponent(iconSystemName: "at", nameMarkdown: data.user.extra.nameMarkdown, text: "mentioned you")
@@ -27,7 +27,7 @@ struct MastodonNotificationComponent: View {
             if let status = data.status {
                 MastodonStatusComponent(mastodon: status, event: event)
             }
-            if [NotificationTypes.follow, NotificationTypes.followrequest].contains(data.type) {
+            if [NotificationTypes.follow, NotificationTypes.followRequest].contains(data.type) {
                 HStack {
                     UserComponent(user: data.user)
                     Spacer()

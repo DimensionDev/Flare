@@ -42,12 +42,18 @@ inline fun <reified T : Any> LazyPagingItemsProxy<T>.onLoading(block: () -> Unit
     return this
 }
 
+val <T : Any> LazyPagingItemsProxy<T>.isLoading: Boolean
+    get() = loadState.refresh is LoadState.Loading && itemCount == 0
+
 inline fun <reified T : Any> LazyPagingItemsProxy<T>.onError(block: (Throwable) -> Unit): LazyPagingItemsProxy<T> {
     if (loadState.refresh is LoadState.Error && itemCount == 0) {
         block((loadState.refresh as LoadState.Error).error)
     }
     return this
 }
+
+val <T : Any> LazyPagingItemsProxy<T>.isError: Boolean
+    get() = loadState.refresh is LoadState.Error && itemCount == 0
 
 inline fun <reified T : Any> LazyPagingItemsProxy<T>.onEmpty(block: () -> Unit): LazyPagingItemsProxy<T> {
     if (loadState.refresh is LoadState.NotLoading && itemCount == 0) {
@@ -56,6 +62,9 @@ inline fun <reified T : Any> LazyPagingItemsProxy<T>.onEmpty(block: () -> Unit):
     return this
 }
 
+val <T : Any> LazyPagingItemsProxy<T>.isEmpty: Boolean
+    get() = loadState.refresh is LoadState.NotLoading && itemCount == 0
+
 inline fun <reified T : Any> LazyPagingItemsProxy<T>.onNotEmptyOrLoading(block: () -> Unit): LazyPagingItemsProxy<T> {
     if (itemCount > 0 || loadState.refresh is LoadState.Loading) {
         block()
@@ -63,12 +72,18 @@ inline fun <reified T : Any> LazyPagingItemsProxy<T>.onNotEmptyOrLoading(block: 
     return this
 }
 
+val <T : Any> LazyPagingItemsProxy<T>.isNotEmptyOrLoading: Boolean
+    get() = itemCount > 0 || loadState.refresh is LoadState.Loading
+
 inline fun <reified T : Any> LazyPagingItemsProxy<T>.onSuccess(block: () -> Unit): LazyPagingItemsProxy<T> {
     if (itemCount > 0) {
         block()
     }
     return this
 }
+
+val <T : Any> LazyPagingItemsProxy<T>.isSuccess: Boolean
+    get() = itemCount > 0
 
 // for iOS, collectAsLazyPagingItems does not trigger PresenterBase to emit new state when LazyPagingItems changes itself
 @Immutable
@@ -84,7 +99,7 @@ data class LazyPagingItemsProxy<T : Any>(
 
     operator fun get(index: Int): T? = data.get(index)
 
-    fun peek(index: Int): T? = data.peek(index)
+    fun peek(index: Int): T? = if (index < itemCount) data.peek(index) else null
 
     fun retry() = data.retry()
 

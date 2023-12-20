@@ -102,27 +102,8 @@ struct HomeSheetContent: View {
         NavigationStack(path: $sheetRouter.navPath) {
             SettingsScreen()
                 .withSheetRouter {
-                    sheetRouter.navigateBack(count: 3)
-                } toMisskey: {
-                    sheetRouter.navigate(to: .misskey)
-                } toMastodon: {
-                    sheetRouter.navigate(to: .mastodon)
-                } toBluesky: {
-                    sheetRouter.navigate(to: .bluesky)
+                    sheetRouter.navigateBack()
                 }
-        }
-        .onOpenURL { url in
-            if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON)) {
-                if let range = url.absoluteString.range(of: "code=") {
-                    let code = url.absoluteString.suffix(from: range.upperBound)
-                    sheetRouter.navigate(to: .mastodonCallback(code: String(code)))
-                }
-            } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY)) {
-                if let range = url.absoluteString.range(of: "session=") {
-                    let session = url.absoluteString.suffix(from: range.upperBound)
-                    sheetRouter.navigate(to: .misskeyCallback(session: String(session)))
-                }
-            }
         }
     }
 }

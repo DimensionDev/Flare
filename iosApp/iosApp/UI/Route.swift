@@ -23,39 +23,14 @@ struct RouterView : View {
                 if type == .login {
                     NavigationStack(path: $sheetRouter.navPath) {
                         ServiceSelectScreen(
-                            toMisskey: {
-                                sheetRouter.navigate(to: .misskey)
-                            },
-                            toMastodon: {
-                                sheetRouter.navigate(to: .mastodon)
-                            },
-                            toBluesky: {
-                                sheetRouter.navigate(to: .bluesky)
+                            toHome: {
+                                
                             }
                         )
                         .withSheetRouter {
                             sheetRouter.clearBackStack()
-                        } toMisskey: {
-                            sheetRouter.navigate(to: .misskey)
-                        } toMastodon: {
-                            sheetRouter.navigate(to: .mastodon)
-                        } toBluesky: {
-                            sheetRouter.navigate(to: .bluesky)
                         }
 
-                    }
-                    .onOpenURL { url in
-                        if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON)) {
-                            if let range = url.absoluteString.range(of: "code=") {
-                                let code = url.absoluteString.suffix(from: range.upperBound)
-                                sheetRouter.navigate(to: .mastodonCallback(code: String(code)))
-                            }
-                        } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY)) {
-                            if let range = url.absoluteString.range(of: "session=") {
-                                let session = url.absoluteString.suffix(from: range.upperBound)
-                                sheetRouter.navigate(to: .misskeyCallback(session: String(session)))
-                            }
-                        }
                     }
                     .interactiveDismissDisabled()
                 }
@@ -87,12 +62,7 @@ public enum TabDestination: Codable, Hashable {
 public enum SheetDestination: Codable, Hashable {
     case settings
     case accountSettings
-    case mastodon
-    case mastodonCallback(code: String)
-    case misskey
-    case misskeyCallback(session: String)
     case serviceSelection
-    case bluesky
 }
 
 @Observable
@@ -136,29 +106,15 @@ extension View {
         }
     }
     
-    func withSheetRouter(toHome:@escaping () -> Void, toMisskey: @escaping () -> Void, toMastodon: @escaping () -> Void, toBluesky: @escaping () -> Void) -> some View {
+    func withSheetRouter(toHome:@escaping () -> Void) -> some View {
         navigationDestination(for: SheetDestination.self) { destination in
             switch destination {
-            case .mastodon:
-                MastodonOAuthScreen()
-            case let .mastodonCallback(code):
-                MastodonCallbackScreen(code: code, toHome: toHome)
-            case .misskey:
-                MisskeyOAuthScreen()
-            case let .misskeyCallback(session):
-                MisskeyCallbackScreen(session: session, toHome: toHome)
             case .serviceSelection:
-                ServiceSelectScreen(
-                    toMisskey: toMisskey,
-                    toMastodon: toMastodon,
-                    toBluesky: toBluesky
-                )
+                ServiceSelectScreen(toHome: toHome)
             case .settings:
                 SettingsScreen()
             case .accountSettings:
                 AccountsScreen()
-            case .bluesky:
-                BlueskyLoginScreen(toHome: toHome)
             }
         }
     }

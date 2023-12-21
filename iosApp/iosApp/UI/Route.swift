@@ -3,7 +3,6 @@ import SwiftUI
 import shared
 
 struct RouterView : View {
-    @Bindable var sheetRouter = Router<SheetDestination>()
     var body: some View {
         SplashScreen { type in
             ZStack {
@@ -21,17 +20,11 @@ struct RouterView : View {
                 
             }), content: {
                 if type == .login {
-                    NavigationStack(path: $sheetRouter.navPath) {
-                        ServiceSelectScreen(
-                            toHome: {
-                                
-                            }
-                        )
-                        .withSheetRouter {
-                            sheetRouter.clearBackStack()
+                    ServiceSelectScreen(
+                        toHome: {
+                            
                         }
-
-                    }
+                    )
                     .interactiveDismissDisabled()
                 }
             })
@@ -57,12 +50,6 @@ public enum TabDestination: Codable, Hashable {
     case statusDetail(statusKey: String)
     case profileWithUserNameAndHost(userName: String, host: String)
     case search(q: String)
-}
-
-public enum SheetDestination: Codable, Hashable {
-    case settings
-    case accountSettings
-    case serviceSelection
 }
 
 @Observable
@@ -102,19 +89,6 @@ extension View {
                 Text("todo")
             case let .search(data):
                 Text("todo")
-            }
-        }
-    }
-    
-    func withSheetRouter(toHome:@escaping () -> Void) -> some View {
-        navigationDestination(for: SheetDestination.self) { destination in
-            switch destination {
-            case .serviceSelection:
-                ServiceSelectScreen(toHome: toHome)
-            case .settings:
-                SettingsScreen()
-            case .accountSettings:
-                AccountsScreen()
             }
         }
     }

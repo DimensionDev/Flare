@@ -10,6 +10,9 @@ struct ServiceSelectScreen: View {
     }
     var body: some View {
         List {
+            Spacer()
+                .padding()
+                .listRowSeparator(.hidden)
             Text("Welcome to Flare")
                 .frame(maxWidth: .infinity, alignment: .center)
                 .font(.title)

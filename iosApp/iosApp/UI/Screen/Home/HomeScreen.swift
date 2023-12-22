@@ -6,60 +6,92 @@ struct HomeScreen: View {
     @State var showSettings = false
     @State var showCompose = false
     @State var statusEvent = StatusEvent()
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var body: some View {
-        TabView {
-            TabItem {
-                HomeTimelineScreen()
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .principal) {
-                            Text("Flare")
-                        }
-                        ToolbarItem(placement: .primaryAction) {
-                            Button(action: {
-                                showCompose = true
-                            }) {
-                                Image(systemName: "square.and.pencil")
-                            }
-                        }
-                        ToolbarItem(placement: .navigation) {
-                            Button {
-                                showSettings = true
-                            } label: {
-                                if case .success(let data) = onEnum(of: viewModel.model.user) {
-                                    UserAvatar(data: data.data.avatarUrl, size: 36)
-                                } else {
-                                    UserAvatarPlaceholder(size: 36)
-                                }
-                            }
-                        }
+        AdativeTabView(
+            items: [
+                TabModel(
+                    title: "Home",
+                    image: "house",
+                    destination: TabItem {
+                        HomeTimelineScreen()
+                            .if(horizontalSizeClass != .compact, transform: { HomeTimelineScreen in
+                                HomeTimelineScreen
+                                    .toolbar(.hidden)
+                            })
+                                .if(horizontalSizeClass == .compact, transform: { HomeTimelineScreen in
+                                    HomeTimelineScreen
+                                        .navigationBarTitleDisplayMode(.inline)
+                                        .toolbar {
+                                            ToolbarItem(placement: .principal) {
+                                                Text("Flare")
+                                            }
+                                            ToolbarItem(placement: .primaryAction) {
+                                                Button(action: {
+                                                    showCompose = true
+                                                }) {
+                                                    Image(systemName: "square.and.pencil")
+                                                }
+                                            }
+                                            ToolbarItem(placement: .navigation) {
+                                                Button {
+                                                    showSettings = true
+                                                } label: {
+                                                    if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                                        UserAvatar(data: data.data.avatarUrl, size: 36)
+                                                    } else {
+                                                        UserAvatarPlaceholder(size: 36)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                })
                     }
-            }
-            .tabItem {
-                Image(systemName: "house")
-                Text("Home")
-            }
-            TabItem {
-                NotificationScreen()
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .principal) {
-                            Text("Notification")
-                        }
+                ),
+                TabModel(
+                    title: "Notification",
+                    image: "bell",
+                    destination: TabItem {
+                        NotificationScreen()
+                            .if(horizontalSizeClass != .compact, transform: { NotificationScreen in
+                                NotificationScreen
+                                    .toolbar(.hidden)
+                            })
+                                .if(horizontalSizeClass == .compact, transform: { NotificationScreen in
+                                    NotificationScreen
+                                        .navigationBarTitleDisplayMode(.inline)
+                                        .toolbar {
+                                            ToolbarItem(placement: .principal) {
+                                                Text("Notification")
+                                            }
+                                        }
+                                })
                     }
+                ),
+                TabModel(title: "Me", image: "person.circle", destination: TabItem{ProfileScreen(userKey: nil)})
+            ],
+            secondaryItems: [
+                
+            ],
+            leading: HStack {
+                if case .success(let data) = onEnum(of: viewModel.model.user) {
+                    UserComponent(user: data.data)
+                } else {
+                    UserAvatarPlaceholder(size: 36)
+                }
+                Spacer()
+                Button(action: {
+                    showCompose = true
+                }, label: {
+                    Image(systemName: "square.and.pencil")
+                })
+                .buttonStyle(.borderedProminent)
             }
-            .tabItem {
-                Image(systemName: "bell")
-                Text("Notification")
+                .padding([.horizontal, .top]),
+            onSettingsclicked: {
+                showSettings = true
             }
-            TabItem {
-                ProfileScreen(userKey: nil)
-            }
-            .tabItem {
-                Image(systemName: "person.circle")
-                Text("Me")
-            }
-        }
+        )
         .sheet(isPresented: $showCompose, content: {
             NavigationStack {
                 ComposeScreen(onBack: {
@@ -68,7 +100,7 @@ struct HomeScreen: View {
             }
         })
         .sheet(isPresented: $showSettings, content: {
-            HomeSheetContent()
+            SettingsScreen()
         })
         .sheet(isPresented: Binding(
             get: {statusEvent.composeStatus != nil},
@@ -96,39 +128,9 @@ struct HomeScreen: View {
 class HomeViewModel : MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
 }
 
-struct HomeSheetContent: View {
-    @Bindable var sheetRouter = Router<SheetDestination>()
-    var body: some View {
-        NavigationStack(path: $sheetRouter.navPath) {
-            SettingsScreen()
-                .withSheetRouter {
-                    sheetRouter.navigateBack(count: 3)
-                } toMisskey: {
-                    sheetRouter.navigate(to: .misskey)
-                } toMastodon: {
-                    sheetRouter.navigate(to: .mastodon)
-                } toBluesky: {
-                    sheetRouter.navigate(to: .bluesky)
-                }
-        }
-        .onOpenURL { url in
-            if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON)) {
-                if let range = url.absoluteString.range(of: "code=") {
-                    let code = url.absoluteString.suffix(from: range.upperBound)
-                    sheetRouter.navigate(to: .mastodonCallback(code: String(code)))
-                }
-            } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY)) {
-                if let range = url.absoluteString.range(of: "session=") {
-                    let session = url.absoluteString.suffix(from: range.upperBound)
-                    sheetRouter.navigate(to: .misskeyCallback(session: String(session)))
-                }
-            }
-        }
-    }
-}
 
 struct TabItem<Content: View>: View {
-    @Bindable var router = Router<TabDestination>()
+    @State var router = Router<TabDestination>()
     let content: () -> Content
     
     var body: some View {
@@ -158,11 +160,11 @@ struct TabItem<Content: View>: View {
 class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
     let accountRepository = KoinHelper.shared.accountRepository
     var composeStatus: ComposeStatus? = nil
-
+    
     func onReplyClick(status: UiStatus.Mastodon) {
         composeStatus = ComposeStatusReply(statusKey: status.statusKey)
     }
-
+    
     func onReblogClick(status: UiStatus.Mastodon) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
@@ -170,7 +172,7 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onLikeClick(status: UiStatus.Mastodon) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
@@ -178,7 +180,7 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onBookmarkClick(status: UiStatus.Mastodon) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
@@ -186,10 +188,10 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onMediaClick(media: UiMedia) {
     }
-
+    
     func onReportClick(status: UiStatus.Mastodon) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
@@ -198,7 +200,7 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.MisskeyEmojiReaction) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
@@ -206,11 +208,11 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onReplyClick(data: UiStatus.Misskey) {
         composeStatus = ComposeStatusReply(statusKey: data.statusKey)
     }
-
+    
     func onReblogClick(data: UiStatus.Misskey) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
@@ -218,14 +220,14 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onQuoteClick(data: UiStatus.Misskey) {
         composeStatus = ComposeStatusQuote(statusKey: data.statusKey)
     }
-
+    
     func onAddReactionClick(data: UiStatus.Misskey) {
     }
-
+    
     func onReportClick(data: UiStatus.Misskey) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
@@ -233,11 +235,11 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onReplyClick(data: UiStatus.Bluesky) {
         composeStatus = ComposeStatusReply(statusKey: data.statusKey)
     }
-
+    
     func onReblogClick(data: UiStatus.Bluesky) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
@@ -245,11 +247,11 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onQuoteClick(data: UiStatus.Bluesky) {
         composeStatus = ComposeStatusQuote(statusKey: data.statusKey)
     }
-
+    
     func onLikeClick(data: UiStatus.Bluesky) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
@@ -257,7 +259,7 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onReportClick(data: UiStatus.Bluesky, reason: BlueskyReportStatusStateReportReason) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
@@ -265,7 +267,7 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-
+    
     func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
         Task {
             if let account = accountRepository.get(accountKey: accountKey) {

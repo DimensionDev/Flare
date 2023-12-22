@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.skie)
-    alias(libs.plugins.compose.jb)
+    alias(libs.plugins.molecule)
     alias(libs.plugins.ktlint)
 }
 

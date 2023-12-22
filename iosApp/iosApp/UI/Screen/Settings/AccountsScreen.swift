@@ -3,6 +3,7 @@ import shared
 
 struct AccountsScreen: View {
     @State var viewModel = AccountsViewModel()
+    @State var showServiceSelectSheet = false
     var body: some View {
         List {
             switch onEnum(of: viewModel.model.accounts) {
@@ -52,10 +53,17 @@ struct AccountsScreen: View {
         }
         .navigationTitle("Accounts")
         .toolbar {
-            NavigationLink(value: SheetDestination.serviceSelection) {
+            Button(action: {
+                showServiceSelectSheet = true
+            }) {
                 Image(systemName: "plus")
             }
         }
+        .sheet(isPresented: $showServiceSelectSheet, content: {
+            ServiceSelectScreen {
+                showServiceSelectSheet = false
+            }
+        })
         .activateViewModel(viewModel: viewModel)
     }
 }
@@ -63,10 +71,4 @@ struct AccountsScreen: View {
 @Observable
 class AccountsViewModel : MoleculeViewModelBase<AccountsState, AccountsPresenter> {
     
-}
-
-#Preview {
-    NavigationStack {
-        AccountsScreen()
-    }
 }

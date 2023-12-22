@@ -45,7 +45,7 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.login.misskeyLoginUseCase
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @Destination(
     wrappers = [ThemeWrapper::class],
@@ -161,7 +161,7 @@ fun MisskeyLoginScreen(
 @Composable
 private fun loginPresenter(launchUrl: (String) -> Unit) =
     run {
-        val applicationRepository: ApplicationRepository = rememberKoinInject()
+        val applicationRepository: ApplicationRepository = koinInject()
         val hostTextState by remember {
             mutableStateOf(TextFieldState(""))
         }

@@ -9,7 +9,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class MisskeyReportPresenter(
     private val userKey: MicroBlogKey,
@@ -23,7 +23,7 @@ class MisskeyReportPresenter(
             }
 
         // using io scope because it's a long-running operation
-        val scope = rememberKoinInject<CoroutineScope>()
+        val scope = koinInject<CoroutineScope>()
         return object : MisskeyReportState {
             override fun report() {
                 service.onSuccess {

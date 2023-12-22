@@ -26,7 +26,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class AccountRepository(
     private val appDatabase: AppDatabase,
@@ -70,7 +70,7 @@ class AccountRepository(
 object NoActiveAccountException : Exception("No active account.")
 
 @Composable
-internal fun activeAccountPresenter(repository: AccountRepository = rememberKoinInject()): State<UiState<UiAccount>> {
+internal fun activeAccountPresenter(repository: AccountRepository = koinInject()): State<UiState<UiAccount>> {
     return remember(repository) {
         repository.activeAccount
             .map<UiAccount?, UiState<UiAccount>> {
@@ -117,7 +117,7 @@ internal fun accountServiceProvider(account: UiAccount): MicroblogDataSource {
 }
 
 @Composable
-internal fun allAccountsPresenter(repository: AccountRepository = rememberKoinInject()): State<UiState<ImmutableList<UiAccount>>> {
+internal fun allAccountsPresenter(repository: AccountRepository = koinInject()): State<UiState<ImmutableList<UiAccount>>> {
     return remember(repository) {
         repository.allAccounts
             .map {

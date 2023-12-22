@@ -19,7 +19,7 @@ import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class MastodonCallbackPresenter(
     private val code: String?,
@@ -27,8 +27,8 @@ class MastodonCallbackPresenter(
 ) : PresenterBase<UiState<Nothing>>() {
     @Composable
     override fun body(): UiState<Nothing> {
-        val applicationRepository: ApplicationRepository = rememberKoinInject()
-        val accountRepository: AccountRepository = rememberKoinInject()
+        val applicationRepository: ApplicationRepository = koinInject()
+        val accountRepository: AccountRepository = koinInject()
         if (code == null) {
             return UiState.Error(Exception("No code"))
         }

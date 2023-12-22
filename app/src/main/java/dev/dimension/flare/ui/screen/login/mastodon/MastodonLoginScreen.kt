@@ -46,7 +46,7 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.login.mastodonLoginUseCase
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @Composable
 @Preview(showBackground = true)
@@ -164,7 +164,7 @@ internal fun MastodonLoginScreen(onBack: () -> Unit = {}) {
 @Composable
 private fun loginPresenter(launchUrl: (String) -> Unit) =
     run {
-        val applicationRepository: ApplicationRepository = rememberKoinInject()
+        val applicationRepository: ApplicationRepository = koinInject()
         val hostTextState by remember {
             mutableStateOf(TextFieldState(""))
         }

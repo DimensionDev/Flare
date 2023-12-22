@@ -49,7 +49,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
 @Destination(
@@ -173,7 +173,7 @@ internal fun HomeTimelineScreen(
 }
 
 @Composable
-private fun homeTimelinePresenter(statusEvent: StatusEvent = rememberKoinInject()) =
+private fun homeTimelinePresenter(statusEvent: StatusEvent = koinInject()) =
     run {
         val state = remember { HomeTimelinePresenter() }.invoke()
         val accountState = remember { ActiveAccountPresenter() }.invoke()

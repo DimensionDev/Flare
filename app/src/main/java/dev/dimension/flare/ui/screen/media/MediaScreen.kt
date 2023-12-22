@@ -58,7 +58,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -194,7 +194,7 @@ internal fun MediaScreen(
 private fun mediaPresenter(
     uri: String,
     context: Context,
-    scope: CoroutineScope = rememberKoinInject(),
+    scope: CoroutineScope = koinInject(),
 ) = run {
     var showMenu by remember { mutableStateOf(false) }
     object {

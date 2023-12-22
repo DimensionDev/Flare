@@ -14,14 +14,14 @@ import dev.dimension.flare.ui.presenter.splash.SplashType
 import dev.dimension.flare.ui.screen.home.HomeScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.splash.SplashScreen
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @Composable
 fun AppContainer() {
     val state by producePresenter("AppContainer") {
         SplashPresenter({}, {}).invoke()
     }
-    val settingsRepository = rememberKoinInject<SettingsRepository>()
+    val settingsRepository = koinInject<SettingsRepository>()
     val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
         AppearanceSettings(),
     )

@@ -25,7 +25,7 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class ComposePresenter(
     private val status: ComposeStatus? = null,
@@ -33,7 +33,7 @@ class ComposePresenter(
     @Composable
     override fun body(): ComposeState {
         val account by activeAccountPresenter()
-        val composeUseCase: ComposeUseCase = rememberKoinInject()
+        val composeUseCase: ComposeUseCase = koinInject()
         val visibilityState =
             account.flatMap {
                 when (it) {

@@ -19,7 +19,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class BlueskyReportStatusPresenter(
     private val statusKey: MicroBlogKey,
@@ -49,7 +49,7 @@ class BlueskyReportStatusPresenter(
             }
         var reason by remember { mutableStateOf<BlueskyReportStatusState.ReportReason?>(null) }
         // using io scope because it's a long-running operation
-        val scope = rememberKoinInject<CoroutineScope>()
+        val scope = koinInject<CoroutineScope>()
         return object : BlueskyReportStatusState {
             override val allReasons = BlueskyReportStatusState.ReportReason.entries.toImmutableList()
             override val reason: BlueskyReportStatusState.ReportReason?

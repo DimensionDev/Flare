@@ -10,12 +10,12 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class StoragePresenter : PresenterBase<StorageState>() {
     @Composable
     override fun body(): StorageState {
-        val cacheDatabase = rememberKoinInject<CacheDatabase>()
+        val cacheDatabase = koinInject<CacheDatabase>()
         val statusCount by remember {
             cacheDatabase.dbStatusQueries.count().asFlow().mapToOneNotNull(Dispatchers.IO)
         }.collectAsState(0L)

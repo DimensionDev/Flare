@@ -62,7 +62,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @Destination(
     wrappers = [ThemeWrapper::class],
@@ -964,7 +964,7 @@ private fun ColumnScope.MisskeyAppearance(
 private fun appearancePresenter() =
     run {
         val scope = rememberCoroutineScope()
-        val settingsRepository = rememberKoinInject<SettingsRepository>()
+        val settingsRepository = koinInject<SettingsRepository>()
         val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
         val sampleStatus =
             activeAccountState.user.map {

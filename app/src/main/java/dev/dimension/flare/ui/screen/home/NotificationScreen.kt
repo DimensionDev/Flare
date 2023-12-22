@@ -34,7 +34,7 @@ import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.presenter.home.NotificationState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @Destination(
     wrappers = [ThemeWrapper::class],
@@ -142,7 +142,7 @@ private val NotificationFilter.title: Int
         }
 
 @Composable
-private fun notificationPresenter(statusEvent: StatusEvent = rememberKoinInject()) =
+private fun notificationPresenter(statusEvent: StatusEvent = koinInject()) =
     run {
         val state = remember { NotificationPresenter() }.invoke()
         object {

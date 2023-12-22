@@ -60,7 +60,7 @@ import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.decodeURLQueryComponent
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @Destination(
     wrappers = [ThemeWrapper::class],
@@ -179,7 +179,7 @@ private fun SearchContent(
     searchUsers: UiState<LazyPagingItemsProxy<UiUser>>,
     searchStatus: UiState<LazyPagingItemsProxy<UiStatus>>,
     modifier: Modifier = Modifier,
-    statusEvent: StatusEvent = rememberKoinInject(),
+    statusEvent: StatusEvent = koinInject(),
 ) {
     SearchBar(
         modifier = modifier,
@@ -304,7 +304,7 @@ private fun SearchContent(
 @Composable
 internal fun discoverSearchPresenter(
     initialSearch: String? = null,
-    statusEvent: StatusEvent = rememberKoinInject(),
+    statusEvent: StatusEvent = koinInject(),
 ): DiscoverSearchState =
     run {
         val activeAccount = remember { ActiveAccountPresenter() }.invoke()

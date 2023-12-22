@@ -10,7 +10,7 @@ import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class ServiceSelectPresenter(
     private val toHome: () -> Unit,
@@ -42,7 +42,7 @@ class ServiceSelectPresenter(
         launchUrl: (String) -> Unit,
         onBack: (() -> Unit)?,
     ): MisskeyLoginState {
-        val applicationRepository: ApplicationRepository = rememberKoinInject()
+        val applicationRepository: ApplicationRepository = koinInject()
         var loading by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
         val scope = rememberCoroutineScope()
@@ -92,7 +92,7 @@ class ServiceSelectPresenter(
         launchUrl: (String) -> Unit,
         onBack: (() -> Unit)?,
     ): MastodonLoginState {
-        val applicationRepository: ApplicationRepository = rememberKoinInject()
+        val applicationRepository: ApplicationRepository = koinInject()
         var loading by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
         val scope = rememberCoroutineScope()

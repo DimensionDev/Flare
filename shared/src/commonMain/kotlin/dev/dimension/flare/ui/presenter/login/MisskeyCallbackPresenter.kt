@@ -18,7 +18,7 @@ import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.seconds
 
 class MisskeyCallbackPresenter(
@@ -30,8 +30,8 @@ class MisskeyCallbackPresenter(
         if (session == null) {
             return UiState.Error(Exception("No code"))
         }
-        val applicationRepository: ApplicationRepository = rememberKoinInject()
-        val accountRepository: AccountRepository = rememberKoinInject()
+        val applicationRepository: ApplicationRepository = koinInject()
+        val accountRepository: AccountRepository = koinInject()
         var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(session) {
             val pendingOAuth = applicationRepository.getPendingOAuth()

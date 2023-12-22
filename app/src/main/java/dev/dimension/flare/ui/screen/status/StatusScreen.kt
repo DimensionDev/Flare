@@ -29,7 +29,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @Composable
 @Destination(
@@ -98,7 +98,7 @@ internal fun StatusScreen(
 @Composable
 private fun statusPresenter(
     statusKey: MicroBlogKey,
-    statusEvent: StatusEvent = rememberKoinInject(),
+    statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state =
         remember(statusKey) {

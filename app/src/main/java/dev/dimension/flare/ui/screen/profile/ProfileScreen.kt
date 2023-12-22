@@ -105,7 +105,7 @@ import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.ktml.dom.Element
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.reflect.KFunction1
@@ -1007,7 +1007,7 @@ private fun ProfileMeidasPreview(
 @Composable
 private fun profilePresenter(
     userKey: MicroBlogKey?,
-    statusEvent: StatusEvent = rememberKoinInject(),
+    statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state =
         remember(userKey) {

@@ -14,7 +14,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class BlueskyLoginPresenter(
     private val toHome: () -> Unit,
@@ -24,7 +24,7 @@ class BlueskyLoginPresenter(
         var error by remember { mutableStateOf<Throwable?>(null) }
         val scope = rememberCoroutineScope()
         var loading by remember { mutableStateOf(false) }
-        val accountRepository: AccountRepository = rememberKoinInject()
+        val accountRepository: AccountRepository = koinInject()
 
         return object : BlueskyLoginState {
             override val loading = loading

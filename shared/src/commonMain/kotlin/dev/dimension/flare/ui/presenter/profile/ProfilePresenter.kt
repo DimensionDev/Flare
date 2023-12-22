@@ -26,7 +26,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class ProfilePresenter(
     private val userKey: MicroBlogKey?,
@@ -72,7 +72,7 @@ class ProfilePresenter(
                 }.collectAsUiState().value.flatMap { it }
             }
 
-        val scope = rememberKoinInject<CoroutineScope>()
+        val scope = koinInject<CoroutineScope>()
         val isMe =
             accountServiceState.map {
                 it.second.accountKey == userKey || userKey == null

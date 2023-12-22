@@ -18,7 +18,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class MisskeyReactionPresenter(
     private val statusKey: MicroBlogKey,
@@ -54,7 +54,7 @@ class MisskeyReactionPresenter(
                 }
             }
         // using io scope because it's a long-running operation
-        val scope = rememberKoinInject<CoroutineScope>()
+        val scope = koinInject<CoroutineScope>()
         return object : MisskeyReactionState {
             override val emojis = data
 

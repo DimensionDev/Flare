@@ -18,12 +18,12 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 class QuickMenuPresenter : PresenterBase<QuickMenuState>() {
     @Composable
     override fun body(): QuickMenuState {
-        val accountRepository = rememberKoinInject<AccountRepository>()
+        val accountRepository = koinInject<AccountRepository>()
         val user =
             activeAccountServicePresenter().flatMap { (service, account) ->
                 remember(account.accountKey) {

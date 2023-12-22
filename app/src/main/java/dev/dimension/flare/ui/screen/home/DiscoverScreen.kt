@@ -47,7 +47,7 @@ import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
-import org.koin.compose.rememberKoinInject
+import org.koin.compose.koinInject
 
 @Destination(
     wrappers = [ThemeWrapper::class],
@@ -261,7 +261,7 @@ internal fun DiscoverScreen(
 }
 
 @Composable
-private fun discoverPresenter(statusEvent: StatusEvent = rememberKoinInject()) =
+private fun discoverPresenter(statusEvent: StatusEvent = koinInject()) =
     run {
         val state = remember { DiscoverPresenter() }.invoke()
 

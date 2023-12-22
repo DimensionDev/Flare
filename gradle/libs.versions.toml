@@ -47,7 +47,7 @@ versionUpdate = "0.50.0"
 bluesky = "0.0.1-SNAPSHOT"
 kotlinpoet = "1.15.3"
 kotlinx-coroutines = "1.7.3"
-koin = "3.5.1"
+koin = "3.5.3"
 koin-annotation = "1.3.0"
 composeIcons = "1.1.0"
 

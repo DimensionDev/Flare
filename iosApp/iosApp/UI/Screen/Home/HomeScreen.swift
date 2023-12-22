@@ -19,33 +19,33 @@ struct HomeScreen: View {
                                 HomeTimelineScreen
                                     .toolbar(.hidden)
                             })
-                            .if(horizontalSizeClass == .compact, transform: { HomeTimelineScreen in
-                                HomeTimelineScreen
-                                    .navigationBarTitleDisplayMode(.inline)
-                                    .toolbar {
-                                        ToolbarItem(placement: .principal) {
-                                            Text("Flare")
-                                        }
-                                        ToolbarItem(placement: .primaryAction) {
-                                            Button(action: {
-                                                showCompose = true
-                                            }) {
-                                                Image(systemName: "square.and.pencil")
+                                .if(horizontalSizeClass == .compact, transform: { HomeTimelineScreen in
+                                    HomeTimelineScreen
+                                        .navigationBarTitleDisplayMode(.inline)
+                                        .toolbar {
+                                            ToolbarItem(placement: .principal) {
+                                                Text("Flare")
                                             }
-                                        }
-                                        ToolbarItem(placement: .navigation) {
-                                            Button {
-                                                showSettings = true
-                                            } label: {
-                                                if case .success(let data) = onEnum(of: viewModel.model.user) {
-                                                    UserAvatar(data: data.data.avatarUrl, size: 36)
-                                                } else {
-                                                    UserAvatarPlaceholder(size: 36)
+                                            ToolbarItem(placement: .primaryAction) {
+                                                Button(action: {
+                                                    showCompose = true
+                                                }) {
+                                                    Image(systemName: "square.and.pencil")
+                                                }
+                                            }
+                                            ToolbarItem(placement: .navigation) {
+                                                Button {
+                                                    showSettings = true
+                                                } label: {
+                                                    if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                                        UserAvatar(data: data.data.avatarUrl, size: 36)
+                                                    } else {
+                                                        UserAvatarPlaceholder(size: 36)
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                            })
+                                })
                     }
                 ),
                 TabModel(
@@ -57,24 +57,39 @@ struct HomeScreen: View {
                                 NotificationScreen
                                     .toolbar(.hidden)
                             })
-                            .if(horizontalSizeClass == .compact, transform: { NotificationScreen in
-                                NotificationScreen
-                                    .navigationBarTitleDisplayMode(.inline)
-                                    .toolbar {
-                                        ToolbarItem(placement: .principal) {
-                                            Text("Notification")
+                                .if(horizontalSizeClass == .compact, transform: { NotificationScreen in
+                                    NotificationScreen
+                                        .navigationBarTitleDisplayMode(.inline)
+                                        .toolbar {
+                                            ToolbarItem(placement: .principal) {
+                                                Text("Notification")
+                                            }
                                         }
-                                    }
-                            })
+                                })
                     }
                 ),
                 TabModel(title: "Me", image: "person.circle", destination: TabItem{ProfileScreen(userKey: nil)})
             ],
+            secondaryItems: [
+                
+            ],
+            leading: HStack {
+                if case .success(let data) = onEnum(of: viewModel.model.user) {
+                    UserComponent(user: data.data)
+                } else {
+                    UserAvatarPlaceholder(size: 36)
+                }
+                Spacer()
+                Button(action: {
+                    showCompose = true
+                }, label: {
+                    Image(systemName: "square.and.pencil")
+                })
+                .buttonStyle(.borderedProminent)
+            }
+                .padding([.horizontal, .top]),
             onSettingsclicked: {
                 showSettings = true
-            },
-            onComposeClicked: {
-                showCompose = true
             }
         )
         .sheet(isPresented: $showCompose, content: {

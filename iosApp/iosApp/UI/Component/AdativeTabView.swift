@@ -2,14 +2,16 @@ import SwiftUI
 
 struct AdativeTabView: View {
     let items: [TabModel]
+    let secondaryItems: [TabModel]
     let onSettingsclicked: () -> Void
-    let onComposeClicked: () -> Void
+    let leading: AnyView
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedTabItem: TabModel
-    init(items: [TabModel], onSettingsclicked: @escaping () -> Void, onComposeClicked: @escaping () -> Void) {
+    init<V>(items: [TabModel], secondaryItems: [TabModel], leading: V, onSettingsclicked: @escaping () -> Void) where V: View {
         self.items = items
+        self.secondaryItems = secondaryItems
         self.onSettingsclicked = onSettingsclicked
-        self.onComposeClicked = onComposeClicked
+        self.leading = AnyView(leading)
         _selectedTabItem = State(initialValue: items.first!)
     }
     var body: some View {
@@ -17,29 +19,38 @@ struct AdativeTabView: View {
         HStack {
             if (horizontalSizeClass != .compact) {
                 VStack {
-                    HStack {
-                        Text("Flare")
-                            .font(.title)
-                        Spacer()
-                        Button(action: onComposeClicked, label: {
-                            Image(systemName: "square.and.pencil")
-                        })
-                    }
-                    .padding([.horizontal, .top])
-                    List(items, selection: Binding<TabModel?>(get: {
+                    leading
+                    List(selection: Binding<TabModel?>(get: {
                         self.selectedTabItem
                     }, set: { Value in
                         if let value = Value {
                             self.selectedTabItem = value
                         }
-                    })) { item in
-                        HStack {
-                            Image(systemName: item.image)
-                            Text(item.title)
+                    })) {
+                        ForEach(items) { item in
+                            HStack {
+                                Image(systemName: item.image)
+                                Text(item.title)
+                            }
+                            .listRowSeparator(.hidden)
+                            .tag(item)
+                            .listRowBackground(selectedTabItem == item ? Color.accentColor : Color.clear)
                         }
-                        .listRowSeparator(.hidden)
-                        .tag(item)
+                        if !secondaryItems.isEmpty {
+                            Divider()
+                                .listRowBackground(Color.clear)
+                            ForEach(secondaryItems) { item in
+                                HStack {
+                                    Image(systemName: item.image)
+                                    Text(item.title)
+                                }
+                                .listRowSeparator(.hidden)
+                                .tag(item)
+                                .listRowBackground(selectedTabItem == item ? Color.accentColor : Color.clear)
+                            }
+                        }
                     }
+                    .scrollContentBackground(.hidden)
                     .listStyle(.plain)
                     Spacer()
                     HStack {
@@ -55,7 +66,6 @@ struct AdativeTabView: View {
                 .background(Color(UIColor.secondarySystemBackground))
                 .frame(width: 256)
             }
-            
             TabView(selection: $selectedTabItem) {
                 ForEach(items, id: \.title) { item in
                     item.destination
@@ -68,6 +78,15 @@ struct AdativeTabView: View {
                             View
                                 .toolbar(.hidden, for: .tabBar)
                         }
+                }
+                ForEach(secondaryItems, id: \.title) { item in
+                    item.destination
+                        .tabItem {
+                            Image(systemName: item.image)
+                            Text(item.title)
+                        }
+                        .tag(item)
+                        .toolbar(.hidden, for: .tabBar)
                 }
             }
         }

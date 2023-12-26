@@ -10,6 +10,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
     let timestamp: Int64
     @ViewBuilder let headerTrailing: () -> HeaderTrailing
     let onMediaClick: (UiMedia) -> Void
+    let sensitive: Bool
     var body: some View {
         VStack(alignment:.leading) {
             HStack {
@@ -28,7 +29,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
             if !medias.isEmpty {
                 Spacer()
                     .frame(height: 8)
-                MediaComponent(medias: medias, onMediaClick: onMediaClick)
+                MediaComponent(hideSensitive: sensitive, medias: medias, onMediaClick: onMediaClick)
             }
         }.frame(alignment: .leading)
     }

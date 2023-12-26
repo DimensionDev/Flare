@@ -53,19 +53,6 @@ struct HomeScreen: View {
                     image: "bell",
                     destination: TabItem {
                         NotificationScreen()
-                            .if(horizontalSizeClass != .compact, transform: { NotificationScreen in
-                                NotificationScreen
-                                    .toolbar(.hidden)
-                            })
-                                .if(horizontalSizeClass == .compact, transform: { NotificationScreen in
-                                    NotificationScreen
-                                        .navigationBarTitleDisplayMode(.inline)
-                                        .toolbar {
-                                            ToolbarItem(placement: .principal) {
-                                                Text("Notification")
-                                            }
-                                        }
-                                })
                     }
                 ),
                 TabModel(title: "Me", image: "person.circle", destination: TabItem{ProfileScreen(userKey: nil)})

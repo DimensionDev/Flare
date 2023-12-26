@@ -7,7 +7,7 @@ struct LinkPreview: View {
         Link(destination: URL(string: card.url)!) {
             HStack {
                 if let media = card.media {
-                    MediaItemComponent(media: media, onMediaClick: {})
+                    MediaItemComponent(media: media)
                         .frame(width: 64, height: 64)
                 }
                 VStack(alignment: .leading) {
@@ -32,5 +32,5 @@ struct LinkPreview: View {
 }
 
 #Preview {
-    LinkPreview(card: UiCard(title: "title", description: "desc", media: UiMediaImage(url: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500", previewUrl: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500", description: nil, height: 500, width: 1500), url: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500"))
+    LinkPreview(card: UiCard(title: "title", description: "desc", media: UiMediaImage(url: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500", previewUrl: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500", description: nil, height: 500, width: 1500, sensitive: false), url: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500"))
 }

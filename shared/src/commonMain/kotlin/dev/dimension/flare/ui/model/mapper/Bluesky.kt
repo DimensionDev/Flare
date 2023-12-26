@@ -123,6 +123,7 @@ private fun findCard(postView: PostView): UiCard? {
                         description = null,
                         width = 0f,
                         height = 0f,
+                        sensitive = false,
                     )
                 },
         )
@@ -141,6 +142,7 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> {
                 description = it.alt,
                 width = it.aspectRatio?.width?.toFloat() ?: 0f,
                 height = it.aspectRatio?.height?.toFloat() ?: 0f,
+                sensitive = false,
             )
         }
     } else {
@@ -192,6 +194,7 @@ private fun toUi(
                                         description = it.alt,
                                         width = it.aspectRatio?.width?.toFloat() ?: 0f,
                                         height = it.aspectRatio?.height?.toFloat() ?: 0f,
+                                        sensitive = false,
                                     )
                                 }
 
@@ -214,6 +217,7 @@ private fun toUi(
                                                 description = null,
                                                 width = 0f,
                                                 height = 0f,
+                                                sensitive = false,
                                             )
                                         },
                                 )

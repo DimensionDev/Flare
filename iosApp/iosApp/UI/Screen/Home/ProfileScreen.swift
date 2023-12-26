@@ -1,22 +1,51 @@
 import SwiftUI
+import OrderedCollections
 import shared
+import MarkdownUI
 
 struct ProfileScreen: View {
     @State var viewModel: ProfileViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     init(userKey: MicroBlogKey?) {
-        viewModel = ProfileViewModel(userKey: userKey)
+        _viewModel = State(initialValue: ProfileViewModel(userKey: userKey))
     }
     
     var body: some View {
-        List {
-            ProfileHeader(user: viewModel.model.userState, relation: viewModel.model.relationState, isMe: viewModel.model.isMe, onFollowClick: { user, relation in viewModel.model.follow(user: user, data: relation) })
-                .listRowInsets(EdgeInsets())
-            StatusTimelineComponent(data: viewModel.model.listState, mastodonEvent: statusEvent, misskeyEvent: statusEvent, blueskyEvent: statusEvent)
+        let title: LocalizedStringKey = if case .success(let user) = onEnum(of: viewModel.model.userState) {
+            LocalizedStringKey(user.data.extra.nameMarkdown)
+        } else {
+            "Profile"
         }
-        .listStyle(.plain)
-        .edgesIgnoringSafeArea(.top)
+        HStack {
+            if horizontalSizeClass != .compact {
+                ScrollView {
+                    VStack {
+                        ProfileHeader(user: viewModel.model.userState, relation: viewModel.model.relationState, isMe: viewModel.model.isMe, onFollowClick: { user, relation in viewModel.model.follow(user: user, data: relation) })
+                        LargeProfileImagePreviews(state: viewModel.model.mediaState)
+                    }
+                }
+                .frame(width: 384)
+            }
+            List {
+                if horizontalSizeClass == .compact {
+                    ProfileHeader(user: viewModel.model.userState, relation: viewModel.model.relationState, isMe: viewModel.model.isMe, onFollowClick: { user, relation in viewModel.model.follow(user: user, data: relation) })
+                        .listRowInsets(EdgeInsets())
+                }
+                StatusTimelineComponent(data: viewModel.model.listState, mastodonEvent: statusEvent, misskeyEvent: statusEvent, blueskyEvent: statusEvent)
+            }
+            .listStyle(.plain)
+        }
+        .if(horizontalSizeClass == .compact, transform: { view in
+            view
+                .ignoresSafeArea(edges: .top)
+        })
+        .if(horizontalSizeClass != .compact, transform: { view in
+            view
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationTitle(title)
+        })
         .toolbar {
             Menu {
                 if case .success(let user) = onEnum(of: viewModel.model.userState) {
@@ -42,6 +71,41 @@ struct ProfileScreen: View {
             
         }
         .activateViewModel(viewModel: viewModel)
+    }
+}
+
+struct LargeProfileImagePreviews : View {
+    let state: UiState<LazyPagingItemsProxy<UiMedia>>
+    var body: some View {
+        switch onEnum(of: state) {
+        case .error(_):
+            EmptyView()
+        case .loading(_):
+            EmptyView()
+        case .success(let success):
+            if success.data.isSuccess {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                    ForEach(0..<min(success.data.itemCount, 6), id: \.self) { index in
+                        let item = success.data.peek(index: index)
+                        if let media = item {
+                            let image = media as? UiMediaImage
+                            let shouldBlur = image?.sensitive ?? false
+                            MediaItemComponent(media: media)
+                                .if(shouldBlur, transform: { view in
+                                    view.blur(radius: 32)
+                                })
+                                .onAppear(perform: {
+                                    success.data.get(index: index)
+                                })
+                                .aspectRatio(1, contentMode: .fill)
+                                .clipped()
+                        }
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal)
+            }
+        }
     }
 }
 
@@ -195,7 +259,38 @@ struct MastodonProfileHeader: View {
     var body: some View {
         CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: {
             MastodonFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick)
+        }, content: {
+            FieldsView(fields: user.extra.fieldsMarkdown)
         })
+    }
+}
+
+struct FieldsView : View {
+    let fields: ImmutableListWrapper<KotlinPair<NSString, NSString>>
+    var body: some View {
+        if fields.size > 0 {
+            VStack(alignment: .leading) {
+                ForEach(0..<fields.size, id: \.self) { index in
+                    let key = fields.get(index: index).first as? String ?? ""
+                    let value = fields.get(index: index).second as? String ?? ""
+                    Text(key)
+                        .font(.caption)
+                    Markdown(value)
+                        .font(.body)
+                        .markdownInlineImageProvider(.emoji)
+                    if index != fields.size - 1 {
+                        Divider()
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .padding(.vertical)
+            .background(Color(uiColor: UIColor.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+        } else {
+            EmptyView()
+        }
+        
     }
 }
 
@@ -232,7 +327,9 @@ struct MisskeyProfileHeader: View {
     let isMe: UiState<KotlinBoolean>
     let onFollowClick: (UiRelation) -> Void
     var body: some View {
-        CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: { MisskeyFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick) })
+        CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: { MisskeyFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick) }, content: {
+            FieldsView(fields: user.extra.fieldsMarkdown)
+        })
     }
 }
 

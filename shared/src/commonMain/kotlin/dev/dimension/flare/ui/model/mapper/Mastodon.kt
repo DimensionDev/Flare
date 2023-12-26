@@ -92,6 +92,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
                                 description = card.description,
                                 width = card.width?.toFloat() ?: 0f,
                                 height = card.height?.toFloat() ?: 0f,
+                                sensitive = false,
                             )
                         },
                 )
@@ -120,7 +121,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
             } ?: UiStatus.Mastodon.Visibility.Public,
         media =
             mediaAttachments?.mapNotNull { attachment ->
-                attachment.toUi()
+                attachment.toUi(sensitive = sensitive ?: false)
             }?.toPersistentList() ?: persistentListOf(),
         reaction =
             UiStatus.Mastodon.Reaction(
@@ -133,7 +134,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
     )
 }
 
-private fun Attachment.toUi(): UiMedia? {
+private fun Attachment.toUi(sensitive: Boolean): UiMedia? {
     return when (type) {
         MediaType.Image ->
             UiMedia.Image(
@@ -142,6 +143,7 @@ private fun Attachment.toUi(): UiMedia? {
                 description = description,
                 width = meta?.width?.toFloat() ?: meta?.original?.width?.toFloat() ?: 0f,
                 height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
+                sensitive = sensitive,
             )
 
         MediaType.GifV ->

@@ -7,6 +7,7 @@ sealed interface UiMedia {
         val description: String?,
         val height: Float,
         val width: Float,
+        val sensitive: Boolean,
     ) : UiMedia {
         val aspectRatio: Float
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f

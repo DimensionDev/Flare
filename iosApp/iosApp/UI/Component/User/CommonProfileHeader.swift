@@ -31,7 +31,7 @@ struct CommonProfileHeader<HeaderTrailing, HandleTrailing, Content>: View where 
     
     var body: some View {
         ZStack(alignment: .top) {
-            if let banner = bannerUrl {
+            if let banner = bannerUrl, !banner.isEmpty {
                 Color.clear.overlay {
                     NetworkImage(url: URL(string: banner)) { image in
                         image.resizable().scaledToFill()

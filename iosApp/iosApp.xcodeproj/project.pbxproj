@@ -26,6 +26,9 @@
 		0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */; };
 		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
 		066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */; };
+		066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0442B3ACDC1006F28F4 /* Collections */; };
+		066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0462B3ACDC1006F28F4 /* DequeModule */; };
+		066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0482B3ACDC1006F28F4 /* OrderedCollections */; };
 		067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 067D89762AD25C1700F8F932 /* MarkdownUI */; };
 		067D89792AD25DB000F8F932 /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D89782AD25DB000F8F932 /* MarkdownTheme.swift */; };
 		067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D897D2AD3A2F900F8F932 /* MediaComponent.swift */; };
@@ -94,7 +97,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */,
 				067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */,
+				066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */,
+				066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +311,9 @@
 			name = iosApp;
 			packageProductDependencies = (
 				067D89762AD25C1700F8F932 /* MarkdownUI */,
+				066AD0442B3ACDC1006F28F4 /* Collections */,
+				066AD0462B3ACDC1006F28F4 /* DequeModule */,
+				066AD0482B3ACDC1006F28F4 /* OrderedCollections */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -337,6 +346,7 @@
 			packageReferences = (
 				067D89752AD25C1700F8F932 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				0641D85E2B0DFD3800029CA1 /* XCRemoteSwiftPackageReference "RichText" */,
+				066AD0432B3ACDC1006F28F4 /* XCRemoteSwiftPackageReference "swift-collections" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -661,6 +671,14 @@
 				minimumVersion = 2.3.0;
 			};
 		};
+		066AD0432B3ACDC1006F28F4 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-collections.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.6;
+			};
+		};
 		067D89752AD25C1700F8F932 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
@@ -672,6 +690,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		066AD0442B3ACDC1006F28F4 /* Collections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 066AD0432B3ACDC1006F28F4 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = Collections;
+		};
+		066AD0462B3ACDC1006F28F4 /* DequeModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 066AD0432B3ACDC1006F28F4 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = DequeModule;
+		};
+		066AD0482B3ACDC1006F28F4 /* OrderedCollections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 066AD0432B3ACDC1006F28F4 /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = OrderedCollections;
+		};
 		067D89762AD25C1700F8F932 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 067D89752AD25C1700F8F932 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;

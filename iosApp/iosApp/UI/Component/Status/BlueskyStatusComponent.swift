@@ -11,7 +11,7 @@ struct BlueskyStatusComponent: View {
             if let repostBy = bluesky.repostBy {
                 StatusRetweetHeaderComponent(iconSystemName: "arrow.left.arrow.right", nameMarkdown: repostBy.extra.nameMarkdown, text: "boosted a status")
             }
-            CommonStatusComponent(content: bluesky.extra.contentMarkdown, user: bluesky.user, medias: bluesky.medias, timestamp: bluesky.indexedAt.epochSeconds, headerTrailing: { EmptyView() }, onMediaClick: { media in event.onMediaClick(media: media) })
+            CommonStatusComponent(content: bluesky.extra.contentMarkdown, user: bluesky.user, medias: bluesky.medias, timestamp: bluesky.indexedAt.epochSeconds, headerTrailing: { EmptyView() }, onMediaClick: { media in event.onMediaClick(media: media) }, sensitive: false)
             if let card = bluesky.card {
                 LinkPreview(card: card)
             }

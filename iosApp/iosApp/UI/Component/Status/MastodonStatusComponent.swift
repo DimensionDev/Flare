@@ -17,7 +17,7 @@ struct MastodonStatusComponent: View {
             }
             CommonStatusComponent(content: actual.extra.contentMarkdown, user: actual.user, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
                 MastodonVisibilityIcon(visibility: actual.visibility)
-            }, onMediaClick: { media in event.onMediaClick(media: media) })
+            }, onMediaClick: { media in event.onMediaClick(media: media) }, sensitive: actual.sensitive)
             if let card = mastodon.card {
                 LinkPreview(card: card)
             }

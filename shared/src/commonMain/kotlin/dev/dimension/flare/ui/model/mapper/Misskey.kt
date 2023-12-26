@@ -125,6 +125,7 @@ private fun DriveFile.toUi(): UiMedia? {
             description = comment,
             width = properties.width?.toFloat() ?: 0f,
             height = properties.height?.toFloat() ?: 0f,
+            sensitive = isSensitive,
         )
     } else if (type.startsWith("video/")) {
         return UiMedia.Video(

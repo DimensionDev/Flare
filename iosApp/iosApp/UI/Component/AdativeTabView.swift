@@ -16,7 +16,7 @@ struct AdativeTabView: View {
     }
     var body: some View {
         // NavigationSplitView does not work well with TabView + NavigationStack, so I just create my own
-        HStack {
+        HStack(spacing: 0) {
             if (horizontalSizeClass != .compact) {
                 VStack {
                     leading

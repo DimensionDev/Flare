@@ -15,7 +15,7 @@ struct MisskeyStatusComponent: View {
             }
             CommonStatusComponent(content: actual.extra.contentMarkdown, user: actual.user, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
                 MisskeyVisibilityIcon(visibility: actual.visibility)
-            }, onMediaClick: { media in event.onMediaClick(media: media) })
+            }, onMediaClick: { media in event.onMediaClick(media: media) }, sensitive: actual.sensitive)
 
             if let quote = misskey.quote {
                 QuotedStatus(data: quote, onMediaClick: event.onMediaClick)

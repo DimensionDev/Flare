@@ -86,7 +86,7 @@ struct CommonProfileHeader<HeaderTrailing, HandleTrailing, Content>: View where 
                 }
                 content()
             }
-            .padding([.horizontal, .bottom])
+            .padding([.horizontal])
         }
     }
     

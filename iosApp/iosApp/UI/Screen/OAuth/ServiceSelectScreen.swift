@@ -85,8 +85,8 @@ struct ServiceSelectScreen: View {
                                 viewModel.model.blueskyLoginState.login(baseUrl: viewModel.blueskyInputViewModel.baseUrl, username: viewModel.blueskyInputViewModel.username, password: viewModel.blueskyInputViewModel.password)
                             }) {
                                 Text("Confirm")
-                                    .buttonStyle(.borderedProminent)
                             }
+                            .buttonStyle(.borderedProminent)
                         }
                         .listRowSeparator(.hidden)
                         .frame(maxWidth: .infinity, alignment: Alignment.center)

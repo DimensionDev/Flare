@@ -189,6 +189,27 @@ struct ComposeScreen: View {
                         }, label: {
                             Image(systemName: "face.smiling")
                         })
+                        .popover(isPresented: $viewModel.showEmoji) {
+                            if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
+                                ScrollView {
+                                    LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                                        ForEach(1...emojis.data.count, id: \.self) { index in
+                                            if let item = emojis.data[index - 1] as? UiEmoji {
+                                                Button(action: {
+                                                    viewModel.addEmoji(emoji: item)
+                                                }, label: {
+                                                    NetworkImage(url: URL(string: item.url)){ image in
+                                                        image.resizable().scaledToFit()
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    }
+                                    .padding()
+                                }
+                                .frame(maxWidth: 300, maxHeight: 200)
+                            }
+                        }
                     }
                 }
             }
@@ -196,38 +217,6 @@ struct ComposeScreen: View {
         .activateViewModel(viewModel: viewModel)
         .padding()
         .toolbarTitleDisplayMode(.inline)
-        .sheet(isPresented: $viewModel.showEmoji) {
-            if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                        ForEach(1...emojis.data.count, id: \.self) { index in
-                            if let item = emojis.data[index - 1] as? UiEmoji {
-                                Button(action: {
-                                    viewModel.addEmoji(emoji: item)
-                                }, label: {
-                                    NetworkImage(url: URL(string: item.url)){ image in
-                                        image.resizable().scaledToFit()
-                                    }
-                                })
-                            }
-                        }
-                    }
-                    .padding()
-                }
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(action: {
-                            viewModel.showEmoji = false
-                        }, label: {
-                            Image(systemName: "xmark")
-                        })
-                    }
-                    ToolbarItem(placement: .principal) {
-                        Text("Compose")
-                    }
-                }
-            }
-        }
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button(action: {

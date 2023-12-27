@@ -32,7 +32,7 @@ struct BlueskyStatusComponent: View {
                     }
                 }
                 Spacer()
-
+                
                 Menu(content: {
                     Button(action: {
                         event.onReblogClick(data: bluesky)
@@ -45,12 +45,7 @@ struct BlueskyStatusComponent: View {
                         Label("Quote", systemImage: "quote.bubble.fill")
                     })
                 }, label: {
-                    Label(
-                        title: { EmptyView() },
-                        icon: {
-                            Image(systemName: "arrow.left.arrow.right")
-                        }
-                    )
+                    Image(systemName: "arrow.left.arrow.right")
                 })
                 .if(!bluesky.reaction.reposted) { view in
                     view.opacity(0.6)
@@ -73,7 +68,7 @@ struct BlueskyStatusComponent: View {
                     view.opacity(0.6)
                 }
                 Spacer()
-
+                
                 Menu {
                     if bluesky.isFromMe {
                         Button(role: .destructive,action: {
@@ -89,11 +84,8 @@ struct BlueskyStatusComponent: View {
                         })
                     }
                 } label: {
-                    Label(
-                        title: { EmptyView() },
-                        icon: { Image(systemName: "ellipsis") }
-                    )
-                    .opacity(0.6)
+                    Image(systemName: "ellipsis")
+                        .opacity(0.6)
                 }
             }
             .buttonStyle(.borderless)

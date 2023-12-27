@@ -32,6 +32,9 @@ struct ProfileScreen: View {
                 if horizontalSizeClass == .compact {
                     ProfileHeader(user: viewModel.model.userState, relation: viewModel.model.relationState, isMe: viewModel.model.isMe, onFollowClick: { user, relation in viewModel.model.follow(user: user, data: relation) })
                         .listRowInsets(EdgeInsets())
+                        .padding(.bottom)
+                    SmallProfileMediaPreviews(state: viewModel.model.mediaState)
+                        .listRowInsets(.none)
                 }
                 StatusTimelineComponent(data: viewModel.model.listState, mastodonEvent: statusEvent, misskeyEvent: statusEvent, blueskyEvent: statusEvent)
             }
@@ -104,6 +107,42 @@ struct LargeProfileImagePreviews : View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .padding(.horizontal)
+            }
+        }
+    }
+}
+
+struct SmallProfileMediaPreviews : View {
+    let state: UiState<LazyPagingItemsProxy<UiMedia>>
+    var body: some View {
+        switch onEnum(of: state) {
+        case .error(_):
+            EmptyView()
+        case .loading(_):
+            EmptyView()
+        case .success(let success):
+            if success.data.isSuccess {
+                ScrollView(.horizontal) {
+                    LazyHStack(content: {
+                        ForEach(0..<min(success.data.itemCount, 6), id: \.self) { index in
+                            let item = success.data.peek(index: index)
+                            if let media = item {
+                                let image = media as? UiMediaImage
+                                let shouldBlur = image?.sensitive ?? false
+                                MediaItemComponent(media: media)
+                                    .if(shouldBlur, transform: { view in
+                                        view.blur(radius: 32)
+                                    })
+                                    .onAppear(perform: {
+                                        success.data.get(index: index)
+                                    })
+                                    .aspectRatio(1, contentMode: .fill)
+                                    .clipped()
+                                    .frame(width: 48, height: 48)
+                            }
+                        }
+                    })
+                }
             }
         }
     }
@@ -260,8 +299,26 @@ struct MastodonProfileHeader: View {
         CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: {
             MastodonFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick)
         }, content: {
-            FieldsView(fields: user.extra.fieldsMarkdown)
+            VStack {
+                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+                FieldsView(fields: user.extra.fieldsMarkdown)
+            }
         })
+    }
+}
+
+struct MatrixView : View {
+    let followCount: String
+    let fansCount: String
+    var body: some View {
+        HStack {
+            Text(followCount)
+            Text("following")
+            Divider()
+            Text(fansCount)
+            Text("followers")
+        }
+        .font(.caption)
     }
 }
 
@@ -328,7 +385,10 @@ struct MisskeyProfileHeader: View {
     let onFollowClick: (UiRelation) -> Void
     var body: some View {
         CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: { MisskeyFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick) }, content: {
-            FieldsView(fields: user.extra.fieldsMarkdown)
+            VStack {
+                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+                FieldsView(fields: user.extra.fieldsMarkdown)
+            }
         })
     }
 }
@@ -366,7 +426,9 @@ struct BlueskyProfileHeader: View {
     let isMe: UiState<KotlinBoolean>
     let onFollowClick: (UiRelation) -> Void
     var body: some View {
-        CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: { BlueskyFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick) })
+        CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: { BlueskyFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick) }, content: {
+            MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+        })
     }
 }
 

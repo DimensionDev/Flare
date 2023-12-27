@@ -12,7 +12,6 @@ import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
 import app.bsky.feed.PostReplyRef
-import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.feed.ViewerState
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
@@ -28,8 +27,6 @@ import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MemCacheable
-import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -55,22 +52,14 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Clock
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNamingStrategy
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.koin.core.component.KoinComponent
@@ -78,7 +67,6 @@ import org.koin.core.component.inject
 import sh.christian.ozone.api.AtIdentifier
 import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Cid
-import sh.christian.ozone.api.Language
 import sh.christian.ozone.api.Nsid
 
 @OptIn(ExperimentalPagingApi::class)
@@ -292,62 +280,72 @@ class BlueskyDataSource(
             }.map {
                 it.blob
             }
-        val post = Post(
-            text = data.content,
-            createdAt = Clock.System.now(),
-            embed = data.quoteId?.let { quoteId ->
-                service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(quoteId))))
-                    .maybeResponse()
-                    ?.posts
-                    ?.firstOrNull()
-            }?.let { item ->
-                PostEmbedUnion.Record(
-                    Record(
-                        StrongRef(
-                            uri = item.uri,
-                            cid = item.cid
+        val post =
+            Post(
+                text = data.content,
+                createdAt = Clock.System.now(),
+                embed =
+                    data.quoteId?.let { quoteId ->
+                        service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(quoteId))))
+                            .maybeResponse()
+                            ?.posts
+                            ?.firstOrNull()
+                    }?.let { item ->
+                        PostEmbedUnion.Record(
+                            Record(
+                                StrongRef(
+                                    uri = item.uri,
+                                    cid = item.cid,
+                                ),
+                            ),
                         )
-                    )
-                )
-            } ?: mediaBlob.takeIf { it.any() }?.let { blobs ->
-                PostEmbedUnion.Images(Images(blobs.map { blob ->
-                    ImagesImage(image = blob, alt = "")
-                }.toImmutableList()))
-            },
-            reply = data.inReplyToID?.let { inReplyToID ->
-                service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(inReplyToID))))
-                    .maybeResponse()
-                    ?.posts
-                    ?.firstOrNull()
-            }?.let { item ->
-                val root = item.record.jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
-                    ?.jsonObjectOrNull?.let { root ->
-                        StrongRef(
-                            uri = AtUri(root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri),
-                            cid = Cid(root["cid"]?.jsonPrimitive?.content ?: item.cid.cid)
+                    } ?: mediaBlob.takeIf { it.any() }?.let { blobs ->
+                        PostEmbedUnion.Images(
+                            Images(
+                                blobs.map { blob ->
+                                    ImagesImage(image = blob, alt = "")
+                                }.toImmutableList(),
+                            ),
                         )
-                } ?: StrongRef(
-                    uri = item.uri,
-                    cid = item.cid
-                )
-                PostReplyRef(
-                    parent = StrongRef(
-                        uri = item.uri,
-                        cid = item.cid
-                    ),
-                    root = root,
-                )
-            },
-        )
-        val json = Json {
-            ignoreUnknownKeys = true
-            classDiscriminator = "${'$'}type"
-        }
+                    },
+                reply =
+                    data.inReplyToID?.let { inReplyToID ->
+                        service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(inReplyToID))))
+                            .maybeResponse()
+                            ?.posts
+                            ?.firstOrNull()
+                    }?.let { item ->
+                        val root =
+                            item.record.jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
+                                ?.jsonObjectOrNull?.let { root ->
+                                    StrongRef(
+                                        uri = AtUri(root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri),
+                                        cid = Cid(root["cid"]?.jsonPrimitive?.content ?: item.cid.cid),
+                                    )
+                                } ?: StrongRef(
+                                uri = item.uri,
+                                cid = item.cid,
+                            )
+                        PostReplyRef(
+                            parent =
+                                StrongRef(
+                                    uri = item.uri,
+                                    cid = item.cid,
+                                ),
+                            root = root,
+                        )
+                    },
+            )
+        val json =
+            Json {
+                ignoreUnknownKeys = true
+                classDiscriminator = "${'$'}type"
+            }
         service.createRecord(
             CreateRecordRequest(
                 repo = AtIdentifier(data.account.accountKey.id),
                 collection = Nsid("app.bsky.feed.post"),
-                record = json.encodeToJsonElement(post)
+                record = json.encodeToJsonElement(post),
             ),
         )
     }

@@ -299,7 +299,7 @@ struct MastodonProfileHeader: View {
         CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: {
             MastodonFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick)
         }, content: {
-            VStack {
+            VStack(alignment: .leading) {
                 MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
                 FieldsView(fields: user.extra.fieldsMarkdown)
             }
@@ -385,7 +385,7 @@ struct MisskeyProfileHeader: View {
     let onFollowClick: (UiRelation) -> Void
     var body: some View {
         CommonProfileHeader(bannerUrl: user.bannerUrl, avatarUrl: user.avatarUrl, displayName: user.extra.nameMarkdown, handle: user.handle, description: user.extra.descriptionMarkdown, headerTrailing: { MisskeyFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick) }, content: {
-            VStack {
+            VStack(alignment: .leading) {
                 MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
                 FieldsView(fields: user.extra.fieldsMarkdown)
             }

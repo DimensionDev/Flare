@@ -4,13 +4,14 @@ import PhotosUI
 import NetworkImage
 
 struct ComposeScreen: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State var viewModel: ComposeViewModel
     @FocusState private var keyboardFocused: Bool
     @FocusState private var cwKeyboardFocused: Bool
     let onBack: () -> Void
     init(onBack: @escaping () -> Void, status: ComposeStatus? = nil) {
         self.onBack = onBack
-        viewModel = ComposeViewModel(status: status)
+        _viewModel = State(initialValue: ComposeViewModel(status: status))
     }
     var body: some View {
         HStack(alignment: .top) {
@@ -194,8 +195,7 @@ struct ComposeScreen: View {
                         .popover(isPresented: $viewModel.showEmoji) {
                             if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
                                 ScrollView {
-                                    let columns = (0...6).map { _ in GridItem(.flexible()) }
-                                    LazyVGrid(columns: columns, spacing: 8) {
+                                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
                                         ForEach(1...emojis.data.count, id: \.self) { index in
                                             if let item = emojis.data[index - 1] as? UiEmoji {
                                                 Button(action: {
@@ -210,7 +210,10 @@ struct ComposeScreen: View {
                                     }
                                     .padding()
                                 }
-                                .frame(maxWidth: 300, maxHeight: 200)
+                                .if(horizontalSizeClass != .compact, transform: { view in
+                                    view
+                                        .frame(maxWidth: 300, maxHeight: 200)
+                                })
                             }
                         }
                     }

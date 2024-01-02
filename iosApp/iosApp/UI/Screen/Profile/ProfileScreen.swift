@@ -4,10 +4,12 @@ import shared
 import MarkdownUI
 
 struct ProfileScreen: View {
+    let toProfileMedia: (MicroBlogKey) -> Void
     @State var viewModel: ProfileViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    init(userKey: MicroBlogKey?) {
+    init(userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
+        self.toProfileMedia = toProfileMedia
         _viewModel = State(initialValue: ProfileViewModel(userKey: userKey))
     }
     var body: some View {
@@ -28,7 +30,14 @@ struct ProfileScreen: View {
                                 viewModel.model.follow(user: user, data: relation)
                             }
                         )
-                        LargeProfileImagePreviews(state: viewModel.model.mediaState)
+                        if case .success(let userState) = onEnum(of: viewModel.model.userState) {
+                            Button(action: {
+                                toProfileMedia(userState.data.userKey)
+                            }, label: {
+                                LargeProfileImagePreviews(state: viewModel.model.mediaState)
+                            })
+                            .buttonStyle(.borderless)
+                        }
                     }
                 }
                 .frame(width: 384)
@@ -43,10 +52,17 @@ struct ProfileScreen: View {
                             viewModel.model.follow(user: user, data: relation)
                         }
                     )
+                    .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
-                    .padding(.bottom)
-                    SmallProfileMediaPreviews(state: viewModel.model.mediaState)
+                    if case .success(let userState) = onEnum(of: viewModel.model.userState) {
+                        Button(action: {
+                            toProfileMedia(userState.data.userKey)
+                        }, label: {
+                            SmallProfileMediaPreviews(state: viewModel.model.mediaState)
+                        })
+                        .buttonStyle(.borderless)
                         .listRowInsets(.none)
+                    }
                 }
                 StatusTimelineComponent(
                     data: viewModel.model.listState,
@@ -176,106 +192,6 @@ struct SmallProfileMediaPreviews: View {
     }
 }
 
-struct BlueskyMenu: View {
-    let relation: UiRelationBluesky
-    let onMuteClick: () -> Void
-    let onBlockClick: () -> Void
-    var body: some View {
-        Button(action: onMuteClick, label: {
-            let text = if relation.muting {
-                "Unmute"
-            } else {
-                "Mute"
-            }
-            let icon = if relation.muting {
-                "speaker"
-            } else {
-                "speaker.slash"
-            }
-            Label(text, systemImage: icon)
-        })
-        Button(action: onBlockClick, label: {
-            let text = if relation.blocking {
-                "Unblock"
-            } else {
-                "Block"
-            }
-            let icon = if relation.blocking {
-                "xmark.circle"
-            } else {
-                "checkmark.circle"
-            }
-            Label(text, systemImage: icon)
-        })
-    }
-}
-struct MastodonMenu: View {
-    let relation: UiRelationMastodon
-    let onMuteClick: () -> Void
-    let onBlockClick: () -> Void
-    var body: some View {
-        Button(action: onMuteClick, label: {
-            let text = if relation.muting {
-                "Unmute"
-            } else {
-                "Mute"
-            }
-            let icon = if relation.muting {
-                "speaker"
-            } else {
-                "speaker.slash"
-            }
-            Label(text, systemImage: icon)
-        })
-        Button(action: onBlockClick, label: {
-            let text = if relation.blocking {
-                "Unblock"
-            } else {
-                "Block"
-            }
-            let icon = if relation.blocking {
-                "xmark.circle"
-            } else {
-                "checkmark.circle"
-            }
-            Label(text, systemImage: icon)
-        })
-    }
-}
-struct MisskeyMenu: View {
-    let relation: UiRelationMisskey
-    let onMuteClick: () -> Void
-    let onBlockClick: () -> Void
-    var body: some View {
-        Button(action: onMuteClick, label: {
-            let text = if relation.muted {
-                "Unmute"
-            } else {
-                "Mute"
-            }
-            let icon = if relation.muted {
-                "speaker"
-            } else {
-                "speaker.slash"
-            }
-            Label(text, systemImage: icon)
-        })
-        Button(action: onBlockClick, label: {
-            let text = if relation.blocking {
-                "Unblock"
-            } else {
-                "Block"
-            }
-            let icon = if relation.blocking {
-                "xmark.circle"
-            } else {
-                "checkmark.circle"
-            }
-            Label(text, systemImage: icon)
-        })
-    }
-}
-
 struct ProfileHeader: View {
     let user: UiState<UiUser>
     let relation: UiState<UiRelation>
@@ -298,7 +214,8 @@ struct ProfileHeader: View {
                     Text("handle")
                 }, content: {
                     Text("content")
-                })
+                }
+            )
             .redacted(reason: .placeholder)
         case .success(let data):
             ProfileHeaderSuccess(
@@ -325,32 +242,6 @@ struct ProfileHeaderSuccess: View {
         case .bluesky(let bluesky):
             BlueskyProfileHeader(user: bluesky, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
         }
-    }
-}
-
-struct MastodonProfileHeader: View {
-    let user: UiUser.Mastodon
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
-    var body: some View {
-        CommonProfileHeader(
-            bannerUrl: user.bannerUrl,
-            avatarUrl: user.avatarUrl,
-            displayName: user.extra.nameMarkdown,
-            handle: user.handle,
-            description: user.extra.descriptionMarkdown,
-            headerTrailing: {
-                MastodonFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick)
-            }, content: {
-                VStack(alignment: .leading) {
-                    MatrixView(
-                        followCount: user.matrices.followsCountHumanized,
-                        fansCount: user.matrices.fansCountHumanized
-                    )
-                    FieldsView(fields: user.extra.fieldsMarkdown)
-                }
-            })
     }
 }
 
@@ -396,142 +287,6 @@ struct FieldsView: View {
         }
     }
 }
-
-struct MastodonFollowButton: View {
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
-    var body: some View {
-        if case .success(let success) = onEnum(of: isMe),
-            !success.data.boolValue,
-           case .success(let relationData) = onEnum(of: relation),
-           let mastodonRelation = relationData.data as? UiRelationMastodon {
-            let text = if mastodonRelation.blocking {
-                "Blocked"
-            } else if mastodonRelation.following {
-                "Following"
-            } else if mastodonRelation.requested {
-                "Requested"
-            } else {
-                "Follow"
-            }
-            Button(action: {
-                onFollowClick(mastodonRelation)
-            }, label: {
-                Text(text)
-            })
-            .buttonStyle(.borderless)
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct MisskeyProfileHeader: View {
-    let user: UiUser.Misskey
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
-    var body: some View {
-        CommonProfileHeader(
-            bannerUrl: user.bannerUrl,
-            avatarUrl: user.avatarUrl,
-            displayName: user.extra.nameMarkdown,
-            handle: user.handle,
-            description: user.extra.descriptionMarkdown,
-            headerTrailing: { MisskeyFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick) },
-            content: {
-                VStack(alignment: .leading) {
-                    MatrixView(
-                        followCount: user.matrices.followsCountHumanized,
-                        fansCount: user.matrices.fansCountHumanized
-                    )
-                    FieldsView(fields: user.extra.fieldsMarkdown)
-                }
-            })
-    }
-}
-
-struct MisskeyFollowButton: View {
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
-    var body: some View {
-        if case .success(let success) = onEnum(of: isMe),
-           !success.data.boolValue,
-           case .success(let relationData) = onEnum(of: relation),
-           let actualRelation = relationData.data as? UiRelationMisskey {
-            let text = if actualRelation.blocking {
-                "Blocked"
-            } else if actualRelation.following {
-                "Following"
-            } else if actualRelation.hasPendingFollowRequestFromYou {
-                "Requested"
-            } else {
-                "Follow"
-            }
-            Button(action: {
-                onFollowClick(actualRelation)
-            }, label: {
-                Text(text)
-            })
-            .buttonStyle(.borderless)
-        } else {
-            EmptyView()
-        }
-    }
-}
-
-struct BlueskyProfileHeader: View {
-    let user: UiUser.Bluesky
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
-    var body: some View {
-        CommonProfileHeader(
-            bannerUrl: user.bannerUrl,
-            avatarUrl: user.avatarUrl,
-            displayName: user.extra.nameMarkdown,
-            handle: user.handle,
-            description: user.extra.descriptionMarkdown,
-            headerTrailing: { BlueskyFollowButton(relation: relation, isMe: isMe, onFollowClick: onFollowClick) },
-            content: {
-                MatrixView(
-                    followCount: user.matrices.followsCountHumanized,
-                    fansCount: user.matrices.fansCountHumanized
-                )
-            })
-    }
-}
-
-struct BlueskyFollowButton: View {
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
-    var body: some View {
-        if case .success(let success) = onEnum(of: isMe),
-           !success.data.boolValue,
-           case .success(let relationData) = onEnum(of: relation),
-           let actualRelation = relationData.data as? UiRelationBluesky {
-            let text = if actualRelation.blocking {
-                "Blocked"
-            } else if actualRelation.following {
-                "Following"
-            } else {
-                "Follow"
-            }
-            Button(action: {
-                onFollowClick(actualRelation)
-            }, label: {
-                Text(text)
-            })
-            .buttonStyle(.borderless)
-        } else {
-            EmptyView()
-        }
-    }
-}
-
 @Observable
 class ProfileViewModel: MoleculeViewModelProto {
     let presenter: ProfilePresenter

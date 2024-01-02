@@ -17,12 +17,10 @@ struct RouterView: View {
             }.sheet(isPresented: Binding(get: {
                 type == .login
             }, set: { _ in
-
             }), content: {
                 if type == .login {
                     ServiceSelectScreen(
                         toHome: {
-
                         }
                     )
                     .interactiveDismissDisabled()
@@ -38,7 +36,6 @@ class RouterViewModel: MoleculeViewModelProto {
     var model: __SplashType
     typealias Model = __SplashType
     typealias Presenter = SplashPresenter
-
     init() {
         presenter = SplashPresenter(toHome: {}, toLogin: {})
         model = presenter.models.value
@@ -50,25 +47,21 @@ public enum TabDestination: Codable, Hashable {
     case statusDetail(statusKey: String)
     case profileWithUserNameAndHost(userName: String, host: String)
     case search(query: String)
+    case profileMedia(userKey: String)
 }
 
 @Observable
 final class Router<T: Hashable>: ObservableObject {
-
     var navPath = NavigationPath()
-
     func navigate(to destination: T) {
         navPath.append(destination)
     }
-
     func navigateBack(count: Int = 1) {
         navPath.removeLast(count)
     }
-
     func navigateToRoot() {
         navPath.removeLast(navPath.count)
     }
-
     func clearBackStack() {
         navPath = NavigationPath()
     }
@@ -76,19 +69,26 @@ final class Router<T: Hashable>: ObservableObject {
 
 @MainActor
 extension View {
-    func withTabRouter() -> some View {
+    func withTabRouter(router: Router<TabDestination>) -> some View {
         navigationDestination(
             for: TabDestination.self
         ) { destination in
             switch destination {
             case let .profile(userKey):
-                ProfileScreen(userKey: MicroBlogKey.companion.valueOf(str: userKey))
+                ProfileScreen(
+                    userKey: MicroBlogKey.companion.valueOf(str: userKey),
+                    toProfileMedia: { userKey in
+                        router.navigate(to: .profileMedia(userKey: userKey.description()))
+                    }
+                )
             case let .statusDetail(statusKey):
                 Text("todo")
             case let .profileWithUserNameAndHost(userName, host):
                 Text("todo")
             case let .search(data):
                 Text("todo")
+            case let .profileMedia(userKey):
+                ProfileMediaListScreen(userKey: MicroBlogKey.companion.valueOf(str: userKey))
             }
         }
     }

@@ -40,7 +40,7 @@ class ProfileMediaPresenter(
                 }.collectPagingProxy()
             }
         return object : ProfileMediaState {
-            override val mediaState: UiState<LazyPagingItemsProxy<UiMedia>> = mediaState
+            override val mediaState = mediaState
         }
     }
 }

@@ -7,12 +7,36 @@ struct QuotedStatus: View {
     let onMediaClick: (UiMedia) -> Void
     var body: some View {
         switch onEnum(of: data) {
-        case .mastodon(let mastodon): QuotedContent(content: mastodon.content, user: mastodon.user, medias: mastodon.media, timestamp: mastodon.createdAt.epochSeconds, onMediaClick: onMediaClick)
-        case .mastodonNotification(_): EmptyView()
-        case .misskey(let misskey): QuotedContent(content: misskey.content, user: misskey.user, medias: misskey.media, timestamp: misskey.createdAt.epochSeconds, onMediaClick: onMediaClick)
-        case .misskeyNotification(_): EmptyView()
-        case .bluesky(let bluesky): QuotedContent(content: bluesky.content, user: bluesky.user, medias: bluesky.medias, timestamp: bluesky.indexedAt.epochSeconds, onMediaClick: onMediaClick)
-        case .blueskyNotification(_): EmptyView()
+        case .mastodon(let mastodon):
+            QuotedContent(
+                content: mastodon.content,
+                user: mastodon.user,
+                medias: mastodon.media,
+                timestamp: mastodon.createdAt.epochSeconds,
+                onMediaClick: onMediaClick,
+                sensitive: mastodon.sensitive
+            )
+        case .mastodonNotification: EmptyView()
+        case .misskey(let misskey):
+            QuotedContent(
+                content: misskey.content,
+                user: misskey.user,
+                medias: misskey.media,
+                timestamp: misskey.createdAt.epochSeconds,
+                onMediaClick: onMediaClick,
+                sensitive: misskey.sensitive
+            )
+        case .misskeyNotification: EmptyView()
+        case .bluesky(let bluesky):
+            QuotedContent(
+                content: bluesky.content,
+                user: bluesky.user,
+                medias: bluesky.medias,
+                timestamp: bluesky.indexedAt.epochSeconds,
+                onMediaClick: onMediaClick,
+                sensitive: false
+            )
+        case .blueskyNotification: EmptyView()
         }
     }
 }
@@ -23,7 +47,7 @@ private struct QuotedContent: View {
     let medias: [UiMedia]
     let timestamp: Int64
     let onMediaClick: (UiMedia) -> Void
-
+    let sensitive: Bool
     var body: some View {
         VStack {
             HStack {
@@ -43,7 +67,7 @@ private struct QuotedContent: View {
             if !medias.isEmpty {
                 Spacer()
                     .frame(height: 8)
-                MediaComponent(medias: medias, onMediaClick: onMediaClick)
+                MediaComponent(hideSensitive: sensitive, medias: medias, onMediaClick: onMediaClick)
             }
         }
     }

@@ -13,14 +13,14 @@ struct HomeScreen: View {
                 TabModel(
                     title: "Home",
                     image: "house",
-                    destination: TabItem {
+                    destination: TabItem { _ in
                         HomeTimelineScreen()
-                            .if(horizontalSizeClass != .compact, transform: { HomeTimelineScreen in
-                                HomeTimelineScreen
+                            .if(horizontalSizeClass != .compact, transform: { view in
+                                view
                                     .toolbar(.hidden)
                             })
-                                .if(horizontalSizeClass == .compact, transform: { HomeTimelineScreen in
-                                    HomeTimelineScreen
+                                .if(horizontalSizeClass == .compact, transform: { view in
+                                    view
                                         .navigationBarTitleDisplayMode(.inline)
                                         .toolbar {
                                             ToolbarItem(placement: .principal) {
@@ -29,9 +29,9 @@ struct HomeScreen: View {
                                             ToolbarItem(placement: .primaryAction) {
                                                 Button(action: {
                                                     showCompose = true
-                                                }) {
+                                                }, label: {
                                                     Image(systemName: "square.and.pencil")
-                                                }
+                                                })
                                             }
                                             ToolbarItem(placement: .navigation) {
                                                 Button {
@@ -40,7 +40,7 @@ struct HomeScreen: View {
                                                     if case .success(let data) = onEnum(of: viewModel.model.user) {
                                                         UserAvatar(data: data.data.avatarUrl, size: 36)
                                                     } else {
-                                                        UserAvatarPlaceholder(size: 36)
+                                                        userAvatarPlaceholder(size: 36)
                                                     }
                                                 }
                                             }
@@ -51,33 +51,30 @@ struct HomeScreen: View {
                 TabModel(
                     title: "Notification",
                     image: "bell",
-                    destination: TabItem {
+                    destination: TabItem { _ in
                         NotificationScreen()
-                            .if(horizontalSizeClass != .compact, transform: { NotificationScreen in
-                                NotificationScreen
-                                    .toolbar(.hidden)
-                            })
-                                .if(horizontalSizeClass == .compact, transform: { NotificationScreen in
-                                    NotificationScreen
-                                        .navigationBarTitleDisplayMode(.inline)
-                                        .toolbar {
-                                            ToolbarItem(placement: .principal) {
-                                                Text("Notification")
-                                            }
-                                        }
-                                })
                     }
                 ),
-                TabModel(title: "Me", image: "person.circle", destination: TabItem{ProfileScreen(userKey: nil)})
+                TabModel(
+                    title: "Me",
+                    image: "person.circle",
+                    destination: TabItem { router in
+                        ProfileScreen(
+                            userKey: nil,
+                            toProfileMedia: { userKey in
+                                router.navigate(to: .profileMedia(userKey: userKey.description()))
+                            }
+                        )
+                    }
+                )
             ],
             secondaryItems: [
-                
             ],
             leading: HStack {
                 if case .success(let data) = onEnum(of: viewModel.model.user) {
                     UserComponent(user: data.data)
                 } else {
-                    UserAvatarPlaceholder(size: 36)
+                    userAvatarPlaceholder(size: 36)
                 }
                 Spacer()
                 Button(action: {
@@ -125,18 +122,16 @@ struct HomeScreen: View {
 }
 
 @Observable
-class HomeViewModel : MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
+class HomeViewModel: MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
 }
-
 
 struct TabItem<Content: View>: View {
     @State var router = Router<TabDestination>()
-    let content: () -> Content
-    
+    let content: (Router<TabDestination>) -> Content
     var body: some View {
         NavigationStack(path: $router.navPath) {
-            content()
-                .withTabRouter()
+            content(router)
+                .withTabRouter(router: router)
         }.environment(\.openURL, OpenURLAction { url in
             if let event = AppDeepLink.shared.parse(url: url.absoluteString) {
                 switch onEnum(of: event) {
@@ -145,26 +140,23 @@ struct TabItem<Content: View>: View {
                 case .profileWithNameAndHost(let data):
                     router.navigate(to: .profileWithUserNameAndHost(userName: data.userName, host: data.host))
                 case .search(let data):
-                    router.navigate(to: .search(q: data.keyword))
+                    router.navigate(to: .search(query: data.keyword))
                 }
                 return .handled
             } else {
                 return .discarded
             }
         })
-        
     }
 }
 
 @Observable
-class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
+class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
     let accountRepository = KoinHelper.shared.accountRepository
-    var composeStatus: ComposeStatus? = nil
-    
+    var composeStatus: ComposeStatus?
     func onReplyClick(status: UiStatus.Mastodon) {
         composeStatus = ComposeStatusReply(statusKey: status.statusKey)
     }
-    
     func onReblogClick(status: UiStatus.Mastodon) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
@@ -172,7 +164,6 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onLikeClick(status: UiStatus.Mastodon) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
@@ -180,7 +171,6 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onBookmarkClick(status: UiStatus.Mastodon) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
@@ -188,10 +178,8 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onMediaClick(media: UiMedia) {
     }
-    
     func onReportClick(status: UiStatus.Mastodon) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountMastodon {
@@ -200,7 +188,6 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.MisskeyEmojiReaction) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
@@ -208,11 +195,9 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onReplyClick(data: UiStatus.Misskey) {
         composeStatus = ComposeStatusReply(statusKey: data.statusKey)
     }
-    
     func onReblogClick(data: UiStatus.Misskey) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
@@ -220,14 +205,11 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onQuoteClick(data: UiStatus.Misskey) {
         composeStatus = ComposeStatusQuote(statusKey: data.statusKey)
     }
-    
     func onAddReactionClick(data: UiStatus.Misskey) {
     }
-    
     func onReportClick(data: UiStatus.Misskey) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountMisskey {
@@ -235,11 +217,9 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onReplyClick(data: UiStatus.Bluesky) {
         composeStatus = ComposeStatusReply(statusKey: data.statusKey)
     }
-    
     func onReblogClick(data: UiStatus.Bluesky) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
@@ -247,11 +227,9 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onQuoteClick(data: UiStatus.Bluesky) {
         composeStatus = ComposeStatusQuote(statusKey: data.statusKey)
     }
-    
     func onLikeClick(data: UiStatus.Bluesky) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
@@ -259,7 +237,6 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onReportClick(data: UiStatus.Bluesky, reason: BlueskyReportStatusStateReportReason) {
         Task {
             if let account = accountRepository.get(accountKey: data.accountKey) as? UiAccountBluesky {
@@ -267,7 +244,6 @@ class StatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent 
             }
         }
     }
-    
     func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
         Task {
             if let account = accountRepository.get(accountKey: accountKey) {

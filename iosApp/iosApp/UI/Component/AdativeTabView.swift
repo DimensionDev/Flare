@@ -7,7 +7,12 @@ struct AdativeTabView: View {
     let leading: AnyView
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedTabItem: TabModel
-    init<V>(items: [TabModel], secondaryItems: [TabModel], leading: V, onSettingsclicked: @escaping () -> Void) where V: View {
+    init<V>(
+        items: [TabModel],
+        secondaryItems: [TabModel],
+        leading: V,
+        onSettingsclicked: @escaping () -> Void
+    ) where V: View {
         self.items = items
         self.secondaryItems = secondaryItems
         self.onSettingsclicked = onSettingsclicked
@@ -16,14 +21,14 @@ struct AdativeTabView: View {
     }
     var body: some View {
         // NavigationSplitView does not work well with TabView + NavigationStack, so I just create my own
-        HStack {
-            if (horizontalSizeClass != .compact) {
+        HStack(spacing: 0) {
+            if horizontalSizeClass != .compact {
                 VStack {
                     leading
                     List(selection: Binding<TabModel?>(get: {
                         self.selectedTabItem
-                    }, set: { Value in
-                        if let value = Value {
+                    }, set: { newValue in
+                        if let value = newValue {
                             self.selectedTabItem = value
                         }
                     })) {
@@ -74,8 +79,8 @@ struct AdativeTabView: View {
                             Text(item.title)
                         }
                         .tag(item)
-                        .if(horizontalSizeClass != .compact) { View in
-                            View
+                        .if(horizontalSizeClass != .compact) { view in
+                            view
                                 .toolbar(.hidden, for: .tabBar)
                         }
                 }
@@ -93,24 +98,19 @@ struct AdativeTabView: View {
     }
 }
 
-
 struct TabModel: Identifiable, Hashable {
     public var id: String {
         self.title
     }
-    
     static func == (lhs: TabModel, rhs: TabModel) -> Bool {
         return lhs.title == rhs.title
     }
-    
     func hash(into hasher: inout Hasher) {
         hasher.combine(title)
     }
-    
     let title: String
     let image: String
     let destination: AnyView
-    
     init<V>(title: String, image: String, destination: V) where V: View {
         self.title = title
         self.image = image

@@ -5,7 +5,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import app.bsky.actor.GetProfileQueryParams
+import app.bsky.embed.Images
+import app.bsky.embed.ImagesImage
+import app.bsky.embed.Record
 import app.bsky.feed.GetPostsQueryParams
+import app.bsky.feed.Post
+import app.bsky.feed.PostEmbedUnion
+import app.bsky.feed.PostReplyRef
 import app.bsky.feed.ViewerState
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
@@ -21,8 +27,6 @@ import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MemCacheable
-import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -47,14 +51,15 @@ import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Clock
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.koin.core.component.KoinComponent
@@ -275,101 +280,72 @@ class BlueskyDataSource(
             }.map {
                 it.blob
             }
+        val post =
+            Post(
+                text = data.content,
+                createdAt = Clock.System.now(),
+                embed =
+                    data.quoteId?.let { quoteId ->
+                        service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(quoteId))))
+                            .maybeResponse()
+                            ?.posts
+                            ?.firstOrNull()
+                    }?.let { item ->
+                        PostEmbedUnion.Record(
+                            Record(
+                                StrongRef(
+                                    uri = item.uri,
+                                    cid = item.cid,
+                                ),
+                            ),
+                        )
+                    } ?: mediaBlob.takeIf { it.any() }?.let { blobs ->
+                        PostEmbedUnion.Images(
+                            Images(
+                                blobs.map { blob ->
+                                    ImagesImage(image = blob, alt = "")
+                                }.toImmutableList(),
+                            ),
+                        )
+                    },
+                reply =
+                    data.inReplyToID?.let { inReplyToID ->
+                        service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(inReplyToID))))
+                            .maybeResponse()
+                            ?.posts
+                            ?.firstOrNull()
+                    }?.let { item ->
+                        val root =
+                            item.record.jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
+                                ?.jsonObjectOrNull?.let { root ->
+                                    StrongRef(
+                                        uri = AtUri(root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri),
+                                        cid = Cid(root["cid"]?.jsonPrimitive?.content ?: item.cid.cid),
+                                    )
+                                } ?: StrongRef(
+                                uri = item.uri,
+                                cid = item.cid,
+                            )
+                        PostReplyRef(
+                            parent =
+                                StrongRef(
+                                    uri = item.uri,
+                                    cid = item.cid,
+                                ),
+                            root = root,
+                        )
+                    },
+            )
+        val json =
+            Json {
+                ignoreUnknownKeys = true
+                classDiscriminator = "${'$'}type"
+            }
         service.createRecord(
             CreateRecordRequest(
                 repo = AtIdentifier(data.account.accountKey.id),
                 collection = Nsid("app.bsky.feed.post"),
-                record =
-                    buildJsonObject {
-                        put("\$type", "app.bsky.feed.post")
-                        put("createdAt", Clock.System.now().toString())
-                        put("text", data.content)
-                        if (data.quoteId != null) {
-                            val item =
-                                service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(data.quoteId))))
-                                    .maybeResponse()
-                                    ?.posts
-                                    ?.firstOrNull()
-                            if (item != null) {
-                                put(
-                                    "embed",
-                                    buildJsonObject {
-                                        put("\$type", "app.bsky.embed.record")
-                                        put(
-                                            "record",
-                                            buildJsonObject {
-                                                put("cid", item.cid.cid)
-                                                put("uri", item.uri.atUri)
-                                            },
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                        if (data.inReplyToID != null) {
-                            val item =
-                                service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(data.inReplyToID))))
-                                    .maybeResponse()
-                                    ?.posts
-                                    ?.firstOrNull()
-                            if (item != null) {
-                                put(
-                                    "reply",
-                                    buildJsonObject {
-                                        put(
-                                            "parent",
-                                            buildJsonObject {
-                                                put("cid", item.cid.cid)
-                                                put("uri", item.uri.atUri)
-                                            },
-                                        )
-                                        put(
-                                            "root",
-                                            buildJsonObject {
-                                                item.record.jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
-                                                    ?.jsonObjectOrNull?.let { root ->
-                                                        put("cid", root["cid"]?.jsonPrimitive?.content)
-                                                        put("uri", root["uri"]?.jsonPrimitive?.content)
-                                                    } ?: run {
-                                                    put("cid", item.cid.cid)
-                                                    put("uri", item.uri.atUri)
-                                                }
-                                            },
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                        if (mediaBlob.any()) {
-                            put(
-                                "embed",
-                                buildJsonObject {
-                                    put("\$type", "app.bsky.embed.images")
-                                    put(
-                                        "images",
-                                        buildJsonArray {
-                                            mediaBlob.forEach { blob ->
-                                                add(
-                                                    buildJsonObject {
-                                                        put("image", blob.encodeJson().decodeJson())
-                                                        put("alt", "")
-                                                    },
-                                                )
-                                            }
-                                        },
-                                    )
-                                },
-                            )
-                        }
-                        put(
-                            "langs",
-                            buildJsonArray {
-                                data.language.forEach { lang ->
-                                    add(lang)
-                                }
-                            },
-                        )
-                    },
+                record = json.encodeToJsonElement(post),
             ),
         )
     }

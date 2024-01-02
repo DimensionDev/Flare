@@ -9,9 +9,21 @@ struct BlueskyStatusComponent: View {
     var body: some View {
         VStack(alignment: .leading) {
             if let repostBy = bluesky.repostBy {
-                StatusRetweetHeaderComponent(iconSystemName: "arrow.left.arrow.right", nameMarkdown: repostBy.extra.nameMarkdown, text: "boosted a status")
+                StatusRetweetHeaderComponent(
+                    iconSystemName: "arrow.left.arrow.right",
+                    nameMarkdown: repostBy.extra.nameMarkdown,
+                    text: "boosted a status"
+                )
             }
-            CommonStatusComponent(content: bluesky.extra.contentMarkdown, user: bluesky.user, medias: bluesky.medias, timestamp: bluesky.indexedAt.epochSeconds, headerTrailing: { EmptyView() }, onMediaClick: { media in event.onMediaClick(media: media) })
+            CommonStatusComponent(
+                content: bluesky.extra.contentMarkdown,
+                user: bluesky.user,
+                medias: bluesky.medias,
+                timestamp: bluesky.indexedAt.epochSeconds,
+                headerTrailing: { EmptyView() },
+                onMediaClick: { media in event.onMediaClick(media: media) },
+                sensitive: false
+            )
             if let card = bluesky.card {
                 LinkPreview(card: card)
             }
@@ -21,18 +33,20 @@ struct BlueskyStatusComponent: View {
             Spacer()
                 .frame(height: 8)
             HStack {
-                Button(action: {
-                    event.onReplyClick(data: bluesky)
-                }) {
-                    HStack {
-                        Image(systemName: "arrowshape.turn.up.left")
-                        if let humanizedReplyCount = bluesky.matrices.humanizedReplyCount {
-                            Text(humanizedReplyCount)
+                Button(
+                    action: {
+                        event.onReplyClick(data: bluesky)
+                    },
+                    label: {
+                        HStack {
+                            Image(systemName: "arrowshape.turn.up.left")
+                            if let humanizedReplyCount = bluesky.matrices.humanizedReplyCount {
+                                Text(humanizedReplyCount)
+                            }
                         }
                     }
-                }
+                )
                 Spacer()
-
                 Menu(content: {
                     Button(action: {
                         event.onReblogClick(data: bluesky)
@@ -45,55 +59,52 @@ struct BlueskyStatusComponent: View {
                         Label("Quote", systemImage: "quote.bubble.fill")
                     })
                 }, label: {
-                    Label(
-                        title: { EmptyView() },
-                        icon: {
-                            Image(systemName: "arrow.left.arrow.right")
-                        }
-                    )
+                    Image(systemName: "arrow.left.arrow.right")
                 })
                 .if(!bluesky.reaction.reposted) { view in
                     view.opacity(0.6)
                 }
                 Spacer()
-                Button(action: {
-                    event.onLikeClick(data: bluesky)
-                }) {
-                    HStack {
-                        Image(systemName: "star")
-                        if let humanizedFavouriteCount = bluesky.matrices.humanizedLikeCount {
-                            Text(humanizedFavouriteCount)
+                Button(
+                    action: {
+                        event.onLikeClick(data: bluesky)
+                    },
+                    label: {
+                        HStack {
+                            Image(systemName: "star")
+                            if let humanizedFavouriteCount = bluesky.matrices.humanizedLikeCount {
+                                Text(humanizedFavouriteCount)
+                            }
+                        }
+                        .if(bluesky.reaction.liked) { view in
+                            view.foregroundStyle(.red, .red)
                         }
                     }
-                    .if(bluesky.reaction.liked) { view in
-                        view.foregroundStyle(.red, .red)
-                    }
-                }
+                )
                 .if(!bluesky.reaction.liked) { view in
                     view.opacity(0.6)
                 }
                 Spacer()
-
                 Menu {
                     if bluesky.isFromMe {
-                        Button(role: .destructive,action: {
+                        Button(role: .destructive, action: {
                             showDeleteAlert = true
                         }, label: {
                             Label("Delete Toot", systemImage: "trash")
                         })
                     } else {
-                        Button(action: {
-                            showReportAlert = true
-                        }, label: {
-                            Label("Report", systemImage: "exclamationmark.shield")
-                        })
+                        Button(
+                            action: {
+                                showReportAlert = true
+                            },
+                            label: {
+                                Label("Report", systemImage: "exclamationmark.shield")
+                            }
+                        )
                     }
                 } label: {
-                    Label(
-                        title: { EmptyView() },
-                        icon: { Image(systemName: "ellipsis") }
-                    )
-                    .opacity(0.6)
+                    Image(systemName: "ellipsis")
+                        .opacity(0.6)
                 }
             }
             .buttonStyle(.borderless)

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsScreen: View {
-    @State private var selectedDetail: SettingsDestination? = nil
+    @State private var selectedDetail: SettingsDestination?
     var body: some View {
         NavigationSplitView {
             List(SettingsDestination.allCases, selection: $selectedDetail) { item in
@@ -40,7 +40,7 @@ struct ListItem: View {
 
 public enum SettingsDestination: String, CaseIterable, Identifiable {
     case account
-    
+
     public var id: String {
         self.rawValue
     }

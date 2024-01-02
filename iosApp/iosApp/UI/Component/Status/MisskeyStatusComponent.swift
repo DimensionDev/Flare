@@ -11,16 +11,23 @@ struct MisskeyStatusComponent: View {
         let actual = misskey.renote ?? misskey
         VStack {
             if misskey.renote != nil {
-                StatusRetweetHeaderComponent(iconSystemName: "arrow.left.arrow.right", nameMarkdown: misskey.user.extra.nameMarkdown, text: "boosted a status")
+                StatusRetweetHeaderComponent(
+                    iconSystemName: "arrow.left.arrow.right",
+                    nameMarkdown: misskey.user.extra.nameMarkdown,
+                    text: "boosted a status"
+                )
             }
-            CommonStatusComponent(content: actual.extra.contentMarkdown, user: actual.user, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
-                MisskeyVisibilityIcon(visibility: actual.visibility)
-            }, onMediaClick: { media in event.onMediaClick(media: media) })
-
+            CommonStatusComponent(
+                content: actual.extra.contentMarkdown,
+                user: actual.user,
+                medias: actual.media,
+                timestamp: actual.createdAt.epochSeconds,
+                headerTrailing: {
+                    MisskeyVisibilityIcon(visibility: actual.visibility)
+                }, onMediaClick: { media in event.onMediaClick(media: media) }, sensitive: actual.sensitive)
             if let quote = misskey.quote {
                 QuotedStatus(data: quote, onMediaClick: event.onMediaClick)
             }
-
             if misskey.reaction.emojiReactions.count > 0 {
                 ScrollView(.horizontal) {
                     LazyHStack {
@@ -39,20 +46,19 @@ struct MisskeyStatusComponent: View {
                     }
                 }
             }
-
             Spacer()
                 .frame(height: 8)
             HStack {
                 Button(action: {
                     event.onReplyClick(data: actual)
-                }) {
+                }, label: {
                     HStack {
                         Image(systemName: "arrowshape.turn.up.left")
                         if let humanizedReplyCount = actual.matrices.humanizedReplyCount {
                             Text(humanizedReplyCount)
                         }
                     }
-                }
+                })
                 Spacer()
                 Menu(content: {
                     Button(action: {
@@ -69,7 +75,7 @@ struct MisskeyStatusComponent: View {
                     Label(
                         title: { EmptyView() },
                         icon: {
-                            if (actual.canRenote) {
+                            if actual.canRenote {
                                 Image(systemName: "arrow.left.arrow.right")
                             } else {
                                 Image(systemName: "slash.circle")
@@ -81,15 +87,14 @@ struct MisskeyStatusComponent: View {
                 Spacer()
                 Button(action: {
                     event.onAddReactionClick(data: actual)
-                }) {
+                }, label: {
                     if actual.reaction.myReaction != nil {
                         Image(systemName: "minus")
                     } else {
                         Image(systemName: "plus")
                     }
-                }
+                })
                 Spacer()
-
                 Menu {
                     if actual.isFromMe {
                         Button(role: .destructive, action: {
@@ -117,36 +122,36 @@ struct MisskeyStatusComponent: View {
             .opacity(0.6)
             .font(.caption)
         }
-            .alert("Delete Status", isPresented: $showDeleteAlert, actions: {
-                Button(role: .cancel) {
-                    showDeleteAlert = false
-                } label: {
-                    Text("Cancel")
-                }
-                Button(role: .destructive) {
-                    event.onDeleteClick(accountKey: actual.accountKey, statusKey: actual.statusKey)
-                    showDeleteAlert = false
-                } label: {
-                    Text("Delete")
-                }
-            }, message: {
-                Text("Confirm delete this status?")
-            })
-            .alert("Report Status", isPresented: $showReportAlert, actions: {
-                Button(role: .cancel) {
-                    showReportAlert = false
-                } label: {
-                    Text("Cancel")
-                }
-                Button(role: .destructive) {
-                    event.onReportClick(data: actual)
-                    showReportAlert = false
-                } label: {
-                    Text("Report")
-                }
-            }, message: {
-                Text("Confirm report this status?")
-            })
+        .alert("Delete Status", isPresented: $showDeleteAlert, actions: {
+            Button(role: .cancel) {
+                showDeleteAlert = false
+            } label: {
+                Text("Cancel")
+            }
+            Button(role: .destructive) {
+                event.onDeleteClick(accountKey: actual.accountKey, statusKey: actual.statusKey)
+                showDeleteAlert = false
+            } label: {
+                Text("Delete")
+            }
+        }, message: {
+            Text("Confirm delete this status?")
+        })
+        .alert("Report Status", isPresented: $showReportAlert, actions: {
+            Button(role: .cancel) {
+                showReportAlert = false
+            } label: {
+                Text("Cancel")
+            }
+            Button(role: .destructive) {
+                event.onReportClick(data: actual)
+                showReportAlert = false
+            } label: {
+                Text("Report")
+            }
+        }, message: {
+            Text("Confirm report this status?")
+        })
     }
 }
 

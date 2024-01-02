@@ -9,20 +9,29 @@ struct StatusTimelineComponent: View {
     var body: some View {
         switch onEnum(of: data) {
         case .success(let success):
-            if (success.data.loadState.refresh is Paging_commonLoadState.Loading || success.data.loadState.prepend is Paging_commonLoadState.Loading) && success.data.itemCount == 0 {
+            if (success.data.loadState.refresh is Paging_commonLoadState.Loading ||
+                success.data.loadState.prepend is Paging_commonLoadState.Loading) &&
+                success.data.itemCount == 0 {
                 ForEach(0...10, id: \.self) { _ in
                     StatusPlaceHolder()
                 }
-            } else if (success.data.loadState.refresh is Paging_commonLoadState.Error || success.data.loadState.prepend is Paging_commonLoadState.Error) && success.data.itemCount == 0 {
+            } else if (success.data.loadState.refresh is Paging_commonLoadState.Error ||
+                       success.data.loadState.prepend is Paging_commonLoadState.Error) &&
+                        success.data.itemCount == 0 {
                 Text("error: ")
-            } else if (success.data.itemCount == 0) {
+            } else if success.data.itemCount == 0 {
                 Text("Empty list")
-            } else  {
-                StatusTimeline(pagingSource: success.data, mastodonEvent: mastodonEvent, misskeyEvent: misskeyEvent, blueskyEvent: blueskyEvent)
+            } else {
+                StatusTimeline(
+                    pagingSource: success.data,
+                    mastodonEvent: mastodonEvent,
+                    misskeyEvent: misskeyEvent,
+                    blueskyEvent: blueskyEvent
+                )
             }
         case .error(let error):
             Text("error: " + (error.throwable.message ?? ""))
-        case .loading(_):
+        case .loading:
             ForEach(0...10, id: \.self) { _ in
                 StatusPlaceHolder()
             }
@@ -36,19 +45,23 @@ struct StatusTimeline: View {
     let misskeyEvent: MisskeyStatusEvent
     let blueskyEvent: BlueskyStatusEvent
     var body: some View {
-        if (pagingSource.loadState.refresh is Paging_commonLoadState.Loading || pagingSource.loadState.prepend is Paging_commonLoadState.Loading) && pagingSource.itemCount == 0 {
+        if (pagingSource.loadState.refresh is Paging_commonLoadState.Loading ||
+            pagingSource.loadState.prepend is Paging_commonLoadState.Loading) &&
+            pagingSource.itemCount == 0 {
             ForEach(0...10, id: \.self) { _ in
                 StatusPlaceHolder()
             }
-        } else if (pagingSource.loadState.refresh is Paging_commonLoadState.Error || pagingSource.loadState.prepend is Paging_commonLoadState.Error) && pagingSource.itemCount == 0 {
+        } else if (pagingSource.loadState.refresh is Paging_commonLoadState.Error ||
+                   pagingSource.loadState.prepend is Paging_commonLoadState.Error) &&
+                    pagingSource.itemCount == 0 {
             Text("error: ")
-        } else if (pagingSource.itemCount == 0) {
+        } else if pagingSource.itemCount == 0 {
             Text("Empty list")
-        } else  {
+        } else {
             ForEach(1...pagingSource.itemCount, id: \.self) { index in
                 let data = pagingSource.peek(index: index - 1)
                 VStack {
-                    if (data != nil) {
+                    if data != nil {
                         switch onEnum(of: data!) {
                         case .mastodon(let mastodon):
                             MastodonStatusComponent(mastodon: mastodon, event: mastodonEvent)
@@ -76,7 +89,25 @@ struct StatusTimeline: View {
 
 struct StatusPlaceHolder: View {
     var body: some View {
-        CommonStatusComponent(content: "haha",user: UiUser.Bluesky(userKey: MicroBlogKey(id: "", host: ""), displayName: "hahaname", handleInternal: "haha.haha", avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg", bannerUrl: nil, description: nil, matrices: UiUser.BlueskyMatrices(fansCount: 0, followsCount: 0, statusesCount: 0), relation: UiRelationBluesky(isFans: false, following: false, blocking: false, muting: false), accountHost: ""), medias: [], timestamp: 1696838289, headerTrailing: {EmptyView()}, onMediaClick: { _ in })
-            .redacted(reason: .placeholder)
+        CommonStatusComponent(
+            content: "haha",
+            user: UiUser.Bluesky(
+                userKey: MicroBlogKey(id: "", host: ""),
+                displayName: "hahaname",
+                handleInternal: "haha.haha",
+                avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg",
+                bannerUrl: nil,
+                description: nil,
+                matrices: UiUser.BlueskyMatrices(fansCount: 0, followsCount: 0, statusesCount: 0),
+                relation: UiRelationBluesky(isFans: false, following: false, blocking: false, muting: false),
+                accountHost: ""
+            ),
+            medias: [],
+            timestamp: 1696838289,
+            headerTrailing: {EmptyView()},
+            onMediaClick: { _ in },
+            sensitive: false
+        )
+        .redacted(reason: .placeholder)
     }
 }

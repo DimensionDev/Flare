@@ -4,23 +4,22 @@ import PhotosUI
 import NetworkImage
 
 struct ComposeScreen: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State var viewModel: ComposeViewModel
     @FocusState private var keyboardFocused: Bool
     @FocusState private var cwKeyboardFocused: Bool
     let onBack: () -> Void
-    
     init(onBack: @escaping () -> Void, status: ComposeStatus? = nil) {
         self.onBack = onBack
-        viewModel = ComposeViewModel(status: status)
+        _viewModel = State(initialValue: ComposeViewModel(status: status))
     }
-    
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
                 ScrollView(.vertical) {
                     VStack(alignment: .leading) {
                         if viewModel.enableCW {
-                            TextField(text: $viewModel.cw) {
+                            TextField(text: $viewModel.contentWarning) {
                                 Text("Content Warning")
                             }
                             .focused($cwKeyboardFocused)
@@ -111,26 +110,29 @@ struct ComposeScreen: View {
                                 }
                             }
                         }
-                        
-                        if let replyState = viewModel.model.replyState, case .success(let reply) = onEnum(of: replyState), reply.data.itemCount > 0, let replyStatus = reply.data.get(index: 0) {
+                        if let replyState = viewModel.model.replyState,
+                           case .success(let reply) = onEnum(of: replyState),
+                           reply.data.itemCount > 0,
+                           let replyStatus = reply.data.get(index: 0) {
                             QuotedStatus(data: replyStatus, onMediaClick: { _ in })
                         }
                     }
                 }
                 Spacer()
-                
                 HStack {
                     if !viewModel.pollViewModel.enabled {
                         PhotosPicker(selection: Binding(get: {
                             viewModel.mediaViewModel.selectedItems
-                        }, set: { Value in
-                            viewModel.mediaViewModel.selectedItems = Value
+                        }, set: { value in
+                            viewModel.mediaViewModel.selectedItems = value
                             viewModel.mediaViewModel.update()
-                        }), matching: .any(of: [.images, .videos,.livePhotos])) {
+                        }), matching: .any(of: [.images, .videos, .livePhotos])) {
                             Image(systemName: "photo")
                         }
                     }
-                    if viewModel.mediaViewModel.selectedItems.count == 0, case .success(let canPoll) = onEnum(of: viewModel.model.canPoll), canPoll.data == KotlinBoolean(bool: true) {
+                    if viewModel.mediaViewModel.selectedItems.count == 0,
+                        case .success(let canPoll) = onEnum(of: viewModel.model.canPoll),
+                       canPoll.data == KotlinBoolean(bool: true) {
                         Button(action: {
                             withAnimation {
                                 viewModel.togglePoll()
@@ -169,7 +171,8 @@ struct ComposeScreen: View {
                             }
                         }
                     }
-                    if case .success(let canCW) = onEnum(of: viewModel.model.canCW), canCW.data == KotlinBoolean(bool: true) {
+                    if case .success(let canCW) = onEnum(of: viewModel.model.canCW),
+                       canCW.data == KotlinBoolean(bool: true) {
                         Button(action: {
                             withAnimation {
                                 viewModel.toggleCW()
@@ -183,12 +186,36 @@ struct ComposeScreen: View {
                             Image(systemName: "exclamationmark.triangle")
                         })
                     }
-                    if case .success(_) = onEnum(of: viewModel.model.emojiState) {
+                    if case .success = onEnum(of: viewModel.model.emojiState) {
                         Button(action: {
                             viewModel.showEmojiPanel()
                         }, label: {
                             Image(systemName: "face.smiling")
                         })
+                        .popover(isPresented: $viewModel.showEmoji) {
+                            if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
+                                ScrollView {
+                                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
+                                        ForEach(1...emojis.data.count, id: \.self) { index in
+                                            if let item = emojis.data[index - 1] as? UiEmoji {
+                                                Button(action: {
+                                                    viewModel.addEmoji(emoji: item)
+                                                }, label: {
+                                                    NetworkImage(url: URL(string: item.url)) { image in
+                                                        image.resizable().scaledToFit()
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    }
+                                    .padding()
+                                }
+                                .if(horizontalSizeClass != .compact, transform: { view in
+                                    view
+                                        .frame(maxWidth: 300, maxHeight: 200)
+                                })
+                            }
+                        }
                     }
                 }
             }
@@ -196,38 +223,6 @@ struct ComposeScreen: View {
         .activateViewModel(viewModel: viewModel)
         .padding()
         .toolbarTitleDisplayMode(.inline)
-        .sheet(isPresented: $viewModel.showEmoji) {
-            if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible()),GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                        ForEach(1...emojis.data.count, id: \.self) { index in
-                            if let item = emojis.data[index - 1] as? UiEmoji {
-                                Button(action: {
-                                    viewModel.addEmoji(emoji: item)
-                                }, label: {
-                                    NetworkImage(url: URL(string: item.url)){ image in
-                                        image.resizable().scaledToFit()
-                                    }
-                                })
-                            }
-                        }
-                    }
-                    .padding()
-                }
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(action: {
-                            viewModel.showEmoji = false
-                        }, label: {
-                            Image(systemName: "xmark")
-                        })
-                    }
-                    ToolbarItem(placement: .principal) {
-                        Text("Compose")
-                    }
-                }
-            }
-        }
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button(action: {

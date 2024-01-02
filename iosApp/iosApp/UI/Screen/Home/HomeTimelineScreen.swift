@@ -6,16 +6,19 @@ struct HomeTimelineScreen: View {
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     var body: some View {
         List {
-            StatusTimelineComponent(data: viewModel.model.listState, mastodonEvent: statusEvent, misskeyEvent: statusEvent, blueskyEvent: statusEvent)
+            StatusTimelineComponent(
+                data: viewModel.model.listState,
+                mastodonEvent: statusEvent,
+                misskeyEvent: statusEvent,
+                blueskyEvent: statusEvent
+            )
         }
         .listStyle(.plain)
         .refreshable {
             do {
                 try await viewModel.model.refresh()
             } catch {
-                
             }
-            
         }
         .activateViewModel(viewModel: viewModel)
     }

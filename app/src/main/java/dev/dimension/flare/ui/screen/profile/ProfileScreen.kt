@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.profile
 
+import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -62,6 +63,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -962,7 +964,30 @@ private fun ProfileMeidasPreview(
                                 Box {
                                     MediaItem(
                                         media = item,
-                                        modifier = Modifier.size(64.dp),
+                                        modifier =
+                                            Modifier.size(64.dp).let {
+                                                if (item is UiMedia.Image && item.sensitive &&
+                                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                                                ) {
+                                                    it.blur(32.dp)
+                                                } else {
+                                                    it
+                                                }
+                                            },
+                                    )
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .matchParentSize()
+                                                .let {
+                                                    if (item is UiMedia.Image && item.sensitive &&
+                                                        Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+                                                    ) {
+                                                        it.background(MaterialTheme.colorScheme.surfaceContainer)
+                                                    } else {
+                                                        it
+                                                    }
+                                                },
                                     )
                                     if (it == count - 1) {
                                         Box(

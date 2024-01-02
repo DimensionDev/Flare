@@ -21,8 +21,12 @@ struct AccountsScreen: View {
                                     Spacer()
                                     switch onEnum(of: viewModel.model.activeAccount) {
                                     case .success(let activeAccount):
-                                        Image(systemName: activeAccount.data.accountKey == user.data.userKey ? "checkmark.circle.fill" : "circle")
-                                            .foregroundStyle(.blue)
+                                        Image(
+                                            systemName: activeAccount.data.accountKey == user.data.userKey ?
+                                            "checkmark.circle.fill" :
+                                                "circle"
+                                        )
+                                        .foregroundStyle(.blue)
                                     default:
                                         Image(systemName: "circle")
                                             .foregroundStyle(.blue)
@@ -35,7 +39,6 @@ struct AccountsScreen: View {
                                     }
                                 }
                             }
-
                         case .error:
                             Text("error")
                         case .loading:
@@ -55,9 +58,9 @@ struct AccountsScreen: View {
         .toolbar {
             Button(action: {
                 showServiceSelectSheet = true
-            }) {
+            }, label: {
                 Image(systemName: "plus")
-            }
+            })
         }
         .sheet(isPresented: $showServiceSelectSheet, content: {
             ServiceSelectScreen {
@@ -69,6 +72,5 @@ struct AccountsScreen: View {
 }
 
 @Observable
-class AccountsViewModel : MoleculeViewModelBase<AccountsState, AccountsPresenter> {
-    
+class AccountsViewModel: MoleculeViewModelBase<AccountsState, AccountsPresenter> {
 }

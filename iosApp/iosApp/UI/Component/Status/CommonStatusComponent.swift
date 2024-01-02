@@ -12,7 +12,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
     let onMediaClick: (UiMedia) -> Void
     let sensitive: Bool
     var body: some View {
-        VStack(alignment:.leading) {
+        VStack(alignment: .leading) {
             HStack {
                 UserComponent(user: user)
                 Spacer()
@@ -33,12 +33,11 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
             }
         }.frame(alignment: .leading)
     }
-    
-    
+
     private func dateFormatter(_ date: Date) -> some View {
         let now = Date()
         let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: now)!
-        
+
         if date > oneDayAgo {
             // If the date is within the last day, use the .timer style
             return Text(date, style: .relative)
@@ -48,4 +47,3 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
         }
     }
 }
-

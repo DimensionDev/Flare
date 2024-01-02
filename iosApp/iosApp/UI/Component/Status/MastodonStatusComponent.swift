@@ -5,19 +5,28 @@ import shared
 struct MastodonStatusComponent: View {
     @State var showDeleteAlert = false
     @State var showReportAlert = false
-
     let mastodon: UiStatus.Mastodon
     let event: MastodonStatusEvent
-
     var body: some View {
         let actual = mastodon.reblogStatus ?? mastodon
         VStack(alignment: .leading) {
             if mastodon.reblogStatus != nil {
-                StatusRetweetHeaderComponent(iconSystemName: "arrow.left.arrow.right", nameMarkdown: mastodon.user.extra.nameMarkdown, text: "boosted a status")
+                StatusRetweetHeaderComponent(
+                    iconSystemName: "arrow.left.arrow.right",
+                    nameMarkdown: mastodon.user.extra.nameMarkdown,
+                    text: "boosted a status"
+                )
             }
-            CommonStatusComponent(content: actual.extra.contentMarkdown, user: actual.user, medias: actual.media, timestamp: actual.createdAt.epochSeconds, headerTrailing: {
-                MastodonVisibilityIcon(visibility: actual.visibility)
-            }, onMediaClick: { media in event.onMediaClick(media: media) }, sensitive: actual.sensitive)
+            CommonStatusComponent(
+                content: actual.extra.contentMarkdown,
+                user: actual.user,
+                medias: actual.media,
+                timestamp: actual.createdAt.epochSeconds,
+                headerTrailing: {
+                    MastodonVisibilityIcon(visibility: actual.visibility)
+                },
+                onMediaClick: { media in event.onMediaClick(media: media) },
+                sensitive: actual.sensitive)
             if let card = mastodon.card {
                 LinkPreview(card: card)
             }
@@ -26,19 +35,19 @@ struct MastodonStatusComponent: View {
             HStack {
                 Button(action: {
                     event.onReplyClick(status: actual)
-                }) {
+                }, label: {
                     HStack {
                         Image(systemName: "arrowshape.turn.up.left")
                         if let humanizedReplyCount = actual.matrices.humanizedReplyCount {
                             Text(humanizedReplyCount)
                         }
                     }
-                }
+                })
                 .opacity(0.6)
                 Spacer()
                 Button(action: {
                     event.onReblogClick(status: actual)
-                }) {
+                }, label: {
                     HStack {
                         if actual.canReblog {
                             Image(systemName: "arrow.left.arrow.right")
@@ -52,7 +61,7 @@ struct MastodonStatusComponent: View {
                     .if(actual.reaction.reblogged) { view in
                         view.foregroundStyle(.link)
                     }
-                }
+                })
                 .if(!actual.reaction.reblogged) { view in
                     view.opacity(0.6)
                 }
@@ -60,7 +69,7 @@ struct MastodonStatusComponent: View {
                 Spacer()
                 Button(action: {
                     event.onLikeClick(status: actual)
-                }) {
+                }, label: {
                     HStack {
                         Image(systemName: "star")
                         if let humanizedFavouriteCount = actual.matrices.humanizedFavouriteCount {
@@ -70,7 +79,7 @@ struct MastodonStatusComponent: View {
                     .if(actual.reaction.liked) { view in
                         view.foregroundStyle(.red, .red)
                     }
-                }
+                })
                 .if(!actual.reaction.liked) { view in
                     view.opacity(0.6)
                 }
@@ -86,7 +95,7 @@ struct MastodonStatusComponent: View {
                         }
                     })
                     if actual.isFromMe {
-                        Button(role: .destructive,action: {
+                        Button(role: .destructive, action: {
                             showDeleteAlert = true
                         }, label: {
                             Label("Delete Toot", systemImage: "trash")
@@ -143,7 +152,6 @@ struct MastodonStatusComponent: View {
         })
     }
 }
-
 
 protocol MastodonStatusEvent {
     func onReplyClick(status: UiStatus.Mastodon)

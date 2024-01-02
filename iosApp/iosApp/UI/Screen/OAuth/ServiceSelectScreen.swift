@@ -36,20 +36,38 @@ struct ServiceSelectScreen: View {
                 switch onEnum(of: viewModel.model.detectedPlatformType) {
                 case .success(let success):
                     switch success.data.toSwiftEnum() {
-                    case .bluesky: NetworkImage(url: .init(string: "https://blueskyweb.xyz/images/apple-touch-icon.png")){ image in
-                        image.resizable().frame(width: 24, height: 24)
-                    }.frame(width: 24, height: 24)
-                    case .mastodon: NetworkImage(url: .init(string: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Mastodon_logotype_%28simple%29_new_hue.svg/65px-Mastodon_logotype_%28simple%29_new_hue.svg.png")){ image in
-                        image.resizable().frame(width: 24, height: 24)
-                    }.frame(width: 24, height: 24)
-                    case .misskey: NetworkImage(url: .init(string: "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png")){ image in
-                        image.resizable().frame(width: 24, height: 24)
-                    }.frame(width: 24, height: 24)
+                    case .bluesky:
+                        NetworkImage(
+                            url: .init(string: "https://blueskyweb.xyz/images/apple-touch-icon.png"),
+                            content: { image in
+                                image.resizable().frame(width: 24, height: 24)
+                            }
+                        )
+                        .frame(width: 24, height: 24)
+                    case .mastodon:
+                        NetworkImage(
+                            url: .init(
+                                string: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/" +
+                                "Mastodon_logotype_%28simple%29_new_hue.svg/" +
+                                "65px-Mastodon_logotype_%28simple%29_new_hue.svg.png"
+                            ),
+                            content: { image in
+                                image.resizable().frame(width: 24, height: 24)
+                            }
+                        ) .frame(width: 24, height: 24)
+                    case .misskey:
+                        NetworkImage(
+                            url: .init(string: "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png"),
+                            content: { image in
+                                image.resizable().frame(width: 24, height: 24)
+                            }
+                        )
+                        .frame(width: 24, height: 24)
                     }
-                case .error(_):
+                case .error:
                     Image(systemName: "questionmark")
                         .frame(width: 24, height: 24)
-                case .loading(_):
+                case .loading:
                     Image(systemName: "questionmark")
                         .frame(width: 24, height: 24)
                         .redacted(reason: .placeholder)
@@ -59,22 +77,25 @@ struct ServiceSelectScreen: View {
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             ) {
-                if viewModel.model.canNext, case .success(let success) = onEnum(of: viewModel.model.detectedPlatformType) {
+                if viewModel.model.canNext,
+                   case .success(let success) = onEnum(of: viewModel.model.detectedPlatformType) {
                     switch success.data.toSwiftEnum() {
                     case .bluesky:
                         VStack {
-                            TextField("Base URL, e.g. https://bsky.social", text: $viewModel.blueskyInputViewModel.baseUrl)
-                                .disableAutocorrection(true)
-                                .textInputAutocapitalization(.never)
-                                .keyboardType(.URL)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .disabled(viewModel.model.loading)
+                            TextField(
+                                "Base URL, e.g. https://bsky.social",
+                                text: $viewModel.blueskyInputViewModel.baseUrl
+                            )
+                            .disableAutocorrection(true)
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.URL)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .disabled(viewModel.model.loading)
                             TextField("User Name", text: $viewModel.blueskyInputViewModel.username)
                                 .disableAutocorrection(true)
                                 .textInputAutocapitalization(.never)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(viewModel.model.loading)
-                            
                             SecureField("Password", text: $viewModel.blueskyInputViewModel.password)
                                 .disableAutocorrection(true)
                                 .textInputAutocapitalization(.never)
@@ -82,10 +103,14 @@ struct ServiceSelectScreen: View {
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(viewModel.model.loading)
                             Button(action: {
-                                viewModel.model.blueskyLoginState.login(baseUrl: viewModel.blueskyInputViewModel.baseUrl, username: viewModel.blueskyInputViewModel.username, password: viewModel.blueskyInputViewModel.password)
-                            }) {
+                                viewModel.model.blueskyLoginState.login(
+                                    baseUrl: viewModel.blueskyInputViewModel.baseUrl,
+                                    username: viewModel.blueskyInputViewModel.username,
+                                    password: viewModel.blueskyInputViewModel.password
+                                )
+                            }, label: {
                                 Text("Confirm")
-                            }
+                            })
                             .buttonStyle(.borderedProminent)
                         }
                         .listRowSeparator(.hidden)
@@ -126,10 +151,9 @@ struct ServiceSelectScreen: View {
                                     VStack {
                                         HStack {
                                             if instance.iconUrl != nil {
-                                                NetworkImage(url: URL(string: instance.iconUrl!)){ image in
+                                                NetworkImage(url: URL(string: instance.iconUrl!)) { image in
                                                     image.resizable().frame(width: 24, height: 24)
                                                 }.frame(width: 24, height: 24)
-                                                
                                             }
                                             Text(instance.name)
                                                 .font(.title)
@@ -141,7 +165,7 @@ struct ServiceSelectScreen: View {
                                             .frame(maxWidth: .infinity)
                                     }.background {
                                         if instance.bannerUrl != nil {
-                                            NetworkImage(url: URL(string: instance.bannerUrl!)){ image in
+                                            NetworkImage(url: URL(string: instance.bannerUrl!)) { image in
                                                 image.resizable().scaledToFill()
                                             }
                                             .opacity(0.15)
@@ -178,9 +202,9 @@ struct ServiceSelectScreen: View {
         .frame(maxHeight: .infinity, alignment: .top)
         .activateViewModel(viewModel: viewModel)
         .onOpenURL { url in
-            if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON)) {
+            if url.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON) {
                 viewModel.model.mastodonLoginState.resume(url: url.absoluteString)
-            } else if (url.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY)) {
+            } else if url.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY) {
                 viewModel.model.misskeyLoginState.resume(url: url.absoluteString)
             }
         }
@@ -203,7 +227,7 @@ struct InstancePlaceHolder: View {
 }
 
 @Observable
-class ServiceSelectViewModel : MoleculeViewModelProto {
+class ServiceSelectViewModel: MoleculeViewModelProto {
     typealias Model = ServiceSelectState
     typealias Presenter = ServiceSelectPresenter
     var model: Model
@@ -226,7 +250,6 @@ class ServiceSelectViewModel : MoleculeViewModelProto {
             }
         })
         self.model = presenter.models.value
-        
         instanceURLPublisher
             .debounce(for: .milliseconds(666), scheduler: DispatchQueue.main)
             .sink { [weak self] value in
@@ -234,7 +257,6 @@ class ServiceSelectViewModel : MoleculeViewModelProto {
             }
             .store(in: &subscriptions)
     }
-    
 }
 
 @Observable

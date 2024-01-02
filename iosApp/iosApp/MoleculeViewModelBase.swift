@@ -6,10 +6,10 @@ import shared
 class MoleculeViewModelBase<Model, Presenter: PresenterBase<Model>>: MoleculeViewModelProto {
     typealias Model = Model
     typealias Presenter = Presenter
-    
+
     internal let presenter = Presenter()
     var model: Model
-    
+
     init() {
         model = presenter.models.value
     }

@@ -29,10 +29,10 @@
 		066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0442B3ACDC1006F28F4 /* Collections */; };
 		066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0462B3ACDC1006F28F4 /* DequeModule */; };
 		066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0482B3ACDC1006F28F4 /* OrderedCollections */; };
+		066F23052B43BD59004A4A8D /* ProfileMediaListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066F23042B43BD59004A4A8D /* ProfileMediaListScreen.swift */; };
 		067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 067D89762AD25C1700F8F932 /* MarkdownUI */; };
 		067D89792AD25DB000F8F932 /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D89782AD25DB000F8F932 /* MarkdownTheme.swift */; };
 		067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D897D2AD3A2F900F8F932 /* MediaComponent.swift */; };
-		067D898A2AD3A88500F8F932 /* AdaptiveGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D89892AD3A88500F8F932 /* AdaptiveGrid.swift */; };
 		067D898C2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D898B2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift */; };
 		067D898E2AD3F52100F8F932 /* MastodonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D898D2AD3F52100F8F932 /* MastodonStatusComponent.swift */; };
 		067D89902AD3FC5300F8F932 /* MisskeyStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D898F2AD3FC5300F8F932 /* MisskeyStatusComponent.swift */; };
@@ -69,9 +69,9 @@
 		0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTimelineScreen.swift; sourceTree = "<group>"; };
 		066151202AC540B700CCB945 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonStatusComponent.swift; sourceTree = "<group>"; };
+		066F23042B43BD59004A4A8D /* ProfileMediaListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaListScreen.swift; sourceTree = "<group>"; };
 		067D89782AD25DB000F8F932 /* MarkdownTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTheme.swift; sourceTree = "<group>"; };
 		067D897D2AD3A2F900F8F932 /* MediaComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaComponent.swift; sourceTree = "<group>"; };
-		067D89892AD3A88500F8F932 /* AdaptiveGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveGrid.swift; sourceTree = "<group>"; };
 		067D898B2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonVisibilityIcon.swift; sourceTree = "<group>"; };
 		067D898D2AD3F52100F8F932 /* MastodonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastodonStatusComponent.swift; sourceTree = "<group>"; };
 		067D898F2AD3FC5300F8F932 /* MisskeyStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyStatusComponent.swift; sourceTree = "<group>"; };
@@ -167,7 +167,6 @@
 				0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */,
 				066151202AC540B700CCB945 /* HomeScreen.swift */,
 				060501BD2ACAC4ED00DBCCEB /* NotificationScreen.swift */,
-				B62B2851F576CA14E4CE93E0 /* ProfileScreen.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -179,11 +178,19 @@
 				060501C32ACBF40200DBCCEB /* Status */,
 				060501C72ACD09B800DBCCEB /* UserAvatar.swift */,
 				067D89782AD25DB000F8F932 /* MarkdownTheme.swift */,
-				067D89892AD3A88500F8F932 /* AdaptiveGrid.swift */,
 				067D898B2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift */,
 				06C9C5602B34241400AE5284 /* AdativeTabView.swift */,
 			);
 			path = Component;
+			sourceTree = "<group>";
+		};
+		066F23032B43BD45004A4A8D /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				B62B2851F576CA14E4CE93E0 /* ProfileScreen.swift */,
+				066F23042B43BD59004A4A8D /* ProfileMediaListScreen.swift */,
+			);
+			path = Profile;
 			sourceTree = "<group>";
 		};
 		06AD156C2AC40067000DC865 /* OAuth */ = {
@@ -207,6 +214,7 @@
 		06D5C9162AC3BB35007439D5 /* Screen */ = {
 			isa = PBXGroup;
 			children = (
+				066F23032B43BD45004A4A8D /* Profile */,
 				060881BF2AE10C51001AAD2F /* Compose */,
 				060881B82ADE5520001AAD2F /* Settings */,
 				0620DD9C2AC44224009BD1BE /* Home */,
@@ -303,6 +311,7 @@
 				7555FF77242A565900829871 /* Sources */,
 				7555FF79242A565900829871 /* Resources */,
 				F85CB1118929364A9C6EFABC /* Frameworks */,
+				066F23062B43BE8A004A4A8D /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -388,6 +397,23 @@
 			shellPath = /bin/sh;
 			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
 		};
+		066F23062B43BE8A004A4A8D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -397,6 +423,7 @@
 			files = (
 				060501C02ACAC8AF00DBCCEB /* SplashScreen.swift in Sources */,
 				060881AF2AD908FA001AAD2F /* LinkPreview.swift in Sources */,
+				066F23052B43BD59004A4A8D /* ProfileMediaListScreen.swift in Sources */,
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
 				067D898C2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift in Sources */,
 				060881BE2AE109FA001AAD2F /* ComposeScreen.swift in Sources */,
@@ -407,7 +434,6 @@
 				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
 				066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */,
 				066151212AC540B700CCB945 /* HomeScreen.swift in Sources */,
-				067D898A2AD3A88500F8F932 /* AdaptiveGrid.swift in Sources */,
 				060881C12AE10D35001AAD2F /* ComposeViewModel.swift in Sources */,
 				0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */,
 				068D2E0B2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift in Sources */,

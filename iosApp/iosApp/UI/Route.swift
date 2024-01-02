@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import shared
 
-struct RouterView : View {
+struct RouterView: View {
     var body: some View {
         SplashScreen { type in
             ZStack {
@@ -16,13 +16,13 @@ struct RouterView : View {
                 }
             }.sheet(isPresented: Binding(get: {
                 type == .login
-            }, set: { Value in
-                
+            }, set: { _ in
+
             }), content: {
                 if type == .login {
                     ServiceSelectScreen(
                         toHome: {
-                            
+
                         }
                     )
                     .interactiveDismissDisabled()
@@ -33,12 +33,12 @@ struct RouterView : View {
 }
 
 @Observable
-class RouterViewModel : MoleculeViewModelProto {
+class RouterViewModel: MoleculeViewModelProto {
     let presenter: SplashPresenter
     var model: __SplashType
     typealias Model = __SplashType
     typealias Presenter = SplashPresenter
-    
+
     init() {
         presenter = SplashPresenter(toHome: {}, toLogin: {})
         model = presenter.models.value
@@ -49,26 +49,26 @@ public enum TabDestination: Codable, Hashable {
     case profile(userKey: String)
     case statusDetail(statusKey: String)
     case profileWithUserNameAndHost(userName: String, host: String)
-    case search(q: String)
+    case search(query: String)
 }
 
 @Observable
 final class Router<T: Hashable>: ObservableObject {
-    
+
     var navPath = NavigationPath()
-    
+
     func navigate(to destination: T) {
         navPath.append(destination)
     }
-    
+
     func navigateBack(count: Int = 1) {
         navPath.removeLast(count)
     }
-    
+
     func navigateToRoot() {
         navPath.removeLast(navPath.count)
     }
-    
+
     func clearBackStack() {
         navPath = NavigationPath()
     }

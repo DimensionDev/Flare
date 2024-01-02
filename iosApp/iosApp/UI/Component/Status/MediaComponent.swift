@@ -14,7 +14,7 @@ struct MediaComponent: View {
         } else {
             [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
         }
-        ZStack(alignment:.topLeading) {
+        ZStack(alignment: .topLeading) {
             LazyVGrid(columns: columns) {
                 if medias.count == 1 {
                     Button(action: {
@@ -30,7 +30,7 @@ struct MediaComponent: View {
                         case .gif(let gif):
                             MediaItemComponent(media: medias[0])
                                 .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
-                        case .audio(_):
+                        case .audio:
                             MediaItemComponent(media: medias[0])
                         }
                     })
@@ -94,17 +94,17 @@ struct MediaItemComponent: View {
             Color.clear.overlay {
                 switch onEnum(of: media) {
                 case .image(let data):
-                    NetworkImage(url: URL(string: data.previewUrl)){ image in
+                    NetworkImage(url: URL(string: data.previewUrl)) { image in
                         image.resizable().scaledToFill()
                     }
                 case .video(let video):
-                    NetworkImage(url: URL(string: video.thumbnailUrl)){ image in
+                    NetworkImage(url: URL(string: video.thumbnailUrl)) { image in
                         image.resizable().scaledToFill()
                     }
-                case .audio(_):
+                case .audio:
                     Text("")
                 case .gif(let gif):
-                    NetworkImage(url: URL(string: gif.previewUrl)){ image in
+                    NetworkImage(url: URL(string: gif.previewUrl)) { image in
                         image.resizable().scaledToFill()
                     }
                 }

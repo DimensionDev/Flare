@@ -71,6 +71,9 @@ struct ProfileScreen: View {
                     blueskyEvent: statusEvent
                 )
             }
+            .refreshable {
+                try? await viewModel.model.refresh()
+            }
             .listStyle(.plain)
         }
         .if(horizontalSizeClass == .compact, transform: { view in

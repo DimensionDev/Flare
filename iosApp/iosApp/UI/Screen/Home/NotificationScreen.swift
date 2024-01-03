@@ -19,6 +19,7 @@ struct NotificationScreen: View {
                     }
                 }
                 .pickerStyle(.segmented)
+                .listRowSeparator(.hidden)
             }
             StatusTimelineComponent(
                 data: viewModel.model.listState,
@@ -29,10 +30,7 @@ struct NotificationScreen: View {
         }
         .listStyle(.plain)
         .refreshable {
-            do {
-                try await viewModel.model.refresh()
-            } catch {
-            }
+            try? await viewModel.model.refresh()
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

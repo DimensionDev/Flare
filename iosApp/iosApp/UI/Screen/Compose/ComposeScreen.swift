@@ -128,6 +128,7 @@ struct ComposeScreen: View {
                             )
                         }
                     }
+                    .padding()
                 }
                 let iconSize: CGFloat = 24
                 Divider()
@@ -234,18 +235,18 @@ struct ComposeScreen: View {
                                     }
                                     .if(horizontalSizeClass != .compact, transform: { view in
                                         view
-                                            .frame(maxWidth: 300, maxHeight: 200)
+                                            .frame(width: 384, height: 256)
                                     })
                                 }
                             }
                         }
                     }
+                    .padding([.bottom, .horizontal])
                 })
                 .buttonStyle(.bordered)
             }
         }
         .activateViewModel(viewModel: viewModel)
-        .padding()
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {

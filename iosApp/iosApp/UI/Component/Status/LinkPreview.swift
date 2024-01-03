@@ -12,21 +12,20 @@ struct LinkPreview: View {
                 }
                 VStack(alignment: .leading) {
                     Text(card.title)
+                        .lineLimit(1)
                     if let desc = card.description_ {
                         Text(desc)
                             .font(.caption)
                             .foregroundStyle(.gray)
+                            .lineLimit(2)
                     }
                 }
                 .foregroundStyle(.foreground)
                 Spacer()
             }
         }
+        .buttonStyle(.plain)
+        .background(Color(uiColor: UIColor.secondarySystemBackground))
         .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.gray)
-                .opacity(0.5)
-        )
     }
 }

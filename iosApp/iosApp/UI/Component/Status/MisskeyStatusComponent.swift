@@ -5,6 +5,7 @@ import NetworkImage
 struct MisskeyStatusComponent: View {
     @State var showDeleteAlert = false
     @State var showReportAlert = false
+    @Environment(\.openURL) private var openURL
     let misskey: UiStatus.Misskey
     let event: MisskeyStatusEvent
     var body: some View {
@@ -19,6 +20,7 @@ struct MisskeyStatusComponent: View {
             }
             CommonStatusComponent(
                 content: actual.extra.contentMarkdown,
+                contentWarning: actual.contentWarningText,
                 user: actual.user,
                 medias: actual.media,
                 timestamp: actual.createdAt.epochSeconds,
@@ -26,7 +28,18 @@ struct MisskeyStatusComponent: View {
                     MisskeyVisibilityIcon(visibility: actual.visibility)
                 }, onMediaClick: { media in event.onMediaClick(media: media) }, sensitive: actual.sensitive)
             if let quote = misskey.quote {
-                QuotedStatus(data: quote, onMediaClick: event.onMediaClick)
+                Spacer()
+                    .frame(height: 8)
+                QuotedStatus(
+                    data: quote,
+                    onMediaClick: event.onMediaClick,
+                    onUserClick: { user in
+                        openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
+                    },
+                    onStatusClick: { _ in
+                        event.onQuoteClick(data: quote)
+                    }
+                )
             }
             if misskey.reaction.emojiReactions.count > 0 {
                 ScrollView(.horizontal) {

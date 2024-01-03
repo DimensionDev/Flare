@@ -101,7 +101,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
             createdAt
                 ?: throw IllegalArgumentException("mastodon Status.createdAt should not be null"),
         content = content.orEmpty(),
-        contentWarningText = spoilerText,
+        contentWarningText = spoilerText?.takeIf { it.isNotEmpty() },
         user = user,
         matrices =
             UiStatus.Mastodon.Matrices(

@@ -91,6 +91,7 @@ struct StatusPlaceHolder: View {
     var body: some View {
         CommonStatusComponent(
             content: "haha",
+            contentWarning: nil,
             user: UiUser.Bluesky(
                 userKey: MicroBlogKey(id: "", host: ""),
                 displayName: "hahaname",

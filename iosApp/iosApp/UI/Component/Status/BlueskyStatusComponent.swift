@@ -4,6 +4,7 @@ import shared
 struct BlueskyStatusComponent: View {
     @State var showDeleteAlert = false
     @State var showReportAlert = false
+    @Environment(\.openURL) private var openURL
     let bluesky: UiStatus.Bluesky
     let event: BlueskyStatusEvent
     var body: some View {
@@ -17,6 +18,7 @@ struct BlueskyStatusComponent: View {
             }
             CommonStatusComponent(
                 content: bluesky.extra.contentMarkdown,
+                contentWarning: nil,
                 user: bluesky.user,
                 medias: bluesky.medias,
                 timestamp: bluesky.indexedAt.epochSeconds,
@@ -28,7 +30,18 @@ struct BlueskyStatusComponent: View {
                 LinkPreview(card: card)
             }
             if let quote = bluesky.quote {
-                QuotedStatus(data: quote, onMediaClick: event.onMediaClick)
+                Spacer()
+                    .frame(height: 8)
+                QuotedStatus(
+                    data: quote,
+                    onMediaClick: event.onMediaClick,
+                    onUserClick: { user in
+                        openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
+                    },
+                    onStatusClick: { _ in
+                        event.onQuoteClick(data: quote)
+                    }
+                )
             }
             Spacer()
                 .frame(height: 8)
@@ -46,6 +59,7 @@ struct BlueskyStatusComponent: View {
                         }
                     }
                 )
+                .opacity(0.6)
                 Spacer()
                 Menu(content: {
                     Button(action: {
@@ -60,9 +74,16 @@ struct BlueskyStatusComponent: View {
                     })
                 }, label: {
                     Image(systemName: "arrow.left.arrow.right")
+                    if let humanizedRepostCount = bluesky.matrices.humanizedRepostCount {
+                        Text(humanizedRepostCount)
+                    }
                 })
                 .if(!bluesky.reaction.reposted) { view in
                     view.opacity(0.6)
+                }
+                .if(bluesky.reaction.reposted) { view in
+                    view
+                        .tint(.accentColor)
                 }
                 Spacer()
                 Button(
@@ -83,6 +104,10 @@ struct BlueskyStatusComponent: View {
                 )
                 .if(!bluesky.reaction.liked) { view in
                     view.opacity(0.6)
+                }
+                .if(bluesky.reaction.liked) { view in
+                    view
+                        .tint(.red)
                 }
                 Spacer()
                 Menu {

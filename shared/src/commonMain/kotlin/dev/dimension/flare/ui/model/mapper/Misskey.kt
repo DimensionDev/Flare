@@ -71,7 +71,7 @@ internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
         card = null,
         createdAt = createdAt.toInstant(),
         content = text.orEmpty(),
-        contentWarningText = cw,
+        contentWarningText = cw?.takeIf { it.isNotEmpty() },
         user = user,
         matrices =
             UiStatus.Misskey.Matrices(

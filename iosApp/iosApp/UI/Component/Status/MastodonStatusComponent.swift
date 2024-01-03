@@ -19,6 +19,7 @@ struct MastodonStatusComponent: View {
             }
             CommonStatusComponent(
                 content: actual.extra.contentMarkdown,
+                contentWarning: actual.contentWarningText,
                 user: actual.user,
                 medias: actual.media,
                 timestamp: actual.createdAt.epochSeconds,

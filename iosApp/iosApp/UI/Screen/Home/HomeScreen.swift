@@ -71,11 +71,7 @@ struct HomeScreen: View {
             secondaryItems: [
             ],
             leading: HStack {
-                if case .success(let data) = onEnum(of: viewModel.model.user) {
-                    UserComponent(user: data.data)
-                } else {
-                    userAvatarPlaceholder(size: 36)
-                }
+                AccountItem(userState: viewModel.model.user)
                 Spacer()
                 Button(action: {
                     showCompose = true
@@ -257,5 +253,48 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
                 }
             }
         }
+    }
+}
+
+class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
+    static let shared = EmptyStatusEvent()
+    private init() {
+        
+    }
+    func onReplyClick(status: UiStatus.Mastodon) {
+    }
+    func onReblogClick(status: UiStatus.Mastodon) {
+    }
+    func onLikeClick(status: UiStatus.Mastodon) {
+    }
+    func onBookmarkClick(status: UiStatus.Mastodon) {
+    }
+    func onMediaClick(media: UiMedia) {
+    }
+    func onReportClick(status: UiStatus.Mastodon) {
+    }
+    func onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.MisskeyEmojiReaction) {
+    }
+    func onReplyClick(data: UiStatus.Misskey) {
+    }
+    func onReblogClick(data: UiStatus.Misskey) {
+    }
+    func onQuoteClick(data: UiStatus.Misskey) {
+    }
+    func onAddReactionClick(data: UiStatus.Misskey) {
+    }
+    func onReportClick(data: UiStatus.Misskey) {
+    }
+    func onReplyClick(data: UiStatus.Bluesky) {
+    }
+    func onReblogClick(data: UiStatus.Bluesky) {
+    }
+    func onQuoteClick(data: UiStatus.Bluesky) {
+    }
+    func onLikeClick(data: UiStatus.Bluesky) {
+    }
+    func onReportClick(data: UiStatus.Bluesky, reason: BlueskyReportStatusStateReportReason) {
+    }
+    func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
     }
 }

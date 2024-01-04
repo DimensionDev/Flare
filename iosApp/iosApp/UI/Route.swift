@@ -10,9 +10,19 @@ struct RouterView: View {
                 case .home:
                     HomeScreen()
                 case .login:
-                    Text("Flare")
+                    Image(.logo)
+                        .resizable()
+                        .frame(width: 96, height: 96)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .clipped()
+                        .padding()
                 case .splash:
-                    Text("Flare")
+                    Image(.logo)
+                        .resizable()
+                        .frame(width: 96, height: 96)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .clipped()
+                        .padding()
                 }
             }.sheet(isPresented: Binding(get: {
                 type == .login

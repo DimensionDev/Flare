@@ -63,7 +63,6 @@ import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.login.NodeInfoPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -418,16 +417,6 @@ private fun serviceSelectPresenter(
     onBack: (() -> Unit)?,
 ) = run {
     val instanceInputState = rememberTextFieldState()
-    val nodeInfoState = remember { NodeInfoPresenter() }.invoke()
-    LaunchedEffect(Unit) {
-        instanceInputState
-            .textAsFlow()
-            .distinctUntilChanged()
-            .debounce(666L)
-            .collect {
-                nodeInfoState.setFilter(it.toString())
-            }
-    }
     val state =
         remember {
             ServiceSelectPresenter(
@@ -440,6 +429,15 @@ private fun serviceSelectPresenter(
                 launchUrl = launchUrl,
             )
         }.invoke()
+    LaunchedEffect(Unit) {
+        instanceInputState
+            .textAsFlow()
+            .distinctUntilChanged()
+            .debounce(666L)
+            .collect {
+                state.setFilter(it.toString())
+            }
+    }
     val blueskyLoginState = blueskyLoginPresenter()
     object : ServiceSelectState by state {
         val instanceInputState = instanceInputState
@@ -449,14 +447,14 @@ private fun serviceSelectPresenter(
             instanceInputState.edit {
                 replace(0, instanceInputState.text.length, instance.domain)
             }
-            nodeInfoState.setFilter(instance.domain)
+            setFilter(instance.domain)
         }
 
         fun clearInstance() {
             instanceInputState.edit {
                 replace(0, instanceInputState.text.length, "")
             }
-            nodeInfoState.setFilter("")
+            setFilter("")
         }
     }
 }

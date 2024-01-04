@@ -6,10 +6,8 @@ import shared
 class MoleculeViewModelBase<Model, Presenter: PresenterBase<Model>>: MoleculeViewModelProto {
     typealias Model = Model
     typealias Presenter = Presenter
-
     internal let presenter = Presenter()
     var model: Model
-
     init() {
         model = presenter.models.value
     }
@@ -22,11 +20,28 @@ protocol MoleculeViewModelProto: AnyObject {
     var model: Model { get set }
 }
 
+protocol ModelChangedProto {
+    associatedtype Model: AnyObject
+    func onModelChanged(value: Model)
+    func callOnModelChangedIfConformed(with model: AnyObject)
+}
+
+extension ModelChangedProto {
+    func callOnModelChangedIfConformed(with model: AnyObject) {
+        if let model = model as? Model {
+            onModelChanged(value: model)
+        }
+    }
+}
+
 extension MoleculeViewModelProto {
     @MainActor
     func activate() async {
         for await model in presenter.models {
             self.model = model
+            if let notify = self as? any ModelChangedProto {
+                notify.callOnModelChangedIfConformed(with: model)
+            }
         }
     }
 }

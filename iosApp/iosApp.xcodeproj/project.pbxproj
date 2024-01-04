@@ -41,6 +41,11 @@
 		06AD156B2AC3F454000DC865 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156A2AC3F454000DC865 /* Route.swift */; };
 		06C9C5612B34241400AE5284 /* AdativeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C9C5602B34241400AE5284 /* AdativeTabView.swift */; };
 		06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */; };
+		06DF79CF2B465D1D00CF21FE /* AboutScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79CE2B465D1D00CF21FE /* AboutScreen.swift */; };
+		06DF79D12B4699E200CF21FE /* AppearanceScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D02B4699E200CF21FE /* AppearanceScreen.swift */; };
+		06DF79D32B46AC7F00CF21FE /* StorageScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D22B46AC7F00CF21FE /* StorageScreen.swift */; };
+		06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D62B46B24800CF21FE /* SettingsRepository.swift */; };
+		06DF79DA2B46B26600CF21FE /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */; };
 		B62B206B672982F032F669C3 /* ProfileScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2851F576CA14E4CE93E0 /* ProfileScreen.swift */; };
 		B62B213A8296FC2A13CAE4D7 /* KotlinByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */; };
 		B62B238878D4BA843A1BB66F /* ViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2CF30DB9A3370D1BB87E /* ViewExt.swift */; };
@@ -84,6 +89,11 @@
 		06BE4D632B3181B0000C6D7D /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
 		06C9C5602B34241400AE5284 /* AdativeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdativeTabView.swift; sourceTree = "<group>"; };
 		06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSelectScreen.swift; sourceTree = "<group>"; };
+		06DF79CE2B465D1D00CF21FE /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
+		06DF79D02B4699E200CF21FE /* AppearanceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceScreen.swift; sourceTree = "<group>"; };
+		06DF79D22B46AC7F00CF21FE /* StorageScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageScreen.swift; sourceTree = "<group>"; };
+		06DF79D62B46B24800CF21FE /* SettingsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRepository.swift; sourceTree = "<group>"; };
+		06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -154,6 +164,9 @@
 			children = (
 				060881B92ADE555D001AAD2F /* SettingsScreen.swift */,
 				060881BB2ADE5C68001AAD2F /* AccountsScreen.swift */,
+				06DF79CE2B465D1D00CF21FE /* AboutScreen.swift */,
+				06DF79D02B4699E200CF21FE /* AppearanceScreen.swift */,
+				06DF79D22B46AC7F00CF21FE /* StorageScreen.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -233,6 +246,31 @@
 			path = Screen;
 			sourceTree = "<group>";
 		};
+		06DF79D42B46B1C700CF21FE /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				06DF79D82B46B25900CF21FE /* Model */,
+				06DF79D52B46B23300CF21FE /* Repository */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		06DF79D52B46B23300CF21FE /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				06DF79D62B46B24800CF21FE /* SettingsRepository.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
+		06DF79D82B46B25900CF21FE /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		42799AB246E5F90AF97AA0EF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -263,6 +301,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				06DF79D42B46B1C700CF21FE /* Data */,
 				06BE4D632B3181B0000C6D7D /* iosApp.entitlements */,
 				06D5C9152AC3BB2B007439D5 /* UI */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
@@ -433,6 +472,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				060501C02ACAC8AF00DBCCEB /* SplashScreen.swift in Sources */,
+				06DF79CF2B465D1D00CF21FE /* AboutScreen.swift in Sources */,
 				060881AF2AD908FA001AAD2F /* LinkPreview.swift in Sources */,
 				066F23052B43BD59004A4A8D /* ProfileMediaListScreen.swift in Sources */,
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
@@ -440,15 +480,19 @@
 				060881BE2AE109FA001AAD2F /* ComposeScreen.swift in Sources */,
 				068D2E0D2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift in Sources */,
 				067D89902AD3FC5300F8F932 /* MisskeyStatusComponent.swift in Sources */,
+				06DF79D12B4699E200CF21FE /* AppearanceScreen.swift in Sources */,
 				060881B72ADE4F44001AAD2F /* MisskeyNotificationComponent.swift in Sources */,
 				067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */,
 				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
+				06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */,
 				066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */,
 				066151212AC540B700CCB945 /* HomeScreen.swift in Sources */,
 				060881C12AE10D35001AAD2F /* ComposeViewModel.swift in Sources */,
 				0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */,
 				068D2E0B2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift in Sources */,
 				067D898E2AD3F52100F8F932 /* MastodonStatusComponent.swift in Sources */,
+				06DF79DA2B46B26600CF21FE /* AppearanceSettings.swift in Sources */,
+				06DF79D32B46AC7F00CF21FE /* StorageScreen.swift in Sources */,
 				060501BC2ACA985B00DBCCEB /* StatusTimelineBuilder.swift in Sources */,
 				060501BE2ACAC4ED00DBCCEB /* NotificationScreen.swift in Sources */,
 				06AD156B2AC3F454000DC865 /* Route.swift in Sources */,

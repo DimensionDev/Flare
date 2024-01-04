@@ -10,6 +10,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.humanizer.humanizePercentage
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import moe.tlaster.ktml.Ktml
@@ -655,4 +656,96 @@ private fun resolveMisskeyEmoji(
             "https://$accountHost/emoji/$it.webp"
         }
     }
+}
+
+fun createSampleStatus(user: UiUser) =
+    when (user) {
+        is UiUser.Bluesky -> createBlueskyStatus(user)
+        is UiUser.Mastodon -> createMastodonStatus(user)
+        is UiUser.Misskey -> createMisskeyStatus(user)
+    }
+
+private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon {
+    return UiStatus.Mastodon(
+        statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
+        accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
+        user = user,
+        content = "Sample content for Mastodon status",
+        contentWarningText = null,
+        matrices =
+            UiStatus.Mastodon.Matrices(
+                replyCount = 10,
+                reblogCount = 5,
+                favouriteCount = 15,
+            ),
+        media = persistentListOf(),
+        createdAt = Clock.System.now(),
+        visibility = UiStatus.Mastodon.Visibility.Public,
+        poll = null,
+        card = null,
+        reaction =
+            UiStatus.Mastodon.Reaction(
+                liked = false,
+                reblogged = false,
+                bookmarked = false,
+            ),
+        sensitive = false,
+        reblogStatus = null,
+        raw = Status(),
+    )
+}
+
+private fun createBlueskyStatus(user: UiUser.Bluesky): UiStatus.Bluesky {
+    return UiStatus.Bluesky(
+        accountKey = MicroBlogKey(id = "123", host = user.userKey.host),
+        statusKey = MicroBlogKey(id = "456", host = user.userKey.host),
+        user = user,
+        indexedAt = Clock.System.now(),
+        repostBy = null,
+        quote = null,
+        content = "Bluesky post content",
+        medias = persistentListOf(),
+        card = null,
+        matrices =
+            UiStatus.Bluesky.Matrices(
+                replyCount = 20,
+                likeCount = 30,
+                repostCount = 40,
+            ),
+        reaction =
+            UiStatus.Bluesky.Reaction(
+                repostUri = null,
+                likedUri = null,
+            ),
+        cid = "cid_sample",
+        uri = "https://bluesky.post/uri",
+    )
+}
+
+private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey {
+    return UiStatus.Misskey(
+        statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
+        accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
+        user = user,
+        content = "Misskey post content",
+        contentWarningText = null,
+        matrices =
+            UiStatus.Misskey.Matrices(
+                replyCount = 15,
+                renoteCount = 25,
+            ),
+        media = persistentListOf(),
+        createdAt = Clock.System.now(),
+        visibility = UiStatus.Misskey.Visibility.Public,
+        poll = null,
+        card = null,
+        reaction =
+            UiStatus.Misskey.Reaction(
+                emojiReactions = persistentListOf(),
+                myReaction = null,
+            ),
+        sensitive = false,
+        quote = null,
+        renote = null,
+    )
 }

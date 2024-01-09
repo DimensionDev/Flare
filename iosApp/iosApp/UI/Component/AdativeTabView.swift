@@ -39,7 +39,8 @@ struct AdativeTabView: View {
                             }
                             .listRowSeparator(.hidden)
                             .tag(item)
-                            .listRowBackground(selectedTabItem == item ? Color.accentColor : Color.clear)
+                            .listRowBackground(selectedTabItem == item ? .init(uiColor: .systemFill) : Color.clear)
+                            .foregroundStyle(selectedTabItem == item ? Color.accentColor : Color.primary)
                         }
                         if !secondaryItems.isEmpty {
                             Divider()
@@ -51,7 +52,8 @@ struct AdativeTabView: View {
                                 }
                                 .listRowSeparator(.hidden)
                                 .tag(item)
-                                .listRowBackground(selectedTabItem == item ? Color.accentColor : Color.clear)
+                                .listRowBackground(selectedTabItem == item ? .init(uiColor: .systemFill) : Color.clear)
+                                .foregroundStyle(selectedTabItem == item ? Color.accentColor : Color.primary)
                             }
                         }
                     }
@@ -66,7 +68,7 @@ struct AdativeTabView: View {
                         .buttonStyle(.plain)
                         Spacer()
                     }
-                    .padding(.horizontal)
+                    .padding()
                 }
                 .background(Color(UIColor.secondarySystemBackground))
                 .frame(width: 256)

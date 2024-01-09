@@ -3,6 +3,7 @@ import shared
 import NetworkImage
 
 struct MisskeyStatusComponent: View {
+    @Environment(\.appSettings) private var appSettings
     @State var showDeleteAlert = false
     @State var showReportAlert = false
     @Environment(\.openURL) private var openURL
@@ -26,7 +27,11 @@ struct MisskeyStatusComponent: View {
                 timestamp: actual.createdAt.epochSeconds,
                 headerTrailing: {
                     MisskeyVisibilityIcon(visibility: actual.visibility)
-                }, onMediaClick: { media in event.onMediaClick(media: media) }, sensitive: actual.sensitive)
+                },
+                onMediaClick: { media in event.onMediaClick(media: media) },
+                sensitive: actual.sensitive,
+                card: actual.card
+            )
             if let quote = misskey.quote {
                 Spacer()
                     .frame(height: 8)
@@ -41,7 +46,7 @@ struct MisskeyStatusComponent: View {
                     }
                 )
             }
-            if misskey.reaction.emojiReactions.count > 0 {
+            if misskey.reaction.emojiReactions.count > 0, appSettings.appearanceSettings.misskey.showReaction {
                 ScrollView(.horizontal) {
                     LazyHStack {
                         ForEach(1...misskey.reaction.emojiReactions.count, id: \.self) { index in
@@ -59,81 +64,83 @@ struct MisskeyStatusComponent: View {
                     }
                 }
             }
-            Spacer()
-                .frame(height: 8)
-            HStack {
-                Button(action: {
-                    event.onReplyClick(data: actual)
-                }, label: {
-                    HStack {
-                        Image(systemName: "arrowshape.turn.up.left")
-                        if let humanizedReplyCount = actual.matrices.humanizedReplyCount {
-                            Text(humanizedReplyCount)
-                        }
-                    }
-                })
+            if appSettings.appearanceSettings.showActions {
                 Spacer()
-                Menu(content: {
+                    .frame(height: 8)
+                HStack {
                     Button(action: {
-                        event.onReblogClick(data: actual)
+                        event.onReplyClick(data: actual)
                     }, label: {
-                        Label("Renote", systemImage: "arrow.left.arrow.right")
-                    })
-                    Button(action: {
-                        event.onQuoteClick(data: actual)
-                    }, label: {
-                        Label("Quote", systemImage: "quote.bubble.fill")
-                    })
-                }, label: {
-                    Label(
-                        title: { EmptyView() },
-                        icon: {
-                            if actual.canRenote {
-                                Image(systemName: "arrow.left.arrow.right")
-                            } else {
-                                Image(systemName: "slash.circle")
+                        HStack {
+                            Image(systemName: "arrowshape.turn.up.left")
+                            if let humanizedReplyCount = actual.matrices.humanizedReplyCount, appSettings.appearanceSettings.showNumbers {
+                                Text(humanizedReplyCount)
                             }
                         }
-                    )
-                })
-                .disabled(!actual.canRenote)
-                Spacer()
-                Button(action: {
-                    event.onAddReactionClick(data: actual)
-                }, label: {
-                    if actual.reaction.myReaction != nil {
-                        Image(systemName: "minus")
-                    } else {
-                        Image(systemName: "plus")
-                    }
-                })
-                Spacer()
-                Menu {
-                    if actual.isFromMe {
-                        Button(role: .destructive, action: {
-                            showDeleteAlert = true
-                        }, label: {
-                            Label("Delete Note", systemImage: "trash")
-                        })
-                    } else {
+                    })
+                    Spacer()
+                    Menu(content: {
                         Button(action: {
-                            showReportAlert = true
+                            event.onReblogClick(data: actual)
                         }, label: {
-                            Label("Report", systemImage: "exclamationmark.shield")
+                            Label("Renote", systemImage: "arrow.left.arrow.right")
                         })
+                        Button(action: {
+                            event.onQuoteClick(data: actual)
+                        }, label: {
+                            Label("Quote", systemImage: "quote.bubble.fill")
+                        })
+                    }, label: {
+                        Label(
+                            title: { EmptyView() },
+                            icon: {
+                                if actual.canRenote {
+                                    Image(systemName: "arrow.left.arrow.right")
+                                } else {
+                                    Image(systemName: "slash.circle")
+                                }
+                            }
+                        )
+                    })
+                    .disabled(!actual.canRenote)
+                    Spacer()
+                    Button(action: {
+                        event.onAddReactionClick(data: actual)
+                    }, label: {
+                        if actual.reaction.myReaction != nil {
+                            Image(systemName: "minus")
+                        } else {
+                            Image(systemName: "plus")
+                        }
+                    })
+                    Spacer()
+                    Menu {
+                        if actual.isFromMe {
+                            Button(role: .destructive, action: {
+                                showDeleteAlert = true
+                            }, label: {
+                                Label("Delete Note", systemImage: "trash")
+                            })
+                        } else {
+                            Button(action: {
+                                showReportAlert = true
+                            }, label: {
+                                Label("Report", systemImage: "exclamationmark.shield")
+                            })
+                        }
+                    } label: {
+                        Label(
+                            title: { EmptyView() },
+                            icon: { Image(systemName: "ellipsis") }
+                        )
                     }
-                } label: {
-                    Label(
-                        title: { EmptyView() },
-                        icon: { Image(systemName: "ellipsis") }
-                    )
                 }
+                .foregroundStyle(.primary)
+                .buttonStyle(.borderless)
+                .tint(.primary)
+                .opacity(0.6)
+                .font(.caption)
             }
-            .foregroundStyle(.primary)
-            .buttonStyle(.borderless)
-            .tint(.primary)
-            .opacity(0.6)
-            .font(.caption)
         }
         .alert("Delete Status", isPresented: $showDeleteAlert, actions: {
             Button(role: .cancel) {

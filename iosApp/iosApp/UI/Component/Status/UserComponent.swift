@@ -13,11 +13,7 @@ struct UserComponent: View {
                     openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
                 },
                 label: {
-                    NetworkImage(url: URL(string: user.avatarUrl)) { image in
-                        image.resizable().scaledToFit()
-                    }
-                    .frame(width: 48, height: 48)
-                    .clipShape(Circle())
+                    UserAvatar(data: user.avatarUrl, size: 48)
                 }
             )
             .buttonStyle(.borderless)
@@ -51,11 +47,7 @@ struct AccountItem: View {
             EmptyView()
         case .loading:
             HStack {
-                NetworkImage(url: URL(string: "")) { image in
-                    image.resizable().scaledToFit()
-                }
-                .frame(width: 48, height: 48)
-                .clipShape(Circle())
+                userAvatarPlaceholder(size: 48)
                 VStack(alignment: .leading) {
                     Markdown("loading...")
                         .lineLimit(1)
@@ -71,11 +63,7 @@ struct AccountItem: View {
         case .success(let success):
             let user = success.data
             HStack {
-                NetworkImage(url: URL(string: user.avatarUrl)) { image in
-                    image.resizable().scaledToFit()
-                }
-                .frame(width: 48, height: 48)
-                .clipShape(Circle())
+                UserAvatar(data: user.avatarUrl, size: 48)
                 VStack(alignment: .leading) {
                     Markdown(user.extra.nameMarkdown)
                         .lineLimit(1)

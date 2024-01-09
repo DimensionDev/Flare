@@ -39,6 +39,7 @@
 		068D2E0B2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068D2E0A2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift */; };
 		068D2E0D2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068D2E0C2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift */; };
 		06AD156B2AC3F454000DC865 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156A2AC3F454000DC865 /* Route.swift */; };
+		06C862712B4D0C7A008C902C /* FlareTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862702B4D0C7A008C902C /* FlareTheme.swift */; };
 		06C9C5612B34241400AE5284 /* AdativeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C9C5602B34241400AE5284 /* AdativeTabView.swift */; };
 		06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */; };
 		06DF79CF2B465D1D00CF21FE /* AboutScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79CE2B465D1D00CF21FE /* AboutScreen.swift */; };
@@ -87,6 +88,7 @@
 		068D2E0C2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueskyNotificationComponent.swift; sourceTree = "<group>"; };
 		06AD156A2AC3F454000DC865 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
 		06BE4D632B3181B0000C6D7D /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
+		06C862702B4D0C7A008C902C /* FlareTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareTheme.swift; sourceTree = "<group>"; };
 		06C9C5602B34241400AE5284 /* AdativeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdativeTabView.swift; sourceTree = "<group>"; };
 		06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSelectScreen.swift; sourceTree = "<group>"; };
 		06DF79CE2B465D1D00CF21FE /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 				067D89782AD25DB000F8F932 /* MarkdownTheme.swift */,
 				067D898B2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift */,
 				06C9C5602B34241400AE5284 /* AdativeTabView.swift */,
+				06C862702B4D0C7A008C902C /* FlareTheme.swift */,
 			);
 			path = Component;
 			sourceTree = "<group>";
@@ -476,6 +479,7 @@
 				060881AF2AD908FA001AAD2F /* LinkPreview.swift in Sources */,
 				066F23052B43BD59004A4A8D /* ProfileMediaListScreen.swift in Sources */,
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
+				06C862712B4D0C7A008C902C /* FlareTheme.swift in Sources */,
 				067D898C2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift in Sources */,
 				060881BE2AE109FA001AAD2F /* ComposeScreen.swift in Sources */,
 				068D2E0D2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift in Sources */,

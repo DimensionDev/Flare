@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.SyncAlt
@@ -77,6 +79,9 @@ internal fun BlueskyStatusComponent(
     modifier: Modifier = Modifier,
 ) {
     val currentData by rememberUpdatedState(data)
+    var showMedia by remember {
+        mutableStateOf(false)
+    }
     val appearanceSettings = LocalAppearanceSettings.current
     val uriHandler = LocalUriHandler.current
 
@@ -163,15 +168,44 @@ internal fun BlueskyStatusComponent(
             StatusContentComponent(
                 data = data,
             )
-            if (data.medias.isNotEmpty() && appearanceSettings.showMedia) {
+            if (data.medias.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                StatusMediaComponent(
-                    data = data.medias,
-                    onMediaClick = {
-                        event.onMediaClick(it, uriHandler)
-                    },
-                    sensitive = false,
-                )
+                if (appearanceSettings.showMedia || showMedia) {
+                    StatusMediaComponent(
+                        data = data.medias,
+                        onMediaClick = {
+                            event.onMediaClick(it, uriHandler)
+                        },
+                        sensitive = false,
+                    )
+                } else {
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    showMedia = true
+                                },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = stringResource(id = R.string.show_media),
+                            modifier =
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(id = R.string.show_media),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier
+                                    .alpha(MediumAlpha),
+                        )
+                    }
+                }
             }
             data.quote?.let { quote ->
                 Spacer(modifier = Modifier.height(8.dp))

@@ -1,28 +1,45 @@
 import Foundation
+import SwiftUI
 
-class SettingsRepository {
-    static let shared = SettingsRepository()
-    private init() {
-        
+@Observable
+class AppSettings {
+    var appearanceSettings: AppearanceSettings = UserDefaults.standard.appearanceSettings {
+        didSet {
+            UserDefaults.standard.appearanceSettings = appearanceSettings
+        }
+    }
+    func update(newValue: AppearanceSettings) {
+        withAnimation {
+            appearanceSettings = newValue
+        }
     }
 }
-//
-//@Observable
-//class AppSettings {
-//    var appearanceSettings: AppearanceSettings = AppearanceSettings()
-//    var observer: NSKeyValueObservation?
-//
-//    init() {
-//        observer = UserDefaults.standard.observe(\.appearanceSettings, options: [.new]) { [weak self] (defaults, change) in
-//            if let newData = defaults.data(forKey: "AppearanceSettings") {
-//                self?.appearanceSettings = ... // 解码 newData 为 AppearanceSettings 实例
-//            }
-//        }
-//    }
-//
-//    deinit {
-//        if let observer = observer {
-//            UserDefaults.standard.removeObserver(observer, forKeyPath: "AppearanceSettings")
-//        }
-//    }
-//}
+
+extension UserDefaults {
+    var appearanceSettings: AppearanceSettings {
+        get {
+            if let data = UserDefaults.standard.object(forKey: "AppearanceSettings") as? Data {
+                let decoder = JSONDecoder()
+                if let settings = try? decoder.decode(AppearanceSettings.self, from: data) {
+                    return settings
+                }
+            }
+            return AppearanceSettings()
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                UserDefaults.standard.set(data, forKey: "AppearanceSettings")
+            }
+        }
+    }
+}
+
+private struct AppSettingsKey: EnvironmentKey {
+    static let defaultValue = AppSettings()
+}
+extension EnvironmentValues {
+    var appSettings: AppSettings {
+        get { self[AppSettingsKey.self] }
+        set { self[AppSettingsKey.self] = newValue }
+    }
+}

@@ -79,7 +79,7 @@ struct StatusTimeline: View {
     }
 }
 
-struct StatusItemView : View {
+struct StatusItemView: View {
     let status: UiStatus
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
@@ -122,7 +122,8 @@ struct StatusPlaceHolder: View {
             timestamp: 1696838289,
             headerTrailing: {EmptyView()},
             onMediaClick: { _ in },
-            sensitive: false
+            sensitive: false,
+            card: nil
         )
         .redacted(reason: .placeholder)
     }

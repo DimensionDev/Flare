@@ -1,6 +1,6 @@
 import Foundation
 
-struct AppearanceSettings: Codable {
+struct AppearanceSettings: Codable, Changeable {
     var theme: Theme = Theme.auto
     var avatarShape: AvatarShape = AvatarShape.circle
     var showActions: Bool = true
@@ -12,12 +12,10 @@ struct AppearanceSettings: Codable {
     var mastodon: Mastodon = Mastodon()
     var misskey: Misskey = Misskey()
     var bluesky: Bluesky = Bluesky()
-    
-    struct Mastodon : Codable {
+    struct Mastodon: Codable, Changeable {
         var showVisibility: Bool = true
         var swipeLeft: SwipeActions = SwipeActions.reply
         var swipeRight: SwipeActions = SwipeActions.none
-        
         enum SwipeActions: Codable {
             case none
             case reply
@@ -26,13 +24,11 @@ struct AppearanceSettings: Codable {
             case bookmark
         }
     }
-    
-    struct Misskey: Codable {
+    struct Misskey: Codable, Changeable {
         var showVisibility: Bool = true
         var showReaction: Bool = true
         var swipeLeft: SwipeActions = SwipeActions.reply
         var swipeRight: SwipeActions = SwipeActions.none
-        
         enum SwipeActions: Codable {
             case none
             case reply
@@ -40,11 +36,9 @@ struct AppearanceSettings: Codable {
             case favourite
         }
     }
-    
-    struct Bluesky: Codable {
+    struct Bluesky: Codable, Changeable {
         var swipeLeft: SwipeActions = SwipeActions.reply
         var swipeRight: SwipeActions = SwipeActions.none
-        
         enum SwipeActions: Codable {
             case none
             case reply
@@ -52,7 +46,6 @@ struct AppearanceSettings: Codable {
             case favourite
         }
     }
-    
 }
 
 enum Theme: Codable {
@@ -64,4 +57,14 @@ enum Theme: Codable {
 enum AvatarShape: Codable {
     case circle
     case square
+}
+
+protocol Changeable {}
+
+extension Changeable {
+    func changing<T>(path: WritableKeyPath<Self, T>, to value: T) -> Self {
+        var clone = self
+        clone[keyPath: path] = value
+        return clone
+    }
 }

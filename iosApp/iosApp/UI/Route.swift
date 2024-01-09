@@ -3,6 +3,7 @@ import SwiftUI
 import shared
 
 struct RouterView: View {
+    @State var appSettings = AppSettings()
     var body: some View {
         SplashScreen { type in
             ZStack {
@@ -37,6 +38,7 @@ struct RouterView: View {
                 }
             })
         }
+        .environment(\.appSettings, appSettings)
     }
 }
 

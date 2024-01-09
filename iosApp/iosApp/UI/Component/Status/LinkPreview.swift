@@ -21,6 +21,9 @@ struct LinkPreview: View {
                     }
                 }
                 .foregroundStyle(.foreground)
+                .if(card.media == nil) { view in
+                    view.padding()
+                }
                 Spacer()
             }
         }

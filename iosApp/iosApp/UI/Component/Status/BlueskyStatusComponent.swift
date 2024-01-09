@@ -2,6 +2,7 @@ import SwiftUI
 import shared
 
 struct BlueskyStatusComponent: View {
+    @Environment(\.appSettings) private var appSettings
     @State var showDeleteAlert = false
     @State var showReportAlert = false
     @Environment(\.openURL) private var openURL
@@ -24,11 +25,9 @@ struct BlueskyStatusComponent: View {
                 timestamp: bluesky.indexedAt.epochSeconds,
                 headerTrailing: { EmptyView() },
                 onMediaClick: { media in event.onMediaClick(media: media) },
-                sensitive: false
+                sensitive: false,
+                card: bluesky.card
             )
-            if let card = bluesky.card {
-                LinkPreview(card: card)
-            }
             if let quote = bluesky.quote {
                 Spacer()
                     .frame(height: 8)
@@ -43,98 +42,100 @@ struct BlueskyStatusComponent: View {
                     }
                 )
             }
-            Spacer()
-                .frame(height: 8)
-            HStack {
-                Button(
-                    action: {
-                        event.onReplyClick(data: bluesky)
-                    },
-                    label: {
-                        HStack {
-                            Image(systemName: "arrowshape.turn.up.left")
-                            if let humanizedReplyCount = bluesky.matrices.humanizedReplyCount {
-                                Text(humanizedReplyCount)
+            if appSettings.appearanceSettings.showActions {
+                Spacer()
+                    .frame(height: 8)
+                HStack {
+                    Button(
+                        action: {
+                            event.onReplyClick(data: bluesky)
+                        },
+                        label: {
+                            HStack {
+                                Image(systemName: "arrowshape.turn.up.left")
+                                if let humanizedReplyCount = bluesky.matrices.humanizedReplyCount, appSettings.appearanceSettings.showNumbers {
+                                    Text(humanizedReplyCount)
+                                }
                             }
                         }
-                    }
-                )
-                .opacity(0.6)
-                Spacer()
-                Menu(content: {
-                    Button(action: {
-                        event.onReblogClick(data: bluesky)
-                    }, label: {
-                        Label("Reblog", systemImage: "arrow.left.arrow.right")
-                    })
-                    Button(action: {
-                        event.onQuoteClick(data: bluesky)
-                    }, label: {
-                        Label("Quote", systemImage: "quote.bubble.fill")
-                    })
-                }, label: {
-                    Image(systemName: "arrow.left.arrow.right")
-                    if let humanizedRepostCount = bluesky.matrices.humanizedRepostCount {
-                        Text(humanizedRepostCount)
-                    }
-                })
-                .if(!bluesky.reaction.reposted) { view in
-                    view.opacity(0.6)
-                }
-                .if(bluesky.reaction.reposted) { view in
-                    view
-                        .tint(.accentColor)
-                }
-                Spacer()
-                Button(
-                    action: {
-                        event.onLikeClick(data: bluesky)
-                    },
-                    label: {
-                        HStack {
-                            Image(systemName: "star")
-                            if let humanizedFavouriteCount = bluesky.matrices.humanizedLikeCount {
-                                Text(humanizedFavouriteCount)
-                            }
-                        }
-                        .if(bluesky.reaction.liked) { view in
-                            view.foregroundStyle(.red, .red)
-                        }
-                    }
-                )
-                .if(!bluesky.reaction.liked) { view in
-                    view.opacity(0.6)
-                }
-                .if(bluesky.reaction.liked) { view in
-                    view
-                        .tint(.red)
-                }
-                Spacer()
-                Menu {
-                    if bluesky.isFromMe {
-                        Button(role: .destructive, action: {
-                            showDeleteAlert = true
+                    )
+                    .opacity(0.6)
+                    Spacer()
+                    Menu(content: {
+                        Button(action: {
+                            event.onReblogClick(data: bluesky)
                         }, label: {
-                            Label("Delete Toot", systemImage: "trash")
+                            Label("Reblog", systemImage: "arrow.left.arrow.right")
                         })
-                    } else {
-                        Button(
-                            action: {
-                                showReportAlert = true
-                            },
-                            label: {
-                                Label("Report", systemImage: "exclamationmark.shield")
-                            }
-                        )
+                        Button(action: {
+                            event.onQuoteClick(data: bluesky)
+                        }, label: {
+                            Label("Quote", systemImage: "quote.bubble.fill")
+                        })
+                    }, label: {
+                        Image(systemName: "arrow.left.arrow.right")
+                        if let humanizedRepostCount = bluesky.matrices.humanizedRepostCount, appSettings.appearanceSettings.showNumbers {
+                            Text(humanizedRepostCount)
+                        }
+                    })
+                    .if(!bluesky.reaction.reposted) { view in
+                        view.opacity(0.6)
                     }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .opacity(0.6)
+                    .if(bluesky.reaction.reposted) { view in
+                        view
+                            .tint(.accentColor)
+                    }
+                    Spacer()
+                    Button(
+                        action: {
+                            event.onLikeClick(data: bluesky)
+                        },
+                        label: {
+                            HStack {
+                                Image(systemName: "star")
+                                if let humanizedFavouriteCount = bluesky.matrices.humanizedLikeCount, appSettings.appearanceSettings.showNumbers {
+                                    Text(humanizedFavouriteCount)
+                                }
+                            }
+                            .if(bluesky.reaction.liked) { view in
+                                view.foregroundStyle(.red, .red)
+                            }
+                        }
+                    )
+                    .if(!bluesky.reaction.liked) { view in
+                        view.opacity(0.6)
+                    }
+                    .if(bluesky.reaction.liked) { view in
+                        view
+                            .tint(.red)
+                    }
+                    Spacer()
+                    Menu {
+                        if bluesky.isFromMe {
+                            Button(role: .destructive, action: {
+                                showDeleteAlert = true
+                            }, label: {
+                                Label("Delete Toot", systemImage: "trash")
+                            })
+                        } else {
+                            Button(
+                                action: {
+                                    showReportAlert = true
+                                },
+                                label: {
+                                    Label("Report", systemImage: "exclamationmark.shield")
+                                }
+                            )
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .opacity(0.6)
+                    }
                 }
+                .buttonStyle(.borderless)
+                .tint(.primary)
+                .font(.caption)
             }
-            .buttonStyle(.borderless)
-            .tint(.primary)
-            .font(.caption)
         }
         .alert("Delete Status", isPresented: $showDeleteAlert, actions: {
             Button(role: .cancel) {

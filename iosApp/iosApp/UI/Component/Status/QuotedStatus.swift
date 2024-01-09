@@ -62,6 +62,8 @@ struct QuotedStatus: View {
 }
 
 private struct QuotedContent: View {
+    @Environment(\.appSettings) private var appSettings
+    @State var showMedia: Bool = false
     let content: String
     let user: UiUser
     let medias: [UiMedia]
@@ -99,7 +101,21 @@ private struct QuotedContent: View {
                 Spacer()
                     .frame(height: 8)
                 if !medias.isEmpty {
-                    MediaComponent(hideSensitive: sensitive, medias: medias, onMediaClick: onMediaClick)
+                    if appSettings.appearanceSettings.showMedia, showMedia {
+                        MediaComponent(
+                            hideSensitive: sensitive && !appSettings.appearanceSettings.showSensitiveContent,
+                            medias: medias,
+                            onMediaClick: onMediaClick
+                        )
+                    } else {
+                        Button {
+                            withAnimation {
+                                showMedia = true
+                            }
+                        } label: {
+                            Label("Show Medias", systemImage: "photo")
+                        }
+                    }
                 }
             }
         })

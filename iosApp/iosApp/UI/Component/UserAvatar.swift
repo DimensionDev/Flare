@@ -2,6 +2,7 @@ import SwiftUI
 import NetworkImage
 
 struct UserAvatar: View {
+    @Environment(\.appSettings) private var appSettings
     let data: String
     var size: CGFloat = 48
     var body: some View {
@@ -9,7 +10,12 @@ struct UserAvatar: View {
             image.resizable().scaledToFit()
         }
         .frame(width: size, height: size)
-        .clipShape(Circle())
+        .if(appSettings.appearanceSettings.avatarShape == AvatarShape.circle, transform: { view in
+            view.clipShape(Circle())
+        })
+        .if(appSettings.appearanceSettings.avatarShape == AvatarShape.square, transform: { view in
+            view.clipShape(RoundedRectangle(cornerRadius: 8))
+        })
     }
 }
 

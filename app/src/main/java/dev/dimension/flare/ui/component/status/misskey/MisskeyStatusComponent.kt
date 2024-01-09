@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MailOutline
@@ -90,6 +91,9 @@ internal fun MisskeyStatusComponent(
     val uriHandler = LocalUriHandler.current
     val currentData by rememberUpdatedState(data)
     val actualData by rememberUpdatedState(newValue = data.renote ?: data)
+    var showMedia by remember {
+        mutableStateOf(false)
+    }
     val appearanceSettings = LocalAppearanceSettings.current
     val dismissState =
         rememberSwipeToDismissState(
@@ -177,15 +181,44 @@ internal fun MisskeyStatusComponent(
             StatusContentComponent(
                 data = actualData,
             )
-            if (actualData.media.isNotEmpty() && appearanceSettings.showMedia) {
+            if (actualData.media.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                StatusMediaComponent(
-                    data = actualData.media,
-                    onMediaClick = {
-                        event.onMediaClick(it, uriHandler)
-                    },
-                    sensitive = actualData.sensitive,
-                )
+                if (appearanceSettings.showMedia || showMedia) {
+                    StatusMediaComponent(
+                        data = actualData.media,
+                        onMediaClick = {
+                            event.onMediaClick(it, uriHandler)
+                        },
+                        sensitive = actualData.sensitive,
+                    )
+                } else {
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    showMedia = true
+                                },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = stringResource(id = R.string.show_media),
+                            modifier =
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(id = R.string.show_media),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier
+                                    .alpha(MediumAlpha),
+                        )
+                    }
+                }
             }
 //        StatusCardComponent(
 //            data = actualData,

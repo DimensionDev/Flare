@@ -23,6 +23,7 @@ struct StorageScreen: View {
                     }
                 }
             }
+            .buttonStyle(.borderless)
         }
         .navigationTitle("Storage")
         .activateViewModel(viewModel: viewModel)

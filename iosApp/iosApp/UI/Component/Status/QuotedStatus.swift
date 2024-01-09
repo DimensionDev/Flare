@@ -101,7 +101,7 @@ private struct QuotedContent: View {
                 Spacer()
                     .frame(height: 8)
                 if !medias.isEmpty {
-                    if appSettings.appearanceSettings.showMedia, showMedia {
+                    if appSettings.appearanceSettings.showMedia || showMedia {
                         MediaComponent(
                             hideSensitive: sensitive && !appSettings.appearanceSettings.showSensitiveContent,
                             medias: medias,
@@ -115,6 +115,8 @@ private struct QuotedContent: View {
                         } label: {
                             Label("Show Medias", systemImage: "photo")
                         }
+                        .padding()
+                        .buttonStyle(.borderless)
                     }
                 }
             }

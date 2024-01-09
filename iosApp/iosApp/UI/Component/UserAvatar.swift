@@ -6,16 +6,15 @@ struct UserAvatar: View {
     let data: String
     var size: CGFloat = 48
     var body: some View {
+        let shape = switch appSettings.appearanceSettings.avatarShape {
+        case .circle: RoundedRectangle(cornerRadius: size)
+        case .square: RoundedRectangle(cornerRadius: 8)
+        }
         NetworkImage(url: URL(string: data)) { image in
             image.resizable().scaledToFit()
         }
         .frame(width: size, height: size)
-        .if(appSettings.appearanceSettings.avatarShape == AvatarShape.circle, transform: { view in
-            view.clipShape(Circle())
-        })
-        .if(appSettings.appearanceSettings.avatarShape == AvatarShape.square, transform: { view in
-            view.clipShape(RoundedRectangle(cornerRadius: 8))
-        })
+        .clipShape(shape)
     }
 }
 

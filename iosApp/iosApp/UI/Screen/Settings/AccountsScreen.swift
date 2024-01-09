@@ -66,6 +66,9 @@ struct AccountsScreen: View {
             ServiceSelectScreen {
                 showServiceSelectSheet = false
             }
+#if os(macOS)
+            .frame(minWidth: 600, minHeight: 400)
+#endif
         })
         .activateViewModel(viewModel: viewModel)
     }

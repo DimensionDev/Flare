@@ -23,12 +23,14 @@ struct ComposeScreen: View {
                                 TextField(text: $viewModel.contentWarning) {
                                     Text("Content Warning")
                                 }
+                                .textFieldStyle(.plain)
                                 .focused($cwKeyboardFocused)
                                 Divider()
                             }
                             TextField(text: $viewModel.text) {
                                 Text("What's happening?")
                             }
+                            .textFieldStyle(.plain)
                             .focused($keyboardFocused)
                             .onAppear {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -235,6 +237,7 @@ struct ComposeScreen: View {
                                                                 image.resizable().scaledToFit()
                                                             }
                                                         })
+                                                        .buttonStyle(.plain)
                                                     }
                                                 }
                                             }

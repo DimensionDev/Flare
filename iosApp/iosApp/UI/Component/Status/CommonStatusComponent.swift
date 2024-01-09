@@ -95,6 +95,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
                     } label: {
                         Label("Show Medias", systemImage: "photo")
                     }
+                    .buttonStyle(.borderless)
                 }
             }
             if let card = card, appSettings.appearanceSettings.showLinkPreview {

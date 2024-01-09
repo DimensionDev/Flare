@@ -92,6 +92,10 @@ struct AppearanceScreen: View {
             .navigationTitle("Appearance")
             .activateViewModel(viewModel: viewModel)
         }
+        #if os(macOS)
+        .toggleStyle(.switch)
+        .pickerStyle(.segmented)
+        #endif
     }
 }
 @Observable

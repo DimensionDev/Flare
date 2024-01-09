@@ -34,6 +34,9 @@ struct RouterView: View {
                         toHome: {
                         }
                     )
+#if os(macOS)
+                    .frame(minWidth: 600, minHeight: 400)
+#endif
                     .interactiveDismissDisabled()
                 }
             })

@@ -16,10 +16,12 @@ struct HomeScreen: View {
                         image: "house",
                         destination: TabItem { _ in
                             HomeTimelineScreen()
+                                #if !os(macOS)
                                 .if(horizontalSizeClass != .compact, transform: { view in
                                     view
                                         .toolbar(.hidden)
                                 })
+                                #endif
                                     .if(horizontalSizeClass == .compact, transform: { view in
                                         view
                                         #if !os(macOS)
@@ -73,20 +75,32 @@ struct HomeScreen: View {
                 ],
                 secondaryItems: [
                 ],
-                leading: HStack {
-                    AccountItem(userState: viewModel.model.user)
-                    Spacer()
+                leading: VStack {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        AccountItem(userState: viewModel.model.user)
+                        Spacer()
+                        Image(systemName: "gear")
+                            .opacity(0.5)
+                    }
+                    #if !os(macOS)
+                    .padding([.horizontal, .top])
+                    #endif
+                    .buttonStyle(.plain)
                     Button(action: {
                         showCompose = true
                     }, label: {
-                        Image(systemName: "square.and.pencil")
+                        HStack {
+                            Image(systemName: "square.and.pencil")
+                            Text("Write a post")
+                            Spacer()
+                        }
+                        .padding(4)
                     })
                     .buttonStyle(.borderedProminent)
                 }
-                    .padding([.horizontal, .top]),
-                onSettingsclicked: {
-                    showSettings = true
-                }
+                    .listRowInsets(EdgeInsets())
             )
         }
         .sheet(isPresented: $showCompose, content: {
@@ -95,12 +109,15 @@ struct HomeScreen: View {
                     showCompose = false
                 })
             }
+#if os(macOS)
+            .frame(minWidth: 600, minHeight: 400)
+#endif
         })
         .sheet(isPresented: $showSettings, content: {
             SettingsScreen()
-            #if os(macOS)
-                .frame(minWidth: 500, minHeight: 400)
-            #endif
+#if os(macOS)
+                .frame(minWidth: 600, minHeight: 400)
+#endif
         })
         .sheet(isPresented: Binding(
             get: {statusEvent.composeStatus != nil},
@@ -117,6 +134,9 @@ struct HomeScreen: View {
                         statusEvent.composeStatus = nil
                     }, status: status)
                 }
+#if os(macOS)
+                .frame(minWidth: 500, minHeight: 400)
+#endif
             }
         }
         .activateViewModel(viewModel: viewModel)

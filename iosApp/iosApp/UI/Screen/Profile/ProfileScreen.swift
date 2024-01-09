@@ -82,7 +82,9 @@ struct ProfileScreen: View {
         })
         .if(horizontalSizeClass != .compact, transform: { view in
             view
+#if !os(macOS)
                 .navigationBarTitleDisplayMode(.inline)
+#endif
                 .navigationTitle(title)
         })
         .toolbar {
@@ -283,7 +285,11 @@ struct FieldsView: View {
                 .padding(.horizontal)
             }
             .padding(.vertical)
-            .background(Color(uiColor: UIColor.secondarySystemBackground))
+#if !os(macOS)
+            .background(Color(UIColor.secondarySystemBackground))
+#else
+            .background(Color(NSColor.windowBackgroundColor))
+#endif
             .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
             EmptyView()

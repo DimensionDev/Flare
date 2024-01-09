@@ -39,8 +39,12 @@ struct AdativeTabView: View {
                             }
                             .listRowSeparator(.hidden)
                             .tag(item)
-                            .listRowBackground(selectedTabItem == item ? .init(uiColor: .systemFill) : Color.clear)
+                            #if !os(macOS)
+                            .listRowBackground(selectedTabItem == item ? Color(uiColor: .systemFill) : Color.clear)
                             .foregroundStyle(selectedTabItem == item ? Color.accentColor : Color.primary)
+                            #else
+                            .padding(8)
+                            #endif
                         }
                         if !secondaryItems.isEmpty {
                             Divider()
@@ -52,8 +56,12 @@ struct AdativeTabView: View {
                                 }
                                 .listRowSeparator(.hidden)
                                 .tag(item)
-                                .listRowBackground(selectedTabItem == item ? .init(uiColor: .systemFill) : Color.clear)
+                                #if !os(macOS)
+                                .listRowBackground(selectedTabItem == item ? Color(uiColor: .systemFill) : Color.clear)
                                 .foregroundStyle(selectedTabItem == item ? Color.accentColor : Color.primary)
+                                #else
+                                .padding(8)
+                                #endif
                             }
                         }
                     }
@@ -70,9 +78,14 @@ struct AdativeTabView: View {
                     }
                     .padding()
                 }
+                #if !os(macOS)
                 .background(Color(UIColor.secondarySystemBackground))
+                #else
+                .background(Color(NSColor.windowBackgroundColor))
+                #endif
                 .frame(width: 256)
             }
+            #if !os(macOS)
             TabView(selection: $selectedTabItem) {
                 ForEach(items, id: \.title) { item in
                     item.destination
@@ -83,7 +96,9 @@ struct AdativeTabView: View {
                         .tag(item)
                         .if(horizontalSizeClass != .compact) { view in
                             view
+#if !os(macOS)
                                 .toolbar(.hidden, for: .tabBar)
+#endif
                         }
                 }
                 ForEach(secondaryItems, id: \.title) { item in
@@ -93,9 +108,14 @@ struct AdativeTabView: View {
                             Text(item.title)
                         }
                         .tag(item)
+                    #if !os(macOS)
                         .toolbar(.hidden, for: .tabBar)
+                    #endif
                 }
             }
+            #else
+            selectedTabItem.destination
+            #endif
         }
     }
 }

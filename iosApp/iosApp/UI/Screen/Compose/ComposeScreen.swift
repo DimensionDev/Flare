@@ -38,7 +38,8 @@ struct ComposeScreen: View {
                             if viewModel.mediaViewModel.items.count > 0 {
                                 ScrollView(.horizontal) {
                                     HStack {
-                                        ForEach(viewModel.mediaViewModel.items, id: \.item) { item in
+                                        ForEach(0..<viewModel.mediaViewModel.items.count, id: \.self) { index in
+                                            let item = viewModel.mediaViewModel.items[index]
                                             if let image = item.image {
                                                 Menu {
                                                     Button(action: {
@@ -50,11 +51,19 @@ struct ComposeScreen: View {
                                                         Image(systemName: "trash")
                                                     })
                                                 } label: {
+                                                    #if os(macOS)
+                                                    Image(nsImage: image)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 128, height: 128)
+                                                        .cornerRadius(8)
+                                                    #else
                                                     Image(uiImage: image)
                                                         .resizable()
                                                         .scaledToFill()
                                                         .frame(width: 128, height: 128)
                                                         .cornerRadius(8)
+                                                    #endif
                                                 }
                                             }
                                         }

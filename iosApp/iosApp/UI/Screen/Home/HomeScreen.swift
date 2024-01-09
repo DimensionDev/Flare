@@ -22,7 +22,9 @@ struct HomeScreen: View {
                                 })
                                     .if(horizontalSizeClass == .compact, transform: { view in
                                         view
+                                        #if !os(macOS)
                                             .navigationBarTitleDisplayMode(.inline)
+                                        #endif
                                             .toolbar {
                                                 ToolbarItem(placement: .principal) {
                                                     Text("Flare")
@@ -96,6 +98,9 @@ struct HomeScreen: View {
         })
         .sheet(isPresented: $showSettings, content: {
             SettingsScreen()
+            #if os(macOS)
+                .frame(minWidth: 500, minHeight: 400)
+            #endif
         })
         .sheet(isPresented: Binding(
             get: {statusEvent.composeStatus != nil},

@@ -165,7 +165,7 @@ coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
 compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]
-sqldelight = ["sqldelight-coroutines-extensions", "sqldelight-androidx-paging3-extensions"]
+sqldelight = ["sqldelight-coroutines-extensions"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

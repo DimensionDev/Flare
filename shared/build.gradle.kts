@@ -25,11 +25,12 @@ kotlin {
     androidTarget()
 
     listOf(
-        iosX64(),
+//        iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
+        macosArm64(),
+    ).forEach { appleTarget ->
+        appleTarget.binaries.framework {
             baseName = "shared"
 //            isStatic = true
         }
@@ -79,6 +80,11 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation(libs.sqldelight.android.driver)
+            }
+        }
+        val appleMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:${libs.versions.ktor.get()}")
             }
         }
         val nativeMain by getting {

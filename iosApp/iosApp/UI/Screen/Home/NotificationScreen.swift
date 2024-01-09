@@ -32,7 +32,9 @@ struct NotificationScreen: View {
         .refreshable {
             try? await viewModel.model.refresh()
         }
+        #if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text("Notification")

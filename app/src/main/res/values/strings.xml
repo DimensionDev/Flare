@@ -98,6 +98,7 @@
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="status_empty">Nothing to see here</string>
     <string name="status_sensitive_media">Sensitive media</string>
+    <string name="show_media">Show media</string>
 
     <string name="service_select_welcome_title">Welcome to Flare</string>
     <string name="service_select_welcome_message">Flare is a social network client for Android.\nTo get started, please select a service to connect to.</string>

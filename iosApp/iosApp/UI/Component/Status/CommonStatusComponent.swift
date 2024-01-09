@@ -4,7 +4,9 @@ import shared
 import NetworkImage
 
 struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
+    @Environment(\.appSettings) private var appSettings
     @State var expanded: Bool
+    @State var showMedia: Bool
     let content: String
     let contentWarning: String?
     let user: UiUser
@@ -13,6 +15,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
     @ViewBuilder let headerTrailing: () -> HeaderTrailing
     let onMediaClick: (UiMedia) -> Void
     let sensitive: Bool
+    let card: UiCard?
     init(
         content: String,
         contentWarning: String?,
@@ -21,7 +24,8 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
         timestamp: Int64,
         headerTrailing: @escaping () -> HeaderTrailing,
         onMediaClick: @escaping (UiMedia) -> Void,
-        sensitive: Bool
+        sensitive: Bool,
+        card: UiCard?
     ) {
         self.content = content
         self.contentWarning = contentWarning
@@ -31,7 +35,9 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
         self.headerTrailing = headerTrailing
         self.onMediaClick = onMediaClick
         self.sensitive = sensitive
+        self.card = card
         _expanded = State(initialValue: contentWarning == nil)
+        showMedia = false
     }
     var body: some View {
         VStack(alignment: .leading) {
@@ -75,7 +81,24 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
             if !medias.isEmpty {
                 Spacer()
                     .frame(height: 8)
-                MediaComponent(hideSensitive: sensitive, medias: medias, onMediaClick: onMediaClick)
+                if appSettings.appearanceSettings.showMedia || showMedia {
+                    MediaComponent(
+                        hideSensitive: sensitive && !appSettings.appearanceSettings.showSensitiveContent,
+                        medias: medias,
+                        onMediaClick: onMediaClick
+                    )
+                } else {
+                    Button {
+                        withAnimation {
+                            showMedia = true
+                        }
+                    } label: {
+                        Label("Show Medias", systemImage: "photo")
+                    }
+                }
+            }
+            if let card = card, appSettings.appearanceSettings.showLinkPreview {
+                LinkPreview(card: card)
             }
         }.frame(alignment: .leading)
     }
@@ -84,7 +107,6 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
 func dateFormatter(_ date: Date) -> some View {
     let now = Date()
     let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: now)!
-    
     if date > oneDayAgo {
         // If the date is within the last day, use the .timer style
         return Text(date, style: .relative)

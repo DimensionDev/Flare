@@ -11,5 +11,8 @@ struct FlareApp: SwiftUI.App {
         WindowGroup {
             RouterView()
         }
+        #if os(macOS)
+        .windowStyle(.hiddenTitleBar)
+        #endif
     }
 }

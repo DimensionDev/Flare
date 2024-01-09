@@ -29,8 +29,10 @@ struct ServiceSelectScreen: View {
             Section(header: HStack {
                 TextField("Instance URL, e.g. mastodon.social", text: $viewModel.instanceURL)
                     .disableAutocorrection(true)
+                #if !os(macOS)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
+                #endif
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .disabled(viewModel.model.loading)
                 switch onEnum(of: viewModel.model.detectedPlatformType) {
@@ -87,19 +89,25 @@ struct ServiceSelectScreen: View {
                                 text: $viewModel.blueskyInputViewModel.baseUrl
                             )
                             .disableAutocorrection(true)
+                            #if !os(macOS)
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
+                            #endif
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .disabled(viewModel.model.loading)
                             TextField("User Name", text: $viewModel.blueskyInputViewModel.username)
                                 .disableAutocorrection(true)
+                            #if !os(macOS)
                                 .textInputAutocapitalization(.never)
+                            #endif
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(viewModel.model.loading)
                             SecureField("Password", text: $viewModel.blueskyInputViewModel.password)
                                 .disableAutocorrection(true)
+                            #if !os(macOS)
                                 .textInputAutocapitalization(.never)
                                 .keyboardType(.URL)
+                            #endif
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(viewModel.model.loading)
                             Button(action: {
@@ -246,7 +254,11 @@ class ServiceSelectViewModel: MoleculeViewModelProto {
                 return
             }
             DispatchQueue.main.async {
+                #if os(macOS)
+                NSWorkspace.shared.open(url)
+                #else
                 UIApplication.shared.open(url)
+                #endif
             }
         })
         self.model = presenter.models.value

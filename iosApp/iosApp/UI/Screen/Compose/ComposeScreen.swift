@@ -14,236 +14,247 @@ struct ComposeScreen: View {
         _viewModel = State(initialValue: ComposeViewModel(status: status))
     }
     var body: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading) {
-                ScrollView(.vertical) {
-                    VStack(alignment: .leading) {
-                        if viewModel.enableCW {
-                            TextField(text: $viewModel.contentWarning) {
-                                Text("Content Warning")
+        FlareTheme {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading) {
+                    ScrollView(.vertical) {
+                        VStack(alignment: .leading) {
+                            if viewModel.enableCW {
+                                TextField(text: $viewModel.contentWarning) {
+                                    Text("Content Warning")
+                                }
+                                .focused($cwKeyboardFocused)
+                                Divider()
                             }
-                            .focused($cwKeyboardFocused)
-                            Divider()
-                        }
-                        TextField(text: $viewModel.text) {
-                            Text("What's happening?")
-                        }
-                        .focused($keyboardFocused)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                keyboardFocused = true
+                            TextField(text: $viewModel.text) {
+                                Text("What's happening?")
                             }
-                        }
-                        if viewModel.mediaViewModel.items.count > 0 {
-                            ScrollView(.horizontal) {
-                                HStack {
-                                    ForEach(viewModel.mediaViewModel.items, id: \.item) { item in
-                                        if let image = item.image {
-                                            Menu {
-                                                Button(action: {
-                                                    withAnimation {
-                                                        viewModel.mediaViewModel.remove(item: item)
-                                                    }
-                                                }, label: {
-                                                    Text("Delete")
-                                                    Image(systemName: "trash")
-                                                })
-                                            } label: {
-                                                Image(uiImage: image)
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: 128, height: 128)
-                                                    .cornerRadius(8)
-                                            }
-                                        }
-                                    }
+                            .focused($keyboardFocused)
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    keyboardFocused = true
                                 }
                             }
-                            Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
-                                Text("Mark media as sensitive")
-                            })
-                        }
-                        if viewModel.pollViewModel.enabled {
-                            HStack {
-                                Picker("NotificationType", selection: $viewModel.pollViewModel.pollType) {
-                                    Text("Single Choice")
-                                        .tag(ComposePollType.single)
-                                    Text("Multiple Choice")
-                                        .tag(ComposePollType.multiple)
-                                }
-                                .pickerStyle(.segmented)
-                                Button {
-                                    withAnimation {
-                                        viewModel.pollViewModel.add()
-                                    }
-                                } label: {
-                                    Image(systemName: "plus")
-                                }.disabled(viewModel.pollViewModel.choices.count >= 4)
-                            }
-                            .padding(.vertical)
-                            ForEach($viewModel.pollViewModel.choices) { $choice in
-                                HStack {
-                                    TextField(text: $choice.text) {
-                                        Text("option")
-                                    }
-                                    .textFieldStyle(.roundedBorder)
-                                    Button {
-                                        withAnimation {
-                                            viewModel.pollViewModel.remove(choice: choice)
-                                        }
-                                    } label: {
-                                        Image(systemName: "delete.left")
-                                    }
-                                    .disabled(viewModel.pollViewModel.choices.count <= 2)
-                                }
-                                .padding(.bottom)
-                            }
-                            HStack {
-                                Spacer()
-                                Menu {
-                                    ForEach(viewModel.pollViewModel.allExpiration, id: \.self) { expiration in
-                                        Button(action: {
-                                            viewModel.pollViewModel.expired = expiration
-                                        }, label: {
-                                            Text(expiration.rawValue)
-                                        })
-                                    }
-                                } label: {
-                                    Text("expiration: ")
-                                    Text(viewModel.pollViewModel.expired.rawValue)
-                                }
-                            }
-                        }
-                        if let replyState = viewModel.model.replyState,
-                           case .success(let reply) = onEnum(of: replyState),
-                           reply.data.itemCount > 0,
-                           let replyStatus = reply.data.get(index: 0) {
-                            Spacer()
-                                .frame(height: 8)
-                            QuotedStatus(
-                                data: replyStatus,
-                                onMediaClick: { _ in },
-                                onUserClick: { _ in },
-                                onStatusClick: { _ in }
-                            )
-                        }
-                    }
-                    .padding()
-                }
-                let iconSize: CGFloat = 24
-                Divider()
-                ScrollView(.horizontal, content: {
-                    HStack {
-                        if !viewModel.pollViewModel.enabled {
-                            PhotosPicker(selection: Binding(get: {
-                                viewModel.mediaViewModel.selectedItems
-                            }, set: { value in
-                                viewModel.mediaViewModel.selectedItems = value
-                                viewModel.mediaViewModel.update()
-                            }), matching: .any(of: [.images, .videos, .livePhotos])) {
-                                Image(systemName: "photo")
-                                    .frame(width: iconSize, height: iconSize)
-                            }
-                        }
-                        if viewModel.mediaViewModel.selectedItems.count == 0,
-                            case .success(let canPoll) = onEnum(of: viewModel.model.canPoll),
-                           canPoll.data == KotlinBoolean(bool: true) {
-                            Button(action: {
-                                withAnimation {
-                                    viewModel.togglePoll()
-                                }
-                            }, label: {
-                                Image(systemName: "list.bullet")
-                                    .frame(width: iconSize, height: iconSize)
-                            })
-                        }
-                        if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
-                            switch onEnum(of: visibilityState.data) {
-                            case .misskeyVisibilityState(let misskeyVisibility):
-                                Menu {
-                                    ForEach(misskeyVisibility.allVisibilities, id: \.self) { visibility in
-                                        Button {
-                                            misskeyVisibility.setVisibility(value: visibility)
-                                        } label: {
-                                            MisskeyVisibilityIcon(visibility: visibility)
-                                            Text(visibility.name)
-                                        }
-                                    }
-                                } label: {
-                                    MisskeyVisibilityIcon(visibility: misskeyVisibility.visibility)
-                                        .frame(width: iconSize, height: iconSize)
-                                }
-                            case .mastodonVisibilityState(let mastodonVisibility):
-                                Menu {
-                                    ForEach(mastodonVisibility.allVisibilities, id: \.self) { visibility in
-                                        Button {
-                                            mastodonVisibility.setVisibility(value: visibility)
-                                        } label: {
-                                            MastodonVisibilityIcon(visibility: visibility)
-                                            Text(visibility.name)
-                                        }
-                                    }
-                                } label: {
-                                    MastodonVisibilityIcon(visibility: mastodonVisibility.visibility)
-                                        .frame(width: iconSize, height: iconSize)
-                                }
-                            }
-                        }
-                        if case .success(let canCW) = onEnum(of: viewModel.model.canCW),
-                           canCW.data == KotlinBoolean(bool: true) {
-                            Button(action: {
-                                withAnimation {
-                                    viewModel.toggleCW()
-                                    if viewModel.enableCW {
-                                        cwKeyboardFocused = true
-                                    } else {
-                                        keyboardFocused = true
-                                    }
-                                }
-                            }, label: {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .frame(width: iconSize, height: iconSize)
-                            })
-                        }
-                        if case .success = onEnum(of: viewModel.model.emojiState) {
-                            Button(action: {
-                                viewModel.showEmojiPanel()
-                            }, label: {
-                                Image(systemName: "face.smiling")
-                                    .frame(width: iconSize, height: iconSize)
-                            })
-                            .popover(isPresented: $viewModel.showEmoji) {
-                                if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
-                                    ScrollView {
-                                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                                            ForEach(1...emojis.data.count, id: \.self) { index in
-                                                if let item = emojis.data[index - 1] as? UiEmoji {
+                            if viewModel.mediaViewModel.items.count > 0 {
+                                ScrollView(.horizontal) {
+                                    HStack {
+                                        ForEach(0..<viewModel.mediaViewModel.items.count, id: \.self) { index in
+                                            let item = viewModel.mediaViewModel.items[index]
+                                            if let image = item.image {
+                                                Menu {
                                                     Button(action: {
-                                                        viewModel.addEmoji(emoji: item)
-                                                    }, label: {
-                                                        NetworkImage(url: URL(string: item.url)) { image in
-                                                            image.resizable().scaledToFit()
+                                                        withAnimation {
+                                                            viewModel.mediaViewModel.remove(item: item)
                                                         }
+                                                    }, label: {
+                                                        Text("Delete")
+                                                        Image(systemName: "trash")
                                                     })
+                                                } label: {
+                                                    #if os(macOS)
+                                                    Image(nsImage: image)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 128, height: 128)
+                                                        .cornerRadius(8)
+                                                    #else
+                                                    Image(uiImage: image)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 128, height: 128)
+                                                        .cornerRadius(8)
+                                                    #endif
                                                 }
                                             }
                                         }
-                                        .if(horizontalSizeClass == .compact, transform: { view in
+                                    }
+                                }
+                                Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
+                                    Text("Mark media as sensitive")
+                                })
+                            }
+                            if viewModel.pollViewModel.enabled {
+                                HStack {
+                                    Picker("NotificationType", selection: $viewModel.pollViewModel.pollType) {
+                                        Text("Single Choice")
+                                            .tag(ComposePollType.single)
+                                        Text("Multiple Choice")
+                                            .tag(ComposePollType.multiple)
+                                    }
+                                    .pickerStyle(.segmented)
+                                    Button {
+                                        withAnimation {
+                                            viewModel.pollViewModel.add()
+                                        }
+                                    } label: {
+                                        Image(systemName: "plus")
+                                    }.disabled(viewModel.pollViewModel.choices.count >= 4)
+                                }
+                                .padding(.vertical)
+                                ForEach($viewModel.pollViewModel.choices) { $choice in
+                                    HStack {
+                                        TextField(text: $choice.text) {
+                                            Text("option")
+                                        }
+                                        .textFieldStyle(.roundedBorder)
+                                        Button {
+                                            withAnimation {
+                                                viewModel.pollViewModel.remove(choice: choice)
+                                            }
+                                        } label: {
+                                            Image(systemName: "delete.left")
+                                        }
+                                        .disabled(viewModel.pollViewModel.choices.count <= 2)
+                                    }
+                                    .padding(.bottom)
+                                }
+                                HStack {
+                                    Spacer()
+                                    Menu {
+                                        ForEach(viewModel.pollViewModel.allExpiration, id: \.self) { expiration in
+                                            Button(action: {
+                                                viewModel.pollViewModel.expired = expiration
+                                            }, label: {
+                                                Text(expiration.rawValue)
+                                            })
+                                        }
+                                    } label: {
+                                        Text("expiration: ")
+                                        Text(viewModel.pollViewModel.expired.rawValue)
+                                    }
+                                }
+                            }
+                            if let replyState = viewModel.model.replyState,
+                               case .success(let reply) = onEnum(of: replyState),
+                               reply.data.itemCount > 0,
+                               let replyStatus = reply.data.get(index: 0) {
+                                Spacer()
+                                    .frame(height: 8)
+                                QuotedStatus(
+                                    data: replyStatus,
+                                    onMediaClick: { _ in },
+                                    onUserClick: { _ in },
+                                    onStatusClick: { _ in }
+                                )
+                            }
+                        }
+                        .padding()
+                    }
+                    let iconSize: CGFloat = 24
+                    Divider()
+                    ScrollView(.horizontal, content: {
+                        HStack {
+                            if !viewModel.pollViewModel.enabled {
+                                PhotosPicker(selection: Binding(get: {
+                                    viewModel.mediaViewModel.selectedItems
+                                }, set: { value in
+                                    viewModel.mediaViewModel.selectedItems = value
+                                    viewModel.mediaViewModel.update()
+                                }), matching: .any(of: [.images, .videos, .livePhotos])) {
+                                    Image(systemName: "photo")
+                                        .frame(width: iconSize, height: iconSize)
+                                }
+                            }
+                            if viewModel.mediaViewModel.selectedItems.count == 0,
+                               case .success(let canPoll) = onEnum(of: viewModel.model.canPoll),
+                               canPoll.data == KotlinBoolean(bool: true) {
+                                Button(action: {
+                                    withAnimation {
+                                        viewModel.togglePoll()
+                                    }
+                                }, label: {
+                                    Image(systemName: "list.bullet")
+                                        .frame(width: iconSize, height: iconSize)
+                                })
+                            }
+                            if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
+                                switch onEnum(of: visibilityState.data) {
+                                case .misskeyVisibilityState(let misskeyVisibility):
+                                    Menu {
+                                        ForEach(misskeyVisibility.allVisibilities, id: \.self) { visibility in
+                                            Button {
+                                                misskeyVisibility.setVisibility(value: visibility)
+                                            } label: {
+                                                MisskeyVisibilityIcon(visibility: visibility)
+                                                Text(visibility.name)
+                                            }
+                                        }
+                                    } label: {
+                                        MisskeyVisibilityIcon(visibility: misskeyVisibility.visibility)
+                                            .frame(width: iconSize, height: iconSize)
+                                    }
+                                case .mastodonVisibilityState(let mastodonVisibility):
+                                    Menu {
+                                        ForEach(mastodonVisibility.allVisibilities, id: \.self) { visibility in
+                                            Button {
+                                                mastodonVisibility.setVisibility(value: visibility)
+                                            } label: {
+                                                MastodonVisibilityIcon(visibility: visibility)
+                                                Text(visibility.name)
+                                            }
+                                        }
+                                    } label: {
+                                        MastodonVisibilityIcon(visibility: mastodonVisibility.visibility)
+                                            .frame(width: iconSize, height: iconSize)
+                                    }
+                                }
+                            }
+                            if case .success(let canCW) = onEnum(of: viewModel.model.canCW),
+                               canCW.data == KotlinBoolean(bool: true) {
+                                Button(action: {
+                                    withAnimation {
+                                        viewModel.toggleCW()
+                                        if viewModel.enableCW {
+                                            cwKeyboardFocused = true
+                                        } else {
+                                            keyboardFocused = true
+                                        }
+                                    }
+                                }, label: {
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .frame(width: iconSize, height: iconSize)
+                                })
+                            }
+                            if case .success = onEnum(of: viewModel.model.emojiState) {
+                                Button(action: {
+                                    viewModel.showEmojiPanel()
+                                }, label: {
+                                    Image(systemName: "face.smiling")
+                                        .frame(width: iconSize, height: iconSize)
+                                })
+                                .popover(isPresented: $viewModel.showEmoji) {
+                                    if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
+                                        ScrollView {
+                                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
+                                                ForEach(1...emojis.data.count, id: \.self) { index in
+                                                    if let item = emojis.data[index - 1] as? UiEmoji {
+                                                        Button(action: {
+                                                            viewModel.addEmoji(emoji: item)
+                                                        }, label: {
+                                                            NetworkImage(url: URL(string: item.url)) { image in
+                                                                image.resizable().scaledToFit()
+                                                            }
+                                                        })
+                                                    }
+                                                }
+                                            }
+                                            .if(horizontalSizeClass == .compact, transform: { view in
+                                                view
+                                                    .padding()
+                                            })
+                                        }
+                                        .if(horizontalSizeClass != .compact, transform: { view in
                                             view
-                                                .padding()
+                                                .frame(width: 384, height: 256)
                                         })
                                     }
-                                    .if(horizontalSizeClass != .compact, transform: { view in
-                                        view
-                                            .frame(width: 384, height: 256)
-                                    })
                                 }
                             }
                         }
-                    }
-                    .padding([.bottom, .horizontal])
-                })
-                .buttonStyle(.bordered)
+                        .padding([.bottom, .horizontal])
+                    })
+                    .buttonStyle(.bordered)
+                }
             }
         }
         .activateViewModel(viewModel: viewModel)

@@ -8,87 +8,87 @@ struct HomeScreen: View {
     @State var statusEvent = StatusEvent()
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var body: some View {
-        AdativeTabView(
-            items: [
-                TabModel(
-                    title: "Home",
-                    image: "house",
-                    destination: TabItem { _ in
-                        HomeTimelineScreen()
-                            .if(horizontalSizeClass != .compact, transform: { view in
-                                view
-                                    .toolbar(.hidden)
-                            })
-                                .if(horizontalSizeClass == .compact, transform: { view in
+        FlareTheme {
+            AdativeTabView(
+                items: [
+                    TabModel(
+                        title: "Home",
+                        image: "house",
+                        destination: TabItem { _ in
+                            HomeTimelineScreen()
+                                .if(horizontalSizeClass != .compact, transform: { view in
                                     view
-                                        .navigationBarTitleDisplayMode(.inline)
-                                        .toolbar {
-                                            ToolbarItem(placement: .principal) {
-                                                Text("Flare")
-                                            }
-                                            ToolbarItem(placement: .primaryAction) {
-                                                Button(action: {
-                                                    showCompose = true
-                                                }, label: {
-                                                    Image(systemName: "square.and.pencil")
-                                                })
-                                            }
-                                            ToolbarItem(placement: .navigation) {
-                                                Button {
-                                                    showSettings = true
-                                                } label: {
-                                                    if case .success(let data) = onEnum(of: viewModel.model.user) {
-                                                        UserAvatar(data: data.data.avatarUrl, size: 36)
-                                                    } else {
-                                                        userAvatarPlaceholder(size: 36)
+                                        .toolbar(.hidden)
+                                })
+                                    .if(horizontalSizeClass == .compact, transform: { view in
+                                        view
+                                        #if !os(macOS)
+                                            .navigationBarTitleDisplayMode(.inline)
+                                        #endif
+                                            .toolbar {
+                                                ToolbarItem(placement: .principal) {
+                                                    Text("Flare")
+                                                }
+                                                ToolbarItem(placement: .primaryAction) {
+                                                    Button(action: {
+                                                        showCompose = true
+                                                    }, label: {
+                                                        Image(systemName: "square.and.pencil")
+                                                    })
+                                                }
+                                                ToolbarItem(placement: .navigation) {
+                                                    Button {
+                                                        showSettings = true
+                                                    } label: {
+                                                        if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                                            UserAvatar(data: data.data.avatarUrl, size: 36)
+                                                        } else {
+                                                            userAvatarPlaceholder(size: 36)
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                })
-                    }
-                ),
-                TabModel(
-                    title: "Notification",
-                    image: "bell",
-                    destination: TabItem { _ in
-                        NotificationScreen()
-                    }
-                ),
-                TabModel(
-                    title: "Me",
-                    image: "person.circle",
-                    destination: TabItem { router in
-                        ProfileScreen(
-                            userKey: nil,
-                            toProfileMedia: { userKey in
-                                router.navigate(to: .profileMedia(userKey: userKey.description()))
-                            }
-                        )
-                    }
-                )
-            ],
-            secondaryItems: [
-            ],
-            leading: HStack {
-                if case .success(let data) = onEnum(of: viewModel.model.user) {
-                    UserComponent(user: data.data)
-                } else {
-                    userAvatarPlaceholder(size: 36)
+                                    })
+                        }
+                    ),
+                    TabModel(
+                        title: "Notification",
+                        image: "bell",
+                        destination: TabItem { _ in
+                            NotificationScreen()
+                        }
+                    ),
+                    TabModel(
+                        title: "Me",
+                        image: "person.circle",
+                        destination: TabItem { router in
+                            ProfileScreen(
+                                userKey: nil,
+                                toProfileMedia: { userKey in
+                                    router.navigate(to: .profileMedia(userKey: userKey.description()))
+                                }
+                            )
+                        }
+                    )
+                ],
+                secondaryItems: [
+                ],
+                leading: HStack {
+                    AccountItem(userState: viewModel.model.user)
+                    Spacer()
+                    Button(action: {
+                        showCompose = true
+                    }, label: {
+                        Image(systemName: "square.and.pencil")
+                    })
+                    .buttonStyle(.borderedProminent)
                 }
-                Spacer()
-                Button(action: {
-                    showCompose = true
-                }, label: {
-                    Image(systemName: "square.and.pencil")
-                })
-                .buttonStyle(.borderedProminent)
-            }
-                .padding([.horizontal, .top]),
-            onSettingsclicked: {
-                showSettings = true
-            }
-        )
+                    .padding([.horizontal, .top]),
+                onSettingsclicked: {
+                    showSettings = true
+                }
+            )
+        }
         .sheet(isPresented: $showCompose, content: {
             NavigationStack {
                 ComposeScreen(onBack: {
@@ -98,6 +98,9 @@ struct HomeScreen: View {
         })
         .sheet(isPresented: $showSettings, content: {
             SettingsScreen()
+            #if os(macOS)
+                .frame(minWidth: 500, minHeight: 400)
+            #endif
         })
         .sheet(isPresented: Binding(
             get: {statusEvent.composeStatus != nil},
@@ -257,5 +260,48 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
                 }
             }
         }
+    }
+}
+
+class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
+    static let shared = EmptyStatusEvent()
+    private init() {
+
+    }
+    func onReplyClick(status: UiStatus.Mastodon) {
+    }
+    func onReblogClick(status: UiStatus.Mastodon) {
+    }
+    func onLikeClick(status: UiStatus.Mastodon) {
+    }
+    func onBookmarkClick(status: UiStatus.Mastodon) {
+    }
+    func onMediaClick(media: UiMedia) {
+    }
+    func onReportClick(status: UiStatus.Mastodon) {
+    }
+    func onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.MisskeyEmojiReaction) {
+    }
+    func onReplyClick(data: UiStatus.Misskey) {
+    }
+    func onReblogClick(data: UiStatus.Misskey) {
+    }
+    func onQuoteClick(data: UiStatus.Misskey) {
+    }
+    func onAddReactionClick(data: UiStatus.Misskey) {
+    }
+    func onReportClick(data: UiStatus.Misskey) {
+    }
+    func onReplyClick(data: UiStatus.Bluesky) {
+    }
+    func onReblogClick(data: UiStatus.Bluesky) {
+    }
+    func onQuoteClick(data: UiStatus.Bluesky) {
+    }
+    func onLikeClick(data: UiStatus.Bluesky) {
+    }
+    func onReportClick(data: UiStatus.Bluesky, reason: BlueskyReportStatusStateReportReason) {
+    }
+    func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
     }
 }

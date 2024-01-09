@@ -21,11 +21,18 @@ struct LinkPreview: View {
                     }
                 }
                 .foregroundStyle(.foreground)
+                .if(card.media == nil) { view in
+                    view.padding()
+                }
                 Spacer()
             }
         }
         .buttonStyle(.plain)
-        .background(Color(uiColor: UIColor.secondarySystemBackground))
+#if !os(macOS)
+        .background(Color(UIColor.secondarySystemBackground))
+#else
+        .background(Color(NSColor.windowBackgroundColor))
+#endif
         .cornerRadius(8)
     }
 }

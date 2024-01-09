@@ -61,21 +61,13 @@ struct StatusTimeline: View {
             ForEach(1...pagingSource.itemCount, id: \.self) { index in
                 let data = pagingSource.peek(index: index - 1)
                 VStack {
-                    if data != nil {
-                        switch onEnum(of: data!) {
-                        case .mastodon(let mastodon):
-                            MastodonStatusComponent(mastodon: mastodon, event: mastodonEvent)
-                        case .mastodonNotification(let mastodonNotification):
-                            MastodonNotificationComponent(data: mastodonNotification, event: mastodonEvent)
-                        case .misskey(let misskey):
-                            MisskeyStatusComponent(misskey: misskey, event: misskeyEvent)
-                        case .misskeyNotification(let misskeyNotification):
-                            MisskeyNotificationComponent(data: misskeyNotification, event: misskeyEvent)
-                        case .bluesky(let bluesky):
-                            BlueskyStatusComponent(bluesky: bluesky, event: blueskyEvent)
-                        case .blueskyNotification(let blueskyNotification):
-                            BlueskyNotificationComponent(data: blueskyNotification)
-                        }
+                    if let status = data {
+                        StatusItemView(
+                            status: status,
+                            mastodonEvent: mastodonEvent,
+                            misskeyEvent: misskeyEvent,
+                            blueskyEvent: blueskyEvent
+                        )
                     } else {
                         StatusPlaceHolder()
                     }
@@ -83,6 +75,29 @@ struct StatusTimeline: View {
                     pagingSource.get(index: index - 1)
                 }
             }
+        }
+    }
+}
+
+struct StatusItemView: View {
+    let status: UiStatus
+    let mastodonEvent: MastodonStatusEvent
+    let misskeyEvent: MisskeyStatusEvent
+    let blueskyEvent: BlueskyStatusEvent
+    var body: some View {
+        switch onEnum(of: status) {
+        case .mastodon(let mastodon):
+            MastodonStatusComponent(mastodon: mastodon, event: mastodonEvent)
+        case .mastodonNotification(let mastodonNotification):
+            MastodonNotificationComponent(data: mastodonNotification, event: mastodonEvent)
+        case .misskey(let misskey):
+            MisskeyStatusComponent(misskey: misskey, event: misskeyEvent)
+        case .misskeyNotification(let misskeyNotification):
+            MisskeyNotificationComponent(data: misskeyNotification, event: misskeyEvent)
+        case .bluesky(let bluesky):
+            BlueskyStatusComponent(bluesky: bluesky, event: blueskyEvent)
+        case .blueskyNotification(let blueskyNotification):
+            BlueskyNotificationComponent(data: blueskyNotification)
         }
     }
 }
@@ -107,7 +122,8 @@ struct StatusPlaceHolder: View {
             timestamp: 1696838289,
             headerTrailing: {EmptyView()},
             onMediaClick: { _ in },
-            sensitive: false
+            sensitive: false,
+            card: nil
         )
         .redacted(reason: .placeholder)
     }

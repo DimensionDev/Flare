@@ -7,6 +7,10 @@ public struct EmojiInlineImageProvider: InlineImageProvider {
     var emojiSize: CGFloat = 14
     public func image(with url: URL, label: String) async throws -> Image {
         let img = try await DefaultNetworkImageLoader.shared.image(from: url)
+        #if os(macOS)
+        let uiimg = UIImage(cgImage: img, size: .init(width: emojiSize, height: emojiSize))
+        return .init(nsImage: uiimg)
+        #else
         return if let uiimg = UIImage(cgImage: img).resize(height: emojiSize) {
             Image(uiImage: uiimg)
         } else {
@@ -16,6 +20,7 @@ public struct EmojiInlineImageProvider: InlineImageProvider {
                 label: Text(label)
             )
         }
+        #endif
     }
 }
 
@@ -28,6 +33,7 @@ extension InlineImageProvider where Self == EmojiInlineImageProvider {
     }
 }
 
+#if !os(macOS)
 extension UIImage {
     func resize(height: CGFloat) -> UIImage? {
         let heightRatio = height / size.height
@@ -43,3 +49,4 @@ extension UIImage {
         return resizedImage
     }
 }
+#endif

@@ -1,22 +1,22 @@
 import Foundation
 
 struct AppearanceSettings: Codable {
-    let theme: Theme
-    let avatarShape: AvatarShape
-    let showActions: Bool
-    let showNumbers: Bool
-    let showLinkPreview: Bool
-    let showMedia: Bool
-    let showSensitiveContent: Bool
-    let swipeGestures: Bool
-    let mastodon: Mastodon
-    let misskey: Misskey
-    let bluesky: Bluesky
+    var theme: Theme = Theme.auto
+    var avatarShape: AvatarShape = AvatarShape.circle
+    var showActions: Bool = true
+    var showNumbers: Bool = true
+    var showLinkPreview: Bool = true
+    var showMedia: Bool = true
+    var showSensitiveContent: Bool = false
+    var swipeGestures: Bool = false
+    var mastodon: Mastodon = Mastodon()
+    var misskey: Misskey = Misskey()
+    var bluesky: Bluesky = Bluesky()
     
     struct Mastodon : Codable {
-        let showVisibility: Bool
-        let swipeLeft: SwipeActions
-        let swipeRight: SwipeActions
+        var showVisibility: Bool = true
+        var swipeLeft: SwipeActions = SwipeActions.reply
+        var swipeRight: SwipeActions = SwipeActions.none
         
         enum SwipeActions: Codable {
             case none
@@ -28,10 +28,10 @@ struct AppearanceSettings: Codable {
     }
     
     struct Misskey: Codable {
-        let showVisibility: Bool
-        let showReaction: Bool
-        let swipeLeft: SwipeActions
-        let swipeRight: SwipeActions
+        var showVisibility: Bool = true
+        var showReaction: Bool = true
+        var swipeLeft: SwipeActions = SwipeActions.reply
+        var swipeRight: SwipeActions = SwipeActions.none
         
         enum SwipeActions: Codable {
             case none
@@ -42,8 +42,8 @@ struct AppearanceSettings: Codable {
     }
     
     struct Bluesky: Codable {
-        let swipeLeft: SwipeActions
-        let swipeRight: SwipeActions
+        var swipeLeft: SwipeActions = SwipeActions.reply
+        var swipeRight: SwipeActions = SwipeActions.none
         
         enum SwipeActions: Codable {
             case none

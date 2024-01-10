@@ -40,9 +40,26 @@ struct ComposeScreen: View {
                             if viewModel.mediaViewModel.items.count > 0 {
                                 ScrollView(.horizontal) {
                                     HStack {
-                                        ForEach(0..<viewModel.mediaViewModel.items.count, id: \.self) { index in
+                                        ForEach(viewModel.mediaViewModel.items.indices, id: \.self) { index in
                                             let item = viewModel.mediaViewModel.items[index]
                                             if let image = item.image {
+                                                #if os(macOS)
+                                                Image(nsImage: image)
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 128, height: 128)
+                                                    .cornerRadius(8)
+                                                    .contextMenu {
+                                                        Button(action: {
+                                                            withAnimation {
+                                                                viewModel.mediaViewModel.remove(item: item)
+                                                            }
+                                                        }, label: {
+                                                            Text("Delete")
+                                                            Image(systemName: "trash")
+                                                        })
+                                                    }
+                                                #else
                                                 Menu {
                                                     Button(action: {
                                                         withAnimation {
@@ -53,20 +70,13 @@ struct ComposeScreen: View {
                                                         Image(systemName: "trash")
                                                     })
                                                 } label: {
-                                                    #if os(macOS)
-                                                    Image(nsImage: image)
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 128, height: 128)
-                                                        .cornerRadius(8)
-                                                    #else
                                                     Image(uiImage: image)
                                                         .resizable()
                                                         .scaledToFill()
                                                         .frame(width: 128, height: 128)
                                                         .cornerRadius(8)
-                                                    #endif
                                                 }
+                                                #endif
                                             }
                                         }
                                     }
@@ -92,7 +102,9 @@ struct ComposeScreen: View {
                                         Image(systemName: "plus")
                                     }.disabled(viewModel.pollViewModel.choices.count >= 4)
                                 }
+                                #if !os(macOS)
                                 .padding(.vertical)
+                                #endif
                                 ForEach($viewModel.pollViewModel.choices) { $choice in
                                     HStack {
                                         TextField(text: $choice.text) {
@@ -108,7 +120,9 @@ struct ComposeScreen: View {
                                         }
                                         .disabled(viewModel.pollViewModel.choices.count <= 2)
                                     }
+                                    #if !os(macOS)
                                     .padding(.bottom)
+                                    #endif
                                 }
                                 HStack {
                                     Spacer()

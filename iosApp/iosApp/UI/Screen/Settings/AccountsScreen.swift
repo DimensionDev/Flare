@@ -39,6 +39,7 @@ struct AccountsScreen: View {
                                     }
                                 }
                             }
+                            .buttonStyle(.plain)
                         case .error:
                             Text("error")
                         case .loading:

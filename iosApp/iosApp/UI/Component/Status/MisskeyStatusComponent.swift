@@ -101,6 +101,7 @@ struct MisskeyStatusComponent: View {
                                 }
                             }
                         )
+                        .font(.caption)
                     })
                     .disabled(!actual.canRenote)
                     Spacer()

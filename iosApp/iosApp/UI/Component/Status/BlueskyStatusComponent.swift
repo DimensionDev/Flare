@@ -74,8 +74,10 @@ struct BlueskyStatusComponent: View {
                         })
                     }, label: {
                         Image(systemName: "arrow.left.arrow.right")
+                            .font(.caption)
                         if let humanizedRepostCount = bluesky.matrices.humanizedRepostCount, appSettings.appearanceSettings.showNumbers {
                             Text(humanizedRepostCount)
+                                .font(.caption)
                         }
                     })
                     .if(!bluesky.reaction.reposted) { view in

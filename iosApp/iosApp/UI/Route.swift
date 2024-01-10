@@ -99,7 +99,9 @@ extension View {
             case let .statusDetail(statusKey):
                 Text("todo")
             case let .profileWithUserNameAndHost(userName, host):
-                Text("todo")
+                ProfileWithUserNameScreen(userName: userName, host: host) { userKey in
+                    router.navigate(to: .profileMedia(userKey: userKey.description()))
+                }
             case let .search(data):
                 Text("todo")
             case let .profileMedia(userKey):

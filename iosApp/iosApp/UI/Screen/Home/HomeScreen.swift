@@ -162,6 +162,8 @@ struct TabItem<Content: View>: View {
                     router.navigate(to: .profileWithUserNameAndHost(userName: data.userName, host: data.host))
                 case .search(let data):
                     router.navigate(to: .search(query: data.keyword))
+                case .statusDetail(let data):
+                    router.navigate(to: .statusDetail(statusKey: data.statusKey.description()))
                 }
                 return .handled
             } else {

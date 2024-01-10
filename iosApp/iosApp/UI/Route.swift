@@ -97,7 +97,7 @@ extension View {
                     }
                 )
             case let .statusDetail(statusKey):
-                Text("todo")
+                StatusDetailScreen(statusKey: MicroBlogKey.companion.valueOf(str: statusKey))
             case let .profileWithUserNameAndHost(userName, host):
                 ProfileWithUserNameScreen(userName: userName, host: host) { userKey in
                     router.navigate(to: .profileMedia(userKey: userKey.description()))

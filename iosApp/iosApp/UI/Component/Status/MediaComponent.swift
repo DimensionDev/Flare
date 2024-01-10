@@ -116,6 +116,7 @@ struct MediaItemComponent: View {
             }
         }
         .clipped()
+#if os(macOS)
         .onTapGesture {
             switch onEnum(of: media) {
             case .image(let data):
@@ -128,7 +129,7 @@ struct MediaItemComponent: View {
                 openWindow(id: "image-view", value: gif.url)
             }
         }
-#if !os(macOS)
+#else
         .onTapGesture {
             showCover = true
         }

@@ -40,6 +40,7 @@ struct StatusTimelineComponent: View {
 }
 
 struct StatusTimeline: View {
+    @Environment(\.openURL) private var openURL
     let pagingSource: LazyPagingItemsProxy<UiStatus>
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
@@ -68,6 +69,9 @@ struct StatusTimeline: View {
                             misskeyEvent: misskeyEvent,
                             blueskyEvent: blueskyEvent
                         )
+                        .onTapGesture {
+                            openURL(URL(string: AppDeepLink.StatusDetail.shared.invoke(statusKey: status.statusKey))!)
+                        }
                     } else {
                         StatusPlaceHolder()
                     }

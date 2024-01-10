@@ -32,6 +32,12 @@ object AppDeepLink {
         ) = "$APPSCHEMA://ProfileWithNameAndHost/${userName.encodeURLQueryComponent()}/$host"
     }
 
+    object StatusDetail {
+        const val ROUTE = "$APPSCHEMA://StatusDetail/{statusKey}"
+
+        operator fun invoke(statusKey: MicroBlogKey) = "$APPSCHEMA://StatusDetail/$statusKey"
+    }
+
     fun parse(url: String): DeeplinkEvent? {
         val uri = url.removePrefix("$APPSCHEMA://")
         return when {
@@ -48,6 +54,10 @@ object AppDeepLink {
                 val userName = userNameAndHost.substringBefore("/")
                 val host = userNameAndHost.substringAfter("/")
                 DeeplinkEvent.ProfileWithNameAndHost(userName, host)
+            }
+            uri.startsWith("StatusDetail/") -> {
+                val statusKey = uri.substringAfter("StatusDetail/")
+                DeeplinkEvent.StatusDetail(MicroBlogKey.valueOf(statusKey))
             }
             else -> null
         }
@@ -66,5 +76,9 @@ sealed interface DeeplinkEvent {
     data class ProfileWithNameAndHost(
         val userName: String,
         val host: String,
+    ) : DeeplinkEvent
+
+    data class StatusDetail(
+        val statusKey: MicroBlogKey,
     ) : DeeplinkEvent
 }

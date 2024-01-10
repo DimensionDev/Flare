@@ -23,6 +23,8 @@
 		060881BE2AE109FA001AAD2F /* ComposeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060881BD2AE109FA001AAD2F /* ComposeScreen.swift */; };
 		060881C12AE10D35001AAD2F /* ComposeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060881C02AE10D35001AAD2F /* ComposeViewModel.swift */; };
 		060D00C22AC407DF0087427A /* FlareApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C12AC407DF0087427A /* FlareApp.swift */; };
+		061C2CFA2B4E6E0100249514 /* ProfileWithUserNameScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061C2CF92B4E6E0100249514 /* ProfileWithUserNameScreen.swift */; };
+		061C2CFC2B4E77D700249514 /* FullScreenImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061C2CFB2B4E77D700249514 /* FullScreenImageViewer.swift */; };
 		0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */; };
 		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
 		066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */; };
@@ -77,6 +79,8 @@
 		060881BD2AE109FA001AAD2F /* ComposeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeScreen.swift; sourceTree = "<group>"; };
 		060881C02AE10D35001AAD2F /* ComposeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeViewModel.swift; sourceTree = "<group>"; };
 		060D00C12AC407DF0087427A /* FlareApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareApp.swift; sourceTree = "<group>"; };
+		061C2CF92B4E6E0100249514 /* ProfileWithUserNameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileWithUserNameScreen.swift; sourceTree = "<group>"; };
+		061C2CFB2B4E77D700249514 /* FullScreenImageViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullScreenImageViewer.swift; sourceTree = "<group>"; };
 		0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTimelineScreen.swift; sourceTree = "<group>"; };
 		066151202AC540B700CCB945 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonStatusComponent.swift; sourceTree = "<group>"; };
@@ -207,6 +211,7 @@
 				067D898B2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift */,
 				06C9C5602B34241400AE5284 /* AdativeTabView.swift */,
 				06C862702B4D0C7A008C902C /* FlareTheme.swift */,
+				061C2CFB2B4E77D700249514 /* FullScreenImageViewer.swift */,
 			);
 			path = Component;
 			sourceTree = "<group>";
@@ -219,6 +224,7 @@
 				B62B23B387C72E27B5E2451F /* Mastodon.swift */,
 				B62B2FF1AAD5F991A19FBDA8 /* Misskey.swift */,
 				B62B283301219DCB3219696A /* Bluesky.swift */,
+				061C2CF92B4E6E0100249514 /* ProfileWithUserNameScreen.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -509,6 +515,7 @@
 				060881C12AE10D35001AAD2F /* ComposeViewModel.swift in Sources */,
 				0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */,
 				068D2E0B2AEF5AA500F2B1AE /* BlueskyStatusComponent.swift in Sources */,
+				061C2CFC2B4E77D700249514 /* FullScreenImageViewer.swift in Sources */,
 				067D898E2AD3F52100F8F932 /* MastodonStatusComponent.swift in Sources */,
 				06DF79DA2B46B26600CF21FE /* AppearanceSettings.swift in Sources */,
 				06DF79D32B46AC7F00CF21FE /* StorageScreen.swift in Sources */,
@@ -531,6 +538,7 @@
 				B62B27AA5CE37383A67B419B /* CommonProfileHeader.swift in Sources */,
 				B62B206B672982F032F669C3 /* ProfileScreen.swift in Sources */,
 				B62B28A9B1D6315A0B1EB570 /* Mastodon.swift in Sources */,
+				061C2CFA2B4E6E0100249514 /* ProfileWithUserNameScreen.swift in Sources */,
 				B62B2BA171EFE28A77E3877F /* Misskey.swift in Sources */,
 				B62B2D5F623BE2DD92E63B51 /* Bluesky.swift in Sources */,
 			);
@@ -670,6 +678,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = JBX27Q658M;
@@ -681,11 +690,13 @@
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Flare;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -714,6 +725,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = JBX27Q658M;
@@ -725,11 +737,13 @@
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Flare;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",

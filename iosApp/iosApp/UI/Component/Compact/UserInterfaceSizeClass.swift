@@ -24,4 +24,18 @@ extension EnvironmentValues {
         set { self[VerticalSizeClassEnvironmentKey.self] = newValue }
     }
 }
+
+struct ProvideWindowSizeClass<Child>: View where Child: View {
+    let content: () -> Child
+    var body: some View {
+        GeometryReader { proxy in
+            let horizontalSizeClass: UserInterfaceSizeClass = proxy.size.width < 768 ? .compact : .regular
+            let verticalSizeClass: UserInterfaceSizeClass = proxy.size.height < 768 ? .compact : .regular
+            content()
+                .environment(\.horizontalSizeClass, horizontalSizeClass)
+                .environment(\.verticalSizeClass, verticalSizeClass)
+        }
+    }
+}
+
 #endif

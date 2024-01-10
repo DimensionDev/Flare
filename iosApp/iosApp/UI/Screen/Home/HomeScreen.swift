@@ -16,17 +16,14 @@ struct HomeScreen: View {
                         image: "house",
                         destination: TabItem { _ in
                             HomeTimelineScreen()
-                                #if !os(macOS)
+#if !os(macOS)
                                 .if(horizontalSizeClass != .compact, transform: { view in
                                     view
                                         .toolbar(.hidden)
                                 })
-                                #endif
                                     .if(horizontalSizeClass == .compact, transform: { view in
                                         view
-                                        #if !os(macOS)
                                             .navigationBarTitleDisplayMode(.inline)
-                                        #endif
                                             .toolbar {
                                                 ToolbarItem(placement: .principal) {
                                                     Text("Flare")
@@ -51,6 +48,7 @@ struct HomeScreen: View {
                                                 }
                                             }
                                     })
+                                    #endif
                         }
                     ),
                     TabModel(
@@ -84,9 +82,9 @@ struct HomeScreen: View {
                         Image(systemName: "gear")
                             .opacity(0.5)
                     }
-                    #if !os(macOS)
+#if !os(macOS)
                     .padding([.horizontal, .top])
-                    #endif
+#endif
                     .buttonStyle(.plain)
                     Button(action: {
                         showCompose = true
@@ -167,7 +165,7 @@ struct TabItem<Content: View>: View {
                 }
                 return .handled
             } else {
-                return .discarded
+                return .systemAction
             }
         })
     }
@@ -286,7 +284,7 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
 class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
     static let shared = EmptyStatusEvent()
     private init() {
-
+        
     }
     func onReplyClick(status: UiStatus.Mastodon) {
     }

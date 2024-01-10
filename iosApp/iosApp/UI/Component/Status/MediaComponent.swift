@@ -17,33 +17,33 @@ struct MediaComponent: View {
         ZStack(alignment: .topLeading) {
             LazyVGrid(columns: columns) {
                 if medias.count == 1 {
-                    Button(action: {
-                        onMediaClick(medias[0])
-                    }, label: {
-                        switch onEnum(of: medias[0]) {
-                        case .image(let image):
-                            MediaItemComponent(media: medias[0])
-                                .aspectRatio(.init(image.aspectRatio), contentMode: .fill)
-                        case .video(let video):
-                            MediaItemComponent(media: medias[0])
-                                .aspectRatio(.init(video.aspectRatio), contentMode: .fill)
-                        case .gif(let gif):
-                            MediaItemComponent(media: medias[0])
-                                .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
-                        case .audio:
-                            MediaItemComponent(media: medias[0])
-                        }
-                    })
-                    .buttonStyle(.borderless)
+                    switch onEnum(of: medias[0]) {
+                    case .image(let image):
+                        MediaItemComponent(media: medias[0])
+                            .aspectRatio(.init(image.aspectRatio), contentMode: .fill)
+                    case .video(let video):
+                        MediaItemComponent(media: medias[0])
+                            .aspectRatio(.init(video.aspectRatio), contentMode: .fill)
+                    case .gif(let gif):
+                        MediaItemComponent(media: medias[0])
+                            .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
+                    case .audio:
+                        MediaItemComponent(media: medias[0])
+                    }
+                    //                    Button(action: {
+                    //                        onMediaClick(medias[0])
+                    //                    }, label: {
+                    //                    })
+                    //                    .buttonStyle(.borderless)
                 } else {
                     ForEach(1...medias.count, id: \.self) { index in
-                        Button(action: {
-                            onMediaClick(medias[index - 1])
-                        }, label: {
-                            MediaItemComponent(media: medias[index - 1])
-                                .aspectRatio(1, contentMode: .fill)
-                        })
-                        .buttonStyle(.borderless)
+                        MediaItemComponent(media: medias[index - 1])
+                            .aspectRatio(1, contentMode: .fill)
+                        //                        Button(action: {
+                        //                            onMediaClick(medias[index - 1])
+                        //                        }, label: {
+                        //                        })
+                        //                        .buttonStyle(.borderless)
                     }
                 }
             }
@@ -88,6 +88,9 @@ struct MediaComponent: View {
 }
 
 struct MediaItemComponent: View {
+#if !os(macOS)
+    @State var showCover = false
+#endif
     let media: UiMedia
     var body: some View {
         ZStack {
@@ -111,5 +114,13 @@ struct MediaItemComponent: View {
             }
         }
         .clipped()
+        .onTapGesture {
+            showCover = true
+        }
+#if !os(macOS)
+        .fullScreenCover(isPresented: $showCover, onDismiss: { showCover = false }) {
+            FullScreenImageViewer(media: media, dismiss: { showCover = false })
+        }
+#endif
     }
 }

@@ -76,10 +76,12 @@ struct ProfileScreen: View {
             }
             .listStyle(.plain)
         }
+#if !os(macOS)
         .if(horizontalSizeClass == .compact, transform: { view in
             view
                 .ignoresSafeArea(edges: .top)
         })
+#endif
         .if(horizontalSizeClass != .compact, transform: { view in
             view
 #if !os(macOS)

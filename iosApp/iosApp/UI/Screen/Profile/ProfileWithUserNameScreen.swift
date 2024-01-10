@@ -4,7 +4,7 @@ import shared
 struct ProfileWithUserNameScreen: View {
     @State private var viewModel: ProfileWithUserNameViewModel
     let toProfileMedia: (MicroBlogKey) -> Void
-    
+
     init(userName: String, host: String, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         viewModel = .init(userName: userName, host: host)
         self.toProfileMedia = toProfileMedia
@@ -48,7 +48,7 @@ class ProfileWithUserNameViewModel: MoleculeViewModelProto {
     var model: UiState<UiUser>
     typealias Model = UiState<UiUser>
     typealias Presenter = ProfileWithUserNameAndHostPresenter
-    
+
     init(userName: String, host: String) {
         presenter = .init(userName: userName, host: host)
         model = presenter.models.value

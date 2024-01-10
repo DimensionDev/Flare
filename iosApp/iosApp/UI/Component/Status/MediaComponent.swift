@@ -90,6 +90,8 @@ struct MediaComponent: View {
 struct MediaItemComponent: View {
 #if !os(macOS)
     @State var showCover = false
+#else
+    @Environment(\.openWindow) var openWindow
 #endif
     let media: UiMedia
     var body: some View {
@@ -115,9 +117,21 @@ struct MediaItemComponent: View {
         }
         .clipped()
         .onTapGesture {
-            showCover = true
+            switch onEnum(of: media) {
+            case .image(let data):
+                openWindow(id: "image-view", value: data.url)
+            case .video(let video):
+                openWindow(id: "image-view", value: video.url)
+            case .audio(let audio):
+                openWindow(id: "image-view", value: audio.url)
+            case .gif(let gif):
+                openWindow(id: "image-view", value: gif.url)
+            }
         }
 #if !os(macOS)
+        .onTapGesture {
+            showCover = true
+        }
         .fullScreenCover(isPresented: $showCover, onDismiss: { showCover = false }) {
             FullScreenImageViewer(media: media, dismiss: { showCover = false })
         }

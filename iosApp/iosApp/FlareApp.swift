@@ -21,5 +21,11 @@ struct FlareApp: SwiftUI.App {
         #if os(macOS)
         .windowStyle(.hiddenTitleBar)
         #endif
+        #if os(macOS)
+        WindowGroup(id: "image-view", for: String.self) { $url in
+            ImageViewWindow(url: url)
+        }
+        .windowStyle(.hiddenTitleBar)
+        #endif
     }
 }

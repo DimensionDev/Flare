@@ -284,7 +284,7 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
 class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
     static let shared = EmptyStatusEvent()
     private init() {
-        
+
     }
     func onReplyClick(status: UiStatus.Mastodon) {
     }

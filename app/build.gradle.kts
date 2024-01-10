@@ -102,8 +102,6 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
     implementation(libs.material3WindowSizeClass)
-    implementation(libs.bundles.room)
-    ksp(libs.room.compiler)
     implementation(libs.bundles.navigation)
     implementation(libs.bundles.kotlinx)
     implementation(platform(libs.koin.bom))

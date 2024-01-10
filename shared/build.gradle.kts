@@ -145,16 +145,6 @@ android {
     }
 }
 
-// to include all dependencies in the jar
-tasks.withType<Jar> {
-    doFirst {
-        configurations["jvmCompileClasspath"].forEach { file ->
-            from(zipTree(file.absoluteFile))
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
-    }
-}
-
 ktlint {
     version.set(libs.versions.ktlint)
     filter {

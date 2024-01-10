@@ -47,15 +47,12 @@
 
 
 	<ItemGroup>
-		<IkvmReference Include="..\shared\build\libs\shared-jvm.jar">
+		<IkvmReference Include="build\libs\windowsApp-all.jar">
 			<AssemblyName>shared</AssemblyName>
-			<AssemblyVersion>1.0.0</AssemblyVersion>
-			<AssemblyFileVersion>1.0.0</AssemblyFileVersion>
+			<AssemblyVersion>1.0.3</AssemblyVersion>
+			<AssemblyFileVersion>1.0.3</AssemblyFileVersion>
 		</IkvmReference>
-		
 	</ItemGroup>
-
-
 	<!-- 
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
     Tools extension to be activated for this project even if the Windows App SDK Nuget
@@ -84,7 +81,7 @@
 		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
 	</PropertyGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="cd ..&#xD;&#xA;./gradlew :shared:jvmjar" />
+		<Exec Command="cd ..&#xD;&#xA;./gradlew :windowsApp:shadowJar" />
 	</Target>
 
 </Project>

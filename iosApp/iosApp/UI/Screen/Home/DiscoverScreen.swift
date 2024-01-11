@@ -89,6 +89,10 @@ struct DiscoverScreen: View {
                                                 .background(Color(NSColor.windowBackgroundColor))
                                         #endif
                                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                .onTapGesture {
+                                                    searchViewModel.searchText = "#" + item.hashtag
+                                                    searchViewModel.model.search(new: "#" + item.hashtag)
+                                                }
                                         }
                                     }
                                 }

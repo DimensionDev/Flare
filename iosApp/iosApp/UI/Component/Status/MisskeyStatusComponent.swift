@@ -136,6 +136,7 @@ struct MisskeyStatusComponent: View {
                         )
                     }
                 }
+                .frame(maxWidth: 600)
                 .foregroundStyle(.primary)
                 .buttonStyle(.borderless)
                 .tint(.primary)

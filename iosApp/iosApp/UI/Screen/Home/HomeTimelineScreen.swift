@@ -17,6 +17,7 @@ struct HomeTimelineScreen: View {
         .refreshable {
             try? await viewModel.model.refresh()
         }
+        .navigationTitle("Home")
         .activateViewModel(viewModel: viewModel)
     }
 }

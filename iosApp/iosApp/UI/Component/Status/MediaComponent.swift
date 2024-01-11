@@ -83,6 +83,7 @@ struct MediaComponent: View {
                 .frame(maxWidth: .infinity, alignment: .topLeading)
             }
         }
+        .frame(maxWidth: 600)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

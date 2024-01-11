@@ -103,7 +103,7 @@ extension View {
                     router.navigate(to: .profileMedia(userKey: userKey.description()))
                 }
             case let .search(data):
-                Text("todo")
+                SearchScreen(initialQuery: data)
             case let .profileMedia(userKey):
                 ProfileMediaListScreen(userKey: MicroBlogKey.companion.valueOf(str: userKey))
             }

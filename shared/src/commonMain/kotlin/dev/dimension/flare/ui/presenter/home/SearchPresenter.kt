@@ -37,9 +37,12 @@ class SearchPresenter(
                 }.collectPagingProxy()
             }
 
+        val isSearching = user is UiState.Success && status is UiState.Success && query.isNotEmpty()
+
         return object : SearchState {
             override val users = user
             override val status = status
+            override val searching = isSearching
 
             override fun search(new: String) {
                 query = new
@@ -51,6 +54,7 @@ class SearchPresenter(
 interface SearchState {
     val users: UiState<LazyPagingItemsProxy<UiUser>>
     val status: UiState<LazyPagingItemsProxy<UiStatus>>
+    val searching: Boolean
 
     fun search(new: String)
 }

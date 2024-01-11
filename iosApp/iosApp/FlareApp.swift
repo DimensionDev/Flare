@@ -12,14 +12,14 @@ struct FlareApp: SwiftUI.App {
             #if os(macOS)
             ProvideWindowSizeClass {
                 RouterView()
-                    .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
             }
+            .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
             #else
             RouterView()
             #endif
         }
         #if os(macOS)
-        .windowStyle(.hiddenTitleBar)
+//        .windowStyle(.hiddenTitleBar)
         #endif
         #if os(macOS)
         WindowGroup(id: "image-view", for: String.self) { $url in

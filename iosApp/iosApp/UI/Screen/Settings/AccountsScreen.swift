@@ -31,7 +31,8 @@ struct AccountsScreen: View {
                                         Image(systemName: "circle")
                                             .foregroundStyle(.blue)
                                     }
-                                }.swipeActions(edge: .trailing) {
+                                }
+                                .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
                                         viewModel.model.removeAccount(accountKey: user.data.userKey)
                                     } label: {
@@ -40,6 +41,15 @@ struct AccountsScreen: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            #if os(macOS)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    viewModel.model.removeAccount(accountKey: user.data.userKey)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                            #endif
                         case .error:
                             Text("error")
                         case .loading:

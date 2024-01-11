@@ -269,6 +269,12 @@ class ServiceSelectViewModel: MoleculeViewModelProto {
             }
             .store(in: &subscriptions)
     }
+    deinit {
+        subscriptions.forEach { cancelable in
+            cancelable.cancel()
+        }
+        subscriptions.removeAll()
+    }
 }
 
 @Observable

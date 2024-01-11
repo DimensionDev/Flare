@@ -12,8 +12,8 @@ struct FlareApp: SwiftUI.App {
             #if os(macOS)
             ProvideWindowSizeClass {
                 RouterView()
-                    .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
             }
+            .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
             #else
             RouterView()
             #endif

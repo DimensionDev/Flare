@@ -18,10 +18,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissValue
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberSwipeToDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -109,9 +109,9 @@ internal fun AccountsScreen(
                         data.onSuccess { user ->
                             SwipeToDismissBox(
                                 state =
-                                    rememberSwipeToDismissState(
+                                    rememberSwipeToDismissBoxState(
                                         confirmValueChange = {
-                                            if (it == SwipeToDismissValue.EndToStart) {
+                                            if (it == SwipeToDismissBoxValue.EndToStart) {
                                                 state.removeAccount(user.userKey)
                                                 true
                                             } else {

@@ -28,9 +28,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissValue
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -86,11 +86,11 @@ internal fun BlueskyStatusComponent(
     val uriHandler = LocalUriHandler.current
 
     val dismissState =
-        rememberSwipeToDismissState(
+        rememberSwipeToDismissBoxState(
             confirmValueChange = {
                 when (it) {
-                    SwipeToDismissValue.StartToEnd -> appearanceSettings.bluesky.swipeRight
-                    SwipeToDismissValue.EndToStart -> appearanceSettings.bluesky.swipeLeft
+                    SwipeToDismissBoxValue.StartToEnd -> appearanceSettings.bluesky.swipeRight
+                    SwipeToDismissBoxValue.EndToStart -> appearanceSettings.bluesky.swipeLeft
                     else -> null
                 }?.let {
                     when (it) {
@@ -120,19 +120,22 @@ internal fun BlueskyStatusComponent(
         backgroundContent = {
             val alignment =
                 when (dismissState.dismissDirection) {
-                    SwipeToDismissValue.StartToEnd -> Alignment.CenterStart
-                    SwipeToDismissValue.EndToStart -> Alignment.CenterEnd
-                    SwipeToDismissValue.Settled -> Alignment.Center
+                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                    SwipeToDismissBoxValue.Settled -> Alignment.Center
                 }
             val action =
                 when (dismissState.dismissDirection) {
-                    SwipeToDismissValue.StartToEnd -> appearanceSettings.bluesky.swipeRight
-                    SwipeToDismissValue.EndToStart -> appearanceSettings.bluesky.swipeLeft
-                    SwipeToDismissValue.Settled -> null
+                    SwipeToDismissBoxValue.StartToEnd -> appearanceSettings.bluesky.swipeRight
+                    SwipeToDismissBoxValue.EndToStart -> appearanceSettings.bluesky.swipeLeft
+                    SwipeToDismissBoxValue.Settled -> null
                 }
             if (action != null) {
                 Box(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = screenHorizontalPadding),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = screenHorizontalPadding),
                     contentAlignment = alignment,
                 ) {
                     StatusSwipeButton(

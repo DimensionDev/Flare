@@ -35,9 +35,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissValue
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -169,11 +169,11 @@ internal fun MastodonStatusComponent(
     var showMedia by remember { mutableStateOf(false) }
     val appearanceSettings = LocalAppearanceSettings.current
     val dismissState =
-        rememberSwipeToDismissState(
+        rememberSwipeToDismissBoxState(
             confirmValueChange = {
                 when (it) {
-                    SwipeToDismissValue.StartToEnd -> appearanceSettings.mastodon.swipeRight
-                    SwipeToDismissValue.EndToStart -> appearanceSettings.mastodon.swipeLeft
+                    SwipeToDismissBoxValue.StartToEnd -> appearanceSettings.mastodon.swipeRight
+                    SwipeToDismissBoxValue.EndToStart -> appearanceSettings.mastodon.swipeLeft
                     else -> null
                 }?.let {
                     when (it) {
@@ -206,15 +206,15 @@ internal fun MastodonStatusComponent(
         backgroundContent = {
             val alignment =
                 when (dismissState.dismissDirection) {
-                    SwipeToDismissValue.StartToEnd -> Alignment.CenterStart
-                    SwipeToDismissValue.EndToStart -> Alignment.CenterEnd
-                    SwipeToDismissValue.Settled -> Alignment.Center
+                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                    SwipeToDismissBoxValue.Settled -> Alignment.Center
                 }
             val action =
                 when (dismissState.dismissDirection) {
-                    SwipeToDismissValue.StartToEnd -> appearanceSettings.mastodon.swipeRight
-                    SwipeToDismissValue.EndToStart -> appearanceSettings.mastodon.swipeLeft
-                    SwipeToDismissValue.Settled -> null
+                    SwipeToDismissBoxValue.StartToEnd -> appearanceSettings.mastodon.swipeRight
+                    SwipeToDismissBoxValue.EndToStart -> appearanceSettings.mastodon.swipeLeft
+                    SwipeToDismissBoxValue.Settled -> null
                 }
             if (action != null) {
                 Box(

@@ -28,6 +28,8 @@
 		061C2CFE2B4E82C900249514 /* ImageViewWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061C2CFD2B4E82C900249514 /* ImageViewWindow.swift */; };
 		061C2D002B4E8B0600249514 /* StatusDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061C2CFF2B4E8B0600249514 /* StatusDetailScreen.swift */; };
 		0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */; };
+		063476792B4FBB9E006B21F1 /* DiscoverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */; };
+		0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */; };
 		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
 		066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */; };
 		066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0442B3ACDC1006F28F4 /* Collections */; };
@@ -86,6 +88,8 @@
 		061C2CFD2B4E82C900249514 /* ImageViewWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewWindow.swift; sourceTree = "<group>"; };
 		061C2CFF2B4E8B0600249514 /* StatusDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusDetailScreen.swift; sourceTree = "<group>"; };
 		0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTimelineScreen.swift; sourceTree = "<group>"; };
+		063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverScreen.swift; sourceTree = "<group>"; };
+		0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
 		066151202AC540B700CCB945 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonStatusComponent.swift; sourceTree = "<group>"; };
 		066F23042B43BD59004A4A8D /* ProfileMediaListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaListScreen.swift; sourceTree = "<group>"; };
@@ -200,6 +204,8 @@
 				0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */,
 				066151202AC540B700CCB945 /* HomeScreen.swift */,
 				060501BD2ACAC4ED00DBCCEB /* NotificationScreen.swift */,
+				063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */,
+				0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -508,6 +514,7 @@
 				06C862712B4D0C7A008C902C /* FlareTheme.swift in Sources */,
 				06C862762B4D2A55008C902C /* UIImage.swift in Sources */,
 				067D898C2AD3E7DD00F8F932 /* MastodonVisibilityIcon.swift in Sources */,
+				0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */,
 				060881BE2AE109FA001AAD2F /* ComposeScreen.swift in Sources */,
 				061C2D002B4E8B0600249514 /* StatusDetailScreen.swift in Sources */,
 				068D2E0D2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift in Sources */,
@@ -534,6 +541,7 @@
 				060881BC2ADE5C68001AAD2F /* AccountsScreen.swift in Sources */,
 				067D89792AD25DB000F8F932 /* MarkdownTheme.swift in Sources */,
 				060881B32AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift in Sources */,
+				063476792B4FBB9E006B21F1 /* DiscoverScreen.swift in Sources */,
 				060501C82ACD09B800DBCCEB /* UserAvatar.swift in Sources */,
 				060881BA2ADE555D001AAD2F /* SettingsScreen.swift in Sources */,
 				06C862732B4D2A14008C902C /* UserInterfaceSizeClass.swift in Sources */,

@@ -59,6 +59,13 @@ struct HomeScreen: View {
                         }
                     ),
                     TabModel(
+                        title: "Discover",
+                        image: "magnifyingglass",
+                        destination: TabItem { _ in
+                            DiscoverScreen()
+                        }
+                    ),
+                    TabModel(
                         title: "Me",
                         image: "person.circle",
                         destination: TabItem { router in
@@ -286,7 +293,7 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
 class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
     static let shared = EmptyStatusEvent()
     private init() {
-
+        
     }
     func onReplyClick(status: UiStatus.Mastodon) {
     }

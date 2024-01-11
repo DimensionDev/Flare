@@ -32,13 +32,11 @@ struct NotificationScreen: View {
         .refreshable {
             try? await viewModel.model.refresh()
         }
+        .navigationTitle("Notification")
         #if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("Notification")
-            }
             if horizontalSizeClass != .compact,
                case .success(let data) = onEnum(of: viewModel.model.allTypes),
                data.data.count > 1 {

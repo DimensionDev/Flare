@@ -27,6 +27,7 @@ struct LinkPreview: View {
                 Spacer()
             }
         }
+        .frame(maxWidth: 600)
         .buttonStyle(.plain)
 #if !os(macOS)
         .background(Color(UIColor.secondarySystemBackground))

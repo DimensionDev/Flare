@@ -2,6 +2,7 @@ import SwiftUI
 import shared
 
 struct StatusTimelineComponent: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let data: UiState<LazyPagingItemsProxy<UiStatus>>
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
@@ -14,6 +15,9 @@ struct StatusTimelineComponent: View {
                 success.data.itemCount == 0 {
                 ForEach(0...10, id: \.self) { _ in
                     StatusPlaceHolder()
+                        .if(horizontalSizeClass != .compact) { view in
+                            view.padding([.horizontal])
+                        }
                 }
             } else if (success.data.loadState.refresh is Paging_commonLoadState.Error ||
                        success.data.loadState.prepend is Paging_commonLoadState.Error) &&
@@ -34,6 +38,9 @@ struct StatusTimelineComponent: View {
         case .loading:
             ForEach(0...10, id: \.self) { _ in
                 StatusPlaceHolder()
+                    .if(horizontalSizeClass != .compact) { view in
+                        view.padding([.horizontal])
+                    }
             }
         }
     }
@@ -41,6 +48,7 @@ struct StatusTimelineComponent: View {
 
 struct StatusTimeline: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let pagingSource: LazyPagingItemsProxy<UiStatus>
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
@@ -51,6 +59,9 @@ struct StatusTimeline: View {
             pagingSource.itemCount == 0 {
             ForEach(0...10, id: \.self) { _ in
                 StatusPlaceHolder()
+                    .if(horizontalSizeClass != .compact) { view in
+                        view.padding([.horizontal])
+                    }
             }
         } else if (pagingSource.loadState.refresh is Paging_commonLoadState.Error ||
                    pagingSource.loadState.prepend is Paging_commonLoadState.Error) &&
@@ -75,8 +86,12 @@ struct StatusTimeline: View {
                     } else {
                         StatusPlaceHolder()
                     }
-                }.onAppear {
+                }
+                .onAppear {
                     pagingSource.get(index: index - 1)
+                }
+                .if(horizontalSizeClass != .compact) { view in
+                    view.padding([.horizontal])
                 }
             }
         }
@@ -109,7 +124,7 @@ struct StatusItemView: View {
 struct StatusPlaceHolder: View {
     var body: some View {
         CommonStatusComponent(
-            content: "haha",
+            content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.",
             contentWarning: nil,
             user: UiUser.Bluesky(
                 userKey: MicroBlogKey(id: "", host: ""),

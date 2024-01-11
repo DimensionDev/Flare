@@ -12,69 +12,88 @@ struct ProfileScreen: View {
         self.toProfileMedia = toProfileMedia
         _viewModel = State(initialValue: ProfileViewModel(userKey: userKey))
     }
+    var sideProfileHeader: some View {
+        ScrollView {
+            VStack {
+                ProfileHeader(
+                    user: viewModel.model.userState,
+                    relation: viewModel.model.relationState,
+                    isMe: viewModel.model.isMe,
+                    onFollowClick: { user, relation in
+                        viewModel.model.follow(user: user, data: relation)
+                    }
+                )
+                if case .success(let userState) = onEnum(of: viewModel.model.userState) {
+                    Button(action: {
+                        toProfileMedia(userState.data.userKey)
+                    }, label: {
+                        LargeProfileImagePreviews(state: viewModel.model.mediaState)
+                    })
+                    .buttonStyle(.borderless)
+                }
+            }
+        }
+#if !os(macOS)
+        .frame(width: 384)
+#endif
+    }
+    var profileListContent: some View {
+        List {
+            if horizontalSizeClass == .compact {
+                ProfileHeader(
+                    user: viewModel.model.userState,
+                    relation: viewModel.model.relationState,
+                    isMe: viewModel.model.isMe,
+                    onFollowClick: { user, relation in
+                        viewModel.model.follow(user: user, data: relation)
+                    }
+                )
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets())
+                if case .success(let userState) = onEnum(of: viewModel.model.userState) {
+                    Button(action: {
+                        toProfileMedia(userState.data.userKey)
+                    }, label: {
+                        SmallProfileMediaPreviews(state: viewModel.model.mediaState)
+                    })
+                    .buttonStyle(.borderless)
+                    .listRowInsets(.none)
+                }
+            }
+            StatusTimelineComponent(
+                data: viewModel.model.listState,
+                mastodonEvent: statusEvent,
+                misskeyEvent: statusEvent,
+                blueskyEvent: statusEvent
+            )
+        }
+        .refreshable {
+            try? await viewModel.model.refresh()
+        }
+        .listStyle(.plain)
+    }
     var body: some View {
         let title: LocalizedStringKey = if case .success(let user) = onEnum(of: viewModel.model.userState) {
             LocalizedStringKey(user.data.extra.nameMarkdown)
         } else {
             "Profile"
         }
-        HStack {
-            if horizontalSizeClass != .compact {
-                ScrollView {
-                    VStack {
-                        ProfileHeader(
-                            user: viewModel.model.userState,
-                            relation: viewModel.model.relationState,
-                            isMe: viewModel.model.isMe,
-                            onFollowClick: { user, relation in
-                                viewModel.model.follow(user: user, data: relation)
-                            }
-                        )
-                        if case .success(let userState) = onEnum(of: viewModel.model.userState) {
-                            Button(action: {
-                                toProfileMedia(userState.data.userKey)
-                            }, label: {
-                                LargeProfileImagePreviews(state: viewModel.model.mediaState)
-                            })
-                            .buttonStyle(.borderless)
-                        }
-                    }
+        ZStack {
+#if os(macOS)
+            HSplitView {
+                if horizontalSizeClass != .compact {
+                    sideProfileHeader
                 }
-                .frame(width: 384)
+                profileListContent
             }
-            List {
-                if horizontalSizeClass == .compact {
-                    ProfileHeader(
-                        user: viewModel.model.userState,
-                        relation: viewModel.model.relationState,
-                        isMe: viewModel.model.isMe,
-                        onFollowClick: { user, relation in
-                            viewModel.model.follow(user: user, data: relation)
-                        }
-                    )
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
-                    if case .success(let userState) = onEnum(of: viewModel.model.userState) {
-                        Button(action: {
-                            toProfileMedia(userState.data.userKey)
-                        }, label: {
-                            SmallProfileMediaPreviews(state: viewModel.model.mediaState)
-                        })
-                        .buttonStyle(.borderless)
-                        .listRowInsets(.none)
-                    }
+#else
+            HStack {
+                if horizontalSizeClass != .compact {
+                    sideProfileHeader
                 }
-                StatusTimelineComponent(
-                    data: viewModel.model.listState,
-                    mastodonEvent: statusEvent,
-                    misskeyEvent: statusEvent,
-                    blueskyEvent: statusEvent
-                )
+                profileListContent
             }
-            .refreshable {
-                try? await viewModel.model.refresh()
-            }
-            .listStyle(.plain)
+#endif
         }
 #if !os(macOS)
         .if(horizontalSizeClass == .compact, transform: { view in

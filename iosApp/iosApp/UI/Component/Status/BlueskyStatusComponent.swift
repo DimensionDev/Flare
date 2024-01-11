@@ -134,6 +134,7 @@ struct BlueskyStatusComponent: View {
                             .opacity(0.6)
                     }
                 }
+                .frame(maxWidth: 600)
                 .buttonStyle(.borderless)
                 .tint(.primary)
                 .font(.caption)

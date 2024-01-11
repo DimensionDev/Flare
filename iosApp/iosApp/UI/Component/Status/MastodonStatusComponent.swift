@@ -117,6 +117,7 @@ struct MastodonStatusComponent: View {
                         .opacity(0.6)
                     }
                 }
+                .frame(maxWidth: 600)
                 .foregroundStyle(.primary)
                 .buttonStyle(.borderless)
                 .tint(.primary)

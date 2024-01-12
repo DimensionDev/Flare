@@ -77,6 +77,7 @@ import dev.dimension.flare.ui.screen.destinations.MediaRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination
 import dev.dimension.flare.ui.screen.destinations.StatusRouteDestination
+import dev.dimension.flare.ui.screen.destinations.VideoRouteDestination
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
@@ -737,8 +738,31 @@ internal class DefaultMastodonStatusEvent(
         media: UiMedia,
         uriHandler: UriHandler,
     ) {
-        if (media is UiMedia.Image) {
-            uriHandler.openUri(MediaRouteDestination(media.url).deeplink())
+        when (media) {
+            is UiMedia.Image -> {
+                uriHandler.openUri(MediaRouteDestination(media.url).deeplink())
+            }
+
+            is UiMedia.Audio -> Unit
+            is UiMedia.Gif -> {
+                uriHandler.openUri(
+                    VideoRouteDestination(
+                        media.url,
+                        previewUri = media.previewUrl,
+                        contentDescription = media.description,
+                    ).deeplink(),
+                )
+            }
+
+            is UiMedia.Video -> {
+                uriHandler.openUri(
+                    VideoRouteDestination(
+                        media.url,
+                        previewUri = media.thumbnailUrl,
+                        contentDescription = media.description,
+                    ).deeplink(),
+                )
+            }
         }
     }
 

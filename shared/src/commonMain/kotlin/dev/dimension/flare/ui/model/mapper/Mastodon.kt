@@ -151,10 +151,8 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? {
                 url = url.orEmpty(),
                 previewUrl = previewURL.orEmpty(),
                 description = description,
-                aspectRatio =
-                    meta?.width?.toFloat()?.div(meta.height ?: 1)
-                        ?.coerceAtLeast(0f)
-                        ?.takeUnless { it.isNaN() } ?: 1f,
+                width = meta?.width?.toFloat() ?: meta?.original?.width?.toFloat() ?: 0f,
+                height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
             )
 
         MediaType.Video ->
@@ -162,16 +160,15 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? {
                 url = url.orEmpty(),
                 thumbnailUrl = previewURL.orEmpty(),
                 description = description,
-                aspectRatio =
-                    meta?.width?.toFloat()?.div(meta.height ?: 1)
-                        ?.coerceAtLeast(0f)
-                        ?.takeUnless { it.isNaN() } ?: 1f,
+                width = meta?.width?.toFloat() ?: meta?.original?.width?.toFloat() ?: 0f,
+                height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
             )
 
         MediaType.Audio ->
             UiMedia.Audio(
                 url = url.orEmpty(),
                 description = description,
+                previewUrl = previewURL,
             )
 
         else -> null

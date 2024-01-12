@@ -14,11 +14,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import dev.dimension.flare.common.PlayerPoll
-import org.koin.compose.koinInject
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -30,7 +30,6 @@ fun VideoPlayer(
     muted: Boolean = false,
     showControls: Boolean = false,
     keepScreenOn: Boolean = false,
-    poll: PlayerPoll = koinInject(),
 ) {
     var isLoaded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
@@ -39,18 +38,23 @@ fun VideoPlayer(
                 Modifier
                     .matchParentSize(),
             factory = { context ->
-                val exoPlayer = poll.get(uri)
-                exoPlayer.prepare()
-                exoPlayer.playWhenReady = true
-                exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
-                exoPlayer.volume = if (muted) 0f else 1f
-                exoPlayer.addListener(
-                    object : Player.Listener {
-                        override fun onIsLoadingChanged(isLoading: Boolean) {
-                            isLoaded = !isLoading || exoPlayer.duration > 0
+                val exoPlayer =
+                    ExoPlayer.Builder(context)
+                        .build()
+                        .apply {
+                            setMediaItem(MediaItem.fromUri(uri))
+                            prepare()
+                            playWhenReady = true
+                            repeatMode = Player.REPEAT_MODE_ALL
+                            volume = if (muted) 0f else 1f
+                            addListener(
+                                object : Player.Listener {
+                                    override fun onIsLoadingChanged(isLoading: Boolean) {
+                                        isLoaded = !isLoading || duration > 0
+                                    }
+                                },
+                            )
                         }
-                    },
-                )
                 PlayerView(context).apply {
                     useController = showControls
                     player = exoPlayer
@@ -64,7 +68,6 @@ fun VideoPlayer(
             },
             onRelease = {
                 it.player?.release()
-                poll.remove(uri)
             },
         )
         if (!isLoaded && previewUri != null) {

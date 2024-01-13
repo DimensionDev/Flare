@@ -69,6 +69,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
         targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
     }
@@ -127,6 +128,7 @@ dependencies {
     implementation(libs.material3.adaptive.navigation.suite)
     implementation(libs.material3.adaptive)
     implementation(libs.bundles.media3)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(projects.shared)
 

@@ -1,5 +1,6 @@
 package dev.dimension.flare.di
 
+import dev.dimension.flare.common.PlayerPoll
 import dev.dimension.flare.data.repository.ComposeNotifyUseCase
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.status.StatusEvent
@@ -28,4 +29,5 @@ val androidModule =
         singleOf(::ComposeNotifyUseCase)
         singleOf(::StatusEvent)
         singleOf(::SettingsRepository)
+        singleOf(::PlayerPoll)
     }

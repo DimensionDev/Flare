@@ -45,6 +45,7 @@ import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -475,6 +476,72 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                                 }
                             },
                     )
+                }
+                AnimatedVisibility(appearanceSettings.showMedia) {
+                    BoxWithConstraints {
+                        var showMenu by remember { mutableStateOf(false) }
+                        ListItem(
+                            modifier =
+                                Modifier.clickable {
+                                    if (maxWidth < 400.dp) {
+                                        showMenu = true
+                                    }
+                                },
+                            headlineContent = {
+                                Text(text = stringResource(id = R.string.settings_appearance_video_autoplay))
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_appearance_video_autoplay_description))
+                            },
+                            trailingContent = {
+                                if (maxWidth >= 400.dp) {
+                                    SingleChoiceSegmentedButtonRow {
+                                        VideoAutoplay.entries.forEachIndexed { index, it ->
+                                            SegmentedButton(
+                                                selected = appearanceSettings.videoAutoplay == it,
+                                                onClick = {
+                                                    state.updateSettings {
+                                                        copy(videoAutoplay = it)
+                                                    }
+                                                },
+                                                shape =
+                                                    SegmentedButtonDefaults.itemShape(
+                                                        index = index,
+                                                        count = VideoAutoplay.entries.size,
+                                                    ),
+                                            ) {
+                                                Text(text = stringResource(id = it.id))
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    TextButton(onClick = {
+                                        showMenu = true
+                                    }) {
+                                        Text(text = stringResource(id = appearanceSettings.videoAutoplay.id))
+                                    }
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false },
+                                    ) {
+                                        VideoAutoplay.entries.forEach {
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(text = stringResource(id = it.id))
+                                                },
+                                                onClick = {
+                                                    state.updateSettings {
+                                                        copy(videoAutoplay = it)
+                                                    }
+                                                    showMenu = false
+                                                },
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                        )
+                    }
                 }
                 ListItem(
                     headlineContent = {
@@ -991,5 +1058,14 @@ private fun appearancePresenter() =
                     settingsRepository.updateAppearanceSettings(block)
                 }
             }
+        }
+    }
+
+private val VideoAutoplay.id: Int
+    get() {
+        return when (this) {
+            VideoAutoplay.WIFI -> R.string.settings_appearance_video_autoplay_wifi
+            VideoAutoplay.ALWAYS -> R.string.settings_appearance_video_autoplay_always
+            VideoAutoplay.NEVER -> R.string.settings_appearance_video_autoplay_never
         }
     }

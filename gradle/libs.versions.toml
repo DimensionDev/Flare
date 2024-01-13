@@ -44,6 +44,7 @@ bluesky = "0.0.1-SNAPSHOT"
 kotlinx-coroutines = "1.7.3"
 koin = "3.5.3"
 composeIcons = "1.1.0"
+media3 = "1.2.0"
 
 [libraries]
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
@@ -76,6 +77,9 @@ paging-compose = { group = "androidx.paging", name = "paging-compose", version.r
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 composeIcons-fontAwesome = { module = "br.com.devsrsouza.compose.icons:font-awesome", version.ref = "composeIcons" }
 datastore = { group = "androidx.datastore", name = "datastore", version = "1.0.0" }
+
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
@@ -147,6 +151,7 @@ accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
 compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]
 sqldelight = ["sqldelight-coroutines-extensions"]
+media3 = ["media3-exoplayer", "media3-ui"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

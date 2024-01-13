@@ -36,6 +36,7 @@ data class AppearanceSettings(
     val showLinkPreview: Boolean = true,
     val showMedia: Boolean = true,
     val showSensitiveContent: Boolean = false,
+    val videoAutoplay: VideoAutoplay = VideoAutoplay.WIFI,
     val swipeGestures: Boolean = false,
     val mastodon: Mastodon = Mastodon(),
     val misskey: Misskey = Misskey(),
@@ -103,6 +104,12 @@ enum class Theme {
 enum class AvatarShape {
     CIRCLE,
     SQUARE,
+}
+
+enum class VideoAutoplay {
+    ALWAYS,
+    WIFI,
+    NEVER,
 }
 
 @OptIn(ExperimentalSerializationApi::class)

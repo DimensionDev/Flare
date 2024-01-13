@@ -87,13 +87,17 @@ fun EmojiImage(
                 },
         )
     if (painter.state is AsyncImagePainter.State.Success) {
-        val size = painter.intrinsicSize
+        val aspectRatio =
+            remember(painter.intrinsicSize) {
+                val size = painter.intrinsicSize
+                (size.width / size.height).takeUnless { it.isNaN() } ?: 1f
+            }
         Image(
             painter = painter,
             contentDescription = null,
             modifier =
                 modifier
-                    .aspectRatio(size.width / size.height)
+                    .aspectRatio(aspectRatio)
                     .fillMaxSize(),
         )
     }

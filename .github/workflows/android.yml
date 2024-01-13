@@ -1,4 +1,4 @@
-name: Release CI
+name: Android CI
 
 on:
   push:
@@ -18,7 +18,7 @@ on:
       - develop
 
 jobs:
-  release-android:
+  build:
     runs-on: [self-hosted]
     timeout-minutes: 30
 
@@ -62,10 +62,10 @@ jobs:
             **/*.aab
             **/*.apk
 
-  upload-release:
+  upload:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [self-hosted]
-    needs: [release-android]
+    needs: [build]
     timeout-minutes: 30
     steps:
       - uses: actions/download-artifact@v2

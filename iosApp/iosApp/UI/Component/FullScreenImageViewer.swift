@@ -1,6 +1,7 @@
 import SwiftUI
 import shared
 import NetworkImage
+import AVKit
 
 struct FullScreenImageViewer: View {
     let media: UiMedia
@@ -24,26 +25,61 @@ struct FullScreenImageViewer: View {
                             .gesture(makeMagnificationGesture(size: proxy.size))
                     }
                 case .video(let video):
-                    NetworkImage(url: URL(string: video.thumbnailUrl)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaleEffect(scale)
-                            .offset(x: offset.x, y: offset.y)
-                            .gesture(makeDragGesture(size: proxy.size))
-                            .gesture(makeMagnificationGesture(size: proxy.size))
+                    VideoPlayer(player: AVPlayer(url: URL(string: video.url)!)) {
+                        VStack {
+                            HStack {
+                                Button {
+                                    dismiss()
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .resizable()
+                                        .renderingMode(.template)
+                                        .frame(width: 15, height: 15)
+                                        .foregroundColor(.white)
+                                }
+                                .padding()
+                                Spacer()
+                            }
+                            Spacer()
+                        }
                     }
-                case .audio:
-                    Text("")
+                case .audio(let audio):
+                    VideoPlayer(player: AVPlayer(url: URL(string: audio.url)!)) {
+                        VStack {
+                            HStack {
+                                Button {
+                                    dismiss()
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .resizable()
+                                        .renderingMode(.template)
+                                        .frame(width: 15, height: 15)
+                                        .foregroundColor(.white)
+                                }
+                                .padding()
+                                Spacer()
+                            }
+                            Spacer()
+                        }
+                    }
                 case .gif(let gif):
-                    NetworkImage(url: URL(string: gif.previewUrl)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaleEffect(scale)
-                            .offset(x: offset.x, y: offset.y)
-                            .gesture(makeDragGesture(size: proxy.size))
-                            .gesture(makeMagnificationGesture(size: proxy.size))
+                    VideoPlayer(player: AVPlayer(url: URL(string: gif.url)!)) {
+                        VStack {
+                            HStack {
+                                Button {
+                                    dismiss()
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .resizable()
+                                        .renderingMode(.template)
+                                        .frame(width: 15, height: 15)
+                                        .foregroundColor(.white)
+                                }
+                                .padding()
+                                Spacer()
+                            }
+                            Spacer()
+                        }
                     }
                 }
             }

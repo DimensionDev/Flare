@@ -1,12 +1,16 @@
 import SwiftUI
 import shared
 import NetworkImage
+import AVKit
 
 struct MediaComponent: View {
     @State var hideSensitive: Bool
     let medias: [UiMedia]
     let onMediaClick: (UiMedia) -> Void
     var body: some View {
+        let showSensitiveButton = medias.allSatisfy { media in
+            media is UiMediaImage
+        }
         let columns = if medias.count == 1 {
             [GridItem(.flexible())]
         } else if medias.count < 5 {
@@ -29,58 +33,51 @@ struct MediaComponent: View {
                             .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
                     case .audio:
                         MediaItemComponent(media: medias[0])
+                            .frame(minHeight: 48)
                     }
-                    //                    Button(action: {
-                    //                        onMediaClick(medias[0])
-                    //                    }, label: {
-                    //                    })
-                    //                    .buttonStyle(.borderless)
                 } else {
                     ForEach(1...medias.count, id: \.self) { index in
                         MediaItemComponent(media: medias[index - 1])
                             .aspectRatio(1, contentMode: .fill)
-                        //                        Button(action: {
-                        //                            onMediaClick(medias[index - 1])
-                        //                        }, label: {
-                        //                        })
-                        //                        .buttonStyle(.borderless)
                     }
                 }
             }
             .if(hideSensitive, transform: { view in
                 view.blur(radius: 32)
             })
-            if hideSensitive {
-                Button(action: {
-                    withAnimation {
-                        hideSensitive = false
-                    }
-                }, label: {
-                    Color.clear
-                })
-                .buttonStyle(.borderless)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                Button(action: {
-                    withAnimation {
-                        hideSensitive = false
-                    }
-                }, label: {
-                    Text("Show Media")
-                })
-                .buttonStyle(.borderedProminent)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            } else {
-                Button(action: {
-                    withAnimation {
-                        hideSensitive = true
-                    }
-                }, label: {
-                    Image(systemName: "eye.slash")
-                })
-                .padding()
-                .buttonStyle(.borderedProminent)
-                .tint(Color.primary)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
+            if showSensitiveButton {
+                if hideSensitive {
+                    Button(action: {
+                        withAnimation {
+                            hideSensitive = false
+                        }
+                    }, label: {
+                        Color.clear
+                    })
+                    .buttonStyle(.borderless)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Button(action: {
+                        withAnimation {
+                            hideSensitive = false
+                        }
+                    }, label: {
+                        Text("Show Media")
+                    })
+                    .buttonStyle(.borderedProminent)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                } else {
+                    Button(action: {
+                        withAnimation {
+                            hideSensitive = true
+                        }
+                    }, label: {
+                        Image(systemName: "eye.slash")
+                    })
+                    .padding()
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.primary)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                }
             }
         }
         .frame(maxWidth: 600)
@@ -104,15 +101,17 @@ struct MediaItemComponent: View {
                         image.resizable().scaledToFill()
                     }
                 case .video(let video):
-                    NetworkImage(url: URL(string: video.thumbnailUrl)) { image in
-                        image.resizable().scaledToFill()
+                    MutedVideoPlayer(url: video.url)
+                case .audio(let audio):
+                    VideoPlayer(player: AVPlayer(url: URL(string: audio.url)!)) {
+                        if let cover = audio.previewUrl {
+                            NetworkImage(url: URL(string: cover)) { image in
+                                image.resizable().scaledToFill()
+                            }
+                        }
                     }
-                case .audio:
-                    Text("")
                 case .gif(let gif):
-                    NetworkImage(url: URL(string: gif.previewUrl)) { image in
-                        image.resizable().scaledToFill()
-                    }
+                    MutedVideoPlayer(url: gif.url)
                 }
             }
         }
@@ -123,20 +122,45 @@ struct MediaItemComponent: View {
             case .image(let data):
                 openWindow(id: "image-view", value: data.url)
             case .video(let video):
-                openWindow(id: "image-view", value: video.url)
+                openWindow(id: "video-view", value: video.url)
             case .audio(let audio):
-                openWindow(id: "image-view", value: audio.url)
+                openWindow(id: "video-view", value: audio.url)
             case .gif(let gif):
-                openWindow(id: "image-view", value: gif.url)
+                openWindow(id: "video-view", value: gif.url)
             }
         }
 #else
         .onTapGesture {
             showCover = true
         }
-        .fullScreenCover(isPresented: $showCover, onDismiss: { showCover = false }) {
+        .fullScreenCover(
+            isPresented: $showCover,
+            onDismiss: { showCover = false }
+        ) {
             FullScreenImageViewer(media: media, dismiss: { showCover = false })
         }
 #endif
+    }
+}
+
+struct MutedVideoPlayer: View {
+    let player: AVPlayer
+    let autoPlay: Bool
+    init(url: String, autoPlay: Bool = true) {
+        self.player = AVPlayer(url: URL(string: url)!)
+        self.player.isMuted = true
+        self.autoPlay = autoPlay
+    }
+    var body: some View {
+        VideoPlayer(player: player)
+            .if(autoPlay) { view in
+                view
+                    .onAppear {
+                        player.play()
+                    }
+                    .onDisappear {
+                        player.pause()
+                    }
+            }
     }
 }

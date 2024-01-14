@@ -43,6 +43,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
         run: ./.github/apply_signing.sh
 
       # Build with Gradle

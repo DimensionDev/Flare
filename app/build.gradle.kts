@@ -1,3 +1,5 @@
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
+import com.google.gms.googleservices.GoogleServicesPlugin
 import java.util.Properties
 
 plugins {
@@ -7,6 +9,13 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
+}
+
+if (project.file("google-services.json").exists()) {
+    apply<GoogleServicesPlugin>()
+    apply<CrashlyticsPlugin>()
 }
 
 android {
@@ -91,7 +100,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.runtime.compose)
@@ -131,6 +139,12 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(projects.shared)
+
+    if (project.file("google-services.json").exists()) {
+        implementation(platform(libs.firebase.bom))
+        implementation(libs.firebase.crashlytics.ktx)
+        implementation(libs.firebase.analytics.ktx)
+    }
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

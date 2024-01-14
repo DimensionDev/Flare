@@ -46,6 +46,9 @@ koin = "3.5.3"
 composeIcons = "1.1.0"
 media3 = "1.2.0"
 desugar_jdk_libs = "2.0.4"
+firebase-bom = "32.7.0"
+google-services = "4.4.0"
+firebase-crashlytics = "2.9.9"
 
 [libraries]
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
@@ -143,6 +146,10 @@ uuid = { group = "com.benasher44", name = "uuid", version.ref = "uuid" }
 
 kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermit" }
 
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+
 [bundles]
 navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json"]
@@ -154,6 +161,7 @@ compose-destinations = ["compose-destinations", "compose-destinations-animations
 compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]
 sqldelight = ["sqldelight-coroutines-extensions"]
 media3 = ["media3-exoplayer", "media3-ui"]
+firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -168,3 +176,5 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 molecule = { id = "app.cash.molecule", version.ref = "molecule" }
 ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "versionUpdate" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }

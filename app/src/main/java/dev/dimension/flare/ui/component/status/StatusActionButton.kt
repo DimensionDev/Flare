@@ -10,12 +10,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +36,7 @@ internal fun StatusActionButton(
     modifier: Modifier = Modifier,
     color: Color = LocalContentColor.current,
     contentDescription: String? = null,
+    enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -42,6 +48,7 @@ internal fun StatusActionButton(
                     indication = null,
                     interactionSource = interactionSource,
                     onClick = onClicked,
+                    enabled = enabled,
                 )
                 .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -72,4 +79,49 @@ internal fun StatusActionButton(
         }
         content.invoke(this)
     }
+}
+
+@Composable
+internal fun StatusActionGroupComponent(
+    action: StatusAction.Group,
+    modifier: Modifier = Modifier,
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    StatusActionButton(
+        icon = action.icon,
+        text = action.text,
+        modifier = modifier,
+        onClicked = {
+            showMenu = true
+        },
+        color = action.color?.toColor() ?: LocalContentColor.current,
+        enabled = action.enabled,
+        content = {
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+            ) {
+                action.items.forEach { item ->
+                    DropdownMenuItem(
+                        onClick = {
+                            item.onClick.invoke()
+                            showMenu = false
+                        },
+                        text = {
+                            if (item.text != null) {
+                                Text(text = item.text)
+                            }
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = null,
+                            )
+                        },
+                    )
+                }
+            }
+        },
+    )
 }

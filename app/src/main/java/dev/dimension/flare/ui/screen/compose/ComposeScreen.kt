@@ -103,9 +103,11 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
+import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
+import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
+import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
+import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
@@ -854,21 +856,20 @@ private fun composePresenter(
         textFieldState.textAsFlow()
     }.collectAsState(initial = "")
     val pollState =
-        state.account.flatMap {
-            when (it) {
-                is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
-                is UiAccount.Mastodon, is UiAccount.Misskey -> UiState.Success(pollPresenter())
+        state.supportedComposeEvent.flatMap {
+            if (it.contains(SupportedComposeEvent.Poll)) {
+                UiState.Success(pollPresenter())
+            } else {
+                UiState.Error(IllegalStateException("Poll not supported"))
             }
         }
     val mediaState = mediaPresenter()
     val contentWarningState =
-        state.account.flatMap {
-            when (it) {
-                is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
-                is UiAccount.Misskey, is UiAccount.Mastodon ->
-                    UiState.Success(
-                        contentWarningPresenter(),
-                    )
+        state.supportedComposeEvent.flatMap {
+            if (it.contains(SupportedComposeEvent.ContentWarning)) {
+                UiState.Success(contentWarningPresenter())
+            } else {
+                UiState.Error(IllegalStateException("Content warning not supported"))
             }
         }
     state.replyState?.onSuccess {
@@ -934,7 +935,7 @@ private fun composePresenter(
                 val data =
                     when (it) {
                         is UiAccount.Mastodon ->
-                            MastodonDataSource.MastodonComposeData(
+                            MastodonComposeData(
                                 content = textFieldState.text.toString(),
                                 medias =
                                     mediaState.medias.map {
@@ -942,7 +943,7 @@ private fun composePresenter(
                                     },
                                 poll =
                                     if (pollState is UiState.Success && pollState.data.enabled) {
-                                        MastodonDataSource.MastodonComposeData.Poll(
+                                        MastodonComposeData.Poll(
                                             multiple = !pollState.data.pollSingleChoice,
                                             expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
                                             options =
@@ -965,7 +966,7 @@ private fun composePresenter(
                             )
 
                         is UiAccount.Misskey ->
-                            MisskeyDataSource.MisskeyComposeData(
+                            MisskeyComposeData(
                                 account = it,
                                 medias =
                                     mediaState.medias.map {
@@ -973,7 +974,7 @@ private fun composePresenter(
                                     },
                                 poll =
                                     if (pollState is UiState.Success && pollState.data.enabled) {
-                                        MisskeyDataSource.MisskeyComposeData.Poll(
+                                        MisskeyComposeData.Poll(
                                             multiple = !pollState.data.pollSingleChoice,
                                             expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
                                             options =
@@ -1002,7 +1003,7 @@ private fun composePresenter(
                             )
 
                         is UiAccount.Bluesky ->
-                            BlueskyDataSource.BlueskyComposeData(
+                            BlueskyComposeData(
                                 account = it,
                                 medias =
                                     mediaState.medias.map {
@@ -1011,6 +1012,31 @@ private fun composePresenter(
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 content = textFieldState.text.toString(),
+                            )
+
+                        is UiAccount.XQT ->
+                            XQTComposeData(
+                                account = it,
+                                medias =
+                                    mediaState.medias.map {
+                                        FileItem(context, it)
+                                    },
+                                inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                                quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+                                content = textFieldState.text.toString(),
+                                poll =
+                                    if (pollState is UiState.Success && pollState.data.enabled) {
+                                        XQTComposeData.Poll(
+                                            multiple = !pollState.data.pollSingleChoice,
+                                            expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
+                                            options =
+                                                pollState.data.options.map { option ->
+                                                    option.text.toString()
+                                                },
+                                        )
+                                    } else {
+                                        null
+                                    },
                             )
                     }
                 state.send(data)

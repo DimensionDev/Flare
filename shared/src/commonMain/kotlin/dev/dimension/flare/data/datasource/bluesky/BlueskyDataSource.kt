@@ -25,7 +25,6 @@ import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.database.app.AppDatabase
@@ -33,16 +32,19 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
-import dev.dimension.flare.data.datasource.ComposeData
-import dev.dimension.flare.data.datasource.ComposeProgress
-import dev.dimension.flare.data.datasource.MicroblogDataSource
-import dev.dimension.flare.data.datasource.NotificationFilter
-import dev.dimension.flare.data.datasource.relationKeyWithUserKey
-import dev.dimension.flare.data.datasource.timelinePager
+import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
+import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
+import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.getService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -255,15 +257,6 @@ class BlueskyDataSource(
                     statusOnly = true,
                 ),
         )
-
-    data class BlueskyComposeData(
-        val account: UiAccount.Bluesky,
-        val content: String,
-        val inReplyToID: String? = null,
-        val quoteId: String? = null,
-        val language: List<String> = listOf("en"),
-        val medias: List<FileItem> = emptyList(),
-    ) : ComposeData
 
     override suspend fun compose(
         data: ComposeData,
@@ -846,7 +839,7 @@ class BlueskyDataSource(
         }.flow
     }
 
-    fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUser>> {
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
         val service = account.getService(appDatabase)
         return Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -856,5 +849,22 @@ class BlueskyDataSource(
                 account.accountKey,
             )
         }.flow
+    }
+
+    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
+        throw UnsupportedOperationException("Bluesky does not support discover hashtags")
+    }
+
+    override fun discoverStatuses(
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiStatus>> {
+        throw UnsupportedOperationException("Bluesky does not support discover statuses")
+    }
+
+    override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
+        return listOf(
+            SupportedComposeEvent.Media,
+        )
     }
 }

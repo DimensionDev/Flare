@@ -4,6 +4,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.DbApplication
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.model.PlatformType
+import io.ktor.util.decodeBase64String
 
 sealed interface UiApplication {
     val host: String
@@ -21,6 +22,16 @@ sealed interface UiApplication {
     data class Bluesky(
         override val host: String,
     ) : UiApplication
+
+    data object XQT : UiApplication {
+        override val host: String =
+            buildString {
+                append("dHc=".decodeBase64String())
+                append("aXR0".decodeBase64String())
+                append("ZXI=".decodeBase64String())
+                append("LmNvbQ==".decodeBase64String())
+            }
+    }
 
     companion object {
         fun DbApplication.toUi(): UiApplication {
@@ -41,6 +52,8 @@ sealed interface UiApplication {
                     Bluesky(
                         host = host,
                     )
+
+                PlatformType.xQt -> XQT
             }
         }
     }

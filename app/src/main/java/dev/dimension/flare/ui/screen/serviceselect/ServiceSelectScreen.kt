@@ -51,6 +51,7 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.common.plus
@@ -86,6 +87,7 @@ fun ServiceSelectRoute(navigator: DestinationsNavigator) {
 @Composable
 fun ServiceSelectScreen(
     modifier: Modifier = Modifier,
+    onXQT: (() -> Unit)? = null,
     onBack: (() -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -161,14 +163,8 @@ fun ServiceSelectScreen(
                     modifier = Modifier.width(300.dp),
                     leadingIcon = {
                         state.detectedPlatformType.onSuccess {
-                            val url =
-                                when (it) {
-                                    PlatformType.Mastodon -> "https://joinmastodon.org/logos/logo-purple.svg"
-                                    PlatformType.Misskey -> "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png"
-                                    PlatformType.Bluesky -> "https://blueskyweb.xyz/images/apple-touch-icon.png"
-                                }
                             NetworkImage(
-                                url,
+                                it.logoUrl,
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
                             )
@@ -295,6 +291,19 @@ fun ServiceSelectScreen(
                                     state.mastodonLoginState.error?.let {
                                         Text(text = it)
                                     }
+                                }
+                            }
+
+                            PlatformType.xQt -> {
+                                Button(
+                                    onClick = {
+                                        onXQT?.invoke()
+                                    },
+                                    modifier = Modifier.width(300.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(id = R.string.service_select_next_button),
+                                    )
                                 }
                             }
                         }

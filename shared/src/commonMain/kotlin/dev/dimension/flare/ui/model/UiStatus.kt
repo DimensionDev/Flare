@@ -8,7 +8,6 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
-import dev.dimension.flare.ui.humanizer.humanizePercentage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
@@ -157,7 +156,7 @@ sealed class UiStatus {
         val media: ImmutableList<UiMedia>,
         val createdAt: Instant,
         val visibility: Visibility,
-        val poll: Poll?,
+        val poll: UiPoll?,
         val card: UiCard?,
         val reaction: Reaction,
         val sensitive: Boolean,
@@ -185,26 +184,6 @@ sealed class UiStatus {
             val reblogged: Boolean,
             val bookmarked: Boolean,
         )
-
-        data class Poll(
-            val id: String,
-            val options: ImmutableList<PollOption>,
-            val expiresAt: Instant,
-            val expired: Boolean,
-            val multiple: Boolean,
-            val voted: Boolean,
-            val ownVotes: ImmutableList<Int>,
-        ) {
-            val humanizedExpiresAt by lazy { expiresAt.humanize() }
-        }
-
-        data class PollOption(
-            val title: String,
-            val votesCount: Long,
-            val percentage: Float,
-        ) {
-            val humanizedPercentage by lazy { percentage.humanizePercentage() }
-        }
 
         enum class Visibility {
             Public,
@@ -234,7 +213,7 @@ sealed class UiStatus {
         val media: ImmutableList<UiMedia>,
         val createdAt: Instant,
         val visibility: Visibility,
-        val poll: Poll?,
+        val poll: UiPoll?,
         val card: UiCard?,
         val reaction: Reaction,
         val sensitive: Boolean,
@@ -280,25 +259,6 @@ sealed class UiStatus {
             Home,
             Followers,
             Specified,
-        }
-
-        data class Poll(
-            val id: String,
-            val options: ImmutableList<PollOption>,
-            val expiresAt: Instant,
-            val multiple: Boolean,
-        ) {
-            val expired: Boolean by lazy { expiresAt < Clock.System.now() }
-            val humanizedExpiresAt by lazy { expiresAt.humanize() }
-        }
-
-        data class PollOption(
-            val title: String,
-            val votesCount: Long,
-            val percentage: Float,
-            val voted: Boolean,
-        ) {
-            val humanizedPercentage by lazy { percentage.humanizePercentage() }
         }
 
         data class Matrices(

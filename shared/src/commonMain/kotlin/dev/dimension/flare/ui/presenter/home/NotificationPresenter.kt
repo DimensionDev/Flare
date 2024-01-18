@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
-import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus

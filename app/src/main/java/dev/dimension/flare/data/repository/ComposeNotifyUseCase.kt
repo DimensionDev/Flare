@@ -9,7 +9,7 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datasource.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.ui.presenter.compose.ComposeProgressState
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import kotlinx.coroutines.CoroutineScope

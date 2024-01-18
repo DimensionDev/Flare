@@ -9,11 +9,12 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.collectPagingProxy
-import dev.dimension.flare.data.datasource.ComposeData
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.data.repository.activeAccountPresenter
+import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
@@ -23,6 +24,8 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
+import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
@@ -32,41 +35,38 @@ class ComposePresenter(
 ) : PresenterBase<ComposeState>() {
     @Composable
     override fun body(): ComposeState {
-        val account by activeAccountPresenter()
+        val account = activeAccountServicePresenter()
         val composeUseCase: ComposeUseCase = koinInject()
         val visibilityState =
-            account.flatMap {
+            account.flatMap { (_, it) ->
                 when (it) {
                     is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
                     is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
+                    is UiAccount.XQT -> UiState.Error(IllegalStateException("XQT not supported"))
                     is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
                 }
             }
 
         val replyState =
             status?.let { status ->
-                account.map {
+                account.map { (_, it) ->
                     statusPresenter(it, status)
                 }
             }
         val emojiState =
-            account.flatMap {
+            account.flatMap { (_, it) ->
                 emojiPresenter(it)
                     ?: UiState.Error(IllegalStateException("Emoji not supported"))
             }
 
         return object : ComposeState(
-            account = account,
+            account = account.map { it.second },
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
-            canPoll =
+            supportedComposeEvent =
                 account.map {
-                    it is UiAccount.Misskey || it is UiAccount.Mastodon
-                },
-            canCW =
-                account.map {
-                    it is UiAccount.Misskey || it is UiAccount.Mastodon
+                    it.first.supportedComposeEvent(statusKey = status?.statusKey).toImmutableList().toImmutableListWrapper()
                 },
         ) {
             override fun send(data: ComposeData) {
@@ -89,7 +89,7 @@ class ComposePresenter(
     }
 
     @Composable
-    private fun emojiPresenter(account: UiAccount): UiState<ImmutableList<UiEmoji>>? {
+    private fun emojiPresenter(account: UiAccount): UiState<ImmutableListWrapper<UiEmoji>>? {
         val service = accountServiceProvider(account = account)
         return remember(account.accountKey) {
             when (service) {
@@ -97,7 +97,9 @@ class ComposePresenter(
                 is MisskeyDataSource -> service.emoji()
                 else -> null
             }
-        }?.collectAsState()?.toUi()
+        }?.collectAsState()?.toUi()?.map {
+            it.toImmutableListWrapper()
+        }
     }
 
     @Composable
@@ -211,9 +213,8 @@ abstract class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
     val replyState: UiState<LazyPagingItemsProxy<UiStatus>>?,
-    val emojiState: UiState<ImmutableList<UiEmoji>>,
-    val canPoll: UiState<Boolean>,
-    val canCW: UiState<Boolean>,
+    val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
+    val supportedComposeEvent: UiState<ImmutableListWrapper<SupportedComposeEvent>>,
 ) {
     abstract fun send(data: ComposeData)
 }

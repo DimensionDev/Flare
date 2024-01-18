@@ -63,14 +63,7 @@ abstract class AccountsState(
 @Immutable
 data class ImmutableListWrapper<T : Any>(
     private val data: ImmutableList<T>,
-) {
-    operator fun get(index: Int): T {
-        return data[index]
-    }
-
-    val size: Int
-        get() = data.size
-}
+) : List<T> by data
 
 fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> {
     return ImmutableListWrapper(this)

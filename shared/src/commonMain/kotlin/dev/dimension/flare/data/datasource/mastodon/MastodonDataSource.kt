@@ -9,19 +9,20 @@ import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.benasher44.uuid.uuid4
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
-import dev.dimension.flare.data.datasource.ComposeData
-import dev.dimension.flare.data.datasource.ComposeProgress
-import dev.dimension.flare.data.datasource.MicroblogDataSource
-import dev.dimension.flare.data.datasource.NotificationFilter
-import dev.dimension.flare.data.datasource.relationKeyWithUserKey
-import dev.dimension.flare.data.datasource.timelinePager
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
+import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
+import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
@@ -286,23 +287,6 @@ class MastodonDataSource(
             ),
         )
         progress(ComposeProgress(maxProgress, maxProgress))
-    }
-
-    data class MastodonComposeData(
-        val account: UiAccount.Mastodon,
-        val content: String,
-        val visibility: UiStatus.Mastodon.Visibility = UiStatus.Mastodon.Visibility.Public,
-        val inReplyToID: String? = null,
-        val medias: List<FileItem> = emptyList(),
-        val sensitive: Boolean = false,
-        val spoilerText: String? = null,
-        val poll: Poll? = null,
-    ) : ComposeData {
-        data class Poll(
-            val options: List<String>,
-            val expiresIn: Long,
-            val multiple: Boolean,
-        )
     }
 
     suspend fun like(status: UiStatus.Mastodon) {
@@ -631,7 +615,7 @@ class MastodonDataSource(
         }
     }
 
-    fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUser>> {
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
         return Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
@@ -642,9 +626,9 @@ class MastodonDataSource(
         }.flow
     }
 
-    fun discoverStatus(
-        pageSize: Int = 20,
-        pagingKey: String = "discover_status",
+    override fun discoverStatuses(
+        pageSize: Int,
+        pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = pageSize,
@@ -661,7 +645,7 @@ class MastodonDataSource(
         )
     }
 
-    fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>> {
+    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
         return Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
@@ -705,5 +689,15 @@ class MastodonDataSource(
                 query,
             )
         }.flow
+    }
+
+    override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
+        return listOf(
+            SupportedComposeEvent.Media,
+            SupportedComposeEvent.Poll,
+            SupportedComposeEvent.Emoji,
+            SupportedComposeEvent.ContentWarning,
+            SupportedComposeEvent.Visibility,
+        )
     }
 }

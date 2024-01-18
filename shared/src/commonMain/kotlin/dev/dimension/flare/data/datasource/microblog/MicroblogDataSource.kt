@@ -1,26 +1,15 @@
-package dev.dimension.flare.data.datasource
+package dev.dimension.flare.data.datasource.microblog
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.RemoteMediator
-import androidx.paging.map
-import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
-import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.mapper.toUi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 interface MicroblogDataSource {
     val account: UiAccount
@@ -79,6 +68,17 @@ interface MicroblogDataSource {
         query: String,
         pageSize: Int = 20,
     ): Flow<PagingData<UiUser>>
+
+    fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUser>>
+
+    fun discoverStatuses(
+        pageSize: Int = 20,
+        pagingKey: String = "discover_status",
+    ): Flow<PagingData<UiStatus>>
+
+    fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
+
+    fun supportedComposeEvent(statusKey: MicroBlogKey? = null): List<SupportedComposeEvent>
 }
 
 data class ComposeProgress(
@@ -89,48 +89,17 @@ data class ComposeProgress(
         get() = progress.toDouble() / total.toDouble()
 }
 
-interface ComposeData
-
 enum class NotificationFilter {
     All,
     Mention,
 }
 
-@OptIn(ExperimentalPagingApi::class)
-internal fun timelinePager(
-    pageSize: Int,
-    pagingKey: String,
-    accountKey: MicroBlogKey,
-    database: CacheDatabase,
-    mediator: RemoteMediator<Int, DbPagingTimelineWithStatusView>,
-): Flow<PagingData<UiStatus>> {
-    return Pager(
-        config = PagingConfig(pageSize = pageSize),
-        remoteMediator = mediator,
-        pagingSourceFactory = {
-            QueryPagingSource(
-                countQuery =
-                    database.dbPagingTimelineQueries.pageCount(
-                        account_key = accountKey,
-                        paging_key = pagingKey,
-                    ),
-                transacter = database.dbPagingTimelineQueries,
-                context = Dispatchers.IO,
-                queryProvider = { limit, offset ->
-                    database.dbPagingTimelineQueries.getPage(
-                        account_key = accountKey,
-                        paging_key = pagingKey,
-                        offset = offset,
-                        limit = limit,
-                    )
-                },
-            )
-        },
-    ).flow.map {
-        it.map {
-            it.toUi()
-        }
-    }
+enum class SupportedComposeEvent {
+    Media,
+    Poll,
+    Emoji,
+    ContentWarning,
+    Visibility,
 }
 
 fun MicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:${account.accountKey}:$userKey"

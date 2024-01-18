@@ -55,6 +55,15 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
                         bannerUrl = null,
                         usersCount = 0,
                     ),
+                    UiInstance(
+                        name = PlatformType.xQt.name,
+                        description = "The X makes it sound cool",
+                        iconUrl = "https://archive.md/FRp5v/1d3b14a6e115cfd9bb74720cd4569fb846a31fce",
+                        domain = "xqt.social",
+                        type = PlatformType.xQt,
+                        bannerUrl = null,
+                        usersCount = 0,
+                    ),
                 )
             LoadResult.Page(
                 data = bsky + instances.sortedByDescending { it.usersCount },

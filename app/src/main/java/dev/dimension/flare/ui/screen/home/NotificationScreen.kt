@@ -22,7 +22,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
-import dev.dimension.flare.data.datasource.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper

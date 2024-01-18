@@ -54,7 +54,6 @@ internal class NotificationRemoteMediator(
                 )
 
             cursor = response.cursor
-            cursor = response.cursor
             Bluesky.saveNotification(
                 accountKey,
                 pagingKey,

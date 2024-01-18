@@ -32,6 +32,7 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.presenter.home.NotificationState
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import org.koin.compose.koinInject

@@ -63,6 +63,7 @@ import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
 import dev.dimension.flare.ui.theme.FlareTheme

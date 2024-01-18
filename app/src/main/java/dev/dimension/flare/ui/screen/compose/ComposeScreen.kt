@@ -126,6 +126,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
 import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
 import dev.dimension.flare.ui.presenter.compose.VisibilityState
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.time.Duration

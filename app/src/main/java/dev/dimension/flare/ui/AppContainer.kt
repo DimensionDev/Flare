@@ -9,6 +9,7 @@ import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.splash.SplashPresenter
 import dev.dimension.flare.ui.presenter.splash.SplashType
 import dev.dimension.flare.ui.screen.home.HomeScreen

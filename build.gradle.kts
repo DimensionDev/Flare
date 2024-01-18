@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.sqldelight) apply false
     alias(libs.plugins.skie) apply false
     alias(libs.plugins.molecule) apply false
-//    alias(libs.plugins.compose.jb) apply false
     alias(libs.plugins.ben.manes.versions)
 }
 

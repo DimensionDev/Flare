@@ -44,6 +44,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountState
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.destinations.AboutRouteDestination
 import dev.dimension.flare.ui.screen.destinations.AccountsRouteDestination

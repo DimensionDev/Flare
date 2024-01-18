@@ -47,6 +47,7 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.BlueskyLoginPresenter
 import dev.dimension.flare.ui.screen.destinations.BlueskyLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination

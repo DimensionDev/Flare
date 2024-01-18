@@ -53,6 +53,7 @@ import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.FullScreenBox
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

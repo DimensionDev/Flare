@@ -28,6 +28,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.MastodonCallbackPresenter
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MastodonCallbackRouteDestination

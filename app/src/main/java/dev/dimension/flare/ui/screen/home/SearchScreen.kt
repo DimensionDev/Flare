@@ -55,6 +55,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.profile.CommonProfileHeader
 import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
 import dev.dimension.flare.ui.theme.screenHorizontalPadding

@@ -47,6 +47,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject

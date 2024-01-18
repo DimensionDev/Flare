@@ -36,6 +36,7 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMediaPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 

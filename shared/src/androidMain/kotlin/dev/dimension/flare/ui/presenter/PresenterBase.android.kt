@@ -1,13 +1,19 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.flow.StateFlow
 
 actual abstract class PresenterBase<Model : Any> {
-    @Composable
-    operator fun invoke(): Model {
-        return body()
-    }
+    // For android, just use invoke() to get the model
+    actual val models: StateFlow<Model> = throw NotImplementedError(
+        "PresenterBase.models is not implemented for android, use invoke() instead",
+    )
 
     @Composable
     internal actual abstract fun body(): Model
+}
+
+@Composable
+fun <Model : Any> PresenterBase<Model>.invoke(): Model {
+    return body()
 }

@@ -42,6 +42,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.misskeyLoginUseCase
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch

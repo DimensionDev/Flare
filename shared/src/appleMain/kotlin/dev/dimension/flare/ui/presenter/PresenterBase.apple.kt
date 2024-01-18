@@ -12,7 +12,7 @@ import kotlin.experimental.ExperimentalObjCRefinement
 actual abstract class PresenterBase<Model : Any> {
     private val scope = CoroutineScope(Dispatchers.Main + DisplayLinkClock)
 
-    val models: StateFlow<Model> by lazy {
+    actual val models: StateFlow<Model> by lazy {
         scope.launchMolecule(mode = RecompositionMode.ContextClock) {
             body()
         }

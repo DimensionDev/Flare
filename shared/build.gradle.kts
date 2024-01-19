@@ -153,6 +153,7 @@ ktlint {
     filter {
         exclude { element -> element.file.path.contains("build", ignoreCase = true) }
         exclude { element -> element.file.absolutePath.contains("data/network/misskey/api/", ignoreCase = true) }
+        exclude { element -> element.file.absolutePath.contains("data/network/xqt/", ignoreCase = true) }
     }
 }
 

@@ -67,6 +67,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
+import dev.dimension.flare.ui.screen.destinations.XQTLoginRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
@@ -80,6 +81,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 fun ServiceSelectRoute(navigator: DestinationsNavigator) {
     ServiceSelectScreen(
         onBack = navigator::navigateUp,
+        onXQT = {
+            navigator.navigate(XQTLoginRouteDestination)
+        },
     )
 }
 

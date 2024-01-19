@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
+import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusComponent
@@ -38,14 +40,24 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.screen.destinations.BlueskyReportStatusRouteDestination
+import dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination
+import dev.dimension.flare.ui.screen.destinations.MediaRouteDestination
+import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
+import dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination
+import dev.dimension.flare.ui.screen.destinations.StatusRouteDestination
+import dev.dimension.flare.ui.screen.destinations.VideoRouteDestination
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent)
 internal fun status() {
@@ -232,14 +244,14 @@ internal fun StatusItem(
         is UiStatus.Mastodon ->
             MastodonStatusComponent(
                 data = item,
-                event = event.mastodonStatusEvent,
+                event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.MastodonNotification ->
             MastodonNotificationComponent(
                 data = item,
-                event = event.mastodonStatusEvent,
+                event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
@@ -253,49 +265,298 @@ internal fun StatusItem(
         is UiStatus.Misskey ->
             MisskeyStatusComponent(
                 data = item,
-                event = event.misskeyStatusEvent,
+                event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.MisskeyNotification ->
             MisskeyNotificationComponent(
                 data = item,
-                event = event.misskeyStatusEvent,
+                event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.Bluesky ->
             BlueskyStatusComponent(
                 data = item,
-                event = event.blueskyStatusEvent,
+                event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.BlueskyNotification ->
             BlueskyNotificationComponent(
                 data = item,
-                event = event.blueskyStatusEvent,
+                event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
     }
 }
 
-internal data class StatusEvent(
-    val mastodonStatusEvent: MastodonStatusEvent,
-    val misskeyStatusEvent: MisskeyStatusEvent,
-    val blueskyStatusEvent: BlueskyStatusEvent,
-) {
-    companion object {
-        val empty =
-            StatusEvent(
-                mastodonStatusEvent = EmptyStatusEvent,
-                misskeyStatusEvent = EmptyStatusEvent,
-                blueskyStatusEvent = EmptyStatusEvent,
-            )
+internal sealed interface StatusEvent :
+    MastodonStatusEvent,
+    MisskeyStatusEvent,
+    BlueskyStatusEvent
+
+internal class DefaultStatusEvent(
+    private val scope: CoroutineScope,
+    private val accountRepository: AccountRepository,
+) : StatusEvent {
+    override fun onUserClick(
+        userKey: MicroBlogKey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(ProfileRouteDestination(userKey).deeplink())
+    }
+
+    override fun onStatusClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(StatusRouteDestination(status.statusKey).deeplink())
+    }
+
+    override fun onReplyClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(ReplyRouteDestination(status.statusKey).deeplink())
+    }
+
+    override fun onReblogClick(status: UiStatus.Mastodon) {
+        scope.launch {
+            val account =
+                accountRepository.get(status.accountKey) as? UiAccount.Mastodon ?: return@launch
+            account.dataSource.reblog(status)
+        }
+    }
+
+    override fun onLikeClick(status: UiStatus.Mastodon) {
+        scope.launch {
+            val account =
+                accountRepository.get(status.accountKey) as? UiAccount.Mastodon ?: return@launch
+            account.dataSource.like(status)
+        }
+    }
+
+    override fun onBookmarkClick(status: UiStatus.Mastodon) {
+        scope.launch {
+            val account =
+                accountRepository.get(status.accountKey) as? UiAccount.Mastodon ?: return@launch
+            account.dataSource.bookmark(status)
+        }
+    }
+
+    override fun onMediaClick(
+        media: UiMedia,
+        uriHandler: UriHandler,
+    ) {
+        when (media) {
+            is UiMedia.Image -> {
+                uriHandler.openUri(MediaRouteDestination(media.url).deeplink())
+            }
+
+            is UiMedia.Audio -> Unit
+            is UiMedia.Gif -> {
+                uriHandler.openUri(
+                    VideoRouteDestination(
+                        media.url,
+                        previewUri = media.previewUrl,
+                        contentDescription = media.description,
+                    ).deeplink(),
+                )
+            }
+
+            is UiMedia.Video -> {
+                uriHandler.openUri(
+                    VideoRouteDestination(
+                        media.url,
+                        previewUri = media.thumbnailUrl,
+                        contentDescription = media.description,
+                    ).deeplink(),
+                )
+            }
+        }
+    }
+
+    override fun onDeleteClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(
+                status.statusKey,
+            ).deeplink(),
+        )
+    }
+
+    override fun onReportClick(
+        status: UiStatus.Mastodon,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.MastodonReportRouteDestination(
+                userKey = status.user.userKey,
+                statusKey = status.statusKey,
+            ).deeplink(),
+        )
+    }
+
+    override fun onStatusClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onReactionClick(
+        data: UiStatus.Misskey,
+        reaction: UiStatus.Misskey.EmojiReaction,
+    ) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.Misskey ?: return@launch
+            runCatching {
+                account.dataSource.react(data, reaction.name)
+            }.onFailure {
+            }
+        }
+    }
+
+    override fun onReplyClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onReblogClick(data: UiStatus.Misskey) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.Misskey ?: return@launch
+            runCatching {
+                account.dataSource.renote(data)
+            }.onFailure {
+            }
+        }
+    }
+
+    override fun onQuoteClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onAddReactionClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.MisskeyReactionRouteDestination(
+                statusKey = data.statusKey,
+            ).deeplink(),
+        )
+    }
+
+    override fun onDeleteClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onReportClick(
+        data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.MisskeyReportRouteDestination(
+                userKey = data.user.userKey,
+                statusKey = data.statusKey,
+            ).deeplink(),
+        )
+    }
+
+    override fun onStatusClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onReplyClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onReblogClick(data: UiStatus.Bluesky) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.Bluesky ?: return@launch
+            account.dataSource.reblog(data)
+        }
+    }
+
+    override fun onLikeClick(data: UiStatus.Bluesky) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.Bluesky ?: return@launch
+            account.dataSource.like(data)
+        }
+    }
+
+    override fun onReportClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            BlueskyReportStatusRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onDeleteClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            DeleteStatusConfirmRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onQuoteClick(
+        data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
+                .deeplink(),
+        )
     }
 }
 
-internal data object EmptyStatusEvent : MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
+internal data object EmptyStatusEvent : StatusEvent {
     override fun onStatusClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,

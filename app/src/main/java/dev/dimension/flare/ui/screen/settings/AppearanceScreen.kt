@@ -49,7 +49,7 @@ import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.component.status.StatusEvent
+import dev.dimension.flare.ui.component.status.EmptyStatusEvent
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
@@ -99,7 +99,7 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                     .padding(it),
         ) {
             state.sampleStatus.onSuccess {
-                StatusItem(it, StatusEvent.empty)
+                StatusItem(it, EmptyStatusEvent)
             }
             HorizontalDivider()
             Column(

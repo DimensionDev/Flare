@@ -57,6 +57,7 @@
     <string name="mastodon_notification_item_favourited_your_status">喜欢了你的嘟文</string>
     <string name="mastodon_notification_item_reblogged_your_status">转嘟了你的嘟文</string>
     <string name="mastodon_notification_item_poll_ended">你参与的一个投票已经结束</string>
+    <string name="mastodon_notification_item_mentioned_you">提及了你</string>
     <string name="mastodon_notification_item_requested_follow">申请关注你</string>
     <string name="mastodon_notification_item_posted_status">刚刚发布了一条嘟文</string>
     <string name="mastodon_notification_item_updated_status">更新了一条嘟文</string>
@@ -246,6 +247,7 @@
     <string name="swipe_action_reblog">转发</string>
     <string name="swipe_action_renote">转贴</string>
     <string name="swipe_action_favourite">收藏</string>
+    <string name="swipe_action_add_reaction">添加反应</string>
     <string name="swipe_action_bookmark">书签</string>
 
     <string name="settings_storage_clear_image_cache">清除图片缓存</string>

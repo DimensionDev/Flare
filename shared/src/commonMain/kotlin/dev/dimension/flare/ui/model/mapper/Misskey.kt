@@ -10,6 +10,7 @@ import dev.dimension.flare.data.network.misskey.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
@@ -48,23 +49,23 @@ internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
         sensitive = files?.any { it.isSensitive } ?: false,
         poll =
             poll?.let {
-                UiStatus.Misskey.Poll(
+                UiPoll(
                     // misskey poll doesn't have id
                     id = "",
                     options =
                         poll.choices.map { option ->
-                            UiStatus.Misskey.PollOption(
+                            UiPoll.Option(
                                 title = option.text,
                                 votesCount = option.votes.toLong(),
                                 percentage =
                                     option.votes.toFloat().div(
                                         poll.choices.sumOf { it.votes }.toFloat(),
                                     ).takeUnless { it.isNaN() } ?: 0f,
-                                voted = option.isVoted,
                             )
                         }.toPersistentList(),
                     expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
                     multiple = poll.multiple,
+                    ownVotes = List(poll.choices.filter { it.isVoted }.size) { index -> index }.toPersistentList(),
                 )
             },
         // TODO: parse card content lazily

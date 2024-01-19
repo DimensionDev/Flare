@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -17,15 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Report
-import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,14 +40,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.HtmlText2
@@ -64,21 +54,41 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.contentDirection
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import moe.tlaster.ktml.dom.Element
 
+// damm the parameters are soooooooooooooooo looooooooooooong
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonStatusComponent(
-    data: CommonStatusComponentData,
-    action: CommonStatusComponentAction,
+    rawContent: String,
+    content: Element,
+    contentDirection: LayoutDirection,
+    user: UiUser,
+    medias: ImmutableList<UiMedia>,
+    humanizedTime: String,
     onMediaClick: (UiMedia) -> Unit,
+    onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
+    sensitive: Boolean = false,
+    contentWarning: String? = null,
+    card: UiCard? = null,
+    quotedStatus: UiStatus? = null,
+    poll: UiPoll? = null,
+    headerIcon: ImageVector? = null,
+    headerUser: UiUser? = null,
+    @StringRes headerTextId: Int? = null,
     headerTrailing: @Composable RowScope.() -> Unit = {},
+    contentFooter: @Composable ColumnScope.() -> Unit = {},
+    statusActions: @Composable RowScope.() -> Unit = {},
+    swipeLeftText: String? = null,
+    swipeLeftIcon: ImageVector? = null,
+    onSwipeLeft: (() -> Unit)? = null,
+    swipeRightText: String? = null,
+    swipeRightIcon: ImageVector? = null,
+    onSwipeRight: (() -> Unit)? = null,
 ) {
     var showMedia by remember { mutableStateOf(false) }
     val appearanceSettings = LocalAppearanceSettings.current
@@ -87,11 +97,11 @@ fun CommonStatusComponent(
             confirmValueChange = {
                 when (it) {
                     SwipeToDismissBoxValue.StartToEnd -> {
-                        action.startToEndSwipeActions?.onClick?.invoke()
+                        onSwipeRight?.invoke()
                     }
 
                     SwipeToDismissBoxValue.EndToStart -> {
-                        action.endToStartSwipeActions?.onClick?.invoke()
+                        onSwipeLeft?.invoke()
                     }
 
                     SwipeToDismissBoxValue.Settled -> Unit
@@ -104,7 +114,7 @@ fun CommonStatusComponent(
         state = dismissState,
         enabled =
             appearanceSettings.swipeGestures &&
-                (action.startToEndSwipeActions != null || action.endToStartSwipeActions != null),
+                (onSwipeLeft != null || onSwipeRight != null),
         backgroundContent = {
             val alignment =
                 when (dismissState.dismissDirection) {
@@ -112,13 +122,25 @@ fun CommonStatusComponent(
                     SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
                     SwipeToDismissBoxValue.Settled -> Alignment.Center
                 }
-            val action =
+            val actualAction =
                 when (dismissState.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> action.startToEndSwipeActions
-                    SwipeToDismissBoxValue.EndToStart -> action.endToStartSwipeActions
+                    SwipeToDismissBoxValue.StartToEnd -> onSwipeRight
+                    SwipeToDismissBoxValue.EndToStart -> onSwipeLeft
                     SwipeToDismissBoxValue.Settled -> null
                 }
-            if (action != null) {
+            val actualText =
+                when (dismissState.dismissDirection) {
+                    SwipeToDismissBoxValue.StartToEnd -> swipeRightText
+                    SwipeToDismissBoxValue.EndToStart -> swipeLeftText
+                    SwipeToDismissBoxValue.Settled -> null
+                }
+            val actualIcon =
+                when (dismissState.dismissDirection) {
+                    SwipeToDismissBoxValue.StartToEnd -> swipeRightIcon
+                    SwipeToDismissBoxValue.EndToStart -> swipeLeftIcon
+                    SwipeToDismissBoxValue.Settled -> null
+                }
+            if (actualAction != null && actualText != null && actualIcon != null) {
                 Box(
                     modifier =
                         Modifier
@@ -127,39 +149,44 @@ fun CommonStatusComponent(
                     contentAlignment = alignment,
                 ) {
                     StatusSwipeButton(
-                        action = action,
+                        text = actualText,
+                        icon = actualIcon,
                     )
                 }
             }
         },
     ) {
         Column {
-            if (data.header != null) {
+            if (headerIcon != null && headerUser != null && headerTextId != null) {
                 StatusRetweetHeaderComponent(
-                    icon = data.header.icon,
-                    user = data.header.user,
-                    text = stringResource(id = data.header.textId),
+                    icon = headerIcon,
+                    user = headerUser,
+                    text = stringResource(id = headerTextId),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
             StatusHeaderComponent(
-                user = data.user,
-                humanizedTime = data.humanizedTime,
-                onUserClick = { },
+                user = user,
+                humanizedTime = humanizedTime,
+                onUserClick = { onUserClick(it) },
                 headerTrailing = headerTrailing,
             )
 
             StatusContentComponent(
-                data = data,
+                rawContent = rawContent,
+                content = content,
+                contentDirection = contentDirection,
+                contentWarning = contentWarning,
+                poll = poll,
             )
 
-            if (data.medias.isNotEmpty()) {
+            if (medias.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 if (appearanceSettings.showMedia || showMedia) {
                     StatusMediaComponent(
-                        data = data.medias,
+                        data = medias,
                         onMediaClick = onMediaClick,
-                        sensitive = data.sensitive,
+                        sensitive = sensitive,
                     )
                 } else {
                     Row(
@@ -190,258 +217,36 @@ fun CommonStatusComponent(
                     }
                 }
             }
-            if (appearanceSettings.showLinkPreview && data.card != null) {
-                StatusCardComponent(
-                    card = data.card,
-                )
+            card?.let { card ->
+                if (appearanceSettings.showLinkPreview) {
+                    StatusCardComponent(
+                        card = card,
+                    )
+                }
             }
+
+            if (quotedStatus != null) {
+                UiStatusQuoted(quotedStatus, onMediaClick)
+            }
+
+            contentFooter.invoke(this)
 
             if (appearanceSettings.showActions) {
-                StatusFooterComponent(
-                    actions = action.actions,
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    CompositionLocalProvider(
+                        LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
+                    ) {
+                        statusActions.invoke(this)
+                    }
+                }
             } else {
                 Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-    }
-}
-
-@Immutable
-data class CommonStatusComponentAction(
-    val actions: ImmutableList<StatusAction>,
-    val startToEndSwipeActions: StatusAction.Item?,
-    val endToStartSwipeActions: StatusAction.Item?,
-) {
-    companion object {
-        @Composable
-        internal fun fromUiStatus(
-            data: UiStatus,
-            statusEvent: StatusEvent,
-        ): CommonStatusComponentAction {
-            return when (data) {
-                is UiStatus.Bluesky ->
-                    buildBluesky(data, statusEvent)
-
-                is UiStatus.BlueskyNotification -> TODO()
-                is UiStatus.Mastodon -> TODO()
-                is UiStatus.MastodonNotification -> TODO()
-                is UiStatus.Misskey -> TODO()
-                is UiStatus.MisskeyNotification -> TODO()
-            }
-        }
-
-        @Composable
-        private fun buildBluesky(
-            data: UiStatus.Bluesky,
-            statusEvent: StatusEvent,
-        ): CommonStatusComponentAction {
-            val uriHandler = LocalUriHandler.current
-            val appearanceSettings = LocalAppearanceSettings.current
-            return CommonStatusComponentAction(
-                actions =
-                    persistentListOf(
-                        StatusAction.Item(
-                            icon = Icons.AutoMirrored.Filled.Reply,
-                            text = data.matrices.humanizedReplyCount,
-                            onClick = {
-                                statusEvent.blueskyStatusEvent.onReplyClick(data, uriHandler)
-                            },
-                        ),
-                        StatusAction.Group(
-                            icon = Icons.Default.SyncAlt,
-                            text = data.matrices.humanizedRepostCount,
-                            color = if (data.reaction.reposted) StatusAction.ColorToken.Primary else null,
-                            items =
-                                persistentListOf(
-                                    StatusAction.Item(
-                                        icon = Icons.Default.SyncAlt,
-                                        text = stringResource(id = R.string.blusky_item_action_repost),
-                                        onClick = {
-                                            statusEvent.blueskyStatusEvent.onReblogClick(data)
-                                        },
-                                    ),
-                                    StatusAction.Item(
-                                        icon = Icons.Default.FormatQuote,
-                                        text = stringResource(id = R.string.blusky_item_action_quote),
-                                        onClick = {
-                                            statusEvent.blueskyStatusEvent.onQuoteClick(data, uriHandler)
-                                        },
-                                    ),
-                                ),
-                        ),
-                        StatusAction.Item(
-                            icon =
-                                if (data.reaction.liked) {
-                                    Icons.Default.Favorite
-                                } else {
-                                    Icons.Default.FavoriteBorder
-                                },
-                            text = data.matrices.humanizedLikeCount,
-                            onClick = {
-                                statusEvent.blueskyStatusEvent.onLikeClick(data)
-                            },
-                            color = if (data.reaction.liked) StatusAction.ColorToken.Red else null,
-                        ),
-                        StatusAction.Group(
-                            icon = Icons.Default.MoreHoriz,
-                            text = null,
-                            items =
-                                persistentListOf(
-                                    if (data.isFromMe) {
-                                        StatusAction.Item(
-                                            icon = Icons.Default.Delete,
-                                            text = stringResource(id = R.string.blusky_item_action_delete),
-                                            onClick = {
-                                                statusEvent.blueskyStatusEvent.onDeleteClick(data, uriHandler)
-                                            },
-                                        )
-                                    } else {
-                                        StatusAction.Item(
-                                            icon = Icons.Default.Report,
-                                            text = stringResource(id = R.string.blusky_item_action_report),
-                                            onClick = {
-                                                statusEvent.blueskyStatusEvent.onReportClick(data, uriHandler)
-                                            },
-                                        )
-                                    },
-                                ),
-                        ),
-                    ),
-                startToEndSwipeActions =
-                    appearanceSettings.bluesky.swipeRight.takeIf {
-                        it != AppearanceSettings.Bluesky.SwipeActions.NONE
-                    }?.let {
-                        StatusAction.Item(
-                            icon = it.icon,
-                            text = stringResource(id = it.id),
-                            onClick = {
-                                when (it) {
-                                    AppearanceSettings.Bluesky.SwipeActions.NONE -> Unit
-                                    AppearanceSettings.Bluesky.SwipeActions.REPLY ->
-                                        statusEvent.blueskyStatusEvent.onReplyClick(data, uriHandler)
-
-                                    AppearanceSettings.Bluesky.SwipeActions.REBLOG ->
-                                        statusEvent.blueskyStatusEvent.onReblogClick(data)
-
-                                    AppearanceSettings.Bluesky.SwipeActions.FAVOURITE ->
-                                        statusEvent.blueskyStatusEvent.onLikeClick(data)
-                                }
-                            },
-                        )
-                    },
-                endToStartSwipeActions =
-                    appearanceSettings.bluesky.swipeLeft.takeIf {
-                        it != AppearanceSettings.Bluesky.SwipeActions.NONE
-                    }?.let {
-                        StatusAction.Item(
-                            icon = it.icon,
-                            text = stringResource(id = it.id),
-                            onClick = {
-                                when (it) {
-                                    AppearanceSettings.Bluesky.SwipeActions.NONE -> Unit
-                                    AppearanceSettings.Bluesky.SwipeActions.REPLY ->
-                                        statusEvent.blueskyStatusEvent.onReplyClick(data, uriHandler)
-
-                                    AppearanceSettings.Bluesky.SwipeActions.REBLOG ->
-                                        statusEvent.blueskyStatusEvent.onReblogClick(data)
-
-                                    AppearanceSettings.Bluesky.SwipeActions.FAVOURITE ->
-                                        statusEvent.blueskyStatusEvent.onLikeClick(data)
-                                }
-                            },
-                        )
-                    },
-            )
-        }
-    }
-}
-
-@Immutable
-data class CommonStatusComponentData(
-    val header: Header?,
-    val rawContent: String,
-    val content: Element,
-    val contentDirection: LayoutDirection,
-    val contentWarning: String?,
-    val user: UiUser,
-    val medias: ImmutableList<UiMedia>,
-    val card: UiCard?,
-    val humanizedTime: String,
-    val sensitive: Boolean,
-    val quotedStatus: UiStatus?,
-    val poll: UiPoll?,
-) {
-    data class Header(
-        val icon: ImageVector,
-        val user: UiUser?,
-        @StringRes val textId: Int,
-    )
-
-    companion object {
-        internal fun fromUiStatus(data: UiStatus) =
-            when (data) {
-                is UiStatus.Bluesky ->
-                    CommonStatusComponentData(
-                        header =
-                            data.repostBy?.let {
-                                Header(
-                                    icon = Icons.Default.SyncAlt,
-                                    user = it,
-                                    textId = R.string.mastodon_item_reblogged_status,
-                                )
-                            },
-                        rawContent = data.content,
-                        content = data.contentToken,
-                        contentDirection = data.contentDirection,
-                        contentWarning = null,
-                        user = data.user,
-                        medias = data.medias,
-                        card = data.card,
-                        humanizedTime = data.humanizedTime,
-                        sensitive = false,
-                        quotedStatus = data.quote,
-                        poll = null,
-                    )
-
-                is UiStatus.BlueskyNotification -> TODO()
-                is UiStatus.Mastodon -> TODO()
-                is UiStatus.MastodonNotification -> TODO()
-                is UiStatus.Misskey -> TODO()
-                is UiStatus.MisskeyNotification -> TODO()
-            }
-    }
-}
-
-sealed interface StatusAction {
-    @Immutable
-    data class Item(
-        val icon: ImageVector,
-        val text: String?,
-        val enabled: Boolean = true,
-        val color: ColorToken? = null,
-        val onClick: () -> Unit,
-    ) : StatusAction
-
-    @Immutable
-    data class Group(
-        val icon: ImageVector,
-        val text: String?,
-        val enabled: Boolean = true,
-        val color: ColorToken? = null,
-        val items: ImmutableList<Item>,
-    ) : StatusAction
-
-    enum class ColorToken {
-        Primary,
-        Red,
-        ;
-
-        @Composable
-        fun toColor(): Color {
-            return when (this) {
-                Primary -> MaterialTheme.colorScheme.primary
-                Red -> Color.Red
             }
         }
     }
@@ -473,7 +278,8 @@ private fun StatusHeaderComponent(
 
 @Composable
 private fun StatusSwipeButton(
-    action: StatusAction.Item,
+    text: String?,
+    icon: ImageVector,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -481,13 +287,13 @@ private fun StatusSwipeButton(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
-            imageVector = action.icon,
-            contentDescription = action.text,
+            imageVector = icon,
+            contentDescription = text,
             modifier = Modifier.size(36.dp),
         )
-        if (action.text != null) {
+        if (text != null) {
             Text(
-                text = action.text,
+                text = text,
                 style = MaterialTheme.typography.titleMedium,
             )
         }
@@ -496,7 +302,11 @@ private fun StatusSwipeButton(
 
 @Composable
 private fun StatusContentComponent(
-    data: CommonStatusComponentData,
+    rawContent: String,
+    content: Element,
+    contentDirection: LayoutDirection,
+    contentWarning: String?,
+    poll: UiPoll?,
     modifier: Modifier = Modifier,
 ) {
     var expanded by rememberSaveable {
@@ -505,7 +315,7 @@ private fun StatusContentComponent(
     Column(
         modifier = modifier,
     ) {
-        data.contentWarning?.let {
+        contentWarning?.let {
             if (it.isNotEmpty()) {
                 Row(
                     modifier =
@@ -531,16 +341,16 @@ private fun StatusContentComponent(
                 }
             }
         }
-        AnimatedVisibility(visible = expanded || data.contentWarning.isNullOrEmpty()) {
+        AnimatedVisibility(visible = expanded || contentWarning.isNullOrEmpty()) {
             Column {
-                if (data.rawContent.isNotEmpty() && data.rawContent.isNotBlank()) {
+                if (rawContent.isNotEmpty() && rawContent.isNotBlank()) {
                     HtmlText2(
-                        element = data.content,
-                        layoutDirection = data.contentDirection,
+                        element = content,
+                        layoutDirection = contentDirection,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                data.poll?.let {
+                poll?.let {
                     Spacer(modifier = Modifier.height(8.dp))
                     StatusPollComponent(
                         poll = it,
@@ -631,49 +441,6 @@ private fun StatusCardComponent(
                             Modifier
                                 .alpha(MediumAlpha),
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatusFooterComponent(
-    actions: ImmutableList<StatusAction>,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        CompositionLocalProvider(
-            LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
-        ) {
-            actions.forEach {
-                when (it) {
-                    is StatusAction.Item -> {
-                        StatusActionButton(
-                            icon = it.icon,
-                            text = it.text,
-                            modifier =
-                                Modifier
-                                    .weight(1f),
-                            onClicked = it.onClick,
-                            color = it.color?.toColor() ?: LocalContentColor.current,
-                            enabled = it.enabled,
-                        )
-                    }
-
-                    is StatusAction.Group -> {
-                        StatusActionGroupComponent(
-                            action = it,
-                            modifier =
-                                Modifier
-                                    .weight(1f),
-                        )
-                    }
                 }
             }
         }

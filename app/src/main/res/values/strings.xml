@@ -57,6 +57,7 @@
     <string name="mastodon_notification_item_favourited_your_status">favourited your status</string>
     <string name="mastodon_notification_item_reblogged_your_status">reblogged your status</string>
     <string name="mastodon_notification_item_poll_ended">A poll you were participating in has ended</string>
+    <string name="mastodon_notification_item_mentioned_you">mentioned you</string>
     <string name="mastodon_notification_item_requested_follow">request to follow you</string>
     <string name="mastodon_notification_item_posted_status">just posted a status</string>
     <string name="mastodon_notification_item_updated_status">updated a status</string>
@@ -249,6 +250,7 @@
     <string name="swipe_action_reblog">Reblog</string>
     <string name="swipe_action_renote">Renote</string>
     <string name="swipe_action_favourite">Favourite</string>
+    <string name="swipe_action_add_reaction">Reaction</string>
     <string name="swipe_action_bookmark">Bookmark</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>

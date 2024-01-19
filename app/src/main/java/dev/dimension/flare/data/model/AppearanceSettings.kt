@@ -74,7 +74,7 @@ data class AppearanceSettings(
             NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
             REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
             RENOTE(R.string.swipe_action_renote, Icons.Default.SyncAlt),
-            FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
+            ADDREACTION(R.string.swipe_action_favourite, Icons.Default.Favorite),
         }
     }
 

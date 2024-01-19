@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component.status
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -82,44 +82,33 @@ internal fun StatusActionButton(
 }
 
 @Composable
-internal fun StatusActionGroupComponent(
-    action: StatusAction.Group,
+internal fun StatusActionGroup(
+    icon: ImageVector,
+    text: String?,
     modifier: Modifier = Modifier,
+    color: Color = LocalContentColor.current,
+    contentDescription: String? = null,
+    enabled: Boolean = true,
+    subMenus: @Composable ColumnScope.(closeMenu: () -> Unit) -> Unit = {},
 ) {
     var showMenu by remember { mutableStateOf(false) }
-
     StatusActionButton(
-        icon = action.icon,
-        text = action.text,
+        icon = icon,
+        text = text,
         modifier = modifier,
+        contentDescription = contentDescription,
         onClicked = {
             showMenu = true
         },
-        color = action.color?.toColor() ?: LocalContentColor.current,
-        enabled = action.enabled,
+        color = color,
+        enabled = enabled,
         content = {
             DropdownMenu(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
             ) {
-                action.items.forEach { item ->
-                    DropdownMenuItem(
-                        onClick = {
-                            item.onClick.invoke()
-                            showMenu = false
-                        },
-                        text = {
-                            if (item.text != null) {
-                                Text(text = item.text)
-                            }
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = null,
-                            )
-                        },
-                    )
+                subMenus.invoke(this) {
+                    showMenu = false
                 }
             }
         },

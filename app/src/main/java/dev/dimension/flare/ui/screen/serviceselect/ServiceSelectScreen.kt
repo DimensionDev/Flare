@@ -115,7 +115,7 @@ annotation class EntryNavGraph(
 @EntryNavGraph(start = true)
 fun EntryServiceSelectRoute(navigator: DestinationsNavigator) {
     ServiceSelectScreen(
-        onBack = navigator::navigateUp,
+        onBack = null,
         onXQT = {
             navigator.navigate(XQTLoginRouteDestination)
         },
@@ -126,7 +126,7 @@ fun EntryServiceSelectRoute(navigator: DestinationsNavigator) {
 @Composable
 fun ServiceSelectScreen(
     onXQT: () -> Unit,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -336,7 +336,7 @@ fun ServiceSelectScreen(
                             PlatformType.xQt -> {
                                 Button(
                                     onClick = {
-                                        onXQT?.invoke()
+                                        onXQT.invoke()
                                     },
                                     modifier = Modifier.width(300.dp),
                                 ) {

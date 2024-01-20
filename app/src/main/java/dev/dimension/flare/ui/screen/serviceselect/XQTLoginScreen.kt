@@ -4,34 +4,73 @@ import android.webkit.CookieManager
 import android.webkit.WebSettings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.kevinnzou.accompanist.web.LoadingState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.kevinnzou.accompanist.web.WebView
 import com.kevinnzou.accompanist.web.rememberWebViewState
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.result.ResultBackNavigator
+import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiApplication
+import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.login.XQTLoginPresenter
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
-internal fun XQTLoginRoute() {
-    XQTLoginScreen()
+internal fun XQTLoginRoute(resultNavigator: ResultBackNavigator<Boolean>) {
+    XQTLoginScreen(
+        toHome = {
+            resultNavigator.navigateBack(result = true)
+        },
+    )
+}
+
+@EntryNavGraph
+@Composable
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+internal fun EntryXQTLoginRoute(navigator: DestinationsNavigator) {
+    XQTLoginScreen(
+        toHome = {
+            navigator.navigateUp()
+        },
+    )
 }
 
 @Composable
-private fun XQTLoginScreen() {
-    val state = rememberWebViewState(UiApplication.XQT.host)
-    LaunchedEffect(state.loadingState) {
-        if (state.loadingState is LoadingState.Loading) {
-            CookieManager.getInstance().getCookie(UiApplication.XQT.host)?.let {
-                println(it)
+private fun XQTLoginScreen(toHome: () -> Unit) {
+    val state by producePresenter { xQtLoginPresenter(toHome) }
+    val webViewState = rememberWebViewState(UiApplication.XQT.host)
+    LaunchedEffect(Unit) {
+        while (true) {
+            if (!state.loading) {
+                webViewState.lastLoadedUrl?.let { url ->
+                    CookieManager
+                        .getInstance()
+                        .getCookie(url)
+                        ?.takeIf {
+                            state.checkChocolate(it)
+                        }
+                        ?.let {
+                            state.login(it)
+                        }
+                }
             }
+            delay(2.seconds)
         }
     }
     WebView(
-        state,
+        webViewState,
         onCreated = {
+            // clea all cookies
+            CookieManager.getInstance().removeAllCookies(null)
             with(it.settings) {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -42,3 +81,10 @@ private fun XQTLoginScreen() {
         },
     )
 }
+
+@Composable
+private fun xQtLoginPresenter(toHome: () -> Unit) =
+    run {
+        val state = remember { XQTLoginPresenter(toHome) }.invoke()
+        state
+    }

@@ -45,7 +45,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.NavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.result.NavResult
+import com.ramcosta.composedestinations.result.ResultRecipient
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onLoading
@@ -78,7 +81,39 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
-fun ServiceSelectRoute(navigator: DestinationsNavigator) {
+fun ServiceSelectRoute(
+    navigator: DestinationsNavigator,
+    resultRecipient: ResultRecipient<XQTLoginRouteDestination, Boolean>,
+) {
+    resultRecipient.onNavResult {
+        when (it) {
+            NavResult.Canceled -> Unit
+            is NavResult.Value -> {
+                if (it.value) {
+                    navigator.navigateUp()
+                }
+            }
+        }
+    }
+    ServiceSelectScreen(
+        onBack = navigator::navigateUp,
+        onXQT = {
+            navigator.navigate(XQTLoginRouteDestination)
+        },
+    )
+}
+
+@NavGraph
+annotation class EntryNavGraph(
+    val start: Boolean = false,
+)
+
+@Composable
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+@EntryNavGraph(start = true)
+fun EntryServiceSelectRoute(navigator: DestinationsNavigator) {
     ServiceSelectScreen(
         onBack = navigator::navigateUp,
         onXQT = {
@@ -90,9 +125,9 @@ fun ServiceSelectRoute(navigator: DestinationsNavigator) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ServiceSelectScreen(
+    onXQT: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    onXQT: (() -> Unit)? = null,
-    onBack: (() -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {

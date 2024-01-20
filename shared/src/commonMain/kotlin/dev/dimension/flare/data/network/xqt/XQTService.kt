@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.xqt
 import dev.dimension.flare.data.network.authorization.BearerAuthorization
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
+import dev.dimension.flare.data.network.xqt.api.GuestApi
 import dev.dimension.flare.data.network.xqt.api.OtherApi
 import dev.dimension.flare.data.network.xqt.api.PostApi
 import dev.dimension.flare.data.network.xqt.api.TweetApi
@@ -20,87 +21,67 @@ import io.ktor.client.request.headers
 import io.ktor.util.AttributeKey
 import io.ktor.util.KtorDsl
 
-private val baseUrl = "https://$xqtHost/i/api"
+private val baseUrl = "https://$xqtHost/i/api/"
+private val guestApiUrl = "https://api.$xqtHost/"
 private val token =
     "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 
 private fun config(
-    guestToken: String? = null,
+    url: String = baseUrl,
     chocolate: String? = null,
-    csrfToken: String? = null,
-) = ktorfit(baseUrl, BearerAuthorization(token)) {
+) = ktorfit(url, BearerAuthorization(token)) {
     install(XQTHeaderPlugin) {
-        this.guestToken = guestToken
         this.chocolate = chocolate
-        this.csrfToken = csrfToken
     }
 }
 
 class XQTService(
-    private val guestToken: String? = null,
     private val chocolate: String? = null,
-    private val csrfToken: String? = null,
 ) : DefaultApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     OtherApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     PostApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     TweetApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     UserApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     UserListApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     UsersApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     V11GetApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     V11PostApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
     ).create(),
     V20GetApi by config(
-        guestToken = guestToken,
         chocolate = chocolate,
-        csrfToken = csrfToken,
-    ).create()
+    ).create(),
+    GuestApi by config(
+        url = guestApiUrl,
+        chocolate = chocolate,
+    ).create() {
+    companion object {
+        fun checkChocolate(value: String) = value.contains("gt=") && value.contains("ct0=") && value.contains("auth_token=")
+    }
+}
 
 private class XQTHeaderPlugin(
-    private val guestToken: String? = null,
     private val chocolate: String? = null,
-    private val csrfToken: String? = null,
 ) {
     @KtorDsl
     class Config(
-        var guestToken: String? = null,
         var chocolate: String? = null,
-        var csrfToken: String? = null,
     )
 
     @KtorDsl
@@ -118,9 +99,7 @@ private class XQTHeaderPlugin(
         override fun prepare(block: Config.() -> Unit): XQTHeaderPlugin {
             val config = Config().apply(block)
             return XQTHeaderPlugin(
-                guestToken = config.guestToken,
                 chocolate = config.chocolate,
-                csrfToken = config.csrfToken,
             )
         }
     }
@@ -139,16 +118,12 @@ private class XQTHeaderPlugin(
                     "User-Agent",
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
                 )
-                if (guestToken != null) {
-                    append("x-guest-token", guestToken)
-                }
                 if (chocolate != null) {
+                    append("x-guest-token", chocolate.split("; ").first { it.startsWith("gt=") }.removePrefix("gt="))
                     append("Cookie", chocolate)
                     append("x-twitter-active-user", "yes")
                     append("x-twitter-auth-type", "OAuth2Session")
-                }
-                if (csrfToken != null) {
-                    append("x-csrf-token", csrfToken)
+                    append("x-csrf-token", chocolate.split("; ").first { it.startsWith("ct0=") }.removePrefix("ct0="))
                 }
             }
         }

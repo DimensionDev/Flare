@@ -29,5 +29,5 @@ data class GetSearchTimeline200Response(
     @SerialName(value = "data")
     val `data`: SearchTimelineData,
     @SerialName(value = "errors")
-    val errors: kotlin.collections.List<Error>,
+    val errors: kotlin.collections.List<Error>? = null,
 )

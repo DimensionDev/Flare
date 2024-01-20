@@ -29,5 +29,5 @@ data class PostDeleteRetweet200Response(
     @SerialName(value = "data")
     val `data`: DeleteRetweetResponseData,
     @SerialName(value = "errors")
-    val errors: kotlin.collections.List<Error>,
+    val errors: kotlin.collections.List<Error>? = null,
 )

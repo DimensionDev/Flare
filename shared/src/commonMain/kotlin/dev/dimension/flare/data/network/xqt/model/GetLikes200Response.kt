@@ -29,5 +29,5 @@ data class GetLikes200Response(
     @SerialName(value = "data")
     val `data`: UserTweetsData,
     @SerialName(value = "errors")
-    val errors: kotlin.collections.List<Error>,
+    val errors: kotlin.collections.List<Error>? = null,
 )

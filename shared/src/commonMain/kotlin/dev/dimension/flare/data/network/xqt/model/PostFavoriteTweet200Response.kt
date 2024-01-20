@@ -29,5 +29,5 @@ data class PostFavoriteTweet200Response(
     @SerialName(value = "data")
     val `data`: FavoriteTweet,
     @SerialName(value = "errors")
-    val errors: kotlin.collections.List<Error>,
+    val errors: kotlin.collections.List<Error>? = null,
 )

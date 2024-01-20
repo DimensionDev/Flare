@@ -29,5 +29,5 @@ data class PostCreateTweet200Response(
     @SerialName(value = "data")
     val `data`: CreateTweetResponseData,
     @SerialName(value = "errors")
-    val errors: kotlin.collections.List<Error>,
+    val errors: kotlin.collections.List<Error>? = null,
 )

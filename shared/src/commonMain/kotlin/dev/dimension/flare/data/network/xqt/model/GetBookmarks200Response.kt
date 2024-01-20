@@ -29,5 +29,5 @@ data class GetBookmarks200Response(
     @SerialName(value = "data")
     val `data`: BookmarksResponseData,
     @SerialName(value = "errors")
-    val errors: kotlin.collections.List<Error>,
+    val errors: kotlin.collections.List<Error>? = null,
 )

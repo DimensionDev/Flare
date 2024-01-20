@@ -25,7 +25,8 @@ import kotlinx.serialization.Serializable
  * @param typename
  */
 @Serializable
+@SerialName("TimelineCommunity")
 data class TimelineCommunity(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName? = null,
-) : kotlin.collections.HashMap<String, kotlin.Any>()
+) : ItemContentUnion

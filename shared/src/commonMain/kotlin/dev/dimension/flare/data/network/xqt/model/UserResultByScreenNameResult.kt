@@ -18,6 +18,7 @@ package dev.dimension.flare.data.network.xqt.model
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -37,7 +38,7 @@ data class UserResultByScreenNameResult(
     @SerialName(value = "legacy")
     val legacy: UserResultByScreenNameLegacy,
     @Contextual @SerialName(value = "profilemodules")
-    val profilemodules: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+    val profilemodules: JsonElement,
     @SerialName(value = "rest_id")
     val restId: kotlin.String,
 )

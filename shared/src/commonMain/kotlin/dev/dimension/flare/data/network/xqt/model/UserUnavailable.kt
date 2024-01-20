@@ -26,9 +26,10 @@ import kotlinx.serialization.Serializable
  * @param reason
  */
 @Serializable
+@SerialName("UserUnavailable")
 data class UserUnavailable(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName,
     @SerialName(value = "reason")
     val reason: kotlin.String,
-)
+) : UserUnion

@@ -18,6 +18,7 @@ package dev.dimension.flare.data.network.xqt.model
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -81,7 +82,7 @@ data class UserLegacy(
     @SerialName(value = "description")
     val description: kotlin.String,
     @Contextual @SerialName(value = "entities")
-    val entities: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+    val entities: JsonElement,
     @SerialName(value = "fast_followers_count")
     val fastFollowersCount: kotlin.Int,
     @SerialName(value = "favourites_count")

@@ -15,9 +15,9 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 
 /**
  *
@@ -41,98 +41,7 @@ import kotlinx.serialization.Serializable
  * @param iconDisplayInfo
  * @param triggerDelayMs
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-interface InstructionUnion {
-    @SerialName(value = "entries")
-    val propertyEntries: kotlin.collections.List<TimelineAddEntry>
-
-    @Contextual
-    @SerialName(value = "type")
-    val type: InstructionType
-
-    @SerialName(value = "moduleEntryId")
-    val moduleEntryId: kotlin.String
-
-    @SerialName(value = "moduleItems")
-    val moduleItems: kotlin.collections.List<ModuleItem>
-
-    @SerialName(value = "entry")
-    val entry: TimelineAddEntry
-
-    @SerialName(value = "entry_id_to_replace")
-    val entryIdToReplace: kotlin.String
-
-    @SerialName(value = "richText")
-    val richText: TimelineShowAlertRichText
-
-    @SerialName(value = "usersResults")
-    val usersResults: kotlin.collections.List<UserResults>
-
-    @SerialName(value = "direction")
-    val direction: InstructionUnion.Direction
-
-    @SerialName(value = "clientEventInfo")
-    val clientEventInfo: ClientEventInfo
-
-    @SerialName(value = "cover")
-    val cover: TimelineHalfCover
-
-    @SerialName(value = "prepend")
-    val prepend: kotlin.Boolean?
-
-    @SerialName(value = "alertType")
-    val alertType: InstructionUnion.AlertType?
-
-    @Contextual
-    @SerialName(value = "colorConfig")
-    val colorConfig: kotlin.collections.Map<kotlin.String, kotlin.Any>?
-
-    @SerialName(value = "displayDurationMs")
-    val displayDurationMs: kotlin.Int?
-
-    @SerialName(value = "displayLocation")
-    val displayLocation: InstructionUnion.DisplayLocation?
-
-    @Contextual
-    @SerialName(value = "iconDisplayInfo")
-    val iconDisplayInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>?
-
-    @SerialName(value = "triggerDelayMs")
-    val triggerDelayMs: kotlin.Int?
-
-    /**
-     *
-     *
-     * Values: top,bottom
-     */
-    @Serializable
-    enum class Direction(val value: kotlin.String) {
-        @SerialName(value = "Top")
-        top("Top"),
-
-        @SerialName(value = "Bottom")
-        bottom("Bottom"),
-    }
-
-    /**
-     *
-     *
-     * Values: newTweets
-     */
-    @Serializable
-    enum class AlertType(val value: kotlin.String) {
-        @SerialName(value = "NewTweets")
-        newTweets("NewTweets"),
-    }
-
-    /**
-     *
-     *
-     * Values: top
-     */
-    @Serializable
-    enum class DisplayLocation(val value: kotlin.String) {
-        @SerialName(value = "Top")
-        top("Top"),
-    }
-}
+@JsonClassDiscriminator("type")
+sealed interface InstructionUnion

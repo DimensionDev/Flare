@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -33,26 +32,27 @@ import kotlinx.serialization.Serializable
  * @param triggerDelayMs
  */
 @Serializable
+@SerialName("TimelineShowAlert")
 data class TimelineShowAlert(
     @SerialName(value = "richText")
     val richText: TimelineShowAlertRichText,
-    @Contextual @SerialName(value = "type")
-    val type: InstructionType,
+//    @Contextual @SerialName(value = "type")
+//    val type: InstructionType,
     @SerialName(value = "usersResults")
     val usersResults: kotlin.collections.List<UserResults>,
     @SerialName(value = "alertType")
     val alertType: TimelineShowAlert.AlertType? = null,
-    @Contextual @SerialName(value = "colorConfig")
-    val colorConfig: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+//    @Contextual @SerialName(value = "colorConfig")
+//    val colorConfig: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
     @SerialName(value = "displayDurationMs")
     val displayDurationMs: kotlin.Int? = null,
     @SerialName(value = "displayLocation")
     val displayLocation: TimelineShowAlert.DisplayLocation? = null,
-    @Contextual @SerialName(value = "iconDisplayInfo")
-    val iconDisplayInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+//    @Contextual @SerialName(value = "iconDisplayInfo")
+//    val iconDisplayInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
     @SerialName(value = "triggerDelayMs")
     val triggerDelayMs: kotlin.Int? = null,
-) {
+) : InstructionUnion {
     /**
      *
      *

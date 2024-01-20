@@ -25,7 +25,8 @@ import kotlinx.serialization.Serializable
  * @param typename
  */
 @Serializable
+@SerialName("TimelineMessagePrompt")
 data class TimelineMessagePrompt(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName? = null,
-) : kotlin.collections.HashMap<String, kotlin.Any>()
+) : ItemContentUnion

@@ -29,9 +29,10 @@ import kotlinx.serialization.Serializable
  * @param itemType
  */
 @Serializable
+@SerialName("TimelineTimelineCursor")
 data class TimelineTimelineCursor(
-    @Contextual @SerialName(value = "__typename")
-    val typename: TypeName,
+//    @Contextual @SerialName(value = "__typename")
+//    val typename: TypeName,
     @Contextual @SerialName(value = "cursorType")
     val cursorType: CursorType,
     @SerialName(value = "value")
@@ -40,4 +41,4 @@ data class TimelineTimelineCursor(
     val entryType: ContentEntryType? = null,
     @Contextual @SerialName(value = "itemType")
     val itemType: ContentEntryType? = null,
-)
+) : ContentUnion, ItemContentUnion

@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -25,7 +24,8 @@ import kotlinx.serialization.Serializable
  * @param type
  */
 @Serializable
+@SerialName("TimelineClearCache")
 data class TimelineClearCache(
-    @Contextual @SerialName(value = "type")
+    @SerialName(value = "type")
     val type: InstructionType,
-)
+) : InstructionUnion

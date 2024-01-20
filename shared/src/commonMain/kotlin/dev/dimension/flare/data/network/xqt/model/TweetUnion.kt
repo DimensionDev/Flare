@@ -15,9 +15,9 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 
 /**
  *
@@ -39,56 +39,58 @@ import kotlinx.serialization.Serializable
  * @param source
  * @param unmentionData
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-interface TweetUnion {
-    @Contextual
-    @SerialName(value = "__typename")
-    val typename: TypeName
-
-    @SerialName(value = "edit_control")
-    val editControl: TweetEditControl
-
-    @SerialName(value = "is_translatable")
-    val isTranslatable: kotlin.Boolean
-
-    @SerialName(value = "rest_id")
-    val restId: kotlin.String
-
-    @SerialName(value = "views")
-    val views: TweetView
-
-    @SerialName(value = "tweet")
-    val tweet: Tweet
-
-    @SerialName(value = "birdwatch_pivot")
-    val birdwatchPivot: BirdwatchPivot?
-
-    @SerialName(value = "card")
-    val card: TweetCard?
-
-    @SerialName(value = "core")
-    val core: UserResultCore?
-
-    @SerialName(value = "edit_prespective")
-    val editPrespective: TweetEditPrespective?
-
-    @SerialName(value = "legacy")
-    val legacy: TweetLegacy?
-
-    @SerialName(value = "note_tweet")
-    val noteTweet: NoteTweet?
-
-    @Contextual
-    @SerialName(value = "quick_promote_eligibility")
-    val quickPromoteEligibility: kotlin.Any?
-
-    @SerialName(value = "quoted_status_result")
-    val quotedStatusResult: ItemResult?
-
-    @SerialName(value = "source")
-    val source: kotlin.String?
-
-    @Contextual
-    @SerialName(value = "unmention_data")
-    val unmentionData: kotlin.collections.Map<kotlin.String, kotlin.Any>?
+@JsonClassDiscriminator("__typename")
+sealed interface TweetUnion {
+//    @Contextual
+//    @SerialName(value = "__typename")
+//    val typename: TypeName
+//
+//    @SerialName(value = "edit_control")
+//    val editControl: TweetEditControl
+//
+//    @SerialName(value = "is_translatable")
+//    val isTranslatable: kotlin.Boolean
+//
+//    @SerialName(value = "rest_id")
+//    val restId: kotlin.String
+//
+//    @SerialName(value = "views")
+//    val views: TweetView
+//
+//    @SerialName(value = "tweet")
+//    val tweet: Tweet
+//
+//    @SerialName(value = "birdwatch_pivot")
+//    val birdwatchPivot: BirdwatchPivot?
+//
+//    @SerialName(value = "card")
+//    val card: TweetCard?
+//
+//    @SerialName(value = "core")
+//    val core: UserResultCore?
+//
+//    @SerialName(value = "edit_prespective")
+//    val editPrespective: TweetEditPrespective?
+//
+//    @SerialName(value = "legacy")
+//    val legacy: TweetLegacy?
+//
+//    @SerialName(value = "note_tweet")
+//    val noteTweet: NoteTweet?
+//
+//    @Contextual
+//    @SerialName(value = "quick_promote_eligibility")
+//    val quickPromoteEligibility: kotlin.Any?
+//
+//    @SerialName(value = "quoted_status_result")
+//    val quotedStatusResult: ItemResult?
+//
+//    @SerialName(value = "source")
+//    val source: kotlin.String?
+//
+//    @Contextual
+//    @SerialName(value = "unmention_data")
+//    val unmentionData: kotlin.collections.Map<kotlin.String, kotlin.Any>?
 }

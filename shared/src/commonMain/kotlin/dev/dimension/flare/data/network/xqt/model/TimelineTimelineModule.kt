@@ -31,22 +31,23 @@ import kotlinx.serialization.Serializable
  * @param items
  */
 @Serializable
+@SerialName("TimelineTimelineModule")
 data class TimelineTimelineModule(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName,
-    @Contextual @SerialName(value = "clientEventInfo")
-    val clientEventInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+//    @Contextual @SerialName(value = "clientEventInfo")
+//    val clientEventInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>,
     @SerialName(value = "displayType")
     val displayType: TimelineTimelineModule.DisplayType,
     @Contextual @SerialName(value = "entryType")
     val entryType: ContentEntryType,
-    @Contextual @SerialName(value = "footer")
-    val footer: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-    @Contextual @SerialName(value = "header")
-    val header: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+//    @Contextual @SerialName(value = "footer")
+//    val footer: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+//    @Contextual @SerialName(value = "header")
+//    val header: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
     @SerialName(value = "items")
     val items: kotlin.collections.List<ModuleItem>? = null,
-) {
+) : ContentUnion {
     /**
      *
      *

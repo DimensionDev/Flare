@@ -15,9 +15,9 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 
 /**
  *
@@ -35,66 +35,70 @@ import kotlinx.serialization.Serializable
  * @param items
  * @param itemType
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-interface ContentUnion {
-    @Contextual
-    @SerialName(value = "__typename")
-    val typename: TypeName
-
-    @Contextual
-    @SerialName(value = "clientEventInfo")
-    val clientEventInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>
-
-    @Contextual
-    @SerialName(value = "entryType")
-    val entryType: ContentEntryType
-
-    @SerialName(value = "itemContent")
-    val itemContent: ItemContentUnion
-
-    @SerialName(value = "displayType")
-    val displayType: ContentUnion.DisplayType
-
-    @Contextual
-    @SerialName(value = "cursorType")
-    val cursorType: CursorType
-
-    @SerialName(value = "value")
-    val `value`: kotlin.String
-
-    @Contextual
-    @SerialName(value = "feedbackInfo")
-    val feedbackInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>?
-
-    @Contextual
-    @SerialName(value = "footer")
-    val footer: kotlin.collections.Map<kotlin.String, kotlin.Any>?
-
-    @Contextual
-    @SerialName(value = "header")
-    val header: kotlin.collections.Map<kotlin.String, kotlin.Any>?
-
-    @SerialName(value = "items")
-    val items: kotlin.collections.List<ModuleItem>?
-
-    @Contextual
-    @SerialName(value = "itemType")
-    val itemType: ContentEntryType?
-
-    /**
-     *
-     *
-     * Values: vertical,verticalConversation,carousel
-     */
-    @Serializable
-    enum class DisplayType(val value: kotlin.String) {
-        @SerialName(value = "Vertical")
-        vertical("Vertical"),
-
-        @SerialName(value = "VerticalConversation")
-        verticalConversation("VerticalConversation"),
-
-        @SerialName(value = "Carousel")
-        carousel("Carousel"),
-    }
+@JsonClassDiscriminator("entryType")
+sealed interface ContentUnion {
+//    @SerialName(value = "type")
+//    val type: InstructionType
+//    @Contextual
+//    @SerialName(value = "__typename")
+//    val typename: TypeName
+//
+//    @Contextual
+//    @SerialName(value = "clientEventInfo")
+//    val clientEventInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>
+//
+//    @Contextual
+//    @SerialName(value = "entryType")
+//    val entryType: ContentEntryType
+//
+//    @SerialName(value = "itemContent")
+//    val itemContent: ItemContentUnion
+//
+//    @SerialName(value = "displayType")
+//    val displayType: ContentUnion.DisplayType
+//
+//    @Contextual
+//    @SerialName(value = "cursorType")
+//    val cursorType: CursorType
+//
+//    @SerialName(value = "value")
+//    val `value`: kotlin.String
+//
+//    @Contextual
+//    @SerialName(value = "feedbackInfo")
+//    val feedbackInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>?
+//
+//    @Contextual
+//    @SerialName(value = "footer")
+//    val footer: kotlin.collections.Map<kotlin.String, kotlin.Any>?
+//
+//    @Contextual
+//    @SerialName(value = "header")
+//    val header: kotlin.collections.Map<kotlin.String, kotlin.Any>?
+//
+//    @SerialName(value = "items")
+//    val items: kotlin.collections.List<ModuleItem>?
+//
+//    @Contextual
+//    @SerialName(value = "itemType")
+//    val itemType: ContentEntryType?
+//
+//    /**
+//     *
+//     *
+//     * Values: vertical,verticalConversation,carousel
+//     */
+//    @Serializable
+//    enum class DisplayType(val value: kotlin.String) {
+//        @SerialName(value = "Vertical")
+//        vertical("Vertical"),
+//
+//        @SerialName(value = "VerticalConversation")
+//        verticalConversation("VerticalConversation"),
+//
+//        @SerialName(value = "Carousel")
+//        carousel("Carousel"),
+//    }
 }

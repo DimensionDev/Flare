@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -30,8 +29,8 @@ import kotlinx.serialization.Serializable
 data class ClientEventInfo(
     @SerialName(value = "component")
     val component: kotlin.String? = null,
-    @Contextual @SerialName(value = "details")
-    val details: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+//    @Contextual @SerialName(value = "details")
+//    val details: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
     @SerialName(value = "element")
     val element: kotlin.String? = null,
 )

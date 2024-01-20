@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -26,9 +25,10 @@ import kotlinx.serialization.Serializable
  * @param type
  */
 @Serializable
+@SerialName("TimelineAddEntries")
 data class TimelineAddEntries(
     @SerialName(value = "entries")
     val propertyEntries: kotlin.collections.List<TimelineAddEntry>,
-    @Contextual @SerialName(value = "type")
-    val type: InstructionType,
-)
+//    @SerialName(value = "type")
+//    override val type: InstructionType,
+) : InstructionUnion

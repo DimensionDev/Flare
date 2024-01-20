@@ -18,6 +18,7 @@ package dev.dimension.flare.data.network.xqt.model
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -39,6 +40,7 @@ import kotlinx.serialization.Serializable
  * @param unmentionData
  */
 @Serializable
+@SerialName("Tweet")
 data class Tweet(
     @SerialName(value = "edit_control")
     val editControl: TweetEditControl,
@@ -69,5 +71,5 @@ data class Tweet(
     @SerialName(value = "source")
     val source: kotlin.String? = null,
     @Contextual @SerialName(value = "unmention_data")
-    val unmentionData: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-)
+    val unmentionData: JsonElement? = null,
+) : TweetUnion

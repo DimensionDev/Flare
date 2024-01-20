@@ -29,6 +29,7 @@ import kotlinx.serialization.Serializable
  * @param socialContext
  */
 @Serializable
+@SerialName("TimelineUser")
 data class TimelineUser(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName,
@@ -40,7 +41,7 @@ data class TimelineUser(
     val userResults: UserResults,
     @SerialName(value = "SocialContext")
     val socialContext: SocialContext? = null,
-) {
+) : ItemContentUnion {
     /**
      *
      *

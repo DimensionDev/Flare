@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -26,12 +25,13 @@ import kotlinx.serialization.Serializable
  * @param type
  */
 @Serializable
+@SerialName("TimelineTerminateTimeline")
 data class TimelineTerminateTimeline(
     @SerialName(value = "direction")
     val direction: TimelineTerminateTimeline.Direction,
-    @Contextual @SerialName(value = "type")
-    val type: InstructionType,
-) {
+//    @Contextual @SerialName(value = "type")
+//    val type: InstructionType,
+) : InstructionUnion {
     /**
      *
      *

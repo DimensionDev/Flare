@@ -26,9 +26,10 @@ import kotlinx.serialization.Serializable
  * @param tweet
  */
 @Serializable
+@SerialName("TweetWithVisibilityResults")
 data class TweetWithVisibilityResults(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName,
     @SerialName(value = "tweet")
     val tweet: Tweet,
-)
+) : TweetUnion

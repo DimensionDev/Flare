@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -30,8 +29,8 @@ import kotlinx.serialization.Serializable
 data class Timeline(
     @SerialName(value = "instructions")
     val instructions: kotlin.collections.List<InstructionUnion>,
-    @Contextual @SerialName(value = "metadata")
-    val metadata: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-    @Contextual @SerialName(value = "responseObjects")
-    val responseObjects: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+//    @Contextual @SerialName(value = "metadata")
+//    val metadata: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+//    @Contextual @SerialName(value = "responseObjects")
+//    val responseObjects: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 )

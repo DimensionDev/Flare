@@ -29,15 +29,16 @@ import kotlinx.serialization.Serializable
  * @param feedbackInfo
  */
 @Serializable
+@SerialName("TimelineTimelineItem")
 data class TimelineTimelineItem(
-    @Contextual @SerialName(value = "__typename")
-    val typename: TypeName,
+//    @Contextual @SerialName(value = "__typename")
+//    val typename: TypeName,
     @Contextual @SerialName(value = "entryType")
     val entryType: ContentEntryType,
     @SerialName(value = "itemContent")
     val itemContent: ItemContentUnion,
     @SerialName(value = "clientEventInfo")
     val clientEventInfo: ClientEventInfo? = null,
-    @Contextual @SerialName(value = "feedbackInfo")
-    val feedbackInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-)
+//    @Contextual @SerialName(value = "feedbackInfo")
+//    val feedbackInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+) : ContentUnion

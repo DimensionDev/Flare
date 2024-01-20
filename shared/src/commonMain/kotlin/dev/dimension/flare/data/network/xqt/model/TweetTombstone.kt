@@ -25,7 +25,8 @@ import kotlinx.serialization.Serializable
  * @param typename
  */
 @Serializable
+@SerialName("TweetTombstone")
 data class TweetTombstone(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName? = null,
-) : kotlin.collections.HashMap<String, kotlin.Any>()
+) : TweetUnion

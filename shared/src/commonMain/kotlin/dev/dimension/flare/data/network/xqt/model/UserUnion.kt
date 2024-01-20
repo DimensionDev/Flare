@@ -15,9 +15,9 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 
 /**
  *
@@ -36,47 +36,49 @@ import kotlinx.serialization.Serializable
  * @param hasGraduatedAccess
  * @param hasNftAvatar
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-interface UserUnion {
-    @Contextual
-    @SerialName(value = "__typename")
-    val typename: TypeName
-
-    @Contextual
-    @SerialName(value = "affiliates_highlighted_label")
-    val affiliatesHighlightedLabel: kotlin.collections.Map<kotlin.String, kotlin.Any>
-
-    @SerialName(value = "id")
-    val id: kotlin.String
-
-    @SerialName(value = "is_blue_verified")
-    val isBlueVerified: kotlin.Boolean
-
-    @SerialName(value = "legacy")
-    val legacy: UserLegacy
-
-    @SerialName(value = "rest_id")
-    val restId: kotlin.String
-
-    @SerialName(value = "super_follow_eligible")
-    val superFollowEligible: kotlin.Boolean
-
-    @SerialName(value = "super_followed_by")
-    val superFollowedBy: kotlin.Boolean
-
-    @SerialName(value = "super_following")
-    val superFollowing: kotlin.Boolean
-
-    @SerialName(value = "reason")
-    val reason: kotlin.String
-
-    @Contextual
-    @SerialName(value = "business_account")
-    val businessAccount: kotlin.collections.Map<kotlin.String, kotlin.Any>?
-
-    @SerialName(value = "has_graduated_access")
-    val hasGraduatedAccess: kotlin.Boolean?
-
-    @SerialName(value = "has_nft_avatar")
-    val hasNftAvatar: kotlin.Boolean?
+@JsonClassDiscriminator("__typename")
+sealed interface UserUnion {
+//    @Contextual
+//    @SerialName(value = "__typename")
+//    val typename: TypeName
+//
+//    @Contextual
+//    @SerialName(value = "affiliates_highlighted_label")
+//    val affiliatesHighlightedLabel: kotlin.collections.Map<kotlin.String, kotlin.Any>
+//
+//    @SerialName(value = "id")
+//    val id: kotlin.String
+//
+//    @SerialName(value = "is_blue_verified")
+//    val isBlueVerified: kotlin.Boolean
+//
+//    @SerialName(value = "legacy")
+//    val legacy: UserLegacy
+//
+//    @SerialName(value = "rest_id")
+//    val restId: kotlin.String
+//
+//    @SerialName(value = "super_follow_eligible")
+//    val superFollowEligible: kotlin.Boolean
+//
+//    @SerialName(value = "super_followed_by")
+//    val superFollowedBy: kotlin.Boolean
+//
+//    @SerialName(value = "super_following")
+//    val superFollowing: kotlin.Boolean
+//
+//    @SerialName(value = "reason")
+//    val reason: kotlin.String
+//
+//    @Contextual
+//    @SerialName(value = "business_account")
+//    val businessAccount: kotlin.collections.Map<kotlin.String, kotlin.Any>?
+//
+//    @SerialName(value = "has_graduated_access")
+//    val hasGraduatedAccess: kotlin.Boolean?
+//
+//    @SerialName(value = "has_nft_avatar")
+//    val hasNftAvatar: kotlin.Boolean?
 }

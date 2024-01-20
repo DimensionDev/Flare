@@ -15,9 +15,9 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TimelineShowAlertRichText(
     @SerialName(value = "entities")
-    val entities: kotlin.collections.List<@Contextual kotlin.collections.Map<kotlin.String, kotlin.Any>>? = null,
+    val entities: JsonElement? = null,
     @SerialName(value = "text")
     val text: kotlin.String? = null,
 )

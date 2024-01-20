@@ -18,6 +18,7 @@ package dev.dimension.flare.data.network.xqt.model
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -36,11 +37,12 @@ import kotlinx.serialization.Serializable
  * @param hasNftAvatar
  */
 @Serializable
+@SerialName("User")
 data class User(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName,
     @Contextual @SerialName(value = "affiliates_highlighted_label")
-    val affiliatesHighlightedLabel: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+    val affiliatesHighlightedLabel: JsonElement,
     @SerialName(value = "id")
     val id: kotlin.String,
     @SerialName(value = "is_blue_verified")
@@ -56,9 +58,9 @@ data class User(
     @SerialName(value = "super_following")
     val superFollowing: kotlin.Boolean = false,
     @Contextual @SerialName(value = "business_account")
-    val businessAccount: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    val businessAccount: JsonElement? = null,
     @SerialName(value = "has_graduated_access")
     val hasGraduatedAccess: kotlin.Boolean? = null,
     @SerialName(value = "has_nft_avatar")
     val hasNftAvatar: kotlin.Boolean? = false,
-)
+) : UserUnion

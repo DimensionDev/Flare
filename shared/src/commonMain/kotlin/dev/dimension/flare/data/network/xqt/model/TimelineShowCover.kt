@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -27,11 +26,12 @@ import kotlinx.serialization.Serializable
  * @param type
  */
 @Serializable
+@SerialName("TimelineShowCover")
 data class TimelineShowCover(
     @SerialName(value = "clientEventInfo")
     val clientEventInfo: ClientEventInfo,
     @SerialName(value = "cover")
     val cover: TimelineHalfCover,
-    @Contextual @SerialName(value = "type")
-    val type: InstructionType,
-)
+//    @Contextual @SerialName(value = "type")
+//    val type: InstructionType,
+) : InstructionUnion

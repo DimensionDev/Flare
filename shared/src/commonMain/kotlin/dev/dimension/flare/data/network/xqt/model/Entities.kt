@@ -15,9 +15,9 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -31,13 +31,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Entities(
     @SerialName(value = "hashtags")
-    val hashtags: kotlin.collections.List<@Contextual kotlin.collections.Map<kotlin.String, kotlin.Any>>,
+    val hashtags: JsonElement,
     @SerialName(value = "symbols")
-    val symbols: kotlin.collections.List<@Contextual kotlin.collections.Map<kotlin.String, kotlin.Any>>,
+    val symbols: JsonElement,
     @SerialName(value = "urls")
     val urls: kotlin.collections.List<Url>,
     @SerialName(value = "user_mentions")
-    val userMentions: kotlin.collections.List<@Contextual kotlin.collections.Map<kotlin.String, kotlin.Any>>,
+    val userMentions: JsonElement,
     @SerialName(value = "media")
     val media: kotlin.collections.List<Media>? = null,
 )

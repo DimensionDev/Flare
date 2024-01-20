@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -28,13 +27,12 @@ import kotlinx.serialization.Serializable
  * @param prepend
  */
 @Serializable
+@SerialName("TimelineAddToModule")
 data class TimelineAddToModule(
     @SerialName(value = "moduleEntryId")
     val moduleEntryId: kotlin.String,
     @SerialName(value = "moduleItems")
     val moduleItems: kotlin.collections.List<ModuleItem>,
-    @Contextual @SerialName(value = "type")
-    val type: InstructionType,
     @SerialName(value = "prepend")
     val prepend: kotlin.Boolean? = null,
-)
+) : InstructionUnion

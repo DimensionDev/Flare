@@ -31,7 +31,7 @@ data class BirdwatchEntityRef(
     @SerialName(value = "type")
     val type: BirdwatchEntityRef.Type,
     @Contextual @SerialName(value = "url")
-    val url: java.net.URI,
+    val url: String,
     @SerialName(value = "urlType")
     val urlType: BirdwatchEntityRef.UrlType,
 ) {

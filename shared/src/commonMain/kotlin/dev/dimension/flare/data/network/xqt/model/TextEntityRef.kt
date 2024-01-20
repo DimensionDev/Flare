@@ -31,7 +31,7 @@ data class TextEntityRef(
     @SerialName(value = "type")
     val type: TextEntityRef.Type,
     @Contextual @SerialName(value = "url")
-    val url: java.net.URI,
+    val url: String,
     @SerialName(value = "urlType")
     val urlType: TextEntityRef.UrlType,
 ) {

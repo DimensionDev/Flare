@@ -27,5 +27,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Callback(
     @Contextual @SerialName(value = "endpoint")
-    val endpoint: java.net.URI,
+    val endpoint: String,
 )

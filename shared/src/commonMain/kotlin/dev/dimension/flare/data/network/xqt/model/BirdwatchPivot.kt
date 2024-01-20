@@ -34,7 +34,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BirdwatchPivot(
     @Contextual @SerialName(value = "destinationUrl")
-    val destinationUrl: java.net.URI,
+    val destinationUrl: String,
     @SerialName(value = "footer")
     val footer: BirdwatchPivotFooter,
     @SerialName(value = "iconType")

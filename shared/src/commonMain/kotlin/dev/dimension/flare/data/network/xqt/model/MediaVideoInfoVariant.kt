@@ -31,7 +31,7 @@ data class MediaVideoInfoVariant(
     @SerialName(value = "content_type")
     val contentType: kotlin.String,
     @Contextual @SerialName(value = "url")
-    val url: java.net.URI,
+    val url: String,
     @SerialName(value = "bitrate")
     val bitrate: kotlin.Int? = null,
 )

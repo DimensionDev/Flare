@@ -32,9 +32,9 @@ data class Url(
     @SerialName(value = "display_url")
     val displayUrl: kotlin.String,
     @Contextual @SerialName(value = "expanded_url")
-    val expandedUrl: java.net.URI,
+    val expandedUrl: String,
     @SerialName(value = "indices")
     val indices: kotlin.collections.List<kotlin.Int>,
     @Contextual @SerialName(value = "url")
-    val url: java.net.URI,
+    val url: String,
 )

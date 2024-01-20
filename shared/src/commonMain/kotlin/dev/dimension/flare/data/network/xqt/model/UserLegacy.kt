@@ -112,7 +112,7 @@ data class UserLegacy(
     @SerialName(value = "possibly_sensitive")
     val possiblySensitive: kotlin.Boolean = false,
     @Contextual @SerialName(value = "profile_image_url_https")
-    val profileImageUrlHttps: java.net.URI,
+    val profileImageUrlHttps: String,
     @SerialName(value = "profile_interstitial_type")
     val profileInterstitialType: kotlin.String,
     @SerialName(value = "screen_name")
@@ -136,7 +136,7 @@ data class UserLegacy(
     @Contextual @SerialName(value = "profile_banner_extensions")
     val profileBannerExtensions: kotlin.Any? = null,
     @Contextual @SerialName(value = "profile_banner_url")
-    val profileBannerUrl: java.net.URI? = null,
+    val profileBannerUrl: String? = null,
     @Contextual @SerialName(value = "profile_image_extensions")
     val profileImageExtensions: kotlin.Any? = null,
     @SerialName(value = "protected")

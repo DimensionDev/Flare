@@ -41,9 +41,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MediaExtended(
     @Contextual @SerialName(value = "display_url")
-    val displayUrl: java.net.URI,
+    val displayUrl: String,
     @Contextual @SerialName(value = "expanded_url")
-    val expandedUrl: java.net.URI,
+    val expandedUrl: String,
     @SerialName(value = "id_str")
     val idStr: kotlin.String,
     @SerialName(value = "indices")
@@ -51,7 +51,7 @@ data class MediaExtended(
     @SerialName(value = "media_key")
     val mediaKey: kotlin.String,
     @Contextual @SerialName(value = "media_url_https")
-    val mediaUrlHttps: java.net.URI,
+    val mediaUrlHttps: String,
     @SerialName(value = "original_info")
     val originalInfo: MediaOriginalInfo,
     @SerialName(value = "sizes")
@@ -59,7 +59,7 @@ data class MediaExtended(
     @SerialName(value = "type")
     val type: MediaExtended.Type,
     @Contextual @SerialName(value = "url")
-    val url: java.net.URI,
+    val url: String,
     @SerialName(value = "additional_media_info")
     val additionalMediaInfo: AdditionalMediaInfo? = null,
     @SerialName(value = "ext_media_availability")

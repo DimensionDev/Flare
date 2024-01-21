@@ -53,6 +53,10 @@ internal val blueskyParser by lazy {
     TwitterParser(enableDotInUserName = true)
 }
 
+internal val twitterParser by lazy {
+    TwitterParser()
+}
+
 expect class UiStatusExtra
 
 internal expect fun createStatusExtra(status: UiStatus): UiStatusExtra
@@ -105,6 +109,7 @@ sealed class UiStatus {
                     if (poll != null) append("_poll")
                     if (card != null) append("_card")
                 }
+
             is MisskeyNotification ->
                 buildString {
                     append("misskey_notification")
@@ -129,6 +134,20 @@ sealed class UiStatus {
                 buildString {
                     append("bluesky_notification")
                     append("_${reason.name.lowercase()}")
+                }
+
+            is XQT ->
+                buildString {
+                    append("xqt")
+                    if (retweet != null) {
+                        append("_retweet_")
+                        append(retweet.itemType)
+                    }
+                    if (quote != null) {
+                        append("_quote_")
+                        append(quote.itemType)
+                    }
+                    if (card != null) append("_card")
                 }
         }
     }
@@ -352,9 +371,50 @@ sealed class UiStatus {
             indexedAt.humanize()
         }
     }
+
+    data class XQT(
+        override val accountKey: MicroBlogKey,
+        override val statusKey: MicroBlogKey,
+        val user: UiUser.XQT,
+        val createdAt: Instant,
+        val content: String,
+        val medias: ImmutableList<UiMedia>,
+        val card: UiCard?,
+        val matrices: Matrices,
+        val reaction: Reaction,
+        val poll: UiPoll?,
+        val retweet: XQT?,
+        val quote: XQT?,
+        val inReplyToScreenName: String?,
+        val inReplyToStatusId: String?,
+        val inReplyToUserId: String?,
+    ) : UiStatus() {
+        val isFromMe by lazy {
+            user.userKey == accountKey
+        }
+
+        val contentToken by lazy {
+            twitterParser.parse(content).toHtml(accountKey.host)
+        }
+
+        data class Matrices(
+            val replyCount: Long,
+            val likeCount: Long,
+            val retweetCount: Long,
+        ) {
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
+            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
+            val humanizedRetweetCount by lazy { if (retweetCount > 0) retweetCount.toString() else null }
+        }
+
+        data class Reaction(
+            val liked: Boolean,
+            val retweeted: Boolean,
+        )
+    }
 }
 
-private fun List<Token>.toHtml(host: String): Element {
+internal fun List<Token>.toHtml(host: String): Element {
     val body = Element("body")
     forEach {
         body.children.add(it.toHtml(host))
@@ -376,12 +436,14 @@ private fun Token.toHtml(host: String): Node {
                 attributes["href"] = AppDeepLink.Search("#$value")
                 children.add(Text("#$value"))
             }
+
         is StringToken -> Text(value)
         is UrlToken ->
             Element("a").apply {
                 attributes["href"] = value
                 children.add(Text(value))
             }
+
         is UserNameToken ->
             Element("a").apply {
                 attributes["href"] = AppDeepLink.ProfileWithNameAndHost(value, host)

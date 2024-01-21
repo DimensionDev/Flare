@@ -15,10 +15,8 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -81,8 +79,8 @@ data class UserLegacy(
     val defaultProfileImage: kotlin.Boolean = false,
     @SerialName(value = "description")
     val description: kotlin.String,
-    @Contextual @SerialName(value = "entities")
-    val entities: JsonElement,
+    @SerialName(value = "entities")
+    val entities: Entities,
     @SerialName(value = "fast_followers_count")
     val fastFollowersCount: kotlin.Int,
     @SerialName(value = "favourites_count")
@@ -111,7 +109,7 @@ data class UserLegacy(
     val pinnedTweetIdsStr: kotlin.collections.List<kotlin.String>,
     @SerialName(value = "possibly_sensitive")
     val possiblySensitive: kotlin.Boolean = false,
-    @Contextual @SerialName(value = "profile_image_url_https")
+    @SerialName(value = "profile_image_url_https")
     val profileImageUrlHttps: String,
     @SerialName(value = "profile_interstitial_type")
     val profileInterstitialType: kotlin.String,
@@ -133,14 +131,16 @@ data class UserLegacy(
     val following: kotlin.Boolean? = false,
     @SerialName(value = "notifications")
     val notifications: kotlin.Boolean? = false,
-    @Contextual @SerialName(value = "profile_banner_extensions")
-    val profileBannerExtensions: kotlin.Any? = null,
-    @Contextual @SerialName(value = "profile_banner_url")
+//    @SerialName(value = "profile_banner_extensions")
+//    val profileBannerExtensions: kotlin.Any? = null,
+    @SerialName(value = "profile_banner_url")
     val profileBannerUrl: String? = null,
-    @Contextual @SerialName(value = "profile_image_extensions")
-    val profileImageExtensions: kotlin.Any? = null,
+//    @SerialName(value = "profile_image_extensions")
+//    val profileImageExtensions: kotlin.Any? = null,
     @SerialName(value = "protected")
     val `protected`: kotlin.Boolean? = false,
     @SerialName(value = "url")
     val url: kotlin.String? = null,
+    @SerialName(value = "verified_type")
+    val verifiedType: kotlin.String? = null,
 )

@@ -15,10 +15,8 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -50,8 +48,8 @@ data class Tweet(
     val restId: kotlin.String,
     @SerialName(value = "views")
     val views: TweetView,
-    @Contextual @SerialName(value = "__typename")
-    val typename: TypeName? = null,
+//    @Contextual @SerialName(value = "__typename")
+//    val typename: TypeName? = null,
     @SerialName(value = "birdwatch_pivot")
     val birdwatchPivot: BirdwatchPivot? = null,
     @SerialName(value = "card")
@@ -64,12 +62,12 @@ data class Tweet(
     val legacy: TweetLegacy? = null,
     @SerialName(value = "note_tweet")
     val noteTweet: NoteTweet? = null,
-    @Contextual @SerialName(value = "quick_promote_eligibility")
-    val quickPromoteEligibility: kotlin.Any? = null,
+//    @Contextual @SerialName(value = "quick_promote_eligibility")
+//    val quickPromoteEligibility: kotlin.Any? = null,
     @SerialName(value = "quoted_status_result")
     val quotedStatusResult: ItemResult? = null,
     @SerialName(value = "source")
     val source: kotlin.String? = null,
-    @Contextual @SerialName(value = "unmention_data")
-    val unmentionData: JsonElement? = null,
+//    @Contextual @SerialName(value = "unmention_data")
+//    val unmentionData: JsonElement? = null,
 ) : TweetUnion

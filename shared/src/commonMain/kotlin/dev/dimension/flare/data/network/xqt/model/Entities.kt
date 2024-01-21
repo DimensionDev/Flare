@@ -31,13 +31,15 @@ import kotlinx.serialization.json.JsonElement
 @Serializable
 data class Entities(
     @SerialName(value = "hashtags")
-    val hashtags: JsonElement,
+    val hashtags: JsonElement? = null,
     @SerialName(value = "symbols")
-    val symbols: JsonElement,
+    val symbols: JsonElement? = null,
     @SerialName(value = "urls")
-    val urls: kotlin.collections.List<Url>,
+    val urls: kotlin.collections.List<Url>? = null,
     @SerialName(value = "user_mentions")
-    val userMentions: JsonElement,
+    val userMentions: JsonElement? = null,
     @SerialName(value = "media")
     val media: kotlin.collections.List<Media>? = null,
+    @SerialName(value = "description")
+    val description: kotlin.collections.List<Url>? = null,
 )

@@ -36,4 +36,13 @@ data class TweetCardLegacyBindingValueData(
     val scribeKey: kotlin.String? = null,
     @SerialName(value = "string_value")
     val stringValue: kotlin.String? = null,
+    @SerialName(value = "image_value")
+    val imageValue: ImageValue? = null,
+)
+
+@Serializable
+data class ImageValue(
+    val height: Long? = null,
+    val width: Long? = null,
+    val url: String? = null,
 )

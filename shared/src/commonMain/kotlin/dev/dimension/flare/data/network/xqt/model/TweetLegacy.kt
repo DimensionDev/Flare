@@ -90,4 +90,7 @@ data class TweetLegacy(
     val retweetedStatusResult: ItemResult? = null,
     @SerialName(value = "self_thread")
     val selfThread: SelfThread? = null,
+    val in_reply_to_screen_name: String? = null,
+    val in_reply_to_status_id_str: String? = null,
+    val in_reply_to_user_id_str: String? = null,
 )

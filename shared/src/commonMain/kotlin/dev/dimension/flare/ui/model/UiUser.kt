@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.humanizer.humanize
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
@@ -139,6 +140,45 @@ sealed class UiUser {
             val fansCountHumanized = fansCount.humanize()
             val followsCountHumanized = followsCount.humanize()
             val statusesCountHumanized = statusesCount.humanize()
+        }
+    }
+
+    data class XQT(
+        override val userKey: MicroBlogKey,
+        val displayName: String,
+        val handleInternal: String,
+        override val avatarUrl: String,
+        override val bannerUrl: String?,
+        val description: String?,
+        val matrices: Matrices,
+        val verifyType: VerifyType?,
+        val location: String?,
+        val url: String?,
+    ) : UiUser() {
+        override val handle: String = "@$handleInternal"
+
+        data class Matrices(
+            val fansCount: Long,
+            val followsCount: Long,
+            val statusesCount: Long,
+        ) {
+            val fansCountHumanized = fansCount.humanize()
+            val followsCountHumanized = followsCount.humanize()
+            val statusesCountHumanized = statusesCount.humanize()
+        }
+
+        override val nameElement: Element by lazy {
+            twitterParser.parse(displayName).toHtml(xqtHost)
+        }
+        override val descriptionElement: Element? by lazy {
+            description?.let {
+                twitterParser.parse(it).toHtml(xqtHost)
+            }
+        }
+
+        enum class VerifyType {
+            Money,
+            Company,
         }
     }
 }

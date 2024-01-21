@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -35,15 +34,15 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Media(
-    @Contextual @SerialName(value = "display_url")
+    @SerialName(value = "display_url")
     val displayUrl: String,
-    @Contextual @SerialName(value = "expanded_url")
+    @SerialName(value = "expanded_url")
     val expandedUrl: String,
     @SerialName(value = "id_str")
     val idStr: kotlin.String,
     @SerialName(value = "indices")
     val indices: kotlin.collections.List<kotlin.Int>,
-    @Contextual @SerialName(value = "media_url_https")
+    @SerialName(value = "media_url_https")
     val mediaUrlHttps: String,
     @SerialName(value = "original_info")
     val originalInfo: MediaOriginalInfo,
@@ -51,10 +50,14 @@ data class Media(
     val sizes: MediaSizes,
     @SerialName(value = "type")
     val type: Media.Type,
-    @Contextual @SerialName(value = "url")
+    @SerialName(value = "url")
     val url: String,
-    @Contextual @SerialName(value = "features")
-    val features: kotlin.Any? = null,
+    @SerialName(value = "video_info")
+    val videoInfo: MediaVideoInfo? = null,
+    @SerialName(value = "ext_alt_text")
+    val ext_alt_text: String? = null,
+//    @SerialName(value = "features")
+//    val features: kotlin.Any? = null,
 ) {
     /**
      *

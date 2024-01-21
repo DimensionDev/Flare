@@ -50,7 +50,7 @@ data class MediaExtended(
     val indices: kotlin.collections.List<kotlin.Int>,
     @SerialName(value = "media_key")
     val mediaKey: kotlin.String,
-    @Contextual @SerialName(value = "media_url_https")
+    @SerialName(value = "media_url_https")
     val mediaUrlHttps: String,
     @SerialName(value = "original_info")
     val originalInfo: MediaOriginalInfo,
@@ -58,14 +58,14 @@ data class MediaExtended(
     val sizes: MediaSizes,
     @SerialName(value = "type")
     val type: MediaExtended.Type,
-    @Contextual @SerialName(value = "url")
+    @SerialName(value = "url")
     val url: String,
     @SerialName(value = "additional_media_info")
     val additionalMediaInfo: AdditionalMediaInfo? = null,
     @SerialName(value = "ext_media_availability")
     val extMediaAvailability: ExtMediaAvailability? = null,
-    @Contextual @SerialName(value = "features")
-    val features: kotlin.Any? = null,
+//    @Contextual @SerialName(value = "features")
+//    val features: kotlin.Any? = null,
     @SerialName(value = "mediaStats")
     val mediaStats: MediaStats? = null,
     @SerialName(value = "video_info")

@@ -40,6 +40,8 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.component.status.xqt.XQTStatusComponent
+import dev.dimension.flare.ui.component.status.xqt.XQTStatusEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
@@ -289,13 +291,21 @@ internal fun StatusItem(
                 event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
             )
+
+        is UiStatus.XQT ->
+            XQTStatusComponent(
+                data = item,
+                event = event,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
     }
 }
 
 internal sealed interface StatusEvent :
     MastodonStatusEvent,
     MisskeyStatusEvent,
-    BlueskyStatusEvent
+    BlueskyStatusEvent,
+    XQTStatusEvent
 
 internal class DefaultStatusEvent(
     private val scope: CoroutineScope,
@@ -344,6 +354,10 @@ internal class DefaultStatusEvent(
                 accountRepository.get(status.accountKey) as? UiAccount.Mastodon ?: return@launch
             account.dataSource.bookmark(status)
         }
+    }
+
+    override fun onBookmarkClick(data: UiStatus.XQT) {
+        TODO("Not yet implemented")
     }
 
     override fun onMediaClick(
@@ -509,6 +523,16 @@ internal class DefaultStatusEvent(
         )
     }
 
+    override fun onReplyClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
     override fun onReblogClick(data: UiStatus.Bluesky) {
         scope.launch {
             val account =
@@ -517,12 +541,20 @@ internal class DefaultStatusEvent(
         }
     }
 
+    override fun onReblogClick(data: UiStatus.XQT) {
+        TODO("Not yet implemented")
+    }
+
     override fun onLikeClick(data: UiStatus.Bluesky) {
         scope.launch {
             val account =
                 accountRepository.get(data.accountKey) as? UiAccount.Bluesky ?: return@launch
             account.dataSource.like(data)
         }
+    }
+
+    override fun onLikeClick(data: UiStatus.XQT) {
+        TODO("Not yet implemented")
     }
 
     override fun onReportClick(
@@ -535,8 +567,28 @@ internal class DefaultStatusEvent(
         )
     }
 
+    override fun onReportClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            BlueskyReportStatusRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
     override fun onDeleteClick(
         data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            DeleteStatusConfirmRouteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onDeleteClick(
+        data: UiStatus.XQT,
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
@@ -615,6 +667,8 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onBookmarkClick(status: UiStatus.Mastodon) = Unit
 
+    override fun onBookmarkClick(data: UiStatus.XQT) = Unit
+
     override fun onMediaClick(
         media: UiMedia,
         uriHandler: UriHandler,
@@ -640,7 +694,14 @@ internal data object EmptyStatusEvent : StatusEvent {
         uriHandler: UriHandler,
     ) = Unit
 
+    override fun onReplyClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) = Unit
+
     override fun onReblogClick(data: UiStatus.Bluesky) = Unit
+
+    override fun onReblogClick(data: UiStatus.XQT) = Unit
 
     override fun onQuoteClick(
         data: UiStatus.Bluesky,
@@ -649,13 +710,25 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onLikeClick(data: UiStatus.Bluesky) = Unit
 
+    override fun onLikeClick(data: UiStatus.XQT) = Unit
+
     override fun onReportClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
     ) = Unit
 
+    override fun onReportClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) = Unit
+
     override fun onDeleteClick(
         data: UiStatus.Bluesky,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onDeleteClick(
+        data: UiStatus.XQT,
         uriHandler: UriHandler,
     ) = Unit
 }

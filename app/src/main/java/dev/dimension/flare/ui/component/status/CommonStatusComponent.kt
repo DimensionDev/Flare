@@ -226,6 +226,7 @@ fun CommonStatusComponent(
             }
 
             if (quotedStatus != null) {
+                Spacer(modifier = Modifier.height(4.dp))
                 UiStatusQuoted(quotedStatus, onMediaClick)
             }
 

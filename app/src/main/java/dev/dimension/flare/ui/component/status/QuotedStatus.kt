@@ -75,6 +75,18 @@ internal fun UiStatusQuoted(
                 modifier = modifier,
             )
         is UiStatus.BlueskyNotification -> Unit
+        is UiStatus.XQT ->
+            QuotedStatus(
+                avatarUrl = status.user.avatarUrl,
+                nameElement = status.user.nameElement,
+                handle = status.user.handle,
+                contentElement = status.contentToken,
+                contentLayoutDirection = status.contentDirection,
+                medias = status.medias,
+                createdAt = status.humanizedTime,
+                onMediaClick = onMediaClick,
+                modifier = modifier,
+            )
     }
 }
 

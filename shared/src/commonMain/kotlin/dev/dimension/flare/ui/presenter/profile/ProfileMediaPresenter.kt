@@ -34,6 +34,7 @@ class ProfileMediaPresenter(
                                     is UiStatus.MastodonNotification -> persistentListOf()
                                     is UiStatus.Misskey -> it.media
                                     is UiStatus.MisskeyNotification -> persistentListOf()
+                                    is UiStatus.XQT -> it.medias
                                 }
                             }
                         }

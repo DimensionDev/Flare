@@ -7,6 +7,7 @@ import androidx.paging.RemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -64,9 +65,13 @@ internal class UserTimelineRemoteMediator(
                 }.body()
             val instructions = response?.data?.user?.result?.timelineV2?.timeline?.instructions.orEmpty()
             val tweet = instructions.tweets()
-
             cursor = instructions.cursor()
-
+            XQT.save(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                tweet = tweet,
+            )
             MediatorResult.Success(
                 endOfPaginationReached = tweet.isEmpty(),
             )

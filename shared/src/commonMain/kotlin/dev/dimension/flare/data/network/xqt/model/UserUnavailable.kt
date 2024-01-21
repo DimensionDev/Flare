@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -28,8 +27,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("UserUnavailable")
 data class UserUnavailable(
-    @Contextual @SerialName(value = "__typename")
-    val typename: TypeName,
+//    @Contextual @SerialName(value = "__typename")
+//    val typename: TypeName,
     @SerialName(value = "reason")
     val reason: kotlin.String,
 ) : UserUnion

@@ -19,6 +19,9 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 
 fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
     val retweet =
@@ -96,7 +99,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
                     options = options,
                     multiple = false,
                     ownVotes = persistentListOf(),
-                    expiresAt = cardLegacy.get("end_datetime_utc")?.stringValue?.let { Instant.parse(it) } ?: Clock.System.now(),
+                    expiresAt = cardLegacy.get("end_datetime_utc")?.stringValue?.let { parseCustomDateTime(it) } ?: Clock.System.now(),
                 )
             } else {
                 null
@@ -128,6 +131,9 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
         legacy?.fullText?.let {
             if (legacy.displayTextRange.size == 2) {
                 it.substring(legacy.displayTextRange[0], legacy.displayTextRange[1])
+                    .replace("&amp;", "&")
+                    .replace("&lt;", "<")
+                    .replace("&gt;", ">")
             } else {
                 it
             }
@@ -140,7 +146,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
                 host = accountKey.host,
             ),
         user = user,
-        createdAt = legacy.createdAt.let { Instant.parse(it) },
+        createdAt = legacy.createdAt.let { parseCustomDateTime(it) } ?: Clock.System.now(),
         content = text,
         medias = medias,
         card = uiCard,
@@ -154,6 +160,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
             UiStatus.XQT.Reaction(
                 liked = legacy.favorited,
                 retweeted = legacy.retweeted,
+                bookmarked = legacy.bookmarked,
             ),
         retweet = retweet,
         quote = quote,
@@ -198,3 +205,37 @@ fun User.toUi() =
     )
 
 private fun String.replaceWithOriginImageUrl() = this.replace("_normal.jpg", ".jpg")
+
+fun parseCustomDateTime(dateTimeStr: String): Instant? {
+    val months =
+        mapOf(
+            "Jan" to 1, "Feb" to 2, "Mar" to 3, "Apr" to 4, "May" to 5, "Jun" to 6,
+            "Jul" to 7, "Aug" to 8, "Sep" to 9, "Oct" to 10, "Nov" to 11, "Dec" to 12,
+        )
+
+    val parts = dateTimeStr.split(" ")
+    if (parts.size != 6) return null
+
+    try {
+        val month = months[parts[1]] ?: return null
+        val day = parts[2].toInt()
+        val timeParts = parts[3].split(":").map { it.toInt() }
+        val year = parts[5].toInt()
+
+        val hour = timeParts[0]
+        val minute = timeParts[1]
+        val second = timeParts[2]
+
+        // Assuming the timezone is always in the format of +HHMM or -HHMM
+//        val timezoneOffset = parts[4]
+//        val offsetHours = timezoneOffset.substring(1, 3).toInt()
+//        val offsetMinutes = timezoneOffset.substring(3, 5).toInt()
+//        val totalOffsetMinutes = offsetHours * 60 + offsetMinutes
+//        val offsetSign = if (timezoneOffset.startsWith("+")) 1 else -1
+
+        val dateTime = LocalDateTime(year, month, day, hour, minute, second)
+        return dateTime.toInstant(TimeZone.UTC)
+    } catch (e: Exception) {
+        return null
+    }
+}

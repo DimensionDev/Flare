@@ -397,6 +397,10 @@ sealed class UiStatus {
             twitterParser.parse(content).toHtml(accountKey.host)
         }
 
+        val humanizedTime by lazy {
+            createdAt.humanize()
+        }
+
         data class Matrices(
             val replyCount: Long,
             val likeCount: Long,
@@ -410,6 +414,7 @@ sealed class UiStatus {
         data class Reaction(
             val liked: Boolean,
             val retweeted: Boolean,
+            val bookmarked: Boolean,
         )
     }
 }
@@ -433,8 +438,15 @@ private fun Token.toHtml(host: String): Node {
         is EmojiToken -> Text(value)
         is HashTagToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search("#$value")
-                children.add(Text("#$value"))
+                val text =
+                    buildString {
+//                    if (!value.contains("#") || !value.contains("＃")) {
+//                        append("#")
+//                    }
+                        append(value)
+                    }
+                attributes["href"] = AppDeepLink.Search(text)
+                children.add(Text(text))
             }
 
         is StringToken -> Text(value)
@@ -685,6 +697,7 @@ fun createSampleStatus(user: UiUser) =
         is UiUser.Bluesky -> createBlueskyStatus(user)
         is UiUser.Mastodon -> createMastodonStatus(user)
         is UiUser.Misskey -> createMisskeyStatus(user)
+        is UiUser.XQT -> createXQTStatus(user)
     }
 
 private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon {
@@ -769,5 +782,35 @@ private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey {
         sensitive = false,
         quote = null,
         renote = null,
+    )
+}
+
+fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT {
+    return UiStatus.XQT(
+        statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
+        accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
+        user = user,
+        content = "Misskey post content",
+        matrices =
+            UiStatus.XQT.Matrices(
+                likeCount = 15,
+                replyCount = 25,
+                retweetCount = 35,
+            ),
+        medias = persistentListOf(),
+        createdAt = Clock.System.now(),
+        poll = null,
+        card = null,
+        reaction =
+            UiStatus.XQT.Reaction(
+                liked = false,
+                retweeted = false,
+                bookmarked = false,
+            ),
+        quote = null,
+        retweet = null,
+        inReplyToScreenName = null,
+        inReplyToStatusId = null,
+        inReplyToUserId = null,
     )
 }

@@ -594,6 +594,9 @@ private fun AppearanceScreen(onBack: () -> Unit) {
 
                                         is UiUser.Misskey ->
                                             appearanceSettings.misskey.swipeLeft.icon
+
+                                        is UiUser.XQT ->
+                                            appearanceSettings.xqt.swipeLeft.icon
                                     }
                                 val textId =
                                     when (user) {
@@ -605,6 +608,9 @@ private fun AppearanceScreen(onBack: () -> Unit) {
 
                                         is UiUser.Misskey ->
                                             appearanceSettings.misskey.swipeLeft.id
+
+                                        is UiUser.XQT ->
+                                            appearanceSettings.xqt.swipeLeft.id
                                     }
                                 TextButton(onClick = {
                                     showMenu = true
@@ -716,6 +722,37 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                                                     },
                                                 )
                                             }
+                                        is UiUser.XQT ->
+                                            AppearanceSettings.XQT.SwipeActions.entries.forEach {
+                                                DropdownMenuItem(
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            imageVector = it.icon,
+                                                            contentDescription = stringResource(id = it.id),
+                                                        )
+                                                    },
+                                                    text = {
+                                                        Text(text = stringResource(id = it.id))
+                                                    },
+                                                    onClick = {
+                                                        state.updateSettings {
+                                                            copy(
+                                                                xqt =
+                                                                    xqt.copy(
+                                                                        swipeLeft = it,
+                                                                    ),
+                                                            )
+                                                        }
+                                                        showMenu = false
+                                                    },
+                                                    trailingIcon = {
+                                                        Checkbox(
+                                                            checked = appearanceSettings.xqt.swipeLeft == it,
+                                                            onCheckedChange = null,
+                                                        )
+                                                    },
+                                                )
+                                            }
                                     }
                                 }
                             },
@@ -746,6 +783,9 @@ private fun AppearanceScreen(onBack: () -> Unit) {
 
                                         is UiUser.Misskey ->
                                             appearanceSettings.misskey.swipeRight.icon
+
+                                        is UiUser.XQT ->
+                                            appearanceSettings.xqt.swipeRight.icon
                                     }
                                 val textId =
                                     when (user) {
@@ -757,6 +797,9 @@ private fun AppearanceScreen(onBack: () -> Unit) {
 
                                         is UiUser.Misskey ->
                                             appearanceSettings.misskey.swipeRight.id
+
+                                        is UiUser.XQT ->
+                                            appearanceSettings.xqt.swipeRight.id
                                     }
                                 TextButton(onClick = {
                                     showMenu = true
@@ -868,6 +911,38 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                                                     },
                                                 )
                                             }
+
+                                        is UiUser.XQT ->
+                                            AppearanceSettings.XQT.SwipeActions.entries.forEach {
+                                                DropdownMenuItem(
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            imageVector = it.icon,
+                                                            contentDescription = stringResource(id = it.id),
+                                                        )
+                                                    },
+                                                    text = {
+                                                        Text(text = stringResource(id = it.id))
+                                                    },
+                                                    onClick = {
+                                                        state.updateSettings {
+                                                            copy(
+                                                                xqt =
+                                                                    xqt.copy(
+                                                                        swipeRight = it,
+                                                                    ),
+                                                            )
+                                                        }
+                                                        showMenu = false
+                                                    },
+                                                    trailingIcon = {
+                                                        Checkbox(
+                                                            checked = appearanceSettings.xqt.swipeRight == it,
+                                                            onCheckedChange = null,
+                                                        )
+                                                    },
+                                                )
+                                            }
                                     }
                                 }
                             },
@@ -878,6 +953,7 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                         headlineContent = {
                             when (user) {
                                 is UiUser.Bluesky -> Unit
+                                is UiUser.XQT -> Unit
 
                                 is UiUser.Mastodon ->
                                     Text(
@@ -896,6 +972,7 @@ private fun AppearanceScreen(onBack: () -> Unit) {
 
                     when (user) {
                         is UiUser.Bluesky -> Unit
+                        is UiUser.XQT -> Unit
                         is UiUser.Mastodon ->
                             MastodonAppearance(
                                 appearanceSettings,

@@ -689,6 +689,8 @@ private fun ProfileHeaderSuccess(
                 menu = menu,
                 expandMatrices = expandMatrices,
             )
+
+        is UiUser.XQT -> TODO()
     }
 }
 

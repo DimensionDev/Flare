@@ -75,5 +75,20 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
         is UiStatus.BlueskyNotification -> {
             UiStatusExtra.Empty
         }
+
+        is UiStatus.XQT -> {
+            UiStatusExtra(
+                contentDirection =
+                    if (Bidi(
+                            status.content,
+                            Bidi.DIRECTION_DEFAULT_LEFT_TO_RIGHT,
+                        ).baseIsLeftToRight()
+                    ) {
+                        LayoutDirection.Ltr
+                    } else {
+                        LayoutDirection.Rtl
+                    },
+            )
+        }
     }
 }

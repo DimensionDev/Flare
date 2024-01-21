@@ -7,10 +7,12 @@ import androidx.paging.RemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
@@ -63,14 +65,19 @@ internal class HomeTimelineRemoteMediator(
                     }
                 }.body()
             val instructions = response?.data?.home?.homeTimelineUrt?.instructions.orEmpty()
-            val tweet = instructions.tweets()
-
             cursor = instructions.cursor()
-
+            val tweet = instructions.tweets()
+            XQT.save(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                tweet = tweet,
+            )
             MediatorResult.Success(
                 endOfPaginationReached = tweet.isEmpty(),
             )
         } catch (e: Throwable) {
+            e.printStackTrace()
             MediatorResult.Error(e)
         }
     }
@@ -78,8 +85,11 @@ internal class HomeTimelineRemoteMediator(
 
 @Serializable
 data class HomeTimelineRequest(
-    val count: Long? = null,
+    @Required
+    val count: Long = 20,
     val cursor: String? = null,
+    @Required
     val includePromotedContent: Boolean = false,
+    @Required
     val latestControlAvailable: Boolean = false,
 )

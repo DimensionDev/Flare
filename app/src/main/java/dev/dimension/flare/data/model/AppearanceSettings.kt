@@ -41,6 +41,7 @@ data class AppearanceSettings(
     val mastodon: Mastodon = Mastodon(),
     val misskey: Misskey = Misskey(),
     val bluesky: Bluesky = Bluesky(),
+    val xqt: XQT = XQT(),
 ) {
     @Serializable
     data class Mastodon(
@@ -80,6 +81,22 @@ data class AppearanceSettings(
 
     @Serializable
     data class Bluesky(
+        val swipeLeft: SwipeActions = SwipeActions.REPLY,
+        val swipeRight: SwipeActions = SwipeActions.NONE,
+    ) {
+        enum class SwipeActions(
+            @StringRes val id: Int,
+            val icon: ImageVector,
+        ) {
+            NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
+            REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
+            REBLOG(R.string.swipe_action_reblog, Icons.Default.SyncAlt),
+            FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
+        }
+    }
+
+    @Serializable
+    data class XQT(
         val swipeLeft: SwipeActions = SwipeActions.REPLY,
         val swipeRight: SwipeActions = SwipeActions.NONE,
     ) {

@@ -17,6 +17,7 @@ package dev.dimension.flare.data.network.xqt.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -41,6 +42,6 @@ data class TimelineTweet(
     val tweetResults: ItemResult,
     @SerialName(value = "SocialContext")
     val socialContext: SocialContext? = null,
-//    @Contextual @SerialName(value = "promotedMetadata")
-//    val promotedMetadata: JsonElement? = null,
+    @SerialName(value = "promotedMetadata")
+    val promotedMetadata: JsonElement? = null,
 ) : ItemContentUnion

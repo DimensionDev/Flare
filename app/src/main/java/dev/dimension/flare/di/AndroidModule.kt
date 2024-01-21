@@ -8,6 +8,7 @@ import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.MastodonStatusEvent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.component.status.xqt.XQTStatusEvent
 import org.koin.core.module.dsl.binds
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.withOptions
@@ -22,6 +23,7 @@ val androidModule =
                     MastodonStatusEvent::class,
                     MisskeyStatusEvent::class,
                     BlueskyStatusEvent::class,
+                    XQTStatusEvent::class,
                     StatusEvent::class,
                 ),
             )

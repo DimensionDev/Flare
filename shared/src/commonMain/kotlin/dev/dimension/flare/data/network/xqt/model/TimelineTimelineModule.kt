@@ -33,8 +33,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("TimelineTimelineModule")
 data class TimelineTimelineModule(
-    @Contextual @SerialName(value = "__typename")
-    val typename: TypeName,
+//    @Contextual @SerialName(value = "__typename")
+//    val typename: TypeName,
 //    @Contextual @SerialName(value = "clientEventInfo")
 //    val clientEventInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>,
     @SerialName(value = "displayType")

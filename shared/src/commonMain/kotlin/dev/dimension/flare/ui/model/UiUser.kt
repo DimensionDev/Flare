@@ -168,7 +168,9 @@ sealed class UiUser {
         }
 
         override val nameElement: Element by lazy {
-            twitterParser.parse(displayName).toHtml(xqtHost)
+            Element("span").apply {
+                children.add(Text(displayName))
+            }
         }
         override val descriptionElement: Element? by lazy {
             description?.let {

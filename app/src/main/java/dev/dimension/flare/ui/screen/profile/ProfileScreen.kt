@@ -107,11 +107,11 @@ import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import moe.tlaster.ktml.dom.Element
-import org.koin.compose.koinInject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.reflect.KFunction1
+import moe.tlaster.ktml.dom.Element
+import org.koin.compose.koinInject
 
 @Composable
 @Destination(
@@ -567,6 +567,16 @@ private fun ProfileMenu(
                                         profileState.mute(user, relation)
                                     },
                                 )
+
+                            is UiRelation.XQT ->
+                                XQTUserMenu(
+                                    user = user,
+                                    relation = relation,
+                                    onBlockClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.block(user, relation)
+                                    },
+                                )
                         }
                     }
                     DropdownMenuItem(
@@ -690,7 +700,18 @@ private fun ProfileHeaderSuccess(
                 expandMatrices = expandMatrices,
             )
 
-        is UiUser.XQT -> TODO()
+        is UiUser.XQT ->
+            XQTProfileHeader(
+                user = user,
+                relationState = relationState,
+                modifier = modifier,
+                isMe = isMe,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
+                menu = menu,
+                expandMatrices = expandMatrices,
+            )
     }
 }
 

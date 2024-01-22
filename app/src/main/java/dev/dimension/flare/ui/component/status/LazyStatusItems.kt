@@ -357,7 +357,11 @@ internal class DefaultStatusEvent(
     }
 
     override fun onBookmarkClick(data: UiStatus.XQT) {
-        TODO("Not yet implemented")
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.XQT ?: return@launch
+            account.dataSource.bookmark(data)
+        }
     }
 
     override fun onMediaClick(
@@ -542,7 +546,11 @@ internal class DefaultStatusEvent(
     }
 
     override fun onReblogClick(data: UiStatus.XQT) {
-        TODO("Not yet implemented")
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.XQT ?: return@launch
+            account.dataSource.retweet(data)
+        }
     }
 
     override fun onLikeClick(data: UiStatus.Bluesky) {
@@ -554,7 +562,11 @@ internal class DefaultStatusEvent(
     }
 
     override fun onLikeClick(data: UiStatus.XQT) {
-        TODO("Not yet implemented")
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.XQT ?: return@launch
+            account.dataSource.like(data)
+        }
     }
 
     override fun onReportClick(

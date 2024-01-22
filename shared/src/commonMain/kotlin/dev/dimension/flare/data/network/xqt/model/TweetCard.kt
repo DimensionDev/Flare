@@ -28,6 +28,6 @@ import kotlinx.serialization.Serializable
 data class TweetCard(
     @SerialName(value = "legacy")
     val legacy: TweetCardLegacy? = null,
-    @SerialName(value = "rest_id")
-    val restId: kotlin.String? = null,
+//    @SerialName(value = "rest_id")
+//    val restId: kotlin.String? = null,
 )

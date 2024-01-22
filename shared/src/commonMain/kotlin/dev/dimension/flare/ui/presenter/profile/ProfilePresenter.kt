@@ -8,6 +8,7 @@ import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
@@ -86,6 +87,7 @@ class ProfilePresenter(
                             is UiRelation.Bluesky -> blueskyFollow(service as BlueskyDataSource, user.userKey, data)
                             is UiRelation.Mastodon -> mastodonFollow(service as MastodonDataSource, user.userKey, data)
                             is UiRelation.Misskey -> misskeyFollow(service as MisskeyDataSource, user.userKey, data)
+                            is UiRelation.XQT -> xqtFollow(service as XQTDataSource, user.userKey, data)
                         }
                     }
                 }
@@ -108,6 +110,11 @@ class ProfilePresenter(
                             }
                             is UiRelation.Misskey -> {
                                 require(service is MisskeyDataSource)
+                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                            }
+
+                            is UiRelation.XQT -> {
+                                require(service is XQTDataSource)
                                 if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
                             }
                         }
@@ -133,6 +140,11 @@ class ProfilePresenter(
                             is UiRelation.Misskey -> {
                                 require(service is MisskeyDataSource)
                                 if (data.muted) service.unmute(user.userKey) else service.mute(user.userKey)
+                            }
+
+                            is UiRelation.XQT -> {
+//                                require(service is XQTDataSource)
+//                                if (data.muted) service.unmute(user.userKey) else service.mute(user.userKey)
                             }
                         }
                     }
@@ -174,6 +186,18 @@ class ProfilePresenter(
         service: BlueskyDataSource,
         userKey: MicroBlogKey,
         data: UiRelation.Bluesky,
+    ) {
+        when {
+            data.following -> service.unfollow(userKey)
+            data.blocking -> service.unblock(userKey)
+            else -> service.follow(userKey)
+        }
+    }
+
+    private suspend fun xqtFollow(
+        service: XQTDataSource,
+        userKey: MicroBlogKey,
+        data: UiRelation.XQT,
     ) {
         when {
             data.following -> service.unfollow(userKey)

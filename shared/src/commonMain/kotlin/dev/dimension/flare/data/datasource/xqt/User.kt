@@ -19,6 +19,12 @@ data class UserByScreenNameRequest(
     val withSafetyModeUserFields: Boolean? = null,
 )
 
+@Serializable
+data class ProfileSpotlightsQueryRequest(
+    @SerialName("screen_name")
+    val screenName: String? = null
+)
+
 suspend fun XQTService.userById(id: String) =
     getUserByRestId(
         variables =
@@ -34,5 +40,13 @@ suspend fun XQTService.userByScreenName(screenName: String) =
             UserByScreenNameRequest(
                 screenName = screenName,
                 withSafetyModeUserFields = true,
+            ).encodeJson(),
+    )
+
+suspend fun XQTService.profileSpotlights(screenName: String) =
+    getProfileSpotlightsQuery(
+        variables =
+            ProfileSpotlightsQueryRequest(
+                screenName = screenName,
             ).encodeJson(),
     )

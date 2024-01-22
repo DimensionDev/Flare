@@ -36,6 +36,7 @@ internal class HomeTimelineRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
+                        cursor = null
                         service.getHomeLatestTimeline(
                             variables =
                                 HomeTimelineRequest(
@@ -74,7 +75,7 @@ internal class HomeTimelineRemoteMediator(
                 tweet = tweet,
             )
             MediatorResult.Success(
-                endOfPaginationReached = tweet.isEmpty(),
+                endOfPaginationReached = cursor == null,
             )
         } catch (e: Throwable) {
             e.printStackTrace()

@@ -26,4 +26,12 @@ sealed interface UiRelation {
         val blocking: Boolean,
         val muting: Boolean,
     ) : UiRelation
+
+    data class XQT(
+        val isFans: Boolean,
+        val following: Boolean,
+        val blocking: Boolean,
+        val blockedBy: Boolean,
+        val protected: Boolean,
+    ) : UiRelation
 }

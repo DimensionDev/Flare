@@ -34,14 +34,14 @@ import kotlinx.serialization.json.JsonElement
 data class TimelineTweet(
 //    @SerialName(value = "__typename")
 //    val typename: TypeName,
-    @SerialName(value = "itemType")
-    val itemType: ContentItemType,
-    @SerialName(value = "tweetDisplayType")
-    val tweetDisplayType: kotlin.String,
+//    @SerialName(value = "itemType")
+//    val itemType: ContentItemType,
+//    @SerialName(value = "tweetDisplayType")
+//    val tweetDisplayType: kotlin.String,
     @SerialName(value = "tweet_results")
     val tweetResults: ItemResult,
-    @SerialName(value = "SocialContext")
-    val socialContext: SocialContext? = null,
+//    @SerialName(value = "SocialContext")
+//    val socialContext: SocialContext? = null,
     @SerialName(value = "promotedMetadata")
     val promotedMetadata: JsonElement? = null,
 ) : ItemContentUnion

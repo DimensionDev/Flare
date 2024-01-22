@@ -41,24 +41,24 @@ data class User(
 //    val typename: TypeName,
 //    @Contextual @SerialName(value = "affiliates_highlighted_label")
 //    val affiliatesHighlightedLabel: JsonElement,
-    @SerialName(value = "id")
-    val id: kotlin.String,
+//    @SerialName(value = "id")
+//    val id: kotlin.String,
     @SerialName(value = "is_blue_verified")
     val isBlueVerified: kotlin.Boolean = false,
     @SerialName(value = "legacy")
     val legacy: UserLegacy,
     @SerialName(value = "rest_id")
     val restId: kotlin.String,
-    @SerialName(value = "super_follow_eligible")
-    val superFollowEligible: kotlin.Boolean = false,
-    @SerialName(value = "super_followed_by")
-    val superFollowedBy: kotlin.Boolean = false,
-    @SerialName(value = "super_following")
-    val superFollowing: kotlin.Boolean = false,
+//    @SerialName(value = "super_follow_eligible")
+//    val superFollowEligible: kotlin.Boolean = false,
+//    @SerialName(value = "super_followed_by")
+//    val superFollowedBy: kotlin.Boolean = false,
+//    @SerialName(value = "super_following")
+//    val superFollowing: kotlin.Boolean = false,
 //    @Contextual @SerialName(value = "business_account")
 //    val businessAccount: JsonElement? = null,
-    @SerialName(value = "has_graduated_access")
-    val hasGraduatedAccess: kotlin.Boolean? = null,
-    @SerialName(value = "has_nft_avatar")
-    val hasNftAvatar: kotlin.Boolean? = false,
+//    @SerialName(value = "has_graduated_access")
+//    val hasGraduatedAccess: kotlin.Boolean? = null,
+//    @SerialName(value = "has_nft_avatar")
+//    val hasNftAvatar: kotlin.Boolean? = false,
 ) : UserUnion

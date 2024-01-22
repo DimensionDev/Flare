@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
 import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacy
@@ -13,6 +15,7 @@ import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import kotlinx.collections.immutable.persistentListOf
@@ -142,7 +145,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
         accountKey = accountKey,
         statusKey =
             MicroBlogKey(
-                id = legacy?.idStr ?: throw Exception("no id for tweet"),
+                id = legacy?.idStr ?: throw Exception("no id for tweet: ${this.encodeJson()}"),
                 host = accountKey.host,
             ),
         user = user,
@@ -160,7 +163,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
             UiStatus.XQT.Reaction(
                 liked = legacy.favorited,
                 retweeted = legacy.retweeted,
-                bookmarked = legacy.bookmarked,
+                bookmarked = legacy.bookmarked ?: false,
             ),
         retweet = retweet,
         quote = quote,
@@ -184,7 +187,7 @@ fun User.toUi() =
         handleInternal = legacy.screenName,
         avatarUrl = legacy.profileImageUrlHttps.replaceWithOriginImageUrl(),
         bannerUrl = legacy.profileBannerUrl,
-        description = legacy.description.takeIf { it.isNotEmpty() },
+        description = legacy.description?.takeIf { it.isNotEmpty() },
         matrices =
             UiUser.XQT.Matrices(
                 fansCount = legacy.followersCount.toLong(),
@@ -197,16 +200,28 @@ fun User.toUi() =
                 isBlueVerified -> UiUser.XQT.VerifyType.Money
                 else -> null
             },
-        location = legacy.location.takeIf { it.isNotEmpty() },
+        location = legacy.location?.takeIf { it.isNotEmpty() },
         url =
             legacy.url?.takeIf { it.isNotEmpty() }?.let { url ->
                 legacy.entities.urls?.firstOrNull { it.url == url }?.expandedUrl
             },
     )
 
+internal fun GetProfileSpotlightsQuery200Response.toUi(): UiRelation {
+    with (data.userResultByScreenName.result.legacy) {
+        return UiRelation.XQT(
+            following = following ?: false,
+            isFans = followedBy ?: false,
+            blocking = blocking ?: false,
+            blockedBy = blockedBy ?: false,
+            protected = protected ?: false,
+        )
+    }
+}
+
 private fun String.replaceWithOriginImageUrl() = this.replace("_normal.jpg", ".jpg")
 
-fun parseCustomDateTime(dateTimeStr: String): Instant? {
+private fun parseCustomDateTime(dateTimeStr: String): Instant? {
     val months =
         mapOf(
             "Jan" to 1, "Feb" to 2, "Mar" to 3, "Apr" to 4, "May" to 5, "Jun" to 6,

@@ -5,6 +5,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.humanizer.humanize
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentMap
 import moe.tlaster.ktml.Ktml
 import moe.tlaster.ktml.dom.Element
@@ -156,6 +157,17 @@ sealed class UiUser {
         val url: String?,
     ) : UiUser() {
         override val handle: String = "@$handleInternal"
+
+        val fieldsParsed by lazy {
+            persistentMapOf<String, Element>().apply {
+                location?.let {
+                    put("location", Element("span").apply { children.add(Text(it)) })
+                }
+                url?.let {
+                    put("url", Element("a").apply { children.add(Text(it)) })
+                }
+            }
+        }
 
         data class Matrices(
             val fansCount: Long,

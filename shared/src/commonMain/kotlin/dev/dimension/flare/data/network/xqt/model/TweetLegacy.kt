@@ -47,9 +47,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TweetLegacy(
     @SerialName(value = "bookmark_count")
-    val bookmarkCount: kotlin.Int,
+    val bookmarkCount: kotlin.Int? = null,
     @SerialName(value = "bookmarked")
-    val bookmarked: kotlin.Boolean,
+    val bookmarked: kotlin.Boolean? = null,
     @SerialName(value = "conversation_id_str")
     val conversationIdStr: kotlin.String,
     @SerialName(value = "created_at")
@@ -93,4 +93,5 @@ data class TweetLegacy(
     val in_reply_to_screen_name: String? = null,
     val in_reply_to_status_id_str: String? = null,
     val in_reply_to_user_id_str: String? = null,
+    val card: TweetCardLegacy? = null,
 )

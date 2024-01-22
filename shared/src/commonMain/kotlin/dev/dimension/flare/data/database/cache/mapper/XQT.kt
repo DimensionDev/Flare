@@ -7,15 +7,20 @@ import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
+import dev.dimension.flare.data.network.xqt.model.ItemResult
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineCursor
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineItem
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTweet
 import dev.dimension.flare.data.network.xqt.model.Tweet
+import dev.dimension.flare.data.network.xqt.model.TweetCard
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
+import dev.dimension.flare.data.network.xqt.model.UserResultCore
+import dev.dimension.flare.data.network.xqt.model.UserResults
+import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
@@ -96,10 +101,10 @@ internal fun TimelineTweet.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     return DbStatus(
         id = 0,
         status_key =
-            MicroBlogKey(
-                id = tweet.restId,
-                host = user.user_key.host,
-            ),
+        MicroBlogKey(
+            id = tweet.restId,
+            host = user.user_key.host,
+        ),
         platform_type = PlatformType.xQt,
         content = StatusContent.XQT(tweet),
         user_key = user.user_key,
@@ -128,10 +133,10 @@ private fun TimelineTweet.toDbUser(): DbUser {
 internal fun User.toDbUser() =
     DbUser(
         user_key =
-            MicroBlogKey(
-                id = restId,
-                host = xqtHost,
-            ),
+        MicroBlogKey(
+            id = restId,
+            host = xqtHost,
+        ),
         platform_type = PlatformType.xQt,
         name = legacy.name,
         handle = legacy.screenName,
@@ -141,6 +146,7 @@ internal fun User.toDbUser() =
 
 data class XQTTimeline(
     val tweets: TimelineTweet,
+    val id: String?,
     val sortedIndex: Long,
 )
 
@@ -164,6 +170,12 @@ internal fun List<InstructionUnion>.tweets(): List<XQTTimeline> =
                                 XQTTimeline(
                                     tweets = it,
                                     sortedIndex = pair.second,
+                                    id = when (it.tweetResults.result) {
+                                        is Tweet -> it.tweetResults.result.restId
+                                        is TweetTombstone -> null
+                                        is TweetWithVisibilityResults -> it.tweetResults.result.tweet.restId
+                                        null -> null
+                                    },
                                 )
                             }
 
@@ -199,3 +211,79 @@ internal fun List<InstructionUnion>.cursor() =
             else -> emptyList()
         }
     }.firstOrNull()
+
+internal fun TopLevel.tweets(): List<XQTTimeline> =
+    timeline
+        ?.instructions
+        ?.asSequence()
+        ?.flatMap {
+            it.addEntries?.entries.orEmpty()
+        }
+        ?.mapNotNull { entry ->
+            val id = entry.content?.item?.content?.tweet?.id
+            val index = entry.sortIndex?.toLong()
+            if (id != null && index != null) {
+                id to index
+            } else {
+                null
+            }
+        }
+        ?.mapNotNull { (id, index) ->
+            globalObjects?.tweets?.get(id)?.let {
+                it to index
+            }
+        }
+        ?.map { (tweetLegacy, index) ->
+            // build tweet
+            Tweet(
+                restId = tweetLegacy.idStr,
+                card = tweetLegacy.card?.let {
+                    TweetCard(
+                        legacy = tweetLegacy.card,
+                    )
+                },
+                core = globalObjects?.users?.get(tweetLegacy.userIdStr)?.let {
+                    UserResultCore(
+                        userResults = UserResults(
+                            result = User(
+                                legacy = it,
+                                isBlueVerified = it.verified,
+                                restId = tweetLegacy.userIdStr,
+                            )
+                        )
+                    )
+                },
+                legacy = tweetLegacy,
+            ) to index
+        }
+        ?.map { (tweet, index) ->
+            XQTTimeline(
+                tweets = TimelineTweet(
+                    tweetResults = ItemResult(
+                        result = tweet
+                    )
+                ),
+                id = tweet.restId,
+                sortedIndex = index,
+            )
+        }
+        ?.toList()
+        .orEmpty()
+
+internal fun TopLevel.cursor(): String? =
+    timeline
+        ?.instructions
+        ?.asSequence()
+        ?.flatMap {
+            it.addEntries?.entries.orEmpty()
+        }
+        ?.mapNotNull {
+            it.content?.operation?.cursor
+        }
+        ?.filter {
+            it.cursorType == CursorType.bottom
+        }
+        ?.map {
+            it.value
+        }
+        ?.firstOrNull()

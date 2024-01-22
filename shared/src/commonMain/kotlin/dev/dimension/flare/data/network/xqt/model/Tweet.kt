@@ -40,24 +40,24 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("Tweet")
 data class Tweet(
-    @SerialName(value = "edit_control")
-    val editControl: TweetEditControl,
-    @SerialName(value = "is_translatable")
-    val isTranslatable: kotlin.Boolean = false,
+//    @SerialName(value = "edit_control")
+//    val editControl: TweetEditControl,
+//    @SerialName(value = "is_translatable")
+//    val isTranslatable: kotlin.Boolean = false,
     @SerialName(value = "rest_id")
     val restId: kotlin.String,
-    @SerialName(value = "views")
-    val views: TweetView,
+//    @SerialName(value = "views")
+//    val views: TweetView,
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName? = null,
-    @SerialName(value = "birdwatch_pivot")
-    val birdwatchPivot: BirdwatchPivot? = null,
+//    @SerialName(value = "birdwatch_pivot")
+//    val birdwatchPivot: BirdwatchPivot? = null,
     @SerialName(value = "card")
     val card: TweetCard? = null,
     @SerialName(value = "core")
     val core: UserResultCore? = null,
-    @SerialName(value = "edit_prespective")
-    val editPrespective: TweetEditPrespective? = null,
+//    @SerialName(value = "edit_prespective")
+//    val editPrespective: TweetEditPrespective? = null,
     @SerialName(value = "legacy")
     val legacy: TweetLegacy? = null,
     @SerialName(value = "note_tweet")

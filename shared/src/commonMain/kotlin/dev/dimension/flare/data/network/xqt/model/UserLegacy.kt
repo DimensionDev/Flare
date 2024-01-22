@@ -78,11 +78,11 @@ data class UserLegacy(
     @SerialName(value = "default_profile_image")
     val defaultProfileImage: kotlin.Boolean = false,
     @SerialName(value = "description")
-    val description: kotlin.String,
+    val description: kotlin.String? = null,
     @SerialName(value = "entities")
     val entities: Entities,
     @SerialName(value = "fast_followers_count")
-    val fastFollowersCount: kotlin.Int,
+    val fastFollowersCount: kotlin.Int? = null,
     @SerialName(value = "favourites_count")
     val favouritesCount: kotlin.Int = 0,
     @SerialName(value = "followers_count")
@@ -96,7 +96,7 @@ data class UserLegacy(
     @SerialName(value = "listed_count")
     val listedCount: kotlin.Int = 0,
     @SerialName(value = "location")
-    val location: kotlin.String,
+    val location: kotlin.String? = null,
     @SerialName(value = "media_count")
     val mediaCount: kotlin.Int = 0,
     @SerialName(value = "muting")
@@ -106,13 +106,13 @@ data class UserLegacy(
     @SerialName(value = "normal_followers_count")
     val normalFollowersCount: kotlin.Int = 0,
     @SerialName(value = "pinned_tweet_ids_str")
-    val pinnedTweetIdsStr: kotlin.collections.List<kotlin.String>,
+    val pinnedTweetIdsStr: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "possibly_sensitive")
     val possiblySensitive: kotlin.Boolean = false,
     @SerialName(value = "profile_image_url_https")
     val profileImageUrlHttps: String,
     @SerialName(value = "profile_interstitial_type")
-    val profileInterstitialType: kotlin.String,
+    val profileInterstitialType: kotlin.String? = null,
     @SerialName(value = "screen_name")
     val screenName: kotlin.String,
     @SerialName(value = "statuses_count")

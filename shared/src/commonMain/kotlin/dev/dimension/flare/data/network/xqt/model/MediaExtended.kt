@@ -49,7 +49,7 @@ data class MediaExtended(
     @SerialName(value = "indices")
     val indices: kotlin.collections.List<kotlin.Int>,
     @SerialName(value = "media_key")
-    val mediaKey: kotlin.String,
+    val mediaKey: kotlin.String? = null,
     @SerialName(value = "media_url_https")
     val mediaUrlHttps: String,
     @SerialName(value = "original_info")

@@ -6,6 +6,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -13,6 +14,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
+import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.User
@@ -26,6 +28,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.model.toUi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -66,11 +69,23 @@ class XQTDataSource(
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
-        TODO("Not yet implemented")
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+            MentionRemoteMediator(
+                service,
+                database,
+                account.accountKey,
+                pagingKey,
+            ),
+        )
     }
 
     override val supportedNotificationFilter: List<NotificationFilter>
-        get() = listOf(NotificationFilter.All, NotificationFilter.Mention)
+        get() = listOf(NotificationFilter.Mention)
 
     override fun userByAcct(acct: String): CacheData<UiUser> {
         val (name, host) = MicroBlogKey.valueOf(acct)
@@ -141,7 +156,26 @@ class XQTDataSource(
     }
 
     override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        TODO("Not yet implemented")
+        return MemCacheable<UiRelation>(
+            relationKeyWithUserKey(userKey),
+        ) {
+            val user =
+                service.userById(userKey.id)
+                    .body()
+                    ?.data
+                    ?.user
+                    ?.result
+                    ?.let {
+                        when (it) {
+                            is User -> it
+                            is UserUnavailable -> null
+                        }
+                    }
+                    ?.toDbUser() ?: throw Exception("User not found")
+            service.profileSpotlights(user.handle)
+                .body()
+                ?.toUi() ?: throw Exception("User not found")
+        }.toUi()
     }
 
     override fun userTimeline(
@@ -170,16 +204,42 @@ class XQTDataSource(
         statusKey: MicroBlogKey,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        TODO("Not yet implemented")
-    }
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
+            pageSize = 1,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+            StatusDetailRemoteMediator(
+                statusKey,
+                service,
+                database,
+                account.accountKey,
+                pagingKey,
+                statusOnly = false,
+            ),
+        )
 
     override fun status(
         statusKey: MicroBlogKey,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        TODO("Not yet implemented")
-    }
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
+            pageSize = 1,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            mediator =
+            StatusDetailRemoteMediator(
+                statusKey,
+                service,
+                database,
+                account.accountKey,
+                pagingKey,
+                statusOnly = true,
+            ),
+        )
 
     override suspend fun compose(
         data: ComposeData,
@@ -231,5 +291,41 @@ class XQTDataSource(
         } else {
             return listOf()
         }
+    }
+
+    suspend fun like(status: UiStatus.XQT) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun retweet(status: UiStatus.XQT) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun bookmark(status: UiStatus.XQT) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun follow(userKey: MicroBlogKey) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun unfollow(userKey: MicroBlogKey) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun mute(userKey: MicroBlogKey) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun unmute(userKey: MicroBlogKey) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun block(userKey: MicroBlogKey) {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun unblock(userKey: MicroBlogKey) {
+        TODO("Not yet implemented")
     }
 }

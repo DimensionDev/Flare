@@ -93,5 +93,4 @@ data class TweetLegacy(
     val in_reply_to_screen_name: String? = null,
     val in_reply_to_status_id_str: String? = null,
     val in_reply_to_user_id_str: String? = null,
-    val card: TweetCardLegacy? = null,
 )

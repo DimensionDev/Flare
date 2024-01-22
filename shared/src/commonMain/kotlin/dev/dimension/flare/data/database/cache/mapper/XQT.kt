@@ -14,7 +14,6 @@ import dev.dimension.flare.data.network.xqt.model.TimelineTimelineItem
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTweet
 import dev.dimension.flare.data.network.xqt.model.Tweet
-import dev.dimension.flare.data.network.xqt.model.TweetCard
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
@@ -237,11 +236,7 @@ internal fun TopLevel.tweets(): List<XQTTimeline> =
             // build tweet
             Tweet(
                 restId = tweetLegacy.idStr,
-                card = tweetLegacy.card?.let {
-                    TweetCard(
-                        legacy = tweetLegacy.card,
-                    )
-                },
+//                
                 core = globalObjects?.users?.get(tweetLegacy.userIdStr)?.let {
                     UserResultCore(
                         userResults = UserResults(

@@ -57,6 +57,21 @@ struct QuotedStatus: View {
                 sensitive: false
             )
         case .blueskyNotification: EmptyView()
+        case .xQT(let xqt):
+            QuotedContent(
+                content: xqt.extra.contentMarkdown,
+                user: xqt.user,
+                medias: xqt.medias,
+                timestamp: xqt.createdAt.epochSeconds,
+                onMediaClick: onMediaClick,
+                onUserClick: {
+                    onUserClick(xqt.user)
+                },
+                onStatusClick: {
+                    onStatusClick(xqt)
+                },
+                sensitive: xqt.sensitive
+            )
         }
     }
 }

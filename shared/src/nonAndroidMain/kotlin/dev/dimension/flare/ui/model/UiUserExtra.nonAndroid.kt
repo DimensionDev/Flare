@@ -18,18 +18,8 @@ actual class UiUserExtra(
 
 internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
     return UiUserExtra(
-        nameMarkdown =
-            when (user) {
-                is UiUser.Mastodon -> user.nameElement.toMarkdown()
-                is UiUser.Misskey -> user.nameElement.toMarkdown()
-                is UiUser.Bluesky -> user.nameElement.toMarkdown()
-            },
-        descriptionMarkdown =
-            when (user) {
-                is UiUser.Mastodon -> user.descriptionElement.toMarkdown()
-                is UiUser.Misskey -> user.descriptionElement?.toMarkdown()
-                is UiUser.Bluesky -> user.descriptionElement?.toMarkdown()
-            },
+        nameMarkdown = user.nameElement.toMarkdown(),
+        descriptionMarkdown = user.descriptionElement?.toMarkdown(),
         fieldsMarkdown =
             when (user) {
                 is UiUser.Mastodon ->
@@ -41,6 +31,10 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
                         value.toMarkdown()
                     }
                 is UiUser.Bluesky -> persistentMapOf()
+                is UiUser.XQT ->
+                    user.fieldsParsed.mapValues { (_, value) ->
+                        value.toMarkdown()
+                    }
             }.map { (key, value) ->
                 key to value
             }.toImmutableList().toImmutableListWrapper(),

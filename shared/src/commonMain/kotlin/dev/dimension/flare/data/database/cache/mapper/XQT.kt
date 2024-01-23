@@ -100,10 +100,10 @@ internal fun TimelineTweet.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     return DbStatus(
         id = 0,
         status_key =
-        MicroBlogKey(
-            id = tweet.restId,
-            host = user.user_key.host,
-        ),
+            MicroBlogKey(
+                id = tweet.restId,
+                host = user.user_key.host,
+            ),
         platform_type = PlatformType.xQt,
         content = StatusContent.XQT(tweet),
         user_key = user.user_key,
@@ -132,10 +132,10 @@ private fun TimelineTweet.toDbUser(): DbUser {
 internal fun User.toDbUser() =
     DbUser(
         user_key =
-        MicroBlogKey(
-            id = restId,
-            host = xqtHost,
-        ),
+            MicroBlogKey(
+                id = restId,
+                host = xqtHost,
+            ),
         platform_type = PlatformType.xQt,
         name = legacy.name,
         handle = legacy.screenName,
@@ -169,12 +169,13 @@ internal fun List<InstructionUnion>.tweets(): List<XQTTimeline> =
                                 XQTTimeline(
                                     tweets = it,
                                     sortedIndex = pair.second,
-                                    id = when (it.tweetResults.result) {
-                                        is Tweet -> it.tweetResults.result.restId
-                                        is TweetTombstone -> null
-                                        is TweetWithVisibilityResults -> it.tweetResults.result.tweet.restId
-                                        null -> null
-                                    },
+                                    id =
+                                        when (it.tweetResults.result) {
+                                            is Tweet -> it.tweetResults.result.restId
+                                            is TweetTombstone -> null
+                                            is TweetWithVisibilityResults -> it.tweetResults.result.tweet.restId
+                                            null -> null
+                                        },
                                 )
                             }
 
@@ -236,28 +237,33 @@ internal fun TopLevel.tweets(): List<XQTTimeline> =
             // build tweet
             Tweet(
                 restId = tweetLegacy.idStr,
-//                
-                core = globalObjects?.users?.get(tweetLegacy.userIdStr)?.let {
-                    UserResultCore(
-                        userResults = UserResults(
-                            result = User(
-                                legacy = it,
-                                isBlueVerified = it.verified,
-                                restId = tweetLegacy.userIdStr,
-                            )
+//
+                core =
+                    globalObjects?.users?.get(tweetLegacy.userIdStr)?.let {
+                        UserResultCore(
+                            userResults =
+                                UserResults(
+                                    result =
+                                        User(
+                                            legacy = it,
+                                            isBlueVerified = it.verified,
+                                            restId = tweetLegacy.userIdStr,
+                                        ),
+                                ),
                         )
-                    )
-                },
+                    },
                 legacy = tweetLegacy,
             ) to index
         }
         ?.map { (tweet, index) ->
             XQTTimeline(
-                tweets = TimelineTweet(
-                    tweetResults = ItemResult(
-                        result = tweet
-                    )
-                ),
+                tweets =
+                    TimelineTweet(
+                        tweetResults =
+                            ItemResult(
+                                result = tweet,
+                            ),
+                    ),
                 id = tweet.restId,
                 sortedIndex = index,
             )

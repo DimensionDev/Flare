@@ -39,7 +39,8 @@ struct DiscoverScreen: View {
                         data: searchViewModel.model.status,
                         mastodonEvent: statusEvent,
                         misskeyEvent: statusEvent,
-                        blueskyEvent: statusEvent
+                        blueskyEvent: statusEvent,
+                        xqtEvent: statusEvent
                     )
                 }
             } else {
@@ -116,7 +117,8 @@ struct DiscoverScreen: View {
                             data: viewModel.model.status,
                             mastodonEvent: statusEvent,
                             misskeyEvent: statusEvent,
-                            blueskyEvent: statusEvent
+                            blueskyEvent: statusEvent,
+                            xqtEvent: statusEvent
                         )
                     }
                 }

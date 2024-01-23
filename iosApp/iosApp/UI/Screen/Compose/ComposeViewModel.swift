@@ -43,7 +43,7 @@ class ComposeViewModel: MoleculeViewModelProto {
             if case .success(let account) = onEnum(of: model.account) {
                 let data = switch onEnum(of: account.data) {
                 case .bluesky(let bluesky):
-                    BlueskyDataSource.BlueskyComposeData(
+                    BlueskyComposeData(
                         account: bluesky,
                         content: text,
                         inReplyToID: getReplyId(),
@@ -52,7 +52,7 @@ class ComposeViewModel: MoleculeViewModelProto {
                         medias: getMedia()
                     ) as ComposeData_
                 case .mastodon(let mastodon):
-                    MastodonDataSource.MastodonComposeData(
+                    MastodonComposeData(
                         account: mastodon,
                         content: text,
                         visibility: getMastodonVisibility(),
@@ -63,7 +63,7 @@ class ComposeViewModel: MoleculeViewModelProto {
                         poll: getMastodonPoll()
                     ) as ComposeData_
                 case .misskey(let misskey):
-                    MisskeyDataSource.MisskeyComposeData(
+                    MisskeyComposeData(
                         account: misskey,
                         content: text,
                         visibility: getMisskeyVisibility(),
@@ -75,6 +75,15 @@ class ComposeViewModel: MoleculeViewModelProto {
                         poll: getMisskeyPoll(),
                         localOnly: false
                     ) as ComposeData_
+                case .xQT(let xqt):
+                    XQTComposeData(
+                        account: xqt,
+                        content: text,
+                        inReplyToID: getReplyId(),
+                        quoteId: getQuoteId(),
+                        medias: getMedia(),
+                        poll: getXQTPoll()
+                    )
                 }
                 model.send(data: data)
             }
@@ -101,15 +110,15 @@ class ComposeViewModel: MoleculeViewModelProto {
     }
     private func getMastodonVisibility() -> UiStatus.Mastodon.MastodonVisibility {
         return if case .success(let data) = onEnum(of: model.visibilityState),
-                    let state = data.data as? MastodonVisibilityState {
+                  let state = data.data as? MastodonVisibilityState {
             state.visibility
         } else {
             UiStatus.Mastodon.MastodonVisibility.public
         }
     }
-    private func getMastodonPoll() -> MastodonDataSource.MastodonComposeDataPoll? {
+    private func getMastodonPoll() -> MastodonComposeData.Poll? {
         if pollViewModel.enabled {
-            MastodonDataSource.MastodonComposeDataPoll(
+            MastodonComposeData.Poll(
                 options: pollViewModel.choices.map { item in
                     item.text
                 },
@@ -128,9 +137,22 @@ class ComposeViewModel: MoleculeViewModelProto {
             UiStatus.Misskey.MisskeyVisibility.public
         }
     }
-    private func getMisskeyPoll() -> MisskeyDataSource.MisskeyComposeDataPoll? {
+    private func getMisskeyPoll() -> MisskeyComposeData.Poll? {
         if pollViewModel.enabled {
-            MisskeyDataSource.MisskeyComposeDataPoll(
+            MisskeyComposeData.Poll(
+                options: pollViewModel.choices.map { item in
+                    item.text
+                },
+                expiredAfter: pollViewModel.expired.inWholeMilliseconds,
+                multiple: pollViewModel.pollType == ComposePollType.multiple
+            )
+        } else {
+            nil
+        }
+    }
+    private func getXQTPoll() -> XQTComposeData.Poll? {
+        if pollViewModel.enabled {
+            XQTComposeData.Poll(
                 options: pollViewModel.choices.map { item in
                     item.text
                 },

@@ -379,6 +379,7 @@ sealed class UiStatus {
         val createdAt: Instant,
         val content: String,
         val medias: ImmutableList<UiMedia>,
+        val sensitive: Boolean,
         val card: UiCard?,
         val matrices: Matrices,
         val reaction: Reaction,
@@ -812,5 +813,6 @@ fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT {
         inReplyToScreenName = null,
         inReplyToStatusId = null,
         inReplyToUserId = null,
+        sensitive = false,
     )
 }

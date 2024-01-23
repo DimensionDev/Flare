@@ -25,6 +25,7 @@ internal class StatusDetailRemoteMediator(
     private val statusOnly: Boolean,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
     private var cursor: String? = null
+
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
@@ -45,10 +46,11 @@ internal class StatusDetailRemoteMediator(
             }
             val response =
                 service.getTweetDetail(
-                    variables = TweetDetailRequest(
-                        focalTweetID = statusKey.id,
-                        cursor = null,
-                    ).encodeJson(),
+                    variables =
+                        TweetDetailRequest(
+                            focalTweetID = statusKey.id,
+                            cursor = null,
+                        ).encodeJson(),
                 )
                     .body()
                     ?.data
@@ -82,27 +84,21 @@ internal class StatusDetailRemoteMediator(
                     endOfPaginationReached = cursor == null,
                 )
             }
-
-
         } catch (e: Throwable) {
             MediatorResult.Error(e)
         }
     }
 }
 
-
 @Serializable
 data class TweetDetailRequest(
     @SerialName("focalTweetId")
     val focalTweetID: String,
-
     val cursor: String? = null,
     // tweet/profile/home
     val referrer: String = "tweet",
-
     @SerialName("with_rux_injections")
     val withRuxInjections: Boolean = false,
-
     val includePromotedContent: Boolean = true,
     val withCommunity: Boolean = true,
     val withQuickPromoteEligibilityTweetFields: Boolean = true,

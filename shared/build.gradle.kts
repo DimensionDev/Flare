@@ -1,5 +1,4 @@
 import app.cash.sqldelight.core.capitalize
-import org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode
 
 plugins {
     alias(libs.plugins.android.library)
@@ -34,8 +33,8 @@ kotlin {
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "shared"
-            isStatic = true
-            embedBitcode(BitcodeEmbeddingMode.DISABLE)
+//            isStatic = true
+//            embedBitcode(BitcodeEmbeddingMode.DISABLE)
         }
     }
 

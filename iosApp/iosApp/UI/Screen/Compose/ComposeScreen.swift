@@ -43,7 +43,7 @@ struct ComposeScreen: View {
                                         ForEach(viewModel.mediaViewModel.items.indices, id: \.self) { index in
                                             let item = viewModel.mediaViewModel.items[index]
                                             if let image = item.image {
-                                                #if os(macOS)
+#if os(macOS)
                                                 Image(nsImage: image)
                                                     .resizable()
                                                     .scaledToFill()
@@ -59,7 +59,7 @@ struct ComposeScreen: View {
                                                             Image(systemName: "trash")
                                                         })
                                                     }
-                                                #else
+#else
                                                 Menu {
                                                     Button(action: {
                                                         withAnimation {
@@ -76,7 +76,7 @@ struct ComposeScreen: View {
                                                         .frame(width: 128, height: 128)
                                                         .cornerRadius(8)
                                                 }
-                                                #endif
+#endif
                                             }
                                         }
                                     }
@@ -102,9 +102,9 @@ struct ComposeScreen: View {
                                         Image(systemName: "plus")
                                     }.disabled(viewModel.pollViewModel.choices.count >= 4)
                                 }
-                                #if !os(macOS)
+#if !os(macOS)
                                 .padding(.vertical)
-                                #endif
+#endif
                                 ForEach($viewModel.pollViewModel.choices) { $choice in
                                     HStack {
                                         TextField(text: $choice.text) {
@@ -120,9 +120,9 @@ struct ComposeScreen: View {
                                         }
                                         .disabled(viewModel.pollViewModel.choices.count <= 2)
                                     }
-                                    #if !os(macOS)
+#if !os(macOS)
                                     .padding(.bottom)
-                                    #endif
+#endif
                                 }
                                 HStack {
                                     Spacer()
@@ -172,8 +172,8 @@ struct ComposeScreen: View {
                                 }
                             }
                             if viewModel.mediaViewModel.selectedItems.count == 0,
-                               case .success(let canPoll) = onEnum(of: viewModel.model.canPoll),
-                               canPoll.data == KotlinBoolean(bool: true) {
+                            case .success(let data) = onEnum(of: viewModel.model.supportedComposeEvent),
+                               data.data.contains(element: SupportedComposeEvent.poll.toKotlinEnum()) {
                                 Button(action: {
                                     withAnimation {
                                         viewModel.togglePoll()
@@ -215,8 +215,8 @@ struct ComposeScreen: View {
                                     }
                                 }
                             }
-                            if case .success(let canCW) = onEnum(of: viewModel.model.canCW),
-                               canCW.data == KotlinBoolean(bool: true) {
+                            if case .success(let data) = onEnum(of: viewModel.model.supportedComposeEvent),
+                               data.data.contains(element: SupportedComposeEvent.contentWarning.toKotlinEnum()) {
                                 Button(action: {
                                     withAnimation {
                                         viewModel.toggleCW()
@@ -242,17 +242,17 @@ struct ComposeScreen: View {
                                     if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
                                         ScrollView {
                                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                                                ForEach(1...emojis.data.count, id: \.self) { index in
-                                                    if let item = emojis.data[index - 1] as? UiEmoji {
-                                                        Button(action: {
-                                                            viewModel.addEmoji(emoji: item)
-                                                        }, label: {
-                                                            NetworkImage(url: URL(string: item.url)) { image in
-                                                                image.resizable().scaledToFit()
-                                                            }
-                                                        })
-                                                        .buttonStyle(.plain)
-                                                    }
+                                                ForEach(1...emojis.data.size, id: \.self) { index in
+                                                    let item = emojis.data.get(index: index - 1)
+                                                    Button(action: {
+                                                        viewModel.addEmoji(emoji: item)
+                                                    }, label: {
+                                                        NetworkImage(url: URL(string: item.url)) { image in
+                                                            image.resizable().scaledToFit()
+                                                        }
+                                                    })
+                                                    .buttonStyle(.plain)
+
                                                 }
                                             }
                                             .if(horizontalSizeClass == .compact, transform: { view in

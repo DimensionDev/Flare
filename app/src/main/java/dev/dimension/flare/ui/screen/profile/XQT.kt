@@ -35,7 +35,6 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentMapOf
 
-
 @Composable
 internal fun XQTProfileHeader(
     user: UiUser.XQT,
@@ -57,18 +56,20 @@ internal fun XQTProfileHeader(
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(12.dp)
-                            .alpha(MediumAlpha),
+                        modifier =
+                            Modifier
+                                .size(12.dp)
+                                .alpha(MediumAlpha),
                         tint = Color.Blue,
                     )
                 UiUser.XQT.VerifyType.Company ->
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(12.dp)
-                            .alpha(MediumAlpha),
+                        modifier =
+                            Modifier
+                                .size(12.dp)
+                                .alpha(MediumAlpha),
                         tint = Color.Yellow,
                     )
                 null -> Unit
@@ -85,10 +86,10 @@ internal fun XQTProfileHeader(
                                     // No-op
                                 },
                                 modifier =
-                                Modifier.placeholder(
-                                    true,
-                                    shape = ButtonDefaults.filledTonalShape,
-                                ),
+                                    Modifier.placeholder(
+                                        true,
+                                        shape = ButtonDefaults.filledTonalShape,
+                                    ),
                             ) {
                                 Text(text = stringResource(R.string.profile_header_button_follow))
                             }
@@ -104,13 +105,13 @@ internal fun XQTProfileHeader(
                                     ) {
                                         Text(
                                             text =
-                                            stringResource(
-                                                when {
-                                                    data.blocking -> R.string.profile_header_button_blocked
-                                                    data.following -> R.string.profile_header_button_following
-                                                    else -> R.string.profile_header_button_follow
-                                                },
-                                            ),
+                                                stringResource(
+                                                    when {
+                                                        data.blocking -> R.string.profile_header_button_blocked
+                                                        data.following -> R.string.profile_header_button_following
+                                                        else -> R.string.profile_header_button_follow
+                                                    },
+                                                ),
                                         )
                                     }
                                 }
@@ -126,9 +127,9 @@ internal fun XQTProfileHeader(
         content = {
             Column(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = screenHorizontalPadding),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = screenHorizontalPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 user.descriptionElement?.let {
@@ -142,13 +143,13 @@ internal fun XQTProfileHeader(
                 )
                 MatricesDisplay(
                     matrices =
-                    remember(user.matrices) {
-                        persistentMapOf(
-                            R.string.profile_misskey_header_status_count to user.matrices.statusesCountHumanized,
-                            R.string.profile_header_following_count to user.matrices.followsCountHumanized,
-                            R.string.profile_header_fans_count to user.matrices.fansCountHumanized,
-                        )
-                    },
+                        remember(user.matrices) {
+                            persistentMapOf(
+                                R.string.profile_misskey_header_status_count to user.matrices.statusesCountHumanized,
+                                R.string.profile_header_following_count to user.matrices.followsCountHumanized,
+                                R.string.profile_header_fans_count to user.matrices.fansCountHumanized,
+                            )
+                        },
                     expanded = expandMatrices,
                 )
             }

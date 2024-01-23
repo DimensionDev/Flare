@@ -7,6 +7,7 @@ struct StatusTimelineComponent: View {
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
     let blueskyEvent: BlueskyStatusEvent
+    let xqtEvent: XQTStatusEvent
     var body: some View {
         switch onEnum(of: data) {
         case .success(let success):
@@ -30,7 +31,8 @@ struct StatusTimelineComponent: View {
                     pagingSource: success.data,
                     mastodonEvent: mastodonEvent,
                     misskeyEvent: misskeyEvent,
-                    blueskyEvent: blueskyEvent
+                    blueskyEvent: blueskyEvent,
+                    xqtEvent: xqtEvent
                 )
             }
         case .error(let error):
@@ -53,6 +55,7 @@ struct StatusTimeline: View {
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
     let blueskyEvent: BlueskyStatusEvent
+    let xqtEvent: XQTStatusEvent
     var body: some View {
         if (pagingSource.loadState.refresh is Paging_commonLoadState.Loading ||
             pagingSource.loadState.prepend is Paging_commonLoadState.Loading) &&
@@ -78,7 +81,8 @@ struct StatusTimeline: View {
                             status: status,
                             mastodonEvent: mastodonEvent,
                             misskeyEvent: misskeyEvent,
-                            blueskyEvent: blueskyEvent
+                            blueskyEvent: blueskyEvent,
+                            xqtEvent: xqtEvent
                         )
                         .onTapGesture {
                             openURL(URL(string: AppDeepLink.StatusDetail.shared.invoke(statusKey: status.statusKey))!)
@@ -103,6 +107,7 @@ struct StatusItemView: View {
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
     let blueskyEvent: BlueskyStatusEvent
+    let xqtEvent: XQTStatusEvent
     var body: some View {
         switch onEnum(of: status) {
         case .mastodon(let mastodon):
@@ -117,6 +122,8 @@ struct StatusItemView: View {
             BlueskyStatusComponent(bluesky: bluesky, event: blueskyEvent)
         case .blueskyNotification(let blueskyNotification):
             BlueskyNotificationComponent(data: blueskyNotification)
+        case .xQT(let xqt):
+            XQTStatusComponent(xqt: xqt, event: xqtEvent)
         }
     }
 }

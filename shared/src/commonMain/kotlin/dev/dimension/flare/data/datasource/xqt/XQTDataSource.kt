@@ -75,12 +75,12 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             mediator =
-            MentionRemoteMediator(
-                service,
-                database,
-                account.accountKey,
-                pagingKey,
-            ),
+                MentionRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
         )
     }
 
@@ -211,14 +211,14 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             mediator =
-            StatusDetailRemoteMediator(
-                statusKey,
-                service,
-                database,
-                account.accountKey,
-                pagingKey,
-                statusOnly = false,
-            ),
+                StatusDetailRemoteMediator(
+                    statusKey,
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    statusOnly = false,
+                ),
         )
 
     override fun status(
@@ -231,14 +231,14 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             mediator =
-            StatusDetailRemoteMediator(
-                statusKey,
-                service,
-                database,
-                account.accountKey,
-                pagingKey,
-                statusOnly = true,
-            ),
+                StatusDetailRemoteMediator(
+                    statusKey,
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    statusOnly = true,
+                ),
         )
 
     override suspend fun compose(

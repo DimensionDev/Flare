@@ -20,6 +20,7 @@ internal class MentionRemoteMediator(
     private val pagingKey: String,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
     private var cursor: String? = null
+
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatusView>,

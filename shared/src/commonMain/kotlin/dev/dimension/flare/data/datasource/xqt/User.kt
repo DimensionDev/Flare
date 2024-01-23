@@ -22,7 +22,7 @@ data class UserByScreenNameRequest(
 @Serializable
 data class ProfileSpotlightsQueryRequest(
     @SerialName("screen_name")
-    val screenName: String? = null
+    val screenName: String? = null,
 )
 
 suspend fun XQTService.userById(id: String) =

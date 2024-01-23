@@ -181,7 +181,7 @@ struct TabItem<Content: View>: View {
 }
 
 @Observable
-class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
+class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, XQTStatusEvent {
     let accountRepository = KoinHelper.shared.accountRepository
     var composeStatus: ComposeStatus?
     func onReplyClick(status: UiStatus.Mastodon) {
@@ -284,13 +284,45 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
                     try? await mastodon.dataSource.deleteStatus(statusKey: statusKey)
                 case .misskey(let misskey):
                     try? await misskey.dataSource.deleteStatus(statusKey: statusKey)
+                case .xQT(let xqt):
+                    try? await xqt.dataSource.deleteStatus(statusKey: statusKey)
                 }
             }
         }
     }
+    func onReplyClick(status: UiStatus.XQT) {
+        composeStatus = ComposeStatusReply(statusKey: status.statusKey)
+    }
+    
+    func onReblogClick(status: UiStatus.XQT) {
+        Task {
+            if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountXQT {
+                try? await account.dataSource.retweet(status: status)
+            }
+        }
+    }
+    
+    func onLikeClick(status: UiStatus.XQT) {
+        Task {
+            if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountXQT {
+                try? await account.dataSource.like(status: status)
+            }
+        }
+    }
+    
+    func onBookmarkClick(status: UiStatus.XQT) {
+        Task {
+            if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountXQT {
+                try? await account.dataSource.bookmark(status: status)
+            }
+        }
+    }
+    
+    func onReportClick(status: UiStatus.XQT) {
+    }
 }
 
-class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent {
+class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, XQTStatusEvent {
     static let shared = EmptyStatusEvent()
     private init() {
         
@@ -330,5 +362,19 @@ class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEv
     func onReportClick(data: UiStatus.Bluesky, reason: BlueskyReportStatusStateReportReason) {
     }
     func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
+    }
+    func onReplyClick(status: UiStatus.XQT) {
+    }
+    
+    func onReblogClick(status: UiStatus.XQT) {
+    }
+    
+    func onLikeClick(status: UiStatus.XQT) {
+    }
+    
+    func onBookmarkClick(status: UiStatus.XQT) {
+    }
+    
+    func onReportClick(status: UiStatus.XQT) {
     }
 }

@@ -171,6 +171,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
         inReplyToStatusId = legacy.in_reply_to_status_id_str,
         inReplyToUserId = legacy.in_reply_to_user_id_str,
         poll = poll,
+        sensitive = legacy.possiblySensitive == true,
     )
 }
 
@@ -208,7 +209,7 @@ fun User.toUi() =
     )
 
 internal fun GetProfileSpotlightsQuery200Response.toUi(): UiRelation {
-    with (data.userResultByScreenName.result.legacy) {
+    with(data.userResultByScreenName.result.legacy) {
         return UiRelation.XQT(
             following = following ?: false,
             isFans = followedBy ?: false,

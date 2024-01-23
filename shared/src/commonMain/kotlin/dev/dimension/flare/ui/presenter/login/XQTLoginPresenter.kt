@@ -44,6 +44,7 @@ class XQTLoginPresenter(
                         )
                         toHome.invoke()
                     }.onFailure {
+                        it.printStackTrace()
                         error = it
                     }
                     loading = false

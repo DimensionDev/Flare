@@ -5,8 +5,11 @@ import Combine
 
 struct ServiceSelectScreen: View {
     @State var viewModel: ServiceSelectViewModel
+    @State var showXQT: Bool = false
+    let toHome: () -> Void
     init(toHome: @escaping () -> Void) {
         viewModel = ServiceSelectViewModel(toHome: toHome)
+        self.toHome = toHome
     }
     var body: some View {
         List {
@@ -29,43 +32,21 @@ struct ServiceSelectScreen: View {
             Section(header: HStack {
                 TextField("Instance URL, e.g. mastodon.social", text: $viewModel.instanceURL)
                     .disableAutocorrection(true)
-                #if !os(macOS)
+#if !os(macOS)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
-                #endif
+#endif
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .disabled(viewModel.model.loading)
                 switch onEnum(of: viewModel.model.detectedPlatformType) {
                 case .success(let success):
-                    switch success.data.toSwiftEnum() {
-                    case .bluesky:
-                        NetworkImage(
-                            url: .init(string: "https://blueskyweb.xyz/images/apple-touch-icon.png"),
-                            content: { image in
-                                image.resizable().frame(width: 24, height: 24)
-                            }
-                        )
-                        .frame(width: 24, height: 24)
-                    case .mastodon:
-                        NetworkImage(
-                            url: .init(
-                                string: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/" +
-                                "Mastodon_logotype_%28simple%29_new_hue.svg/" +
-                                "65px-Mastodon_logotype_%28simple%29_new_hue.svg.png"
-                            ),
-                            content: { image in
-                                image.resizable().frame(width: 24, height: 24)
-                            }
-                        ) .frame(width: 24, height: 24)
-                    case .misskey:
-                        NetworkImage(
-                            url: .init(string: "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png"),
-                            content: { image in
-                                image.resizable().frame(width: 24, height: 24)
-                            }
-                        )
-                        .frame(width: 24, height: 24)
-                    }
+                    NetworkImage(
+                        url: .init(string: success.data.logoUrl),
+                        content: { image in
+                            image.resizable().frame(width: 24, height: 24)
+                        }
+                    )
+                    .frame(width: 24, height: 24)
                 case .error:
                     Image(systemName: "questionmark")
                         .frame(width: 24, height: 24)
@@ -89,25 +70,25 @@ struct ServiceSelectScreen: View {
                                 text: $viewModel.blueskyInputViewModel.baseUrl
                             )
                             .disableAutocorrection(true)
-                            #if !os(macOS)
+#if !os(macOS)
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
-                            #endif
+#endif
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .disabled(viewModel.model.loading)
                             TextField("User Name", text: $viewModel.blueskyInputViewModel.username)
                                 .disableAutocorrection(true)
-                            #if !os(macOS)
+#if !os(macOS)
                                 .textInputAutocapitalization(.never)
-                            #endif
+#endif
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(viewModel.model.loading)
                             SecureField("Password", text: $viewModel.blueskyInputViewModel.password)
                                 .disableAutocorrection(true)
-                            #if !os(macOS)
+#if !os(macOS)
                                 .textInputAutocapitalization(.never)
                                 .keyboardType(.URL)
-                            #endif
+#endif
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(viewModel.model.loading)
                             Button(action: {
@@ -138,6 +119,17 @@ struct ServiceSelectScreen: View {
                     case .misskey:
                         Button {
                             viewModel.model.misskeyLoginState.login(host: viewModel.instanceURL)
+                        } label: {
+                            Text("Next")
+                                .frame(width: 200)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .listRowSeparator(.hidden)
+                        .frame(maxWidth: .infinity, alignment: Alignment.center)
+                        .disabled(viewModel.model.loading)
+                    case .xQt:
+                        Button {
+                            showXQT = true
                         } label: {
                             Text("Next")
                                 .frame(width: 200)
@@ -216,6 +208,15 @@ struct ServiceSelectScreen: View {
                 viewModel.model.misskeyLoginState.resume(url: url.absoluteString)
             }
         }
+        .sheet(isPresented: $showXQT) {
+            XQTLoginScreen(toHome: {
+                showXQT = false
+                toHome()
+            })
+#if os(macOS)
+            .frame(minWidth: 600, minHeight: 400)
+#endif
+        }
     }
 }
 
@@ -254,11 +255,11 @@ class ServiceSelectViewModel: MoleculeViewModelProto {
                 return
             }
             DispatchQueue.main.async {
-                #if os(macOS)
+#if os(macOS)
                 NSWorkspace.shared.open(url)
-                #else
+#else
                 UIApplication.shared.open(url)
-                #endif
+#endif
             }
         })
         self.model = presenter.models.value

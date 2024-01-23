@@ -64,7 +64,8 @@ struct ProfileScreen: View {
                 data: viewModel.model.listState,
                 mastodonEvent: statusEvent,
                 misskeyEvent: statusEvent,
-                blueskyEvent: statusEvent
+                blueskyEvent: statusEvent,
+                xqtEvent: statusEvent
             )
         }
         .refreshable {
@@ -129,6 +130,12 @@ struct ProfileScreen: View {
                             case .misskey(let misskeyRelation):
                                 MisskeyMenu(
                                     relation: misskeyRelation,
+                                    onMuteClick: { viewModel.model.mute(user: user.data, data: relation.data) },
+                                    onBlockClick: { viewModel.model.block(user: user.data, data: relation.data) }
+                                )
+                            case .xQT(let xqtRelation):
+                                XQTMenu(
+                                    relation: xqtRelation,
                                     onMuteClick: { viewModel.model.mute(user: user.data, data: relation.data) },
                                     onBlockClick: { viewModel.model.block(user: user.data, data: relation.data) }
                                 )
@@ -267,6 +274,8 @@ struct ProfileHeaderSuccess: View {
             MisskeyProfileHeader(user: misskey, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
         case .bluesky(let bluesky):
             BlueskyProfileHeader(user: bluesky, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
+        case .xQT(let xqt):
+            XQTProfileHeader(user: xqt, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
         }
     }
 }

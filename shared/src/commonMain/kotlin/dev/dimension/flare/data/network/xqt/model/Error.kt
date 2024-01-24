@@ -34,24 +34,24 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Error(
-    @SerialName(value = "code")
-    val code: kotlin.Int,
-    @SerialName(value = "extensions")
-    val extensions: ErrorExtensions,
-    @SerialName(value = "kind")
-    val kind: kotlin.String,
-    @SerialName(value = "locations")
-    val locations: kotlin.collections.List<Location>,
+//    @SerialName(value = "code")
+//    val code: kotlin.Int,
+//    @SerialName(value = "extensions")
+//    val extensions: ErrorExtensions,
+//    @SerialName(value = "kind")
+//    val kind: kotlin.String,
+//    @SerialName(value = "locations")
+//    val locations: kotlin.collections.List<Location>,
     @SerialName(value = "message")
     val message: kotlin.String,
-    @SerialName(value = "name")
-    val name: kotlin.String,
-    @SerialName(value = "path")
-    val path: kotlin.collections.List<kotlin.String>,
-    @SerialName(value = "retry_after")
-    val retryAfter: kotlin.Int,
-    @SerialName(value = "source")
-    val source: kotlin.String,
-    @SerialName(value = "tracing")
-    val tracing: Tracing,
+//    @SerialName(value = "name")
+//    val name: kotlin.String,
+//    @SerialName(value = "path")
+//    val path: kotlin.collections.List<kotlin.String>,
+////    @SerialName(value = "retry_after")
+////    val retryAfter: kotlin.Int,
+//    @SerialName(value = "source")
+//    val source: kotlin.String,
+//    @SerialName(value = "tracing")
+//    val tracing: Tracing,
 )

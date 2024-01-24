@@ -30,16 +30,16 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ErrorExtensions(
-    @SerialName(value = "code")
-    val code: kotlin.Int,
-    @SerialName(value = "kind")
-    val kind: kotlin.String,
+//    @SerialName(value = "code")
+//    val code: kotlin.Int,
+//    @SerialName(value = "kind")
+//    val kind: kotlin.String,
     @SerialName(value = "name")
     val name: kotlin.String,
-    @SerialName(value = "retry_after")
-    val retryAfter: kotlin.Int,
-    @SerialName(value = "source")
-    val source: kotlin.String,
-    @SerialName(value = "tracing")
-    val tracing: Tracing,
+//    @SerialName(value = "retry_after")
+//    val retryAfter: kotlin.Int,
+//    @SerialName(value = "source")
+//    val source: kotlin.String,
+//    @SerialName(value = "tracing")
+//    val tracing: Tracing,
 )

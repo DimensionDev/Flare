@@ -347,7 +347,7 @@ class XQTDataSource(
                 service.initUpload(
                     mediaType = mediaType,
                     totalBytes = totalBytes.toString(),
-                    category = if (mediaType.contains("video")) "tweet_video" else null,
+                    category = if (mediaType.contains("video")) "tweet_video" else "tweet_image",
                 ).mediaIDString ?: throw Error("init upload failed")
 
             var streamReadLength = 0

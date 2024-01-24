@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -278,7 +277,10 @@ private fun ComposeScreen(
     Column(
         modifier =
             modifier
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp), shape = MaterialTheme.shapes.large)
+                .background(
+                    MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                    shape = MaterialTheme.shapes.large,
+                )
                 .clip(MaterialTheme.shapes.large),
     ) {
         TopAppBar(
@@ -623,7 +625,7 @@ private fun ComposeScreen(
                         }
                     }
                     state.state.emojiState.onSuccess { emojis ->
-                        if (emojis.isNotEmpty()) {
+                        AnimatedVisibility(emojis.size > 0) {
                             IconButton(
                                 onClick = {
                                     state.setShowEmojiMenu(!state.showEmojiMenu)
@@ -649,8 +651,15 @@ private fun ComposeScreen(
                                         properties = PopupProperties(usePlatformDefaultWidth = true),
                                     ) {
                                         Card(
-                                            modifier = Modifier.sizeIn(maxHeight = 256.dp, maxWidth = 384.dp),
-                                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
+                                            modifier =
+                                                Modifier.sizeIn(
+                                                    maxHeight = 256.dp,
+                                                    maxWidth = 384.dp,
+                                                ),
+                                            elevation =
+                                                CardDefaults.elevatedCardElevation(
+                                                    defaultElevation = 3.dp,
+                                                ),
                                         ) {
                                             LazyVerticalGrid(
                                                 columns = GridCells.Adaptive(36.dp),
@@ -658,7 +667,8 @@ private fun ComposeScreen(
                                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                             ) {
-                                                items(emojis) { emoji ->
+                                                items(emojis.size) { index ->
+                                                    val emoji = emojis[index]
                                                     NetworkImage(
                                                         model = emoji.url,
                                                         contentDescription = emoji.shortcode,
@@ -1023,6 +1033,17 @@ private fun composePresenter(
                                     },
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+                                quoteUsername =
+                                    (status as? ComposeStatus.Quote)?.let {
+                                        if (state.replyState is UiState.Success) {
+                                            (state.replyState as UiState.Success).data
+                                                .peek(0)?.let {
+                                                    it as? UiStatus.XQT
+                                                }?.user?.handle
+                                        } else {
+                                            null
+                                        }
+                                    },
                                 content = textFieldState.text.toString(),
                                 poll =
                                     if (pollState is UiState.Success && pollState.data.enabled) {

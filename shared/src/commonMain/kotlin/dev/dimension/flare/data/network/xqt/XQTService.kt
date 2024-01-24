@@ -4,6 +4,7 @@ import dev.dimension.flare.data.network.authorization.BearerAuthorization
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
 import dev.dimension.flare.data.network.xqt.api.GuestApi
+import dev.dimension.flare.data.network.xqt.api.MediaApi
 import dev.dimension.flare.data.network.xqt.api.OtherApi
 import dev.dimension.flare.data.network.xqt.api.PostApi
 import dev.dimension.flare.data.network.xqt.api.TweetApi
@@ -23,6 +24,7 @@ import io.ktor.util.KtorDsl
 
 private val baseUrl = "https://$xqtHost/i/api/"
 private val guestApiUrl = "https://api.$xqtHost/"
+private val uploadUrl = "https://upload.$xqtHost/i/"
 private val token =
     "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 
@@ -70,7 +72,12 @@ class XQTService(
     GuestApi by config(
         url = guestApiUrl,
         chocolate = chocolate,
+    ).create(),
+    MediaApi by config(
+        url = uploadUrl,
+        chocolate = chocolate,
     ).create() {
+
     companion object {
         fun checkChocolate(value: String) = value.contains("gt=") && value.contains("ct0=") && value.contains("auth_token=")
     }

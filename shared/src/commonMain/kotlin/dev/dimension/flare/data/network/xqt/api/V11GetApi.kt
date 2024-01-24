@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.xqt.api
 import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
+import dev.dimension.flare.data.network.xqt.model.UserRecommendationsItem
 
 interface V11GetApi {
     /**
@@ -74,4 +75,28 @@ interface V11GetApi {
         @Query("src") src: kotlin.String = "search_box",
         @Query("result_type") resultType: kotlin.String = "events,users,topics",
     ): Response<Unit>
+
+    @GET("1.1/users/recommendations.json")
+    suspend fun getUserRecommendations(
+        @Query("include_profile_interstitial_type") includeProfileInterstitialType: Int = 1,
+        @Query("include_blocking") includeBlocking: Int = 1,
+        @Query("include_blocked_by") includeBlockedBy: Int = 1,
+        @Query("include_followed_by") includeFollowedBy: Int = 1,
+        @Query("include_want_retweets") includeWantRetweets: Int = 1,
+        @Query("include_mute_edge") includeMuteEdge: Int = 1,
+        @Query("include_can_dm") includeCanDm: Int = 1,
+        @Query("include_can_media_tag") includeCanMediaTag: Int = 1,
+        @Query("include_ext_has_nft_avatar") includeExtHasNftAvatar: Int = 1,
+        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: Int = 1,
+        @Query("include_ext_verified_type") includeExtVerifiedType: Int = 1,
+        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: Int = 1,
+        @Query("skip_status") skipStatus: Int = 1,
+        @Query("pc") pc: Boolean = true,
+        @Query("display_location") displayLocation: String = "profile_accounts_sidebar",
+        @Query("limit") limit: Int = 3,
+        @Query("user_id") userId: String,
+        @Query("ext") ext: String = "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl"
+    ): List<UserRecommendationsItem>
+
 }
+

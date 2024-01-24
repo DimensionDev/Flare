@@ -163,7 +163,18 @@ internal fun ColumnScope.XQTUserMenu(
     user: UiUser,
     relation: UiRelation.XQT,
     onBlockClick: () -> Unit,
+    onMuteClick: () -> Unit,
 ) {
+    DropdownMenuItem(
+        text = {
+            if (relation.muting) {
+                Text(text = stringResource(R.string.user_unmute, user.handle))
+            } else {
+                Text(text = stringResource(R.string.user_mute, user.handle))
+            }
+        },
+        onClick = onMuteClick,
+    )
     DropdownMenuItem(
         text = {
             if (relation.blocking) {

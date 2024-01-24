@@ -576,6 +576,10 @@ private fun ProfileMenu(
                                         setShowMoreMenus(false)
                                         profileState.block(user, relation)
                                     },
+                                    onMuteClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.mute(user, relation)
+                                    },
                                 )
                         }
                     }

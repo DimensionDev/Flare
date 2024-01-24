@@ -4,6 +4,10 @@ import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
+import dev.dimension.flare.data.network.xqt.model.CreateBookmark200Response
+import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
+import dev.dimension.flare.data.network.xqt.model.DeleteBookmark200Response
+import dev.dimension.flare.data.network.xqt.model.DeleteBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.PostCreateRetweet200Response
 import dev.dimension.flare.data.network.xqt.model.PostCreateRetweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostCreateTweet200Response
@@ -113,4 +117,16 @@ interface PostApi {
         @Path("pathQueryId") pathQueryId: kotlin.String = "ZYKSe-w7KEslx3JhSIk5LA",
         @Body postUnfavoriteTweetRequest: PostUnfavoriteTweetRequest,
     ): Response<PostUnfavoriteTweet200Response>
+
+    @POST("graphql/{pathQueryId}/CreateBookmark")
+    suspend fun postCreateBookmark(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "aoDbu3RHznuiSkQ9aNM67Q",
+        @Body postCreateBookmarkRequest: CreateBookmarkRequest,
+    ): Response<CreateBookmark200Response>
+
+    @POST("graphql/{pathQueryId}/DeleteBookmark")
+    suspend fun postDeleteBookmark(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "Wlmlj2-xzyS1GN3a6cj-mQ",
+        @Body postDeleteBookmarkRequest: DeleteBookmarkRequest,
+    ): Response<DeleteBookmark200Response>
 }

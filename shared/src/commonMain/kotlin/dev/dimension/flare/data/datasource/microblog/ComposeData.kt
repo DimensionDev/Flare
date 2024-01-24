@@ -56,6 +56,7 @@ data class XQTComposeData(
     val content: String,
     val inReplyToID: String?,
     val quoteId: String?,
+    val quoteUsername: String?,
     val medias: List<FileItem>,
     val poll: Poll?,
 ) : ComposeData {

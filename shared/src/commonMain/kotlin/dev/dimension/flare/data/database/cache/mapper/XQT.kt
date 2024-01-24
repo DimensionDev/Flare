@@ -13,12 +13,14 @@ import dev.dimension.flare.data.network.xqt.model.TimelineTimelineCursor
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineItem
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTweet
+import dev.dimension.flare.data.network.xqt.model.TimelineUser
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
+import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -212,8 +214,8 @@ internal fun List<InstructionUnion>.cursor() =
         }
     }.firstOrNull()
 
-internal fun TopLevel.tweets(): List<XQTTimeline> =
-    timeline
+internal fun TopLevel.tweets(): List<XQTTimeline> {
+    return timeline
         ?.instructions
         ?.asSequence()
         ?.flatMap {
@@ -270,6 +272,39 @@ internal fun TopLevel.tweets(): List<XQTTimeline> =
         }
         ?.toList()
         .orEmpty()
+}
+
+internal fun List<InstructionUnion>.users(): List<User> =
+    flatMap { union ->
+        when (union) {
+            is TimelineAddEntries ->
+                union.propertyEntries
+                    .flatMap { entry ->
+                        when (entry.content) {
+                            is TimelineTimelineCursor -> emptyList()
+                            is TimelineTimelineItem -> listOf(entry.content.itemContent)
+                            is TimelineTimelineModule ->
+                                entry.content.items?.map {
+                                    it.item.itemContent
+                                }.orEmpty()
+                        }
+                    }
+
+            else -> emptyList()
+        }
+    }
+        .mapNotNull { content ->
+            when (content) {
+                is TimelineUser -> content.userResults.result
+                else -> null
+            }
+        }
+        .mapNotNull {
+            when (it) {
+                is User -> it
+                is UserUnavailable -> null
+            }
+        }
 
 internal fun TopLevel.cursor(): String? =
     timeline

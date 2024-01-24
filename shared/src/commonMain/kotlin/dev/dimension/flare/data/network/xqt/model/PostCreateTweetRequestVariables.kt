@@ -40,4 +40,6 @@ data class PostCreateTweetRequestVariables(
     val tweetText: kotlin.String = "test",
     @SerialName(value = "reply")
     val reply: PostCreateTweetRequestVariablesReply? = null,
+    @SerialName(value = "attachment_url")
+    val attachmentUrl: kotlin.String? = null,
 )

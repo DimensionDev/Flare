@@ -87,4 +87,28 @@ interface V11PostApi {
         @Field("skip_status") skipStatus: kotlin.Int = 1,
         @Field("user_id") userId: kotlin.String = "44196397",
     ): Response<Unit>
+
+    @FormUrlEncoded
+    @POST("1.1/mutes/users/create.json")
+    suspend fun postMutesUsersCreate(
+        @Field("user_id") userId: kotlin.String = "44196397",
+    ): Response<Unit>
+
+    @FormUrlEncoded
+    @POST("1.1/mutes/users/destroy.json")
+    suspend fun postMutesUsersDestroy(
+        @Field("user_id") userId: kotlin.String = "44196397",
+    ): Response<Unit>
+
+    @FormUrlEncoded
+    @POST("1.1/blocks/create.json")
+    suspend fun postBlocksCreate(
+        @Field("user_id") userId: kotlin.String = "44196397",
+    ): Response<Unit>
+
+    @FormUrlEncoded
+    @POST("1.1/blocks/destroy.json")
+    suspend fun postBlocksDestroy(
+        @Field("user_id") userId: kotlin.String = "44196397",
+    ): Response<Unit>
 }

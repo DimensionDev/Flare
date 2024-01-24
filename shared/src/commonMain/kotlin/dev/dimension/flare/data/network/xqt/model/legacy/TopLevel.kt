@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.xqt.model.legacy
 
+import dev.dimension.flare.data.network.mastodon.api.model.Trend
 import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.TweetLegacy
 import dev.dimension.flare.data.network.xqt.model.UserLegacy
@@ -59,7 +60,8 @@ data class TopLevel(
 
     @Serializable
     data class ItemContent(
-        val tweet: ContentTweet? = null
+        val tweet: ContentTweet? = null,
+        val trend: Trend? = null
     )
 
     @Serializable

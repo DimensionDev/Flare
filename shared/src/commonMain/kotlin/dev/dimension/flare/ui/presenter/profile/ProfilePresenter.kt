@@ -143,8 +143,8 @@ class ProfilePresenter(
                             }
 
                             is UiRelation.XQT -> {
-//                                require(service is XQTDataSource)
-//                                if (data.muted) service.unmute(user.userKey) else service.mute(user.userKey)
+                                require(service is XQTDataSource)
+                                if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
                             }
                         }
                     }

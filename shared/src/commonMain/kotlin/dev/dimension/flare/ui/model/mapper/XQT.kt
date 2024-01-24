@@ -208,7 +208,7 @@ fun User.toUi() =
             },
     )
 
-internal fun GetProfileSpotlightsQuery200Response.toUi(): UiRelation {
+internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelation {
     with(data.userResultByScreenName.result.legacy) {
         return UiRelation.XQT(
             following = following ?: false,
@@ -216,6 +216,7 @@ internal fun GetProfileSpotlightsQuery200Response.toUi(): UiRelation {
             blocking = blocking ?: false,
             blockedBy = blockedBy ?: false,
             protected = protected ?: false,
+            muting = muting,
         )
     }
 }

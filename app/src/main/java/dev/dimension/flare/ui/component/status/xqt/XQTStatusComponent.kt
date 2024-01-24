@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.DropdownMenuItem
@@ -116,21 +117,54 @@ private fun RowScope.StatusFooterComponent(
             event.onReplyClick(actualData, uriHandler)
         },
     )
-    StatusActionButton(
+    StatusActionGroup(
         icon = Icons.Default.SyncAlt,
         text = actualData.matrices.humanizedRetweetCount,
         modifier =
             Modifier
                 .weight(1f),
-        onClicked = {
-            event.onReblogClick(actualData)
-        },
         color =
             if (actualData.reaction.retweeted) {
                 MaterialTheme.colorScheme.primary
             } else {
                 LocalContentColor.current
             },
+        subMenus = { closeMenu ->
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(id = R.string.blusky_item_action_repost),
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.SyncAlt,
+                        contentDescription = null,
+                    )
+                },
+                onClick = {
+                    closeMenu.invoke()
+                    event.onReblogClick(actualData)
+                },
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = stringResource(id = R.string.blusky_item_action_quote),
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.FormatQuote,
+                        contentDescription = null,
+                    )
+                },
+                onClick = {
+                    closeMenu.invoke()
+                    event.onQuoteClick(actualData, uriHandler)
+                },
+            )
+        },
     )
     StatusActionButton(
         icon =
@@ -237,6 +271,11 @@ internal interface XQTStatusEvent {
     )
 
     fun onReportClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    )
+
+    fun onQuoteClick(
         data: UiStatus.XQT,
         uriHandler: UriHandler,
     )

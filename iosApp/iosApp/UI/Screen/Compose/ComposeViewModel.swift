@@ -40,7 +40,7 @@ class ComposeViewModel: MoleculeViewModelProto {
     }
     func send() {
         Task {
-            if case .success(let account) = onEnum(of: model.account) {
+            if case .success(let account) = onEnum(of: self.model.account) {
                 let data = switch onEnum(of: account.data) {
                 case .bluesky(let bluesky):
                     BlueskyComposeData(
@@ -81,6 +81,7 @@ class ComposeViewModel: MoleculeViewModelProto {
                         content: text,
                         inReplyToID: getReplyId(),
                         quoteId: getQuoteId(),
+                        quoteUsername: getXQTUserName(),
                         medias: getMedia(),
                         poll: getXQTPoll()
                     )
@@ -159,6 +160,14 @@ class ComposeViewModel: MoleculeViewModelProto {
                 expiredAfter: pollViewModel.expired.inWholeMilliseconds,
                 multiple: pollViewModel.pollType == ComposePollType.multiple
             )
+        } else {
+            nil
+        }
+    }
+    private func getXQTUserName() -> String? {
+        if case .success(let data) = onEnum(of: self.model.replyState),
+           let status = data.data.peek(index: 0) as? UiStatus.XQT {
+            status.user.rawHandle
         } else {
             nil
         }

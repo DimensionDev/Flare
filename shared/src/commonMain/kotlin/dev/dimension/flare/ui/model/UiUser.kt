@@ -147,7 +147,7 @@ sealed class UiUser {
     data class XQT(
         override val userKey: MicroBlogKey,
         val displayName: String,
-        val handleInternal: String,
+        val rawHandle: String,
         override val avatarUrl: String,
         override val bannerUrl: String?,
         val description: String?,
@@ -156,7 +156,7 @@ sealed class UiUser {
         val location: String?,
         val url: String?,
     ) : UiUser() {
-        override val handle: String = "@$handleInternal"
+        override val handle: String = "@$rawHandle"
 
         val fieldsParsed by lazy {
             persistentMapOf<String, Element>().apply {

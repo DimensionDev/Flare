@@ -293,7 +293,6 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
     func onReplyClick(status: UiStatus.XQT) {
         composeStatus = ComposeStatusReply(statusKey: status.statusKey)
     }
-    
     func onReblogClick(status: UiStatus.XQT) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountXQT {
@@ -301,7 +300,6 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
             }
         }
     }
-    
     func onLikeClick(status: UiStatus.XQT) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountXQT {
@@ -309,7 +307,6 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
             }
         }
     }
-    
     func onBookmarkClick(status: UiStatus.XQT) {
         Task {
             if let account = accountRepository.get(accountKey: status.accountKey) as? UiAccountXQT {
@@ -317,15 +314,17 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
             }
         }
     }
-    
     func onReportClick(status: UiStatus.XQT) {
+    }
+    func onQuoteClick(status: UiStatus.XQT) {
+        composeStatus = ComposeStatusQuote(statusKey: status.statusKey)
     }
 }
 
 class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, XQTStatusEvent {
     static let shared = EmptyStatusEvent()
     private init() {
-        
+
     }
     func onReplyClick(status: UiStatus.Mastodon) {
     }
@@ -365,16 +364,18 @@ class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEv
     }
     func onReplyClick(status: UiStatus.XQT) {
     }
-    
+
     func onReblogClick(status: UiStatus.XQT) {
     }
-    
+
     func onLikeClick(status: UiStatus.XQT) {
     }
-    
+
     func onBookmarkClick(status: UiStatus.XQT) {
     }
-    
+
     func onReportClick(status: UiStatus.XQT) {
+    }
+    func onQuoteClick(status: UiStatus.XQT) {
     }
 }

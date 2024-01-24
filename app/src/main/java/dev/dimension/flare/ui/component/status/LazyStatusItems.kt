@@ -618,6 +618,16 @@ internal class DefaultStatusEvent(
                 .deeplink(),
         )
     }
+
+    override fun onQuoteClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
 }
 
 internal data object EmptyStatusEvent : StatusEvent {
@@ -740,6 +750,11 @@ internal data object EmptyStatusEvent : StatusEvent {
     ) = Unit
 
     override fun onDeleteClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onQuoteClick(
         data: UiStatus.XQT,
         uriHandler: UriHandler,
     ) = Unit

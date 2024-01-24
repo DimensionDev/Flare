@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
@@ -10,7 +9,7 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 class DiscoverPresenter : PresenterBase<DiscoverState>() {
@@ -18,22 +17,46 @@ class DiscoverPresenter : PresenterBase<DiscoverState>() {
     override fun body(): DiscoverState {
         val accountState = activeAccountServicePresenter()
         val users =
-            accountState.map { (dataSource, account) ->
+            accountState.flatMap { (dataSource, account) ->
                 remember(account.accountKey) {
-                    dataSource.discoverUsers()
-                }.collectPagingProxy()
+                    runCatching {
+                        dataSource.discoverUsers()
+                    }.getOrNull()
+                }?.collectPagingProxy().let {
+                    if (it == null) {
+                        UiState.Error(Throwable("No data"))
+                    } else {
+                        UiState.Success(it)
+                    }
+                }
             }
         val status =
-            accountState.map { (dataSource, account) ->
+            accountState.flatMap { (dataSource, account) ->
                 remember(account.accountKey) {
-                    dataSource.discoverStatuses()
-                }.collectPagingProxy()
+                    runCatching {
+                        dataSource.discoverStatuses()
+                    }.getOrNull()
+                }?.collectPagingProxy().let {
+                    if (it == null) {
+                        UiState.Error(Throwable("No data"))
+                    } else {
+                        UiState.Success(it)
+                    }
+                }
             }
         val hashtags =
-            accountState.map { (dataSource, account) ->
+            accountState.flatMap { (dataSource, account) ->
                 remember(account.accountKey) {
-                    dataSource.discoverHashtags()
-                }.collectPagingProxy()
+                    runCatching {
+                        dataSource.discoverHashtags()
+                    }.getOrNull()
+                }?.collectPagingProxy().let {
+                    if (it == null) {
+                        UiState.Error(Throwable("No data"))
+                    } else {
+                        UiState.Success(it)
+                    }
+                }
             }
 
         return object : DiscoverState {

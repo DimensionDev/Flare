@@ -17,12 +17,17 @@ internal class TrendHashtagPagingSource(
             service.getGuide(count = params.loadSize)
                 .timeline
                 ?.instructions
+                ?.asSequence()
                 ?.mapNotNull {
                     it.addEntries?.entries
                 }
                 ?.flatten()
                 ?.mapNotNull {
-                    it.content?.item?.content?.trend
+                    it.content?.timelineModule?.items
+                }
+                ?.flatten()
+                ?.mapNotNull {
+                    it.item?.content?.trend
                 }
                 ?.map {
                     UiHashtag(
@@ -30,6 +35,7 @@ internal class TrendHashtagPagingSource(
                         description = null,
                     )
                 }
+                ?.toList()
                 .orEmpty()
                 .let {
                     return LoadResult.Page(
@@ -39,6 +45,7 @@ internal class TrendHashtagPagingSource(
                     )
                 }
         } catch (e: Throwable) {
+            e.printStackTrace()
             return LoadResult.Error(e)
         }
     }

@@ -41,8 +41,24 @@ data class TopLevel(
     @Serializable
     data class EntryContent(
         val operation: Operation? = null,
+        val item: Item? = null,
+        val timelineModule: TimelineModule? = null
+    )
+    @Serializable
+    data class TimelineModule (
+        val items: List<ItemElement>? = null,
+        val displayType: String? = null,
+//        val header: Header? = null,
+//        val clientEventInfo: TimelineModuleClientEventInfo? = null
+    )
+
+    @Serializable
+    data class ItemElement (
+        @SerialName("entryId")
+        val entryID: String? = null,
         val item: Item? = null
     )
+
 
     @Serializable
     data class Item(
@@ -63,6 +79,19 @@ data class TopLevel(
         val tweet: ContentTweet? = null,
         val trend: Trend? = null
     )
+
+    @Serializable
+    data class Trend (
+        val name: String? = null,
+//        val url: String? = null,
+//        val promotedMetadata: PromotedMetadata? = null,
+        val description: String? = null,
+        val metaDescription: String? = null,
+//        val associatedCardUrls: JsonArray? = null,
+//        val trendMetadata: TrendTrendMetadata? = null,
+        val rank: String? = null
+    )
+
 
     @Serializable
     data class ContentTweet(

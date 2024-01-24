@@ -47,21 +47,31 @@ struct XQTStatusComponent: View {
                     })
                     .opacity(0.6)
                     Spacer()
-                    Button(action: {
-                        event.onReblogClick(status: actual)
+                    Menu(content: {
+                        Button(action: {
+                            event.onReblogClick(status: actual)
+                        }, label: {
+                            Label("Reblog", systemImage: "arrow.left.arrow.right")
+                        })
+                        Button(action: {
+                            event.onQuoteClick(status: actual)
+                        }, label: {
+                            Label("Quote", systemImage: "quote.bubble.fill")
+                        })
                     }, label: {
-                        HStack {
-                            Image(systemName: "arrow.left.arrow.right")
-                            if let humanizedReblogCount = actual.matrices.humanizedRetweetCount, appSettings.appearanceSettings.showNumbers {
-                                Text(humanizedReblogCount)
-                            }
-                        }
-                        .if(actual.reaction.retweeted) { view in
-                            view.foregroundStyle(.link)
+                        Image(systemName: "arrow.left.arrow.right")
+                            .font(.caption)
+                        if let humanizedRetweetCount = actual.matrices.humanizedRetweetCount, appSettings.appearanceSettings.showNumbers {
+                            Text(humanizedRetweetCount)
+                                .font(.caption)
                         }
                     })
                     .if(!actual.reaction.retweeted) { view in
                         view.opacity(0.6)
+                    }
+                    .if(actual.reaction.retweeted) { view in
+                        view
+                            .tint(.accentColor)
                     }
                     Spacer()
                     Button(action: {
@@ -160,4 +170,5 @@ protocol XQTStatusEvent {
     func onMediaClick(media: UiMedia)
     func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey)
     func onReportClick(status: UiStatus.XQT)
+    func onQuoteClick(status: UiStatus.XQT)
 }

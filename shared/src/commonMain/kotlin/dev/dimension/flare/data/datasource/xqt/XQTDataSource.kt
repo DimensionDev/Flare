@@ -472,7 +472,7 @@ class XQTDataSource(
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
         // not supported
-        throw NotImplementedError()
+        throw UnsupportedOperationException("Bluesky does not support discover statuses")
     }
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
@@ -527,7 +527,7 @@ class XQTDataSource(
                         PostUnfavoriteTweetRequest(
                             variables = PostCreateRetweetRequestVariables(tweetId = status.statusKey.id),
                         ),
-                ).body()?.data
+                )
             } else {
                 service.postFavoriteTweet(
                     postFavoriteTweetRequest =
@@ -540,6 +540,7 @@ class XQTDataSource(
                 )
             }
         }.onFailure {
+            it.printStackTrace()
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,
@@ -604,7 +605,7 @@ class XQTDataSource(
                         PostDeleteRetweetRequest(
                             variables = PostDeleteRetweetRequestVariables(sourceTweetId = status.statusKey.id),
                         ),
-                ).body()?.data
+                )
             } else {
                 service.postCreateRetweet(
                     postCreateRetweetRequest =
@@ -617,6 +618,7 @@ class XQTDataSource(
                 )
             }
         }.onFailure {
+            it.printStackTrace()
             updateStatusUseCase<StatusContent.XQT>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,
@@ -681,7 +683,7 @@ class XQTDataSource(
                                     tweetId = status.statusKey.id,
                                 ),
                         ),
-                ).body()?.data
+                )
             } else {
                 service.postCreateBookmark(
                     postCreateBookmarkRequest =
@@ -694,6 +696,7 @@ class XQTDataSource(
                 )
             }
         }.onFailure {
+            it.printStackTrace()
             updateStatusUseCase<StatusContent.XQT>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,

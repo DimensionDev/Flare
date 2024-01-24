@@ -1039,7 +1039,7 @@ private fun composePresenter(
                                             (state.replyState as UiState.Success).data
                                                 .peek(0)?.let {
                                                     it as? UiStatus.XQT
-                                                }?.user?.handle
+                                                }?.user?.rawHandle
                                         } else {
                                             null
                                         }

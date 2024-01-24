@@ -47,7 +47,7 @@ internal fun EntryXQTLoginRoute(navigator: DestinationsNavigator) {
 @Composable
 private fun XQTLoginScreen(toHome: () -> Unit) {
     val state by producePresenter { xQtLoginPresenter(toHome) }
-    val webViewState = rememberWebViewState(UiApplication.XQT.host)
+    val webViewState = rememberWebViewState("https://${UiApplication.XQT.host}")
     LaunchedEffect(Unit) {
         while (true) {
             if (!state.loading) {

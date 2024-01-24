@@ -185,7 +185,7 @@ fun User.toUi() =
                 host = xqtHost,
             ),
         displayName = legacy.name,
-        handleInternal = legacy.screenName,
+        rawHandle = legacy.screenName,
         avatarUrl = legacy.profileImageUrlHttps.replaceWithOriginImageUrl(),
         bannerUrl = legacy.profileBannerUrl,
         description = legacy.description?.takeIf { it.isNotEmpty() },

@@ -12,6 +12,7 @@ import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -96,13 +97,21 @@ data class TweetDetailRequest(
     val focalTweetID: String,
     val cursor: String? = null,
     // tweet/profile/home
+    @Required
     val referrer: String = "tweet",
     @SerialName("with_rux_injections")
+    @Required
     val withRuxInjections: Boolean = false,
+    @Required
     val includePromotedContent: Boolean = true,
+    @Required
     val withCommunity: Boolean = true,
+    @Required
     val withQuickPromoteEligibilityTweetFields: Boolean = true,
+    @Required
     val withBirdwatchNotes: Boolean = true,
+    @Required
     val withVoice: Boolean = true,
+    @Required
     val withV2Timeline: Boolean = true,
 )

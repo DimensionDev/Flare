@@ -40,8 +40,8 @@ private fun config(
 class XQTService(
     private val chocolate: String? = null,
 ) : DefaultApi by config(
-        chocolate = chocolate,
-    ).create(),
+    chocolate = chocolate,
+).create(),
     OtherApi by config(
         chocolate = chocolate,
     ).create(),
@@ -79,11 +79,12 @@ class XQTService(
     ).create() {
 
     companion object {
-        fun checkChocolate(value: String) = value.contains("gt=") && value.contains("ct0=") && value.contains("auth_token=")
+        fun checkChocolate(value: String) =
+            value.contains("gt=") && value.contains("ct0=") && value.contains("auth_token=")
     }
 }
 
-private class XQTHeaderPlugin(
+internal class XQTHeaderPlugin(
     private val chocolate: String? = null,
 ) {
     @KtorDsl
@@ -115,7 +116,10 @@ private class XQTHeaderPlugin(
         client.requestPipeline.intercept(HttpRequestPipeline.State) {
             context.headers {
                 append("x-twitter-client-language", "en")
-                append("Sec-Ch-Ua", "\"Chromium\";v=\"116\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"116\"")
+                append(
+                    "Sec-Ch-Ua",
+                    "\"Chromium\";v=\"116\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"116\""
+                )
                 append("Sec-Ch-Ua-Mobile", "?0")
                 append("Sec-Fetch-Dest", "empty")
                 append("Sec-Fetch-Mode", "cors")
@@ -126,11 +130,17 @@ private class XQTHeaderPlugin(
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
                 )
                 if (chocolate != null) {
-                    append("x-guest-token", chocolate.split("; ").first { it.startsWith("gt=") }.removePrefix("gt="))
-                    append("Cookie", chocolate)
-                    append("x-twitter-active-user", "yes")
-                    append("x-twitter-auth-type", "OAuth2Session")
-                    append("x-csrf-token", chocolate.split("; ").first { it.startsWith("ct0=") }.removePrefix("ct0="))
+                    val guestToken = chocolate.split("; ").firstOrNull { it.startsWith("gt=") }
+                        ?.removePrefix("gt=")
+                    val csrfToken = chocolate.split("; ").firstOrNull { it.startsWith("ct0=") }
+                        ?.removePrefix("ct0=")
+                    if (guestToken != null && csrfToken != null) {
+                        append("x-guest-token", guestToken)
+                        append("Cookie", chocolate)
+                        append("x-twitter-active-user", "yes")
+                        append("x-twitter-auth-type", "OAuth2Session")
+                        append("x-csrf-token", csrfToken)
+                    }
                 }
             }
         }

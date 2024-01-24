@@ -4,16 +4,21 @@ import shared
 
 struct XQTLoginScreen: View {
     @State var viewModel: XQTViewModel
+    let url = "https://" + UiApplicationXQT.shared.host
     init(toHome: @escaping () -> Void) {
         viewModel = XQTViewModel(toHome: toHome)
         viewModel.clearCookie()
     }
     var body: some View {
-        WebView(url: URL(string: "https://" + UiApplicationXQT.shared.host), configuration: viewModel.configuration) { webView in
-            webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
-            viewModel.observe(webView: webView)
+        ZStack {
+            if viewModel.canShowWebView {
+                WebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
+                    webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
+                    viewModel.observe(webView: webView)
+                }
+            }
         }
-            .activateViewModel(viewModel: viewModel)
+        .activateViewModel(viewModel: viewModel)
     }
 }
 
@@ -23,6 +28,7 @@ class XQTViewModel: MoleculeViewModelProto {
     typealias Presenter = XQTLoginPresenter
     let presenter: XQTLoginPresenter
     var model: Model
+    var canShowWebView = false
     private var observers = [NSKeyValueObservation]()
     init(toHome: @escaping () -> Void) {
         presenter = XQTLoginPresenter(toHome: toHome)
@@ -36,12 +42,13 @@ class XQTViewModel: MoleculeViewModelProto {
     func clearCookie() {
         let dataStore = WKWebsiteDataStore.default()
         dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-          dataStore.removeData(
-            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-            for: records.filter { $0.displayName.contains(xqtHost) },
-            completionHandler: {
-            }
-          )
+            dataStore.removeData(
+                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+                for: records.filter { $0.displayName.contains(xqtHost) },
+                completionHandler: {
+                    self.canShowWebView = true
+                }
+            )
         }
     }
     func observe(webView: WKWebView) {
@@ -50,11 +57,11 @@ class XQTViewModel: MoleculeViewModelProto {
         })
     }
     func getCookies(webView: WKWebView) {
-        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies() { (cookies) in
+        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies) in
             var cookieString = ""
             for cookie in cookies {
-                if (cookie.domain.contains(xqtHost)) {
-                    cookieString += "\(cookie.name)=\(cookie.value);"
+                if cookie.domain.contains(xqtHost) {
+                    cookieString += "\(cookie.name)=\(cookie.value); "
                 }
             }
             if self.model.checkChocolate(cookie: cookieString), !self.presenter.models.value.loading {

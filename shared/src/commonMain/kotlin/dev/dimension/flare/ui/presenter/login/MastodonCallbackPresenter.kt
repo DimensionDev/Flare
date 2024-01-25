@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import co.touchlab.kermit.Logger
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
@@ -47,9 +46,6 @@ class MastodonCallbackPresenter(
             }
         }
         if (error != null) {
-            Logger.e(throwable = error) {
-                error.toString()
-            }
             return UiState.Error(error!!)
         }
         return UiState.Loading()

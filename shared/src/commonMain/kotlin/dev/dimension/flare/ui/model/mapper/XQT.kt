@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
+import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
 import dev.dimension.flare.data.network.xqt.model.Media
@@ -136,7 +137,14 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
     val text =
         legacy?.fullText?.let {
             if (legacy.displayTextRange.size == 2) {
-                it.substring(legacy.displayTextRange[0], legacy.displayTextRange[1])
+                it.codePointSequence()
+                    .drop(legacy.displayTextRange[0])
+                    .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
+                    .flatMap { codePoint ->
+                        codePoint.toChars()
+                            .toList()
+                    }
+                    .joinToString("")
                     .replace("&amp;", "&")
                     .replace("&lt;", "<")
                     .replace("&gt;", ">")

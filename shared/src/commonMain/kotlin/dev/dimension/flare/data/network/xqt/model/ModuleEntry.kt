@@ -26,8 +26,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ModuleEntry(
-    @SerialName(value = "clientEventInfo")
-    val clientEventInfo: ClientEventInfo,
+//    @SerialName(value = "clientEventInfo")
+//    val clientEventInfo: ClientEventInfo,
     @SerialName(value = "itemContent")
     val itemContent: ItemContentUnion,
 )

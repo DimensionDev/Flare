@@ -37,7 +37,6 @@ sqldelight = "2.0.1"
 okio = "3.7.0"
 uuid = "0.8.2"
 skie = "0.6.1"
-kermit = "2.0.2"
 ktml = "0.0.6"
 versionUpdate = "0.51.0"
 bluesky = "0.0.1-SNAPSHOT"
@@ -49,6 +48,7 @@ desugar_jdk_libs = "2.0.4"
 firebase-bom = "32.7.1"
 google-services = "4.4.0"
 firebase-crashlytics = "2.9.9"
+napier = "2.7.1"
 
 [libraries]
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
@@ -144,7 +144,8 @@ okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 uuid = { group = "com.benasher44", name = "uuid", version.ref = "uuid" }
 
-kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermit" }
+napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
+kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.6.1" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }

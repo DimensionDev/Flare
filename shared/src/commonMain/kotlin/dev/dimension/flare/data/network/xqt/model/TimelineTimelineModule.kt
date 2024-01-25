@@ -37,8 +37,8 @@ data class TimelineTimelineModule(
 //    val typename: TypeName,
 //    @Contextual @SerialName(value = "clientEventInfo")
 //    val clientEventInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>,
-    @SerialName(value = "displayType")
-    val displayType: TimelineTimelineModule.DisplayType,
+//    @SerialName(value = "displayType")
+//    val displayType: TimelineTimelineModule.DisplayType,
     @Contextual @SerialName(value = "entryType")
     val entryType: ContentEntryType,
 //    @Contextual @SerialName(value = "footer")

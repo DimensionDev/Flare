@@ -152,25 +152,28 @@ data class XQTTimeline(
     val sortedIndex: Long,
 )
 
-internal fun List<InstructionUnion>.tweets(): List<XQTTimeline> =
+internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQTTimeline> =
     flatMap { union ->
         when (union) {
             is TimelineAddEntries ->
                 union.propertyEntries
 
             is TimelinePinEntry ->
-                listOf(union.entry)
+                if (!includePin) {
+                    emptyList()
+                } else {
+                    listOf(union.entry)
+                }
 
             else -> emptyList()
         }
     }.flatMap { entry ->
-        // * 100 for sorted index for module entries sorting
         when (entry.content) {
             is TimelineTimelineCursor -> emptyList()
-            is TimelineTimelineItem -> listOf(entry.content.itemContent to entry.sortIndex.toLong() * 100)
+            is TimelineTimelineItem -> listOf(entry.content.itemContent to entry.sortIndex.toLong())
             is TimelineTimelineModule ->
-                entry.content.items?.mapIndexed { index, it ->
-                    it.item.itemContent to ((entry.sortIndex.toLong() * 100) - index)
+                entry.content.items?.map {
+                    it.item.itemContent to entry.sortIndex.toLong()
                 }.orEmpty()
         }
     }.mapNotNull { pair ->

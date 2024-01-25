@@ -66,7 +66,10 @@ internal class UserTimelineRemoteMediator(
                     }
                 }.body()
             val instructions = response?.data?.user?.result?.timelineV2?.timeline?.instructions.orEmpty()
-            val tweet = instructions.tweets()
+            val tweet =
+                instructions.tweets(
+                    includePin = cursor == null,
+                )
             cursor = instructions.cursor()
             XQT.save(
                 accountKey = accountKey,
@@ -134,7 +137,10 @@ internal class UserMediaTimelineRemoteMediator(
                     }
                 }.body()
             val instructions = response?.data?.user?.result?.timelineV2?.timeline?.instructions.orEmpty()
-            val tweet = instructions.tweets()
+            val tweet =
+                instructions.tweets(
+                    includePin = cursor == null,
+                )
             cursor = instructions.cursor()
             XQT.save(
                 accountKey = accountKey,

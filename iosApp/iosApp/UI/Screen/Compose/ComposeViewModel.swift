@@ -83,8 +83,8 @@ class ComposeViewModel: MoleculeViewModelProto {
                         quoteId: getQuoteId(),
                         quoteUsername: getXQTUserName(),
                         medias: getMedia(),
-                        poll: getXQTPoll(),
-                        sensitive: mediaViewModel.sensitive
+                        sensitive: mediaViewModel.sensitive,
+                        poll: getXQTPoll()
                     )
                 }
                 model.send(data: data)

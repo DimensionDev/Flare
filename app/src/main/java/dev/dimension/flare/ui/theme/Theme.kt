@@ -61,5 +61,5 @@ fun FlareTheme(
 @Composable
 private fun isDarkTheme(): Boolean {
     return LocalAppearanceSettings.current.theme == Theme.DARK ||
-            (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
+        (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
 }

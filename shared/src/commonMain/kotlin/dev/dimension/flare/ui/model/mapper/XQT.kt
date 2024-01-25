@@ -206,6 +206,7 @@ fun User.toUi() =
             legacy.url?.takeIf { it.isNotEmpty() }?.let { url ->
                 legacy.entities.urls?.firstOrNull { it.url == url }?.expandedUrl
             },
+        protected = legacy.protected ?: false,
     )
 
 internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelation {

@@ -402,6 +402,10 @@ sealed class UiStatus {
             createdAt.humanize()
         }
 
+        val canRetweet by lazy {
+            !user.protected
+        }
+
         data class Matrices(
             val replyCount: Long,
             val likeCount: Long,

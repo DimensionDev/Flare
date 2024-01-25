@@ -155,6 +155,7 @@ sealed class UiUser {
         val verifyType: VerifyType?,
         val location: String?,
         val url: String?,
+        val protected: Boolean,
     ) : UiUser() {
         override val handle: String = "@$rawHandle@$xqtHost"
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
@@ -73,6 +74,16 @@ internal fun XQTProfileHeader(
                         tint = Color.Yellow,
                     )
                 null -> Unit
+            }
+            if (user.protected) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    modifier =
+                        Modifier
+                            .size(12.dp)
+                            .alpha(MediumAlpha),
+                )
             }
         },
         headerTrailing = {

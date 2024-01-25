@@ -9,6 +9,7 @@ import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.ItemResult
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
+import dev.dimension.flare.data.network.xqt.model.TimelinePinEntry
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineCursor
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineItem
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
@@ -155,43 +156,45 @@ internal fun List<InstructionUnion>.tweets(): List<XQTTimeline> =
     flatMap { union ->
         when (union) {
             is TimelineAddEntries ->
-                union.propertyEntries.flatMap { entry ->
-                    when (entry.content) {
-                        is TimelineTimelineCursor -> emptyList()
-                        is TimelineTimelineItem -> listOf(entry.content.itemContent to entry.sortIndex.toLong())
-                        is TimelineTimelineModule ->
-                            entry.content.items?.mapIndexed { index, it ->
-                                it.item.itemContent to (entry.sortIndex.toLong() - index)
-                            }.orEmpty()
-                    }
-                }.mapNotNull { pair ->
-                    pair.first.let {
-                        when (it) {
-                            is TimelineTweet -> {
-                                XQTTimeline(
-                                    tweets = it,
-                                    sortedIndex = pair.second,
-                                    id =
-                                        when (it.tweetResults.result) {
-                                            is Tweet -> it.tweetResults.result.restId
-                                            is TweetTombstone -> null
-                                            is TweetWithVisibilityResults -> it.tweetResults.result.tweet.restId
-                                            null -> null
-                                        },
-                                )
-                            }
+                union.propertyEntries
 
-                            else -> null
-                        }
-                    }
-                }
+            is TimelinePinEntry ->
+                listOf(union.entry)
 
             else -> emptyList()
         }
-    }
-        .filter {
-            it.tweets.promotedMetadata == null
+    }.flatMap { entry ->
+        when (entry.content) {
+            is TimelineTimelineCursor -> emptyList()
+            is TimelineTimelineItem -> listOf(entry.content.itemContent to entry.sortIndex.toLong())
+            is TimelineTimelineModule ->
+                entry.content.items?.mapIndexed { index, it ->
+                    it.item.itemContent to (entry.sortIndex.toLong() - index)
+                }.orEmpty()
         }
+    }.mapNotNull { pair ->
+        pair.first.let {
+            when (it) {
+                is TimelineTweet -> {
+                    XQTTimeline(
+                        tweets = it,
+                        sortedIndex = pair.second,
+                        id =
+                            when (it.tweetResults.result) {
+                                is Tweet -> it.tweetResults.result.restId
+                                is TweetTombstone -> null
+                                is TweetWithVisibilityResults -> it.tweetResults.result.tweet.restId
+                                null -> null
+                            },
+                    )
+                }
+
+                else -> null
+            }
+        }
+    }.filter {
+        it.tweets.promotedMetadata == null
+    }
 
 internal fun List<InstructionUnion>.cursor() =
     flatMap {

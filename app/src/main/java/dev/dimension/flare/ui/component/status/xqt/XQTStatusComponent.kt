@@ -118,6 +118,7 @@ private fun RowScope.StatusFooterComponent(
         },
     )
     StatusActionGroup(
+        enabled = data.canRetweet,
         icon = Icons.Default.SyncAlt,
         text = actualData.matrices.humanizedRetweetCount,
         modifier =

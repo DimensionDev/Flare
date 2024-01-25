@@ -66,6 +66,7 @@ struct XQTStatusComponent: View {
                                 .font(.caption)
                         }
                     })
+                    .disabled(!actual.canRetweet)
                     .if(!actual.reaction.retweeted) { view in
                         view.opacity(0.6)
                     }

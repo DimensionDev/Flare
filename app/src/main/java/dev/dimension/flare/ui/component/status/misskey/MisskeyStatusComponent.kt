@@ -61,7 +61,11 @@ internal fun MisskeyStatusComponent(
     val appearanceSettings = LocalAppearanceSettings.current
     val actualData = currentData.renote ?: currentData
     CommonStatusComponent(
-        modifier = modifier,
+        modifier =
+            modifier
+                .clickable {
+                    event.onStatusClick(data, uriHandler)
+                },
         onMediaClick = {
             event.onMediaClick(it, uriHandler)
         },

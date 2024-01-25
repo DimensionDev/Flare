@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status.xqt
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
@@ -42,7 +43,11 @@ internal fun XQTStatusComponent(
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalAppearanceSettings.current
     CommonStatusComponent(
-        modifier = modifier,
+        modifier =
+            modifier
+                .clickable {
+                    event.onStatusClick(data, uriHandler)
+                },
         onMediaClick = {
             event.onMediaClick(it, uriHandler)
         },
@@ -277,6 +282,11 @@ internal interface XQTStatusEvent {
     )
 
     fun onQuoteClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    )
+
+    fun onStatusClick(
         data: UiStatus.XQT,
         uriHandler: UriHandler,
     )

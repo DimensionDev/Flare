@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status.mastodon
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -114,7 +115,11 @@ internal fun MastodonStatusComponent(
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalAppearanceSettings.current
     CommonStatusComponent(
-        modifier = modifier,
+        modifier =
+            modifier
+                .clickable {
+                    event.onStatusClick(data, uriHandler)
+                },
         onMediaClick = {
             event.onMediaClick(it, uriHandler)
         },

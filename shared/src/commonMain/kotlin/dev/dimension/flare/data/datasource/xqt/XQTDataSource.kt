@@ -511,7 +511,7 @@ class XQTDataSource(
     override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
         return if (statusKey == null) {
             listOf(
-                SupportedComposeEvent.Poll,
+//                SupportedComposeEvent.Poll,
                 SupportedComposeEvent.Media,
             )
         } else {

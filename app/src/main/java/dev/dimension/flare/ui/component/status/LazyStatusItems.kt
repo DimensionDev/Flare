@@ -424,7 +424,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
+            StatusRouteDestination(data.statusKey)
                 .deeplink(),
         )
     }
@@ -512,7 +512,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.StatusRouteDestination(data.statusKey)
+            StatusRouteDestination(data.statusKey)
                 .deeplink(),
         )
     }
@@ -625,6 +625,16 @@ internal class DefaultStatusEvent(
     ) {
         uriHandler.openUri(
             dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
+                .deeplink(),
+        )
+    }
+
+    override fun onStatusClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            StatusRouteDestination(data.statusKey)
                 .deeplink(),
         )
     }
@@ -755,6 +765,11 @@ internal data object EmptyStatusEvent : StatusEvent {
     ) = Unit
 
     override fun onQuoteClick(
+        data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onStatusClick(
         data: UiStatus.XQT,
         uriHandler: UriHandler,
     ) = Unit

@@ -1058,6 +1058,7 @@ private fun composePresenter(
                                     } else {
                                         null
                                     },
+                                sensitive = mediaState.isMediaSensitive,
                             )
                     }
                 state.send(data)

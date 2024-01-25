@@ -54,11 +54,12 @@ data class MisskeyComposeData(
 data class XQTComposeData(
     val account: UiAccount.XQT,
     val content: String,
-    val inReplyToID: String?,
-    val quoteId: String?,
-    val quoteUsername: String?,
-    val medias: List<FileItem>,
-    val poll: Poll?,
+    val inReplyToID: String? = null,
+    val quoteId: String? = null,
+    val quoteUsername: String? = null,
+    val medias: List<FileItem> = emptyList(),
+    val sensitive: Boolean = false,
+    val poll: Poll? = null,
 ) : ComposeData {
     data class Poll(
         val options: List<String>,

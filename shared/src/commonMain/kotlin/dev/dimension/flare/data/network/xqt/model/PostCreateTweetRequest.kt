@@ -40,7 +40,7 @@ data class CreateBookmarkRequest(
     @SerialName("variables")
     val variables: CreateBookmarkRequestVariables,
     @SerialName("queryId")
-    val queryId: String = "aoDbu3RHznuiSkQ9aNM67Q"
+    val queryId: String = "aoDbu3RHznuiSkQ9aNM67Q",
 )
 
 @Serializable
@@ -48,13 +48,13 @@ data class CreateBookmarkRequestVariables(
     @SerialName("tweet_id")
     val tweetId: String,
     @SerialName("darkRequest")
-    val darkRequest: Boolean = false
+    val darkRequest: Boolean = false,
 )
 
 @Serializable
 data class CreateBookmark200Response(
     @SerialName("data")
-    val data: CreateBookmark200ResponseData
+    val data: CreateBookmark200ResponseData,
 )
 
 @Serializable
@@ -68,7 +68,7 @@ data class DeleteBookmarkRequest(
     @SerialName("variables")
     val variables: DeleteBookmarkRequestVariables,
     @SerialName("queryId")
-    val queryId: String = "Wlmlj2-xzyS1GN3a6cj-mQ"
+    val queryId: String = "Wlmlj2-xzyS1GN3a6cj-mQ",
 )
 
 @Serializable
@@ -76,13 +76,13 @@ data class DeleteBookmarkRequestVariables(
     @SerialName("tweet_id")
     val tweetId: String,
     @SerialName("darkRequest")
-    val darkRequest: Boolean = false
+    val darkRequest: Boolean = false,
 )
 
 @Serializable
 data class DeleteBookmark200Response(
     @SerialName("data")
-    val data: DeleteBookmark200ResponseData
+    val data: DeleteBookmark200ResponseData,
 )
 
 @Serializable

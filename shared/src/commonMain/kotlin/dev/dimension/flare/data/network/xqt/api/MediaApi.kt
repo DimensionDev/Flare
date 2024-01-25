@@ -46,13 +46,10 @@ interface MediaApi {
 data class TwitterUploadResponse(
     @SerialName("media_id")
     val mediaID: Long? = null,
-
     @SerialName("media_id_string")
     val mediaIDString: String? = null,
-
     @SerialName("expires_after_secs")
     val expiresAfterSecs: Long? = null,
-
     @SerialName("processing_info")
     val processingInfo: TwitterUploadProcessInfo? = null,
 )

@@ -42,4 +42,48 @@ data class PostCreateTweetRequestVariables(
     val reply: PostCreateTweetRequestVariablesReply? = null,
     @SerialName(value = "attachment_url")
     val attachmentUrl: kotlin.String? = null,
+    @SerialName(value = "conversation_control")
+    val conversationControl: PostCreateTweetRequestVariablesConversationControl? = null,
 )
+
+@Serializable
+data class PostCreateTweetRequestVariablesConversationControl(
+    @SerialName(value = "value")
+    val mode: Mode,
+) {
+    @Serializable
+    enum class Mode {
+        ByInvitation,
+        Verified,
+        Community,
+    }
+}
+
+@Serializable
+data class PostMediaMetadataCreateRequest(
+    @SerialName("media_id")
+    val mediaId: String,
+    // other, graphic_violence, adult_content
+    @SerialName("sensitive_media_warning")
+    val sensitiveMediaWarning: List<SensitiveMediaWarning>? = null,
+    @SerialName("alt_text")
+    val altText: AltText? = null,
+) {
+    @Serializable
+    enum class SensitiveMediaWarning {
+        @SerialName("other")
+        Other,
+
+        @SerialName("graphic_violence")
+        GraphicViolence,
+
+        @SerialName("adult_content")
+        AdultContent,
+    }
+
+    @Serializable
+    data class AltText(
+        @SerialName("text")
+        val text: String,
+    )
+}

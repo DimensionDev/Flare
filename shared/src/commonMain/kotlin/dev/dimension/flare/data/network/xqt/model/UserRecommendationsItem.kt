@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 data class UserRecommendationsItem(
     val token: String? = null,
     val user: UserLegacy? = null,
-
     @SerialName("user_id")
-    val userID: String? = null
+    val userID: String? = null,
 )

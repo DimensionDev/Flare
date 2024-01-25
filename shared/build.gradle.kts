@@ -33,8 +33,8 @@ kotlin {
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "shared"
-//            isStatic = true
-//            embedBitcode(BitcodeEmbeddingMode.DISABLE)
+            isStatic = true
+            embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
         }
     }
 

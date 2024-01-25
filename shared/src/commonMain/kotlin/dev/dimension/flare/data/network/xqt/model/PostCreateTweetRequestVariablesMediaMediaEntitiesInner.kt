@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -30,5 +29,5 @@ data class PostCreateTweetRequestVariablesMediaMediaEntitiesInner(
     @SerialName(value = "media_id")
     val mediaId: kotlin.String = "1111111111111111111",
     @SerialName(value = "tagged_users")
-    val taggedUsers: kotlin.collections.List<@Contextual kotlin.Any>,
+    val taggedUsers: kotlin.collections.List<String>,
 )

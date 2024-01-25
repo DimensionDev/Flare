@@ -91,9 +91,10 @@ interface V20GetApi {
         @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true,
         @Query(
             "ext",
-        ) ext: kotlin.String = "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,enrichments,superFollowMetadata,unmentionInfo,editControl,vibe",
+        ) ext: kotlin.String =
+            "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo," +
+                "birdwatchPivot,enrichments,superFollowMetadata,unmentionInfo,editControl,vibe",
     ): Response<Unit>
-
 
     @GET("2/notifications/mentions.json")
     suspend fun getNotificationsMentions(
@@ -129,7 +130,11 @@ interface V20GetApi {
         @Query("count") count: Int = 20,
         @Query("cursor") cursor: String? = null,
         @Query("requestContext") requestContext: String = "launch",
-        @Query("ext") ext: String = "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl"
+        @Query(
+            "ext",
+        ) ext: String =
+            "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo," +
+                "birdwatchPivot,superFollowMetadata,unmentionInfo,editControl",
     ): TopLevel
 
     @GET("2/guide.json")
@@ -165,7 +170,10 @@ interface V20GetApi {
         @Query("simple_quoted_tweet") simpleQuotedTweet: Boolean = true,
         @Query("tab_category") tabCategory: String = "objective_trends",
         @Query("count") count: Int = 20,
-        @Query("ext") ext: String = "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl"
+        @Query(
+            "ext",
+        ) ext: String =
+            "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo," +
+                "birdwatchPivot,superFollowMetadata,unmentionInfo,editControl",
     ): TopLevel
-
 }

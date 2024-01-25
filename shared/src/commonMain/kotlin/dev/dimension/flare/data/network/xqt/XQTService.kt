@@ -40,8 +40,8 @@ private fun config(
 class XQTService(
     private val chocolate: String? = null,
 ) : DefaultApi by config(
-    chocolate = chocolate,
-).create(),
+        chocolate = chocolate,
+    ).create(),
     OtherApi by config(
         chocolate = chocolate,
     ).create(),
@@ -77,10 +77,8 @@ class XQTService(
         url = uploadUrl,
         chocolate = chocolate,
     ).create() {
-
     companion object {
-        fun checkChocolate(value: String) =
-            value.contains("gt=") && value.contains("ct0=") && value.contains("auth_token=")
+        fun checkChocolate(value: String) = value.contains("gt=") && value.contains("ct0=") && value.contains("auth_token=")
     }
 }
 
@@ -118,7 +116,7 @@ internal class XQTHeaderPlugin(
                 append("x-twitter-client-language", "en")
                 append(
                     "Sec-Ch-Ua",
-                    "\"Chromium\";v=\"116\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"116\""
+                    "\"Chromium\";v=\"116\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"116\"",
                 )
                 append("Sec-Ch-Ua-Mobile", "?0")
                 append("Sec-Fetch-Dest", "empty")
@@ -130,10 +128,12 @@ internal class XQTHeaderPlugin(
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
                 )
                 if (chocolate != null) {
-                    val guestToken = chocolate.split("; ").firstOrNull { it.startsWith("gt=") }
-                        ?.removePrefix("gt=")
-                    val csrfToken = chocolate.split("; ").firstOrNull { it.startsWith("ct0=") }
-                        ?.removePrefix("ct0=")
+                    val guestToken =
+                        chocolate.split("; ").firstOrNull { it.startsWith("gt=") }
+                            ?.removePrefix("gt=")
+                    val csrfToken =
+                        chocolate.split("; ").firstOrNull { it.startsWith("ct0=") }
+                            ?.removePrefix("ct0=")
                     if (guestToken != null && csrfToken != null) {
                         append("x-guest-token", guestToken)
                         append("Cookie", chocolate)

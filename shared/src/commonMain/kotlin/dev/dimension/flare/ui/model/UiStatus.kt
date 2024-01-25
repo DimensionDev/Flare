@@ -216,9 +216,9 @@ sealed class UiStatus {
             val reblogCount: Long,
             val favouriteCount: Long,
         ) {
-            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
-            val humanizedReblogCount by lazy { if (reblogCount > 0) reblogCount.toString() else null }
-            val humanizedFavouriteCount by lazy { if (favouriteCount > 0) favouriteCount.toString() else null }
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.humanize() else null }
+            val humanizedReblogCount by lazy { if (reblogCount > 0) reblogCount.humanize() else null }
+            val humanizedFavouriteCount by lazy { if (favouriteCount > 0) favouriteCount.humanize() else null }
         }
     }
 
@@ -284,8 +284,8 @@ sealed class UiStatus {
             val replyCount: Long,
             val renoteCount: Long,
         ) {
-            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
-            val humanizedReNoteCount by lazy { if (renoteCount > 0) renoteCount.toString() else null }
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.humanize() else null }
+            val humanizedReNoteCount by lazy { if (renoteCount > 0) renoteCount.humanize() else null }
         }
     }
 
@@ -334,9 +334,9 @@ sealed class UiStatus {
             val likeCount: Long,
             val repostCount: Long,
         ) {
-            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
-            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
-            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.toString() else null }
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.humanize() else null }
+            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
+            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.humanize() else null }
         }
 
         data class Reaction(
@@ -407,9 +407,9 @@ sealed class UiStatus {
             val likeCount: Long,
             val retweetCount: Long,
         ) {
-            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
-            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
-            val humanizedRetweetCount by lazy { if (retweetCount > 0) retweetCount.toString() else null }
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.humanize() else null }
+            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
+            val humanizedRetweetCount by lazy { if (retweetCount > 0) retweetCount.humanize() else null }
         }
 
         data class Reaction(

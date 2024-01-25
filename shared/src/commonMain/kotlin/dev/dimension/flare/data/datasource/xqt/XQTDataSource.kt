@@ -38,6 +38,7 @@ import dev.dimension.flare.data.network.xqt.model.PostDeleteRetweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostDeleteRetweetRequestVariables
 import dev.dimension.flare.data.network.xqt.model.PostDeleteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
+import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
@@ -286,6 +287,18 @@ class XQTDataSource(
                     mediaType = getMeidaTypeFromName(item.name),
                     mediaData = item.readBytes(),
                 ).also {
+                    if (data.sensitive) {
+                        service.postMediaMetadataCreate(
+                            body =
+                                PostMediaMetadataCreateRequest(
+                                    mediaId = it,
+                                    sensitiveMediaWarning =
+                                        listOf(
+                                            PostMediaMetadataCreateRequest.SensitiveMediaWarning.Other,
+                                        ),
+                                ),
+                        )
+                    }
                     progress(ComposeProgress(index + 1, maxProgress))
                 }
             }

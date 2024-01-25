@@ -1,9 +1,11 @@
 package dev.dimension.flare.data.network.xqt.api
 
 import de.jensklingenberg.ktorfit.Response
+import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.POST
+import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 
 interface V11PostApi {
     /**
@@ -110,5 +112,10 @@ interface V11PostApi {
     @POST("1.1/blocks/destroy.json")
     suspend fun postBlocksDestroy(
         @Field("user_id") userId: kotlin.String = "44196397",
+    ): Response<Unit>
+
+    @POST("1.1/media/metadata/create.json")
+    suspend fun postMediaMetadataCreate(
+        @Body body: PostMediaMetadataCreateRequest,
     ): Response<Unit>
 }

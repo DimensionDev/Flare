@@ -95,8 +95,8 @@ interface V11GetApi {
         @Query("display_location") displayLocation: String = "profile_accounts_sidebar",
         @Query("limit") limit: Int = 3,
         @Query("user_id") userId: String,
-        @Query("ext") ext: String = "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl"
+        @Query(
+            "ext",
+        ) ext: String = "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl",
     ): List<UserRecommendationsItem>
-
 }
-

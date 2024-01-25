@@ -48,8 +48,8 @@ data class Error(
 //    val name: kotlin.String,
 //    @SerialName(value = "path")
 //    val path: kotlin.collections.List<kotlin.String>,
-////    @SerialName(value = "retry_after")
-////    val retryAfter: kotlin.Int,
+// //    @SerialName(value = "retry_after")
+// //    val retryAfter: kotlin.Int,
 //    @SerialName(value = "source")
 //    val source: kotlin.String,
 //    @SerialName(value = "tracing")

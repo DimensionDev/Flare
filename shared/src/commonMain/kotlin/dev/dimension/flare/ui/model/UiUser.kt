@@ -156,7 +156,7 @@ sealed class UiUser {
         val location: String?,
         val url: String?,
     ) : UiUser() {
-        override val handle: String = "@$rawHandle"
+        override val handle: String = "@$rawHandle@$xqtHost"
 
         val fieldsParsed by lazy {
             persistentMapOf<String, Element>().apply {

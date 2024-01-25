@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.ui.BlockQuote
 import com.halilibo.richtext.ui.CodeBlock
 import com.halilibo.richtext.ui.CodeBlockStyle
-import com.halilibo.richtext.ui.RichText
+import com.halilibo.richtext.ui.material3.RichText
 import com.halilibo.richtext.ui.RichTextScope
 import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.WithStyle

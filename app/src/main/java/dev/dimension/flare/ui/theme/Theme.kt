@@ -13,7 +13,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.halilibo.richtext.ui.material3.SetupMaterial3RichText
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
 
@@ -54,9 +53,7 @@ fun FlareTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = {
-            SetupMaterial3RichText {
-                content.invoke()
-            }
+            content.invoke()
         },
     )
 }
@@ -64,5 +61,5 @@ fun FlareTheme(
 @Composable
 private fun isDarkTheme(): Boolean {
     return LocalAppearanceSettings.current.theme == Theme.DARK ||
-        (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
+            (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
 }

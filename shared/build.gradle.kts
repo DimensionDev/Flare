@@ -1,5 +1,4 @@
 import app.cash.sqldelight.core.capitalize
-import org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode
 
 plugins {
     alias(libs.plugins.android.library)
@@ -35,7 +34,7 @@ kotlin {
         appleTarget.binaries.framework {
             baseName = "shared"
             isStatic = true
-            embedBitcode(BitcodeEmbeddingMode.DISABLE)
+            embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
         }
     }
 
@@ -153,6 +152,7 @@ ktlint {
     filter {
         exclude { element -> element.file.path.contains("build", ignoreCase = true) }
         exclude { element -> element.file.absolutePath.contains("data/network/misskey/api/", ignoreCase = true) }
+        exclude { element -> element.file.absolutePath.contains("data/network/xqt/", ignoreCase = true) }
     }
 }
 

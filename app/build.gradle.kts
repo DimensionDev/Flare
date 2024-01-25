@@ -140,6 +140,8 @@ dependencies {
 
     implementation(projects.shared)
 
+    implementation("io.github.kevinnzou:compose-webview:0.33.3")
+
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))
         implementation(libs.firebase.crashlytics.ktx)

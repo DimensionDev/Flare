@@ -46,13 +46,16 @@ internal fun StatusRetweetHeaderComponent(
                 layoutDirection = LocalLayoutDirection.current,
                 textStyle = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.alignByBaseline(),
+                maxLines = 1,
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.alignByBaseline(),
+            modifier =
+                Modifier.alignByBaseline()
+                    .weight(1f),
         )
     }
 }

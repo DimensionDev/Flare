@@ -13,6 +13,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
@@ -53,11 +54,11 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
         sensitive = sensitive ?: false,
         poll =
             poll?.let {
-                UiStatus.Mastodon.Poll(
+                UiPoll(
                     id = poll.id ?: "",
                     options =
                         poll.options?.map { option ->
-                            UiStatus.Mastodon.PollOption(
+                            UiPoll.Option(
                                 title = option.title.orEmpty(),
                                 votesCount = option.votesCount ?: 0,
                                 percentage =
@@ -72,9 +73,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
                             )
                         }?.toPersistentList() ?: persistentListOf(),
                     expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
-                    expired = poll.expired ?: false,
                     multiple = poll.multiple ?: false,
-                    voted = poll.voted ?: false,
                     ownVotes = poll.ownVotes?.toPersistentList() ?: persistentListOf(),
                 )
             },

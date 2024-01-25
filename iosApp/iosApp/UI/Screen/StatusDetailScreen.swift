@@ -13,7 +13,8 @@ struct StatusDetailScreen: View {
                 data: viewModel.model.listState,
                 mastodonEvent: statusEvent,
                 misskeyEvent: statusEvent,
-                blueskyEvent: statusEvent
+                blueskyEvent: statusEvent,
+                xqtEvent: statusEvent
             )
         }
         .listStyle(.plain)

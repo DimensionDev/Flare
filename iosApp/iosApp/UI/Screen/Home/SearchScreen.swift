@@ -39,7 +39,8 @@ struct SearchScreen: View {
                     data: viewModel.model.status,
                     mastodonEvent: statusEvent,
                     misskeyEvent: statusEvent,
-                    blueskyEvent: statusEvent
+                    blueskyEvent: statusEvent,
+                    xqtEvent: statusEvent
                 )
             }
         }

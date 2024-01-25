@@ -2,13 +2,13 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.paging.flatMap
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
@@ -22,9 +22,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -48,23 +46,9 @@ class ProfilePresenter(
                 }.collectPagingProxy()
             }
         val mediaState =
-            accountServiceState.map { (service, account) ->
-                remember(account.accountKey, userKey) {
-                    service.userTimeline(userKey ?: account.accountKey, mediaOnly = true)
-                        .map {
-                            it.flatMap {
-                                when (it) {
-                                    is UiStatus.Bluesky -> it.medias
-                                    is UiStatus.BlueskyNotification -> persistentListOf()
-                                    is UiStatus.Mastodon -> it.media
-                                    is UiStatus.MastodonNotification -> persistentListOf()
-                                    is UiStatus.Misskey -> it.media
-                                    is UiStatus.MisskeyNotification -> persistentListOf()
-                                }
-                            }
-                        }
-                }.collectPagingProxy()
-            }
+            remember {
+                ProfileMediaPresenter(userKey)
+            }.body().mediaState
         val relationState =
             accountServiceState.flatMap { (service, account) ->
                 remember(account.accountKey, userKey) {
@@ -103,6 +87,7 @@ class ProfilePresenter(
                             is UiRelation.Bluesky -> blueskyFollow(service as BlueskyDataSource, user.userKey, data)
                             is UiRelation.Mastodon -> mastodonFollow(service as MastodonDataSource, user.userKey, data)
                             is UiRelation.Misskey -> misskeyFollow(service as MisskeyDataSource, user.userKey, data)
+                            is UiRelation.XQT -> xqtFollow(service as XQTDataSource, user.userKey, data)
                         }
                     }
                 }
@@ -125,6 +110,11 @@ class ProfilePresenter(
                             }
                             is UiRelation.Misskey -> {
                                 require(service is MisskeyDataSource)
+                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                            }
+
+                            is UiRelation.XQT -> {
+                                require(service is XQTDataSource)
                                 if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
                             }
                         }
@@ -150,6 +140,11 @@ class ProfilePresenter(
                             is UiRelation.Misskey -> {
                                 require(service is MisskeyDataSource)
                                 if (data.muted) service.unmute(user.userKey) else service.mute(user.userKey)
+                            }
+
+                            is UiRelation.XQT -> {
+                                require(service is XQTDataSource)
+                                if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
                             }
                         }
                     }
@@ -191,6 +186,18 @@ class ProfilePresenter(
         service: BlueskyDataSource,
         userKey: MicroBlogKey,
         data: UiRelation.Bluesky,
+    ) {
+        when {
+            data.following -> service.unfollow(userKey)
+            data.blocking -> service.unblock(userKey)
+            else -> service.follow(userKey)
+        }
+    }
+
+    private suspend fun xqtFollow(
+        service: XQTDataSource,
+        userKey: MicroBlogKey,
+        data: UiRelation.XQT,
     ) {
         when {
             data.following -> service.unfollow(userKey)

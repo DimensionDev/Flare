@@ -11,7 +11,8 @@ struct AppearanceScreen: View {
                     status: success.data,
                     mastodonEvent: EmptyStatusEvent.shared,
                     misskeyEvent: EmptyStatusEvent.shared,
-                    blueskyEvent: EmptyStatusEvent.shared
+                    blueskyEvent: EmptyStatusEvent.shared,
+                    xqtEvent: EmptyStatusEvent.shared
                 )
             }
             Section("Generic") {

@@ -1,9 +1,10 @@
 package dev.dimension.flare.ui.presenter.compose
 
-import dev.dimension.flare.data.datasource.ComposeData
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
+import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
+import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -17,7 +18,7 @@ class ComposeUseCase(
         scope.launch {
             runCatching {
                 when (data) {
-                    is MastodonDataSource.MastodonComposeData ->
+                    is MastodonComposeData ->
                         data.account.dataSource.compose(
                             data = data,
                             progress = {
@@ -25,7 +26,7 @@ class ComposeUseCase(
                             },
                         )
 
-                    is MisskeyDataSource.MisskeyComposeData ->
+                    is MisskeyComposeData ->
                         data.account.dataSource.compose(
                             data = data,
                             progress = {
@@ -33,7 +34,14 @@ class ComposeUseCase(
                             },
                         )
 
-                    is BlueskyDataSource.BlueskyComposeData ->
+                    is BlueskyComposeData ->
+                        data.account.dataSource.compose(
+                            data = data,
+                            progress = {
+                                progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
+                            },
+                        )
+                    is XQTComposeData ->
                         data.account.dataSource.compose(
                             data = data,
                             progress = {

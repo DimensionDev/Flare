@@ -567,6 +567,20 @@ private fun ProfileMenu(
                                         profileState.mute(user, relation)
                                     },
                                 )
+
+                            is UiRelation.XQT ->
+                                XQTUserMenu(
+                                    user = user,
+                                    relation = relation,
+                                    onBlockClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.block(user, relation)
+                                    },
+                                    onMuteClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.mute(user, relation)
+                                    },
+                                )
                         }
                     }
                     DropdownMenuItem(
@@ -679,6 +693,19 @@ private fun ProfileHeaderSuccess(
 
         is UiUser.Bluesky ->
             BlueskyProfileHeader(
+                user = user,
+                relationState = relationState,
+                modifier = modifier,
+                isMe = isMe,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
+                menu = menu,
+                expandMatrices = expandMatrices,
+            )
+
+        is UiUser.XQT ->
+            XQTProfileHeader(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.ramcosta.composedestinations.DestinationsNavHost
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -12,8 +13,8 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.splash.SplashPresenter
 import dev.dimension.flare.ui.presenter.splash.SplashType
+import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.home.HomeScreen
-import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import org.koin.compose.koinInject
 
@@ -32,7 +33,7 @@ fun AppContainer() {
         AnimatedContent(targetState = state, label = "AppContainer") {
             when (it) {
                 SplashType.Splash -> SplashScreen()
-                SplashType.Login -> ServiceSelectScreen()
+                SplashType.Login -> DestinationsNavHost(NavGraphs.entry)
                 SplashType.Home -> HomeScreen()
             }
         }

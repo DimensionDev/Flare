@@ -1,58 +1,62 @@
 package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
-import dev.dimension.flare.data.repository.activeAccountPresenter
-import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 class DiscoverPresenter : PresenterBase<DiscoverState>() {
     @Composable
     override fun body(): DiscoverState {
-        val accountState by activeAccountPresenter()
+        val accountState = activeAccountServicePresenter()
         val users =
-            accountState.map { account ->
+            accountState.flatMap { (dataSource, account) ->
                 remember(account.accountKey) {
-                    when (account) {
-                        is UiAccount.Bluesky -> account.dataSource.discoverUsers()
-                        is UiAccount.Mastodon -> account.dataSource.discoverUsers()
-                        is UiAccount.Misskey -> account.dataSource.discoverUsers()
+                    runCatching {
+                        dataSource.discoverUsers()
+                    }.getOrNull()
+                }?.collectPagingProxy().let {
+                    if (it == null) {
+                        UiState.Error(Throwable("No data"))
+                    } else {
+                        UiState.Success(it)
                     }
-                }.collectPagingProxy()
+                }
             }
         val status =
-            accountState.flatMap { account ->
+            accountState.flatMap { (dataSource, account) ->
                 remember(account.accountKey) {
-                    when (account) {
-                        // TODO: Bluesky has different discover approach
-                        is UiAccount.Bluesky -> UiState.Error(NotImplementedError())
-                        is UiAccount.Mastodon -> UiState.Success(account.dataSource.discoverStatus())
-                        is UiAccount.Misskey -> UiState.Success(account.dataSource.discoverStatus())
+                    runCatching {
+                        dataSource.discoverStatuses()
+                    }.getOrNull()
+                }?.collectPagingProxy().let {
+                    if (it == null) {
+                        UiState.Error(Throwable("No data"))
+                    } else {
+                        UiState.Success(it)
                     }
                 }
-            }.map {
-                it.collectPagingProxy()
             }
         val hashtags =
-            accountState.flatMap { account ->
+            accountState.flatMap { (dataSource, account) ->
                 remember(account.accountKey) {
-                    when (account) {
-                        is UiAccount.Bluesky -> UiState.Error(NotImplementedError())
-                        is UiAccount.Mastodon -> UiState.Success(account.dataSource.discoverHashtags())
-                        is UiAccount.Misskey -> UiState.Success(account.dataSource.discoverHashtags())
+                    runCatching {
+                        dataSource.discoverHashtags()
+                    }.getOrNull()
+                }?.collectPagingProxy().let {
+                    if (it == null) {
+                        UiState.Error(Throwable("No data"))
+                    } else {
+                        UiState.Success(it)
                     }
                 }
-            }.map {
-                it.collectPagingProxy()
             }
 
         return object : DiscoverState {

@@ -4,6 +4,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.DbApplication
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.xqtHost
 
 sealed interface UiApplication {
     val host: String
@@ -21,6 +22,10 @@ sealed interface UiApplication {
     data class Bluesky(
         override val host: String,
     ) : UiApplication
+
+    data object XQT : UiApplication {
+        override val host: String = xqtHost
+    }
 
     companion object {
         fun DbApplication.toUi(): UiApplication {
@@ -41,6 +46,8 @@ sealed interface UiApplication {
                     Bluesky(
                         host = host,
                     )
+
+                PlatformType.xQt -> XQT
             }
         }
     }

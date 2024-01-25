@@ -45,12 +45,16 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.NavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.result.NavResult
+import com.ramcosta.composedestinations.result.ResultRecipient
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.common.plus
@@ -66,6 +70,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
+import dev.dimension.flare.ui.screen.destinations.XQTLoginRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
@@ -76,17 +81,53 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
-fun ServiceSelectRoute(navigator: DestinationsNavigator) {
+fun ServiceSelectRoute(
+    navigator: DestinationsNavigator,
+    resultRecipient: ResultRecipient<XQTLoginRouteDestination, Boolean>,
+) {
+    resultRecipient.onNavResult {
+        when (it) {
+            NavResult.Canceled -> Unit
+            is NavResult.Value -> {
+                if (it.value) {
+                    navigator.navigateUp()
+                }
+            }
+        }
+    }
     ServiceSelectScreen(
         onBack = navigator::navigateUp,
+        onXQT = {
+            navigator.navigate(XQTLoginRouteDestination)
+        },
+    )
+}
+
+@NavGraph
+annotation class EntryNavGraph(
+    val start: Boolean = false,
+)
+
+@Composable
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
+@EntryNavGraph(start = true)
+fun EntryServiceSelectRoute(navigator: DestinationsNavigator) {
+    ServiceSelectScreen(
+        onBack = null,
+        onXQT = {
+            navigator.navigate(XQTLoginRouteDestination)
+        },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ServiceSelectScreen(
+    onXQT: () -> Unit,
+    onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    onBack: (() -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
@@ -161,14 +202,8 @@ fun ServiceSelectScreen(
                     modifier = Modifier.width(300.dp),
                     leadingIcon = {
                         state.detectedPlatformType.onSuccess {
-                            val url =
-                                when (it) {
-                                    PlatformType.Mastodon -> "https://joinmastodon.org/logos/logo-purple.svg"
-                                    PlatformType.Misskey -> "https://raw.githubusercontent.com/misskey-dev/assets/main/favicon.png"
-                                    PlatformType.Bluesky -> "https://blueskyweb.xyz/images/apple-touch-icon.png"
-                                }
                             NetworkImage(
-                                url,
+                                it.logoUrl,
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
                             )
@@ -295,6 +330,19 @@ fun ServiceSelectScreen(
                                     state.mastodonLoginState.error?.let {
                                         Text(text = it)
                                     }
+                                }
+                            }
+
+                            PlatformType.xQt -> {
+                                Button(
+                                    onClick = {
+                                        onXQT.invoke()
+                                    },
+                                    modifier = Modifier.width(300.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(id = R.string.service_select_next_button),
+                                    )
                                 }
                             }
                         }

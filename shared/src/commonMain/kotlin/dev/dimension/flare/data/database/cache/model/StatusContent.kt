@@ -43,6 +43,12 @@ sealed interface StatusContent {
     @SerialName("bluesky-notification")
     data class BlueskyNotification(val data: app.bsky.notification.ListNotificationsNotification) :
         StatusContent
+
+    @Serializable
+    @SerialName("XQT")
+    data class XQT(
+        val data: dev.dimension.flare.data.network.xqt.model.Tweet,
+    ) : StatusContent
 }
 
 internal inline fun <reified T : StatusContent> updateStatusUseCase(

@@ -75,6 +75,7 @@ sealed class CacheData<T>(
                         fetchSource.invoke()
                         LoadState.Success
                     } catch (e: Throwable) {
+                        e.printStackTrace()
                         LoadState.Error(e)
                     },
                 )

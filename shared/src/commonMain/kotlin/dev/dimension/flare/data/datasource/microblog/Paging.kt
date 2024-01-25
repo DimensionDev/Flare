@@ -1,0 +1,119 @@
+package dev.dimension.flare.data.datasource.microblog
+
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import androidx.paging.RemoteMediator
+import androidx.paging.map
+import app.cash.sqldelight.paging3.QueryPagingSource
+import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.mapper.toUi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+@OptIn(ExperimentalPagingApi::class)
+internal fun timelinePager(
+    pageSize: Int,
+    pagingKey: String,
+    accountKey: MicroBlogKey,
+    database: CacheDatabase,
+    mediator: RemoteMediator<Int, DbPagingTimelineWithStatusView>,
+): Flow<PagingData<UiStatus>> {
+    return Pager(
+        config = PagingConfig(pageSize = pageSize),
+        remoteMediator = mediator,
+        pagingSourceFactory = {
+            QueryPagingSource(
+                countQuery =
+                    database.dbPagingTimelineQueries.pageCount(
+                        account_key = accountKey,
+                        paging_key = pagingKey,
+                    ),
+                transacter = database.dbPagingTimelineQueries,
+                context = Dispatchers.IO,
+                queryProvider = { limit, offset ->
+                    database.dbPagingTimelineQueries.getPage(
+                        account_key = accountKey,
+                        paging_key = pagingKey,
+                        offset = offset,
+                        limit = limit,
+                    )
+                },
+            )
+        },
+    ).flow.map {
+        it.map {
+            it.toUi()
+        }
+    }
+}
+
+@OptIn(ExperimentalPagingApi::class)
+internal fun timelineFetcher(
+    fetch: suspend (minId: String?, maxId: String?, limit: Int) -> Boolean,
+): RemoteMediator<Int, DbPagingTimelineWithStatusView> =
+    object : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+        override suspend fun load(
+            loadType: LoadType,
+            state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        ): MediatorResult {
+            return try {
+                val minId =
+                    when (loadType) {
+                        LoadType.PREPEND -> state.firstItemOrNull()?.timeline_status_key?.id
+                        else -> null
+                    }
+                val maxId =
+                    when (loadType) {
+                        LoadType.APPEND -> state.lastItemOrNull()?.timeline_status_key?.id
+                        else -> null
+                    }
+                val pageSize = state.config.pageSize
+                val endOfPaginationReached = fetch(minId, maxId, pageSize)
+                MediatorResult.Success(
+                    endOfPaginationReached = endOfPaginationReached,
+                )
+            } catch (e: Exception) {
+                MediatorResult.Error(e)
+            }
+        }
+    }
+
+internal fun <T : Any> userPager(
+    pageSize: Int,
+    pagingSourceFactory: () -> PagingSource<T, UiUser>,
+) = Pager(
+    config = PagingConfig(pageSize = pageSize),
+    pagingSourceFactory = pagingSourceFactory,
+).flow
+
+internal fun <T : Any> userFetcher(fetch: suspend (nextKey: T?, pageSize: Int) -> Pair<T?, List<UiUser>>) =
+    object : PagingSource<T, UiUser>() {
+        override fun getRefreshKey(state: PagingState<T, UiUser>): T? {
+            return null
+        }
+
+        override suspend fun load(params: LoadParams<T>): LoadResult<T, UiUser> {
+            return try {
+                val pageSize = params.loadSize
+                val (nextKey, data) = fetch(params.key, pageSize)
+                LoadResult.Page(
+                    data = data,
+                    prevKey = null,
+                    nextKey = nextKey,
+                )
+            } catch (e: Exception) {
+                LoadResult.Error(e)
+            }
+        }
+    }

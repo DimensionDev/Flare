@@ -6,9 +6,9 @@ import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.misskey.api.model.Notification
+import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
-import dev.dimension.flare.ui.humanizer.humanizePercentage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
@@ -52,6 +52,10 @@ internal val misskeyParser by lazy {
 
 internal val blueskyParser by lazy {
     TwitterParser(enableDotInUserName = true)
+}
+
+internal val twitterParser by lazy {
+    TwitterParser()
 }
 
 expect class UiStatusExtra
@@ -106,6 +110,7 @@ sealed class UiStatus {
                     if (poll != null) append("_poll")
                     if (card != null) append("_card")
                 }
+
             is MisskeyNotification ->
                 buildString {
                     append("misskey_notification")
@@ -130,6 +135,20 @@ sealed class UiStatus {
                 buildString {
                     append("bluesky_notification")
                     append("_${reason.name.lowercase()}")
+                }
+
+            is XQT ->
+                buildString {
+                    append("xqt")
+                    if (retweet != null) {
+                        append("_retweet_")
+                        append(retweet.itemType)
+                    }
+                    if (quote != null) {
+                        append("_quote_")
+                        append(quote.itemType)
+                    }
+                    if (card != null) append("_card")
                 }
         }
     }
@@ -157,7 +176,7 @@ sealed class UiStatus {
         val media: ImmutableList<UiMedia>,
         val createdAt: Instant,
         val visibility: Visibility,
-        val poll: Poll?,
+        val poll: UiPoll?,
         val card: UiCard?,
         val reaction: Reaction,
         val sensitive: Boolean,
@@ -186,26 +205,6 @@ sealed class UiStatus {
             val bookmarked: Boolean,
         )
 
-        data class Poll(
-            val id: String,
-            val options: ImmutableList<PollOption>,
-            val expiresAt: Instant,
-            val expired: Boolean,
-            val multiple: Boolean,
-            val voted: Boolean,
-            val ownVotes: ImmutableList<Int>,
-        ) {
-            val humanizedExpiresAt by lazy { expiresAt.humanize() }
-        }
-
-        data class PollOption(
-            val title: String,
-            val votesCount: Long,
-            val percentage: Float,
-        ) {
-            val humanizedPercentage by lazy { percentage.humanizePercentage() }
-        }
-
         enum class Visibility {
             Public,
             Unlisted,
@@ -218,9 +217,9 @@ sealed class UiStatus {
             val reblogCount: Long,
             val favouriteCount: Long,
         ) {
-            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
-            val humanizedReblogCount by lazy { if (reblogCount > 0) reblogCount.toString() else null }
-            val humanizedFavouriteCount by lazy { if (favouriteCount > 0) favouriteCount.toString() else null }
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.humanize() else null }
+            val humanizedReblogCount by lazy { if (reblogCount > 0) reblogCount.humanize() else null }
+            val humanizedFavouriteCount by lazy { if (favouriteCount > 0) favouriteCount.humanize() else null }
         }
     }
 
@@ -234,7 +233,7 @@ sealed class UiStatus {
         val media: ImmutableList<UiMedia>,
         val createdAt: Instant,
         val visibility: Visibility,
-        val poll: Poll?,
+        val poll: UiPoll?,
         val card: UiCard?,
         val reaction: Reaction,
         val sensitive: Boolean,
@@ -282,31 +281,12 @@ sealed class UiStatus {
             Specified,
         }
 
-        data class Poll(
-            val id: String,
-            val options: ImmutableList<PollOption>,
-            val expiresAt: Instant,
-            val multiple: Boolean,
-        ) {
-            val expired: Boolean by lazy { expiresAt < Clock.System.now() }
-            val humanizedExpiresAt by lazy { expiresAt.humanize() }
-        }
-
-        data class PollOption(
-            val title: String,
-            val votesCount: Long,
-            val percentage: Float,
-            val voted: Boolean,
-        ) {
-            val humanizedPercentage by lazy { percentage.humanizePercentage() }
-        }
-
         data class Matrices(
             val replyCount: Long,
             val renoteCount: Long,
         ) {
-            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
-            val humanizedReNoteCount by lazy { if (renoteCount > 0) renoteCount.toString() else null }
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.humanize() else null }
+            val humanizedReNoteCount by lazy { if (renoteCount > 0) renoteCount.humanize() else null }
         }
     }
 
@@ -355,9 +335,9 @@ sealed class UiStatus {
             val likeCount: Long,
             val repostCount: Long,
         ) {
-            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.toString() else null }
-            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.toString() else null }
-            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.toString() else null }
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.humanize() else null }
+            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
+            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.humanize() else null }
         }
 
         data class Reaction(
@@ -392,9 +372,77 @@ sealed class UiStatus {
             indexedAt.humanize()
         }
     }
+
+    data class XQT(
+        override val accountKey: MicroBlogKey,
+        override val statusKey: MicroBlogKey,
+        val user: UiUser.XQT,
+        val createdAt: Instant,
+        val content: String,
+        val medias: ImmutableList<UiMedia>,
+        val sensitive: Boolean,
+        val card: UiCard?,
+        val matrices: Matrices,
+        val reaction: Reaction,
+        val poll: UiPoll?,
+        val retweet: XQT?,
+        val quote: XQT?,
+        val inReplyToScreenName: String?,
+        val inReplyToStatusId: String?,
+        val inReplyToUserId: String?,
+        internal val raw: Tweet,
+    ) : UiStatus() {
+        val isFromMe by lazy {
+            user.userKey == accountKey
+        }
+
+        val contentToken by lazy {
+            twitterParser
+                .parse(content)
+                .map { token ->
+                    if (token is UrlToken) {
+                        val actual =
+                            raw.legacy?.entities?.urls
+                                ?.firstOrNull { it.url == token.value.trim() }?.expandedUrl
+                        if (actual != null) {
+                            UrlToken(actual)
+                        } else {
+                            token
+                        }
+                    } else {
+                        token
+                    }
+                }
+                .toHtml(accountKey.host)
+        }
+
+        val humanizedTime by lazy {
+            createdAt.humanize()
+        }
+
+        val canRetweet by lazy {
+            !user.protected
+        }
+
+        data class Matrices(
+            val replyCount: Long,
+            val likeCount: Long,
+            val retweetCount: Long,
+        ) {
+            val humanizedReplyCount by lazy { if (replyCount > 0) replyCount.humanize() else null }
+            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
+            val humanizedRetweetCount by lazy { if (retweetCount > 0) retweetCount.humanize() else null }
+        }
+
+        data class Reaction(
+            val liked: Boolean,
+            val retweeted: Boolean,
+            val bookmarked: Boolean,
+        )
+    }
 }
 
-private fun List<Token>.toHtml(host: String): Element {
+internal fun List<Token>.toHtml(host: String): Element {
     val body = Element("body")
     forEach {
         body.children.add(it.toHtml(host))
@@ -413,15 +461,24 @@ private fun Token.toHtml(host: String): Node {
         is EmojiToken -> Text(value)
         is HashTagToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search("#$value")
-                children.add(Text("#$value"))
+                val text =
+                    buildString {
+//                    if (!value.contains("#") || !value.contains("＃")) {
+//                        append("#")
+//                    }
+                        append(value)
+                    }
+                attributes["href"] = AppDeepLink.Search(text)
+                children.add(Text(text))
             }
+
         is StringToken -> Text(value)
         is UrlToken ->
             Element("a").apply {
                 attributes["href"] = value
                 children.add(Text(value))
             }
+
         is UserNameToken ->
             Element("a").apply {
                 attributes["href"] = AppDeepLink.ProfileWithNameAndHost(value, host)
@@ -663,6 +720,7 @@ fun createSampleStatus(user: UiUser) =
         is UiUser.Bluesky -> createBlueskyStatus(user)
         is UiUser.Mastodon -> createMastodonStatus(user)
         is UiUser.Misskey -> createMisskeyStatus(user)
+        is UiUser.XQT -> createXQTStatus(user)
     }
 
 private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon {
@@ -747,5 +805,37 @@ private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey {
         sensitive = false,
         quote = null,
         renote = null,
+    )
+}
+
+fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT {
+    return UiStatus.XQT(
+        statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
+        accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
+        user = user,
+        content = "Misskey post content",
+        matrices =
+            UiStatus.XQT.Matrices(
+                likeCount = 15,
+                replyCount = 25,
+                retweetCount = 35,
+            ),
+        medias = persistentListOf(),
+        createdAt = Clock.System.now(),
+        poll = null,
+        card = null,
+        reaction =
+            UiStatus.XQT.Reaction(
+                liked = false,
+                retweeted = false,
+                bookmarked = false,
+            ),
+        quote = null,
+        retweet = null,
+        inReplyToScreenName = null,
+        inReplyToStatusId = null,
+        inReplyToUserId = null,
+        sensitive = false,
+        raw = Tweet(restId = ""),
     )
 }

@@ -5,6 +5,7 @@ import dev.dimension.flare.data.database.app.DbAccount
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
@@ -76,6 +77,24 @@ sealed interface UiAccount {
         }
     }
 
+    data class XQT(
+        override val accountKey: MicroBlogKey,
+        override val credential: Credential,
+    ) : UiAccount {
+        override val platformType: PlatformType
+            get() = PlatformType.xQt
+
+        @Serializable
+        @SerialName("XQTCredential")
+        data class Credential(
+            val chocolate: String,
+        ) : UiAccount.Credential
+
+        val dataSource by lazy {
+            XQTDataSource(this)
+        }
+    }
+
     companion object {
         fun DbAccount.toUi(): UiAccount =
             when (platform_type) {
@@ -98,6 +117,14 @@ sealed interface UiAccount {
                 PlatformType.Bluesky -> {
                     val credential = credential_json.decodeJson<Bluesky.Credential>()
                     Bluesky(
+                        credential = credential,
+                        accountKey = account_key,
+                    )
+                }
+
+                PlatformType.xQt -> {
+                    val credential = credential_json.decodeJson<XQT.Credential>()
+                    XQT(
                         credential = credential,
                         accountKey = account_key,
                     )

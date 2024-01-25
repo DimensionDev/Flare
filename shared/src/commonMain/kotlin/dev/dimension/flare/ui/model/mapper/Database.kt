@@ -43,6 +43,11 @@ internal fun DbPagingTimelineWithStatusView.toUi(): UiStatus {
             status.data.toUi(
                 accountKey = timeline_account_key,
             )
+
+        is StatusContent.XQT ->
+            status.data.toUi(
+                accountKey = timeline_account_key,
+            )
     }
 }
 
@@ -67,5 +72,7 @@ internal fun DbUser.toUi(): UiUser {
             user.data.toUi(
                 accountHost = user_key.host,
             )
+        is UserContent.XQT ->
+            user.data.toUi()
     }
 }

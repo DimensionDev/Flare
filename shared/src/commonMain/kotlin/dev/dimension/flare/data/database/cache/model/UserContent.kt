@@ -2,6 +2,7 @@ package dev.dimension.flare.data.database.cache.model
 
 import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
+import dev.dimension.flare.data.network.xqt.model.User
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -34,5 +35,11 @@ sealed interface UserContent {
     @SerialName("BlueskyLite")
     data class BlueskyLite(
         val data: ProfileViewBasic,
+    ) : UserContent
+
+    @Serializable
+    @SerialName("XQT")
+    data class XQT(
+        val data: User,
     ) : UserContent
 }

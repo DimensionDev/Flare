@@ -6,6 +6,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.misskey.api.model.Notification
+import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
 import kotlinx.collections.immutable.ImmutableList
@@ -389,13 +390,30 @@ sealed class UiStatus {
         val inReplyToScreenName: String?,
         val inReplyToStatusId: String?,
         val inReplyToUserId: String?,
+        internal val raw: Tweet,
     ) : UiStatus() {
         val isFromMe by lazy {
             user.userKey == accountKey
         }
 
         val contentToken by lazy {
-            twitterParser.parse(content).toHtml(accountKey.host)
+            twitterParser
+                .parse(content)
+                .map { token ->
+                    if (token is UrlToken) {
+                        val actual =
+                            raw.legacy?.entities?.urls
+                                ?.firstOrNull { it.url == token.value.trim() }?.expandedUrl
+                        if (actual != null) {
+                            UrlToken(actual)
+                        } else {
+                            token
+                        }
+                    } else {
+                        token
+                    }
+                }
+                .toHtml(accountKey.host)
         }
 
         val humanizedTime by lazy {
@@ -818,5 +836,6 @@ fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT {
         inReplyToStatusId = null,
         inReplyToUserId = null,
         sensitive = false,
+        raw = Tweet(restId = ""),
     )
 }

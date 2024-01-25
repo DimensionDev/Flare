@@ -224,13 +224,23 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             mediator =
-                UserTimelineRemoteMediator(
-                    userKey,
-                    service,
-                    database,
-                    account.accountKey,
-                    pagingKey,
-                ),
+                if (mediaOnly) {
+                    UserMediaTimelineRemoteMediator(
+                        userKey,
+                        service,
+                        database,
+                        account.accountKey,
+                        pagingKey,
+                    )
+                } else {
+                    UserTimelineRemoteMediator(
+                        userKey,
+                        service,
+                        database,
+                        account.accountKey,
+                        pagingKey,
+                    )
+                },
         )
     }
 

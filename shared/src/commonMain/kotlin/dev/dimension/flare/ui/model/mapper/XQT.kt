@@ -56,7 +56,10 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
             val title = it.get("title")?.stringValue
             val image = it.get("photo_image_full_size_original")?.imageValue
             val description = it.get("description")?.stringValue
-            val cardUrl = it.get("card_url")?.stringValue
+            val cardUrl =
+                it.get("card_url")?.stringValue?.let {
+                    legacy?.entities?.urls?.firstOrNull { url -> url.url == it }?.expandedUrl
+                }
             if (title != null && cardUrl != null) {
                 UiCard(
                     title = title,
@@ -149,7 +152,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
                 host = accountKey.host,
             ),
         user = user,
-        createdAt = legacy.createdAt.let { parseCustomDateTime(it) } ?: Clock.System.now(),
+        createdAt = parseCustomDateTime(legacy.createdAt) ?: Clock.System.now(),
         content = text,
         medias = medias,
         card = uiCard,
@@ -172,6 +175,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
         inReplyToUserId = legacy.in_reply_to_user_id_str,
         poll = poll,
         sensitive = legacy.possiblySensitive == true,
+        raw = this,
     )
 }
 
@@ -204,9 +208,10 @@ fun User.toUi() =
         location = legacy.location?.takeIf { it.isNotEmpty() },
         url =
             legacy.url?.takeIf { it.isNotEmpty() }?.let { url ->
-                legacy.entities.urls?.firstOrNull { it.url == url }?.expandedUrl
-            },
+                legacy.entities.url?.urls?.firstOrNull { it.url == url }?.expandedUrl
+            } ?: legacy.url,
         protected = legacy.protected ?: false,
+        raw = this,
     )
 
 internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelation {

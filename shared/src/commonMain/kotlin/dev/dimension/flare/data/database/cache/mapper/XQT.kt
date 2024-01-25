@@ -164,12 +164,13 @@ internal fun List<InstructionUnion>.tweets(): List<XQTTimeline> =
             else -> emptyList()
         }
     }.flatMap { entry ->
+        // * 100 for sorted index for module entries sorting
         when (entry.content) {
             is TimelineTimelineCursor -> emptyList()
-            is TimelineTimelineItem -> listOf(entry.content.itemContent to entry.sortIndex.toLong())
+            is TimelineTimelineItem -> listOf(entry.content.itemContent to entry.sortIndex.toLong() * 100)
             is TimelineTimelineModule ->
                 entry.content.items?.mapIndexed { index, it ->
-                    it.item.itemContent to (entry.sortIndex.toLong() - index)
+                    it.item.itemContent to ((entry.sortIndex.toLong() * 100) - index)
                 }.orEmpty()
         }
     }.mapNotNull { pair ->

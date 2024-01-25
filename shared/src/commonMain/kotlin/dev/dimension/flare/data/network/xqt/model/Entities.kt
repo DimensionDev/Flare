@@ -40,6 +40,14 @@ data class Entities(
     val userMentions: JsonElement? = null,
     @SerialName(value = "media")
     val media: kotlin.collections.List<Media>? = null,
-//    @SerialName(value = "description")
-//    val description: kotlin.collections.List<Url>? = null,
+    @SerialName(value = "description")
+    val description: Description? = null,
+    @SerialName(value = "url")
+    val url: Description? = null,
+)
+
+@Serializable
+data class Description(
+    @SerialName(value = "urls")
+    val urls: kotlin.collections.List<Url>? = null,
 )

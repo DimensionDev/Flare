@@ -1,15 +1,17 @@
 package dev.dimension.flare.ui.model
 
 import dev.dimension.flare.data.network.mastodon.api.model.Account
+import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.humanizer.humanize
 import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
 import moe.tlaster.ktml.Ktml
 import moe.tlaster.ktml.dom.Element
 import moe.tlaster.ktml.dom.Text
+import moe.tlaster.twitter.parser.UrlToken
 
 expect class UiUserExtra
 
@@ -156,18 +158,25 @@ sealed class UiUser {
         val location: String?,
         val url: String?,
         val protected: Boolean,
+        internal val raw: User,
     ) : UiUser() {
         override val handle: String = "@$rawHandle@$xqtHost"
 
         val fieldsParsed by lazy {
-            persistentMapOf<String, Element>().apply {
+            hashMapOf<String, Element>().apply {
                 location?.let {
                     put("location", Element("span").apply { children.add(Text(it)) })
                 }
-                url?.let {
-                    put("url", Element("a").apply { children.add(Text(it)) })
+                url?.let { url ->
+                    put(
+                        "url",
+                        Element("a").apply {
+                            children.add(Text(url))
+                            attributes["href"] = url
+                        },
+                    )
                 }
-            }
+            }.toImmutableMap()
         }
 
         data class Matrices(
@@ -187,7 +196,22 @@ sealed class UiUser {
         }
         override val descriptionElement: Element? by lazy {
             description?.let {
-                twitterParser.parse(it).toHtml(xqtHost)
+                twitterParser.parse(it)
+                    .map { token ->
+                        if (token is UrlToken) {
+                            val actual =
+                                raw.legacy.entities.description?.urls
+                                    ?.firstOrNull { it.url == token.value.trim() }?.expandedUrl
+                            if (actual != null) {
+                                UrlToken(actual)
+                            } else {
+                                token
+                            }
+                        } else {
+                            token
+                        }
+                    }
+                    .toHtml(xqtHost)
             }
         }
 

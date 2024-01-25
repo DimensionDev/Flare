@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,18 +30,26 @@ fun RefreshContainer(
             refreshState.endRefresh()
         }
     }
+    val scaleFraction =
+        if (refreshState.isRefreshing) {
+            1f
+        } else {
+            LinearOutSlowInEasing.transform(refreshState.progress).coerceIn(0f, 1f)
+        }
     Box(
         modifier =
             modifier
                 .nestedScroll(refreshState.nestedScrollConnection),
     ) {
         content.invoke(this)
-        PullToRefreshContainer(
-            modifier =
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(indicatorPadding),
-            state = refreshState,
-        )
+        if (scaleFraction > 0) {
+            PullToRefreshContainer(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(indicatorPadding),
+                state = refreshState,
+            )
+        }
     }
 }

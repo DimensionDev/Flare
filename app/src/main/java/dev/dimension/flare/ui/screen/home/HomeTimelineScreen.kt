@@ -5,9 +5,10 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -25,8 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -43,12 +47,17 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.HomeTimelineState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -83,8 +92,7 @@ internal fun HomeTimelineScreen(
     val state by producePresenter {
         homeTimelinePresenter()
     }
-    val lazyListState = rememberLazyListState()
-
+    val lazyListState = rememberLazyStaggeredGridState()
     val isAtTheTop by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0
@@ -92,7 +100,7 @@ internal fun HomeTimelineScreen(
     }
     LaunchedEffect(isAtTheTop) {
         if (isAtTheTop) {
-            state.state.onNewTootsShown()
+            state.onNewTootsShown()
         }
     }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -131,30 +139,34 @@ internal fun HomeTimelineScreen(
             modifier =
                 Modifier
                     .fillMaxSize(),
-            onRefresh = state.state::refresh,
+            onRefresh = state::refresh,
             indicatorPadding = contentPadding,
             content = {
                 LazyStatusVerticalStaggeredGrid(
+                    state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    with(state.state.listState) {
+                    with(state.listState) {
                         with(state.statusEvent) {
                             status()
                         }
                     }
                 }
-                state.state.listState.onSuccess {
+                state.listState.onSuccess {
                     AnimatedVisibility(
-                        state.state.showNewToots,
+                        state.showNewToots,
                         enter = slideInVertically { -it },
                         exit = slideOutVertically { -it },
-                        modifier = Modifier.align(Alignment.TopCenter),
+                        modifier =
+                            Modifier
+                                .padding(contentPadding)
+                                .align(Alignment.TopCenter),
                     ) {
                         FilledTonalButton(
                             onClick = {
-                                state.state.onNewTootsShown()
+                                state.onNewTootsShown()
                                 scope.launch {
-                                    lazyListState.animateScrollToItem(0)
+                                    lazyListState.scrollToItem(0)
                                 }
                             },
                         ) {
@@ -178,8 +190,31 @@ private fun homeTimelinePresenter(statusEvent: StatusEvent = koinInject()) =
     run {
         val state = remember { HomeTimelinePresenter() }.invoke()
         val accountState = remember { ActiveAccountPresenter() }.invoke()
-        object : ActiveAccountState by accountState {
-            val state = state
+        var showNewToots by remember { mutableStateOf(false) }
+        val listState = state.listState
+        if (listState is UiState.Success && listState.data.itemCount > 0) {
+            LaunchedEffect(Unit) {
+                snapshotFlow {
+                    if (listState.data.itemCount > 0) {
+                        listState.data.peek(0)?.statusKey
+                    } else {
+                        null
+                    }
+                }
+                    .mapNotNull { it }
+                    .distinctUntilChanged()
+                    .drop(1)
+                    .collect {
+                        showNewToots = true
+                    }
+            }
+        }
+        object : ActiveAccountState by accountState, HomeTimelineState by state {
             val statusEvent = statusEvent
+            val showNewToots = showNewToots
+
+            fun onNewTootsShown() {
+                showNewToots = false
+            }
         }
     }

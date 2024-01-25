@@ -12,17 +12,20 @@ import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.first
 
 suspend fun <T : Any> LazyPagingItems<T>.refreshSuspend() {
     refresh()
     snapshotFlow { loadState }
         .distinctUntilChanged()
-        .filter {
-            it.refresh is LoadState.NotLoading
+        .first {
+            it.refresh is LoadState.Loading
         }
-        .firstOrNull()
+    snapshotFlow { loadState }
+        .distinctUntilChanged()
+        .first {
+            it.refresh is LoadState.NotLoading || it.refresh is LoadState.Error
+        }
 }
 
 @Composable

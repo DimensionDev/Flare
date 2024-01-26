@@ -81,9 +81,14 @@ internal fun XQTStatusComponent(
                     {
                         when (it) {
                             AppearanceSettings.XQT.SwipeActions.NONE -> Unit
-                            AppearanceSettings.XQT.SwipeActions.REPLY -> event.onReplyClick(actualData, uriHandler)
-                            AppearanceSettings.XQT.SwipeActions.REBLOG -> event.onReblogClick(actualData)
-                            AppearanceSettings.XQT.SwipeActions.FAVOURITE -> event.onLikeClick(actualData)
+                            AppearanceSettings.XQT.SwipeActions.REPLY ->
+                                event.onReplyClick(
+                                    actualData,
+                                    uriHandler,
+                                )
+
+                            AppearanceSettings.XQT.SwipeActions.REBLOG -> event.onReblogClick(data)
+                            AppearanceSettings.XQT.SwipeActions.FAVOURITE -> event.onLikeClick(data)
                         }
                     }
                 },
@@ -96,9 +101,14 @@ internal fun XQTStatusComponent(
                     {
                         when (it) {
                             AppearanceSettings.XQT.SwipeActions.NONE -> Unit
-                            AppearanceSettings.XQT.SwipeActions.REPLY -> event.onReplyClick(actualData, uriHandler)
-                            AppearanceSettings.XQT.SwipeActions.REBLOG -> event.onReblogClick(actualData)
-                            AppearanceSettings.XQT.SwipeActions.FAVOURITE -> event.onLikeClick(actualData)
+                            AppearanceSettings.XQT.SwipeActions.REPLY ->
+                                event.onReplyClick(
+                                    actualData,
+                                    uriHandler,
+                                )
+
+                            AppearanceSettings.XQT.SwipeActions.REBLOG -> event.onReblogClick(data)
+                            AppearanceSettings.XQT.SwipeActions.FAVOURITE -> event.onLikeClick(data)
                         }
                     }
                 },
@@ -123,7 +133,7 @@ private fun RowScope.StatusFooterComponent(
         },
     )
     StatusActionGroup(
-        enabled = data.canRetweet,
+        enabled = actualData.canRetweet,
         icon = Icons.Default.SyncAlt,
         text = actualData.matrices.humanizedRetweetCount,
         modifier =
@@ -150,7 +160,7 @@ private fun RowScope.StatusFooterComponent(
                 },
                 onClick = {
                     closeMenu.invoke()
-                    event.onReblogClick(actualData)
+                    event.onReblogClick(data)
                 },
             )
             DropdownMenuItem(
@@ -184,7 +194,7 @@ private fun RowScope.StatusFooterComponent(
             Modifier
                 .weight(1f),
         onClicked = {
-            event.onLikeClick(actualData)
+            event.onLikeClick(data)
         },
         color =
             if (actualData.reaction.liked) {

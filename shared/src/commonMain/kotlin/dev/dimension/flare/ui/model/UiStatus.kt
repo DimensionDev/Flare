@@ -454,22 +454,15 @@ private fun Token.toHtml(host: String): Node {
     return when (this) {
         is CashTagToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search("$$value")
-                children.add(Text("$$value"))
+                attributes["href"] = AppDeepLink.Search(value)
+                children.add(Text(value))
             }
         // not supported
         is EmojiToken -> Text(value)
         is HashTagToken ->
             Element("a").apply {
-                val text =
-                    buildString {
-//                    if (!value.contains("#") || !value.contains("＃")) {
-//                        append("#")
-//                    }
-                        append(value)
-                    }
-                attributes["href"] = AppDeepLink.Search(text)
-                children.add(Text(text))
+                attributes["href"] = AppDeepLink.Search(value)
+                children.add(Text(value))
             }
 
         is StringToken -> Text(value)

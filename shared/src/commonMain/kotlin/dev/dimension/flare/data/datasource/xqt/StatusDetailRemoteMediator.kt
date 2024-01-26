@@ -10,8 +10,11 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
+import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.mapper.toUi
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,6 +29,7 @@ internal class StatusDetailRemoteMediator(
     private val statusOnly: Boolean,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
     private var cursor: String? = null
+    private var actualId: String? = null
 
     override suspend fun load(
         loadType: LoadType,
@@ -45,22 +49,22 @@ internal class StatusDetailRemoteMediator(
                     }
                 }
             }
-            val response =
-                service.getTweetDetail(
-                    variables =
-                        TweetDetailRequest(
-                            focalTweetID = statusKey.id,
-                            cursor = null,
-                        ).encodeJson(),
-                )
-                    .body()
-                    ?.data
-                    ?.threadedConversationWithInjectionsV2
-                    ?.instructions
-                    .orEmpty()
-            val tweet = response.tweets()
 
             if (statusOnly) {
+                val response =
+                    service.getTweetDetail(
+                        variables =
+                            TweetDetailRequest(
+                                focalTweetID = statusKey.id,
+                                cursor = null,
+                            ).encodeJson(),
+                    )
+                        .body()
+                        ?.data
+                        ?.threadedConversationWithInjectionsV2
+                        ?.instructions
+                        .orEmpty()
+                val tweet = response.tweets()
                 val item = tweet.firstOrNull { it.id == statusKey.id }
                 if (item != null) {
                     XQT.save(
@@ -74,12 +78,109 @@ internal class StatusDetailRemoteMediator(
                     endOfPaginationReached = true,
                 )
             } else {
-                cursor = response.cursor()
+                val id =
+                    actualId ?: run {
+                        val result =
+                            database.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()
+                                ?.content?.let { it as? StatusContent.XQT }
+                                ?.data
+                                ?.toUi(accountKey)
+                                ?.let {
+                                    it
+                                        .retweet
+                                        ?.statusKey
+                                        ?.id ?: it.statusKey.id
+                                } ?: run {
+                                val response =
+                                    service.getTweetDetail(
+                                        variables =
+                                            TweetDetailRequest(
+                                                focalTweetID = statusKey.id,
+                                                cursor = null,
+                                            ).encodeJson(),
+                                    )
+                                        .body()
+                                        ?.data
+                                        ?.threadedConversationWithInjectionsV2
+                                        ?.instructions
+                                        .orEmpty()
+                                val tweet = response.tweets()
+                                tweet
+                                    .firstOrNull {
+                                        it.id == statusKey.id
+                                    }
+                                    ?.tweets
+                                    ?.tweetResults
+                                    ?.result
+                                    ?.let { it as? Tweet }
+                                    ?.legacy
+                                    ?.retweetedStatusResult
+                                    ?.result
+                                    ?.let { it as? Tweet }
+                                    ?.legacy
+                                    ?.idStr
+                            } ?: statusKey.id
+
+                        actualId = result
+                        result
+                    }
+                val currentItem =
+                    cursor?.let {
+                        service.getTweetResultByRestId(
+                            variables =
+                                TweetDetailWithRestIdRequest(
+                                    tweetID = statusKey.id,
+                                ).encodeJson(),
+                        ).body()?.data?.tweetResult
+                    }
+                val actualResponse =
+                    service.getTweetDetail(
+                        variables =
+                            TweetDetailRequest(
+                                focalTweetID = id,
+                                cursor = null,
+                            ).encodeJson(),
+                    )
+                        .body()
+                        ?.data
+                        ?.threadedConversationWithInjectionsV2
+                        ?.instructions
+                        .orEmpty()
+
+                val actualTweet =
+                    actualResponse.tweets()
+                        .map {
+                            if (id != statusKey.id) {
+                                val itId =
+                                    it.tweets
+                                        .tweetResults
+                                        .result
+                                        ?.let { it as? Tweet }
+                                        ?.legacy
+                                        ?.idStr
+                                if (itId == id) {
+                                    it.copy(
+                                        tweets =
+                                            it.tweets.copy(
+                                                tweetResults = currentItem ?: it.tweets.tweetResults,
+                                            ),
+                                        id = statusKey.id,
+                                    )
+                                } else {
+                                    it
+                                }
+                            } else {
+                                it
+                            }
+                        }
+
+                cursor = actualResponse.cursor()
+
                 XQT.save(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                     database = database,
-                    tweet = tweet,
+                    tweet = actualTweet,
                 )
                 MediatorResult.Success(
                     endOfPaginationReached = cursor == null,
@@ -92,7 +193,19 @@ internal class StatusDetailRemoteMediator(
 }
 
 @Serializable
-data class TweetDetailRequest(
+internal data class TweetDetailWithRestIdRequest(
+    @SerialName("tweetId")
+    val tweetID: String,
+    @Required
+    val withCommunity: Boolean = false,
+    @Required
+    val includePromotedContent: Boolean = false,
+    @Required
+    val withVoice: Boolean = false,
+)
+
+@Serializable
+internal data class TweetDetailRequest(
     @SerialName("focalTweetId")
     val focalTweetID: String,
     val cursor: String? = null,

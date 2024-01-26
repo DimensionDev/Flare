@@ -9,6 +9,8 @@ import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.ItemResult
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
+import dev.dimension.flare.data.network.xqt.model.TimelineAddEntry
+import dev.dimension.flare.data.network.xqt.model.TimelineAddToModule
 import dev.dimension.flare.data.network.xqt.model.TimelinePinEntry
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineCursor
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineItem
@@ -164,7 +166,26 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                 } else {
                     listOf(union.entry)
                 }
-
+            is TimelineAddToModule ->
+                union.moduleItems.mapNotNull {
+                    if (it.item.itemContent is TimelineTweet &&
+                        it.item.itemContent.tweetResults.result is Tweet
+                    ) {
+                        TimelineAddEntry(
+                            content =
+                                TimelineTimelineModule(
+                                    items =
+                                        listOf(
+                                            it,
+                                        ),
+                                ),
+                            entryId = it.entryId,
+                            sortIndex = it.item.itemContent.tweetResults.result.restId,
+                        )
+                    } else {
+                        null
+                    }
+                }
             else -> emptyList()
         }
     }.flatMap { entry ->

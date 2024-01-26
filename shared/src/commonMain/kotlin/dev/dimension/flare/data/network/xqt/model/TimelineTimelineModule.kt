@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -39,8 +38,8 @@ internal data class TimelineTimelineModule(
 //    val clientEventInfo: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 //    @SerialName(value = "displayType")
 //    val displayType: TimelineTimelineModule.DisplayType,
-    @Contextual @SerialName(value = "entryType")
-    val entryType: ContentEntryType,
+//    @Contextual @SerialName(value = "entryType")
+//    val entryType: ContentEntryType,
 //    @Contextual @SerialName(value = "footer")
 //    val footer: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 //    @Contextual @SerialName(value = "header")

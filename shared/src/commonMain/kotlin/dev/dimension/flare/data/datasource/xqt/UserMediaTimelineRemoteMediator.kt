@@ -12,12 +12,9 @@ import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
-import kotlinx.serialization.Required
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
-internal class UserTimelineRemoteMediator(
+internal class UserMediaTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val service: XQTService,
     private val database: CacheDatabase,
@@ -35,7 +32,7 @@ internal class UserTimelineRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         cursor = null
-                        service.getUserTweets(
+                        service.getUserMedia(
                             variables =
                                 UserTimelineRequest(
                                     userID = userKey.id,
@@ -55,7 +52,7 @@ internal class UserTimelineRemoteMediator(
                     }
 
                     LoadType.APPEND -> {
-                        service.getUserTweets(
+                        service.getUserMedia(
                             variables =
                                 UserTimelineRequest(
                                     userID = userKey.id,
@@ -76,6 +73,9 @@ internal class UserTimelineRemoteMediator(
                 pagingKey = pagingKey,
                 database = database,
                 tweet = tweet,
+                sortIdProvider = {
+                    it.id?.toLong() ?: it.sortedIndex
+                },
             )
             MediatorResult.Success(
                 endOfPaginationReached = cursor == null,
@@ -86,21 +86,3 @@ internal class UserTimelineRemoteMediator(
         }
     }
 }
-
-@Serializable
-internal data class UserTimelineRequest(
-    @SerialName("userId")
-    @Required
-    val userID: String,
-    @Required
-    val count: Long? = null,
-    val cursor: String? = null,
-    @Required
-    val includePromotedContent: Boolean = false,
-    @Required
-    val withQuickPromoteEligibilityTweetFields: Boolean = true,
-    @Required
-    val withVoice: Boolean = true,
-    @Required
-    val withV2Timeline: Boolean = true,
-)

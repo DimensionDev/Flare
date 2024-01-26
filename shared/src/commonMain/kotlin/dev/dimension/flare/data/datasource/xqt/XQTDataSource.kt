@@ -537,6 +537,7 @@ class XQTDataSource(
                                         } else {
                                             it.data.legacy.favoriteCount.plus(1)
                                         },
+                                    // TODO: update if like retweeted
                                 ),
                         ),
                 )
@@ -615,6 +616,7 @@ class XQTDataSource(
                                         } else {
                                             it.data.legacy.retweetCount.plus(1)
                                         },
+                                    // TODO: update if retweet inner retweeted
                                 ),
                         ),
                 )

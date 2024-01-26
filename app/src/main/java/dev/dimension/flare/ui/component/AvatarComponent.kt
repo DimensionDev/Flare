@@ -22,7 +22,7 @@ fun AvatarComponent(
         model = data,
         contentDescription = null,
         modifier =
-            modifier
+            Modifier
                 .size(size)
                 .clip(
                     when (appearanceSettings.avatarShape) {
@@ -31,6 +31,7 @@ fun AvatarComponent(
                         AvatarShape.SQUARE ->
                             RoundedCornerShape(4.dp)
                     },
-                ),
+                )
+                .then(modifier),
     )
 }

@@ -98,7 +98,7 @@ internal fun HomeTimelineScreen(
             lazyListState.firstVisibleItemIndex == 0
         }
     }
-    LaunchedEffect(isAtTheTop) {
+    LaunchedEffect(isAtTheTop, state.showNewToots) {
         if (isAtTheTop) {
             state.onNewTootsShown()
         }

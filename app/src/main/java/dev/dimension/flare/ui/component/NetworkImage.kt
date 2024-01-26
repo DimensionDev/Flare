@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -16,10 +15,11 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.size.Size
+import coil3.compose.AsyncImagePainter
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.size.Size
 import dev.dimension.flare.ui.component.placeholder.placeholder
 
 @Composable
@@ -41,33 +41,19 @@ fun NetworkImage(
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality,
 ) {
-    val painter = rememberAsyncImagePainter(model = model, filterQuality = filterQuality)
-    Box(modifier) {
-        Image(
-            painter = painter,
-            contentDescription = contentDescription,
-            alignment = alignment,
-            contentScale = contentScale,
-            alpha = alpha,
-            colorFilter = colorFilter,
-            modifier = Modifier.matchParentSize(),
-        )
-
-        AnimatedVisibility(
-            visible =
-                when (painter.state) {
-                    is AsyncImagePainter.State.Empty,
-                    is AsyncImagePainter.State.Success,
-                    -> false
-
-                    is AsyncImagePainter.State.Loading,
-                    is AsyncImagePainter.State.Error,
-                    -> true
-                },
-        ) {
+    SubcomposeAsyncImage(
+        model = model,
+        contentDescription = contentDescription,
+        alignment = alignment,
+        contentScale = contentScale,
+        alpha = alpha,
+        colorFilter = colorFilter,
+        modifier = modifier,
+        filterQuality = filterQuality,
+        loading = {
             placeholder()
-        }
-    }
+        },
+    )
 }
 
 @Composable

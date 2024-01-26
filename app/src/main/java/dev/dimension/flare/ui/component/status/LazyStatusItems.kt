@@ -68,62 +68,60 @@ internal fun status() {
             with(lazyPagingItems) {
                 statusItems()
             }
-            if (lazyPagingItems.itemCount > 0) {
-                when (lazyPagingItems.loadState.append) {
-                    is LoadState.Error ->
-                        item(
-                            span = StaggeredGridItemSpan.FullLine,
+            when (lazyPagingItems.loadState.append) {
+                is LoadState.Error ->
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        lazyPagingItems.retry()
+                                    }
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Column(
-                                modifier =
-                                    Modifier
-                                        .clickable {
-                                            lazyPagingItems.retry()
-                                        }
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.status_loadmore_error),
-                                )
-                                Text(text = stringResource(id = R.string.status_loadmore_error_retry))
-                            }
+                            Text(
+                                text = stringResource(R.string.status_loadmore_error),
+                            )
+                            Text(text = stringResource(id = R.string.status_loadmore_error_retry))
                         }
+                    }
 
-                    LoadState.Loading ->
-                        items(10) {
-                            Column {
-                                StatusPlaceholder(
-                                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                HorizontalDivider(
-                                    modifier = Modifier.alpha(DisabledAlpha),
-                                )
-                            }
+                LoadState.Loading ->
+                    items(10) {
+                        Column {
+                            StatusPlaceholder(
+                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            HorizontalDivider(
+                                modifier = Modifier.alpha(DisabledAlpha),
+                            )
                         }
+                    }
 
-                    is LoadState.NotLoading ->
-                        item(
-                            span = StaggeredGridItemSpan.FullLine,
+                is LoadState.NotLoading ->
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Column(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                HorizontalDivider()
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = stringResource(R.string.status_loadmore_end),
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
+                            HorizontalDivider()
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.status_loadmore_end),
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
-                }
+                    }
             }
         } else if (
             lazyPagingItems.loadState.refresh == LoadState.Loading ||

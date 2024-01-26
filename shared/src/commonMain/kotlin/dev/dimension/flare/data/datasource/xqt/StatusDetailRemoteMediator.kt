@@ -125,13 +125,15 @@ internal class StatusDetailRemoteMediator(
                         result
                     }
                 val currentItem =
-                    cursor?.let {
+                    if (cursor == null) {
                         service.getTweetResultByRestId(
                             variables =
                                 TweetDetailWithRestIdRequest(
                                     tweetID = statusKey.id,
                                 ).encodeJson(),
                         ).body()?.data?.tweetResult
+                    } else {
+                        null
                     }
                 val actualResponse =
                     service.getTweetDetail(
@@ -175,6 +177,10 @@ internal class StatusDetailRemoteMediator(
                         }
 
                 cursor = actualResponse.cursor()
+
+                database.transaction {
+                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                }
 
                 XQT.save(
                     accountKey = accountKey,

@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Notification(
+internal data class Notification(
     val id: String? = null,
     val type: NotificationTypes? = null,
     @SerialName("created_at")

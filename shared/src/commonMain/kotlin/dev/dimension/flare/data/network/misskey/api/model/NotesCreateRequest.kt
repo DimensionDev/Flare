@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-data class NotesCreateRequest(
+internal data class NotesCreateRequest(
     @SerialName("visibility")
     val visibility: String? = null,
     @SerialName("visibleUserIds")

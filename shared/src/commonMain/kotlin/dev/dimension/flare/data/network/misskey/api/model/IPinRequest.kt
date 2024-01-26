@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param noteId */
 @Serializable
-data class IPinRequest(
+internal data class IPinRequest(
     @SerialName(value = "noteId") val noteId: kotlin.String,
 )

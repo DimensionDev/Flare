@@ -5,7 +5,7 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.TestRequest
 
-interface NonProductiveApi {
+internal interface NonProductiveApi {
     /**
      * reset-db
      * Only available when running with &lt;code&gt;NODE_ENV&#x3D;testing&lt;/code&gt;. Reset the database and flush Redis.  **Credential required**: *No*

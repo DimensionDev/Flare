@@ -6,14 +6,14 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
-data class MisskeyInstance(
+internal data class MisskeyInstance(
     val date: String,
     val stats: MisskeyInstanceStats,
     val instancesInfos: List<InstancesInfo>,
 )
 
 @Serializable
-data class InstancesInfo(
+internal data class InstancesInfo(
     val url: String,
     val value: Double,
     val meta: Meta,
@@ -31,7 +31,7 @@ data class InstancesInfo(
 )
 
 @Serializable
-data class Meta(
+internal data class Meta(
     val maintainerName: String? = null,
     val maintainerEmail: String? = null,
     val version: String,
@@ -151,7 +151,7 @@ data class Meta(
 )
 
 @Serializable
-data class Ad(
+internal data class Ad(
     val id: String,
     val url: String,
     val place: String,
@@ -163,19 +163,19 @@ data class Ad(
 )
 
 @Serializable
-data class CPU(
+internal data class CPU(
     val model: String,
     val cores: Long,
 )
 
 @Serializable
-data class Maintainer(
+internal data class Maintainer(
     val email: String? = null,
     val name: String? = null,
 )
 
 @Serializable
-data class Policies(
+internal data class Policies(
     val gtlAvailable: Boolean,
     val ltlAvailable: Boolean,
     val canPublicNote: Boolean,
@@ -218,7 +218,7 @@ data class Policies(
 )
 
 @Serializable
-data class Nodeinfo(
+internal data class Nodeinfo(
     val version: String,
     val software: Software,
     val protocols: List<String>,
@@ -230,7 +230,7 @@ data class Nodeinfo(
 )
 
 @Serializable
-data class Metadata(
+internal data class Metadata(
     val nodeName: String? = null,
     val nodeDescription: String? = null,
     val maintainer: Maintainer,
@@ -271,41 +271,41 @@ data class Metadata(
 )
 
 @Serializable
-data class Announcement(
+internal data class Announcement(
     val text: String,
     val image: JsonElement? = null,
     val title: String,
 )
 
 @Serializable
-data class Mulukhiya(
+internal data class Mulukhiya(
     @SerialName("package")
     val mulukhiyaPackage: Package,
     val config: Config,
 )
 
 @Serializable
-data class Config(
+internal data class Config(
     val controller: String,
     val status: Status,
 )
 
 @Serializable
-data class Status(
+internal data class Status(
     val spoiler: Spoiler,
     @SerialName("default_hashtag")
     val defaultHashtag: String,
 )
 
 @Serializable
-data class Spoiler(
+internal data class Spoiler(
     val text: JsonElement? = null,
     val emoji: String,
     val shortcode: String,
 )
 
 @Serializable
-data class Package(
+internal data class Package(
     val authors: List<String>,
     val description: String,
     val email: List<String>,
@@ -315,13 +315,13 @@ data class Package(
 )
 
 @Serializable
-data class Services(
+internal data class Services(
     val inbound: JsonArray,
     val outbound: List<String>,
 )
 
 @Serializable
-data class Software(
+internal data class Software(
     val name: String,
     val version: String,
     val homepage: String? = null,
@@ -329,21 +329,21 @@ data class Software(
 )
 
 @Serializable
-data class Usage(
+internal data class Usage(
     val users: Users,
     val localPosts: Long? = null,
     val localComments: Long? = null,
 )
 
 @Serializable
-data class Users(
+internal data class Users(
     val total: Long? = null,
     val activeHalfyear: Long? = null,
     val activeMonth: Long? = null,
 )
 
 @Serializable
-data class InstancesInfoStats(
+internal data class InstancesInfoStats(
     val notesCount: Long,
     val originalNotesCount: Long,
     val usersCount: Long,
@@ -355,7 +355,7 @@ data class InstancesInfoStats(
 )
 
 @Serializable
-data class MisskeyInstanceStats(
+internal data class MisskeyInstanceStats(
     val notesCount: Long,
     val usersCount: Long,
     val mau: Long,

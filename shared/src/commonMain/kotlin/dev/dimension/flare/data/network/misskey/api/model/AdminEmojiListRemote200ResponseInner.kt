@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param id * @param aliases * @param name * @param category * @param host The local host is represented with `null`.
  * @param url */
 @Serializable
-data class AdminEmojiListRemote200ResponseInner(
+internal data class AdminEmojiListRemote200ResponseInner(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "aliases") val aliases: kotlin.collections.List<kotlin.String>,
     @SerialName(value = "name") val name: kotlin.String,

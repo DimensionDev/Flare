@@ -32,7 +32,7 @@ sealed class UiUser {
         userKey.toString()
     }
 
-    data class Mastodon(
+    data class Mastodon internal constructor(
         override val userKey: MicroBlogKey,
         val name: String,
         val handleInternal: String,
@@ -146,7 +146,7 @@ sealed class UiUser {
         }
     }
 
-    data class XQT(
+    data class XQT internal constructor(
         override val userKey: MicroBlogKey,
         val displayName: String,
         val rawHandle: String,

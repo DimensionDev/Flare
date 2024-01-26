@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param tweetResults
  */
 @Serializable
-data class DeleteTweetResponseResult(
+internal data class DeleteTweetResponseResult(
     @Contextual @SerialName(value = "tweet_results")
     val tweetResults: kotlin.Any,
 )

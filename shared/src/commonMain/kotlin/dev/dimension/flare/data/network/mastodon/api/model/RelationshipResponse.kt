@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RelationshipResponse(
+internal data class RelationshipResponse(
     val id: String? = null,
     val following: Boolean? = null,
     @SerialName("showing_reblogs")

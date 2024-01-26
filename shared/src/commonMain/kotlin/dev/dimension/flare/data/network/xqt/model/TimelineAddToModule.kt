@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineAddToModule")
-data class TimelineAddToModule(
+internal data class TimelineAddToModule(
     @SerialName(value = "moduleEntryId")
     val moduleEntryId: kotlin.String,
     @SerialName(value = "moduleItems")

@@ -9,7 +9,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.data.network.mastodon.api.model.RequestTokenResponse
 
-interface MastodonOAuthResources {
+internal interface MastodonOAuthResources {
     @POST("api/v1/apps")
     @FormUrlEncoded
     suspend fun createApplication(

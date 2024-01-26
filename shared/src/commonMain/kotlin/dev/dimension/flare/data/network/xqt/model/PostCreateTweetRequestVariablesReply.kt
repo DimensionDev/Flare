@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param inReplyToTweetId
  */
 @Serializable
-data class PostCreateTweetRequestVariablesReply(
+internal data class PostCreateTweetRequestVariablesReply(
     @SerialName(value = "exclude_reply_user_ids")
     val excludeReplyUserIds: kotlin.collections.List<@Contextual kotlin.Any>,
     @SerialName(value = "in_reply_to_tweet_id")

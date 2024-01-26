@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param user
  */
 @Serializable
-data class FollowResponseData(
+internal data class FollowResponseData(
     @SerialName(value = "user")
     val user: FollowResponseUser,
 )

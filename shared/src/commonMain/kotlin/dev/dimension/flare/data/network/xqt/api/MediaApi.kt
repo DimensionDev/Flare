@@ -10,7 +10,7 @@ import dev.dimension.flare.model.xqtHost
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-interface MediaApi {
+internal interface MediaApi {
     @POST("media/upload.json?command=INIT")
     suspend fun initUpload(
         @Query("media_type") mediaType: String,
@@ -43,7 +43,7 @@ interface MediaApi {
 }
 
 @Serializable
-data class TwitterUploadResponse(
+internal data class TwitterUploadResponse(
     @SerialName("media_id")
     val mediaID: Long? = null,
     @SerialName("media_id_string")
@@ -55,7 +55,7 @@ data class TwitterUploadResponse(
 )
 
 @Serializable
-data class TwitterUploadProcessInfo(
+internal data class TwitterUploadProcessInfo(
     @SerialName("check_after_secs")
     val checkAfterSecs: Int? = null,
     @SerialName("progress_percent")

@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param sinceId * @param untilId */
 @Serializable
-data class AdminAbuseReportResolverListRequest(
+internal data class AdminAbuseReportResolverListRequest(
     @SerialName(value = "limit") val limit: kotlin.Double? = (10).toDouble(),
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,

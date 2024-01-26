@@ -30,7 +30,7 @@ import kotlinx.serialization.json.JsonElement
  * @param restId
  */
 @Serializable
-data class UserResultByScreenNameResult(
+internal data class UserResultByScreenNameResult(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName,
     @SerialName(value = "id")

@@ -9,9 +9,9 @@ import dev.dimension.flare.model.xqtHost
 sealed interface UiApplication {
     val host: String
 
-    data class Mastodon(
+    data class Mastodon internal constructor(
         override val host: String,
-        val application: CreateApplicationResponse,
+        internal val application: CreateApplicationResponse,
     ) : UiApplication
 
     data class Misskey(

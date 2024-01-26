@@ -38,7 +38,7 @@ private fun config(
     }
 }
 
-class MastodonService(
+internal class MastodonService(
     private val baseUrl: String,
     private val accessToken: String,
 ) : TimelineResources by config(baseUrl, accessToken).create(),

@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param inbox */
 @Serializable
-data class AdminRelaysAddRequest(
+internal data class AdminRelaysAddRequest(
     @SerialName(value = "inbox") val inbox: kotlin.String,
 )

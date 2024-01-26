@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  * @param y
  */
 @Serializable
-data class MediaOriginalInfoFocusRect(
+internal data class MediaOriginalInfoFocusRect(
     @SerialName(value = "h")
     val h: kotlin.Int,
     @SerialName(value = "w")

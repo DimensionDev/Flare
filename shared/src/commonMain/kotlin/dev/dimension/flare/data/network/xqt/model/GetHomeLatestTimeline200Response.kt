@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param errors
  */
 @Serializable
-data class GetHomeLatestTimeline200Response(
+internal data class GetHomeLatestTimeline200Response(
     @SerialName(value = "data")
     val `data`: HomeTimelineResponseData,
     @SerialName(value = "errors")

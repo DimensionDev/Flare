@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
-class Schema20 {
+internal class Schema20 {
     /**
      * NodeInfo schema version 2.0.
      */

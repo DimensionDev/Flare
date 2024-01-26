@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param `data`
  */
 @Serializable
-data class TweetResultByRestIdResponse(
+internal data class TweetResultByRestIdResponse(
     @SerialName(value = "data")
     val `data`: TweetResultByRestIdData,
 )

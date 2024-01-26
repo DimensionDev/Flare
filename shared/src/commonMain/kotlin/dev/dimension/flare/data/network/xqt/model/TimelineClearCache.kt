@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineClearCache")
-data class TimelineClearCache(
+internal data class TimelineClearCache(
     @SerialName(value = "type")
     val type: InstructionType,
 ) : InstructionUnion

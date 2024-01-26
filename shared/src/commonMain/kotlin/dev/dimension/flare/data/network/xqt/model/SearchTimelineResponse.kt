@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param `data`
  */
 @Serializable
-data class SearchTimelineResponse(
+internal data class SearchTimelineResponse(
     @SerialName(value = "data")
     val `data`: SearchTimelineData,
 )

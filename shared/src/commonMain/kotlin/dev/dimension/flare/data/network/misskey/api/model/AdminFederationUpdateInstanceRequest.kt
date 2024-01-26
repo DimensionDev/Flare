@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param host * @param isSuspended */
 @Serializable
-data class AdminFederationUpdateInstanceRequest(
+internal data class AdminFederationUpdateInstanceRequest(
     @SerialName(value = "host") val host: kotlin.String,
     @SerialName(value = "isSuspended") val isSuspended: kotlin.Boolean,
 )

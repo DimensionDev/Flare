@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  * @param richtext
  */
 @Serializable
-data class NoteTweetResultData(
+internal data class NoteTweetResultData(
     @SerialName(value = "entity_set")
     val entitySet: Entities,
     @SerialName(value = "id")

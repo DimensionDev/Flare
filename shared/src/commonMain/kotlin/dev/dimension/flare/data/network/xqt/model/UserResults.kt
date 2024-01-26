@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param result
  */
 @Serializable
-data class UserResults(
+internal data class UserResults(
     @SerialName(value = "result")
     val result: UserUnion? = null,
 )

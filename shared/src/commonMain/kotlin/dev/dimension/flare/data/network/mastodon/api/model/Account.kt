@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Account(
+internal data class Account(
     val id: String? = null,
     val username: String? = null,
     val acct: String? = null,

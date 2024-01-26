@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param `data`
  */
 @Serializable
-data class UserHighlightsTweetsResponse(
+internal data class UserHighlightsTweetsResponse(
     @SerialName(value = "data")
     val `data`: UserHighlightsTweetsData,
 )

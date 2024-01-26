@@ -22,7 +22,7 @@ import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweet200Response
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 
-interface PostApi {
+internal interface PostApi {
     /**
      *
      * create Retweet

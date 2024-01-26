@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param text
  */
 @Serializable
-data class BirdwatchPivotSubtitle(
+internal data class BirdwatchPivotSubtitle(
     @SerialName(value = "entities")
     val entities: kotlin.collections.List<BirdwatchEntity>,
     @SerialName(value = "text")

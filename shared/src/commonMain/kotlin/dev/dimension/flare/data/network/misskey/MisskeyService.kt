@@ -36,7 +36,7 @@ private fun config(
     },
 )
 
-class MisskeyService(
+internal class MisskeyService(
     private val baseUrl: String,
     private val token: String,
 ) : UsersApi by config(baseUrl, token).create(),

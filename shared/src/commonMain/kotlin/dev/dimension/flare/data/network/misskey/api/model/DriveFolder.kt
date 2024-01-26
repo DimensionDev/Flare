@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param name * @param parentId * @param foldersCount * @param filesCount * @param parent */
 @Serializable
-data class DriveFolder(
+internal data class DriveFolder(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,

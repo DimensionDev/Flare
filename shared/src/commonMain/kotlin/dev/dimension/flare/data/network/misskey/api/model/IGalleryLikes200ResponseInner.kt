@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param post */
 @Serializable
-data class IGalleryLikes200ResponseInner(
+internal data class IGalleryLikes200ResponseInner(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "post") val post: GalleryPost,
 )

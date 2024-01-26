@@ -38,7 +38,7 @@ import kotlinx.serialization.Serializable
  * @param ssoInitTokens
  */
 @Serializable
-data class Session(
+internal data class Session(
     @SerialName(value = "communitiesActions")
     val communitiesActions: CommunitiesActions,
     @SerialName(value = "country")

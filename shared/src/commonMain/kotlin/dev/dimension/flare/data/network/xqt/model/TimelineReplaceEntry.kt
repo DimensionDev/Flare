@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineReplaceEntry")
-data class TimelineReplaceEntry(
+internal data class TimelineReplaceEntry(
     @SerialName(value = "entry")
     val entry: TimelineAddEntry,
     @SerialName(value = "entry_id_to_replace")

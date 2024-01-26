@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param name */
 @Serializable
-data class NoteChannelInner(
+internal data class NoteChannelInner(
     @SerialName(value = "id") val id: kotlin.String? = null,
     @SerialName(value = "name") val name: kotlin.String? = null,
 )

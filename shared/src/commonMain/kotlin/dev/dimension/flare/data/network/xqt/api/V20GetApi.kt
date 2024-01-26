@@ -5,7 +5,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 
-interface V20GetApi {
+internal interface V20GetApi {
     /**
      *
      * get search adaptive

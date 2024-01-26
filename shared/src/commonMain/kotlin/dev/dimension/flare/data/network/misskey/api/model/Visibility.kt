@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class Visibility {
+internal enum class Visibility {
     @SerialName("public")
     Public,
 

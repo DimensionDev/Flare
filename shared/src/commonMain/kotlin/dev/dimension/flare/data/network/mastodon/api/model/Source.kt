@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 
 @Serializable
-data class Source(
+internal data class Source(
     val privacy: String? = null,
     val sensitive: Boolean? = null,
     val language: String? = null,

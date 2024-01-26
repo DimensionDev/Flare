@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param name * @param folderId */
 @Serializable
-data class DriveFilesFindRequest(
+internal data class DriveFilesFindRequest(
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "folderId") val folderId: kotlin.String? = null,
 )

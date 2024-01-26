@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param traceId
  */
 @Serializable
-data class Tracing(
+internal data class Tracing(
     @SerialName(value = "trace_id")
     val traceId: kotlin.String,
 )

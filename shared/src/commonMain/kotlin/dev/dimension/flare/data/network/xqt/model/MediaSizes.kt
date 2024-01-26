@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  * @param thumb
  */
 @Serializable
-data class MediaSizes(
+internal data class MediaSizes(
     @SerialName(value = "large")
     val large: MediaSize,
     @SerialName(value = "medium")

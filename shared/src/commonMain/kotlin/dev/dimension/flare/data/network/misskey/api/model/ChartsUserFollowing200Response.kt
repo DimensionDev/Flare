@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param localFollowingsTotal * @param localFollowingsInc * @param localFollowingsDec * @param localFollowersTotal * @param localFollowersInc * @param localFollowersDec * @param remoteFollowingsTotal * @param remoteFollowingsInc * @param remoteFollowingsDec * @param remoteFollowersTotal * @param remoteFollowersInc * @param remoteFollowersDec */
 @Serializable
-data class ChartsUserFollowing200Response(
+internal data class ChartsUserFollowing200Response(
     @SerialName(value = "local.followings.total") val localFollowingsTotal: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "local.followings.inc") val localFollowingsInc: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "local.followings.dec") val localFollowingsDec: kotlin.collections.List<kotlin.Double>,

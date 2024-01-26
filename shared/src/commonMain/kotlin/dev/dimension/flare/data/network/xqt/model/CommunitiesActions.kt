@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param create
  */
 @Serializable
-data class CommunitiesActions(
+internal data class CommunitiesActions(
     @SerialName(value = "create")
     val create: kotlin.Boolean,
 )

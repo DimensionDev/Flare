@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param antennaId * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
-data class AntennasNotesRequest(
+internal data class AntennasNotesRequest(
     @SerialName(value = "antennaId") val antennaId: kotlin.String,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,

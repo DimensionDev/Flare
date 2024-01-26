@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  * @param urlType
  */
 @Serializable
-data class BirdwatchEntityRef(
+internal data class BirdwatchEntityRef(
     @SerialName(value = "type")
     val type: BirdwatchEntityRef.Type,
     @Contextual @SerialName(value = "url")

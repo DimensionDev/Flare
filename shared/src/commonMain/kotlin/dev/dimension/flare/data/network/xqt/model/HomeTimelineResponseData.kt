@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param home
  */
 @Serializable
-data class HomeTimelineResponseData(
+internal data class HomeTimelineResponseData(
     @SerialName(value = "home")
     val home: HomeTimelineHome,
 )

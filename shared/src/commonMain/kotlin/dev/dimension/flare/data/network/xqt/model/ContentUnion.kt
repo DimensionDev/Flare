@@ -38,7 +38,7 @@ import kotlinx.serialization.json.JsonClassDiscriminator
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("entryType")
-sealed interface ContentUnion {
+internal sealed interface ContentUnion {
 //    @SerialName(value = "type")
 //    val type: InstructionType
 //    @Contextual

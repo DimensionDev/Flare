@@ -15,7 +15,7 @@ import dev.dimension.flare.data.network.misskey.api.model.FederationStatsRequest
 import dev.dimension.flare.data.network.misskey.api.model.Following
 import dev.dimension.flare.data.network.misskey.api.model.UserDetailedNotMe
 
-interface FederationApi {
+internal interface FederationApi {
     /**
      * ap/get
      * No description provided.  **Credential required**: *Yes*

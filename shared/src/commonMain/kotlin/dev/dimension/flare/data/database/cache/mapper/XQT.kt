@@ -27,7 +27,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 
-object XQT {
+internal object XQT {
     fun save(
         accountKey: MicroBlogKey,
         pagingKey: String,
@@ -146,7 +146,7 @@ internal fun User.toDbUser() =
         content = UserContent.XQT(this),
     )
 
-data class XQTTimeline(
+internal data class XQTTimeline(
     val tweets: TimelineTweet,
     val id: String?,
     val sortedIndex: Long,

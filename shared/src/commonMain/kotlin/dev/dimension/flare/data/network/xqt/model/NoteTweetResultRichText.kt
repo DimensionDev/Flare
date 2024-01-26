@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param richtextTags
  */
 @Serializable
-data class NoteTweetResultRichText(
+internal data class NoteTweetResultRichText(
     @SerialName(value = "richtext_tags")
     val richtextTags: kotlin.collections.List<NoteTweetResultRichTextTag>,
 )

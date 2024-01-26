@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param viewCount
  */
 @Serializable
-data class MediaStats(
+internal data class MediaStats(
     @SerialName(value = "viewCount")
     val viewCount: kotlin.Int,
 )

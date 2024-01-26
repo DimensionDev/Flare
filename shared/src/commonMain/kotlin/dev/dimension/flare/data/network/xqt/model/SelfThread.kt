@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param idStr
  */
 @Serializable
-data class SelfThread(
+internal data class SelfThread(
     @SerialName(value = "id_str")
     val idStr: kotlin.String,
 )

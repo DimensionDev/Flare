@@ -36,7 +36,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("User")
-data class User(
+internal data class User(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName,
 //    @Contextual @SerialName(value = "affiliates_highlighted_label")

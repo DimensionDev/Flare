@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param name * @param targetUserPattern * @param reporterPattern * @param reportContentPattern * @param expiresAt * @param forward */
 @Serializable
-data class AdminAbuseReportResolverCreateRequest(
+internal data class AdminAbuseReportResolverCreateRequest(
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "targetUserPattern") val targetUserPattern: kotlin.String? = null,
     @SerialName(value = "reporterPattern") val reporterPattern: kotlin.String? = null,

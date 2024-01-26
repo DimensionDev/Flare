@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param roleId * @param name * @param description * @param color * @param iconUrl * @param target * @param condFormula * @param isPublic * @param isModerator * @param isAdministrator * @param asBadge * @param canEditMembersByModerator * @param displayOrder * @param policies * @param isExplorable */
 @Serializable
-data class AdminRolesUpdateRequest(
+internal data class AdminRolesUpdateRequest(
     @SerialName(value = "roleId") val roleId: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "description") val description: kotlin.String,

@@ -11,7 +11,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersListsPullRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsUpdateRequest
 
-interface ListsApi {
+internal interface ListsApi {
     /**
      * users/lists/create
      * Create a new list of users.  **Credential required**: *Yes* / **Permission**: *write:account*

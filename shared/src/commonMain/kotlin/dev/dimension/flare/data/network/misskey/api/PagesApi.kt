@@ -9,7 +9,7 @@ import dev.dimension.flare.data.network.misskey.api.model.PagesDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.PagesShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.PagesUpdateRequest
 
-interface PagesApi {
+internal interface PagesApi {
     /**
      * pages/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:pages*

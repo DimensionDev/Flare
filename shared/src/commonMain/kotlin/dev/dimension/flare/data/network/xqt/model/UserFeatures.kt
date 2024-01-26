@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param mediatoolStudioLibrary
  */
 @Serializable
-data class UserFeatures(
+internal data class UserFeatures(
     @SerialName(value = "mediatool_studio_library")
     val mediatoolStudioLibrary: kotlin.Boolean,
 )

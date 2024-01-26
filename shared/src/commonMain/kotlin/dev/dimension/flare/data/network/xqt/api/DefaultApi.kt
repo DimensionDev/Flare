@@ -7,7 +7,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
 import dev.dimension.flare.data.network.xqt.model.GetTweetResultByRestId200Response
 
-interface DefaultApi {
+internal interface DefaultApi {
     /**
      *
      * get user by screen name

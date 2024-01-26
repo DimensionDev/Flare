@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param name * @param src * @param keywords * @param excludeKeywords * @param users * @param caseSensitive * @param withReplies * @param withFile * @param notify * @param userListId */
 @Serializable
-data class AntennasCreateRequest(
+internal data class AntennasCreateRequest(
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "src") val src: AntennasCreateRequest.Src,
     @SerialName(value = "keywords") val keywords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,

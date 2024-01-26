@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param errors
  */
 @Serializable
-data class GetProfileSpotlightsQuery200Response(
+internal data class GetProfileSpotlightsQuery200Response(
     @SerialName(value = "data")
     val `data`: ProfileResponseData,
     @SerialName(value = "errors")

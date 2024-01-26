@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineUser")
-data class TimelineUser(
+internal data class TimelineUser(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName,
     @Contextual @SerialName(value = "itemType")

@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param antennaId */
 @Serializable
-data class AntennasDeleteRequest(
+internal data class AntennasDeleteRequest(
     @SerialName(value = "antennaId") val antennaId: kotlin.String,
 )

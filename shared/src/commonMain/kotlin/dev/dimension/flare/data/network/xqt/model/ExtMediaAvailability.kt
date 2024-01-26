@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param status
  */
 @Serializable
-data class ExtMediaAvailability(
+internal data class ExtMediaAvailability(
     @SerialName(value = "reason")
     val reason: kotlin.String? = null,
     @SerialName(value = "status")

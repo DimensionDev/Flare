@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param query * @param offset * @param limit * @param origin * @param detail */
 @Serializable
-data class UsersSearchRequest(
+internal data class UsersSearchRequest(
     @SerialName(value = "query") val query: kotlin.String,
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,

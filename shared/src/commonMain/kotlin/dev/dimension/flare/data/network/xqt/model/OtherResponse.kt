@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param session
  */
 @Serializable
-data class OtherResponse(
+internal data class OtherResponse(
     @SerialName(value = "Session")
     val session: Session? = null,
 )

@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param registration * @param localTimeLine * @param globalTimeLine * @param hcaptcha * @param recaptcha * @param objectStorage * @param serviceWorker * @param miauth */
 @Serializable
-data class Meta200ResponseFeatures(
+internal data class Meta200ResponseFeatures(
     @SerialName(value = "registration") val registration: kotlin.Boolean,
     @SerialName(value = "localTimeLine") val localTimeLine: kotlin.Boolean,
     @SerialName(value = "globalTimeLine") val globalTimeLine: kotlin.Boolean,

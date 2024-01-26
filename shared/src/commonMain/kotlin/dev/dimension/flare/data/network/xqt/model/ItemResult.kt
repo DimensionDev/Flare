@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param result
  */
 @Serializable
-data class ItemResult(
+internal data class ItemResult(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName? = null,
     @SerialName(value = "result")

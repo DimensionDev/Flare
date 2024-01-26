@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param key * @param userId * @param endpoint * @param sendReadMessage * @param state */
 @Serializable
-data class SwRegister200Response(
+internal data class SwRegister200Response(
     @SerialName(value = "key") val key: kotlin.String? = null,
     @SerialName(value = "userId") val userId: kotlin.String,
     @SerialName(value = "endpoint") val endpoint: kotlin.String,

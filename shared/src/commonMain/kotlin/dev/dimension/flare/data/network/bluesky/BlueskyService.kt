@@ -29,7 +29,7 @@ import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
 import sh.christian.ozone.api.response.AtpErrorDescription
 
-class BlueskyService(
+internal class BlueskyService(
     private val baseUrl: String,
     private val accountKey: MicroBlogKey? = null,
     private val accountQueries: DbAccountQueries? = null,
@@ -136,7 +136,7 @@ internal class XrpcAuthPlugin(
     }
 }
 
-fun UiAccount.Bluesky.getService(appDatabase: AppDatabase) =
+internal fun UiAccount.Bluesky.getService(appDatabase: AppDatabase) =
     BlueskyService(
         baseUrl = credential.baseUrl,
         accountKey = accountKey,

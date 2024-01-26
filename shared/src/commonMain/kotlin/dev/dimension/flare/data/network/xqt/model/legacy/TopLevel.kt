@@ -8,7 +8,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TopLevel(
+internal data class TopLevel(
     val globalObjects: GlobalObjects? = null,
     val timeline: Timeline? = null,
 ) {
@@ -108,7 +108,7 @@ data class TopLevel(
 }
 
 @Serializable
-data class GlobalObjects(
+internal data class GlobalObjects(
     val users: Map<String, UserLegacy>? = null,
     val tweets: Map<String, TweetLegacy>? = null,
 )

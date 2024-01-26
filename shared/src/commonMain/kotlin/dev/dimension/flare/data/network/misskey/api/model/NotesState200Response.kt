@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param isFavorited * @param isMutedThread */
 @Serializable
-data class NotesState200Response(
+internal data class NotesState200Response(
     @SerialName(value = "isFavorited") val isFavorited: kotlin.Boolean,
     @SerialName(value = "isMutedThread") val isMutedThread: kotlin.Boolean,
 )

@@ -62,7 +62,7 @@ import kotlinx.serialization.Serializable
  * @param url
  */
 @Serializable
-data class UserLegacy(
+internal data class UserLegacy(
     @SerialName(value = "blocked_by")
     val blockedBy: kotlin.Boolean = false,
     @SerialName(value = "blocking")

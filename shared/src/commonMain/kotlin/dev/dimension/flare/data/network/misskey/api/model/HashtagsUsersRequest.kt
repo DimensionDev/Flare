@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param tag * @param sort * @param limit * @param state * @param origin */
 @Serializable
-data class HashtagsUsersRequest(
+internal data class HashtagsUsersRequest(
     @SerialName(value = "tag") val tag: kotlin.String,
     @SerialName(value = "sort") val sort: HashtagsUsersRequest.Sort,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,

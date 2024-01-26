@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Emoji(
+internal data class Emoji(
     val shortcode: String? = null,
     val url: String? = null,
     @SerialName("static_url")

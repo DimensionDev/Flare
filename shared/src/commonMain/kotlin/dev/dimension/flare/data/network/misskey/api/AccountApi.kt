@@ -39,7 +39,7 @@ import dev.dimension.flare.data.network.misskey.api.model.SwUpdateRegistrationRe
 import dev.dimension.flare.data.network.misskey.api.model.UserDetailedNotMe
 import dev.dimension.flare.data.network.misskey.api.model.UsersUpdateMemoRequest
 
-interface AccountApi {
+internal interface AccountApi {
     /**
      * blocking/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:blocks*

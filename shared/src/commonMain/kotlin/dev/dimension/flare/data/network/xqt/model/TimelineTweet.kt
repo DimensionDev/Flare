@@ -31,7 +31,7 @@ import kotlinx.serialization.json.JsonElement
  */
 @Serializable
 @SerialName("TimelineTweet")
-data class TimelineTweet(
+internal data class TimelineTweet(
 //    @SerialName(value = "__typename")
 //    val typename: TypeName,
 //    @SerialName(value = "itemType")

@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param totalCount * @param totalSize * @param incCount * @param incSize * @param decCount * @param decSize */
 @Serializable
-data class ChartsUserDrive200Response(
+internal data class ChartsUserDrive200Response(
     @SerialName(value = "totalCount") val totalCount: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "totalSize") val totalSize: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "incCount") val incCount: kotlin.collections.List<kotlin.Double>,

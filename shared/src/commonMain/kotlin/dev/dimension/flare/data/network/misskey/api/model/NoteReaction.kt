@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param user * @param type */
 @Serializable
-data class NoteReaction(
+internal data class NoteReaction(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "user") val user: UserLite,

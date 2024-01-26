@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MastodonInstanceElement(
+internal data class MastodonInstanceElement(
     val domain: String,
     val version: String,
     val description: String,

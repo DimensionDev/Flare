@@ -6,7 +6,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 
-interface LookupResources {
+internal interface LookupResources {
     @GET("api/v1/accounts/{id}")
     suspend fun lookupUser(
         @Path(value = "id") id: String,

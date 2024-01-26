@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param unfavoriteTweet
  */
 @Serializable
-data class UnfavoriteTweet(
+internal data class UnfavoriteTweet(
     @SerialName(value = "unfavorite_tweet")
     val unfavoriteTweet: kotlin.String,
 )

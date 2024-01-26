@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param `data`
  */
 @Serializable
-data class ProfileResponse(
+internal data class ProfileResponse(
     @SerialName(value = "data")
     val `data`: ProfileResponseData,
 )

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserRecommendationsItem(
+internal data class UserRecommendationsItem(
     val token: String? = null,
     val user: UserLegacy? = null,
     @SerialName("user_id")

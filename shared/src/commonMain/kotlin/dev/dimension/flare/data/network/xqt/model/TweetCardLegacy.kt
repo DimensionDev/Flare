@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param url
  */
 @Serializable
-data class TweetCardLegacy(
+internal data class TweetCardLegacy(
     @SerialName(value = "binding_values")
     val bindingValues: kotlin.collections.List<TweetCardLegacyBindingValue>,
     @SerialName(value = "name")

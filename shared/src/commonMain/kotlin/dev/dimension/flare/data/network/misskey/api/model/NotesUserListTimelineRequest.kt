@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param listId * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate * @param includeMyRenotes * @param includeRenotedMyNotes * @param includeLocalRenotes * @param withFiles Only show notes that have attached files.
  */
 @Serializable
-data class NotesUserListTimelineRequest(
+internal data class NotesUserListTimelineRequest(
     @SerialName(value = "listId") val listId: kotlin.String,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,

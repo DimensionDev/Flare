@@ -22,10 +22,10 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param type * @param user * @param userId * @param note * @param reaction * @param choice * @param invitation * @param body * @param header * @param icon */
 @Serializable
-data class Notification(
+internal data class Notification(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-    @SerialName(value = "type") val type: Notification.Type,
+    @SerialName(value = "type") val type: NotificationType,
     @SerialName(value = "user") val user: UserLite? = null,
     @SerialName(value = "userId") val userId: kotlin.String? = null,
     @SerialName(value = "note") val note: Note? = null,
@@ -36,44 +36,44 @@ data class Notification(
     @SerialName(value = "header") val header: kotlin.String? = null,
     @SerialName(value = "icon") val icon: kotlin.String? = null,
     val achievement: String? = null,
-) {
-    /**
-     * *
-     * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App
-     */
-    @Serializable
-    enum class Type(val value: kotlin.String) {
-        @SerialName(value = "follow")
-        Follow("follow"),
+)
 
-        @SerialName(value = "mention")
-        Mention("mention"),
+/**
+ * *
+ * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App
+ */
+@Serializable
+enum class NotificationType(val value: kotlin.String) {
+    @SerialName(value = "follow")
+    Follow("follow"),
 
-        @SerialName(value = "reply")
-        Reply("reply"),
+    @SerialName(value = "mention")
+    Mention("mention"),
 
-        @SerialName(value = "renote")
-        Renote("renote"),
+    @SerialName(value = "reply")
+    Reply("reply"),
 
-        @SerialName(value = "quote")
-        Quote("quote"),
+    @SerialName(value = "renote")
+    Renote("renote"),
 
-        @SerialName(value = "reaction")
-        Reaction("reaction"),
+    @SerialName(value = "quote")
+    Quote("quote"),
 
-        @SerialName(value = "pollEnded")
-        PollEnded("pollEnded"),
+    @SerialName(value = "reaction")
+    Reaction("reaction"),
 
-        @SerialName(value = "receiveFollowRequest")
-        ReceiveFollowRequest("receiveFollowRequest"),
+    @SerialName(value = "pollEnded")
+    PollEnded("pollEnded"),
 
-        @SerialName(value = "followRequestAccepted")
-        FollowRequestAccepted("followRequestAccepted"),
+    @SerialName(value = "receiveFollowRequest")
+    ReceiveFollowRequest("receiveFollowRequest"),
 
-        @SerialName(value = "achievementEarned")
-        AchievementEarned("achievementEarned"),
+    @SerialName(value = "followRequestAccepted")
+    FollowRequestAccepted("followRequestAccepted"),
 
-        @SerialName(value = "app")
-        App("app"),
-    }
+    @SerialName(value = "achievementEarned")
+    AchievementEarned("achievementEarned"),
+
+    @SerialName(value = "app")
+    App("app"),
 }

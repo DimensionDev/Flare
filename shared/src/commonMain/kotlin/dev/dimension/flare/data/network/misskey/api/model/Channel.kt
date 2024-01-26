@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param lastNotedAt * @param name * @param description * @param bannerUrl * @param isArchived * @param notesCount * @param usersCount * @param userId * @param pinnedNoteIds * @param color * @param isFollowing * @param isFavorited */
 @Serializable
-data class Channel(
+internal data class Channel(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "lastNotedAt") val lastNotedAt: kotlin.String? = null,

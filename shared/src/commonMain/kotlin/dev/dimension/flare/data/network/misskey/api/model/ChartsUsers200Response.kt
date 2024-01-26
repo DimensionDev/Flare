@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param localTotal * @param localInc * @param localDec * @param remoteTotal * @param remoteInc * @param remoteDec */
 @Serializable
-data class ChartsUsers200Response(
+internal data class ChartsUsers200Response(
     @SerialName(value = "local.total") val localTotal: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "local.inc") val localInc: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "local.dec") val localDec: kotlin.collections.List<kotlin.Double>,

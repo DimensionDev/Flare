@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param userId * @param text */
 @Serializable
-data class AdminUpdateUserNoteRequest(
+internal data class AdminUpdateUserNoteRequest(
     @SerialName(value = "userId") val userId: kotlin.String,
     @SerialName(value = "text") val text: kotlin.String,
 )

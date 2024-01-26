@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param `value`
  */
 @Serializable
-data class TweetCardLegacyBindingValue(
+internal data class TweetCardLegacyBindingValue(
     @SerialName(value = "key")
     val key: kotlin.String,
     @SerialName(value = "value")

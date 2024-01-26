@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param roleId * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
-data class RolesNotesRequest(
+internal data class RolesNotesRequest(
     @SerialName(value = "roleId") val roleId: kotlin.String,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,

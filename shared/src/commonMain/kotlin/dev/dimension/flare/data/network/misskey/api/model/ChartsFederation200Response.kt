@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param deliveredInstances * @param inboxInstances * @param stalled * @param sub * @param pub * @param pubsub * @param subActive * @param pubActive */
 @Serializable
-data class ChartsFederation200Response(
+internal data class ChartsFederation200Response(
     @SerialName(value = "deliveredInstances") val deliveredInstances: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "inboxInstances") val inboxInstances: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "stalled") val stalled: kotlin.collections.List<kotlin.Double>,

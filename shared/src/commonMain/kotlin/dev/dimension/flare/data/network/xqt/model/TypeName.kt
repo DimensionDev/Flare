@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * Values: timelineTweet,timelineTimelineItem,timelineUser,timelineTimelineCursor,tweetWithVisibilityResults,timelineTimelineModule,tweetTombstone,timelinePrompt,timelineMessagePrompt,timelineCommunity,tweetUnavailable,tweet,user,userUnavailable
  */
 @Serializable
-enum class TypeName(val value: kotlin.String) {
+internal enum class TypeName(val value: kotlin.String) {
     @SerialName(value = "TimelineTweet")
     timelineTweet("TimelineTweet"),
 

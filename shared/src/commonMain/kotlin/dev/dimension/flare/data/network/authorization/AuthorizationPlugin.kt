@@ -7,7 +7,7 @@ import io.ktor.client.request.header
 import io.ktor.util.AttributeKey
 import io.ktor.util.KtorDsl
 
-class AuthorizationPlugin private constructor(
+internal class AuthorizationPlugin private constructor(
     private val authorization: Authorization,
     private val header: String,
 ) {

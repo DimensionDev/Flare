@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param endpoint
  */
 @Serializable
-data class Callback(
+internal data class Callback(
     @Contextual @SerialName(value = "endpoint")
     val endpoint: String,
 )

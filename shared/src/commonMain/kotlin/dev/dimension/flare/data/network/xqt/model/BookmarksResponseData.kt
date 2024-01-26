@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param bookmarkTimelineV2
  */
 @Serializable
-data class BookmarksResponseData(
+internal data class BookmarksResponseData(
     @SerialName(value = "bookmark_timeline_v2")
     val bookmarkTimelineV2: BookmarksTimeline,
 )

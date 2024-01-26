@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param timeline
  */
 @Serializable
-data class TimelineV2(
+internal data class TimelineV2(
     @SerialName(value = "timeline")
     val timeline: Timeline,
 )

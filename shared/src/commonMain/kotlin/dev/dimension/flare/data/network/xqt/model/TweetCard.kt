@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param restId
  */
 @Serializable
-data class TweetCard(
+internal data class TweetCard(
     @SerialName(value = "legacy")
     val legacy: TweetCardLegacy? = null,
 //    @SerialName(value = "rest_id")

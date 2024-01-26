@@ -6,23 +6,24 @@ import dev.dimension.flare.data.network.xqt.model.User
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// https://github.com/cashapp/sqldelight/issues/1333
 @Serializable
 sealed interface UserContent {
     @Serializable
     @SerialName("Mastodon")
-    data class Mastodon(val data: dev.dimension.flare.data.network.mastodon.api.model.Account) :
+    data class Mastodon internal constructor(internal val data: dev.dimension.flare.data.network.mastodon.api.model.Account) :
         UserContent
 
     @Serializable
     @SerialName("Misskey")
-    data class Misskey(
-        val data: dev.dimension.flare.data.network.misskey.api.model.User,
+    data class Misskey internal constructor(
+        internal val data: dev.dimension.flare.data.network.misskey.api.model.User,
     ) : UserContent
 
     @Serializable
     @SerialName("MisskeyLite")
-    data class MisskeyLite(
-        val data: dev.dimension.flare.data.network.misskey.api.model.UserLite,
+    data class MisskeyLite internal constructor(
+        internal val data: dev.dimension.flare.data.network.misskey.api.model.UserLite,
     ) : UserContent
 
     @Serializable
@@ -39,7 +40,7 @@ sealed interface UserContent {
 
     @Serializable
     @SerialName("XQT")
-    data class XQT(
-        val data: User,
+    data class XQT internal constructor(
+        internal val data: User,
     ) : UserContent
 }

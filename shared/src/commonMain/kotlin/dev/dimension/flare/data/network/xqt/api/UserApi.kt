@@ -6,7 +6,7 @@ import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.GetUserByRestId200Response
 
-interface UserApi {
+internal interface UserApi {
     /**
      *
      * get user by rest id

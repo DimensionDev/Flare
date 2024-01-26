@@ -37,7 +37,7 @@ private fun config(
     }
 }
 
-class XQTService(
+internal class XQTService(
     private val chocolate: String? = null,
 ) : DefaultApi by config(
         chocolate = chocolate,

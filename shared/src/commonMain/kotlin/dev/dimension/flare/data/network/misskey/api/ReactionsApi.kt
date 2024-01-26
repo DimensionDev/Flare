@@ -6,7 +6,7 @@ import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
 
-interface ReactionsApi {
+internal interface ReactionsApi {
     /**
      * notes/reactions/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:reactions*

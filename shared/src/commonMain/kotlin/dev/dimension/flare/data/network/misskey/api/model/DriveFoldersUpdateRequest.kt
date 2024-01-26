@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param folderId * @param name * @param parentId */
 @Serializable
-data class DriveFoldersUpdateRequest(
+internal data class DriveFoldersUpdateRequest(
     @SerialName(value = "folderId") val folderId: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String? = null,
     @SerialName(value = "parentId") val parentId: kotlin.String? = null,

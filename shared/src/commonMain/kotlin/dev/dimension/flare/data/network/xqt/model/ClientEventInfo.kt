@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param element
  */
 @Serializable
-data class ClientEventInfo(
+internal data class ClientEventInfo(
     @SerialName(value = "component")
     val component: kotlin.String? = null,
 //    @Contextual @SerialName(value = "details")

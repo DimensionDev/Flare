@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
  * @param reply
  */
 @Serializable
-data class PostCreateTweetRequestVariables(
+internal data class PostCreateTweetRequestVariables(
     @SerialName(value = "dark_request")
     val darkRequest: kotlin.Boolean = false,
     @SerialName(value = "media")
@@ -47,7 +47,7 @@ data class PostCreateTweetRequestVariables(
 )
 
 @Serializable
-data class PostCreateTweetRequestVariablesConversationControl(
+internal data class PostCreateTweetRequestVariablesConversationControl(
     @SerialName(value = "value")
     val mode: Mode,
 ) {
@@ -60,7 +60,7 @@ data class PostCreateTweetRequestVariablesConversationControl(
 }
 
 @Serializable
-data class PostMediaMetadataCreateRequest(
+internal data class PostMediaMetadataCreateRequest(
     @SerialName("media_id")
     val mediaId: String,
     // other, graphic_violence, adult_content

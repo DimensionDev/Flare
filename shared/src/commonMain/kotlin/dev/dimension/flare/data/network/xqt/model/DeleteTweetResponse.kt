@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param `data`
  */
 @Serializable
-data class DeleteTweetResponse(
+internal data class DeleteTweetResponse(
     @SerialName(value = "data")
     val `data`: DeleteTweetResponseData,
 )

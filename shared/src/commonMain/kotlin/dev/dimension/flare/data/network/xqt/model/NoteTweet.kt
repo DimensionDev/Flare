@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param noteTweetResults
  */
 @Serializable
-data class NoteTweet(
+internal data class NoteTweet(
     @SerialName(value = "is_expandable")
     val isExpandable: kotlin.Boolean,
     @SerialName(value = "note_tweet_results")

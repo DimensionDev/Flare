@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-data class UsersShowRequest(
+internal data class UsersShowRequest(
     val userId: String? = null,
     val userIds: List<String>? = null,
     val username: String? = null,

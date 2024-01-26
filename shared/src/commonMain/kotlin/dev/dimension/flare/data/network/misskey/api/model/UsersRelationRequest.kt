@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param userId */
 @Serializable
-data class UsersRelationRequest(
+internal data class UsersRelationRequest(
     @SerialName(value = "userId") val userId: List<String>,
 )

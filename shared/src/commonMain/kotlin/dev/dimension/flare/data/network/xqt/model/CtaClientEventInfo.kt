@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param action
  */
 @Serializable
-data class CtaClientEventInfo(
+internal data class CtaClientEventInfo(
     @SerialName(value = "action")
     val action: CtaClientEventInfo.Action,
 ) {

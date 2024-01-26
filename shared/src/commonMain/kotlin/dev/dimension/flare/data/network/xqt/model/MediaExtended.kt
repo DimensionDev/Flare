@@ -39,7 +39,7 @@ import kotlinx.serialization.Serializable
  * @param videoInfo
  */
 @Serializable
-data class MediaExtended(
+internal data class MediaExtended(
     @Contextual @SerialName(value = "display_url")
     val displayUrl: String,
     @Contextual @SerialName(value = "expanded_url")

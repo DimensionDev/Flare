@@ -44,4 +44,4 @@ import kotlinx.serialization.json.JsonClassDiscriminator
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("type")
-sealed interface InstructionUnion
+internal sealed interface InstructionUnion

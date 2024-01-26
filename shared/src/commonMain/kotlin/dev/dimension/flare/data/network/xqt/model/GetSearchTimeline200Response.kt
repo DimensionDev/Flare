@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param errors
  */
 @Serializable
-data class GetSearchTimeline200Response(
+internal data class GetSearchTimeline200Response(
     @SerialName(value = "data")
     val `data`: SearchTimelineData,
     @SerialName(value = "errors")

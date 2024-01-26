@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelinePinEntry")
-data class TimelinePinEntry(
+internal data class TimelinePinEntry(
     @SerialName(value = "entry")
     val entry: TimelineAddEntry,
 ) : InstructionUnion

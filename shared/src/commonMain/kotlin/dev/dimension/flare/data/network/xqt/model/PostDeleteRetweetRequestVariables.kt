@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param sourceTweetId
  */
 @Serializable
-data class PostDeleteRetweetRequestVariables(
+internal data class PostDeleteRetweetRequestVariables(
     @SerialName(value = "dark_request")
     val darkRequest: kotlin.Boolean = false,
     @SerialName(value = "source_tweet_id")

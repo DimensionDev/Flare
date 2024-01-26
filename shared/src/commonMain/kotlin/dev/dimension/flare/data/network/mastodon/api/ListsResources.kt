@@ -14,7 +14,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.MastodonList
 import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
 import dev.dimension.flare.data.network.mastodon.api.model.PostList
 
-interface ListsResources {
+internal interface ListsResources {
     @GET("api/v1/lists")
     suspend fun lists(): List<MastodonList>
 

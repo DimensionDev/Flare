@@ -9,7 +9,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 
-interface TimelineResources {
+internal interface TimelineResources {
     @GET("api/v1/timelines/home")
     suspend fun homeTimeline(
         @Query("max_id") max_id: String? = null,

@@ -19,7 +19,7 @@ import dev.dimension.flare.data.network.misskey.api.model.ChartsUserPv200Respons
 import dev.dimension.flare.data.network.misskey.api.model.ChartsUserReactions200Response
 import dev.dimension.flare.data.network.misskey.api.model.ChartsUsers200Response
 
-interface ChartsApi {
+internal interface ChartsApi {
     /**
      * charts/active-users
      * No description provided.  **Credential required**: *No*

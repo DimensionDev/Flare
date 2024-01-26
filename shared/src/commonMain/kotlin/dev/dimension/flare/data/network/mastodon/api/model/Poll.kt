@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Poll(
+internal data class Poll(
     val id: String? = null,
     @SerialName("expires_at")
     @Serializable(with = DateSerializer::class)

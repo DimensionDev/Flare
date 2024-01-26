@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Trend(
+internal data class Trend(
     @SerialName("history")
     val history: List<TrendHistory>? = null,
     @SerialName("name")
@@ -14,7 +14,7 @@ data class Trend(
 )
 
 @Serializable
-data class TrendHistory(
+internal data class TrendHistory(
     @SerialName("accounts")
     val accounts: String? = null,
     @SerialName("day")
@@ -24,7 +24,7 @@ data class TrendHistory(
 )
 
 @Serializable
-data class Suggestions(
+internal data class Suggestions(
     val source: String? = null,
     val account: Account? = null,
 )

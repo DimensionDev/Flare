@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  * @param tracing
  */
 @Serializable
-data class Extensions(
+internal data class Extensions(
     @SerialName(value = "code")
     val code: kotlin.Int,
     @SerialName(value = "kind")

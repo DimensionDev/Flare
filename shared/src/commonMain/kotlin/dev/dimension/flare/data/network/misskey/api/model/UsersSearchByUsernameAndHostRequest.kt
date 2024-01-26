@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-data class UsersSearchByUsernameAndHostRequest(
+internal data class UsersSearchByUsernameAndHostRequest(
     val limit: Int? = null,
     val detail: Boolean? = null,
     val username: String? = null,

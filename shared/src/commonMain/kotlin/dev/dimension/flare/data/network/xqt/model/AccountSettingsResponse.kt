@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AccountSettingsResponse(
+internal data class AccountSettingsResponse(
     @SerialName("screen_name")
     val screenName: String? = null,
 )

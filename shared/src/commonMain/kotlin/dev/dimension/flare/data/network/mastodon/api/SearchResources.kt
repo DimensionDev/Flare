@@ -4,7 +4,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.mastodon.api.model.SearchResult
 
-interface SearchResources {
+internal interface SearchResources {
     @GET("api/v2/search")
     suspend fun searchV2(
         @Query("q") query: String,

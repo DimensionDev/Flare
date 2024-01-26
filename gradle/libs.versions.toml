@@ -134,6 +134,8 @@ mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.2-SNAPSHOT"
 compose-richtext-ui = { group = "com.halilibo.compose-richtext", name = "richtext-ui", version.ref = "compose-richtext" }
 compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }
 
+compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", version = "0.33.3" }
+
 sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 sqldelight-native-driver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
 sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }

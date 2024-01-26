@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param name * @param description * @param location * @param birthday * @param lang * @param avatarId * @param bannerId * @param fields * @param isLocked * @param isExplorable * @param hideOnlineStatus * @param publicReactions * @param carefulBot * @param autoAcceptFollowed * @param noCrawle * @param preventAiLearning * @param isBot * @param isCat * @param injectFeaturedNote * @param receiveAnnouncementEmail * @param alwaysMarkNsfw * @param autoSensitive * @param ffVisibility * @param pinnedPageId * @param mutedWords * @param mutedInstances * @param mutingNotificationTypes * @param emailNotificationTypes * @param alsoKnownAs */
 @Serializable
-data class IUpdateRequest(
+internal data class IUpdateRequest(
     @SerialName(value = "name") val name: kotlin.String? = null,
     @SerialName(value = "description") val description: kotlin.String? = null,
     @SerialName(value = "location") val location: kotlin.String? = null,

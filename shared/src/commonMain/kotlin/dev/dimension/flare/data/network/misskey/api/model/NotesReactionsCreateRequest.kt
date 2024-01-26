@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param noteId * @param reaction */
 @Serializable
-data class NotesReactionsCreateRequest(
+internal data class NotesReactionsCreateRequest(
     @SerialName(value = "noteId") val noteId: kotlin.String,
     @SerialName(value = "reaction") val reaction: kotlin.String,
 )

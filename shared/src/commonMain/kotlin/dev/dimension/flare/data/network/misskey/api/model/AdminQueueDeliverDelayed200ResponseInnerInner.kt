@@ -21,4 +21,4 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-object AdminQueueDeliverDelayed200ResponseInnerInner
+internal object AdminQueueDeliverDelayed200ResponseInnerInner

@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param upvUser * @param pvUser * @param upvVisitor * @param pvVisitor */
 @Serializable
-data class ChartsUserPv200Response(
+internal data class ChartsUserPv200Response(
     @SerialName(value = "upv.user") val upvUser: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "pv.user") val pvUser: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "upv.visitor") val upvVisitor: kotlin.collections.List<kotlin.Double>,

@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TweetTombstone")
-class TweetTombstone(
+internal class TweetTombstone(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName? = null,
 ) : TweetUnion

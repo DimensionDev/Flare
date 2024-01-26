@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param focusRects
  */
 @Serializable
-data class MediaOriginalInfo(
+internal data class MediaOriginalInfo(
     @SerialName(value = "height")
     val height: kotlin.Int,
     @SerialName(value = "width")

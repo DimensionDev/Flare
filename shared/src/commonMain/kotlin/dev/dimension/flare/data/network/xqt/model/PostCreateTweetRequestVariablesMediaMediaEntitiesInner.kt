@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param taggedUsers
  */
 @Serializable
-data class PostCreateTweetRequestVariablesMediaMediaEntitiesInner(
+internal data class PostCreateTweetRequestVariablesMediaMediaEntitiesInner(
     @SerialName(value = "media_id")
     val mediaId: kotlin.String = "1111111111111111111",
     @SerialName(value = "tagged_users")

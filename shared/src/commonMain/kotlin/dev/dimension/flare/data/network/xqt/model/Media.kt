@@ -33,7 +33,7 @@ import kotlinx.serialization.Serializable
  * @param features
  */
 @Serializable
-data class Media(
+internal data class Media(
     @SerialName(value = "display_url")
     val displayUrl: String,
     @SerialName(value = "expanded_url")

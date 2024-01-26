@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-data class AdminDriveShowFileRequest(
+internal data class AdminDriveShowFileRequest(
     val fileId: String? = null,
     val url: String? = null,
 )

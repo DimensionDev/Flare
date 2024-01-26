@@ -12,7 +12,7 @@ import dev.dimension.flare.data.network.xqt.model.GetSearchTimeline200Response
 import dev.dimension.flare.data.network.xqt.model.GetTweetDetail200Response
 import dev.dimension.flare.data.network.xqt.model.GetUserHighlightsTweets200Response
 
-interface TweetApi {
+internal interface TweetApi {
     /**
      *
      * get bookmarks

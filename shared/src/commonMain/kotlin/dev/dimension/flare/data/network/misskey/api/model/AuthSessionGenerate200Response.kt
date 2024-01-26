@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param token * @param url */
 @Serializable
-data class AuthSessionGenerate200Response(
+internal data class AuthSessionGenerate200Response(
     @SerialName(value = "token") val token: kotlin.String,
     @SerialName(value = "url") val url: kotlin.String,
 )

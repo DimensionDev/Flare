@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param limit * @param offset * @param sort * @param state * @param origin * @param username * @param hostname The local host is represented with `null`.
  */
 @Serializable
-data class AdminShowUsersRequest(
+internal data class AdminShowUsersRequest(
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
     @SerialName(value = "sort") val sort: AdminShowUsersRequest.Sort? = null,

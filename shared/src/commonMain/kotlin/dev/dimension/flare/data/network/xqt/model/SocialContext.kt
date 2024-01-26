@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param type
  */
 @Serializable
-data class SocialContext(
+internal data class SocialContext(
     @SerialName(value = "contextType")
     val contextType: kotlin.String? = null,
     @SerialName(value = "text")

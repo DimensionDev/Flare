@@ -8,7 +8,7 @@ import dev.dimension.flare.data.network.xqt.model.GetFavoriters200Response
 import dev.dimension.flare.data.network.xqt.model.GetFollowers200Response
 import dev.dimension.flare.data.network.xqt.model.GetRetweeters200Response
 
-interface UserListApi {
+internal interface UserListApi {
     /**
      *
      * get tweet favoriters

@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param possiblySensitive
  */
 @Serializable
-data class PostCreateTweetRequestVariablesMedia(
+internal data class PostCreateTweetRequestVariablesMedia(
     @SerialName(value = "media_entities")
     val mediaEntities: kotlin.collections.List<PostCreateTweetRequestVariablesMediaMediaEntitiesInner>,
     @SerialName(value = "possibly_sensitive")

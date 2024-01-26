@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class VerifyCredentialsResponse(
+internal data class VerifyCredentialsResponse(
     val name: String? = null,
     val website: String? = null,
     @SerialName("vapid_key")

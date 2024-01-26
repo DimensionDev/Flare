@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param timeline
  */
 @Serializable
-data class FollowResponseResult(
+internal data class FollowResponseResult(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName,
     @SerialName(value = "timeline")

@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param name * @param keywords * @param excludeKeywords * @param src * @param userListId * @param users * @param caseSensitive * @param notify * @param withReplies * @param withFile * @param isActive * @param hasUnreadNote */
 @Serializable
-data class Antenna(
+internal data class Antenna(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,

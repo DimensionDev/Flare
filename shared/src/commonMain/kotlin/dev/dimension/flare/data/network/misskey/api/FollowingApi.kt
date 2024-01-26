@@ -8,7 +8,7 @@ import dev.dimension.flare.data.network.misskey.api.model.FollowingRequestsList2
 import dev.dimension.flare.data.network.misskey.api.model.FollowingRequestsListRequest
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 
-interface FollowingApi {
+internal interface FollowingApi {
     /**
      * following/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:following*

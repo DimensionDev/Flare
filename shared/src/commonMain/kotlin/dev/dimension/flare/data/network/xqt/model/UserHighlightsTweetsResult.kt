@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param timeline
  */
 @Serializable
-data class UserHighlightsTweetsResult(
+internal data class UserHighlightsTweetsResult(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName,
     @SerialName(value = "timeline")

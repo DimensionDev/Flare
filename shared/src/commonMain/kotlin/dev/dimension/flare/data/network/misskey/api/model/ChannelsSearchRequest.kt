@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param query * @param type * @param sinceId * @param untilId * @param limit */
 @Serializable
-data class ChannelsSearchRequest(
+internal data class ChannelsSearchRequest(
     @SerialName(value = "query") val query: kotlin.String,
     @SerialName(value = "type") val type: ChannelsSearchRequest.Type? = Type.NameAndDescription,
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,

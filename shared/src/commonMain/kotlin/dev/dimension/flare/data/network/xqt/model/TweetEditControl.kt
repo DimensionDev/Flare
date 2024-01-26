@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
  * @param isEditEligible
  */
 @Serializable
-data class TweetEditControl(
+internal data class TweetEditControl(
     @SerialName(value = "edit_control_initial")
     val editControlInitial: TweetEditControlInitial? = null,
     @SerialName(value = "edit_tweet_ids")

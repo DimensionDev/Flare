@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param avatarId * @param bannerId * @param injectFeaturedNote * @param receiveAnnouncementEmail * @param alwaysMarkNsfw * @param autoSensitive * @param carefulBot * @param autoAcceptFollowed * @param noCrawle * @param preventAiLearning * @param isExplorable * @param isDeleted * @param twoFactorBackupCodes * @param hideOnlineStatus * @param hasUnreadSpecifiedNotes * @param hasUnreadMentions * @param hasUnreadAnnouncement * @param hasUnreadAntenna * @param hasUnreadNotification * @param hasPendingReceivedFollowRequest * @param mutedWords * @param mutedInstances * @param mutingNotificationTypes * @param emailNotificationTypes * @param email * @param emailVerified * @param securityKeysList */
 @Serializable
-data class MeDetailedOnly(
+internal data class MeDetailedOnly(
     @SerialName(value = "avatarId") val avatarId: kotlin.String? = null,
     @SerialName(value = "bannerId") val bannerId: kotlin.String? = null,
     @SerialName(value = "injectFeaturedNote") val injectFeaturedNote: kotlin.Boolean? = null,

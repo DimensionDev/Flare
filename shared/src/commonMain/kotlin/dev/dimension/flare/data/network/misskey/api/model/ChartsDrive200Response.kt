@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param localIncCount * @param localIncSize * @param localDecCount * @param localDecSize * @param remoteIncCount * @param remoteIncSize * @param remoteDecCount * @param remoteDecSize */
 @Serializable
-data class ChartsDrive200Response(
+internal data class ChartsDrive200Response(
     @SerialName(value = "local.incCount") val localIncCount: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "local.incSize") val localIncSize: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "local.decCount") val localDecCount: kotlin.collections.List<kotlin.Double>,

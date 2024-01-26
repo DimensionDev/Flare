@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param url * @param folderId * @param isSensitive * @param comment * @param marker * @param force */
 @Serializable
-data class DriveFilesUploadFromUrlRequest(
+internal data class DriveFilesUploadFromUrlRequest(
     @SerialName(value = "url") val url: kotlin.String,
     @SerialName(value = "folderId") val folderId: kotlin.String? = null,
     @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean? = false,

@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.misskey.api.model.App
 import dev.dimension.flare.data.network.misskey.api.model.AppCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.AppShowRequest
 
-interface AppApi {
+internal interface AppApi {
     /**
      * app/create
      * No description provided.  **Credential required**: *No*

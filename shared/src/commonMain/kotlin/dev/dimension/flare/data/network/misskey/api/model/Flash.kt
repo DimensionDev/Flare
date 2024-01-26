@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param updatedAt * @param title * @param summary * @param script * @param userId * @param user * @param likedCount * @param isLiked */
 @Serializable
-data class Flash(
+internal data class Flash(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "updatedAt") val updatedAt: kotlin.String,

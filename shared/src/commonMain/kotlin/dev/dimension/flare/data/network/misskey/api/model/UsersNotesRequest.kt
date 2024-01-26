@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param userId * @param includeReplies * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate * @param includeMyRenotes * @param withFiles * @param fileType * @param excludeNsfw */
 @Serializable
-data class UsersNotesRequest(
+internal data class UsersNotesRequest(
     @SerialName(value = "userId") val userId: kotlin.String,
     @SerialName(value = "includeReplies") val includeReplies: kotlin.Boolean? = true,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,

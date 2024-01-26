@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  * @param url
  */
 @Serializable
-data class Url(
+internal data class Url(
     @SerialName(value = "display_url")
     val displayUrl: kotlin.String,
     @Contextual @SerialName(value = "expanded_url")

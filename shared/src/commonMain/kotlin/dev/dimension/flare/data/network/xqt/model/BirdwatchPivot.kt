@@ -32,7 +32,7 @@ import kotlinx.serialization.Serializable
  * @param visualStyle
  */
 @Serializable
-data class BirdwatchPivot(
+internal data class BirdwatchPivot(
     @Contextual @SerialName(value = "destinationUrl")
     val destinationUrl: String,
     @SerialName(value = "footer")

@@ -5,7 +5,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.data.network.mastodon.api.model.Status
-import dev.dimension.flare.data.network.misskey.api.model.Notification
+import dev.dimension.flare.data.network.misskey.api.model.NotificationType
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.humanize
@@ -55,7 +55,7 @@ internal val blueskyParser by lazy {
 }
 
 internal val twitterParser by lazy {
-    TwitterParser()
+    TwitterParser(enableNonAsciiInUrl = false)
 }
 
 expect class UiStatusExtra
@@ -166,7 +166,7 @@ sealed class UiStatus {
         }
     }
 
-    data class Mastodon(
+    data class Mastodon internal constructor(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
         val user: UiUser.Mastodon,
@@ -290,13 +290,13 @@ sealed class UiStatus {
         }
     }
 
-    data class MisskeyNotification(
+    data class MisskeyNotification internal constructor(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
         val user: UiUser.Misskey?,
         val createdAt: Instant,
         val note: Misskey?,
-        val type: Notification.Type,
+        val type: NotificationType,
         val achievement: String?,
     ) : UiStatus() {
         val humanizedTime by lazy {
@@ -373,7 +373,7 @@ sealed class UiStatus {
         }
     }
 
-    data class XQT(
+    data class XQT internal constructor(
         override val accountKey: MicroBlogKey,
         override val statusKey: MicroBlogKey,
         val user: UiUser.XQT,

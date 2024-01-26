@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TweetWithVisibilityResults")
-data class TweetWithVisibilityResults(
+internal data class TweetWithVisibilityResults(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName,
     @SerialName(value = "tweet")

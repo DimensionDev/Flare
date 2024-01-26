@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param name * @param type * @param md5 * @param propertySize * @param isSensitive * @param blurhash * @param properties * @param url * @param thumbnailUrl * @param comment * @param folderId * @param userId * @param folder * @param user */
 @Serializable
-data class DriveFile(
+internal data class DriveFile(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,

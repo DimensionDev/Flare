@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param toIndex
  */
 @Serializable
-data class NoteTweetResultRichTextTag(
+internal data class NoteTweetResultRichTextTag(
     @SerialName(value = "from_index")
     val fromIndex: kotlin.Int,
     @SerialName(value = "richtext_types")

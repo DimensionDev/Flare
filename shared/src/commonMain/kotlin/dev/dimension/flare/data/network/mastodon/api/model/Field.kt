@@ -12,7 +12,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 @Serializable
-data class Field(
+internal data class Field(
     val name: String? = null,
     val value: String? = null,
     @SerialName("verified_at")

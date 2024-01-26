@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param result
  */
 @Serializable
-data class DeleteRetweet(
+internal data class DeleteRetweet(
     @SerialName(value = "result")
     val result: kotlin.collections.List<Retweet>,
 )

@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineTerminateTimeline")
-data class TimelineTerminateTimeline(
+internal data class TimelineTerminateTimeline(
     @SerialName(value = "direction")
     val direction: TimelineTerminateTimeline.Direction,
 //    @Contextual @SerialName(value = "type")

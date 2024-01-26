@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineCommunity")
-class TimelineCommunity(
+internal class TimelineCommunity(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName? = null,
 ) : ItemContentUnion

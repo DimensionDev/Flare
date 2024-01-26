@@ -10,7 +10,7 @@ import dev.dimension.flare.data.network.misskey.api.model.AuthSessionShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.AuthSessionUserkey200Response
 import dev.dimension.flare.data.network.misskey.api.model.AuthSessionUserkeyRequest
 
-interface AuthApi {
+internal interface AuthApi {
     /**
      * auth/session/generate
      * No description provided.  **Credential required**: *No*

@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param searchTimeline
  */
 @Serializable
-data class SearchByRawQuery(
+internal data class SearchByRawQuery(
     @SerialName(value = "search_timeline")
     val searchTimeline: SearchTimeline,
 )

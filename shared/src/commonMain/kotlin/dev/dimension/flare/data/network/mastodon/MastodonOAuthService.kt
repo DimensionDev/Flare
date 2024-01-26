@@ -6,7 +6,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResp
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonAuthScope
 import io.ktor.http.encodeURLParameter
 
-class MastodonOAuthService(
+internal class MastodonOAuthService(
     private val baseUrl: String,
     private val client_name: String,
     private val website: String? = null,

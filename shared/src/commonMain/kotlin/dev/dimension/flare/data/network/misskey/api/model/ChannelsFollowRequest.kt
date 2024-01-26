@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param channelId */
 @Serializable
-data class ChannelsFollowRequest(
+internal data class ChannelsFollowRequest(
     @SerialName(value = "channelId") val channelId: kotlin.String,
 )

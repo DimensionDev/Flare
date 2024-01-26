@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param users
  */
 @Serializable
-data class UsersResponseData(
+internal data class UsersResponseData(
     @SerialName(value = "users")
     val users: kotlin.collections.List<UserResults>,
 )

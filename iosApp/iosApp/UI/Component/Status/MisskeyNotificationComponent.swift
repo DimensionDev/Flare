@@ -78,9 +78,9 @@ struct MisskeyNotificationComponent: View {
                 MisskeyStatusComponent(misskey: note, event: event)
             }
             if let user = data.user {
-                if [shared.Notification_.Type_.follow,
-                    shared.Notification_.Type_.followRequestAccepted,
-                    shared.Notification_.Type_.receiveFollowRequest].contains(data.type) {
+                if [shared.NotificationType.follow,
+                    shared.NotificationType.followRequestAccepted,
+                    shared.NotificationType.receiveFollowRequest].contains(data.type) {
                     HStack {
                         UserComponent(user: user)
                         Spacer()

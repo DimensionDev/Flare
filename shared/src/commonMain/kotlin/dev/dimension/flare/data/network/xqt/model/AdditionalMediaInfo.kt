@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param monetizable
  */
 @Serializable
-data class AdditionalMediaInfo(
+internal data class AdditionalMediaInfo(
     @SerialName(value = "monetizable")
     val monetizable: kotlin.Boolean,
 )

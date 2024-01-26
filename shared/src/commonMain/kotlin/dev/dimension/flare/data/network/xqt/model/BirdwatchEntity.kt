@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param toIndex
  */
 @Serializable
-data class BirdwatchEntity(
+internal data class BirdwatchEntity(
     @SerialName(value = "fromIndex")
     val fromIndex: kotlin.Int,
     @SerialName(value = "ref")

@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param id * @param name * @param username * @param host The local host is represented with `null`.
  * @param avatarUrl * @param avatarBlurhash * @param onlineStatus * @param isAdmin * @param isModerator * @param isBot * @param isCat */
 @Serializable
-data class UserLite(
+internal data class UserLite(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String? = null,
     @SerialName(value = "username") val username: kotlin.String,

@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param createdNote */
 @Serializable
-data class NotesCreate200Response(
+internal data class NotesCreate200Response(
     @SerialName(value = "createdNote") val createdNote: Note,
 )

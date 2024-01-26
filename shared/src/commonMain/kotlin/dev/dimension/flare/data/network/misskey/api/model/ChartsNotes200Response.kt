@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param localTotal * @param localInc * @param localDec * @param localDiffsNormal * @param localDiffsReply * @param localDiffsRenote * @param localDiffsWithFile * @param remoteTotal * @param remoteInc * @param remoteDec * @param remoteDiffsNormal * @param remoteDiffsReply * @param remoteDiffsRenote * @param remoteDiffsWithFile */
 @Serializable
-data class ChartsNotes200Response(
+internal data class ChartsNotes200Response(
     @SerialName(value = "local.total") val localTotal: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "local.inc") val localInc: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "local.dec") val localDec: kotlin.collections.List<kotlin.Double>,

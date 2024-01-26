@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param id An error ID. This ID is static.
  */
 @Serializable
-data class ErrorError(
+internal data class ErrorError(
     // An error code. Unique within the endpoint.
     @SerialName(value = "code") val code: kotlin.String,
     // An error message.

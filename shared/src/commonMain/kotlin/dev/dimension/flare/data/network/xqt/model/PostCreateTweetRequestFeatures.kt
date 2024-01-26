@@ -42,7 +42,7 @@ import kotlinx.serialization.Serializable
  * @param viewCountsEverywhereApiEnabled
  */
 @Serializable
-data class PostCreateTweetRequestFeatures(
+internal data class PostCreateTweetRequestFeatures(
     @Required
     @SerialName(value = "freedom_of_speech_not_reach_fetch_enabled")
     val freedomOfSpeechNotReachFetchEnabled: kotlin.Boolean = true,

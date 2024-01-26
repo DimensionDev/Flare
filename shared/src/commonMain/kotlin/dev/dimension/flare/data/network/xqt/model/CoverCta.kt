@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  * @param buttonStyle
  */
 @Serializable
-data class CoverCta(
+internal data class CoverCta(
     @SerialName(value = "callbacks")
     val callbacks: kotlin.collections.List<Callback>,
     @SerialName(value = "clientEventInfo")

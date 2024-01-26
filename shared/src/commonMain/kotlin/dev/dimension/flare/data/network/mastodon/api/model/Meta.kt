@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Meta(
+internal data class Meta(
     val length: String? = null,
     val duration: Double? = null,
     val fps: Long? = null,

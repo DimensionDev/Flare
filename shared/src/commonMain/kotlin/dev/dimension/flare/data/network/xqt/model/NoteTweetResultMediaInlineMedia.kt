@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param mediaId
  */
 @Serializable
-data class NoteTweetResultMediaInlineMedia(
+internal data class NoteTweetResultMediaInlineMedia(
     @SerialName(value = "index")
     val index: kotlin.Int,
     @SerialName(value = "media_id")

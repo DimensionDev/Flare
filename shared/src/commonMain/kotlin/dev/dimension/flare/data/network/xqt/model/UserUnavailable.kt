@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("UserUnavailable")
-data class UserUnavailable(
+internal data class UserUnavailable(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName,
     @SerialName(value = "reason")

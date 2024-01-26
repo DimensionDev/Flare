@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.network.authorization
 
-object EmptyAuthorization : Authorization {
+internal object EmptyAuthorization : Authorization {
     override val hasAuthorization: Boolean
         get() = false
 }

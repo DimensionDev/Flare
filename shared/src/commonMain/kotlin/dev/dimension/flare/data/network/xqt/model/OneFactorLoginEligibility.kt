@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param fetchStatus
  */
 @Serializable
-data class OneFactorLoginEligibility(
+internal data class OneFactorLoginEligibility(
     @SerialName(value = "fetchStatus")
     val fetchStatus: kotlin.String,
 )

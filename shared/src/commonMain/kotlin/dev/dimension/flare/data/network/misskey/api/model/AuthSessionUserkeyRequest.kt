@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param appSecret * @param token */
 @Serializable
-data class AuthSessionUserkeyRequest(
+internal data class AuthSessionUserkeyRequest(
     @SerialName(value = "appSecret") val appSecret: kotlin.String,
     @SerialName(value = "token") val token: kotlin.String,
 )

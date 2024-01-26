@@ -29,7 +29,7 @@ import kotlinx.serialization.json.JsonElement
  * @param media
  */
 @Serializable
-data class Entities(
+internal data class Entities(
     @SerialName(value = "hashtags")
     val hashtags: JsonElement? = null,
     @SerialName(value = "symbols")
@@ -47,7 +47,7 @@ data class Entities(
 )
 
 @Serializable
-data class Description(
+internal data class Description(
     @SerialName(value = "urls")
     val urls: kotlin.collections.List<Url>? = null,
 )

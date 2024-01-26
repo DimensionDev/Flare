@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param ids */
 @Serializable
-data class AdminEmojiDeleteBulkRequest(
+internal data class AdminEmojiDeleteBulkRequest(
     @SerialName(value = "ids") val ids: kotlin.collections.List<kotlin.String>,
 )

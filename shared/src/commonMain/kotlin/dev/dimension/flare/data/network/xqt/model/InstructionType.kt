@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * Values: timelineAddEntries,timelineAddToModule,timelineClearCache,timelinePinEntry,timelineReplaceEntry,timelineShowAlert,timelineTerminateTimeline,timelineShowCover
  */
 @Serializable
-enum class InstructionType(val value: kotlin.String) {
+internal enum class InstructionType(val value: kotlin.String) {
     @SerialName(value = "TimelineAddEntries")
     timelineAddEntries("TimelineAddEntries"),
 

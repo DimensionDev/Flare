@@ -5,13 +5,14 @@ import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// https://github.com/cashapp/sqldelight/issues/1333
 @Serializable
 sealed interface EmojiContent {
     @Serializable
     @SerialName("Mastodon")
-    data class Mastodon(val data: List<Emoji>) : EmojiContent
+    data class Mastodon internal constructor(internal val data: List<Emoji>) : EmojiContent
 
     @Serializable
     @SerialName("Misskey")
-    data class Misskey(val data: List<EmojiSimple>) : EmojiContent
+    data class Misskey internal constructor(internal val data: List<EmojiSimple>) : EmojiContent
 }

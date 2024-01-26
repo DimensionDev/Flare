@@ -8,7 +8,7 @@ import dev.dimension.flare.data.network.misskey.api.model.FlashCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.FlashDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.FlashUpdateRequest
 
-interface FlashApi {
+internal interface FlashApi {
     /**
      * flash/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:flash*

@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param timeline
  */
 @Serializable
-data class ListTweetsTimeline(
+internal data class ListTweetsTimeline(
     @SerialName(value = "timeline")
     val timeline: Timeline? = null,
 )

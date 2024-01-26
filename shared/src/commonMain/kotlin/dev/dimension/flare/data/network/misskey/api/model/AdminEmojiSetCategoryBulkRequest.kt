@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param ids * @param category Use `null` to reset the category.
  */
 @Serializable
-data class AdminEmojiSetCategoryBulkRequest(
+internal data class AdminEmojiSetCategoryBulkRequest(
     @SerialName(value = "ids") val ids: kotlin.collections.List<kotlin.String>,
     // Use `null` to reset the category.
     @SerialName(value = "category") val category: kotlin.String? = null,

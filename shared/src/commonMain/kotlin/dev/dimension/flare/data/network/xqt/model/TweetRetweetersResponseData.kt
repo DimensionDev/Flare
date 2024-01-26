@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param retweetersTimeline
  */
 @Serializable
-data class TweetRetweetersResponseData(
+internal data class TweetRetweetersResponseData(
     @SerialName(value = "retweeters_timeline")
     val retweetersTimeline: TimelineV2,
 )

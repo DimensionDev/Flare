@@ -39,7 +39,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("Tweet")
-data class Tweet(
+internal data class Tweet(
 //    @SerialName(value = "edit_control")
 //    val editControl: TweetEditControl,
 //    @SerialName(value = "is_translatable")

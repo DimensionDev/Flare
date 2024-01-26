@@ -2,7 +2,7 @@ package dev.dimension.flare.data.network.mastodon.api.model
 
 import de.jensklingenberg.ktorfit.Response
 
-class MastodonPaging<T>(
+internal class MastodonPaging<T>(
     data: List<T>,
     val next: String? = null,
     val prev: String? = null,

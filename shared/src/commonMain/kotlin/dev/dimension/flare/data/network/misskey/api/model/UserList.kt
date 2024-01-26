@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param name * @param isPublic * @param userIds */
 @Serializable
-data class UserList(
+internal data class UserList(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,

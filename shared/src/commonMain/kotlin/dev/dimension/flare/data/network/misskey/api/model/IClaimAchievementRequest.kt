@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param name */
 @Serializable
-data class IClaimAchievementRequest(
+internal data class IClaimAchievementRequest(
     @SerialName(value = "name") val name: IClaimAchievementRequest.Name,
 ) {
     /**

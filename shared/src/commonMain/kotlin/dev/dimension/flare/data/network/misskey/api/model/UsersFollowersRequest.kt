@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-data class UsersFollowersRequest(
+internal data class UsersFollowersRequest(
     val sinceId: String? = null,
     val untilId: String? = null,
     val limit: Int? = null,

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UploadResponse(
+internal data class UploadResponse(
     val id: String? = null,
     val type: String? = null,
     val url: String? = null,

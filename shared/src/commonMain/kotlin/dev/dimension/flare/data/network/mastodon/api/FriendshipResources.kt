@@ -9,7 +9,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.RelationshipResponse
 
-interface FriendshipResources {
+internal interface FriendshipResources {
     @POST("api/v1/accounts/{id}/follow")
     suspend fun follow(
         @Path(value = "id") id: String,

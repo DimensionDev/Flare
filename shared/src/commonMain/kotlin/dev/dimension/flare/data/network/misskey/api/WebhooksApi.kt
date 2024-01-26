@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.misskey.api.model.IWebhooksCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.IWebhooksShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.IWebhooksUpdateRequest
 
-interface WebhooksApi {
+internal interface WebhooksApi {
     /**
      * i/webhooks/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:account*

@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param line
  */
 @Serializable
-data class Location(
+internal data class Location(
     @SerialName(value = "column")
     val column: kotlin.Int,
     @SerialName(value = "line")

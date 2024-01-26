@@ -32,7 +32,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersSearchRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShow200Response
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 
-interface UsersApi {
+internal interface UsersApi {
     /**
      * email-address/available
      * No description provided.  **Credential required**: *No*

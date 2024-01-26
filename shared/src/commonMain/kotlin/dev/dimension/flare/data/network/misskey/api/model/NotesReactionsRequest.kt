@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param noteId * @param type * @param limit * @param offset * @param sinceId * @param untilId */
 @Serializable
-data class NotesReactionsRequest(
+internal data class NotesReactionsRequest(
     @SerialName(value = "noteId") val noteId: kotlin.String,
     @SerialName(value = "type") val type: kotlin.String? = null,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,

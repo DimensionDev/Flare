@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param errors
  */
 @Serializable
-data class GetFollowers200Response(
+internal data class GetFollowers200Response(
     @SerialName(value = "data")
     val `data`: FollowResponseData,
     @SerialName(value = "errors")

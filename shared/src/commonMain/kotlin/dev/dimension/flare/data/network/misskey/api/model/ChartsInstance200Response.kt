@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param requestsFailed * @param requestsSucceeded * @param requestsReceived * @param notesTotal * @param notesInc * @param notesDec * @param notesDiffsNormal * @param notesDiffsReply * @param notesDiffsRenote * @param notesDiffsWithFile * @param usersTotal * @param usersInc * @param usersDec * @param followingTotal * @param followingInc * @param followingDec * @param followersTotal * @param followersInc * @param followersDec * @param driveTotalFiles * @param driveIncFiles * @param driveDecFiles * @param driveIncUsage * @param driveDecUsage */
 @Serializable
-data class ChartsInstance200Response(
+internal data class ChartsInstance200Response(
     @SerialName(value = "requests.failed") val requestsFailed: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "requests.succeeded") val requestsSucceeded: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "requests.received") val requestsReceived: kotlin.collections.List<kotlin.Double>,

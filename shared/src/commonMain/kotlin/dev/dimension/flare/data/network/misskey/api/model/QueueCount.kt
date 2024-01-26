@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param waiting * @param active * @param completed * @param failed * @param delayed */
 @Serializable
-data class QueueCount(
+internal data class QueueCount(
     @SerialName(value = "waiting") val waiting: kotlin.Double,
     @SerialName(value = "active") val active: kotlin.Double,
     @SerialName(value = "completed") val completed: kotlin.Double,

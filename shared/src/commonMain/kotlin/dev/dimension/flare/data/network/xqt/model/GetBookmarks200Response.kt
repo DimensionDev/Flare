@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param errors
  */
 @Serializable
-data class GetBookmarks200Response(
+internal data class GetBookmarks200Response(
     @SerialName(value = "data")
     val `data`: BookmarksResponseData,
     @SerialName(value = "errors")

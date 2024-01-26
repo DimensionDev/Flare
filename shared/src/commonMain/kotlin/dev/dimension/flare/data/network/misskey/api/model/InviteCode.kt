@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param code * @param expiresAt * @param createdAt * @param createdBy * @param usedBy * @param usedAt * @param used */
 @Serializable
-data class InviteCode(
+internal data class InviteCode(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "code") val code: kotlin.String,
     @SerialName(value = "expiresAt") val expiresAt: kotlin.String? = null,

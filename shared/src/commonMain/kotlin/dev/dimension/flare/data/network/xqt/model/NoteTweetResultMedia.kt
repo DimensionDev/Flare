@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param inlineMedia
  */
 @Serializable
-data class NoteTweetResultMedia(
+internal data class NoteTweetResultMedia(
     @SerialName(value = "inline_media")
     val inlineMedia: kotlin.collections.List<NoteTweetResultMediaInlineMedia>,
 )

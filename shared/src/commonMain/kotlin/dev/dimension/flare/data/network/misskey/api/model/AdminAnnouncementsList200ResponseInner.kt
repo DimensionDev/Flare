@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param updatedAt * @param text * @param title * @param imageUrl * @param displayOrder * @param userId * @param reads * @param closeDuration * @param user */
 @Serializable
-data class AdminAnnouncementsList200ResponseInner(
+internal data class AdminAnnouncementsList200ResponseInner(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "updatedAt") val updatedAt: kotlin.String? = null,

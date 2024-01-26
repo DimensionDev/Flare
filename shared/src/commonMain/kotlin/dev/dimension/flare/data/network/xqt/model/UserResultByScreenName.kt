@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param result
  */
 @Serializable
-data class UserResultByScreenName(
+internal data class UserResultByScreenName(
     @SerialName(value = "id")
     val id: kotlin.String,
     @SerialName(value = "result")

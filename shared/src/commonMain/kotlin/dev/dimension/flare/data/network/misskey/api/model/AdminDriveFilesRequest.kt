@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param limit * @param sinceId * @param untilId * @param userId * @param type * @param origin * @param hostname The local host is represented with `null`.
  */
 @Serializable
-data class AdminDriveFilesRequest(
+internal data class AdminDriveFilesRequest(
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,

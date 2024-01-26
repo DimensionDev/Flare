@@ -6,7 +6,7 @@ import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.RequestResetPasswordRequest
 import dev.dimension.flare.data.network.misskey.api.model.ResetPasswordRequest
 
-interface ResetPasswordApi {
+internal interface ResetPasswordApi {
     /**
      * request-reset-password
      * Request a users password to be reset.  **Credential required**: *No*

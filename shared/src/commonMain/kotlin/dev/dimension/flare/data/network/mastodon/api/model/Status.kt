@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Status(
+internal data class Status(
     val id: String? = null,
     @SerialName("created_at")
     @Serializable(with = DateSerializer::class)

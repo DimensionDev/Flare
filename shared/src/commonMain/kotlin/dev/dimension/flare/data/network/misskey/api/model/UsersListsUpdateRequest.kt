@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param listId * @param name * @param isPublic */
 @Serializable
-data class UsersListsUpdateRequest(
+internal data class UsersListsUpdateRequest(
     @SerialName(value = "listId") val listId: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String? = null,
     @SerialName(value = "isPublic") val isPublic: kotlin.Boolean? = null,

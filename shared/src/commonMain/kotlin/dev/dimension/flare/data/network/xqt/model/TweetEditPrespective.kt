@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param retweeted
  */
 @Serializable
-data class TweetEditPrespective(
+internal data class TweetEditPrespective(
     @SerialName(value = "favorited")
     val favorited: kotlin.Boolean? = null,
     @SerialName(value = "retweeted")

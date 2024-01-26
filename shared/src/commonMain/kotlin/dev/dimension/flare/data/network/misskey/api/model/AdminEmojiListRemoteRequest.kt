@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param query * @param host Use `null` to represent the local host.
  * @param limit * @param sinceId * @param untilId */
 @Serializable
-data class AdminEmojiListRemoteRequest(
+internal data class AdminEmojiListRemoteRequest(
     @SerialName(value = "query") val query: kotlin.String? = null,
     // Use `null` to represent the local host.
     @SerialName(value = "host") val host: kotlin.String? = null,

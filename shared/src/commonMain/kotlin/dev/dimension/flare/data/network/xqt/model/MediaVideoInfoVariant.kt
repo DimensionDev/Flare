@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  * @param bitrate
  */
 @Serializable
-data class MediaVideoInfoVariant(
+internal data class MediaVideoInfoVariant(
     @SerialName(value = "content_type")
     val contentType: kotlin.String,
     @Contextual @SerialName(value = "url")

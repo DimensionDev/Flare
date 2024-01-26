@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param available * @param reason */
 @Serializable
-data class EmailAddressAvailable200Response(
+internal data class EmailAddressAvailable200Response(
     @SerialName(value = "available") val available: kotlin.Boolean,
     @SerialName(value = "reason") val reason: kotlin.String?,
 )

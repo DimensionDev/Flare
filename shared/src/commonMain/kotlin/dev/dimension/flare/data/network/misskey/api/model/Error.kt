@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param error */
 @Serializable
-data class Error(
+internal data class Error(
     @SerialName(value = "error") val error: ErrorError,
 )

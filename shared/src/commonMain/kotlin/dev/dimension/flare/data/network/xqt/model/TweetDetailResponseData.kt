@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param threadedConversationWithInjectionsV2
  */
 @Serializable
-data class TweetDetailResponseData(
+internal data class TweetDetailResponseData(
     @SerialName(value = "threaded_conversation_with_injections_v2")
     val threadedConversationWithInjectionsV2: Timeline,
 )

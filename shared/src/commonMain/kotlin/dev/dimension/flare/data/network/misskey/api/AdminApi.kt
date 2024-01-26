@@ -63,7 +63,7 @@ import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserDetailed
 
-interface AdminApi {
+internal interface AdminApi {
     /**
      * admin/abuse-report-resolver/create
      * No description provided.  **Credential required**: *Yes*

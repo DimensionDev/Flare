@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ActivateResponse(
+internal data class ActivateResponse(
     @SerialName("guest_token")
     val guestToken: String?,
 )

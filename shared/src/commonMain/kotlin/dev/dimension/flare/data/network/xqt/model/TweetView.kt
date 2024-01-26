@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param count
  */
 @Serializable
-data class TweetView(
+internal data class TweetView(
     @SerialName(value = "state")
     val state: TweetView.State? = null,
     @SerialName(value = "count")

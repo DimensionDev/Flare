@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param result
  */
 @Serializable
-data class CreateTweet(
+internal data class CreateTweet(
     @SerialName(value = "result")
     val result: Tweet,
 )

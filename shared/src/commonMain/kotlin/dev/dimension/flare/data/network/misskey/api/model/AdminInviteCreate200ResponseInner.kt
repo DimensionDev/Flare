@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param code */
 @Serializable
-data class AdminInviteCreate200ResponseInner(
+internal data class AdminInviteCreate200ResponseInner(
     @SerialName(value = "code") val code: kotlin.String,
 )

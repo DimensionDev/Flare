@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param errors
  */
 @Serializable
-data class GetRetweeters200Response(
+internal data class GetRetweeters200Response(
     @SerialName(value = "data")
     val `data`: TweetRetweetersResponseData,
     @SerialName(value = "errors")

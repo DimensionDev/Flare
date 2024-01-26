@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param deliver * @param inbox * @param db * @param objectStorage */
 @Serializable
-data class AdminQueueStats200Response(
+internal data class AdminQueueStats200Response(
     @SerialName(value = "deliver") val deliver: QueueCount,
     @SerialName(value = "inbox") val inbox: QueueCount,
     @SerialName(value = "db") val db: QueueCount,

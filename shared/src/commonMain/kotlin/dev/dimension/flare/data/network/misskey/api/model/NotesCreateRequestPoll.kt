@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param choices * @param multiple * @param expiresAt * @param expiredAfter */
 @Serializable
-data class NotesCreateRequestPoll(
+internal data class NotesCreateRequestPoll(
     @SerialName(value = "choices") val choices: kotlin.collections.Set<kotlin.String>,
     @SerialName(value = "multiple") val multiple: kotlin.Boolean? = null,
     @SerialName(value = "expiresAt") val expiresAt: kotlin.Int? = null,

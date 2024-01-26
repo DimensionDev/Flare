@@ -5,7 +5,7 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.ClipsDeleteRequest
 
-interface ClipApi {
+internal interface ClipApi {
     /**
      * clips/favorite
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:clip-favorite*

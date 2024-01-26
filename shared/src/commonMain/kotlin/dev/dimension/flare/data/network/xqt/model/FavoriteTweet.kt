@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param favoriteTweet
  */
 @Serializable
-data class FavoriteTweet(
+internal data class FavoriteTweet(
     @SerialName(value = "favorite_tweet")
     val favoriteTweet: kotlin.String,
 )

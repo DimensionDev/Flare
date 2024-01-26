@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param aliases * @param name * @param category * @param url * @param isSensitive * @param roleIdsThatCanBeUsedThisEmojiAsReaction */
 @Serializable
-data class EmojiSimple(
+internal data class EmojiSimple(
     @SerialName(value = "aliases") val aliases: kotlin.collections.List<kotlin.String>,
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "category") val category: kotlin.String? = null,

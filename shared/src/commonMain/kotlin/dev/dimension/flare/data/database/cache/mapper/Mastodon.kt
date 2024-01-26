@@ -134,7 +134,7 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     )
 }
 
-fun Status.toDbPagingTimeline(
+internal fun Status.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0 },

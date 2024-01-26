@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MastodonList(
+internal data class MastodonList(
     @SerialName("id")
     val id: String? = null,
     @SerialName("replies_policy")

@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param type * @param info * @param userId * @param user */
 @Serializable
-data class AdminShowModerationLogs200ResponseInner(
+internal data class AdminShowModerationLogs200ResponseInner(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "type") val type: kotlin.String,

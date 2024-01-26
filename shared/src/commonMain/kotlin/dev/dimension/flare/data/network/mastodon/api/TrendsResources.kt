@@ -6,7 +6,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Suggestions
 import dev.dimension.flare.data.network.mastodon.api.model.Trend
 
-interface TrendsResources {
+internal interface TrendsResources {
     @GET("api/v1/trends/tags")
     suspend fun trendsTags(): List<Trend>
 

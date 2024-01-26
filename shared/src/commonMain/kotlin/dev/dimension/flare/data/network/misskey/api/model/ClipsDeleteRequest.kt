@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param clipId */
 @Serializable
-data class ClipsDeleteRequest(
+internal data class ClipsDeleteRequest(
     @SerialName(value = "clipId") val clipId: kotlin.String,
 )

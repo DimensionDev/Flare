@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineAddEntries")
-data class TimelineAddEntries(
+internal data class TimelineAddEntries(
     @SerialName(value = "entries")
     val propertyEntries: kotlin.collections.List<TimelineAddEntry>,
 //    @SerialName(value = "type")

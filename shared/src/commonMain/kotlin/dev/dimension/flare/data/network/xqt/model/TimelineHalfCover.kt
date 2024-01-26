@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  * @param type
  */
 @Serializable
-data class TimelineHalfCover(
+internal data class TimelineHalfCover(
     @SerialName(value = "dismissible")
     val dismissible: kotlin.Boolean? = null,
     @SerialName(value = "halfCoverDisplayType")

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Original(
+internal data class Original(
     val width: Long? = null,
     val height: Long? = null,
     @SerialName("frame_rate")

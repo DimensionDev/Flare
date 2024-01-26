@@ -9,7 +9,7 @@ import dev.dimension.flare.data.network.misskey.api.model.GalleryPostsCreateRequ
 import dev.dimension.flare.data.network.misskey.api.model.GalleryPostsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.GalleryPostsUpdateRequest
 
-interface GalleryApi {
+internal interface GalleryApi {
     /**
      * gallery/featured
      * No description provided.  **Credential required**: *No*

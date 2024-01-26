@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param antennaId * @param name * @param src * @param keywords * @param excludeKeywords * @param users * @param caseSensitive * @param withReplies * @param withFile * @param notify * @param userListId */
 @Serializable
-data class AntennasUpdateRequest(
+internal data class AntennasUpdateRequest(
     @SerialName(value = "antennaId") val antennaId: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "src") val src: AntennasUpdateRequest.Src,

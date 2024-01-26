@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Option(
+internal data class Option(
     val title: String? = null,
     @SerialName("votes_count")
     val votesCount: Long? = null,

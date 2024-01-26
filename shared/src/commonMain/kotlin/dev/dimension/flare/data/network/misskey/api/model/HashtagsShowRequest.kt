@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param tag */
 @Serializable
-data class HashtagsShowRequest(
+internal data class HashtagsShowRequest(
     @SerialName(value = "tag") val tag: kotlin.String,
 )

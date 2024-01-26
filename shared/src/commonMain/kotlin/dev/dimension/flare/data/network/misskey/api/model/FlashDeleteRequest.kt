@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param flashId */
 @Serializable
-data class FlashDeleteRequest(
+internal data class FlashDeleteRequest(
     @SerialName(value = "flashId") val flashId: kotlin.String,
 )

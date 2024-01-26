@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Card(
+internal data class Card(
     val url: String? = null,
     val title: String? = null,
     val description: String? = null,

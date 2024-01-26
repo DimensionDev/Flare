@@ -33,7 +33,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineShowAlert")
-data class TimelineShowAlert(
+internal data class TimelineShowAlert(
     @SerialName(value = "richText")
     val richText: TimelineShowAlertRichText,
 //    @Contextual @SerialName(value = "type")

@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param id * @param name * @param aliases * @param fileId * @param category Use `null` to reset the category.
  * @param license * @param isSensitive * @param localOnly * @param roleIdsThatCanBeUsedThisEmojiAsReaction */
 @Serializable
-data class AdminEmojiUpdateRequest(
+internal data class AdminEmojiUpdateRequest(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "aliases") val aliases: kotlin.collections.List<kotlin.String>,

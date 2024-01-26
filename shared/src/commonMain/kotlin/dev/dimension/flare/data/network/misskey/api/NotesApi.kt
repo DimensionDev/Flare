@@ -27,7 +27,7 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesState200Response
 import dev.dimension.flare.data.network.misskey.api.model.NotesTranslateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesUserListTimelineRequest
 
-interface NotesApi {
+internal interface NotesApi {
     /**
      * channels/timeline
      * No description provided.  **Credential required**: *No*

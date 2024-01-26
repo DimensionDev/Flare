@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param channelId * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
-data class ChannelsTimelineRequest(
+internal data class ChannelsTimelineRequest(
     @SerialName(value = "channelId") val channelId: kotlin.String,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,

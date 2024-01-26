@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineTimelineCursor")
-data class TimelineTimelineCursor(
+internal data class TimelineTimelineCursor(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName,
     @Contextual @SerialName(value = "cursorType")

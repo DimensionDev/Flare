@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param variables
  */
 @Serializable
-data class PostFavoriteTweetRequest(
+internal data class PostFavoriteTweetRequest(
     @SerialName(value = "queryId")
     val queryId: kotlin.String = "lI07N6Otwv1PhnEgXILM7A",
     @SerialName(value = "variables")

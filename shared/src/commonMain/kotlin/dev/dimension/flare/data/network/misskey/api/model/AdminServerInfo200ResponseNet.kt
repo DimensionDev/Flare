@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param `interface` */
 @Serializable
-data class AdminServerInfo200ResponseNet(
+internal data class AdminServerInfo200ResponseNet(
     @SerialName(value = "interface") val interface_: kotlin.String,
 )

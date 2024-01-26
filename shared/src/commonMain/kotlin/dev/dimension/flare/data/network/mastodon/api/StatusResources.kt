@@ -13,7 +13,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.UploadResponse
 import io.ktor.client.request.forms.MultiPartFormDataContent
 
-interface StatusResources {
+internal interface StatusResources {
     @POST("api/v1/statuses/{id}/favourite")
     suspend fun favourite(
         @Path("id") id: String,

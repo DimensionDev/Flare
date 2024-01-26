@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param password */
 @Serializable
-data class AdminResetPassword200Response(
+internal data class AdminResetPassword200Response(
     @SerialName(value = "password") val password: kotlin.String,
 )

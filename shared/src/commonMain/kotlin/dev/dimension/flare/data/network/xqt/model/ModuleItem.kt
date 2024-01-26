@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param item
  */
 @Serializable
-data class ModuleItem(
+internal data class ModuleItem(
     @SerialName(value = "entryId")
     val entryId: kotlin.String,
     @SerialName(value = "item")

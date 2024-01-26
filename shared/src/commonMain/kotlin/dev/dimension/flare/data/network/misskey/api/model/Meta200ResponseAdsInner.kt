@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param place * @param url * @param imageUrl */
 @Serializable
-data class Meta200ResponseAdsInner(
+internal data class Meta200ResponseAdsInner(
     @SerialName(value = "place") val place: kotlin.String,
     @SerialName(value = "url") val url: kotlin.String,
     @SerialName(value = "imageUrl") val imageUrl: kotlin.String,

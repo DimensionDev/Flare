@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param userResultByScreenName
  */
 @Serializable
-data class ProfileResponseData(
+internal data class ProfileResponseData(
     @SerialName(value = "user_result_by_screen_name")
     val userResultByScreenName: UserResultByScreenName,
 )

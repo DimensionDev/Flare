@@ -6,7 +6,7 @@ import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 
-interface AccountResources {
+internal interface AccountResources {
     @GET("api/v1/accounts/{id}/followers")
     suspend fun followers(
         @Path(value = "id") id: String,

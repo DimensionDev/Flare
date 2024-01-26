@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param withFiles * @param withReplies * @param fileType * @param excludeNsfw * @param limit * @param sinceId * @param untilId * @param sinceDate * @param untilDate */
 @Serializable
-data class NotesLocalTimelineRequest(
+internal data class NotesLocalTimelineRequest(
     @SerialName(value = "withFiles") val withFiles: kotlin.Boolean? = false,
     @SerialName(value = "withReplies") val withReplies: kotlin.Boolean? = false,
     @SerialName(value = "fileType") val fileType: kotlin.collections.List<kotlin.String>? = null,

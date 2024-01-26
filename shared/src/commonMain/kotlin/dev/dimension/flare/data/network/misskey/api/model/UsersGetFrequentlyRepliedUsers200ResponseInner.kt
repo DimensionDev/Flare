@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param user * @param weight */
 @Serializable
-data class UsersGetFrequentlyRepliedUsers200ResponseInner(
+internal data class UsersGetFrequentlyRepliedUsers200ResponseInner(
     @SerialName(value = "user") val user: UserDetailed,
     @SerialName(value = "weight") val weight: kotlin.Double,
 )

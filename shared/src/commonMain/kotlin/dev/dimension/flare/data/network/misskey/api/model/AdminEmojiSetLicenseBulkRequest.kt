@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param ids * @param license Use `null` to reset the license.
  */
 @Serializable
-data class AdminEmojiSetLicenseBulkRequest(
+internal data class AdminEmojiSetLicenseBulkRequest(
     @SerialName(value = "ids") val ids: kotlin.collections.List<kotlin.String>,
     // Use `null` to reset the license.
     @SerialName(value = "license") val license: kotlin.String? = null,

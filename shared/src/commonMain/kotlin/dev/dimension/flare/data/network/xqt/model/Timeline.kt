@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param responseObjects
  */
 @Serializable
-data class Timeline(
+internal data class Timeline(
     @SerialName(value = "instructions")
     val instructions: kotlin.collections.List<InstructionUnion>,
 //    @Contextual @SerialName(value = "metadata")

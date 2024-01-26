@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param width * @param height * @param orientation * @param avgColor */
 @Serializable
-data class DriveFileProperties(
+internal data class DriveFileProperties(
     @SerialName(value = "width") val width: kotlin.Double? = null,
     @SerialName(value = "height") val height: kotlin.Double? = null,
     @SerialName(value = "orientation") val orientation: kotlin.Double? = null,

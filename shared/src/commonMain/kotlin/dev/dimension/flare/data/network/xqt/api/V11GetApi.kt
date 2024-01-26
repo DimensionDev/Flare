@@ -5,7 +5,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.UserRecommendationsItem
 
-interface V11GetApi {
+internal interface V11GetApi {
     /**
      *
      * get friends following list

@@ -8,7 +8,7 @@ import dev.dimension.flare.data.network.misskey.api.model.AdminRolesUsersRequest
 import dev.dimension.flare.data.network.misskey.api.model.Note
 import dev.dimension.flare.data.network.misskey.api.model.RolesNotesRequest
 
-interface RoleApi {
+internal interface RoleApi {
     /**
      * roles/list
      * No description provided.  **Credential required**: *Yes*

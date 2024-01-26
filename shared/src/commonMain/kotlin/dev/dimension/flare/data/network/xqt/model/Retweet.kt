@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param restId
  */
 @Serializable
-data class Retweet(
+internal data class Retweet(
     @SerialName(value = "legacy")
     val legacy: RetweetLegacy,
     @SerialName(value = "rest_id")

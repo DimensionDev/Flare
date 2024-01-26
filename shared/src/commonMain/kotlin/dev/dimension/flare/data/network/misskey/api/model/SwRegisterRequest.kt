@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param endpoint * @param auth * @param publickey * @param sendReadMessage */
 @Serializable
-data class SwRegisterRequest(
+internal data class SwRegisterRequest(
     @SerialName(value = "endpoint") val endpoint: kotlin.String,
     @SerialName(value = "auth") val auth: kotlin.String,
     @SerialName(value = "publickey") val publickey: kotlin.String,

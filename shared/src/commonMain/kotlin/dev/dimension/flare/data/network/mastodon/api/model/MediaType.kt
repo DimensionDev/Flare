@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class MediaType {
+internal enum class MediaType {
     @SerialName("unknown")
     Unknown,
 

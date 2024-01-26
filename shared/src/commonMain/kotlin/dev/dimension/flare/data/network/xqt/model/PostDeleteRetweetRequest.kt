@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param variables
  */
 @Serializable
-data class PostDeleteRetweetRequest(
+internal data class PostDeleteRetweetRequest(
     @SerialName(value = "queryId")
     val queryId: kotlin.String = "iQtK4dl5hBmXewYZuEOKVw",
     @SerialName(value = "variables")

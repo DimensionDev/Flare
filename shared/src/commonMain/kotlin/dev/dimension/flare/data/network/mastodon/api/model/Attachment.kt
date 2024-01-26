@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Attachment(
+internal data class Attachment(
     val id: String? = null,
     val type: MediaType? = null,
     val url: String? = null,

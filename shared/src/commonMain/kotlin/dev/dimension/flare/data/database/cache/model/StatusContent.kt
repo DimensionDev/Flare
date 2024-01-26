@@ -7,28 +7,31 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// https://github.com/cashapp/sqldelight/issues/1333
 @Serializable
 sealed interface StatusContent {
     @Serializable
     @SerialName("mastodon")
-    data class Mastodon(val data: dev.dimension.flare.data.network.mastodon.api.model.Status) :
+    data class Mastodon internal constructor(internal val data: dev.dimension.flare.data.network.mastodon.api.model.Status) :
         StatusContent
 
     @Serializable
     @SerialName("mastodon-notification")
-    data class MastodonNotification(val data: dev.dimension.flare.data.network.mastodon.api.model.Notification) :
+    data class MastodonNotification internal constructor(
+        internal val data: dev.dimension.flare.data.network.mastodon.api.model.Notification,
+    ) :
         StatusContent
 
     @Serializable
     @SerialName("misskey")
-    data class Misskey(
-        val data: dev.dimension.flare.data.network.misskey.api.model.Note,
+    data class Misskey internal constructor(
+        internal val data: dev.dimension.flare.data.network.misskey.api.model.Note,
     ) : StatusContent
 
     @Serializable
     @SerialName("misskey-notification")
-    data class MisskeyNotification(
-        val data: dev.dimension.flare.data.network.misskey.api.model.Notification,
+    data class MisskeyNotification internal constructor(
+        internal val data: dev.dimension.flare.data.network.misskey.api.model.Notification,
     ) : StatusContent
 
     @Serializable
@@ -46,8 +49,8 @@ sealed interface StatusContent {
 
     @Serializable
     @SerialName("XQT")
-    data class XQT(
-        val data: dev.dimension.flare.data.network.xqt.model.Tweet,
+    data class XQT internal constructor(
+        internal val data: dev.dimension.flare.data.network.xqt.model.Tweet,
     ) : StatusContent
 }
 

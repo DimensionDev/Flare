@@ -4,7 +4,7 @@ import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.GET
 import dev.dimension.flare.data.network.xqt.model.Other200Response
 
-interface OtherApi {
+internal interface OtherApi {
     /**
      *
      * This is not an actual endpoint

@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param readWrite * @param read * @param write * @param registeredWithinWeek * @param registeredWithinMonth * @param registeredWithinYear * @param registeredOutsideWeek * @param registeredOutsideMonth * @param registeredOutsideYear */
 @Serializable
-data class ChartsActiveUsers200Response(
+internal data class ChartsActiveUsers200Response(
     @SerialName(value = "readWrite") val readWrite: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "read") val read: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "write") val write: kotlin.collections.List<kotlin.Double>,

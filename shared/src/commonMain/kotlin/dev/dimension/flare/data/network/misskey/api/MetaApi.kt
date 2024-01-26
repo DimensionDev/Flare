@@ -21,7 +21,7 @@ import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
 import dev.dimension.flare.data.network.misskey.api.model.Ping200Response
 import dev.dimension.flare.data.network.misskey.api.model.Stats200Response
 
-interface MetaApi {
+internal interface MetaApi {
     /**
      * admin/meta
      * No description provided.  **Credential required**: *Yes*

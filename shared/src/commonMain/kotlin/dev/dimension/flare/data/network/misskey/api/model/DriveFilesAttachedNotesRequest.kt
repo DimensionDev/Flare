@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param fileId */
 @Serializable
-data class DriveFilesAttachedNotesRequest(
+internal data class DriveFilesAttachedNotesRequest(
     @SerialName(value = "fileId") val fileId: kotlin.String,
 )

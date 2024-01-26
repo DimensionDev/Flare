@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit */
 @Serializable
-data class FederationStatsRequest(
+internal data class FederationStatsRequest(
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
 )

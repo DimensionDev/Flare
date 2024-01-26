@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param fullText
  */
 @Serializable
-data class RetweetLegacy(
+internal data class RetweetLegacy(
     @SerialName(value = "full_text")
     val fullText: kotlin.String,
 )

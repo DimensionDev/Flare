@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  * @param stringValue
  */
 @Serializable
-data class TweetCardLegacyBindingValueData(
+internal data class TweetCardLegacyBindingValueData(
     @SerialName(value = "type")
     val type: kotlin.String,
     @SerialName(value = "boolean_value")
@@ -41,7 +41,7 @@ data class TweetCardLegacyBindingValueData(
 )
 
 @Serializable
-data class ImageValue(
+internal data class ImageValue(
     val height: Long? = null,
     val width: Long? = null,
     val url: String? = null,

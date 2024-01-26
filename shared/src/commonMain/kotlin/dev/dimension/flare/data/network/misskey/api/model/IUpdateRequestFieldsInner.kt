@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param name * @param `value` */
 @Serializable
-data class IUpdateRequestFieldsInner(
+internal data class IUpdateRequestFieldsInner(
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "value") val `value`: kotlin.String,
 )

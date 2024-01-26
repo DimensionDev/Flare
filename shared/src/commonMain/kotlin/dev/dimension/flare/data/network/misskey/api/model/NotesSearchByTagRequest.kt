@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
  * *
  */
 @Serializable
-data class NotesSearchByTagRequest(
+internal data class NotesSearchByTagRequest(
     val reply: Boolean? = null,
     val renote: Boolean? = null,
     val withFiles: Boolean? = null,

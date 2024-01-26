@@ -32,7 +32,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineTimelineModule")
-data class TimelineTimelineModule(
+internal data class TimelineTimelineModule(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName,
 //    @Contextual @SerialName(value = "clientEventInfo")

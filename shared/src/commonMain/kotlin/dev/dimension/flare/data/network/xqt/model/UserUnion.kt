@@ -39,7 +39,7 @@ import kotlinx.serialization.json.JsonClassDiscriminator
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("__typename")
-sealed interface UserUnion {
+internal sealed interface UserUnion {
 //    @Contextual
 //    @SerialName(value = "__typename")
 //    val typename: TypeName

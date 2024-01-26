@@ -93,7 +93,6 @@ kotlin {
         val nativeMain by getting {
             dependencies {
                 implementation(libs.sqldelight.native.driver)
-//                implementation(libs.sqliter.driver)
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
             }
@@ -131,10 +130,6 @@ sqldelight {
 android {
     compileSdk = libs.versions.compileSdk.get().toInt()
     namespace = "dev.dimension.flare.shared"
-
-//    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-//    sourceSets["main"].res.srcDirs("src/androidMain/res")
-//    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()

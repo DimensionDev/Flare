@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @param query * @param sinceId * @param untilId * @param limit * @param offset * @param host The local host is represented with `.`.
  * @param userId * @param channelId */
 @Serializable
-data class NotesSearchRequest(
+internal data class NotesSearchRequest(
     @SerialName(value = "query") val query: kotlin.String,
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
     @SerialName(value = "untilId") val untilId: kotlin.String? = null,

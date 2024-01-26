@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param limit * @param offset * @param withUnreads * @param privateOnly */
 @Serializable
-data class AnnouncementsRequest(
+internal data class AnnouncementsRequest(
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
     @SerialName(value = "offset") val offset: kotlin.Int? = 0,
     @SerialName(value = "withUnreads") val withUnreads: kotlin.Boolean? = false,

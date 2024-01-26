@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param media
  */
 @Serializable
-data class ExtendedEntities(
+internal data class ExtendedEntities(
     @SerialName(value = "media")
     val media: kotlin.collections.List<MediaExtended>,
 )

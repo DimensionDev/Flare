@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PostReport(
+internal data class PostReport(
     @SerialName("account_id")
     val accountId: String,
     @SerialName("status_ids")

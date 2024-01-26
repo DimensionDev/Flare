@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param comment * @param resolved * @param reporterId * @param targetUserId * @param assigneeId * @param reporter * @param targetUser * @param assignee */
 @Serializable
-data class AdminAbuseUserReports200ResponseInner(
+internal data class AdminAbuseUserReports200ResponseInner(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "comment") val comment: kotlin.String,

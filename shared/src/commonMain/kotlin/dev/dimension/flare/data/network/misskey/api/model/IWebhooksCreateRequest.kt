@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param name * @param url * @param secret * @param on */
 @Serializable
-data class IWebhooksCreateRequest(
+internal data class IWebhooksCreateRequest(
     @SerialName(value = "name") val name: kotlin.String,
     @SerialName(value = "url") val url: kotlin.String,
     @SerialName(value = "secret") val secret: kotlin.String,

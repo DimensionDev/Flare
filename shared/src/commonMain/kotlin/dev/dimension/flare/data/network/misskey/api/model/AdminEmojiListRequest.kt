@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param query * @param limit * @param sinceId * @param untilId */
 @Serializable
-data class AdminEmojiListRequest(
+internal data class AdminEmojiListRequest(
     @SerialName(value = "query") val query: kotlin.String? = null,
     @SerialName(value = "limit") val limit: kotlin.Int? = 10,
     @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,

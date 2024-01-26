@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param postId */
 @Serializable
-data class GalleryPostsDeleteRequest(
+internal data class GalleryPostsDeleteRequest(
     @SerialName(value = "postId") val postId: kotlin.String,
 )

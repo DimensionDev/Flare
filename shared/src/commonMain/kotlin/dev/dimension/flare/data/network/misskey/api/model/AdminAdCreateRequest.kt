@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param url * @param memo * @param place * @param priority * @param ratio * @param expiresAt * @param startsAt * @param imageUrl * @param dayOfWeek */
 @Serializable
-data class AdminAdCreateRequest(
+internal data class AdminAdCreateRequest(
     @SerialName(value = "url") val url: kotlin.String,
     @SerialName(value = "memo") val memo: kotlin.String,
     @SerialName(value = "place") val place: kotlin.String,

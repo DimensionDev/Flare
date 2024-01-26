@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param userId * @param endpoint * @param sendReadMessage */
 @Serializable
-data class SwShowRegistration200Response(
+internal data class SwShowRegistration200Response(
     @SerialName(value = "userId") val userId: kotlin.String,
     @SerialName(value = "endpoint") val endpoint: kotlin.String,
     @SerialName(value = "sendReadMessage") val sendReadMessage: kotlin.Boolean,

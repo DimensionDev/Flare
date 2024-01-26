@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param firstRetrievedAt * @param host * @param usersCount * @param notesCount * @param followingCount * @param followersCount * @param isNotResponding * @param isSuspended * @param isBlocked * @param softwareName * @param softwareVersion * @param openRegistrations * @param name * @param description * @param maintainerName * @param maintainerEmail * @param iconUrl * @param faviconUrl * @param themeColor * @param infoUpdatedAt */
 @Serializable
-data class FederationShowInstance200Response(
+internal data class FederationShowInstance200Response(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "firstRetrievedAt") val firstRetrievedAt: kotlin.String,
     @SerialName(value = "host") val host: kotlin.String,

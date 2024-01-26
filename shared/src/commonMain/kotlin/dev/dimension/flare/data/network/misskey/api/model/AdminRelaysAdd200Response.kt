@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param inbox * @param status */
 @Serializable
-data class AdminRelaysAdd200Response(
+internal data class AdminRelaysAdd200Response(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "inbox") val inbox: kotlin.String,
     @SerialName(value = "status") val status: AdminRelaysAdd200Response.Status = Status.Requesting,

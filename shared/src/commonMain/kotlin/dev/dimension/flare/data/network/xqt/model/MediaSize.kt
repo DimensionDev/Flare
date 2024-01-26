@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param w
  */
 @Serializable
-data class MediaSize(
+internal data class MediaSize(
     @SerialName(value = "h")
     val h: kotlin.Int,
     @SerialName(value = "resize")

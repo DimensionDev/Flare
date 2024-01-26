@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
  * *
  * @param emailAddress */
 @Serializable
-data class EmailAddressAvailableRequest(
+internal data class EmailAddressAvailableRequest(
     @SerialName(value = "emailAddress") val emailAddress: kotlin.String,
 )

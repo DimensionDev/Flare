@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateApplicationResponse(
+internal data class CreateApplicationResponse(
     val id: String? = null,
     val name: String? = null,
     val website: String? = null,

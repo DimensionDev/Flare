@@ -10,7 +10,7 @@ import dev.dimension.flare.data.network.misskey.api.model.AntennasNotesRequest
 import dev.dimension.flare.data.network.misskey.api.model.AntennasUpdateRequest
 import dev.dimension.flare.data.network.misskey.api.model.Note
 
-interface AntennasApi {
+internal interface AntennasApi {
     /**
      * antennas/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:account*

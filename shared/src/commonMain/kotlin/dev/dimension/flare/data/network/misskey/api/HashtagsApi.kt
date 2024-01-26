@@ -12,7 +12,7 @@ import dev.dimension.flare.data.network.misskey.api.model.HashtagsTrend200Respon
 import dev.dimension.flare.data.network.misskey.api.model.HashtagsUsersRequest
 import dev.dimension.flare.data.network.misskey.api.model.User
 
-interface HashtagsApi {
+internal interface HashtagsApi {
     /**
      * hashtags/list
      * No description provided.  **Credential required**: *No*

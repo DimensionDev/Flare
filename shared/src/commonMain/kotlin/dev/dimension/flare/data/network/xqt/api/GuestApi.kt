@@ -6,7 +6,7 @@ import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.AccountSettingsResponse
 import dev.dimension.flare.data.network.xqt.model.ActivateResponse
 
-interface GuestApi {
+internal interface GuestApi {
     @POST("1.1/guest/activate.json")
     suspend fun activate(): ActivateResponse
 

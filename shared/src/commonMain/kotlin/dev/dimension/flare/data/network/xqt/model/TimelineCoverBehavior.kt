@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param type
  */
 @Serializable
-data class TimelineCoverBehavior(
+internal data class TimelineCoverBehavior(
     @SerialName(value = "type")
     val type: TimelineCoverBehavior.Type,
 ) {

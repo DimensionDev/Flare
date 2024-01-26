@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param capacity * @param usage */
 @Serializable
-data class Drive200Response(
+internal data class Drive200Response(
     @SerialName(value = "capacity") val capacity: kotlin.Double,
     @SerialName(value = "usage") val usage: kotlin.Double,
 )

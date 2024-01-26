@@ -7,7 +7,7 @@ import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 
-interface V11PostApi {
+internal interface V11PostApi {
     /**
      *
      * post create friendships

@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param variables
  */
 @Serializable
-data class PostCreateTweetRequest(
+internal data class PostCreateTweetRequest(
     @SerialName(value = "features")
     val features: PostCreateTweetRequestFeatures,
     @SerialName(value = "queryId")
@@ -36,7 +36,7 @@ data class PostCreateTweetRequest(
 )
 
 @Serializable
-data class CreateBookmarkRequest(
+internal data class CreateBookmarkRequest(
     @SerialName("variables")
     val variables: CreateBookmarkRequestVariables,
     @SerialName("queryId")
@@ -44,7 +44,7 @@ data class CreateBookmarkRequest(
 )
 
 @Serializable
-data class CreateBookmarkRequestVariables(
+internal data class CreateBookmarkRequestVariables(
     @SerialName("tweet_id")
     val tweetId: String,
     @SerialName("darkRequest")
@@ -52,19 +52,19 @@ data class CreateBookmarkRequestVariables(
 )
 
 @Serializable
-data class CreateBookmark200Response(
+internal data class CreateBookmark200Response(
     @SerialName("data")
     val data: CreateBookmark200ResponseData,
 )
 
 @Serializable
-data class CreateBookmark200ResponseData(
+internal data class CreateBookmark200ResponseData(
     @SerialName("tweet_bookmark_put")
     val tweet_bookmark_put: String,
 )
 
 @Serializable
-data class DeleteBookmarkRequest(
+internal data class DeleteBookmarkRequest(
     @SerialName("variables")
     val variables: DeleteBookmarkRequestVariables,
     @SerialName("queryId")
@@ -72,7 +72,7 @@ data class DeleteBookmarkRequest(
 )
 
 @Serializable
-data class DeleteBookmarkRequestVariables(
+internal data class DeleteBookmarkRequestVariables(
     @SerialName("tweet_id")
     val tweetId: String,
     @SerialName("darkRequest")
@@ -80,13 +80,13 @@ data class DeleteBookmarkRequestVariables(
 )
 
 @Serializable
-data class DeleteBookmark200Response(
+internal data class DeleteBookmark200Response(
     @SerialName("data")
     val data: DeleteBookmark200ResponseData,
 )
 
 @Serializable
-data class DeleteBookmark200ResponseData(
+internal data class DeleteBookmark200ResponseData(
     @SerialName("tweet_bookmark_delete")
     val tweet_bookmark_delete: String,
 )

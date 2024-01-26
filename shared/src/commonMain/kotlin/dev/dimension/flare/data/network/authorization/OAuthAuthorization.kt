@@ -21,7 +21,7 @@ private const val OAUTH_ACCESS_TOKEN = "oauth_token"
 private const val OAUTH_VERSION = "oauth_version"
 private const val OAUTH_VERSION_VALUE = "1.0"
 
-class OAuthAuthorization(
+internal class OAuthAuthorization(
     private val consumerKey: String,
     private val consumerSecret: String,
     private val accessToken: String? = null,

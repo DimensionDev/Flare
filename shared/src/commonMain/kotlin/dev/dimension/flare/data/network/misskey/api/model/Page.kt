@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param createdAt * @param updatedAt * @param title * @param name * @param summary * @param content * @param variables * @param userId * @param user */
 @Serializable
-data class Page(
+internal data class Page(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
     @SerialName(value = "updatedAt") val updatedAt: kotlin.String,
@@ -36,7 +36,7 @@ data class Page(
 )
 
 @Serializable
-data class PageContent(
+internal data class PageContent(
     @SerialName(value = "id") val id: kotlin.String? = null,
     @SerialName(value = "type") val type: String? = null,
     @SerialName(value = "text") val text: kotlin.String? = null,

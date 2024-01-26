@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @SerialName("TimelineShowCover")
-data class TimelineShowCover(
+internal data class TimelineShowCover(
     @SerialName(value = "clientEventInfo")
     val clientEventInfo: ClientEventInfo,
     @SerialName(value = "cover")

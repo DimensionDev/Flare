@@ -23,7 +23,7 @@ import dev.dimension.flare.data.network.misskey.api.model.DriveStreamRequest
 import dev.dimension.flare.data.network.misskey.api.model.Note
 import io.ktor.client.request.forms.MultiPartFormDataContent
 
-interface DriveApi {
+internal interface DriveApi {
     /**
      * drive
      * No description provided.  **Credential required**: *Yes* / **Permission**: *read:drive*

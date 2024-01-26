@@ -10,7 +10,7 @@ import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowedReques
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsSearchRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsUpdateRequest
 
-interface ChannelsApi {
+internal interface ChannelsApi {
     /**
      * channels/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:channels*

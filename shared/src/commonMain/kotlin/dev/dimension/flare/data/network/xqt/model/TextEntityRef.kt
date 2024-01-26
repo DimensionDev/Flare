@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  * @param urlType
  */
 @Serializable
-data class TextEntityRef(
+internal data class TextEntityRef(
     @SerialName(value = "type")
     val type: TextEntityRef.Type,
     @Contextual @SerialName(value = "url")

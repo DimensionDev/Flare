@@ -13,7 +13,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UserList
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsCreateFromPublicRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsDeleteRequest
 
-interface DefaultApi {
+internal interface DefaultApi {
     /**
      * admin/abuse-report-resolver/delete
      * No description provided.  **Credential required**: *No*

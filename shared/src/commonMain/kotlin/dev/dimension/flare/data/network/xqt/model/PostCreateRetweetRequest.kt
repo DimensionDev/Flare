@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param variables
  */
 @Serializable
-data class PostCreateRetweetRequest(
+internal data class PostCreateRetweetRequest(
     @SerialName(value = "queryId")
     val queryId: kotlin.String = "ojPdsZsimiJrUGLR1sjUtA",
     @SerialName(value = "variables")

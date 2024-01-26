@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PostStatus(
+internal data class PostStatus(
     val status: String? = null,
     @SerialName("in_reply_to_id")
     val inReplyToID: String? = null,

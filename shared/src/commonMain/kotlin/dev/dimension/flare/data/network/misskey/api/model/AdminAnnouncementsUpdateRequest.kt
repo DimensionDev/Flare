@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param id * @param title * @param text * @param imageUrl * @param closeDuration * @param displayOrder * @param userId */
 @Serializable
-data class AdminAnnouncementsUpdateRequest(
+internal data class AdminAnnouncementsUpdateRequest(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "title") val title: kotlin.String,
     @SerialName(value = "text") val text: kotlin.String,

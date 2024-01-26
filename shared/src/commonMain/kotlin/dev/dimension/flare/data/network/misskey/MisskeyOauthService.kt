@@ -37,7 +37,7 @@ private val defaultPermission =
         "read:gallery-likes",
     )
 
-class MisskeyOauthService(
+internal class MisskeyOauthService(
     private val host: String,
     private val name: String? = null,
     private val icon: String? = null,

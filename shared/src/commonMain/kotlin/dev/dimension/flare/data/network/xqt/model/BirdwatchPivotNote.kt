@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @param restId
  */
 @Serializable
-data class BirdwatchPivotNote(
+internal data class BirdwatchPivotNote(
     @SerialName(value = "rest_id")
     val restId: kotlin.String,
 )

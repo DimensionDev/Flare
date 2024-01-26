@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param total * @param inc * @param dec * @param diffsNormal * @param diffsReply * @param diffsRenote * @param diffsWithFile */
 @Serializable
-data class ChartsUserNotes200Response(
+internal data class ChartsUserNotes200Response(
     @SerialName(value = "total") val total: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "inc") val inc: kotlin.collections.List<kotlin.Double>,
     @SerialName(value = "dec") val dec: kotlin.collections.List<kotlin.Double>,

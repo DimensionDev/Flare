@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @param durationMillis
  */
 @Serializable
-data class MediaVideoInfo(
+internal data class MediaVideoInfo(
     @SerialName(value = "aspect_ratio")
     val aspectRatio: kotlin.collections.List<kotlin.Int>,
     @SerialName(value = "variants")

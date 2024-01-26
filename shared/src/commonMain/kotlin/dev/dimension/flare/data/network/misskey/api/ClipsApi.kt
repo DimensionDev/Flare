@@ -9,7 +9,7 @@ import dev.dimension.flare.data.network.misskey.api.model.ClipsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.ClipsUpdateRequest
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 
-interface ClipsApi {
+internal interface ClipsApi {
     /**
      * clips/create
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:account*

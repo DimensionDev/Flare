@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param pageId * @param title * @param name * @param content * @param variables * @param script * @param summary * @param eyeCatchingImageId * @param font * @param alignCenter * @param hideTitleWhenPinned */
 @Serializable
-data class PagesUpdateRequest(
+internal data class PagesUpdateRequest(
     @SerialName(value = "pageId") val pageId: kotlin.String,
     @SerialName(value = "title") val title: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String,

@@ -45,7 +45,9 @@ internal fun StatusRetweetHeaderComponent(
                 element = user.nameElement,
                 layoutDirection = LocalLayoutDirection.current,
                 textStyle = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.alignByBaseline(),
+                modifier =
+                    Modifier.alignByBaseline()
+                        .weight(1f, fill = false),
                 maxLines = 1,
             )
         }
@@ -54,8 +56,7 @@ internal fun StatusRetweetHeaderComponent(
             text = text,
             style = MaterialTheme.typography.bodySmall,
             modifier =
-                Modifier.alignByBaseline()
-                    .weight(1f),
+                Modifier.alignByBaseline(),
         )
     }
 }

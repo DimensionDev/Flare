@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
  * *
  * @param channelId * @param name * @param description * @param bannerId * @param isArchived * @param pinnedNoteIds * @param color */
 @Serializable
-data class ChannelsUpdateRequest(
+internal data class ChannelsUpdateRequest(
     @SerialName(value = "channelId") val channelId: kotlin.String,
     @SerialName(value = "name") val name: kotlin.String? = null,
     @SerialName(value = "description") val description: kotlin.String? = null,

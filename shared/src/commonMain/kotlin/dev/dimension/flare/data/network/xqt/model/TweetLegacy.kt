@@ -45,7 +45,7 @@ import kotlinx.serialization.Serializable
  * @param selfThread
  */
 @Serializable
-data class TweetLegacy(
+internal data class TweetLegacy(
     @SerialName(value = "bookmark_count")
     val bookmarkCount: kotlin.Int? = null,
     @SerialName(value = "bookmarked")

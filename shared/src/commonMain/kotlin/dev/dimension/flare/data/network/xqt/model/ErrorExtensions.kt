@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
  * @param tracing
  */
 @Serializable
-data class ErrorExtensions(
+internal data class ErrorExtensions(
 //    @SerialName(value = "code")
 //    val code: kotlin.Int,
 //    @SerialName(value = "kind")

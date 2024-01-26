@@ -6,7 +6,7 @@ import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Flash
 import dev.dimension.flare.data.network.misskey.api.model.FlashDeleteRequest
 
-interface FlashsApi {
+internal interface FlashsApi {
     /**
      * flash/delete
      * No description provided.  **Credential required**: *Yes* / **Permission**: *write:flash*

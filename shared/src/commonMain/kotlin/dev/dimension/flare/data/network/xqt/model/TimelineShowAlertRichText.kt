@@ -26,7 +26,7 @@ import kotlinx.serialization.json.JsonElement
  * @param text
  */
 @Serializable
-data class TimelineShowAlertRichText(
+internal data class TimelineShowAlertRichText(
     @SerialName(value = "entities")
     val entities: JsonElement? = null,
     @SerialName(value = "text")

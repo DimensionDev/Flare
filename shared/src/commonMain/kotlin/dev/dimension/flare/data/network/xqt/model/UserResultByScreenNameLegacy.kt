@@ -30,7 +30,7 @@ import kotlinx.serialization.Serializable
  * @param screenName
  */
 @Serializable
-data class UserResultByScreenNameLegacy(
+internal data class UserResultByScreenNameLegacy(
     @SerialName(value = "blocked_by")
     val blockedBy: kotlin.Boolean? = null,
     @SerialName(value = "blocking")

@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @param text
  */
 @Serializable
-data class Text(
+internal data class Text(
     @SerialName(value = "entities")
     val entities: kotlin.collections.List<TextEntity>,
     @SerialName(value = "text")

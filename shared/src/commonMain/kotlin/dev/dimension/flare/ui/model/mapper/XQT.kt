@@ -27,7 +27,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 
-fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
+internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
     val retweet =
         legacy?.retweetedStatusResult?.result?.let {
             when (it) {
@@ -189,7 +189,7 @@ fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
 
 private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value
 
-fun User.toUi() =
+internal fun User.toUi() =
     UiUser.XQT(
         userKey =
             MicroBlogKey(

@@ -40,6 +40,9 @@ import dev.dimension.flare.data.network.xqt.model.PostDeleteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
+import dev.dimension.flare.data.network.xqt.model.Tweet
+import dev.dimension.flare.data.network.xqt.model.TweetTombstone
+import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.model.MicroBlogKey
@@ -537,7 +540,50 @@ class XQTDataSource(
                                         } else {
                                             it.data.legacy.favoriteCount.plus(1)
                                         },
-                                    // TODO: update if like retweeted
+                                    retweetedStatusResult =
+                                        it.data.legacy.retweetedStatusResult?.copy(
+                                            result =
+                                                when (it.data.legacy.retweetedStatusResult.result) {
+                                                    is Tweet ->
+                                                        it.data.legacy.retweetedStatusResult.result.copy(
+                                                            legacy =
+                                                                it.data.legacy.retweetedStatusResult.result.legacy?.copy(
+                                                                    favorited = !status.reaction.liked,
+                                                                    favoriteCount =
+                                                                        if (status.reaction.liked) {
+                                                                            it.data.legacy.retweetedStatusResult.result
+                                                                                .legacy.favoriteCount.minus(1)
+                                                                        } else {
+                                                                            it.data.legacy.retweetedStatusResult.result
+                                                                                .legacy.favoriteCount.plus(1)
+                                                                        },
+                                                                ),
+                                                        )
+
+                                                    is TweetTombstone -> it.data.legacy.retweetedStatusResult.result
+                                                    is TweetWithVisibilityResults ->
+                                                        it.data.legacy.retweetedStatusResult.result.copy(
+                                                            tweet =
+                                                                it.data.legacy.retweetedStatusResult.result.tweet.copy(
+                                                                    legacy =
+                                                                        it.data.legacy.retweetedStatusResult.result
+                                                                            .tweet.legacy?.copy(
+                                                                                favorited = !status.reaction.liked,
+                                                                                favoriteCount =
+                                                                                    if (status.reaction.liked) {
+                                                                                        it.data.legacy.retweetedStatusResult
+                                                                                            .result.tweet.legacy.favoriteCount.minus(1)
+                                                                                    } else {
+                                                                                        it.data.legacy.retweetedStatusResult
+                                                                                            .result.tweet.legacy.favoriteCount.plus(1)
+                                                                                    },
+                                                                            ),
+                                                                ),
+                                                        )
+
+                                                    null -> null
+                                                },
+                                        ),
                                 ),
                         ),
                 )
@@ -616,7 +662,49 @@ class XQTDataSource(
                                         } else {
                                             it.data.legacy.retweetCount.plus(1)
                                         },
-                                    // TODO: update if retweet inner retweeted
+                                    retweetedStatusResult =
+                                        it.data.legacy.retweetedStatusResult?.copy(
+                                            result =
+                                                when (it.data.legacy.retweetedStatusResult.result) {
+                                                    is Tweet ->
+                                                        it.data.legacy.retweetedStatusResult.result.copy(
+                                                            legacy =
+                                                                it.data.legacy.retweetedStatusResult.result.legacy?.copy(
+                                                                    retweeted = !status.reaction.retweeted,
+                                                                    retweetCount =
+                                                                        if (status.reaction.retweeted) {
+                                                                            it.data.legacy.retweetedStatusResult
+                                                                                .result.legacy.retweetCount.minus(1)
+                                                                        } else {
+                                                                            it.data.legacy.retweetedStatusResult
+                                                                                .result.legacy.retweetCount.plus(1)
+                                                                        },
+                                                                ),
+                                                        )
+
+                                                    is TweetTombstone -> it.data.legacy.retweetedStatusResult.result
+                                                    is TweetWithVisibilityResults ->
+                                                        it.data.legacy.retweetedStatusResult.result.copy(
+                                                            tweet =
+                                                                it.data.legacy.retweetedStatusResult.result.tweet.copy(
+                                                                    legacy =
+                                                                        it.data.legacy.retweetedStatusResult.result.tweet.legacy?.copy(
+                                                                            retweeted = !status.reaction.retweeted,
+                                                                            retweetCount =
+                                                                                if (status.reaction.retweeted) {
+                                                                                    it.data.legacy.retweetedStatusResult
+                                                                                        .result.tweet.legacy.retweetCount.minus(1)
+                                                                                } else {
+                                                                                    it.data.legacy.retweetedStatusResult
+                                                                                        .result.tweet.legacy.retweetCount.plus(1)
+                                                                                },
+                                                                        ),
+                                                                ),
+                                                        )
+
+                                                    null -> null
+                                                },
+                                        ),
                                 ),
                         ),
                 )

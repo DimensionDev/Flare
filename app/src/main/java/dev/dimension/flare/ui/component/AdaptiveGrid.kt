@@ -36,33 +36,71 @@ fun AdaptiveGrid(
                 }
             } else {
                 val space = spacing.toPx().toInt()
-                val columns = ceil(sqrt(measurables.size.toDouble())).toInt().coerceAtLeast(1)
-                val rows = ceil(measurables.size.toDouble() / columns)
-                val itemSize = (constraints.maxWidth - space * (columns - 1)) / columns
+                val rowCount =
+                    ceil(sqrt(measurables.size.toDouble())).toInt().coerceIn(minimumValue = 1, maximumValue = 3)
+                val firstColumnCount = measurables.size.mod(rowCount)
+
+                val columnCount =
+                    ceil((measurables.size - firstColumnCount).toDouble() / rowCount).toInt().coerceAtLeast(1)
+                        .let {
+                            if (firstColumnCount > 0) {
+                                it + 1
+                            } else {
+                                it
+                            }
+                        }
+
+                val itemSize = (constraints.maxWidth - space * (rowCount - 1)) / rowCount
                 val itemConstraints =
                     constraints.copy(
                         maxWidth = itemSize,
                         maxHeight = itemSize,
                     )
+                val firstColumnConstraints =
+                    constraints.copy(
+                        maxWidth =
+                            if (firstColumnCount > 0) {
+                                (constraints.maxWidth - space * (firstColumnCount - 1)) / firstColumnCount
+                            } else {
+                                itemSize
+                            },
+                        maxHeight = itemSize,
+                    )
                 val placeables =
-                    measurables.map {
-                        it.measure(itemConstraints)
+                    measurables.mapIndexed { index, it ->
+                        if (index < firstColumnCount) {
+                            it.measure(firstColumnConstraints)
+                        } else {
+                            it.measure(itemConstraints)
+                        }
                     }
                 layout(
                     width = constraints.maxWidth,
-                    height = (rows * itemSize + (rows - 1) * space).toInt(),
+                    height = (columnCount * itemSize + (columnCount - 1) * space),
                 ) {
                     var row = 0
                     var column = 0
-                    placeables.forEach { placeable ->
-                        placeable.placeRelative(
-                            x = column * itemSize + column * space,
-                            y = row * itemSize + row * space,
-                        )
-                        column++
-                        if (column == columns) {
-                            column = 0
+                    placeables.forEachIndexed { index, placeable ->
+                        if (index < firstColumnCount) {
+                            placeable.placeRelative(
+                                x = row * firstColumnConstraints.maxWidth + row * space,
+                                y = column * itemSize + column * space,
+                            )
                             row++
+                            if (row == firstColumnCount) {
+                                row = 0
+                                column++
+                            }
+                        } else {
+                            placeable.placeRelative(
+                                x = row * itemSize + row * space,
+                                y = column * itemSize + column * space,
+                            )
+                            row++
+                            if (row == rowCount) {
+                                row = 0
+                                column++
+                            }
                         }
                     }
                 }

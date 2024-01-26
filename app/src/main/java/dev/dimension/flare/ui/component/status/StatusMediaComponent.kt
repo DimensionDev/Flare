@@ -77,6 +77,7 @@ internal fun StatusMediaComponent(
                                 .clickable {
                                     onMediaClick(media)
                                 },
+                        keepAspectRatio = data.size == 1,
                     )
                 }
             },
@@ -161,6 +162,7 @@ internal fun StatusMediaComponent(
 fun MediaItem(
     media: UiMedia,
     modifier: Modifier = Modifier,
+    keepAspectRatio: Boolean = true,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
     Box(
@@ -174,8 +176,15 @@ fun MediaItem(
                     model = media.url,
                     contentDescription = media.description,
                     modifier =
-                        Modifier.fillMaxSize()
-                            .aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f),
+                        Modifier
+                            .fillMaxSize()
+                            .let {
+                                if (keepAspectRatio) {
+                                    it.aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f)
+                                } else {
+                                    it
+                                }
+                            },
                 )
             }
 
@@ -192,16 +201,36 @@ fun MediaItem(
                         previewUri = media.thumbnailUrl,
                         contentDescription = media.description,
                         modifier =
-                            Modifier.fillMaxSize()
-                                .aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f),
+                            Modifier
+                                .fillMaxSize()
+                                .let {
+                                    if (keepAspectRatio) {
+                                        it.aspectRatio(
+                                            media.aspectRatio,
+                                            matchHeightConstraintsFirst = media.aspectRatio > 1f,
+                                        )
+                                    } else {
+                                        it
+                                    }
+                                },
                     )
                 } else {
                     NetworkImage(
                         model = media.thumbnailUrl,
                         contentDescription = media.description,
                         modifier =
-                            Modifier.fillMaxSize()
-                                .aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f),
+                            Modifier
+                                .fillMaxSize()
+                                .let {
+                                    if (keepAspectRatio) {
+                                        it.aspectRatio(
+                                            media.aspectRatio,
+                                            matchHeightConstraintsFirst = media.aspectRatio > 1f,
+                                        )
+                                    } else {
+                                        it
+                                    }
+                                },
                     )
                 }
             }
@@ -213,14 +242,22 @@ fun MediaItem(
                     contentDescription = media.description,
                 )
             }
+
             is UiMedia.Gif ->
                 VideoPlayer(
                     uri = media.url,
                     previewUri = media.previewUrl,
                     contentDescription = media.description,
                     modifier =
-                        Modifier.fillMaxSize()
-                            .aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f),
+                        Modifier
+                            .fillMaxSize()
+                            .let {
+                                if (keepAspectRatio) {
+                                    it.aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f)
+                                } else {
+                                    it
+                                }
+                            },
                 )
         }
     }

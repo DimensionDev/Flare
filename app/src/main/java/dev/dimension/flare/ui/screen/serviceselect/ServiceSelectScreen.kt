@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.NavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -62,7 +63,6 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading

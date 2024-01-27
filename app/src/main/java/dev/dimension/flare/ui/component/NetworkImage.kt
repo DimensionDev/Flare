@@ -20,7 +20,7 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Size
-import dev.dimension.flare.ui.component.placeholder.placeholder
+import com.eygraber.compose.placeholder.material3.placeholder
 
 @Composable
 fun NetworkImage(

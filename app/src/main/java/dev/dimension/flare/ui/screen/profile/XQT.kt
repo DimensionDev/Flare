@@ -22,11 +22,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.eygraber.compose.placeholder.material3.placeholder
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.MatricesDisplay
 import dev.dimension.flare.ui.component.UserFields
-import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser

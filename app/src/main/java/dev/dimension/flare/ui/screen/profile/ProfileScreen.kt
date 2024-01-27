@@ -72,6 +72,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
@@ -89,7 +90,6 @@ import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusEvent

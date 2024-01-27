@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
@@ -35,7 +36,6 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onLoading

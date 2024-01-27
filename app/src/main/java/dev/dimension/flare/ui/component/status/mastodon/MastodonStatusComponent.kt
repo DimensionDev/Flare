@@ -38,11 +38,11 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.eygraber.compose.placeholder.material3.placeholder
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.placeholder.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusActionGroup

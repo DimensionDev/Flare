@@ -17,37 +17,33 @@ struct HomeScreen: View {
                         destination: TabItem { _ in
                             HomeTimelineScreen()
 #if !os(macOS)
-                                .if(horizontalSizeClass != .compact, transform: { view in
+                                .if(horizontalSizeClass == .compact, transform: { view in
                                     view
-                                        .toolbar(.hidden)
-                                })
-                                    .if(horizontalSizeClass == .compact, transform: { view in
-                                        view
-                                            .navigationBarTitleDisplayMode(.inline)
-                                            .toolbar {
-                                                ToolbarItem(placement: .principal) {
-                                                    Text("Flare")
-                                                }
-                                                ToolbarItem(placement: .primaryAction) {
-                                                    Button(action: {
-                                                        showCompose = true
-                                                    }, label: {
-                                                        Image(systemName: "square.and.pencil")
-                                                    })
-                                                }
-                                                ToolbarItem(placement: .navigation) {
-                                                    Button {
-                                                        showSettings = true
-                                                    } label: {
-                                                        if case .success(let data) = onEnum(of: viewModel.model.user) {
-                                                            UserAvatar(data: data.data.avatarUrl, size: 36)
-                                                        } else {
-                                                            userAvatarPlaceholder(size: 36)
-                                                        }
+                                        .navigationBarTitleDisplayMode(.inline)
+                                        .toolbar {
+                                            ToolbarItem(placement: .principal) {
+                                                Text("Flare")
+                                            }
+                                            ToolbarItem(placement: .primaryAction) {
+                                                Button(action: {
+                                                    showCompose = true
+                                                }, label: {
+                                                    Image(systemName: "square.and.pencil")
+                                                })
+                                            }
+                                            ToolbarItem(placement: .navigation) {
+                                                Button {
+                                                    showSettings = true
+                                                } label: {
+                                                    if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                                        UserAvatar(data: data.data.avatarUrl, size: 36)
+                                                    } else {
+                                                        userAvatarPlaceholder(size: 36)
                                                     }
                                                 }
                                             }
-                                    })
+                                        }
+                                })
                                     #endif
                         }
                     ),
@@ -324,7 +320,7 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
 class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, XQTStatusEvent {
     static let shared = EmptyStatusEvent()
     private init() {
-
+        
     }
     func onReplyClick(status: UiStatus.Mastodon) {
     }
@@ -364,16 +360,16 @@ class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEv
     }
     func onReplyClick(status: UiStatus.XQT) {
     }
-
+    
     func onReblogClick(status: UiStatus.XQT) {
     }
-
+    
     func onLikeClick(status: UiStatus.XQT) {
     }
-
+    
     func onBookmarkClick(status: UiStatus.XQT) {
     }
-
+    
     func onReportClick(status: UiStatus.XQT) {
     }
     func onQuoteClick(status: UiStatus.XQT) {

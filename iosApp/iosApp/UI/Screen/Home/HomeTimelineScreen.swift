@@ -19,6 +19,9 @@ struct HomeTimelineScreen: View {
             try? await viewModel.model.refresh()
         }
         .navigationTitle("Home")
+        #if !os(macOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
         .activateViewModel(viewModel: viewModel)
     }
 }

@@ -118,6 +118,7 @@ internal fun StatusMediaComponent(
                     modifier =
                         Modifier
                             .matchParentSize(),
+                    label = "StatusMediaComponent",
                 ) {
                     Box {
                         if (it) {
@@ -198,6 +199,7 @@ fun MediaItem(
                 if (shouldPlay) {
                     VideoPlayer(
                         uri = media.url,
+                        muted = true,
                         previewUri = media.thumbnailUrl,
                         contentDescription = media.description,
                         modifier =
@@ -246,6 +248,7 @@ fun MediaItem(
             is UiMedia.Gif ->
                 VideoPlayer(
                     uri = media.url,
+                    muted = true,
                     previewUri = media.previewUrl,
                     contentDescription = media.description,
                     modifier =

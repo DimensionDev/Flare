@@ -421,7 +421,7 @@ sealed class UiStatus {
         }
 
         val canRetweet by lazy {
-            !user.protected
+            !(retweet?.user ?: user).protected
         }
 
         data class Matrices(

@@ -235,7 +235,7 @@ internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelat
     }
 }
 
-private fun String.replaceWithOriginImageUrl() = this.replace("_normal.jpg", ".jpg")
+private fun String.replaceWithOriginImageUrl() = this.replace("_normal.", ".")
 
 private fun parseCustomDateTime(dateTimeStr: String): Instant? {
     val months =

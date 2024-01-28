@@ -33,7 +33,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -48,12 +47,6 @@ import dev.dimension.flare.ui.presenter.login.mastodonLoginUseCase
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-
-@Composable
-@Preview(showBackground = true)
-fun LoginScreenPreview() {
-    MastodonLoginScreen()
-}
 
 @Destination(
     wrappers = [ThemeWrapper::class],

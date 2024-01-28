@@ -86,7 +86,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
@@ -134,12 +133,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun ComposeScreenPreview() {
-    ComposeScreen(onBack = {})
-}
 
 @Destination(
     style = DestinationStyle.Dialog::class,

@@ -124,7 +124,7 @@ class XQTDataSource(
         get() = listOf(NotificationFilter.Mention)
 
     override fun userByAcct(acct: String): CacheData<UiUser> {
-        val (name, host) = MicroBlogKey.valueOf(acct)
+        val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
         return Cacheable(
             fetchSource = {
                 val user =

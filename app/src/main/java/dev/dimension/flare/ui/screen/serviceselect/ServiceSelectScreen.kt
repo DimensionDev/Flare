@@ -70,6 +70,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
+import dev.dimension.flare.ui.screen.destinations.EntryXQTLoginRouteDestination
 import dev.dimension.flare.ui.screen.destinations.XQTLoginRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -117,7 +118,7 @@ fun EntryServiceSelectRoute(navigator: DestinationsNavigator) {
     ServiceSelectScreen(
         onBack = null,
         onXQT = {
-            navigator.navigate(XQTLoginRouteDestination)
+            navigator.navigate(EntryXQTLoginRouteDestination)
         },
     )
 }

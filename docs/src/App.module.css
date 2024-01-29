@@ -64,12 +64,12 @@
 }
 
 .headerTitle > p:first-child {
-    width: 100%;
     font-size: 2rem;
+    width: 100%;
 }
 
 .header p {
-    max-width: 400px;
+    width: 32em;
     margin: auto;
 }
 

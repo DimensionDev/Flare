@@ -25,7 +25,7 @@ const App: Component = () => {
       <div class={styles.header}>
         <div class={styles.headerInfo}>
           <div class={styles.headerTitle}>
-            <p>The ultimate next-gen* open-sourced AI powered** decentralized social network client for Android, iOS, macOS.</p>
+            <p>The ultimate next-gen* <br/> Open-sourced <br/> AI powered** <br/> Decentralized <br/> Social network client <br/> For Android, iOS, macOS.</p>
             <p class={styles.caption}>* Just a joke</p>
             <p class={styles.caption}>** Not yet implemented.</p>
           </div>

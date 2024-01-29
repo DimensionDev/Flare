@@ -1,0 +1,266 @@
+.App {
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 60%;
+    margin: auto;
+    padding: 1em 0;
+}
+
+.nav > div:first-child {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+}
+
+.nav p {
+    font-size: 1.5rem;
+    margin: auto;
+}
+
+.nav img {
+    height: 3em;
+    border-radius: 8%
+}
+
+.badge img {
+    height: 4em;
+    padding: 4px;
+}
+
+.caption {
+    font-size: 0.8rem;
+    color: #666;
+}
+.header {
+    display: flex;
+    height: 60vh;
+    justify-content: center;
+    gap: 2em;
+}
+
+.headerInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2em;
+}
+
+.headerTitle {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    justify-self: flex-start;
+}
+
+.headerTitle > p {
+    width: 100%;
+}
+
+.headerTitle > p:first-child {
+    width: 100%;
+    font-size: 2rem;
+}
+
+.header p {
+    max-width: 400px;
+    margin: auto;
+}
+
+.header h1 {
+    margin: auto;
+}
+
+.headerScreenshot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+}
+
+.headerScreenshot img {
+    max-height: 80%;
+}
+
+.supportedContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+}
+
+.supportedImgContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 4em;
+    padding-top: 2em;
+}
+
+.supportedImgContainer img {
+    height: 10em;
+}
+
+.supportedImgContainer > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+}
+
+.supportedImgContainer > div > p {
+    font-size: 1.25rem;
+}
+
+.tabletContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    padding-top: 4em;
+}
+
+.tabletImgContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 4em;
+    padding-top: 2em;
+}
+
+.tabletImgContainer img {
+    width: 45vw;
+}
+
+.desktopContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    padding-top: 4em;
+}
+
+.desktopContainer img {
+    width: 50vw;
+}
+
+.fossContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    padding-top: 4em;
+    padding-bottom: 4em;
+}
+
+.divider {
+    width: 100%;
+    height: 1px;
+    background-color: #CAC4D0;
+    margin: 1em 0;
+}
+
+.footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    padding-top: 4em;
+    padding-bottom: 4em;
+    background-color: #F3EDF7;
+}
+
+h1 {
+    font-size: 2rem;
+    margin: auto;
+}
+
+p {
+    margin: auto;
+}
+
+@media (max-width: 768px) {
+    .nav {
+        max-width: 100%;
+        padding: 1em 1.5em;
+    }
+    .AppLogo {
+        height: 20vw;
+    }
+    .header {
+        flex-direction: column;
+        height: unset;
+    }
+    .headerTitle {
+        flex-direction: column;
+        padding: 0 1em;
+    }
+    .badgeContainer {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .badge img {
+        height: unset;
+        width: 50vw;
+    }
+    .headerScreenshot {
+        flex-direction: row;
+    }
+
+    .headerScreenshot img {
+        max-height: unset;
+        max-width: 40vw;
+    }
+
+    .supportedContainer {
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+    .supportedImgContainer {
+        flex-wrap: wrap;
+    }
+
+    .tabletContainer {
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+    .tabletImgContainer {
+        flex-wrap: wrap;
+    }
+
+    .tabletImgContainer img {
+        width: 90vw;
+    }
+
+    .desktopContainer {
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+    .desktopContainer img {
+        width: 90vw;
+    }
+
+    .fossContainer {
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+}

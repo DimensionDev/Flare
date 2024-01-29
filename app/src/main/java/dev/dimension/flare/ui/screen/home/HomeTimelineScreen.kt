@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
@@ -55,6 +54,7 @@ import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelineState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
+import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
@@ -68,18 +68,16 @@ import org.koin.compose.koinInject
 @Composable
 internal fun HomeRoute(
     navigator: DestinationsNavigator,
-    drawerState: DrawerState,
+    screen: Screen,
 ) {
-    val scope = rememberCoroutineScope()
     HomeTimelineScreen(
         toCompose = {
             navigator.navigate(ComposeRouteDestination)
         },
         toQuickMenu = {
-            scope.launch {
-                drawerState.open()
-            }
+            navigator.navigate(QuickMenuDialogRouteDestination)
         },
+        screen = screen,
     )
 }
 
@@ -88,11 +86,20 @@ internal fun HomeRoute(
 internal fun HomeTimelineScreen(
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
+    screen: Screen,
 ) {
     val state by producePresenter {
         homeTimelinePresenter()
     }
+    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
+    LaunchedEffect(screen) {
+        screen.scrollToTop = {
+            scope.launch {
+                lazyListState.animateScrollToItem(0)
+            }
+        }
+    }
     val isAtTheTop by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0
@@ -104,7 +111,6 @@ internal fun HomeTimelineScreen(
         }
     }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(

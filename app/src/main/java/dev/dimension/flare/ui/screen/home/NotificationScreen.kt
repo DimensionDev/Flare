@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -15,8 +16,10 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -35,21 +38,31 @@ import dev.dimension.flare.ui.presenter.home.NotificationState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun NotificationRoute() {
-    NotificationScreen()
+internal fun NotificationRoute(screen: Screen) {
+    NotificationScreen(screen = screen)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-internal fun NotificationScreen(modifier: Modifier = Modifier) {
+private fun NotificationScreen(screen: Screen) {
     val state by producePresenter {
         notificationPresenter()
+    }
+    val scope = rememberCoroutineScope()
+    val lazyListState = rememberLazyStaggeredGridState()
+    LaunchedEffect(screen) {
+        screen.scrollToTop = {
+            scope.launch {
+                lazyListState.animateScrollToItem(0)
+            }
+        }
     }
     val windowInfo = currentWindowAdaptiveInfo()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -75,10 +88,10 @@ internal fun NotificationScreen(modifier: Modifier = Modifier) {
     ) { contentPadding ->
         RefreshContainer(
             indicatorPadding = contentPadding,
-            modifier = modifier,
             onRefresh = state.state::refresh,
             content = {
                 LazyStatusVerticalStaggeredGrid(
+                    state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
                     if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
@@ -90,7 +103,10 @@ internal fun NotificationScreen(modifier: Modifier = Modifier) {
                                     NotificationFilterSelector(
                                         it,
                                         state.state,
-                                        modifier = Modifier.fillMaxSize().padding(horizontal = screenHorizontalPadding),
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .padding(horizontal = screenHorizontalPadding),
                                     )
                                 }
                             }

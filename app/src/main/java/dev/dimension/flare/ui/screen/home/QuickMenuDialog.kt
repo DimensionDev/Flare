@@ -24,9 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
@@ -34,26 +38,28 @@ import dev.dimension.flare.ui.presenter.home.QuickMenuPresenter
 import dev.dimension.flare.ui.presenter.home.QuickMenuState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
+import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
+import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.settings.AccountItem
 
-// @Destination(
-//    style = DestinationStyle.Dialog::class,
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// fun QuickMenuDialogRoute(navigator: DestinationsNavigator) {
-//    QuickMenuDialog(
-//        toSettings = {
-//            navigator.navigate(SettingsRouteDestination)
-//        },
-//        addAccount = {
-//            navigator.navigate(ServiceSelectRouteDestination)
-//        },
-//        dismiss = {
-//            navigator.navigateUp()
-//        },
-//    )
-// }
+@Destination(
+    style = DestinationStyle.Dialog::class,
+    wrappers = [ThemeWrapper::class],
+)
+@Composable
+fun QuickMenuDialogRoute(navigator: DestinationsNavigator) {
+    QuickMenuDialog(
+        toSettings = {
+            navigator.navigate(SettingsRouteDestination)
+        },
+        addAccount = {
+            navigator.navigate(ServiceSelectRouteDestination)
+        },
+        dismiss = {
+            navigator.navigateUp()
+        },
+    )
+}
 
 @Composable
 private fun QuickMenuDialog(

@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -21,12 +20,10 @@ import androidx.compose.material3.adaptive.navigation.suite.ExperimentalMaterial
 import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteType
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
@@ -48,7 +45,6 @@ import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 import com.ramcosta.composedestinations.spec.NavGraphSpec
 import com.ramcosta.composedestinations.utils.composable
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.component.OptionalModalNavigationDrawer
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
@@ -56,13 +52,13 @@ import dev.dimension.flare.ui.screen.destinations.MeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.NotificationRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
-import kotlinx.coroutines.launch
 
 sealed class Screen(
     val navGraph: NavGraphSpec,
     val direction: DirectionDestinationSpec,
     @StringRes val title: Int,
     val icon: ImageVector,
+    var scrollToTop: () -> Unit = {},
 ) {
     data object HomeTimeline :
         Screen(
@@ -136,44 +132,24 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                 currentWindowAdaptiveInfo(),
             )
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val scope = rememberCoroutineScope()
-        OptionalModalNavigationDrawer(
-            drawerContent = {
-                HomeDrawerContent(
-                    currentRoute = currentRoute,
-                    navigateTo = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                        navController.navigate(it) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                )
-            },
-            drawerState = drawerState,
-            enable = layoutType == NavigationSuiteType.NavigationBar,
-        ) {
-            NavigationSuiteScaffold(
-                modifier = modifier,
-                layoutType = layoutType,
-                navigationSuiteItems = {
-                    val items =
-                        if (layoutType == NavigationSuiteType.NavigationBar) {
-                            menuItems
-                        } else {
-                            allScreens
-                        }
-                    items.forEach { destination ->
-                        val selected = currentRoute == destination.direction.route
-                        item(
-                            selected = selected,
-                            onClick = {
+        NavigationSuiteScaffold(
+            modifier = modifier,
+            layoutType = layoutType,
+            navigationSuiteItems = {
+                val items =
+                    if (layoutType == NavigationSuiteType.NavigationBar) {
+                        menuItems
+                    } else {
+                        allScreens
+                    }
+                items.forEach { destination ->
+                    val selected = currentRoute == destination.direction.route
+                    item(
+                        selected = selected,
+                        onClick = {
+                            if (selected) {
+                                destination.scrollToTop()
+                            } else {
                                 navController.navigate(destination.direction) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
@@ -181,36 +157,36 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                                     launchSingleTop = true
                                     restoreState = true
                                 }
-                            },
-                            icon = {
-                                Icon(
-                                    destination.icon,
-                                    contentDescription = stringResource(destination.title),
-                                )
-                            },
-                            label = { Text(stringResource(destination.title)) },
-                        )
-                    }
-                },
-            ) {
-                NavHost(
-                    navController = navController,
-                    startDestination = Screen.HomeTimeline.direction.route,
-                    // NavigationSuiteScaffold should have consumed the insets, but it doesn't
-                    modifier =
-                        Modifier.let {
-                            if (layoutType == NavigationSuiteType.NavigationBar) {
-                                it.consumeWindowInsets(WindowInsets.navigationBars)
-                            } else {
-                                it
                             }
                         },
-                ) {
-                    allScreens.forEach {
-                        composable(it.direction) {
-                            Router(it.navGraph, it.direction) {
-                                dependency(drawerState)
-                            }
+                        icon = {
+                            Icon(
+                                destination.icon,
+                                contentDescription = stringResource(destination.title),
+                            )
+                        },
+                        label = { Text(stringResource(destination.title)) },
+                    )
+                }
+            },
+        ) {
+            NavHost(
+                navController = navController,
+                startDestination = Screen.HomeTimeline.direction.route,
+                // NavigationSuiteScaffold should have consumed the insets, but it doesn't
+                modifier =
+                    Modifier.let {
+                        if (layoutType == NavigationSuiteType.NavigationBar) {
+                            it.consumeWindowInsets(WindowInsets.navigationBars)
+                        } else {
+                            it
+                        }
+                    },
+            ) {
+                allScreens.forEach { screen ->
+                    composable(screen.direction) {
+                        Router(screen.navGraph, screen.direction) {
+                            dependency(screen)
                         }
                     }
                 }

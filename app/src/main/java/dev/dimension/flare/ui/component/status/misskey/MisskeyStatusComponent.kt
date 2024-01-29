@@ -112,7 +112,7 @@ internal fun MisskeyStatusComponent(
         poll = actualData.poll,
         headerIcon = currentData.renote?.let { Icons.Default.SyncAlt },
         headerTextId = currentData.renote?.let { R.string.mastodon_item_reblogged_status },
-        headerUser = currentData.renote?.user,
+        headerUser = currentData.renote?.let { currentData.user },
         statusActions = {
             StatusFooterComponent(
                 data = actualData,

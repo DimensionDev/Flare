@@ -151,7 +151,7 @@ internal fun MastodonStatusComponent(
         poll = actualData.poll,
         headerIcon = data.reblogStatus?.let { Icons.Default.SyncAlt },
         headerTextId = data.reblogStatus?.let { R.string.mastodon_item_reblogged_status },
-        headerUser = data.reblogStatus?.user,
+        headerUser = data.reblogStatus?.let { data.user },
         statusActions = {
             StatusFooterComponent(
                 data = data,

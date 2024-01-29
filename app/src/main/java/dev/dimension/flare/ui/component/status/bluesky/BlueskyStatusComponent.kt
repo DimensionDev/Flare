@@ -43,10 +43,11 @@ internal fun BlueskyStatusComponent(
     val appearanceSettings = LocalAppearanceSettings.current
     CommonStatusComponent(
         modifier =
-            modifier
+            Modifier
                 .clickable {
                     event.onStatusClick(data, uriHandler)
-                },
+                }
+                .then(modifier),
         onMediaClick = {
             event.onMediaClick(it, uriHandler)
         },
@@ -61,6 +62,9 @@ internal fun BlueskyStatusComponent(
         card = data.card,
         humanizedTime = data.humanizedTime,
         quotedStatus = data.quote,
+        onQuotedStatusClick = {
+            event.onStatusClick(it as UiStatus.Bluesky, uriHandler)
+        },
         headerIcon = data.repostBy?.let { Icons.Default.SyncAlt },
         headerTextId = data.repostBy?.let { R.string.mastodon_item_reblogged_status },
         headerUser = data.repostBy,

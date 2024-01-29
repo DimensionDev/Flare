@@ -62,10 +62,11 @@ internal fun MisskeyStatusComponent(
     val actualData = currentData.renote ?: currentData
     CommonStatusComponent(
         modifier =
-            modifier
+            Modifier
                 .clickable {
                     event.onStatusClick(data, uriHandler)
-                },
+                }
+                .then(modifier),
         onMediaClick = {
             event.onMediaClick(it, uriHandler)
         },
@@ -105,6 +106,9 @@ internal fun MisskeyStatusComponent(
         humanizedTime = actualData.humanizedTime,
         sensitive = actualData.sensitive,
         quotedStatus = actualData.quote,
+        onQuotedStatusClick = {
+            event.onStatusClick(it as UiStatus.Misskey, uriHandler)
+        },
         poll = actualData.poll,
         headerIcon = currentData.renote?.let { Icons.Default.SyncAlt },
         headerTextId = currentData.renote?.let { R.string.mastodon_item_reblogged_status },

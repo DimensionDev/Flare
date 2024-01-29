@@ -116,10 +116,11 @@ internal fun MastodonStatusComponent(
     val appearanceSettings = LocalAppearanceSettings.current
     CommonStatusComponent(
         modifier =
-            modifier
+            Modifier
                 .clickable {
                     event.onStatusClick(data, uriHandler)
-                },
+                }
+                .then(modifier),
         onMediaClick = {
             event.onMediaClick(it, uriHandler)
         },

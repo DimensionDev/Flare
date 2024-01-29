@@ -59,8 +59,8 @@ internal fun StatusMediaComponent(
         mutableStateOf(sensitive && !appearanceSettings.showSensitiveContent)
     }
     val showSensitiveButton =
-        remember(data) {
-            data.all { it is UiMedia.Image }
+        remember(data, sensitive) {
+            data.all { it is UiMedia.Image } && sensitive
         }
     Box(
         modifier =

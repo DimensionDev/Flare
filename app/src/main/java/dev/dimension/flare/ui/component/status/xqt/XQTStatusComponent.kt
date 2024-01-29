@@ -44,10 +44,11 @@ internal fun XQTStatusComponent(
     val appearanceSettings = LocalAppearanceSettings.current
     CommonStatusComponent(
         modifier =
-            modifier
+            Modifier
                 .clickable {
                     event.onStatusClick(data, uriHandler)
-                },
+                }
+                .then(modifier),
         onMediaClick = {
             event.onMediaClick(it, uriHandler)
         },
@@ -66,6 +67,9 @@ internal fun XQTStatusComponent(
         headerTextId = data.retweet?.let { R.string.mastodon_item_reblogged_status },
         headerUser = data.retweet?.let { data.user },
         quotedStatus = actualData.quote,
+        onQuotedStatusClick = {
+            event.onStatusClick(it as UiStatus.XQT, uriHandler)
+        },
         statusActions = {
             StatusFooterComponent(
                 data = data,

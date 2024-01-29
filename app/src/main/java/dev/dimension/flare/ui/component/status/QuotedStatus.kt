@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,12 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.LocalAppearanceSettings
-import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.model.UiMedia
@@ -32,6 +29,7 @@ internal fun UiStatusQuoted(
     status: UiStatus,
     onMediaClick: (UiMedia) -> Unit,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     when (status) {
         is UiStatus.Mastodon -> {
@@ -45,6 +43,8 @@ internal fun UiStatusQuoted(
                 createdAt = status.humanizedTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
+                onClick = onClick,
+                sensitive = status.sensitive,
             )
         }
         is UiStatus.MastodonNotification -> Unit
@@ -59,6 +59,8 @@ internal fun UiStatusQuoted(
                 createdAt = status.humanizedTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
+                onClick = onClick,
+                sensitive = status.sensitive,
             )
 
         is UiStatus.MisskeyNotification -> Unit
@@ -73,6 +75,8 @@ internal fun UiStatusQuoted(
                 createdAt = status.humanizedTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
+                onClick = onClick,
+                sensitive = false,
             )
         is UiStatus.BlueskyNotification -> Unit
         is UiStatus.XQT ->
@@ -86,24 +90,29 @@ internal fun UiStatusQuoted(
                 createdAt = status.humanizedTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
+                onClick = onClick,
+                sensitive = status.sensitive,
             )
     }
 }
 
 @Composable
-internal fun QuotedStatus(
+private fun QuotedStatus(
     avatarUrl: String,
     nameElement: Element,
     handle: String,
     contentElement: Element,
     contentLayoutDirection: LayoutDirection,
     medias: ImmutableList<UiMedia>?,
+    sensitive: Boolean,
     createdAt: String,
     onMediaClick: (UiMedia) -> Unit,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     Card(
         modifier = modifier,
+        onClick = onClick,
     ) {
         Column {
             Column(
@@ -153,23 +162,11 @@ internal fun QuotedStatus(
                 }
                 HtmlText2(element = contentElement, layoutDirection = contentLayoutDirection)
             }
-            if (medias != null && LocalAppearanceSettings.current.showMedia) {
-                AdaptiveGrid(
-                    modifier =
-                        Modifier
-                            .clip(MaterialTheme.shapes.medium),
-                    content = {
-                        medias.forEach { media ->
-                            MediaItem(
-                                media = media,
-                                modifier =
-                                    Modifier
-                                        .clickable {
-                                            onMediaClick(media)
-                                        },
-                            )
-                        }
-                    },
+            if (!medias.isNullOrEmpty() && LocalAppearanceSettings.current.showMedia) {
+                StatusMediaComponent(
+                    data = medias,
+                    onMediaClick = onMediaClick,
+                    sensitive = sensitive,
                 )
             }
         }

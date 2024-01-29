@@ -76,6 +76,7 @@ fun CommonStatusComponent(
     contentWarning: String? = null,
     card: UiCard? = null,
     quotedStatus: UiStatus? = null,
+    onQuotedStatusClick: ((UiStatus) -> Unit)? = null,
     poll: UiPoll? = null,
     headerIcon: ImageVector? = null,
     headerUser: UiUser? = null,
@@ -227,7 +228,13 @@ fun CommonStatusComponent(
 
             if (quotedStatus != null) {
                 Spacer(modifier = Modifier.height(4.dp))
-                UiStatusQuoted(quotedStatus, onMediaClick)
+                UiStatusQuoted(
+                    quotedStatus,
+                    onMediaClick,
+                    onClick = {
+                        onQuotedStatusClick?.invoke(quotedStatus)
+                    },
+                )
             }
 
             contentFooter.invoke(this)

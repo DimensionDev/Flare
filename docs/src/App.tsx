@@ -33,7 +33,7 @@ const App: Component = () => {
             <a class={styles.badge}>
               <img src='https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png' />
             </a>
-            <a class={styles.badge} href='https://play.google.com/apps/internaltest/4701434651877971225'>
+            <a class={styles.badge} href='https://play.google.com/store/apps/details?id=dev.dimension.flare'>
               <img src={en_badge_web_generic} />
             </a>
 

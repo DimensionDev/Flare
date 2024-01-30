@@ -17,5 +17,8 @@
   },
   "dependencies": {
     "solid-js": "^1.8.11"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.9.6"
   }
 }

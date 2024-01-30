@@ -15,6 +15,10 @@ The ultimate next generation* open-sourced AI powered** decentralized social net
 *: _Just a joke_  
 **: _Not yet implemented_
 
+
+<a href='https://testflight.apple.com/join/iYP7QZME'><img alt='Get it on Google Play' src='https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png' height=50/></a>
+<a href='https://play.google.com/store/apps/details?id=dev.dimension.flare&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='docs\src\assets\en_badge_web_generic.png' height=50/></a>
+
 ## Features
  - Support for Mastodon, Misskey, Bluesky, xQt, and more in the future
  - Consistent experience across platforms, and is a native app

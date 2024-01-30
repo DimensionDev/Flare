@@ -1,5 +1,6 @@
 # Flare
-![license](https://img.shields.io/github/license/DimensionDev/Flare)  
+![license](https://img.shields.io/github/license/DimensionDev/Flare)
+[![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
 
 ![badge-Mastodon](https://img.shields.io/badge/Mastodon-5d52ea)
 ![badge-Misskey](https://img.shields.io/badge/Misskey-acea31)

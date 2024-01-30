@@ -19,7 +19,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, macos]
+    runs-on: [macos-latest]
 
     steps:
       - name: Checkout

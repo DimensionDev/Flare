@@ -30,7 +30,7 @@ const App: Component = () => {
             <p class={styles.caption}>** Not yet implemented.</p>
           </div>
           <div class={styles.badgeContainer}>
-            <a class={styles.badge}>
+            <a class={styles.badge} href='https://testflight.apple.com/join/iYP7QZME'>
               <img src='https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png' />
             </a>
             <a class={styles.badge} href='https://play.google.com/store/apps/details?id=dev.dimension.flare'>

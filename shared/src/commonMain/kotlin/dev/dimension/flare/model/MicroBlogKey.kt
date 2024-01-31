@@ -43,6 +43,8 @@ data class MicroBlogKey(
     }
 
     companion object {
+        val GUEST = MicroBlogKey("guest", "anonymous")
+
         fun valueOf(str: String): MicroBlogKey {
             var escaping = false
             var idFinished = false

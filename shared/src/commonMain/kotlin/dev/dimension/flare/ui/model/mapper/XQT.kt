@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
 import de.cketti.codepoints.deluxe.codePointSequence
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
 import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.Tweet
@@ -51,7 +50,7 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
                 is UserUnavailable -> null
             }
         }?.toUi()
-    requireNotNull(user)
+    requireNotNull(user) { "user is null" }
     val uiCard =
         card?.legacy?.let {
             val title = it.get("title")?.stringValue
@@ -156,33 +155,33 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
         accountKey = accountKey,
         statusKey =
             MicroBlogKey(
-                id = legacy?.idStr ?: throw Exception("no id for tweet: ${this.encodeJson()}"),
+                id = legacy?.idStr ?: restId,
                 host = accountKey.host,
             ),
         user = user,
-        createdAt = parseCustomDateTime(legacy.createdAt) ?: Clock.System.now(),
+        createdAt = legacy?.createdAt?.let { parseCustomDateTime(it) } ?: Clock.System.now(),
         content = text,
         medias = medias,
         card = uiCard,
         matrices =
             UiStatus.XQT.Matrices(
-                replyCount = legacy.replyCount.toLong(),
-                likeCount = legacy.favoriteCount.toLong(),
-                retweetCount = legacy.retweetCount.toLong(),
+                replyCount = legacy?.replyCount?.toLong() ?: 0,
+                likeCount = legacy?.favoriteCount?.toLong() ?: 0,
+                retweetCount = legacy?.retweetCount?.toLong() ?: 0,
             ),
         reaction =
             UiStatus.XQT.Reaction(
-                liked = legacy.favorited,
-                retweeted = legacy.retweeted,
-                bookmarked = legacy.bookmarked ?: false,
+                liked = legacy?.favorited ?: false,
+                retweeted = legacy?.retweeted ?: false,
+                bookmarked = legacy?.bookmarked ?: false,
             ),
         retweet = retweet,
         quote = quote,
-        inReplyToScreenName = legacy.in_reply_to_screen_name,
-        inReplyToStatusId = legacy.in_reply_to_status_id_str,
-        inReplyToUserId = legacy.in_reply_to_user_id_str,
+        inReplyToScreenName = legacy?.in_reply_to_screen_name,
+        inReplyToStatusId = legacy?.in_reply_to_status_id_str,
+        inReplyToUserId = legacy?.in_reply_to_user_id_str,
         poll = poll,
-        sensitive = legacy.possiblySensitive == true,
+        sensitive = legacy?.possiblySensitive == true,
         raw = this,
     )
 }

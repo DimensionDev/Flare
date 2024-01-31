@@ -30,11 +30,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class Url(
     @SerialName(value = "display_url")
-    val displayUrl: kotlin.String,
+    val displayUrl: kotlin.String? = null,
     @Contextual @SerialName(value = "expanded_url")
-    val expandedUrl: String,
+    val expandedUrl: String? = null,
     @SerialName(value = "indices")
-    val indices: kotlin.collections.List<kotlin.Int>,
+    val indices: kotlin.collections.List<kotlin.Int>? = null,
     @Contextual @SerialName(value = "url")
     val url: String,
 )

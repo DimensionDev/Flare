@@ -48,6 +48,10 @@
 		0690CF8B2B5F426200824A21 /* XQTStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0690CF8A2B5F426200824A21 /* XQTStatusComponent.swift */; };
 		0690CF8D2B5F51A200824A21 /* XQTLoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0690CF8C2B5F51A200824A21 /* XQTLoginScreen.swift */; };
 		06AD156B2AC3F454000DC865 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156A2AC3F454000DC865 /* Route.swift */; };
+		06B8514B2B6B228600DFA075 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 06B8514A2B6B228600DFA075 /* FirebaseAnalytics */; };
+		06B8514D2B6B228600DFA075 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 06B8514C2B6B228600DFA075 /* FirebaseCrashlytics */; };
+		06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */; };
+		06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851502B6B22DD00DFA075 /* AppDelegate.swift */; };
 		06C862712B4D0C7A008C902C /* FlareTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862702B4D0C7A008C902C /* FlareTheme.swift */; };
 		06C862732B4D2A14008C902C /* UserInterfaceSizeClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862722B4D2A14008C902C /* UserInterfaceSizeClass.swift */; };
 		06C862762B4D2A55008C902C /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862752B4D2A55008C902C /* UIImage.swift */; };
@@ -109,6 +113,8 @@
 		0690CF8A2B5F426200824A21 /* XQTStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XQTStatusComponent.swift; sourceTree = "<group>"; };
 		0690CF8C2B5F51A200824A21 /* XQTLoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XQTLoginScreen.swift; sourceTree = "<group>"; };
 		06AD156A2AC3F454000DC865 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
+		06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		06B851502B6B22DD00DFA075 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		06BE4D632B3181B0000C6D7D /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
 		06C862702B4D0C7A008C902C /* FlareTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareTheme.swift; sourceTree = "<group>"; };
 		06C862722B4D2A14008C902C /* UserInterfaceSizeClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceSizeClass.swift; sourceTree = "<group>"; };
@@ -144,6 +150,8 @@
 				066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */,
 				067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */,
 				066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */,
+				06B8514D2B6B228600DFA075 /* FirebaseCrashlytics in Frameworks */,
+				06B8514B2B6B228600DFA075 /* FirebaseAnalytics in Frameworks */,
 				066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -356,9 +364,11 @@
 				06D5C9152AC3BB2B007439D5 /* UI */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF8C242A565B00829871 /* Info.plist */,
+				06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				060D00C12AC407DF0087427A /* FlareApp.swift */,
 				B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */,
+				06B851502B6B22DD00DFA075 /* AppDelegate.swift */,
 				B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */,
 				B62B2CF30DB9A3370D1BB87E /* ViewExt.swift */,
 				B62B2291B79CA2EBCE71D4A8 /* AppIcon.appiconset */,
@@ -421,6 +431,8 @@
 				066AD0442B3ACDC1006F28F4 /* Collections */,
 				066AD0462B3ACDC1006F28F4 /* DequeModule */,
 				066AD0482B3ACDC1006F28F4 /* OrderedCollections */,
+				06B8514A2B6B228600DFA075 /* FirebaseAnalytics */,
+				06B8514C2B6B228600DFA075 /* FirebaseCrashlytics */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -455,6 +467,7 @@
 				067D89752AD25C1700F8F932 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				0641D85E2B0DFD3800029CA1 /* XCRemoteSwiftPackageReference "RichText" */,
 				066AD0432B3ACDC1006F28F4 /* XCRemoteSwiftPackageReference "swift-collections" */,
+				06B851492B6B228600DFA075 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -472,6 +485,7 @@
 			files = (
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
+				06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -504,6 +518,11 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
 			);
 			name = "Run Script";
 			outputFileListPaths = (
@@ -512,7 +531,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -542,6 +561,7 @@
 				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
 				06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */,
 				066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */,
+				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
 				066151212AC540B700CCB945 /* HomeScreen.swift in Sources */,
 				060881C12AE10D35001AAD2F /* ComposeViewModel.swift in Sources */,
 				0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */,
@@ -847,6 +867,14 @@
 				minimumVersion = 2.3.0;
 			};
 		};
+		06B851492B6B228600DFA075 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.20.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -869,6 +897,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 067D89752AD25C1700F8F932 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		06B8514A2B6B228600DFA075 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06B851492B6B228600DFA075 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		06B8514C2B6B228600DFA075 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06B851492B6B228600DFA075 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -128,7 +128,7 @@ private struct QuotedContent: View {
                                 showMedia = true
                             }
                         } label: {
-                            Label("Show Medias", systemImage: "photo")
+                            Label("status_display_media", systemImage: "photo")
                         }
                         .padding()
                         .buttonStyle(.borderless)

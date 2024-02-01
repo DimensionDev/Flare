@@ -49,11 +49,11 @@ struct AccountItem: View {
             HStack {
                 userAvatarPlaceholder(size: 48)
                 VStack(alignment: .leading) {
-                    Markdown("loading...")
+                    Markdown("loading")
                         .lineLimit(1)
                         .font(.headline)
                         .markdownInlineImageProvider(.emoji)
-                    Text("loading...")
+                    Text("loading")
                         .lineLimit(1)
                         .font(.subheadline)
                         .foregroundColor(.gray)

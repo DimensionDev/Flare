@@ -14,7 +14,7 @@ struct BlueskyStatusComponent: View {
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrow.left.arrow.right",
                     nameMarkdown: repostBy.extra.nameMarkdown,
-                    text: "boosted a status"
+                    text: String(localized: "bluesky_status_repost_header")
                 )
             }
             CommonStatusComponent(
@@ -65,12 +65,12 @@ struct BlueskyStatusComponent: View {
                         Button(action: {
                             event.onReblogClick(data: bluesky)
                         }, label: {
-                            Label("Reblog", systemImage: "arrow.left.arrow.right")
+                            Label("bluesky_status_action_reblog", systemImage: "arrow.left.arrow.right")
                         })
                         Button(action: {
                             event.onQuoteClick(data: bluesky)
                         }, label: {
-                            Label("Quote", systemImage: "quote.bubble.fill")
+                            Label("bluesky_status_action_quote", systemImage: "quote.bubble.fill")
                         })
                     }, label: {
                         Image(systemName: "arrow.left.arrow.right")
@@ -117,7 +117,7 @@ struct BlueskyStatusComponent: View {
                             Button(role: .destructive, action: {
                                 showDeleteAlert = true
                             }, label: {
-                                Label("Delete Toot", systemImage: "trash")
+                                Label("bluesky_status_action_delete", systemImage: "trash")
                             })
                         } else {
                             Button(
@@ -125,7 +125,7 @@ struct BlueskyStatusComponent: View {
                                     showReportAlert = true
                                 },
                                 label: {
-                                    Label("Report", systemImage: "exclamationmark.shield")
+                                    Label("bluesky_status_action_repott", systemImage: "exclamationmark.shield")
                                 }
                             )
                         }
@@ -140,51 +140,51 @@ struct BlueskyStatusComponent: View {
                 .font(.caption)
             }
         }
-        .alert("Delete Status", isPresented: $showDeleteAlert, actions: {
+        .alert("bluesky_alert_title_delete", isPresented: $showDeleteAlert, actions: {
             Button(role: .cancel) {
                 showDeleteAlert = false
             } label: {
-                Text("Cancel")
+                Text("cancel")
             }
             Button(role: .destructive) {
                 event.onDeleteClick(accountKey: bluesky.accountKey, statusKey: bluesky.statusKey)
                 showDeleteAlert = false
             } label: {
-                Text("Delete")
+                Text("delete")
             }
         }, message: {
-            Text("Confirm delete this status?")
+            Text("bluesky_alert_desc_delete")
         })
-        .confirmationDialog("Report Status", isPresented: $showReportAlert) {
-            Button("Spam") {
+        .confirmationDialog("bluesky_alert_title_report", isPresented: $showReportAlert) {
+            Button("bluesky_report_reason_spam") {
                 event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.spam)
                 showReportAlert = false
             }
-            Button("Illegal and Urgent") {
+            Button("bluesky_report_reason_illegal") {
                 event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.violation)
                 showReportAlert = false
             }
-            Button("Misleading") {
+            Button("bluesky_report_reason_misleading") {
                 event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.misleading)
                 showReportAlert = false
             }
-            Button("Unwanted Sexual Content") {
+            Button("bluesky_report_reason_sexual") {
                 event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.sexual)
                 showReportAlert = false
             }
-            Button("Anti-Social Behavior") {
+            Button("bluesky_report_reason_rude") {
                 event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.rude)
                 showReportAlert = false
             }
-            Button("Other") {
+            Button("bluesky_report_reason_other") {
                 event.onReportClick(data: bluesky, reason: BlueskyReportStatusStateReportReason.other)
                 showReportAlert = false
             }
-            Button("Cancel", role: .cancel) {
+            Button("cancel", role: .cancel) {
                 showReportAlert = false
             }
         } message: {
-            Text("What's the issue with the post")
+            Text("bluesky_alert_desc_report")
         }
     }
 }

@@ -14,7 +14,7 @@ struct SettingsScreen: View {
                             userState: viewModel.model.user,
                             supportingContent: { _ in
                                 AnyView(
-                                    Text("Account management")
+                                    Text("settings_account_manage")
                                         .lineLimit(1)
                                         .font(.subheadline)
                                         .opacity(0.5)
@@ -24,15 +24,15 @@ struct SettingsScreen: View {
                         .tag(SettingsDestination.account)
                     }
                     Section {
-                        ListItem(systemIconName: "paintpalette", title: "Appearance")
+                        Label("settings_appearance", systemImage: "paintpalette")
                             .tag(SettingsDestination.appearance)
-                        ListItem(systemIconName: "externaldrive", title: "Storage")
+                        Label("settings_storage", systemImage: "externaldrive")
                             .tag(SettingsDestination.storage)
-                        ListItem(systemIconName: "exclamationmark.circle", title: "About")
+                        Label("settings_about", systemImage: "exclamationmark.circle")
                             .tag(SettingsDestination.about)
                     }
                 }
-                .navigationTitle("Settings")
+                .navigationTitle("settings_title")
             } detail: {
                 if let detail = selectedDetail {
                     switch detail {
@@ -46,7 +46,10 @@ struct SettingsScreen: View {
                         AboutScreen()
                     }
                 } else {
-                    Text("Settings")
+                    Text("settings_welcome")
+                        .font(.title)
+                        .multilineTextAlignment(.center)
+                        .padding()
                 }
             }
         }

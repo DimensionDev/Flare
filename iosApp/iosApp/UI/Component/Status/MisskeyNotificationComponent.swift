@@ -11,67 +11,67 @@ struct MisskeyNotificationComponent: View {
                 StatusRetweetHeaderComponent(
                     iconSystemName: "person.badge.plus",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "followed you"
+                    text: String(localized: "misskey_notification_follow")
                 )
             case .mention:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "at",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "mentioned you"
+                    text: String(localized: "misskey_notification_mention")
                 )
             case .reply:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrowshape.turn.up.left",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "replied"
+                    text: String(localized: "misskey_notification_reply")
                 )
             case .renote:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrow.left.arrow.right",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "renoted your note"
+                    text: String(localized: "misskey_notification_renote")
                 )
             case .quote:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrowshape.turn.up.left",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "quoted your note"
+                    text: String(localized: "misskey_notification_quote")
                 )
             case .reaction:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "star",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "react your note"
+                    text: String(localized: "misskey_notification_reaction")
                 )
             case .pollEnded:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "list.bullet",
                     nameMarkdown: nil,
-                    text: "A poll you were participating in has ended"
+                    text: String(localized: "misskey_notification_poll_ended")
                 )
             case .receiveFollowRequest:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "person.badge.plus",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "request to follow you"
+                    text: String(localized: "misskey_notification_receive_follow_request")
                 )
             case .followRequestAccepted:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "person.badge.plus",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "accepted your follow"
+                    text: String(localized: "misskey_notification_follow_request_accepted")
                 )
             case .achievementEarned:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "star",
                     nameMarkdown: nil,
-                    text: "You have earn a new achievement"
+                    text: String(localized: "misskey_notification_achievement_earned")
                 )
             case .app:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "app",
                     nameMarkdown: data.user?.extra.nameMarkdown,
-                    text: "app notification"
+                    text: String(localized: "misskey_notification_app")
                 )
             }
             if let note = data.note {

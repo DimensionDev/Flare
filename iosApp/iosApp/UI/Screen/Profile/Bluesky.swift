@@ -33,11 +33,11 @@ struct BlueskyFollowButton: View {
            case .success(let relationData) = onEnum(of: relation),
            let actualRelation = relationData.data as? UiRelationBluesky {
             let text = if actualRelation.blocking {
-                "Blocked"
+                String(localized: "relation_blocked")
             } else if actualRelation.following {
-                "Following"
+                String(localized: "relation_following")
             } else {
-                "Follow"
+                String(localized: "relation_follow")
             }
             Button(action: {
                 onFollowClick(actualRelation)
@@ -58,9 +58,9 @@ struct BlueskyMenu: View {
     var body: some View {
         Button(action: onMuteClick, label: {
             let text = if relation.muting {
-                "Unmute"
+                String(localized: "unmute")
             } else {
-                "Mute"
+                String(localized: "mute")
             }
             let icon = if relation.muting {
                 "speaker"
@@ -71,9 +71,9 @@ struct BlueskyMenu: View {
         })
         Button(action: onBlockClick, label: {
             let text = if relation.blocking {
-                "Unblock"
+                String(localized: "unblock")
             } else {
-                "Block"
+                String(localized: "block")
             }
             let icon = if relation.blocking {
                 "xmark.circle"

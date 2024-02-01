@@ -12,7 +12,7 @@ struct SearchScreen: View {
         List {
             switch onEnum(of: viewModel.model.users) {
             case .success(let data):
-                Section("Users") {
+                Section("search_users_title") {
                     ScrollView(.horizontal, showsIndicators: false) {
                         LazyHStack {
                             ForEach(0..<data.data.itemCount, id: \.self) { index in
@@ -34,7 +34,7 @@ struct SearchScreen: View {
                 EmptyView()
                     .listRowSeparator(.hidden)
             }
-            Section("Status") {
+            Section("search_status_title") {
                 StatusTimelineComponent(
                     data: viewModel.model.status,
                     mastodonEvent: statusEvent,

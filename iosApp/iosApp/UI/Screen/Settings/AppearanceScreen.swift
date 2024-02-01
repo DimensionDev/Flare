@@ -15,42 +15,42 @@ struct AppearanceScreen: View {
                     xqtEvent: EmptyStatusEvent.shared
                 )
             }
-            Section("Generic") {
+            Section("appearance_settings_generic") {
                 Picker(selection: Binding(get: {
                     appSettings.appearanceSettings.theme
                 }, set: { value in
                     appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.theme, to: value))
                 }), content: {
-                    Text("Auto")
+                    Text("app_theme_auto")
                         .tag(Theme.auto)
-                    Text("Dark")
+                    Text("app_theme_dark")
                         .tag(Theme.dark)
-                    Text("Light")
+                    Text("app_theme_light")
                         .tag(Theme.light)
                 }, label: {
-                    Text("Theme")
-                    Text("Change the theme of the app")
+                    Text("appearance_theme_title")
+                    Text("appearance_theme_description")
                 })
                 Picker(selection: Binding(get: {
                     appSettings.appearanceSettings.avatarShape
                 }, set: { value in
                     appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.avatarShape, to: value))
                 }), content: {
-                    Text("Circle")
+                    Text("avatar_shape_circle")
                         .tag(AvatarShape.circle)
-                    Text("Square")
+                    Text("avatar_shape_square")
                         .tag(AvatarShape.square)
                 }, label: {
-                    Text("Avatar shape")
-                    Text("Change the shape of the avatar")
+                    Text("appearance_avatar_shape_title")
+                    Text("appearance_avatar_shape_description")
                 })
                 Toggle(isOn: Binding(get: {
                     appSettings.appearanceSettings.showActions
                 }, set: { value in
                     appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showActions, to: value))
                 })) {
-                    Text("Show actions")
-                    Text("Show actions on the bottom of the status")
+                    Text("appearance_show_actions_title")
+                    Text("appearance_show_actions_description")
                 }
                 if appSettings.appearanceSettings.showActions {
                     Toggle(isOn: Binding(get: {
@@ -58,8 +58,8 @@ struct AppearanceScreen: View {
                     }, set: { value in
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showNumbers, to: value))
                     })) {
-                        Text("Show numbers")
-                        Text("Show numbers on the bottom of the status")
+                        Text("appearance_show_numbers_title")
+                        Text("appearance_show_numbers_description")
                     }
                 }
                 Toggle(isOn: Binding(get: {
@@ -67,16 +67,16 @@ struct AppearanceScreen: View {
                 }, set: { value in
                     appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showLinkPreview, to: value))
                 })) {
-                    Text("Show link previews")
-                    Text("Show link previews in the status")
+                    Text("appearance_show_link_preview_title")
+                    Text("appearance_show_link_preview_description")
                 }
                 Toggle(isOn: Binding(get: {
                     appSettings.appearanceSettings.showMedia
                 }, set: { value in
                     appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showMedia, to: value))
                 })) {
-                    Text("Show media")
-                    Text("Show media in the status")
+                    Text("appearance_show_media_title")
+                    Text("appearance_show_media_description")
                 }
                 if appSettings.appearanceSettings.showMedia {
                     Toggle(isOn: Binding(get: {
@@ -84,13 +84,13 @@ struct AppearanceScreen: View {
                     }, set: { value in
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showSensitiveContent, to: value))
                     })) {
-                        Text("Show sensitive content")
-                        Text("Always show sensitive content in the status")
+                        Text("appearance_show_sensitive_content_title")
+                        Text("appearance_show_sensitive_content_description")
                     }
                 }
             }
             .buttonStyle(.plain)
-            .navigationTitle("Appearance")
+            .navigationTitle("appearance_title")
             .activateViewModel(viewModel: viewModel)
         }
         #if os(macOS)

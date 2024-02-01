@@ -23,9 +23,9 @@ struct StatusTimelineComponent: View {
             } else if (success.data.loadState.refresh is Paging_commonLoadState.Error ||
                        success.data.loadState.prepend is Paging_commonLoadState.Error) &&
                         success.data.itemCount == 0 {
-                Text("error: ")
+                Text("timeline_load_error", comment: "Timeline loading error")
             } else if success.data.itemCount == 0 {
-                Text("Empty list")
+                Text("timeline_load_empty", comment: "Timeline is empty")
             } else {
                 StatusTimeline(
                     pagingSource: success.data,
@@ -36,7 +36,7 @@ struct StatusTimelineComponent: View {
                 )
             }
         case .error(let error):
-            Text("error: " + (error.throwable.message ?? ""))
+            Text("timeline_load_error", comment: "Timeline loading error")
         case .loading:
             ForEach(0...10, id: \.self) { _ in
                 StatusPlaceHolder()
@@ -69,9 +69,9 @@ struct StatusTimeline: View {
         } else if (pagingSource.loadState.refresh is Paging_commonLoadState.Error ||
                    pagingSource.loadState.prepend is Paging_commonLoadState.Error) &&
                     pagingSource.itemCount == 0 {
-            Text("error: ")
+            Text("timeline_load_error", comment: "Timeline loading error")
         } else if pagingSource.itemCount == 0 {
-            Text("Empty list")
+            Text("timeline_load_empty", comment: "Timeline is empty")
         } else {
             ForEach(1...pagingSource.itemCount, id: \.self) { index in
                 let data = pagingSource.peek(index: index - 1)

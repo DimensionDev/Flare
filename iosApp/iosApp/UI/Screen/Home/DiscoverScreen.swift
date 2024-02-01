@@ -12,7 +12,7 @@ struct DiscoverScreen: View {
             if searchViewModel.model.searching {
                 switch onEnum(of: searchViewModel.model.users) {
                 case .success(let data):
-                    Section("Users") {
+                    Section("discover_users_title") {
                         ScrollView(.horizontal, showsIndicators: false) {
                             LazyHStack {
                                 ForEach(0..<data.data.itemCount, id: \.self) { index in
@@ -34,7 +34,7 @@ struct DiscoverScreen: View {
                     EmptyView()
                         .listRowSeparator(.hidden)
                 }
-                Section("Status") {
+                Section("discover_status_title") {
                     StatusTimelineComponent(
                         data: searchViewModel.model.status,
                         mastodonEvent: statusEvent,
@@ -47,7 +47,7 @@ struct DiscoverScreen: View {
                 switch onEnum(of: viewModel.model.users) {
                 case .success(let data):
                     if data.data.isNotEmptyOrLoading {
-                        Section("Users") {
+                        Section("discover_users_title") {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 LazyHGrid(rows: [.init(), .init()]) {
                                     ForEach(0..<data.data.itemCount, id: \.self) { index in
@@ -77,7 +77,7 @@ struct DiscoverScreen: View {
                 switch onEnum(of: viewModel.model.hashtags) {
                 case .success(let data):
                     if data.data.isNotEmptyOrLoading {
-                        Section("Hashtag") {
+                        Section("discover_hashtags_title") {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 LazyHStack {
                                     ForEach(0..<data.data.itemCount, id: \.self) { index in
@@ -112,7 +112,7 @@ struct DiscoverScreen: View {
                         .listRowSeparator(.hidden)
                 }
                 if case .success(let data) = onEnum(of: viewModel.model.status), data.data.isNotEmptyOrLoading {
-                    Section("Status") {
+                    Section("discover_status_title") {
                         StatusTimelineComponent(
                             data: viewModel.model.status,
                             mastodonEvent: statusEvent,
@@ -134,7 +134,7 @@ struct DiscoverScreen: View {
             }
         }
         .listStyle(.plain)
-        .navigationTitle("Discover")
+        .navigationTitle("discover_title")
         .activateViewModel(viewModel: viewModel)
         .activateViewModel(viewModel: searchViewModel)
     }

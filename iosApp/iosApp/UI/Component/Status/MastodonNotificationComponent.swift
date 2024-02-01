@@ -11,48 +11,49 @@ struct MastodonNotificationComponent: View {
                 StatusRetweetHeaderComponent(
                     iconSystemName: "star",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "favourited your status"
+                    text: String(localized: "mastodon_notification_favourite")
                 )
             case .follow:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "person.badge.plus",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "followed you")
+                    text: String(localized: "mastodon_notification_follow")
+                )
             case .followRequest:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "person.badge.plus",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "request to follow you"
+                    text: String(localized: "mastodon_notification_follow_request")
                 )
             case .mention:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "at",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "mentioned you"
+                    text: String(localized: "mastodon_notification_mention")
                 )
             case .poll:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "list.bullet",
                     nameMarkdown: nil,
-                    text: "A poll you were participating in has ended"
+                    text: String(localized: "mastodon_notification_poll")
                 )
             case .reblog:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrow.left.arrow.right",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "reposted your status"
+                    text: String(localized: "mastodon_notification_reblog")
                 )
             case .status:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "plus.bubble",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "boosted a status"
+                    text: String(localized: "mastodon_notification_status")
                 )
             case .update:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "pencil",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "updated a status"
+                    text: String(localized: "mastodon_notification_update")
                 )
             }
             if let status = data.status {

@@ -16,7 +16,7 @@ struct MisskeyStatusComponent: View {
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrow.left.arrow.right",
                     nameMarkdown: misskey.user.extra.nameMarkdown,
-                    text: "boosted a status"
+                    text: String(localized: "misskey_status_renote_header")
                 )
             }
             CommonStatusComponent(
@@ -83,12 +83,12 @@ struct MisskeyStatusComponent: View {
                         Button(action: {
                             event.onReblogClick(data: actual)
                         }, label: {
-                            Label("Renote", systemImage: "arrow.left.arrow.right")
+                            Label("misskey_status_action_renote", systemImage: "arrow.left.arrow.right")
                         })
                         Button(action: {
                             event.onQuoteClick(data: actual)
                         }, label: {
-                            Label("Quote", systemImage: "quote.bubble.fill")
+                            Label("misskey_status_action_quote", systemImage: "quote.bubble.fill")
                         })
                     }, label: {
                         Label(
@@ -120,13 +120,13 @@ struct MisskeyStatusComponent: View {
                             Button(role: .destructive, action: {
                                 showDeleteAlert = true
                             }, label: {
-                                Label("Delete Note", systemImage: "trash")
+                                Label("misskey_status_action_delete", systemImage: "trash")
                             })
                         } else {
                             Button(action: {
                                 showReportAlert = true
                             }, label: {
-                                Label("Report", systemImage: "exclamationmark.shield")
+                                Label("misskey_status_action_report", systemImage: "exclamationmark.shield")
                             })
                         }
                     } label: {
@@ -144,35 +144,35 @@ struct MisskeyStatusComponent: View {
                 .font(.caption)
             }
         }
-        .alert("Delete Status", isPresented: $showDeleteAlert, actions: {
+        .alert("misskey_alert_title_delete", isPresented: $showDeleteAlert, actions: {
             Button(role: .cancel) {
                 showDeleteAlert = false
             } label: {
-                Text("Cancel")
+                Text("cancel")
             }
             Button(role: .destructive) {
                 event.onDeleteClick(accountKey: actual.accountKey, statusKey: actual.statusKey)
                 showDeleteAlert = false
             } label: {
-                Text("Delete")
+                Text("delete")
             }
         }, message: {
-            Text("Confirm delete this status?")
+            Text("misskey_alert_desc_delete")
         })
-        .alert("Report Status", isPresented: $showReportAlert, actions: {
+        .alert("misskey_alert_title_report", isPresented: $showReportAlert, actions: {
             Button(role: .cancel) {
                 showReportAlert = false
             } label: {
-                Text("Cancel")
+                Text("cancel")
             }
             Button(role: .destructive) {
                 event.onReportClick(data: actual)
                 showReportAlert = false
             } label: {
-                Text("Report")
+                Text("report")
             }
         }, message: {
-            Text("Confirm report this status?")
+            Text("misskey_alert_desc_report")
         })
     }
 }

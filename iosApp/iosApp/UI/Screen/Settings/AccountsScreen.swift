@@ -36,7 +36,7 @@ struct AccountsScreen: View {
                                     Button(role: .destructive) {
                                         viewModel.model.removeAccount(accountKey: user.data.userKey)
                                     } label: {
-                                        Label("Delete", systemImage: "trash")
+                                        Label("delete", systemImage: "trash")
                                     }
                                 }
                             }
@@ -46,7 +46,7 @@ struct AccountsScreen: View {
                                 Button(role: .destructive) {
                                     viewModel.model.removeAccount(accountKey: user.data.userKey)
                                 } label: {
-                                    Label("Delete", systemImage: "trash")
+                                    Label("delete", systemImage: "trash")
                                 }
                             }
                             #endif
@@ -57,7 +57,7 @@ struct AccountsScreen: View {
                         }
                     }
                 } else {
-                    Text("No Accounts")
+                    Text("no_accounts")
                 }
             case .error:
                 Text("error")
@@ -65,7 +65,7 @@ struct AccountsScreen: View {
                 Text("loading")
             }
         }
-        .navigationTitle("Accounts")
+        .navigationTitle("accounts_management_title")
         .toolbar {
             Button(action: {
                 showServiceSelectSheet = true

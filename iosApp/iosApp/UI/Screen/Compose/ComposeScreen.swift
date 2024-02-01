@@ -21,14 +21,14 @@ struct ComposeScreen: View {
                         VStack(alignment: .leading) {
                             if viewModel.enableCW {
                                 TextField(text: $viewModel.contentWarning) {
-                                    Text("Content Warning")
+                                    Text("compose_cw_placeholder")
                                 }
                                 .textFieldStyle(.plain)
                                 .focused($cwKeyboardFocused)
                                 Divider()
                             }
                             TextField(text: $viewModel.text) {
-                                Text("What's happening?")
+                                Text("compose_placeholder")
                             }
                             .textFieldStyle(.plain)
                             .focused($keyboardFocused)
@@ -55,7 +55,7 @@ struct ComposeScreen: View {
                                                                 viewModel.mediaViewModel.remove(item: item)
                                                             }
                                                         }, label: {
-                                                            Text("Delete")
+                                                            Text("delete")
                                                             Image(systemName: "trash")
                                                         })
                                                     }
@@ -66,7 +66,7 @@ struct ComposeScreen: View {
                                                             viewModel.mediaViewModel.remove(item: item)
                                                         }
                                                     }, label: {
-                                                        Text("Delete")
+                                                        Text("delete")
                                                         Image(systemName: "trash")
                                                     })
                                                 } label: {
@@ -82,15 +82,15 @@ struct ComposeScreen: View {
                                     }
                                 }
                                 Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
-                                    Text("Mark media as sensitive")
+                                    Text("compose_media_mark_sensitive")
                                 })
                             }
                             if viewModel.pollViewModel.enabled {
                                 HStack {
-                                    Picker("NotificationType", selection: $viewModel.pollViewModel.pollType) {
-                                        Text("Single Choice")
+                                    Picker("compose_poll_type", selection: $viewModel.pollViewModel.pollType) {
+                                        Text("compose_poll_type_single")
                                             .tag(ComposePollType.single)
-                                        Text("Multiple Choice")
+                                        Text("compose_poll_type_multiple")
                                             .tag(ComposePollType.multiple)
                                     }
                                     .pickerStyle(.segmented)
@@ -108,7 +108,7 @@ struct ComposeScreen: View {
                                 ForEach($viewModel.pollViewModel.choices) { $choice in
                                     HStack {
                                         TextField(text: $choice.text) {
-                                            Text("option")
+                                            Text("compose_poll_choice_placeholder")
                                         }
                                         .textFieldStyle(.roundedBorder)
                                         Button {
@@ -135,7 +135,7 @@ struct ComposeScreen: View {
                                             })
                                         }
                                     } label: {
-                                        Text("expiration: ")
+                                        Text("compose_poll_expiration")
                                         Text(viewModel.pollViewModel.expired.rawValue)
                                     }
                                 }
@@ -293,7 +293,7 @@ struct ComposeScreen: View {
                 })
             }
             ToolbarItem(placement: .principal) {
-                Text("Compose")
+                Text("compose_title")
             }
         }
     }

@@ -77,7 +77,7 @@ struct ProfileScreen: View {
         let title: LocalizedStringKey = if case .success(let user) = onEnum(of: viewModel.model.userState) {
             LocalizedStringKey(user.data.extra.nameMarkdown)
         } else {
-            "Profile"
+            LocalizedStringKey("loading")
         }
         ZStack {
 #if os(macOS)
@@ -142,7 +142,7 @@ struct ProfileScreen: View {
                             }
                         }
                         Button(action: { viewModel.model.report(user: user.data) }, label: {
-                            Label("Report", systemImage: "exclamationmark.bubble")
+                            Label("report", systemImage: "exclamationmark.bubble")
                         })
                     }
                 }
@@ -286,10 +286,10 @@ struct MatrixView: View {
     var body: some View {
         HStack {
             Text(followCount)
-            Text("following")
+            Text("matrix_following")
             Divider()
             Text(fansCount)
-            Text("followers")
+            Text("matrix_followers")
         }
         .font(.caption)
     }

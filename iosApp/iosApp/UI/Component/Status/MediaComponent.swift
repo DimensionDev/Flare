@@ -61,7 +61,7 @@ struct MediaComponent: View {
                             hideSensitive = false
                         }
                     }, label: {
-                        Text("Show Media")
+                        Text("status_sensitive_media_show", comment: "Status media sensitive button")
                     })
                     .buttonStyle(.borderedProminent)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)

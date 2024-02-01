@@ -93,7 +93,10 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
                             showMedia = true
                         }
                     } label: {
-                        Label("Show Medias", systemImage: "photo")
+                        Label(
+                            title: { Text("status_display_media") },
+                            icon: { Image(systemName: "photo") }
+                        )
                     }
                     .buttonStyle(.borderless)
                 }

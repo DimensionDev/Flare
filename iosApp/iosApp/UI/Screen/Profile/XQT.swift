@@ -11,11 +11,11 @@ struct XQTFollowButton: View {
            case .success(let relationData) = onEnum(of: relation),
            let xqtRelation = relationData.data as? UiRelationXQT {
             let text = if xqtRelation.blocking {
-                "Blocked"
+                String(localized: "relation_blocked")
             } else if xqtRelation.following {
-                "Following"
+                String(localized: "relation_following")
             } else {
-                "Follow"
+                String(localized: "relation_follow")
             }
             Button(action: {
                 onFollowClick(xqtRelation)
@@ -36,9 +36,9 @@ struct XQTMenu: View {
     var body: some View {
         Button(action: onBlockClick, label: {
             let text = if relation.blocking {
-                "Unblock"
+                String(localized: "unblock")
             } else {
-                "Block"
+                String(localized: "block")
             }
             let icon = if relation.blocking {
                 "xmark.circle"

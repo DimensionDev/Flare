@@ -3,6 +3,11 @@ import shared
 
 @main
 struct FlareApp: SwiftUI.App {
+    #if os(macOS)
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    #else
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    #endif
     init() {
         KoinHelper.shared.start()
     }

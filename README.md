@@ -1,6 +1,7 @@
 # Flare
 ![license](https://img.shields.io/github/license/DimensionDev/Flare)
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
+[![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
 
 ![badge-Mastodon](https://img.shields.io/badge/Mastodon-5d52ea)
 ![badge-Misskey](https://img.shields.io/badge/Misskey-acea31)
@@ -10,6 +11,7 @@
 ![badge-Android](https://img.shields.io/badge/Android-5.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-17.0-black)
 ![badge-macOS](https://img.shields.io/badge/macOS-14.0-black)
+
 
 The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS/macOS, still in development.  
 *: _Just a joke_  

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">ログイン</string>
   <string name="navigate_back">戻る</string>
   <string name="confirm">確認</string>
@@ -90,10 +89,6 @@
   <string name="show_media">メディアを表示</string>
   <string name="service_select_welcome_title">フレアへようこそ</string>
   <string name="service_select_welcome_message">Flare は Android 用のソーシャルネットワーククライアントです。\n開始するには、接続するサービスを選択してください。</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">Mastodonにログイン</string>
   <string name="mastodon_login_message">以下にインスタンスのURLを入力してください。</string>
   <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>

@@ -1,3 +1,6 @@
 files:
   - source: /app/src/main/res/values/strings.xml
     translation: /app/src/main/res/values-%android_code%/%original_file_name%
+  - source: /iosApp/iosApp/Localizable.xcstrings
+    translation: /iosApp/iosApp/Localizable.xcstrings
+    multilingual: 1

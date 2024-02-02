@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">Anmelden</string>
   <string name="navigate_back">Zurück navigieren</string>
   <string name="confirm">Bestätigen</string>
@@ -90,10 +89,6 @@
   <string name="show_media">Medien anzeigen</string>
   <string name="service_select_welcome_title">Willkommen bei Leuchtturm</string>
   <string name="service_select_welcome_message">Flare ist ein Social-Network-Client für Android.\nUm loszulegen, wählen Sie bitte einen Dienst zum Verbinden aus.</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">Bei Mastodon anmelden</string>
   <string name="mastodon_login_message">Bitte geben Sie unten die URL Ihrer Instanz ein.</string>
   <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>

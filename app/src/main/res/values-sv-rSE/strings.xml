@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">Inloggning</string>
   <string name="navigate_back">Navigera tillbaka</string>
   <string name="confirm">Bekräfta</string>
@@ -90,10 +89,6 @@
   <string name="show_media">Visa media</string>
   <string name="service_select_welcome_title">Välkommen till Flare</string>
   <string name="service_select_welcome_message">Flare är en social nätverksklient för Android.\nFör att komma igång, välj en tjänst att ansluta till.</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">Logga in till Mastodon</string>
   <string name="mastodon_login_message">Ange din instans URL nedan.</string>
   <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>

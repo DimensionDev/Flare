@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">Conectar-se</string>
   <string name="navigate_back">Navegar para trás</string>
   <string name="confirm">Confirmar</string>
@@ -90,10 +89,6 @@
   <string name="show_media">Mostrar mídia</string>
   <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
   <string name="service_select_welcome_message">Sinalizador é um cliente de rede social para Android.\nPara começar, por favor, selecione um serviço para se conectar.</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">Login para o Mastodon</string>
   <string name="mastodon_login_message">Por favor, digite sua URL de instância abaixo.</string>
   <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>

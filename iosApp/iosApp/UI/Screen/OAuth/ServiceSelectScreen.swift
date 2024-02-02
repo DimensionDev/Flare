@@ -16,21 +16,21 @@ struct ServiceSelectScreen: View {
             Spacer()
                 .padding()
                 .listRowSeparator(.hidden)
-            Text("Welcome to Flare")
+            Text("service_select_title")
                 .frame(maxWidth: .infinity, alignment: .center)
                 .font(.title)
                 .fontWeight(.bold)
                 .listRowSeparator(.hidden)
                 .multilineTextAlignment(.center)
                 .frame(alignment: .center)
-            Text("Flare is a social network client for iOS.\nTo get started, please select a service to connect to.")
+            Text("service_select_description")
                 .font(.subheadline)
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
                 .listRowSeparator(.hidden)
                 .frame(maxWidth: .infinity, alignment: .center)
             Section(header: HStack {
-                TextField("Instance URL, e.g. mastodon.social", text: $viewModel.instanceURL)
+                TextField("service_select_instance_url_placeholder", text: $viewModel.instanceURL)
                     .disableAutocorrection(true)
 #if !os(macOS)
                     .textInputAutocapitalization(.never)
@@ -66,7 +66,7 @@ struct ServiceSelectScreen: View {
                     case .bluesky:
                         VStack {
                             TextField(
-                                "Base URL, e.g. https://bsky.social",
+                                "service_select_bluesky_base_url_placeholder",
                                 text: $viewModel.blueskyInputViewModel.baseUrl
                             )
                             .disableAutocorrection(true)
@@ -76,14 +76,14 @@ struct ServiceSelectScreen: View {
 #endif
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .disabled(viewModel.model.loading)
-                            TextField("User Name", text: $viewModel.blueskyInputViewModel.username)
+                            TextField("username", text: $viewModel.blueskyInputViewModel.username)
                                 .disableAutocorrection(true)
 #if !os(macOS)
                                 .textInputAutocapitalization(.never)
 #endif
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(viewModel.model.loading)
-                            SecureField("Password", text: $viewModel.blueskyInputViewModel.password)
+                            SecureField("password", text: $viewModel.blueskyInputViewModel.password)
                                 .disableAutocorrection(true)
 #if !os(macOS)
                                 .textInputAutocapitalization(.never)
@@ -98,7 +98,7 @@ struct ServiceSelectScreen: View {
                                     password: viewModel.blueskyInputViewModel.password
                                 )
                             }, label: {
-                                Text("Confirm")
+                                Text("confirm")
                             })
                             .buttonStyle(.borderedProminent)
                         }
@@ -109,7 +109,7 @@ struct ServiceSelectScreen: View {
                         Button {
                             viewModel.model.mastodonLoginState.login(host: viewModel.instanceURL)
                         } label: {
-                            Text("Next")
+                            Text("next")
                                 .frame(width: 200)
                         }
                         .buttonStyle(.borderedProminent)
@@ -120,7 +120,7 @@ struct ServiceSelectScreen: View {
                         Button {
                             viewModel.model.misskeyLoginState.login(host: viewModel.instanceURL)
                         } label: {
-                            Text("Next")
+                            Text("next")
                                 .frame(width: 200)
                         }
                         .buttonStyle(.borderedProminent)
@@ -131,7 +131,7 @@ struct ServiceSelectScreen: View {
                         Button {
                             showXQT = true
                         } label: {
-                            Text("Next")
+                            Text("next")
                                 .frame(width: 200)
                         }
                         .buttonStyle(.borderedProminent)
@@ -193,7 +193,7 @@ struct ServiceSelectScreen: View {
                             .listRowSeparator(.hidden)
                     }
                 } else {
-                    Text("instance not found")
+                    Text("service_select_no_instance")
                         .listRowSeparator(.hidden)
                 }
             }

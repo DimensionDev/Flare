@@ -14,10 +14,9 @@ struct StorageScreen: View {
                     Spacer()
                         .frame(width: 16)
                     VStack(alignment: .leading) {
-                        Text("Clear cache database")
+                        Text("storage_clear_cache")
                         Text(
-                            viewModel.model.userCount.description + " users," +
-                            viewModel.model.statusCount.description + " statues will be deleted"
+                            "\(viewModel.model.userCount) users, \(viewModel.model.statusCount) statuses will be deleted"
                         )
                         .font(.caption)
                     }
@@ -25,7 +24,7 @@ struct StorageScreen: View {
             }
             .buttonStyle(.borderless)
         }
-        .navigationTitle("Storage")
+        .navigationTitle("storage_title")
         .activateViewModel(viewModel: viewModel)
     }
 }

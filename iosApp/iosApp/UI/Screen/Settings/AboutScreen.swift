@@ -14,7 +14,7 @@ struct AboutScreen: View {
                     .padding()
                 Text("Flare")
                     .font(.title)
-                Text("The ultimate next generation open-sourced AI powered decentralized social network client for Apple.")
+                Text("about_description")
                     .multilineTextAlignment(.center)
                 HStack {
                     Text(versionName)
@@ -33,7 +33,7 @@ struct AboutScreen: View {
                         }
                         .frame(width: 48, height: 48)
                         VStack(alignment: .leading) {
-                            Text("Source code")
+                            Text("about_source_code")
                             Text("https://github.com/DimensionDev/Flare")
                         }
                         Spacer()
@@ -43,7 +43,7 @@ struct AboutScreen: View {
             }
             .padding()
         }
-        .navigationTitle("About")
+        .navigationTitle("about_title")
     }
 }
 

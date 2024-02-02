@@ -36,13 +36,13 @@ struct MisskeyFollowButton: View {
            case .success(let relationData) = onEnum(of: relation),
            let actualRelation = relationData.data as? UiRelationMisskey {
             let text = if actualRelation.blocking {
-                "Blocked"
+                String(localized: "relation_blocked")
             } else if actualRelation.following {
-                "Following"
+                String(localized: "relation_following")
             } else if actualRelation.hasPendingFollowRequestFromYou {
-                "Requested"
+                String(localized: "relation_requested")
             } else {
-                "Follow"
+                String(localized: "relation_follow")
             }
             Button(action: {
                 onFollowClick(actualRelation)
@@ -63,9 +63,9 @@ struct MisskeyMenu: View {
     var body: some View {
         Button(action: onMuteClick, label: {
             let text = if relation.muted {
-                "Unmute"
+                String(localized: "unmute")
             } else {
-                "Mute"
+                String(localized: "mute")
             }
             let icon = if relation.muted {
                 "speaker"
@@ -76,9 +76,9 @@ struct MisskeyMenu: View {
         })
         Button(action: onBlockClick, label: {
             let text = if relation.blocking {
-                "Unblock"
+                String(localized: "unblock")
             } else {
-                "Block"
+                String(localized: "block")
             }
             let icon = if relation.blocking {
                 "xmark.circle"

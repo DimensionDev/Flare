@@ -10,37 +10,37 @@ struct BlueskyNotificationComponent: View {
                 StatusRetweetHeaderComponent(
                     iconSystemName: "person.badge.plus",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "followed you"
+                    text: String(localized: "bluesky_notification_follow")
                 )
             case .mention:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "at",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "mentioned you"
+                    text: String(localized: "bluesky_notification_mention")
                 )
             case .reply:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrowshape.turn.up.left",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "replied"
+                    text: String(localized: "bluesky_notification_reply")
                 )
             case .repost:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrow.left.arrow.right",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "repost your post"
+                    text: String(localized: "bluesky_notification_repost")
                 )
             case .quote:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrowshape.turn.up.left",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "quoted your post"
+                    text: String(localized: "bluesky_notification_quote")
                 )
             case .like:
                 StatusRetweetHeaderComponent(
                     iconSystemName: "star",
                     nameMarkdown: data.user.extra.nameMarkdown,
-                    text: "like your note"
+                    text: String(localized: "bluesky_notification_like")
                 )
             }
             HStack {

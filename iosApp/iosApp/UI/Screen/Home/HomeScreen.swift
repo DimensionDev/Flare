@@ -12,7 +12,7 @@ struct HomeScreen: View {
             AdativeTabView(
                 items: [
                     TabModel(
-                        title: "Home",
+                        title: String(localized: "home_timeline_title"),
                         image: "house",
                         destination: TabItem { _ in
                             HomeTimelineScreen()
@@ -48,21 +48,21 @@ struct HomeScreen: View {
                         }
                     ),
                     TabModel(
-                        title: "Notification",
+                        title: String(localized: "home_notification_title"),
                         image: "bell",
                         destination: TabItem { _ in
                             NotificationScreen()
                         }
                     ),
                     TabModel(
-                        title: "Discover",
+                        title: String(localized: "home_discover_title"),
                         image: "magnifyingglass",
                         destination: TabItem { _ in
                             DiscoverScreen()
                         }
                     ),
                     TabModel(
-                        title: "Me",
+                        title: String(localized: "home_profile_title"),
                         image: "person.circle",
                         destination: TabItem { router in
                             ProfileScreen(
@@ -94,7 +94,7 @@ struct HomeScreen: View {
                     }, label: {
                         HStack {
                             Image(systemName: "square.and.pencil")
-                            Text("Write a post")
+                            Text("home_compose")
                             Spacer()
                         }
                         .padding(4)

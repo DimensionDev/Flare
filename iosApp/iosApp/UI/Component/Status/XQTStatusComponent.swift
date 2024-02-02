@@ -15,7 +15,7 @@ struct XQTStatusComponent: View {
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrow.left.arrow.right",
                     nameMarkdown: xqt.user.extra.nameMarkdown,
-                    text: "boosted a status"
+                    text: String(localized: "xqt_status_reblog_header", comment: "Status header for xqt reblog")
                 )
             }
             CommonStatusComponent(
@@ -51,12 +51,12 @@ struct XQTStatusComponent: View {
                         Button(action: {
                             event.onReblogClick(status: actual)
                         }, label: {
-                            Label("Reblog", systemImage: "arrow.left.arrow.right")
+                            Label("xqt_status_action_reblog", systemImage: "arrow.left.arrow.right")
                         })
                         Button(action: {
                             event.onQuoteClick(status: actual)
                         }, label: {
-                            Label("Quote", systemImage: "quote.bubble.fill")
+                            Label("xqt_status_action_quote", systemImage: "quote.bubble.fill")
                         })
                     }, label: {
                         Image(systemName: "arrow.left.arrow.right")
@@ -97,22 +97,22 @@ struct XQTStatusComponent: View {
                             event.onBookmarkClick(status: actual)
                         }, label: {
                             if actual.reaction.bookmarked {
-                                Label("Remove bookmark", systemImage: "bookmark.slash")
+                                Label("xqt_status_action_remove_bookmark", systemImage: "bookmark.slash")
                             } else {
-                                Label("Add bookmark", systemImage: "bookmark")
+                                Label("xqt_status_action_add_bookmark", systemImage: "bookmark")
                             }
                         })
                         if actual.isFromMe {
                             Button(role: .destructive, action: {
                                 showDeleteAlert = true
                             }, label: {
-                                Label("Delete Toot", systemImage: "trash")
+                                Label("xqt_status_action_delete", systemImage: "trash")
                             })
                         } else {
                             Button(action: {
                                 showReportAlert = true
                             }, label: {
-                                Label("Report", systemImage: "exclamationmark.shield")
+                                Label("xqt_status_action_report", systemImage: "exclamationmark.shield")
                             })
                         }
                     } label: {
@@ -130,35 +130,35 @@ struct XQTStatusComponent: View {
                 .font(.caption)
             }
         }
-        .alert("Delete Toot", isPresented: $showDeleteAlert, actions: {
+        .alert("xqt_status_alert_title_delete", isPresented: $showDeleteAlert, actions: {
             Button(role: .cancel) {
                 showDeleteAlert = false
             } label: {
-                Text("Cancel")
+                Text("cancel")
             }
             Button(role: .destructive) {
                 event.onDeleteClick(accountKey: xqt.accountKey, statusKey: actual.statusKey)
                 showDeleteAlert = false
             } label: {
-                Text("Delete")
+                Text("delete")
             }
         }, message: {
-            Text("Confirm delete this toot?")
+            Text("xqt_status_alert_message_delete")
         })
-        .alert("Report Toot", isPresented: $showReportAlert, actions: {
+        .alert("xqt_status_alert_title_report", isPresented: $showReportAlert, actions: {
             Button(role: .cancel) {
                 showReportAlert = false
             } label: {
-                Text("Cancel")
+                Text("cancel")
             }
             Button(role: .destructive) {
                 event.onReportClick(status: actual)
                 showReportAlert = false
             } label: {
-                Text("Report")
+                Text("report")
             }
         }, message: {
-            Text("Confirm report this toot?")
+            Text("xqt_status_alert_message_report")
         })
     }
 }

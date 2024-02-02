@@ -18,7 +18,7 @@ struct HomeTimelineScreen: View {
         .refreshable {
             try? await viewModel.model.refresh()
         }
-        .navigationTitle("Home")
+        .navigationTitle("home_timeline_title")
         #if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif

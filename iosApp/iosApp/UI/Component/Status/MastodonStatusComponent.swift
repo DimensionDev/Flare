@@ -15,7 +15,7 @@ struct MastodonStatusComponent: View {
                 StatusRetweetHeaderComponent(
                     iconSystemName: "arrow.left.arrow.right",
                     nameMarkdown: mastodon.user.extra.nameMarkdown,
-                    text: "boosted a status"
+                    text: String(localized: "mastodon_status_reblog_header", comment: "Status header for mastodon reblog")
                 )
             }
             CommonStatusComponent(
@@ -91,22 +91,22 @@ struct MastodonStatusComponent: View {
                             event.onBookmarkClick(status: actual)
                         }, label: {
                             if actual.reaction.bookmarked {
-                                Label("Remove bookmark", systemImage: "bookmark.slash")
+                                Label("mastodon_status_action_bookmark_remove", systemImage: "bookmark.slash")
                             } else {
-                                Label("Add bookmark", systemImage: "bookmark")
+                                Label("mastodon_status_action_bookmark_add", systemImage: "bookmark")
                             }
                         })
                         if actual.isFromMe {
                             Button(role: .destructive, action: {
                                 showDeleteAlert = true
                             }, label: {
-                                Label("Delete Toot", systemImage: "trash")
+                                Label("mastodon_status_action_delete", systemImage: "trash")
                             })
                         } else {
                             Button(action: {
                                 showReportAlert = true
                             }, label: {
-                                Label("Report", systemImage: "exclamationmark.shield")
+                                Label("mastodon_status_action_report", systemImage: "exclamationmark.shield")
                             })
                         }
                     } label: {
@@ -124,35 +124,35 @@ struct MastodonStatusComponent: View {
                 .font(.caption)
             }
         }
-        .alert("Delete Toot", isPresented: $showDeleteAlert, actions: {
+        .alert("mastodon_alert_title_delete", isPresented: $showDeleteAlert, actions: {
             Button(role: .cancel) {
                 showDeleteAlert = false
             } label: {
-                Text("Cancel")
+                Text("cancel")
             }
             Button(role: .destructive) {
                 event.onDeleteClick(accountKey: mastodon.accountKey, statusKey: actual.statusKey)
                 showDeleteAlert = false
             } label: {
-                Text("Delete")
+                Text("delete")
             }
         }, message: {
-            Text("Confirm delete this toot?")
+            Text("mastodon_alert_desc_delete")
         })
-        .alert("Report Toot", isPresented: $showReportAlert, actions: {
+        .alert("mastodon_alert_title_report", isPresented: $showReportAlert, actions: {
             Button(role: .cancel) {
                 showReportAlert = false
             } label: {
-                Text("Cancel")
+                Text("cancel")
             }
             Button(role: .destructive) {
                 event.onReportClick(status: actual)
                 showReportAlert = false
             } label: {
-                Text("Report")
+                Text("report")
             }
         }, message: {
-            Text("Confirm report this toot?")
+            Text("mastodon_alert_desc_report")
         })
     }
 }

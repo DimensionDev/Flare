@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">Autentificare</string>
   <string name="navigate_back">Navighează înapoi</string>
   <string name="confirm">Confirmare</string>
@@ -90,10 +89,6 @@
   <string name="show_media">Arată media</string>
   <string name="service_select_welcome_title">Bun venit la Flare</string>
   <string name="service_select_welcome_message">Flare este un client de rețea socială pentru Android.\nPentru a începe, vă rugăm să selectați un serviciu la care să vă conectați.</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">Autentificare în Mastodon</string>
   <string name="mastodon_login_message">Te rugăm să introduci mai jos URL-ul instanței.</string>
   <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>

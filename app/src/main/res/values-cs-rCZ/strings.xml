@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">Přihlásit se</string>
   <string name="navigate_back">Přejít zpět</string>
   <string name="confirm">Potvrdit</string>
@@ -90,10 +89,6 @@
   <string name="show_media">Zobrazit média</string>
   <string name="service_select_welcome_title">Vítejte na Flare</string>
   <string name="service_select_welcome_message">Flare je sociální síťový klient pro Android.\nChcete-li začít, vyberte službu, ke které se chcete připojit.</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">Přihlásit se do Mastodonu</string>
   <string name="mastodon_login_message">Zadejte prosím URL vaší instance níže.</string>
   <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>

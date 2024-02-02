@@ -8511,7 +8511,7 @@
         }
       }
     },
-    "bluesky_status_action_repott": {
+    "bluesky_status_action_report": {
       "comment": null,
       "localizations": {
         "en": {
@@ -28851,6 +28851,191 @@
           "stringUnit": {
             "state": "needs_review",
             "value": "Ви впевнені, що хочете повідомити про цей твіт?"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        }
+      }
+    },
+    "xqt_status_reblog_header": {
+      "comment": "Status header for xqt reblog",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "retweeted"
+          }
+        },
+        "af": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "معتدلة"
+          }
+        },
+        "ca": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "retweetované"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "retweeteret"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "geretweet"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "retweeted"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "retweeté"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "reweeted"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "retweeted"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "retweeted"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "リツイート"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "no": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "retweeted"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "powracające"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "pt_BR": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "retușat"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ретвит"
+          }
+        },
+        "sr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": ""
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "ретвітнуто"
           }
         },
         "vi": {

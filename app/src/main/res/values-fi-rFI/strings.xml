@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">Kirjaudu</string>
   <string name="navigate_back">Siirry takaisin</string>
   <string name="confirm">Vahvista</string>
@@ -90,10 +89,6 @@
   <string name="show_media">Näytä media</string>
   <string name="service_select_welcome_title">Tervetuloa Flareen</string>
   <string name="service_select_welcome_message">Flare on sosiaalisen verkon asiakas Androidille.\nPäästäksesi alkuun, valitse palvelu, johon haluat yhteyden.</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">Kirjaudu sisään Mastodoniin</string>
   <string name="mastodon_login_message">Syötä instanssin URL-osoite alle.</string>
   <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>

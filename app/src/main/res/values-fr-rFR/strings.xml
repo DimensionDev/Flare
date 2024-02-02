@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">Se connecter</string>
   <string name="navigate_back">Revenir en arrière</string>
   <string name="confirm">Valider</string>
@@ -90,10 +89,6 @@
   <string name="show_media">Afficher les médias</string>
   <string name="service_select_welcome_title">Bienvenue dans Flare</string>
   <string name="service_select_welcome_message">Fusée éclairante est un client de réseau social pour Android.\nPour commencer, veuillez sélectionner un service auquel vous connecter.</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">Se connecter à Mastodon</string>
   <string name="mastodon_login_message">Veuillez entrer l\'URL de votre instance ci-dessous.</string>
   <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>

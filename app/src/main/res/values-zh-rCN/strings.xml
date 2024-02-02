@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Flare</string>
   <string name="login_button">登录</string>
   <string name="navigate_back">返回</string>
   <string name="confirm">确认</string>
@@ -90,10 +89,6 @@
   <string name="show_media">显示媒体内容</string>
   <string name="service_select_welcome_title">欢迎使用 Flare</string>
   <string name="service_select_welcome_message">Flare 是一个 Android 平台社交客户端。\n请先选择一个服务来开始。</string>
-  <string name="service_select_mastodon">Mastodon</string>
-  <string name="service_select_passkey">Passkey</string>
-  <string name="service_select_misskey">Misskey</string>
-  <string name="service_select_bluesky">Bluesky</string>
   <string name="mastodon_login_title">登录到 Mastodon</string>
   <string name="mastodon_login_message">请在下面输入实例主机名称。</string>
   <string name="mastodon_login_hint">实例主机名称，比如 mastodon.social</string>

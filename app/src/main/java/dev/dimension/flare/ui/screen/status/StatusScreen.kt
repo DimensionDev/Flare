@@ -29,7 +29,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.status.StatusPresenter
+import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import org.koin.compose.koinInject
 
 @Composable
@@ -103,7 +103,7 @@ private fun statusPresenter(
 ) = run {
     val state =
         remember(statusKey) {
-            StatusPresenter(statusKey)
+            StatusContextPresenter(statusKey)
         }.invoke()
 
     object {

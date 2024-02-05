@@ -29,7 +29,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusActionGroup
-import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
 
@@ -49,8 +48,13 @@ internal fun XQTStatusComponent(
                     event.onStatusClick(data, uriHandler)
                 }
                 .then(modifier),
-        onMediaClick = {
-            event.onMediaClick(it, uriHandler)
+        statusKey = actualData.statusKey,
+        onMediaClick = { statusKey, index ->
+            event.onMediaClick(
+                statusKey = statusKey,
+                index = index,
+                uriHandler = uriHandler,
+            )
         },
         onUserClick = {
             event.onUserClick(it, uriHandler)
@@ -265,7 +269,8 @@ private fun RowScope.StatusFooterComponent(
 
 internal interface XQTStatusEvent {
     fun onMediaClick(
-        media: UiMedia,
+        statusKey: MicroBlogKey,
+        index: Int,
         uriHandler: UriHandler,
     )
 

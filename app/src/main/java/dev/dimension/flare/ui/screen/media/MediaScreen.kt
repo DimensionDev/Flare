@@ -1,20 +1,22 @@
 package dev.dimension.flare.ui.screen.media
 
 import android.Manifest
+import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.webkit.MimeTypeMap
+import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
@@ -25,26 +27,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import coil3.annotation.ExperimentalCoilApi
-import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
 import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.size.Size
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.mxalbert.zoomable.Zoomable
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
@@ -58,6 +59,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
+import moe.tlaster.swiper.Swiper
+import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
 import java.io.File
 import java.io.FileOutputStream
@@ -66,8 +70,39 @@ import java.io.IOException
 object FullScreenDialogStyle : DestinationStyle.Dialog {
     override val properties =
         DialogProperties(
-            usePlatformDefaultWidth = false,
+            usePlatformDefaultWidth = true,
+            decorFitsSystemWindows = false,
         )
+}
+
+@Composable
+fun getActivityWindow(): Window? = LocalView.current.context.getActivityWindow()
+
+private tailrec fun Context.getActivityWindow(): Window? =
+    when (this) {
+        is Activity -> window
+        is ContextWrapper -> baseContext.getActivityWindow()
+        else -> null
+    }
+
+@Composable
+fun SetDialogDestinationToEdgeToEdge() {
+    val activityWindow = getActivityWindow()
+    val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window
+    val parentView = LocalView.current.parent as View
+    SideEffect {
+        if (activityWindow != null && dialogWindow != null) {
+            val attributes = WindowManager.LayoutParams()
+            attributes.copyFrom(activityWindow.attributes)
+            attributes.type = dialogWindow.attributes.type
+            dialogWindow.attributes = attributes
+            parentView.layoutParams =
+                FrameLayout.LayoutParams(
+                    activityWindow.decorView.width,
+                    activityWindow.decorView.height,
+                )
+        }
+    }
 }
 
 @Composable
@@ -90,7 +125,6 @@ fun MediaRoute(
 }
 
 @OptIn(
-    ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
 )
@@ -112,44 +146,29 @@ internal fun MediaScreen(
     FlareTheme(
         darkTheme = true,
     ) {
+        val swiperState =
+            rememberSwiperState(
+                onDismiss = onDismiss,
+            )
         FullScreenBox(
             modifier =
                 Modifier
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f)),
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress))
+                    .alpha(1 - swiperState.progress),
         ) {
-            Zoomable(
-                dismissGestureEnabled = true,
-                onDismiss = {
-                    onDismiss.invoke()
-                    true
-                },
-            ) {
-                val painter =
-                    rememberAsyncImagePainter(
-                        model =
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(uri)
-                                .size(Size.ORIGINAL)
-                                .build(),
-                    )
-                if (painter.state is AsyncImagePainter.State.Success) {
-                    val size = painter.intrinsicSize
-                    Image(
-                        painter = painter,
-                        contentDescription = null,
-                        modifier =
-                            Modifier
-                                .aspectRatio(size.width / size.height)
-                                .fillMaxSize()
-                                .combinedClickable(
-                                    onClick = {},
-                                    onLongClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        state.setShowMenu(true)
-                                    },
-                                ),
-                    )
-                }
+            Swiper(state = swiperState) {
+                ZoomableAsyncImage(
+                    model = uri,
+                    contentDescription = null,
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        state.setShowMenu(true)
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxSize(),
+                )
             }
             if (state.showMenu) {
                 ModalBottomSheet(

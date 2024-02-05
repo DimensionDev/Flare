@@ -9,8 +9,11 @@ import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -63,6 +66,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
@@ -268,25 +272,42 @@ class XQTDataSource(
                 ),
         )
 
-    override fun status(
-        statusKey: MicroBlogKey,
-        pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
-        timelinePager(
-            pageSize = 1,
-            pagingKey = pagingKey,
-            accountKey = account.accountKey,
-            database = database,
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    service,
-                    database,
-                    account.accountKey,
-                    pagingKey,
-                    statusOnly = true,
-                ),
+    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+        val pagingKey = "status_only_$statusKey"
+        return Cacheable(
+            fetchSource = {
+                val response =
+                    service.getTweetDetail(
+                        variables =
+                            TweetDetailRequest(
+                                focalTweetID = statusKey.id,
+                                cursor = null,
+                            ).encodeJson(),
+                    )
+                        .body()
+                        ?.data
+                        ?.threadedConversationWithInjectionsV2
+                        ?.instructions
+                        .orEmpty()
+                val tweet = response.tweets()
+                val item = tweet.firstOrNull { it.id == statusKey.id }
+                if (item != null) {
+                    XQT.save(
+                        accountKey = account.accountKey,
+                        pagingKey = pagingKey,
+                        database = database,
+                        tweet = listOf(item),
+                    )
+                }
+            },
+            cacheSource = {
+                database.dbStatusQueries.get(statusKey, account.accountKey)
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .mapNotNull { it.content.toUi(account.accountKey) }
+            },
         )
+    }
 
     override suspend fun compose(
         data: ComposeData,

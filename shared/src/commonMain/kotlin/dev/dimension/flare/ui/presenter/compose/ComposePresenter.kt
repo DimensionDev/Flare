@@ -6,9 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
@@ -26,6 +24,7 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
+import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
@@ -49,9 +48,9 @@ class ComposePresenter(
 
         val replyState =
             status?.let { status ->
-                account.map { (_, it) ->
-                    statusPresenter(it, status)
-                }
+                remember(status.statusKey) {
+                    StatusPresenter(status.statusKey)
+                }.body().status
             }
         val emojiState =
             account.flatMap { (_, it) ->
@@ -75,17 +74,6 @@ class ComposePresenter(
                 }
             }
         }
-    }
-
-    @Composable
-    private fun statusPresenter(
-        account: UiAccount,
-        status: ComposeStatus,
-    ): LazyPagingItemsProxy<UiStatus> {
-        val service = accountServiceProvider(account = account)
-        return remember(account.accountKey) {
-            service.status(status.statusKey)
-        }.collectPagingProxy()
     }
 
     @Composable
@@ -212,7 +200,7 @@ sealed interface ComposeStatus {
 abstract class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
-    val replyState: UiState<LazyPagingItemsProxy<UiStatus>>?,
+    val replyState: UiState<UiStatus>?,
     val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
     val supportedComposeEvent: UiState<ImmutableListWrapper<SupportedComposeEvent>>,
 ) {

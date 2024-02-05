@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.presenter.status.action
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
@@ -15,6 +14,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -37,22 +37,9 @@ class MisskeyReactionPresenter(
             }
 
         val status =
-            activeAccountServicePresenter().map { (service, account) ->
-                remember(account.accountKey, statusKey) {
-                    service.status(statusKey)
-                }.collectAsLazyPagingItems()
-            }.flatMap {
-                if (it.itemCount == 0) {
-                    UiState.Loading()
-                } else {
-                    val item = it[0]
-                    if (item == null || item !is UiStatus.Misskey) {
-                        UiState.Loading()
-                    } else {
-                        UiState.Success(item)
-                    }
-                }
-            }
+            remember(statusKey) {
+                StatusPresenter(statusKey)
+            }.body().status
         // using io scope because it's a long-running operation
         val scope = koinInject<CoroutineScope>()
         return object : MisskeyReactionState {
@@ -62,7 +49,7 @@ class MisskeyReactionPresenter(
                 service.onSuccess { dataSource ->
                     status.onSuccess { status ->
                         scope.launch {
-                            dataSource.react(status, ":${emoji.shortcode}:")
+                            dataSource.react(status as UiStatus.Misskey, ":${emoji.shortcode}:")
                         }
                     }
                 }

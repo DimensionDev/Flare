@@ -29,6 +29,7 @@ import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
@@ -238,25 +239,34 @@ class BlueskyDataSource(
                 ),
         )
 
-    override fun status(
-        statusKey: MicroBlogKey,
-        pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
-        timelinePager(
-            pageSize = 1,
-            pagingKey = pagingKey,
-            accountKey = account.accountKey,
-            database = database,
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    account.getService(appDatabase),
+    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+        val pagingKey = "status_only_$statusKey"
+        val service = account.getService(appDatabase)
+        return Cacheable(
+            fetchSource = {
+                val result =
+                    service.getPosts(
+                        GetPostsQueryParams(
+                            persistentListOf(AtUri(statusKey.id)),
+                        ),
+                    ).requireResponse().posts.firstOrNull().let {
+                        listOfNotNull(it)
+                    }
+                Bluesky.savePost(
                     account.accountKey,
-                    database,
                     pagingKey,
-                    statusOnly = true,
-                ),
+                    database,
+                    result,
+                )
+            },
+            cacheSource = {
+                database.dbStatusQueries.get(statusKey, account.accountKey)
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .mapNotNull { it.content.toUi(account.accountKey) }
+            },
         )
+    }
 
     override suspend fun compose(
         data: ComposeData,

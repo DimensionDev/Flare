@@ -30,6 +30,7 @@ internal fun UiStatusQuoted(
     onMediaClick: (UiMedia) -> Unit,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    showMedia: Boolean = true,
 ) {
     when (status) {
         is UiStatus.Mastodon -> {
@@ -45,6 +46,7 @@ internal fun UiStatusQuoted(
                 modifier = modifier,
                 onClick = onClick,
                 sensitive = status.sensitive,
+                showMedia = showMedia,
             )
         }
         is UiStatus.MastodonNotification -> Unit
@@ -61,6 +63,7 @@ internal fun UiStatusQuoted(
                 modifier = modifier,
                 onClick = onClick,
                 sensitive = status.sensitive,
+                showMedia = showMedia,
             )
 
         is UiStatus.MisskeyNotification -> Unit
@@ -77,6 +80,7 @@ internal fun UiStatusQuoted(
                 modifier = modifier,
                 onClick = onClick,
                 sensitive = false,
+                showMedia = showMedia,
             )
         is UiStatus.BlueskyNotification -> Unit
         is UiStatus.XQT ->
@@ -92,6 +96,7 @@ internal fun UiStatusQuoted(
                 modifier = modifier,
                 onClick = onClick,
                 sensitive = status.sensitive,
+                showMedia = showMedia,
             )
     }
 }
@@ -107,6 +112,7 @@ private fun QuotedStatus(
     sensitive: Boolean,
     createdAt: String,
     onMediaClick: (UiMedia) -> Unit,
+    showMedia: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
@@ -162,7 +168,7 @@ private fun QuotedStatus(
                 }
                 HtmlText2(element = contentElement, layoutDirection = contentLayoutDirection)
             }
-            if (!medias.isNullOrEmpty() && LocalAppearanceSettings.current.showMedia) {
+            if (!medias.isNullOrEmpty() && LocalAppearanceSettings.current.showMedia && showMedia) {
                 StatusMediaComponent(
                     data = medias,
                     onMediaClick = onMediaClick,

@@ -46,7 +46,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusActionGroup
-import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
 import dev.dimension.flare.ui.theme.MediumAlpha
@@ -121,8 +120,13 @@ internal fun MastodonStatusComponent(
                     event.onStatusClick(data, uriHandler)
                 }
                 .then(modifier),
-        onMediaClick = {
-            event.onMediaClick(it, uriHandler)
+        statusKey = actualData.statusKey,
+        onMediaClick = { statusKey, index ->
+            event.onMediaClick(
+                statusKey = statusKey,
+                index = index,
+                uriHandler = uriHandler,
+            )
         },
         headerTrailing = {
             if (appearanceSettings.mastodon.showVisibility) {
@@ -362,7 +366,8 @@ internal interface MastodonStatusEvent {
     fun onBookmarkClick(status: UiStatus.Mastodon)
 
     fun onMediaClick(
-        media: UiMedia,
+        statusKey: MicroBlogKey,
+        index: Int,
         uriHandler: UriHandler,
     )
 

@@ -128,7 +128,6 @@ dependencies {
     ksp(libs.compose.destinations.ksp)
     lintChecks(libs.compose.lint.checks)
     implementation(libs.androidx.credentials)
-    implementation(libs.zoomable)
     implementation(libs.bundles.compose.richtext)
     implementation(libs.composeIcons.fontAwesome)
     implementation(libs.datastore)
@@ -137,6 +136,7 @@ dependencies {
     implementation(libs.material3.adaptive)
     implementation(libs.bundles.media3)
     implementation(libs.compose.placeholder.material3)
+    implementation(libs.swiper)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(projects.shared)

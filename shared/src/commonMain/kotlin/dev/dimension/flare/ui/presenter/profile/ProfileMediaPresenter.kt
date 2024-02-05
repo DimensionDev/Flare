@@ -9,10 +9,9 @@ import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.map
 
 class ProfileMediaPresenter(
@@ -27,15 +26,7 @@ class ProfileMediaPresenter(
                     service.userTimeline(userKey ?: account.accountKey, mediaOnly = true)
                         .map {
                             it.flatMap {
-                                when (it) {
-                                    is UiStatus.Bluesky -> it.medias
-                                    is UiStatus.BlueskyNotification -> persistentListOf()
-                                    is UiStatus.Mastodon -> it.media
-                                    is UiStatus.MastodonNotification -> persistentListOf()
-                                    is UiStatus.Misskey -> it.media
-                                    is UiStatus.MisskeyNotification -> persistentListOf()
-                                    is UiStatus.XQT -> it.medias
-                                }
+                                it.medias
                             }
                         }
                 }.collectPagingProxy()

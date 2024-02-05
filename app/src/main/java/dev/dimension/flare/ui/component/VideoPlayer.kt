@@ -1,9 +1,10 @@
 package dev.dimension.flare.ui.component
 
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
@@ -14,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -30,6 +32,7 @@ fun VideoPlayer(
     muted: Boolean = false,
     showControls: Boolean = false,
     keepScreenOn: Boolean = false,
+    aspectRatio: Float? = null,
 ) {
     var isLoaded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
@@ -54,12 +57,15 @@ fun VideoPlayer(
                                     }
                                 },
                             )
+                            if (aspectRatio == null) {
+                                this.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+                            }
                         }
                 PlayerView(context).apply {
                     useController = showControls
                     player = exoPlayer
                     layoutParams =
-                        FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
@@ -71,11 +77,29 @@ fun VideoPlayer(
             },
         )
         if (!isLoaded && previewUri != null) {
-            NetworkImage(
-                model = previewUri,
-                contentDescription = contentDescription,
-                modifier = Modifier.matchParentSize(),
-            )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                NetworkImage(
+                    model = previewUri,
+                    contentDescription = contentDescription,
+                    modifier =
+                        Modifier
+                            .let {
+                                if (aspectRatio != null) {
+                                    it.aspectRatio(
+                                        aspectRatio,
+                                        matchHeightConstraintsFirst = aspectRatio > 1f,
+                                    )
+                                } else {
+                                    it
+                                }
+                            },
+                )
+            }
             LinearProgressIndicator(
                 modifier =
                     Modifier

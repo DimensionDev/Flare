@@ -174,7 +174,7 @@ fun MediaItem(
         when (media) {
             is UiMedia.Image -> {
                 NetworkImage(
-                    model = media.url,
+                    model = media.previewUrl,
                     contentDescription = media.description,
                     modifier =
                         Modifier

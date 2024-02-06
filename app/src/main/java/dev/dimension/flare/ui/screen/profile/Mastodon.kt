@@ -39,6 +39,8 @@ internal fun MastodonProfileHeader(
     user: UiUser.Mastodon,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiRelation.Mastodon) -> Unit,
+    onAvatarClick: () -> Unit,
+    onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
@@ -140,6 +142,8 @@ internal fun MastodonProfileHeader(
             }
         },
         modifier = modifier,
+        onAvatarClick = onAvatarClick,
+        onBannerClick = onBannerClick,
     )
 }
 

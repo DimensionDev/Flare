@@ -33,6 +33,8 @@ internal fun MisskeyProfileHeader(
     user: UiUser.Misskey,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiRelation.Misskey) -> Unit,
+    onAvatarClick: () -> Unit,
+    onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
@@ -135,6 +137,8 @@ internal fun MisskeyProfileHeader(
             }
         },
         modifier = modifier,
+        onAvatarClick = onAvatarClick,
+        onBannerClick = onBannerClick,
     )
 }
 

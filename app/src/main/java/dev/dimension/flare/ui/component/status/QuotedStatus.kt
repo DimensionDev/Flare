@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +31,7 @@ internal fun UiStatusQuoted(
     status: UiStatus,
     onMediaClick: (UiMedia) -> Unit,
     modifier: Modifier = Modifier,
+    colors: CardColors = CardDefaults.cardColors(),
     onClick: () -> Unit = {},
     showMedia: Boolean = true,
 ) {
@@ -47,6 +50,7 @@ internal fun UiStatusQuoted(
                 onClick = onClick,
                 sensitive = status.sensitive,
                 showMedia = showMedia,
+                colors = colors,
             )
         }
         is UiStatus.MastodonNotification -> Unit
@@ -64,6 +68,7 @@ internal fun UiStatusQuoted(
                 onClick = onClick,
                 sensitive = status.sensitive,
                 showMedia = showMedia,
+                colors = colors,
             )
 
         is UiStatus.MisskeyNotification -> Unit
@@ -81,6 +86,7 @@ internal fun UiStatusQuoted(
                 onClick = onClick,
                 sensitive = false,
                 showMedia = showMedia,
+                colors = colors,
             )
         is UiStatus.BlueskyNotification -> Unit
         is UiStatus.XQT ->
@@ -97,6 +103,7 @@ internal fun UiStatusQuoted(
                 onClick = onClick,
                 sensitive = status.sensitive,
                 showMedia = showMedia,
+                colors = colors,
             )
     }
 }
@@ -114,10 +121,12 @@ private fun QuotedStatus(
     onMediaClick: (UiMedia) -> Unit,
     showMedia: Boolean,
     modifier: Modifier = Modifier,
+    colors: CardColors = CardDefaults.cardColors(),
     onClick: () -> Unit = {},
 ) {
     Card(
         modifier = modifier,
+        colors = colors,
         onClick = onClick,
     ) {
         Column {

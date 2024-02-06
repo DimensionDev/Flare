@@ -49,10 +49,11 @@ internal fun XQTStatusComponent(
                 }
                 .then(modifier),
         statusKey = actualData.statusKey,
-        onMediaClick = { statusKey, index ->
+        onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(
                 statusKey = statusKey,
                 index = index,
+                preview = preview,
                 uriHandler = uriHandler,
             )
         },
@@ -271,6 +272,7 @@ internal interface XQTStatusEvent {
     fun onMediaClick(
         statusKey: MicroBlogKey,
         index: Int,
+        preview: String?,
         uriHandler: UriHandler,
     )
 

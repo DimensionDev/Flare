@@ -363,35 +363,10 @@ internal class DefaultStatusEvent(
     override fun onMediaClick(
         statusKey: MicroBlogKey,
         index: Int,
+        preview: String?,
         uriHandler: UriHandler,
     ) {
-        uriHandler.openUri(StatusMediaRouteDestination(statusKey, index).deeplink())
-//        when (media) {
-//            is UiMedia.Image -> {
-//                uriHandler.openUri(MediaRouteDestination(media.url).deeplink())
-//            }
-//
-//            is UiMedia.Audio -> Unit
-//            is UiMedia.Gif -> {
-//                uriHandler.openUri(
-//                    VideoRouteDestination(
-//                        media.url,
-//                        previewUri = media.previewUrl,
-//                        contentDescription = media.description,
-//                    ).deeplink(),
-//                )
-//            }
-//
-//            is UiMedia.Video -> {
-//                uriHandler.openUri(
-//                    VideoRouteDestination(
-//                        media.url,
-//                        previewUri = media.thumbnailUrl,
-//                        contentDescription = media.description,
-//                    ).deeplink(),
-//                )
-//            }
-//        }
+        uriHandler.openUri(StatusMediaRouteDestination(statusKey, index, preview).deeplink())
     }
 
     override fun onDeleteClick(
@@ -702,6 +677,7 @@ internal data object EmptyStatusEvent : StatusEvent {
     override fun onMediaClick(
         statusKey: MicroBlogKey,
         index: Int,
+        preview: String?,
         uriHandler: UriHandler,
     ) = Unit
 

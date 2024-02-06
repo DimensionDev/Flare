@@ -15,11 +15,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
 import androidx.media3.ui.PlayerView
 
 @OptIn(UnstableApi::class)
@@ -33,6 +33,8 @@ fun VideoPlayer(
     showControls: Boolean = false,
     keepScreenOn: Boolean = false,
     aspectRatio: Float? = null,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     var isLoaded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
@@ -57,11 +59,9 @@ fun VideoPlayer(
                                     }
                                 },
                             )
-                            if (aspectRatio == null) {
-                                this.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-                            }
                         }
                 PlayerView(context).apply {
+                    controllerShowTimeoutMs = -1
                     useController = showControls
                     player = exoPlayer
                     layoutParams =
@@ -69,7 +69,21 @@ fun VideoPlayer(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
+                    if (aspectRatio == null) {
+                        this.resizeMode = RESIZE_MODE_ZOOM
+                    }
                     this.keepScreenOn = keepScreenOn
+                    if (onClick != null) {
+                        setOnClickListener {
+                            onClick()
+                        }
+                    }
+                    if (onLongClick != null) {
+                        setOnLongClickListener {
+                            onLongClick()
+                            true
+                        }
+                    }
                 }
             },
             onRelease = {
@@ -97,7 +111,8 @@ fun VideoPlayer(
                                 } else {
                                     it
                                 }
-                            },
+                            }
+                            .fillMaxSize(),
                 )
             }
             LinearProgressIndicator(

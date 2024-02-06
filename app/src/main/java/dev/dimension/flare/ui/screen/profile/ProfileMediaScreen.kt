@@ -38,6 +38,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMediaPresenter
+import dev.dimension.flare.ui.screen.destinations.StatusMediaRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
@@ -51,12 +52,14 @@ internal fun ProfileMediaRoute(
     ProfileMediaScreen(
         userKey = userKey,
         onBack = navigator::navigateUp,
-        onItemClicked = { media ->
-            if (media is UiMedia.Image) {
-                navigator.navigate(
-                    dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(media.url),
-                )
-            }
+        onItemClicked = { statusKey, index, preview ->
+            navigator.navigate(
+                StatusMediaRouteDestination(
+                    statusKey = statusKey,
+                    index = index,
+                    preview = preview,
+                ),
+            )
         },
     )
 }
@@ -65,7 +68,7 @@ internal fun ProfileMediaRoute(
 @Composable
 private fun ProfileMediaScreen(
     userKey: MicroBlogKey?,
-    onItemClicked: (UiMedia) -> Unit,
+    onItemClicked: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     onBack: () -> Unit,
 ) {
     val state by producePresenter(key = userKey.toString()) {
@@ -103,7 +106,24 @@ private fun ProfileMediaScreen(
                 items(items.itemCount) { index ->
                     val item = items[index]
                     if (item != null) {
-                        MediaItem(media = item, modifier = Modifier.clickable { onItemClicked(item) })
+                        val media = item.media
+                        MediaItem(
+                            media = media,
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        onItemClicked(
+                                            item.status.statusKey,
+                                            index,
+                                            when (media) {
+                                                is UiMedia.Image -> media.previewUrl
+                                                is UiMedia.Video -> media.thumbnailUrl
+                                                is UiMedia.Gif -> media.previewUrl
+                                                else -> null
+                                            },
+                                        )
+                                    },
+                        )
                     } else {
                         Card {
                             Box(modifier = Modifier.size(120.dp).placeholder(true))

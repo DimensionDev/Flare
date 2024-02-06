@@ -71,7 +71,7 @@ fun CommonStatusComponent(
     user: UiUser,
     medias: ImmutableList<UiMedia>,
     humanizedTime: String,
-    onMediaClick: (statusKey: MicroBlogKey, index: Int) -> Unit,
+    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
     sensitive: Boolean = false,
@@ -192,6 +192,12 @@ fun CommonStatusComponent(
                             onMediaClick.invoke(
                                 statusKey,
                                 medias.indexOf(it),
+                                when (it) {
+                                    is UiMedia.Image -> it.previewUrl
+                                    is UiMedia.Video -> it.thumbnailUrl
+                                    is UiMedia.Gif -> it.previewUrl
+                                    else -> null
+                                },
                             )
                         },
                         sensitive = sensitive,
@@ -241,6 +247,12 @@ fun CommonStatusComponent(
                         onMediaClick.invoke(
                             quotedStatus.statusKey,
                             quotedStatus.medias.indexOf(it),
+                            when (it) {
+                                is UiMedia.Image -> it.previewUrl
+                                is UiMedia.Video -> it.thumbnailUrl
+                                is UiMedia.Gif -> it.previewUrl
+                                else -> null
+                            },
                         )
                     },
                     onClick = {

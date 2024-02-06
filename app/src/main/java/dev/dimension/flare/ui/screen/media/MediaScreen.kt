@@ -15,8 +15,13 @@ import android.view.WindowManager
 import android.webkit.MimeTypeMap
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
@@ -27,22 +32,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
-import coil3.annotation.ExperimentalCoilApi
+import coil3.compose.rememberAsyncImagePainter
 import coil3.imageLoader
+import coil3.request.ImageRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -53,13 +62,15 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.common.FullScreenBox
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.ZoomableContentLocation
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
@@ -118,6 +129,7 @@ fun MediaRoute(
     uri: String,
     navigator: DestinationsNavigator,
 ) {
+    SetDialogDestinationToEdgeToEdge()
     MediaScreen(
         uri = uri,
         onDismiss = navigator::navigateUp,
@@ -127,6 +139,7 @@ fun MediaRoute(
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
+    ExperimentalFoundationApi::class,
 )
 @Composable
 internal fun MediaScreen(
@@ -150,7 +163,7 @@ internal fun MediaScreen(
             rememberSwiperState(
                 onDismiss = onDismiss,
             )
-        FullScreenBox(
+        Box(
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -158,16 +171,41 @@ internal fun MediaScreen(
                     .alpha(1 - swiperState.progress),
         ) {
             Swiper(state = swiperState) {
-                ZoomableAsyncImage(
-                    model = uri,
+                val zoomableState =
+                    rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
+                val painter =
+                    rememberAsyncImagePainter(
+                        model =
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(uri)
+                                .build(),
+                    )
+                LaunchedEffect(painter.intrinsicSize) {
+                    zoomableState.setContentLocation(
+                        ZoomableContentLocation.scaledInsideAndCenterAligned(
+                            painter.intrinsicSize,
+                        ),
+                    )
+                }
+                Image(
+                    painter = painter,
                     contentDescription = null,
-                    onLongClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        state.setShowMenu(true)
-                    },
+                    contentScale = ContentScale.Inside,
+                    alignment = Alignment.Center,
                     modifier =
                         Modifier
-                            .fillMaxSize(),
+                            .fillMaxSize()
+                            .zoomable(zoomableState)
+                            .combinedClickable(
+                                onClick = {
+                                },
+                                onLongClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    state.setShowMenu(true)
+                                },
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                            ),
                 )
             }
             if (state.showMenu) {
@@ -208,7 +246,6 @@ internal fun MediaScreen(
     }
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 private fun mediaPresenter(
     uri: String,
@@ -272,7 +309,7 @@ private fun getMimeType(byteArray: ByteArray): String {
     return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: "image/jpeg" // 默认为JPEG
 }
 
-private fun saveByteArrayToDownloads(
+internal fun saveByteArrayToDownloads(
     context: Context,
     byteArray: ByteArray,
     fileName: String,

@@ -84,7 +84,7 @@ struct DiscoverScreen: View {
                                         if let item = data.data.peek(index: index) {
                                             Text(item.hashtag)
                                                 .padding()
-                                        #if !os(macOS)
+                                        #if os(iOS)
                                                 .background(Color(UIColor.secondarySystemBackground))
                                         #else
                                                 .background(Color(NSColor.windowBackgroundColor))

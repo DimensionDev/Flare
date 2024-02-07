@@ -147,7 +147,7 @@ struct StatusPlaceHolder: View {
             medias: [],
             timestamp: 1696838289,
             headerTrailing: {EmptyView()},
-            onMediaClick: { _ in },
+            onMediaClick: { _, _ in },
             sensitive: false,
             card: nil
         )

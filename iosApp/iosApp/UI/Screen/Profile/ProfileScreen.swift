@@ -33,7 +33,7 @@ struct ProfileScreen: View {
                 }
             }
         }
-#if !os(macOS)
+#if os(iOS)
         .frame(width: 384)
 #endif
     }
@@ -96,7 +96,7 @@ struct ProfileScreen: View {
             }
 #endif
         }
-#if !os(macOS)
+#if os(iOS)
         .if(horizontalSizeClass == .compact, transform: { view in
             view
                 .ignoresSafeArea(edges: .top)
@@ -104,7 +104,7 @@ struct ProfileScreen: View {
 #endif
         .if(horizontalSizeClass != .compact, transform: { view in
             view
-#if !os(macOS)
+#if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
 #endif
                 .navigationTitle(title)
@@ -315,7 +315,7 @@ struct FieldsView: View {
                 .padding(.horizontal)
             }
             .padding(.vertical)
-#if !os(macOS)
+#if os(iOS)
             .background(Color(UIColor.secondarySystemBackground))
 #else
             .background(Color(NSColor.windowBackgroundColor))

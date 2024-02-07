@@ -19,7 +19,7 @@ struct HomeTimelineScreen: View {
             try? await viewModel.model.refresh()
         }
         .navigationTitle("home_timeline_title")
-#if !os(macOS)
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
 #else
         .toolbar {

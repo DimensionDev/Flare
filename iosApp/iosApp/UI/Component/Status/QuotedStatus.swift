@@ -4,7 +4,7 @@ import MarkdownUI
 
 struct QuotedStatus: View {
     let data: UiStatus
-    let onMediaClick: (UiMedia) -> Void
+    let onMediaClick: (Int, String?) -> Void
     let onUserClick: (UiUser) -> Void
     let onStatusClick: (UiStatus) -> Void
     var body: some View {
@@ -83,7 +83,7 @@ private struct QuotedContent: View {
     let user: UiUser
     let medias: [UiMedia]
     let timestamp: Int64
-    let onMediaClick: (UiMedia) -> Void
+    let onMediaClick: (Int, String?) -> Void
     let onUserClick: () -> Void
     let onStatusClick: () -> Void
     let sensitive: Bool
@@ -137,7 +137,7 @@ private struct QuotedContent: View {
             }
         })
         .buttonStyle(.plain)
-#if !os(macOS)
+#if os(iOS)
         .background(Color(UIColor.secondarySystemBackground))
 #else
         .background(Color(NSColor.windowBackgroundColor))

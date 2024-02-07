@@ -34,7 +34,7 @@ struct NotificationScreen: View {
             try? await viewModel.model.refresh()
         }
         .navigationTitle("notification_title")
-        #if !os(macOS)
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #else
         .toolbar {

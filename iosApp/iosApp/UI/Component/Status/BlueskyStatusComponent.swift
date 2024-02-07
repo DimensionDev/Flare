@@ -24,7 +24,9 @@ struct BlueskyStatusComponent: View {
                 medias: bluesky.medias,
                 timestamp: bluesky.indexedAt.epochSeconds,
                 headerTrailing: { EmptyView() },
-                onMediaClick: { media in event.onMediaClick(media: media) },
+                onMediaClick: { index, preview in
+                    event.onMediaClick(statusKey: bluesky.statusKey, index: index, preview: preview)
+                },
                 sensitive: false,
                 card: bluesky.card
             )
@@ -33,7 +35,9 @@ struct BlueskyStatusComponent: View {
                     .frame(height: 8)
                 QuotedStatus(
                     data: quote,
-                    onMediaClick: event.onMediaClick,
+                    onMediaClick: { index, preview in
+                        event.onMediaClick(statusKey: quote.statusKey, index: index, preview: preview)
+                    },
                     onUserClick: { user in
                         openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
                     },
@@ -190,7 +194,7 @@ struct BlueskyStatusComponent: View {
 }
 
 protocol BlueskyStatusEvent {
-    func onMediaClick(media: UiMedia)
+    func onMediaClick(statusKey: MicroBlogKey, index: Int, preview: String?)
     func onReplyClick(data: UiStatus.Bluesky)
     func onReblogClick(data: UiStatus.Bluesky)
     func onQuoteClick(data: UiStatus.Bluesky)

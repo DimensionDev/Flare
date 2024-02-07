@@ -28,7 +28,9 @@ struct MisskeyStatusComponent: View {
                 headerTrailing: {
                     MisskeyVisibilityIcon(visibility: actual.visibility)
                 },
-                onMediaClick: { media in event.onMediaClick(media: media) },
+                onMediaClick: { index, preview in
+                    event.onMediaClick(statusKey: actual.statusKey, index: index, preview: preview)
+                },
                 sensitive: actual.sensitive,
                 card: actual.card
             )
@@ -37,7 +39,9 @@ struct MisskeyStatusComponent: View {
                     .frame(height: 8)
                 QuotedStatus(
                     data: quote,
-                    onMediaClick: event.onMediaClick,
+                    onMediaClick: { index, preview in
+                        event.onMediaClick(statusKey: quote.statusKey, index: index, preview: preview)
+                    },
                     onUserClick: { user in
                         openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
                     },
@@ -178,7 +182,7 @@ struct MisskeyStatusComponent: View {
 }
 
 protocol MisskeyStatusEvent {
-    func onMediaClick(media: UiMedia)
+    func onMediaClick(statusKey: MicroBlogKey, index: Int, preview: String?)
     func onReactionClick(data: UiStatus.Misskey, reaction: UiStatus.MisskeyEmojiReaction)
     func onReplyClick(data: UiStatus.Misskey)
     func onReblogClick(data: UiStatus.Misskey)

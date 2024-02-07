@@ -102,7 +102,7 @@ struct ComposeScreen: View {
                                         Image(systemName: "plus")
                                     }.disabled(viewModel.pollViewModel.choices.count >= 4)
                                 }
-#if !os(macOS)
+#if os(iOS)
                                 .padding(.vertical)
 #endif
                                 ForEach($viewModel.pollViewModel.choices) { $choice in
@@ -120,7 +120,7 @@ struct ComposeScreen: View {
                                         }
                                         .disabled(viewModel.pollViewModel.choices.count <= 2)
                                     }
-#if !os(macOS)
+#if os(iOS)
                                     .padding(.bottom)
 #endif
                                 }
@@ -146,7 +146,7 @@ struct ComposeScreen: View {
                                     .frame(height: 8)
                                 QuotedStatus(
                                     data: reply.data,
-                                    onMediaClick: { _ in },
+                                    onMediaClick: { _, _ in },
                                     onUserClick: { _ in },
                                     onStatusClick: { _ in }
                                 )

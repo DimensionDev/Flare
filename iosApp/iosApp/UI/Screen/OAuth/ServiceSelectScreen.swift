@@ -32,7 +32,7 @@ struct ServiceSelectScreen: View {
             Section(header: HStack {
                 TextField("service_select_instance_url_placeholder", text: $viewModel.instanceURL)
                     .disableAutocorrection(true)
-#if !os(macOS)
+#if os(iOS)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
 #endif
@@ -70,7 +70,7 @@ struct ServiceSelectScreen: View {
                                 text: $viewModel.blueskyInputViewModel.baseUrl
                             )
                             .disableAutocorrection(true)
-#if !os(macOS)
+#if os(iOS)
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
 #endif
@@ -78,14 +78,14 @@ struct ServiceSelectScreen: View {
                             .disabled(viewModel.model.loading)
                             TextField("username", text: $viewModel.blueskyInputViewModel.username)
                                 .disableAutocorrection(true)
-#if !os(macOS)
+#if os(iOS)
                                 .textInputAutocapitalization(.never)
 #endif
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(viewModel.model.loading)
                             SecureField("password", text: $viewModel.blueskyInputViewModel.password)
                                 .disableAutocorrection(true)
-#if !os(macOS)
+#if os(iOS)
                                 .textInputAutocapitalization(.never)
                                 .keyboardType(.URL)
 #endif

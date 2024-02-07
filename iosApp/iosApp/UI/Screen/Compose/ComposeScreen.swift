@@ -141,13 +141,11 @@ struct ComposeScreen: View {
                                 }
                             }
                             if let replyState = viewModel.model.replyState,
-                               case .success(let reply) = onEnum(of: replyState),
-                               reply.data.itemCount > 0,
-                               let replyStatus = reply.data.get(index: 0) {
+                               case .success(let reply) = onEnum(of: replyState) {
                                 Spacer()
                                     .frame(height: 8)
                                 QuotedStatus(
-                                    data: replyStatus,
+                                    data: reply.data,
                                     onMediaClick: { _ in },
                                     onUserClick: { _ in },
                                     onStatusClick: { _ in }

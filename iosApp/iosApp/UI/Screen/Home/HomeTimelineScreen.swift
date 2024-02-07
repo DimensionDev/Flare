@@ -19,9 +19,21 @@ struct HomeTimelineScreen: View {
             try? await viewModel.model.refresh()
         }
         .navigationTitle("home_timeline_title")
-        #if !os(macOS)
+#if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
-        #endif
+#else
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button(action: {
+                    Task {
+                        try? await viewModel.model.refresh()
+                    }
+                }, label: {
+                    Image(systemName: "arrow.clockwise.circle")
+                })
+            }
+        }
+#endif
         .activateViewModel(viewModel: viewModel)
     }
 }

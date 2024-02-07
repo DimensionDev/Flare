@@ -11,7 +11,7 @@ struct ProfileMediaListScreen: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 128))], content: {
                 if case .success(let success) = onEnum(of: viewModel.model.mediaState) {
                     ForEach(0..<success.data.itemCount, id: \.self) { index in
-                        if let item = success.data.peek(index: index) {
+                        if let item = success.data.peek(index: index)?.media {
                             let image = item as? UiMediaImage
                             let shouldBlur = image?.sensitive ?? false
                             MediaItemComponent(media: item)

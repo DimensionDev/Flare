@@ -155,7 +155,7 @@ struct ProfileScreen: View {
 }
 
 struct LargeProfileImagePreviews: View {
-    let state: UiState<LazyPagingItemsProxy<UiMedia>>
+    let state: UiState<LazyPagingItemsProxy<ProfileMedia>>
     var body: some View {
         switch onEnum(of: state) {
         case .error:
@@ -167,7 +167,7 @@ struct LargeProfileImagePreviews: View {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                     ForEach(0..<min(success.data.itemCount, 6), id: \.self) { index in
                         let item = success.data.peek(index: index)
-                        if let media = item {
+                        if let media = item?.media {
                             let image = media as? UiMediaImage
                             let shouldBlur = image?.sensitive ?? false
                             MediaItemComponent(media: media)
@@ -190,7 +190,7 @@ struct LargeProfileImagePreviews: View {
 }
 
 struct SmallProfileMediaPreviews: View {
-    let state: UiState<LazyPagingItemsProxy<UiMedia>>
+    let state: UiState<LazyPagingItemsProxy<ProfileMedia>>
     var body: some View {
         switch onEnum(of: state) {
         case .error:
@@ -203,7 +203,7 @@ struct SmallProfileMediaPreviews: View {
                     LazyHStack(content: {
                         ForEach(0..<min(success.data.itemCount, 6), id: \.self) { index in
                             let item = success.data.peek(index: index)
-                            if let media = item {
+                            if let media = item?.media {
                                 let image = media as? UiMediaImage
                                 let shouldBlur = image?.sensitive ?? false
                                 MediaItemComponent(media: media)

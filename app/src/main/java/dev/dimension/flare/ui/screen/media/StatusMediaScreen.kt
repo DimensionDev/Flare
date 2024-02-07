@@ -12,8 +12,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -142,11 +140,9 @@ internal fun StatusMediaScreen(
     val state by producePresenter {
         statusMediaPresenter(statusKey, index, context)
     }
-
     BackHandler(state.showUi) {
         state.setShowUi(false)
     }
-
     FlareTheme(darkTheme = true) {
         val swiperState =
             rememberSwiperState(
@@ -159,7 +155,10 @@ internal fun StatusMediaScreen(
                     .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress))
                     .alpha(1 - swiperState.progress),
         ) {
-            Swiper(state = swiperState) {
+            Swiper(
+                state = swiperState,
+                enabled = !state.lockPager,
+            ) {
                 Box(
                     modifier =
                         Modifier
@@ -179,6 +178,7 @@ internal fun StatusMediaScreen(
                         }
                         HorizontalPager(
                             state = pagerState,
+                            userScrollEnabled = !state.lockPager,
                         ) {
                             when (val media = medias[it]) {
                                 is UiMedia.Audio ->
@@ -219,6 +219,11 @@ internal fun StatusMediaScreen(
                                 is UiMedia.Image -> {
                                     val zoomableState =
                                         rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
+                                    LaunchedEffect(zoomableState.zoomFraction) {
+                                        zoomableState.zoomFraction?.let {
+                                            state.setLockPager(it > 0.01f)
+                                        } ?: state.setLockPager(false)
+                                    }
                                     val painter =
                                         rememberAsyncImagePainter(
                                             model =
@@ -242,8 +247,8 @@ internal fun StatusMediaScreen(
                                         modifier =
                                             Modifier
                                                 .fillMaxSize()
-                                                .zoomable(zoomableState)
-                                                .combinedClickable(
+                                                .zoomable(
+                                                    zoomableState,
                                                     onClick = {
                                                         state.setShowUi(!state.showUi)
                                                     },
@@ -251,8 +256,6 @@ internal fun StatusMediaScreen(
                                                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                                         state.setShowMenu(true)
                                                     },
-                                                    indication = null,
-                                                    interactionSource = remember { MutableInteractionSource() },
                                                 ),
                                     )
                                 }
@@ -280,30 +283,39 @@ internal fun StatusMediaScreen(
                             }
                         }
                         if (pagerState.pageCount > 1) {
-                            Row(
-                                Modifier
-                                    .wrapContentHeight()
-                                    .fillMaxWidth()
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 8.dp)
-                                    .systemBarsPadding(),
-                                horizontalArrangement = Arrangement.Center,
+                            AnimatedVisibility(
+                                visible = !state.lockPager,
+                                enter = slideInVertically { it },
+                                exit = slideOutVertically { it },
+                                modifier =
+                                    Modifier
+                                        .wrapContentHeight()
+                                        .fillMaxWidth()
+                                        .align(Alignment.BottomCenter),
                             ) {
-                                repeat(pagerState.pageCount) { iteration ->
-                                    val color =
-                                        if (pagerState.currentPage == iteration) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                                        }
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .padding(2.dp)
-                                                .clip(CircleShape)
-                                                .background(color)
-                                                .size(8.dp),
-                                    )
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .padding(bottom = 8.dp)
+                                            .systemBarsPadding(),
+                                    horizontalArrangement = Arrangement.Center,
+                                ) {
+                                    repeat(pagerState.pageCount) { iteration ->
+                                        val color =
+                                            if (pagerState.currentPage == iteration) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                            }
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .padding(2.dp)
+                                                    .clip(CircleShape)
+                                                    .background(color)
+                                                    .size(8.dp),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -435,6 +447,9 @@ private fun statusMediaPresenter(
     var showMenu by remember {
         mutableStateOf(false)
     }
+    var lockPager by remember {
+        mutableStateOf(false)
+    }
     val state =
         remember(statusKey) {
             StatusPresenter(statusKey)
@@ -452,9 +467,12 @@ private fun statusMediaPresenter(
         val withVideoPadding = withVideoPadding
         val showMenu = showMenu
         val currentPage = currentPage
+        val lockPager = lockPager
 
         fun setShowUi(value: Boolean) {
-            showUi = value
+            if (!lockPager) {
+                showUi = value
+            }
         }
 
         fun setWithVideoPadding(value: Boolean) {
@@ -467,6 +485,13 @@ private fun statusMediaPresenter(
 
         fun setCurrentPage(value: Int) {
             currentPage = value
+        }
+
+        fun setLockPager(value: Boolean) {
+            lockPager = value
+            if (value) {
+                showUi = false
+            }
         }
 
         fun save(uri: String) {

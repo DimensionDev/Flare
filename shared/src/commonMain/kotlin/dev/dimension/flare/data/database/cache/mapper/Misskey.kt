@@ -26,7 +26,13 @@ internal object Misskey {
         sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() },
     ) {
         val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
-        val status = data.map { it.toDbStatus(accountKey) }
+        val status =
+            data.flatMap {
+                listOfNotNull(
+                    it.toDbStatus(accountKey),
+                    it.renote?.toDbStatus(accountKey),
+                )
+            }
         val user = data.map { it.user.toDbUser(accountKey.host) }
         save(database, timeline, status, user)
     }
@@ -38,7 +44,13 @@ internal object Misskey {
         data: List<Notification>,
     ) {
         val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey) }
-        val status = data.map { it.toDbStatus(accountKey) }
+        val status =
+            data.flatMap {
+                listOfNotNull(
+                    it.toDbStatus(accountKey),
+                    it.note?.toDbStatus(accountKey),
+                )
+            }
         val user = data.mapNotNull { it.user?.toDbUser(accountKey.host) }
         save(database, timeline, status, user)
     }

@@ -23,7 +23,13 @@ internal object Mastodon {
         sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0 },
     ) {
         val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
-        val status = data.map { it.toDbStatus(accountKey) }
+        val status =
+            data.flatMap {
+                listOfNotNull(
+                    it.toDbStatus(accountKey),
+                    it.reblog?.toDbStatus(accountKey),
+                )
+            }
         val user = data.mapNotNull { it.account?.toDbUser(accountKey.host) }
         database.transaction {
             timeline.forEach {
@@ -63,7 +69,13 @@ internal object Mastodon {
         data: List<Notification>,
     ) {
         val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey) }
-        val status = data.map { it.toDbStatus(accountKey) }
+        val status =
+            data.flatMap {
+                listOfNotNull(
+                    it.toDbStatus(accountKey),
+                    it.status?.toDbStatus(accountKey),
+                )
+            }
         val user = data.mapNotNull { it.account?.toDbUser(accountKey.host) }
         database.transaction {
             timeline.forEach {

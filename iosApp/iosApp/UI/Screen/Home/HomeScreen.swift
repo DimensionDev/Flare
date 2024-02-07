@@ -147,8 +147,8 @@ struct HomeScreen: View {
         ) {
             ZStack {
                 Color.black.ignoresSafeArea()
-                if let data = statusEvent.mediaClickData, let preview = data.preview {
-                    AsyncImage(url: URL(string: preview))
+                if let data = statusEvent.mediaClickData {
+                    StatusMediaScreen(statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
                 }
             }
         }

@@ -8,7 +8,7 @@
 ![badge-Bluesky](https://img.shields.io/badge/Bluesky-blue)
 ![badge-xQt](https://img.shields.io/badge/xQt-black)
 
-![badge-Android](https://img.shields.io/badge/Android-5.0-3DDC84)
+![badge-Android](https://img.shields.io/badge/Android-7.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-17.0-black)
 ![badge-macOS](https://img.shields.io/badge/macOS-14.0-black)
 

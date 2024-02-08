@@ -16,6 +16,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
     let onMediaClick: (Int, String?) -> Void
     let sensitive: Bool
     let card: UiCard?
+    let replyToHandle: String?
     init(
         content: String,
         contentWarning: String?,
@@ -25,7 +26,8 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
         headerTrailing: @escaping () -> HeaderTrailing,
         onMediaClick: @escaping (Int, String?) -> Void,
         sensitive: Bool,
-        card: UiCard?
+        card: UiCard?,
+        replyToHandle: String? = nil
     ) {
         self.content = content
         self.contentWarning = contentWarning
@@ -36,6 +38,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
         self.onMediaClick = onMediaClick
         self.sensitive = sensitive
         self.card = card
+        self.replyToHandle = replyToHandle
         _expanded = State(initialValue: contentWarning == nil)
         showMedia = false
     }
@@ -50,6 +53,13 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
                 }
                 .foregroundColor(.gray)
                 .font(.caption)
+            }
+            if let replyHandle = replyToHandle {
+                Text(String(localized: "Reply to \(replyHandle)"))
+                    .font(.caption)
+                    .opacity(0.6)
+                Spacer()
+                    .frame(height: 4)
             }
             if let cwText = contentWarning, !cwText.isEmpty {
                 Button(action: {

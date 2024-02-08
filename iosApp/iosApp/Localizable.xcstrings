@@ -23388,6 +23388,16 @@
         }
       }
     },
+    "Reply to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reply to %@"
+          }
+        }
+      }
+    },
     "report" : {
       "localizations" : {
         "af" : {

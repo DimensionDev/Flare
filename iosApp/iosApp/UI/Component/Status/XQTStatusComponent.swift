@@ -32,7 +32,8 @@ struct XQTStatusComponent: View {
                     event.onMediaClick(statusKey: actual.statusKey, index: index, preview: preview)
                 },
                 sensitive: actual.sensitive,
-                card: actual.card
+                card: actual.card,
+                replyToHandle: actual.replyHandle
             )
             if let quote = actual.quote {
                 Spacer()

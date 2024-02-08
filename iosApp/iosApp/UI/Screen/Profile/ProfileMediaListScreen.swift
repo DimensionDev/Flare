@@ -3,6 +3,7 @@ import shared
 
 struct ProfileMediaListScreen: View {
     @State var viewModel: ProfileMediaViewModel
+    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     init(userKey: MicroBlogKey) {
         viewModel = ProfileMediaViewModel(userKey: userKey)
     }
@@ -11,10 +12,11 @@ struct ProfileMediaListScreen: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 128))], content: {
                 if case .success(let success) = onEnum(of: viewModel.model.mediaState) {
                     ForEach(0..<success.data.itemCount, id: \.self) { index in
-                        if let item = success.data.peek(index: index)?.media {
-                            let image = item as? UiMediaImage
+                        if let item = success.data.peek(index: index) {
+                            let media = item.media
+                            let image = item.media as? UiMediaImage
                             let shouldBlur = image?.sensitive ?? false
-                            MediaItemComponent(media: item)
+                            MediaItemComponent(media: item.media)
                                 .if(shouldBlur, transform: { view in
                                     view.blur(radius: 32)
                                 })
@@ -23,6 +25,12 @@ struct ProfileMediaListScreen: View {
                                 })
                                 .aspectRatio(1, contentMode: .fill)
                                 .clipped()
+                                .onTapGesture {
+                                    let index = item.status.medias_.firstIndex { it in
+                                        it === media
+                                    } ?? 0
+                                    statusEvent.onMediaClick(statusKey: item.status.statusKey, index: index, preview: nil)
+                                }
                         }
                     }
                 }

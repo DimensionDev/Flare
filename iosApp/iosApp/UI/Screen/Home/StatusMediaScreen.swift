@@ -3,10 +3,12 @@ import shared
 
 struct StatusMediaScreen: View {
     @State var viewModel: StatusMediaViewModel
+    let initialIndex: Int
     let dismiss: () -> Void
     
     init(statusKey: MicroBlogKey, index: Int, dismiss: @escaping () -> Void) {
         viewModel = .init(statusKey: statusKey)
+        self.initialIndex = index
         self.dismiss = dismiss
     }
     
@@ -19,18 +21,23 @@ struct StatusMediaScreen: View {
                 case .loading(_):
                     Text("loading")
                 case .success(let success):
-                    ScrollView(.horizontal) {
-                        LazyHStack(spacing: 0) {
-                            ForEach(0..<success.data.medias_.count, id: \.self) { index in
-                                let item = success.data.medias_[index]
-                                FullScreenImageViewer(media: item)
-                                    .frame(width: geometry.size.width)
+                    ScrollViewReader { reader in
+                        ScrollView(.horizontal) {
+                            LazyHStack(spacing: 0) {
+                                ForEach(0..<success.data.medias_.count, id: \.self) { index in
+                                    let item = success.data.medias_[index]
+                                    FullScreenImageViewer(media: item)
+                                        .frame(width: geometry.size.width)
+                                }
                             }
+                            .scrollTargetLayout()
                         }
-                        .scrollTargetLayout()
+                        .scrollTargetBehavior(.paging)
+                        .ignoresSafeArea()
+                        .onAppear {
+                            reader.scrollTo(initialIndex)
+                        }
                     }
-                    .scrollTargetBehavior(.paging)
-                    .ignoresSafeArea()
                 }
                 
                 VStack {

@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">削除</string>
   <string name="media_menu_save">保存</string>
   <string name="media_save_success">ダウンロードに保存しました</string>
+  <string name="reply_to">%1$s に返信</string>
 </resources>

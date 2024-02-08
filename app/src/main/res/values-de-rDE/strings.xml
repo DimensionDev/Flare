@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Entfernen</string>
   <string name="media_menu_save">Speichern</string>
   <string name="media_save_success">In Downloads gespeichert</string>
+  <string name="reply_to">Auf %1$s antworten</string>
 </resources>

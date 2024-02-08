@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Poista</string>
   <string name="media_menu_save">Tallenna</string>
   <string name="media_save_success">Tallennettu latauksiin</string>
+  <string name="reply_to">Vastaa %1$s</string>
 </resources>

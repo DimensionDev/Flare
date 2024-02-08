@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Fjern</string>
   <string name="media_menu_save">Gem</string>
   <string name="media_save_success">Gemt i Downloads</string>
+  <string name="reply_to">Svar på %1$s</string>
 </resources>

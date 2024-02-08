@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Verwijderen</string>
   <string name="media_menu_save">Opslaan</string>
   <string name="media_save_success">Opgeslagen in Downloads</string>
+  <string name="reply_to">Antwoord aan %1$s</string>
 </resources>

@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Odebrat</string>
   <string name="media_menu_save">Uložit</string>
   <string name="media_save_success">Uloženo do souborů</string>
+  <string name="reply_to">Odpovědět %1$s</string>
 </resources>

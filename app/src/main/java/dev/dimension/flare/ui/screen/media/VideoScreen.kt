@@ -1,18 +1,20 @@
 package dev.dimension.flare.ui.screen.media
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.mxalbert.zoomable.Zoomable
+import androidx.compose.ui.draw.alpha
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import dev.dimension.flare.ui.common.FullScreenBox
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.theme.FlareTheme
+import moe.tlaster.swiper.Swiper
+import moe.tlaster.swiper.rememberSwiperState
 
 @Destination(
     style = FullScreenDialogStyle::class,
@@ -29,6 +31,7 @@ internal fun VideoRoute(
     contentDescription: String?,
     navigator: DestinationsNavigator,
 ) {
+    SetDialogDestinationToEdgeToEdge()
     VideoScreen(
         uri = uri,
         previewUri = previewUri,
@@ -47,18 +50,18 @@ internal fun VideoScreen(
     FlareTheme(
         darkTheme = true,
     ) {
-        FullScreenBox(
+        val swiperState =
+            rememberSwiperState(
+                onDismiss = onDismiss,
+            )
+        Box(
             modifier =
                 Modifier
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f)),
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress))
+                    .alpha(1 - swiperState.progress),
         ) {
-            Zoomable(
-                dismissGestureEnabled = true,
-                onDismiss = {
-                    onDismiss.invoke()
-                    true
-                },
-            ) {
+            Swiper(state = swiperState) {
                 VideoPlayer(
                     uri = uri,
                     previewUri = previewUri,

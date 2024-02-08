@@ -41,6 +41,8 @@ internal fun XQTProfileHeader(
     user: UiUser.XQT,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiRelation.XQT) -> Unit,
+    onAvatarClick: () -> Unit,
+    onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
@@ -166,6 +168,8 @@ internal fun XQTProfileHeader(
             }
         },
         modifier = modifier,
+        onAvatarClick = onAvatarClick,
+        onBannerClick = onBannerClick,
     )
 }
 

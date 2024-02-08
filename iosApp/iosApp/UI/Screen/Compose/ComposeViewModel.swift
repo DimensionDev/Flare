@@ -167,7 +167,7 @@ class ComposeViewModel: MoleculeViewModelProto {
     }
     private func getXQTUserName() -> String? {
         if case .success(let data) = onEnum(of: self.model.replyState),
-           let status = data.data.peek(index: 0) as? UiStatus.XQT {
+           let status = data.data as? UiStatus.XQT {
             status.user.rawHandle
         } else {
             nil

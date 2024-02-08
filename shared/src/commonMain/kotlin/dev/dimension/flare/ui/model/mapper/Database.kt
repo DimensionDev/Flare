@@ -4,52 +4,54 @@ import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.cache.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 
 internal fun DbPagingTimelineWithStatusView.toUi(): UiStatus {
-    return when (val status = status_content) {
+    return status_content.toUi(timeline_account_key)
+}
+
+internal fun StatusContent.toUi(accountKey: MicroBlogKey) =
+    when (this) {
         is StatusContent.Mastodon ->
-            status.data.toUi(
-                accountKey = timeline_account_key,
+            data.toUi(
+                accountKey = accountKey,
             )
 
         is StatusContent.MastodonNotification ->
-            status.data.toUi(
-                accountKey = timeline_account_key,
+            data.toUi(
+                accountKey = accountKey,
             )
 
         is StatusContent.Misskey ->
-            status.data.toUi(
-                accountKey = timeline_account_key,
+            data.toUi(
+                accountKey = accountKey,
             )
 
         is StatusContent.MisskeyNotification ->
-            status.data.toUi(
-                accountKey = timeline_account_key,
+            data.toUi(
+                accountKey = accountKey,
             )
+
         is StatusContent.Bluesky ->
-            if (status.reason != null) {
-                status.reason.toUi(
-                    accountKey = timeline_account_key,
-                    data = status.data,
-                )
-            } else {
-                status.data.toUi(
-                    accountKey = timeline_account_key,
-                )
-            }
+            reason?.toUi(
+                accountKey = accountKey,
+                data = data,
+            ) ?: data.toUi(
+                accountKey = accountKey,
+            )
+
         is StatusContent.BlueskyNotification ->
-            status.data.toUi(
-                accountKey = timeline_account_key,
+            data.toUi(
+                accountKey = accountKey,
             )
 
         is StatusContent.XQT ->
-            status.data.toUi(
-                accountKey = timeline_account_key,
+            data.toUi(
+                accountKey = accountKey,
             )
     }
-}
 
 internal fun DbUser.toUi(): UiUser {
     return when (val user = content) {
@@ -64,14 +66,17 @@ internal fun DbUser.toUi(): UiUser {
             user.data.toUi(
                 accountHost = user_key.host,
             )
+
         is UserContent.Bluesky ->
             user.data.toUi(
                 accountHost = user_key.host,
             )
+
         is UserContent.BlueskyLite ->
             user.data.toUi(
                 accountHost = user_key.host,
             )
+
         is UserContent.XQT ->
             user.data.toUi()
     }

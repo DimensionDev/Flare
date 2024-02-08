@@ -6,7 +6,7 @@ import AVKit
 struct MediaComponent: View {
     @State var hideSensitive: Bool
     let medias: [UiMedia]
-    let onMediaClick: (UiMedia) -> Void
+    let onMediaClick: (Int, String?) -> Void
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
             media is UiMediaImage
@@ -25,20 +25,46 @@ struct MediaComponent: View {
                     case .image(let image):
                         MediaItemComponent(media: medias[0])
                             .aspectRatio(.init(image.aspectRatio), contentMode: .fill)
+                            .onTapGesture {
+                                onMediaClick(0, image.previewUrl)
+                            }
                     case .video(let video):
                         MediaItemComponent(media: medias[0])
                             .aspectRatio(.init(video.aspectRatio), contentMode: .fill)
+                            .onTapGesture {
+                                onMediaClick(0, video.thumbnailUrl)
+                            }
                     case .gif(let gif):
                         MediaItemComponent(media: medias[0])
                             .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
+                            .onTapGesture {
+                                onMediaClick(0, gif.previewUrl)
+                            }
                     case .audio:
                         MediaItemComponent(media: medias[0])
                             .frame(minHeight: 48)
+                            .onTapGesture {
+                                onMediaClick(0, nil)
+                            }
                     }
                 } else {
                     ForEach(1...medias.count, id: \.self) { index in
-                        MediaItemComponent(media: medias[index - 1])
+                        let item = medias[index - 1]
+                        MediaItemComponent(media: item)
                             .aspectRatio(1, contentMode: .fill)
+                            .onTapGesture {
+                                let preview: String? = switch onEnum(of: item) {
+                                case .audio(_):
+                                    nil
+                                case .gif(let gif):
+                                    gif.previewUrl
+                                case .image(let image):
+                                    image.previewUrl
+                                case .video(let video):
+                                    video.thumbnailUrl
+                                }
+                                onMediaClick(index - 1, preview)
+                            }
                     }
                 }
             }
@@ -86,7 +112,7 @@ struct MediaComponent: View {
 }
 
 struct MediaItemComponent: View {
-#if !os(macOS)
+#if os(iOS)
     @State var showCover = false
 #else
     @Environment(\.openWindow) var openWindow
@@ -129,16 +155,16 @@ struct MediaItemComponent: View {
                 openWindow(id: "video-view", value: gif.url)
             }
         }
-#else
-        .onTapGesture {
-            showCover = true
-        }
-        .fullScreenCover(
-            isPresented: $showCover,
-            onDismiss: { showCover = false }
-        ) {
-            FullScreenImageViewer(media: media, dismiss: { showCover = false })
-        }
+//#else
+//        .onTapGesture {
+//            showCover = true
+//        }
+//        .fullScreenCover(
+//            isPresented: $showCover,
+//            onDismiss: { showCover = false }
+//        ) {
+//            FullScreenImageViewer(media: media, dismiss: { showCover = false })
+//        }
 #endif
     }
 }

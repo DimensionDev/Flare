@@ -16,7 +16,7 @@ struct HomeScreen: View {
                         image: "house",
                         destination: TabItem { _ in
                             HomeTimelineScreen()
-#if !os(macOS)
+#if os(iOS)
                                 .if(horizontalSizeClass == .compact, transform: { view in
                                     view
                                         .navigationBarTitleDisplayMode(.inline)
@@ -85,7 +85,7 @@ struct HomeScreen: View {
                         Image(systemName: "gear")
                             .opacity(0.5)
                     }
-#if !os(macOS)
+#if os(iOS)
                     .padding([.horizontal, .top])
 #endif
                     .buttonStyle(.plain)
@@ -140,6 +140,19 @@ struct HomeScreen: View {
 #endif
             }
         }
+#if os(iOS)
+        .fullScreenCover(
+            isPresented: Binding(get: { statusEvent.mediaClickData != nil }, set: { value in if !value { statusEvent.mediaClickData = nil }}),
+            onDismiss: { statusEvent.mediaClickData = nil }
+        ) {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                if let data = statusEvent.mediaClickData {
+                    StatusMediaScreen(statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
+                }
+            }
+        }
+#endif
         .activateViewModel(viewModel: viewModel)
         .environment(statusEvent)
     }
@@ -180,8 +193,9 @@ struct TabItem<Content: View>: View {
 class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, XQTStatusEvent {
     let accountRepository = KoinHelper.shared.accountRepository
     var composeStatus: ComposeStatus?
+    var mediaClickData: MediaClickData?
     func onReplyClick(status: UiStatus.Mastodon) {
-        composeStatus = ComposeStatusReply(statusKey: status.statusKey)
+        self.composeStatus = ComposeStatusReply(statusKey: status.statusKey)
     }
     func onReblogClick(status: UiStatus.Mastodon) {
         Task {
@@ -204,7 +218,8 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
             }
         }
     }
-    func onMediaClick(media: UiMedia) {
+    func onMediaClick(statusKey: MicroBlogKey, index: Int, preview: String?) {
+        self.mediaClickData = MediaClickData(statusKey: statusKey, index: index, preview: preview)
     }
     func onReportClick(status: UiStatus.Mastodon) {
         Task {
@@ -320,7 +335,6 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
 class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, XQTStatusEvent {
     static let shared = EmptyStatusEvent()
     private init() {
-        
     }
     func onReplyClick(status: UiStatus.Mastodon) {
     }
@@ -330,7 +344,7 @@ class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEv
     }
     func onBookmarkClick(status: UiStatus.Mastodon) {
     }
-    func onMediaClick(media: UiMedia) {
+    func onMediaClick(statusKey: MicroBlogKey, index: Int, preview: String?) {
     }
     func onReportClick(status: UiStatus.Mastodon) {
     }
@@ -360,18 +374,20 @@ class EmptyStatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEv
     }
     func onReplyClick(status: UiStatus.XQT) {
     }
-    
     func onReblogClick(status: UiStatus.XQT) {
     }
-    
     func onLikeClick(status: UiStatus.XQT) {
     }
-    
     func onBookmarkClick(status: UiStatus.XQT) {
     }
-    
     func onReportClick(status: UiStatus.XQT) {
     }
     func onQuoteClick(status: UiStatus.XQT) {
     }
+}
+
+struct MediaClickData {
+    let statusKey: MicroBlogKey
+    let index: Int
+    let preview: String?
 }

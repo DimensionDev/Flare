@@ -32,6 +32,8 @@ internal fun BlueskyProfileHeader(
     user: UiUser.Bluesky,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiRelation.Bluesky) -> Unit,
+    onAvatarClick: () -> Unit,
+    onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
@@ -119,6 +121,8 @@ internal fun BlueskyProfileHeader(
             }
         },
         modifier = modifier,
+        onAvatarClick = onAvatarClick,
+        onBannerClick = onBannerClick,
     )
 }
 

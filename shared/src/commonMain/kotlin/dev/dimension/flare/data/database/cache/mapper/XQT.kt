@@ -19,6 +19,7 @@ import dev.dimension.flare.data.network.xqt.model.TimelineTweet
 import dev.dimension.flare.data.network.xqt.model.TimelineUser
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
+import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
@@ -38,7 +39,14 @@ internal object XQT {
         sortIdProvider: (XQTTimeline) -> Long = { it.sortedIndex },
     ) {
         val timeline = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
-        val status = tweet.map { it.tweets.toDbStatus(accountKey) }
+        val status =
+            tweet.flatMap {
+                listOfNotNull(
+                    it.tweets.toDbStatus(accountKey),
+                    it.tweets.tweetResults.result?.getRetweet()?.toDbStatus(accountKey),
+                    it.tweets.tweetResults.result?.getQuoted()?.toDbStatus(accountKey),
+                )
+            }
         val user = tweet.map { it.tweets.toDbUser() }
         database.transaction {
             timeline.forEach {
@@ -72,7 +80,23 @@ internal object XQT {
     }
 }
 
-internal fun XQTTimeline.toDbPagingTimeline(
+private fun TweetUnion.getRetweet(): TweetUnion? {
+    return when (this) {
+        is Tweet -> this.legacy?.retweetedStatusResult?.result
+        is TweetTombstone -> null
+        is TweetWithVisibilityResults -> this.tweet.legacy?.retweetedStatusResult?.result
+    }
+}
+
+private fun TweetUnion.getQuoted(): TweetUnion? {
+    return when (this) {
+        is Tweet -> this.quotedStatusResult?.result
+        is TweetTombstone -> null
+        is TweetWithVisibilityResults -> this.tweet.quotedStatusResult?.result
+    }
+}
+
+private fun XQTTimeline.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (XQTTimeline) -> Long = { sortedIndex },
@@ -87,13 +111,23 @@ internal fun XQTTimeline.toDbPagingTimeline(
     )
 }
 
-internal fun TimelineTweet.toDbStatus(accountKey: MicroBlogKey): DbStatus {
-    val tweet =
-        when (tweetResults.result) {
-            is Tweet -> tweetResults.result
-            null, is TweetTombstone -> throw IllegalStateException("Tweet tombstone should not be saved")
-            is TweetWithVisibilityResults -> tweetResults.result.tweet
-        }
+private fun TimelineTweet.toDbStatus(accountKey: MicroBlogKey): DbStatus {
+    return tweetResults.result?.toDbStatus(accountKey)
+        ?: throw IllegalStateException("Tweet should not be null")
+}
+
+private fun TweetUnion.toDbStatus(accountKey: MicroBlogKey): DbStatus {
+    return when (this) {
+        is Tweet -> toDbStatus(this, accountKey)
+        is TweetTombstone -> throw IllegalStateException("Tweet tombstone should not be saved")
+        is TweetWithVisibilityResults -> toDbStatus(this.tweet, accountKey)
+    }
+}
+
+private fun toDbStatus(
+    tweet: Tweet,
+    accountKey: MicroBlogKey,
+): DbStatus {
     val user =
         tweet.core
             ?.userResults
@@ -166,6 +200,7 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                 } else {
                     listOf(union.entry)
                 }
+
             is TimelineAddToModule ->
                 union.moduleItems.mapNotNull {
                     if (it.item.itemContent is TimelineTweet &&
@@ -186,6 +221,7 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                         null
                     }
                 }
+
             else -> emptyList()
         }
     }.flatMap { entry ->

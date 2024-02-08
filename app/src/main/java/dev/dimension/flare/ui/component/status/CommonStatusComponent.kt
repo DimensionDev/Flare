@@ -54,6 +54,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
@@ -63,13 +64,14 @@ import moe.tlaster.ktml.dom.Element
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonStatusComponent(
+    statusKey: MicroBlogKey,
     rawContent: String,
     content: Element,
     contentDirection: LayoutDirection,
     user: UiUser,
     medias: ImmutableList<UiMedia>,
     humanizedTime: String,
-    onMediaClick: (UiMedia) -> Unit,
+    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
     sensitive: Boolean = false,
@@ -186,7 +188,18 @@ fun CommonStatusComponent(
                 if (appearanceSettings.showMedia || showMedia) {
                     StatusMediaComponent(
                         data = medias,
-                        onMediaClick = onMediaClick,
+                        onMediaClick = {
+                            onMediaClick.invoke(
+                                statusKey,
+                                medias.indexOf(it),
+                                when (it) {
+                                    is UiMedia.Image -> it.previewUrl
+                                    is UiMedia.Video -> it.thumbnailUrl
+                                    is UiMedia.Gif -> it.previewUrl
+                                    else -> null
+                                },
+                            )
+                        },
                         sensitive = sensitive,
                     )
                 } else {
@@ -230,7 +243,18 @@ fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(4.dp))
                 UiStatusQuoted(
                     quotedStatus,
-                    onMediaClick,
+                    onMediaClick = {
+                        onMediaClick.invoke(
+                            quotedStatus.statusKey,
+                            quotedStatus.medias.indexOf(it),
+                            when (it) {
+                                is UiMedia.Image -> it.previewUrl
+                                is UiMedia.Video -> it.thumbnailUrl
+                                is UiMedia.Gif -> it.previewUrl
+                                else -> null
+                            },
+                        )
+                    },
                     onClick = {
                         onQuotedStatusClick?.invoke(quotedStatus)
                     },

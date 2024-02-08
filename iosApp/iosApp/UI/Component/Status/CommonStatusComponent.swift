@@ -13,7 +13,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
     let medias: [UiMedia]
     let timestamp: Int64
     @ViewBuilder let headerTrailing: () -> HeaderTrailing
-    let onMediaClick: (UiMedia) -> Void
+    let onMediaClick: (Int, String?) -> Void
     let sensitive: Bool
     let card: UiCard?
     init(
@@ -23,7 +23,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
         medias: [UiMedia],
         timestamp: Int64,
         headerTrailing: @escaping () -> HeaderTrailing,
-        onMediaClick: @escaping (UiMedia) -> Void,
+        onMediaClick: @escaping (Int, String?) -> Void,
         sensitive: Bool,
         card: UiCard?
     ) {

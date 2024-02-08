@@ -33,7 +33,7 @@ extension InlineImageProvider where Self == EmojiInlineImageProvider {
     }
 }
 
-#if !os(macOS)
+#if os(iOS)
 extension UIImage {
     func resize(height: CGFloat) -> UIImage? {
         let heightRatio = height / size.height

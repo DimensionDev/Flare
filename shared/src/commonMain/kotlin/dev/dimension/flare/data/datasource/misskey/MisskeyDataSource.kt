@@ -10,6 +10,7 @@ import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.Misskey
 import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
@@ -45,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -137,7 +139,8 @@ class MisskeyDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Misskey).asFlow()
+                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Misskey)
+                    .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi() }
             },
@@ -235,24 +238,27 @@ class MisskeyDataSource(
         )
     }
 
-    override fun status(
-        statusKey: MicroBlogKey,
-        pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
-            pageSize = 1,
-            pagingKey = pagingKey,
-            accountKey = account.accountKey,
-            database = database,
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    database,
-                    account,
-                    service,
-                    pagingKey,
-                    statusOnly = true,
-                ),
+    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+        val pagingKey = "status_only_$statusKey"
+        return Cacheable(
+            fetchSource = {
+                val result =
+                    service.notesShow(
+                        IPinRequest(noteId = statusKey.id),
+                    ).body()
+                Misskey.save(
+                    database = database,
+                    accountKey = account.accountKey,
+                    pagingKey = pagingKey,
+                    data = listOfNotNull(result),
+                )
+            },
+            cacheSource = {
+                database.dbStatusQueries.get(statusKey, account.accountKey)
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .mapNotNull { it.content.toUi(account.accountKey) }
+            },
         )
     }
 
@@ -335,8 +341,14 @@ class MisskeyDataSource(
             )
 
             // delete status from cache
-            database.dbStatusQueries.delete(status_key = statusKey, account_key = account.accountKey)
-            database.dbPagingTimelineQueries.deleteStatus(account_key = account.accountKey, status_key = statusKey)
+            database.dbStatusQueries.delete(
+                status_key = statusKey,
+                account_key = account.accountKey,
+            )
+            database.dbPagingTimelineQueries.deleteStatus(
+                account_key = account.accountKey,
+                status_key = statusKey,
+            )
         }
     }
 

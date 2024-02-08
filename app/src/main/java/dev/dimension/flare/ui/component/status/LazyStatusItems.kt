@@ -43,7 +43,6 @@ import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
 import dev.dimension.flare.ui.component.status.xqt.XQTStatusComponent
 import dev.dimension.flare.ui.component.status.xqt.XQTStatusEvent
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.onError
@@ -51,11 +50,10 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.screen.destinations.BlueskyReportStatusRouteDestination
 import dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination
-import dev.dimension.flare.ui.screen.destinations.MediaRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination
+import dev.dimension.flare.ui.screen.destinations.StatusMediaRouteDestination
 import dev.dimension.flare.ui.screen.destinations.StatusRouteDestination
-import dev.dimension.flare.ui.screen.destinations.VideoRouteDestination
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
@@ -363,35 +361,12 @@ internal class DefaultStatusEvent(
     }
 
     override fun onMediaClick(
-        media: UiMedia,
+        statusKey: MicroBlogKey,
+        index: Int,
+        preview: String?,
         uriHandler: UriHandler,
     ) {
-        when (media) {
-            is UiMedia.Image -> {
-                uriHandler.openUri(MediaRouteDestination(media.url).deeplink())
-            }
-
-            is UiMedia.Audio -> Unit
-            is UiMedia.Gif -> {
-                uriHandler.openUri(
-                    VideoRouteDestination(
-                        media.url,
-                        previewUri = media.previewUrl,
-                        contentDescription = media.description,
-                    ).deeplink(),
-                )
-            }
-
-            is UiMedia.Video -> {
-                uriHandler.openUri(
-                    VideoRouteDestination(
-                        media.url,
-                        previewUri = media.thumbnailUrl,
-                        contentDescription = media.description,
-                    ).deeplink(),
-                )
-            }
-        }
+        uriHandler.openUri(StatusMediaRouteDestination(statusKey, index, preview).deeplink())
     }
 
     override fun onDeleteClick(
@@ -700,7 +675,9 @@ internal data object EmptyStatusEvent : StatusEvent {
     override fun onBookmarkClick(data: UiStatus.XQT) = Unit
 
     override fun onMediaClick(
-        media: UiMedia,
+        statusKey: MicroBlogKey,
+        index: Int,
+        preview: String?,
         uriHandler: UriHandler,
     ) = Unit
 

@@ -11,7 +11,6 @@ import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -210,7 +209,7 @@ class ProfilePresenter(
 abstract class ProfileState(
     val userState: UiState<UiUser>,
     val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
-    val mediaState: UiState<LazyPagingItemsProxy<UiMedia>>,
+    val mediaState: UiState<LazyPagingItemsProxy<ProfileMedia>>,
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,
 ) {

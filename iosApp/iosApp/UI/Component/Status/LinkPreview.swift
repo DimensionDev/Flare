@@ -29,7 +29,7 @@ struct LinkPreview: View {
         }
         .frame(maxWidth: 600)
         .buttonStyle(.plain)
-#if !os(macOS)
+#if os(iOS)
         .background(Color(UIColor.secondarySystemBackground))
 #else
         .background(Color(NSColor.windowBackgroundColor))

@@ -46,10 +46,7 @@ interface MicroblogDataSource {
         pagingKey: String = "status_$statusKey",
     ): Flow<PagingData<UiStatus>>
 
-    fun status(
-        statusKey: MicroBlogKey,
-        pagingKey: String = "status_only_$statusKey",
-    ): Flow<PagingData<UiStatus>>
+    fun status(statusKey: MicroBlogKey): CacheData<UiStatus>
 
     suspend fun compose(
         data: ComposeData,

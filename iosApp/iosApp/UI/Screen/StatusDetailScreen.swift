@@ -27,10 +27,10 @@ struct StatusDetailScreen: View {
 
 @Observable
 class StatusDetailViewModel: MoleculeViewModelProto {
-    let presenter: StatusPresenter
-    var model: StatusState
-    typealias Model = StatusState
-    typealias Presenter = StatusPresenter
+    let presenter: StatusContextPresenter
+    var model: StatusContextState
+    typealias Model = StatusContextState
+    typealias Presenter = StatusContextPresenter
     init(statusKey: MicroBlogKey) {
         presenter = .init(statusKey: statusKey)
         model = presenter.models.value

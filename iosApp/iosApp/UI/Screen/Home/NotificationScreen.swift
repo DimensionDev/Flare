@@ -34,8 +34,20 @@ struct NotificationScreen: View {
             try? await viewModel.model.refresh()
         }
         .navigationTitle("notification_title")
-        #if !os(macOS)
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #else
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button(action: {
+                    Task {
+                        try? await viewModel.model.refresh()
+                    }
+                }, label: {
+                    Image(systemName: "arrow.clockwise.circle")
+                })
+            }
+        }
         #endif
         .toolbar {
             if horizontalSizeClass != .compact,

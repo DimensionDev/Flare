@@ -53,6 +53,8 @@
 		06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */; };
 		06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851502B6B22DD00DFA075 /* AppDelegate.swift */; };
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
+		06B851592B73881E00DFA075 /* StatusMediaScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851582B73881E00DFA075 /* StatusMediaScreen.swift */; };
+		06B8515B2B73930100DFA075 /* Zoomable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B8515A2B73930100DFA075 /* Zoomable.swift */; };
 		06C862712B4D0C7A008C902C /* FlareTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862702B4D0C7A008C902C /* FlareTheme.swift */; };
 		06C862732B4D2A14008C902C /* UserInterfaceSizeClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862722B4D2A14008C902C /* UserInterfaceSizeClass.swift */; };
 		06C862762B4D2A55008C902C /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862752B4D2A55008C902C /* UIImage.swift */; };
@@ -117,6 +119,8 @@
 		06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		06B851502B6B22DD00DFA075 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		06B851542B6B926D00DFA075 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		06B851582B73881E00DFA075 /* StatusMediaScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMediaScreen.swift; sourceTree = "<group>"; };
+		06B8515A2B73930100DFA075 /* Zoomable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zoomable.swift; sourceTree = "<group>"; };
 		06BE4D632B3181B0000C6D7D /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
 		06C862702B4D0C7A008C902C /* FlareTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareTheme.swift; sourceTree = "<group>"; };
 		06C862722B4D2A14008C902C /* UserInterfaceSizeClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceSizeClass.swift; sourceTree = "<group>"; };
@@ -227,6 +231,7 @@
 				060501BD2ACAC4ED00DBCCEB /* NotificationScreen.swift */,
 				063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */,
 				0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */,
+				06B851582B73881E00DFA075 /* StatusMediaScreen.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -245,6 +250,7 @@
 				061C2CFB2B4E77D700249514 /* FullScreenImageViewer.swift */,
 				061C2CFD2B4E82C900249514 /* ImageViewWindow.swift */,
 				B62B20B8FBDDC1477802F015 /* WebView.swift */,
+				06B8515A2B73930100DFA075 /* Zoomable.swift */,
 			);
 			path = Component;
 			sourceTree = "<group>";
@@ -557,6 +563,7 @@
 				0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */,
 				060881BE2AE109FA001AAD2F /* ComposeScreen.swift in Sources */,
 				0690CF8D2B5F51A200824A21 /* XQTLoginScreen.swift in Sources */,
+				06B851592B73881E00DFA075 /* StatusMediaScreen.swift in Sources */,
 				061C2D002B4E8B0600249514 /* StatusDetailScreen.swift in Sources */,
 				068D2E0D2AEF5BE800F2B1AE /* BlueskyNotificationComponent.swift in Sources */,
 				067D89902AD3FC5300F8F932 /* MisskeyStatusComponent.swift in Sources */,
@@ -592,6 +599,7 @@
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
 				B62B213A8296FC2A13CAE4D7 /* KotlinByteArray.swift in Sources */,
 				B62B2D085825C9FFC6B5910D /* QuotedStatus.swift in Sources */,
+				06B8515B2B73930100DFA075 /* Zoomable.swift in Sources */,
 				B62B238878D4BA843A1BB66F /* ViewExt.swift in Sources */,
 				06C9C5612B34241400AE5284 /* AdativeTabView.swift in Sources */,
 				B62B27AA5CE37383A67B419B /* CommonProfileHeader.swift in Sources */,

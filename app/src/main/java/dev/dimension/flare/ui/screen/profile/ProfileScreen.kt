@@ -103,6 +103,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.profile.ProfileMedia
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
@@ -142,8 +143,19 @@ fun ProfileWithUserNameAndHostRoute(
             onBack = {
                 navigator.navigateUp()
             },
+            onProfileMediaClick = {
+                navigator.navigate(
+                    dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                        it.userKey,
+                    ),
+                )
+            },
             onMediaClick = {
-                navigator.navigate(dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(it.userKey))
+                navigator.navigate(
+                    dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                        it,
+                    ),
+                )
             },
         )
     }.onLoading {
@@ -274,8 +286,19 @@ fun ProfileRoute(
         onBack = {
             navigator.navigateUp()
         },
+        onProfileMediaClick = {
+            navigator.navigate(
+                dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                    userKey,
+                ),
+            )
+        },
         onMediaClick = {
-            navigator.navigate(dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(userKey))
+            navigator.navigate(
+                dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                    it,
+                ),
+            )
         },
     )
 }
@@ -286,7 +309,8 @@ private fun ProfileScreen(
     // null means current user
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
-    onMediaClick: () -> Unit = {},
+    onProfileMediaClick: () -> Unit = {},
+    onMediaClick: (url: String) -> Unit = {},
     showTopBar: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -429,6 +453,16 @@ private fun ProfileScreen(
                                 )
                             },
                             expandMatrices = true,
+                            onAvatarClick = {
+                                state.state.userState.onSuccess {
+                                    onMediaClick(it.avatarUrl)
+                                }
+                            },
+                            onBannerClick = {
+                                state.state.userState.onSuccess {
+                                    it.bannerUrl?.let { it1 -> onMediaClick(it1) }
+                                }
+                            },
                         )
                     }
                     Card {
@@ -437,7 +471,7 @@ private fun ProfileScreen(
                             orientation = Orientation.Vertical,
                             modifier =
                                 Modifier.clickable {
-                                    onMediaClick.invoke()
+                                    onProfileMediaClick.invoke()
                                 },
                         )
                     }
@@ -471,6 +505,16 @@ private fun ProfileScreen(
                                         Spacer(modifier = Modifier.width(screenHorizontalPadding))
                                     },
                                     expandMatrices = false,
+                                    onAvatarClick = {
+                                        state.state.userState.onSuccess {
+                                            onMediaClick(it.avatarUrl)
+                                        }
+                                    },
+                                    onBannerClick = {
+                                        state.state.userState.onSuccess {
+                                            it.bannerUrl?.let { it1 -> onMediaClick(it1) }
+                                        }
+                                    },
                                 )
                             }
                             item {
@@ -479,7 +523,7 @@ private fun ProfileScreen(
                                     orientation = Orientation.Horizontal,
                                     modifier =
                                         Modifier.clickable {
-                                            onMediaClick.invoke()
+                                            onProfileMediaClick.invoke()
                                         },
                                 )
                             }
@@ -609,6 +653,8 @@ private fun ProfileHeader(
     userState: UiState<UiUser>,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiUser, UiRelation) -> Unit,
+    onAvatarClick: () -> Unit,
+    onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
     expandMatrices: Boolean,
@@ -646,6 +692,8 @@ private fun ProfileHeader(
                     isMe = isMe,
                     menu = menu,
                     expandMatrices = expandMatrices,
+                    onAvatarClick = onAvatarClick,
+                    onBannerClick = onBannerClick,
                 )
             }
         }
@@ -657,6 +705,8 @@ private fun ProfileHeaderSuccess(
     user: UiUser,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiUser, UiRelation) -> Unit,
+    onAvatarClick: () -> Unit,
+    onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
@@ -674,6 +724,8 @@ private fun ProfileHeaderSuccess(
                 },
                 menu = menu,
                 expandMatrices = expandMatrices,
+                onAvatarClick = onAvatarClick,
+                onBannerClick = onBannerClick,
             )
         }
 
@@ -688,6 +740,8 @@ private fun ProfileHeaderSuccess(
                 },
                 menu = menu,
                 expandMatrices = expandMatrices,
+                onAvatarClick = onAvatarClick,
+                onBannerClick = onBannerClick,
             )
         }
 
@@ -702,6 +756,8 @@ private fun ProfileHeaderSuccess(
                 },
                 menu = menu,
                 expandMatrices = expandMatrices,
+                onAvatarClick = onAvatarClick,
+                onBannerClick = onBannerClick,
             )
 
         is UiUser.XQT ->
@@ -715,6 +771,8 @@ private fun ProfileHeaderSuccess(
                 },
                 menu = menu,
                 expandMatrices = expandMatrices,
+                onAvatarClick = onAvatarClick,
+                onBannerClick = onBannerClick,
             )
     }
 }
@@ -726,6 +784,8 @@ internal fun CommonProfileHeader(
     displayName: Element,
     handle: String,
     modifier: Modifier = Modifier,
+    onAvatarClick: (() -> Unit)? = null,
+    onBannerClick: (() -> Unit)? = null,
     headerTrailing: @Composable RowScope.() -> Unit = {},
     handleTrailing: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit = {},
@@ -751,7 +811,16 @@ internal fun CommonProfileHeader(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(actualBannerHeight),
+                        .height(actualBannerHeight)
+                        .let {
+                            if (onBannerClick != null) {
+                                it.clickable {
+                                    onBannerClick.invoke()
+                                }
+                            } else {
+                                it
+                            }
+                        },
             )
         } ?: Box(
             modifier =
@@ -781,7 +850,21 @@ internal fun CommonProfileHeader(
                                 top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
                             ),
                 ) {
-                    AvatarComponent(data = avatarUrl, size = ProfileHeaderConstants.AVATAR_SIZE.dp)
+                    AvatarComponent(
+                        data = avatarUrl,
+                        size = ProfileHeaderConstants.AVATAR_SIZE.dp,
+                        modifier =
+                            Modifier
+                                .let {
+                                    if (onAvatarClick != null) {
+                                        it.clickable {
+                                            onAvatarClick.invoke()
+                                        }
+                                    } else {
+                                        it
+                                    }
+                                },
+                    )
                 }
                 Column(
                     modifier =
@@ -905,7 +988,7 @@ internal fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ProfileMeidasPreview(
-    mediaState: UiState<LazyPagingItemsProxy<UiMedia>>,
+    mediaState: UiState<LazyPagingItemsProxy<ProfileMedia>>,
     orientation: Orientation,
     modifier: Modifier = Modifier,
 ) {
@@ -922,13 +1005,14 @@ private fun ProfileMeidasPreview(
                                 if (item == null) {
                                     Box(
                                         modifier =
-                                            Modifier.aspectRatio(1f)
+                                            Modifier
+                                                .aspectRatio(1f)
                                                 .placeholder(true),
                                     )
                                 } else {
                                     Box {
                                         MediaItem(
-                                            media = item,
+                                            media = item.media,
                                             modifier = Modifier.fillMaxSize(),
                                         )
                                         if (it == count - 1) {
@@ -938,9 +1022,11 @@ private fun ProfileMeidasPreview(
                                                         .matchParentSize()
                                                         .background(
                                                             color =
-                                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                                    3.dp,
-                                                                ).copy(alpha = 0.25f),
+                                                                MaterialTheme.colorScheme
+                                                                    .surfaceColorAtElevation(
+                                                                        3.dp,
+                                                                    )
+                                                                    .copy(alpha = 0.25f),
                                                         ),
                                                 contentAlignment = Alignment.Center,
                                             ) {
@@ -960,7 +1046,8 @@ private fun ProfileMeidasPreview(
                         repeat(6) {
                             Box(
                                 modifier =
-                                    Modifier.aspectRatio(1f)
+                                    Modifier
+                                        .aspectRatio(1f)
                                         .fillMaxSize()
                                         .placeholder(true),
                             )
@@ -984,31 +1071,36 @@ private fun ProfileMeidasPreview(
                             if (item == null) {
                                 Box(
                                     modifier =
-                                        Modifier.aspectRatio(1f)
+                                        Modifier
+                                            .aspectRatio(1f)
                                             .size(64.dp)
                                             .placeholder(true),
                                 )
                             } else {
                                 Box {
                                     MediaItem(
-                                        media = item,
+                                        media = item.media,
                                         modifier =
-                                            Modifier.size(64.dp).let {
-                                                if (item is UiMedia.Image && item.sensitive &&
-                                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                                                ) {
-                                                    it.blur(32.dp)
-                                                } else {
-                                                    it
-                                                }
-                                            },
+                                            Modifier
+                                                .size(64.dp)
+                                                .let {
+                                                    if (item.media is UiMedia.Image &&
+                                                        (item.media as UiMedia.Image).sensitive &&
+                                                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                                                    ) {
+                                                        it.blur(32.dp)
+                                                    } else {
+                                                        it
+                                                    }
+                                                },
                                     )
                                     Box(
                                         modifier =
                                             Modifier
                                                 .matchParentSize()
                                                 .let {
-                                                    if (item is UiMedia.Image && item.sensitive &&
+                                                    if (item.media is UiMedia.Image &&
+                                                        (item.media as UiMedia.Image).sensitive &&
                                                         Build.VERSION.SDK_INT < Build.VERSION_CODES.S
                                                     ) {
                                                         it.background(MaterialTheme.colorScheme.surfaceContainer)
@@ -1024,9 +1116,11 @@ private fun ProfileMeidasPreview(
                                                     .matchParentSize()
                                                     .background(
                                                         color =
-                                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                                3.dp,
-                                                            ).copy(alpha = 0.25f),
+                                                            MaterialTheme.colorScheme
+                                                                .surfaceColorAtElevation(
+                                                                    3.dp,
+                                                                )
+                                                                .copy(alpha = 0.25f),
                                                     ),
                                             contentAlignment = Alignment.Center,
                                         ) {
@@ -1046,7 +1140,8 @@ private fun ProfileMeidasPreview(
                     items(6) {
                         Box(
                             modifier =
-                                Modifier.aspectRatio(1f)
+                                Modifier
+                                    .aspectRatio(1f)
                                     .size(64.dp)
                                     .placeholder(true),
                         )

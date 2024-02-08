@@ -5,16 +5,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -31,22 +30,9 @@ class BlueskyReportStatusPresenter(
                 service as BlueskyDataSource
             }
         val status =
-            activeAccountServicePresenter().map { (service, account) ->
-                remember(account.accountKey, statusKey) {
-                    service.status(statusKey)
-                }.collectAsLazyPagingItems()
-            }.flatMap {
-                if (it.itemCount == 0) {
-                    UiState.Loading()
-                } else {
-                    val item = it[0]
-                    if (item == null || item !is UiStatus.Bluesky) {
-                        UiState.Loading()
-                    } else {
-                        UiState.Success(item)
-                    }
-                }
-            }
+            remember(statusKey) {
+                StatusPresenter(statusKey)
+            }.body().status
         var reason by remember { mutableStateOf<BlueskyReportStatusState.ReportReason?>(null) }
         // using io scope because it's a long-running operation
         val scope = koinInject<CoroutineScope>()
@@ -56,7 +42,10 @@ class BlueskyReportStatusPresenter(
                 get() = reason
 
             override val status: UiState<UiStatus.Bluesky>
-                get() = status
+                get() =
+                    status.map {
+                        it as UiStatus.Bluesky
+                    }
 
             override fun report(
                 value: BlueskyReportStatusState.ReportReason,

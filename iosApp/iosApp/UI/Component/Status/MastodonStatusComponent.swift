@@ -27,7 +27,9 @@ struct MastodonStatusComponent: View {
                 headerTrailing: {
                     MastodonVisibilityIcon(visibility: actual.visibility)
                 },
-                onMediaClick: { media in event.onMediaClick(media: media) },
+                onMediaClick: { index, preview in
+                    event.onMediaClick(statusKey: actual.statusKey, index: index, preview: preview)
+                },
                 sensitive: actual.sensitive,
                 card: actual.card
             )
@@ -162,7 +164,7 @@ protocol MastodonStatusEvent {
     func onReblogClick(status: UiStatus.Mastodon)
     func onLikeClick(status: UiStatus.Mastodon)
     func onBookmarkClick(status: UiStatus.Mastodon)
-    func onMediaClick(media: UiMedia)
+    func onMediaClick(statusKey: MicroBlogKey, index: Int, preview: String?)
     func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey)
     func onReportClick(status: UiStatus.Mastodon)
 }

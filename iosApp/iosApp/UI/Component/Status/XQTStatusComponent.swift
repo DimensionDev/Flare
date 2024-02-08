@@ -3,6 +3,7 @@ import MarkdownUI
 import shared
 
 struct XQTStatusComponent: View {
+    @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     @State var showDeleteAlert = false
     @State var showReportAlert = false
@@ -27,10 +28,28 @@ struct XQTStatusComponent: View {
                 headerTrailing: {
                     EmptyView()
                 },
-                onMediaClick: { media in event.onMediaClick(media: media) },
+                onMediaClick: { index, preview in
+                    event.onMediaClick(statusKey: actual.statusKey, index: index, preview: preview)
+                },
                 sensitive: actual.sensitive,
                 card: actual.card
             )
+            if let quote = actual.quote {
+                Spacer()
+                    .frame(height: 8)
+                QuotedStatus(
+                    data: quote,
+                    onMediaClick: { index, preview in
+                        event.onMediaClick(statusKey: quote.statusKey, index: index, preview: preview)
+                    },
+                    onUserClick: { user in
+                        openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
+                    },
+                    onStatusClick: { _ in
+                        event.onQuoteClick(status: quote)
+                    }
+                )
+            }
             if appSettings.appearanceSettings.showActions {
                 Spacer()
                     .frame(height: 8)
@@ -168,7 +187,7 @@ protocol XQTStatusEvent {
     func onReblogClick(status: UiStatus.XQT)
     func onLikeClick(status: UiStatus.XQT)
     func onBookmarkClick(status: UiStatus.XQT)
-    func onMediaClick(media: UiMedia)
+    func onMediaClick(statusKey: MicroBlogKey, index: Int, preview: String?)
     func onDeleteClick(accountKey: MicroBlogKey, statusKey: MicroBlogKey)
     func onReportClick(status: UiStatus.XQT)
     func onQuoteClick(status: UiStatus.XQT)

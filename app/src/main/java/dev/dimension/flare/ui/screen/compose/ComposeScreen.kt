@@ -534,19 +534,14 @@ private fun ComposeScreen(
 
             state.state.replyState?.let { replyState ->
                 replyState.onSuccess { state ->
-                    if (state.itemCount > 0) {
-                        val item = state[0]
-                        if (item != null) {
-                            UiStatusQuoted(
-                                status = item,
-                                onMediaClick = {},
-                                modifier =
-                                    Modifier
-                                        .padding(horizontal = screenHorizontalPadding)
-                                        .fillMaxWidth(),
-                            )
-                        }
-                    }
+                    UiStatusQuoted(
+                        status = state,
+                        onMediaClick = {},
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding)
+                                .fillMaxWidth(),
+                    )
                 }
             }
         }
@@ -876,9 +871,9 @@ private fun composePresenter(
             }
         }
     state.replyState?.onSuccess {
-        LaunchedEffect(it.itemCount) {
-            if (it.itemCount == 1 && textFieldState.text.isEmpty()) {
-                when (val item = it[0]) {
+        LaunchedEffect(it) {
+            if (textFieldState.text.isEmpty()) {
+                when (val item = it) {
                     is UiStatus.Mastodon -> {
                         textFieldState.edit {
                             append("${item.user.handle} ")
@@ -1029,10 +1024,9 @@ private fun composePresenter(
                                 quoteUsername =
                                     (status as? ComposeStatus.Quote)?.let {
                                         if (state.replyState is UiState.Success) {
-                                            (state.replyState as UiState.Success).data
-                                                .peek(0)?.let {
-                                                    it as? UiStatus.XQT
-                                                }?.user?.rawHandle
+                                            (state.replyState as UiState.Success).data.let {
+                                                it as? UiStatus.XQT
+                                            }?.user?.rawHandle
                                         } else {
                                             null
                                         }

@@ -44,7 +44,17 @@ fun NetworkImage(
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality,
 ) {
     SubcomposeAsyncImage(
-        model = model,
+        model =
+            ImageRequest.Builder(LocalContext.current)
+                .data(model)
+                .let {
+                    if (model is String) {
+                        it.memoryCacheKey(model)
+                    } else {
+                        it
+                    }
+                }
+                .build(),
         contentDescription = contentDescription,
         alignment = alignment,
         contentScale = contentScale,
@@ -60,7 +70,7 @@ fun NetworkImage(
 
 @Composable
 fun EmojiImage(
-    uri: Any?,
+    uri: String,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current

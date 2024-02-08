@@ -832,3 +832,14 @@ fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT {
         raw = Tweet(restId = ""),
     )
 }
+
+val UiStatus.medias: ImmutableList<UiMedia>
+    get() {
+        return when (this) {
+            is UiStatus.Mastodon -> media
+            is UiStatus.Misskey -> media
+            is UiStatus.Bluesky -> medias
+            is UiStatus.XQT -> medias
+            else -> persistentListOf()
+        }
+    }

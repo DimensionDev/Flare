@@ -1,9 +1,10 @@
 package dev.dimension.flare.ui.component
 
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
 import androidx.media3.ui.PlayerView
 
 @OptIn(UnstableApi::class)
@@ -30,6 +32,9 @@ fun VideoPlayer(
     muted: Boolean = false,
     showControls: Boolean = false,
     keepScreenOn: Boolean = false,
+    aspectRatio: Float? = null,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     var isLoaded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
@@ -56,14 +61,29 @@ fun VideoPlayer(
                             )
                         }
                 PlayerView(context).apply {
+                    controllerShowTimeoutMs = -1
                     useController = showControls
                     player = exoPlayer
                     layoutParams =
-                        FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
+                    if (aspectRatio == null) {
+                        this.resizeMode = RESIZE_MODE_ZOOM
+                    }
                     this.keepScreenOn = keepScreenOn
+                    if (onClick != null) {
+                        setOnClickListener {
+                            onClick()
+                        }
+                    }
+                    if (onLongClick != null) {
+                        setOnLongClickListener {
+                            onLongClick()
+                            true
+                        }
+                    }
                 }
             },
             onRelease = {
@@ -71,11 +91,30 @@ fun VideoPlayer(
             },
         )
         if (!isLoaded && previewUri != null) {
-            NetworkImage(
-                model = previewUri,
-                contentDescription = contentDescription,
-                modifier = Modifier.matchParentSize(),
-            )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                NetworkImage(
+                    model = previewUri,
+                    contentDescription = contentDescription,
+                    modifier =
+                        Modifier
+                            .let {
+                                if (aspectRatio != null) {
+                                    it.aspectRatio(
+                                        aspectRatio,
+                                        matchHeightConstraintsFirst = aspectRatio > 1f,
+                                    )
+                                } else {
+                                    it
+                                }
+                            }
+                            .fillMaxSize(),
+                )
+            }
             LinearProgressIndicator(
                 modifier =
                     Modifier

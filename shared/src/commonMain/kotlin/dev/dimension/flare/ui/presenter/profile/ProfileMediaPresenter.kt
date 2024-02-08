@@ -11,8 +11,8 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.map
 
 class ProfileMediaPresenter(
@@ -25,16 +25,13 @@ class ProfileMediaPresenter(
             accountServiceState.map { (service, account) ->
                 remember(account.accountKey, userKey) {
                     service.userTimeline(userKey ?: account.accountKey, mediaOnly = true)
-                        .map {
-                            it.flatMap {
-                                when (it) {
-                                    is UiStatus.Bluesky -> it.medias
-                                    is UiStatus.BlueskyNotification -> persistentListOf()
-                                    is UiStatus.Mastodon -> it.media
-                                    is UiStatus.MastodonNotification -> persistentListOf()
-                                    is UiStatus.Misskey -> it.media
-                                    is UiStatus.MisskeyNotification -> persistentListOf()
-                                    is UiStatus.XQT -> it.medias
+                        .map { data ->
+                            data.flatMap { status ->
+                                status.medias.map {
+                                    ProfileMedia(
+                                        it,
+                                        status,
+                                    )
                                 }
                             }
                         }
@@ -47,5 +44,10 @@ class ProfileMediaPresenter(
 }
 
 interface ProfileMediaState {
-    val mediaState: UiState<LazyPagingItemsProxy<UiMedia>>
+    val mediaState: UiState<LazyPagingItemsProxy<ProfileMedia>>
 }
+
+data class ProfileMedia(
+    val media: UiMedia,
+    val status: UiStatus,
+)

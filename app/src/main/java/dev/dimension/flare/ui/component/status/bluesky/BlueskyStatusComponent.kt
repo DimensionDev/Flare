@@ -29,7 +29,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusActionGroup
-import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
 
@@ -48,8 +47,14 @@ internal fun BlueskyStatusComponent(
                     event.onStatusClick(data, uriHandler)
                 }
                 .then(modifier),
-        onMediaClick = {
-            event.onMediaClick(it, uriHandler)
+        statusKey = data.statusKey,
+        onMediaClick = { statusKey, index, preview ->
+            event.onMediaClick(
+                statusKey = statusKey,
+                index = index,
+                preview = preview,
+                uriHandler = uriHandler,
+            )
         },
         onUserClick = {
             event.onUserClick(it, uriHandler)
@@ -250,7 +255,9 @@ internal interface BlueskyStatusEvent {
     )
 
     fun onMediaClick(
-        media: UiMedia,
+        statusKey: MicroBlogKey,
+        index: Int,
+        preview: String?,
         uriHandler: UriHandler,
     )
 

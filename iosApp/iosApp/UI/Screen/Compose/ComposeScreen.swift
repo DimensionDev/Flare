@@ -102,7 +102,7 @@ struct ComposeScreen: View {
                                         Image(systemName: "plus")
                                     }.disabled(viewModel.pollViewModel.choices.count >= 4)
                                 }
-#if !os(macOS)
+#if os(iOS)
                                 .padding(.vertical)
 #endif
                                 ForEach($viewModel.pollViewModel.choices) { $choice in
@@ -120,7 +120,7 @@ struct ComposeScreen: View {
                                         }
                                         .disabled(viewModel.pollViewModel.choices.count <= 2)
                                     }
-#if !os(macOS)
+#if os(iOS)
                                     .padding(.bottom)
 #endif
                                 }
@@ -141,14 +141,12 @@ struct ComposeScreen: View {
                                 }
                             }
                             if let replyState = viewModel.model.replyState,
-                               case .success(let reply) = onEnum(of: replyState),
-                               reply.data.itemCount > 0,
-                               let replyStatus = reply.data.get(index: 0) {
+                               case .success(let reply) = onEnum(of: replyState) {
                                 Spacer()
                                     .frame(height: 8)
                                 QuotedStatus(
-                                    data: replyStatus,
-                                    onMediaClick: { _ in },
+                                    data: reply.data,
+                                    onMediaClick: { _, _ in },
                                     onUserClick: { _ in },
                                     onStatusClick: { _ in }
                                 )

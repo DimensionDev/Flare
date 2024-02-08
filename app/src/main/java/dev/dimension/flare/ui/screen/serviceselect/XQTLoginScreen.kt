@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import com.kevinnzou.accompanist.web.WebView
-import com.kevinnzou.accompanist.web.rememberWebViewState
+import com.kevinnzou.web.WebView
+import com.kevinnzou.web.rememberWebViewState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.ResultBackNavigator

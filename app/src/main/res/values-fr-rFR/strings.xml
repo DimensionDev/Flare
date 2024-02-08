@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Retirer</string>
   <string name="media_menu_save">Enregistrer</string>
   <string name="media_save_success">Enregistré dans les téléchargements</string>
+  <string name="reply_to">Répondre à %1$s</string>
 </resources>

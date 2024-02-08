@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Excluir</string>
   <string name="media_menu_save">Guardar</string>
   <string name="media_save_success">Salvo nos Downloads</string>
+  <string name="reply_to">Responder à %1$s</string>
 </resources>

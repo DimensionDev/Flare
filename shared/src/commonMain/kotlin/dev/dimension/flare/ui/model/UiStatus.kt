@@ -404,6 +404,8 @@ sealed class UiStatus {
                         val actual =
                             raw.legacy?.entities?.urls
                                 ?.firstOrNull { it.url == token.value.trim() }?.expandedUrl
+                                ?: raw.noteTweet?.noteTweetResults?.result?.entitySet?.urls
+                                    ?.firstOrNull { it.url == token.value.trim() }?.expandedUrl
                         if (actual != null) {
                             UrlToken(actual)
                         } else {

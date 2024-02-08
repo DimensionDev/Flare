@@ -67,6 +67,7 @@ internal fun DiscoverRoute(navigator: DestinationsNavigator) {
                     onAccountClick = {
                         navigator.navigate(QuickMenuDialogRouteDestination)
                     },
+                    toUser = { navigator.navigate(ProfileRouteDestination(it)) },
                 )
             }
         },

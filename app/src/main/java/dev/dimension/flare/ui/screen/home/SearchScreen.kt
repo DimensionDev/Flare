@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -38,6 +39,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
@@ -54,6 +56,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.screen.profile.CommonProfileHeader
 import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
@@ -83,14 +86,18 @@ fun SearchRoute(
         onAccountClick = {
             navigator.navigate(QuickMenuDialogRouteDestination)
         },
+        toUser = { userKey ->
+            navigator.navigate(ProfileRouteDestination(userKey))
+        },
     )
 }
 
 @Composable
-internal fun SearchScreen(
+private fun SearchScreen(
     initialQuery: String,
     onBack: () -> Unit,
     onAccountClick: () -> Unit,
+    toUser: (MicroBlogKey) -> Unit,
 ) {
     val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter(initialQuery.decodeURLQueryComponent()) }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -116,6 +123,7 @@ internal fun SearchScreen(
         searchStatus = state.status,
         statusEvent = state.statusEvent,
         onAccountClick = onAccountClick,
+        toUser = toUser,
     )
 }
 
@@ -123,6 +131,7 @@ internal fun SearchScreen(
 internal fun DiscoverSearch(
     state: DiscoverSearchState,
     onAccountClick: () -> Unit,
+    toUser: (MicroBlogKey) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     BackHandler(enabled = state.isSearching) {
@@ -156,6 +165,7 @@ internal fun DiscoverSearch(
         searchStatus = state.status,
         statusEvent = state.statusEvent,
         onAccountClick = onAccountClick,
+        toUser = toUser,
     )
 }
 
@@ -170,6 +180,7 @@ private fun SearchContent(
     onActiveChange: (Boolean) -> Unit,
     onBack: () -> Unit,
     onAccountClick: () -> Unit,
+    toUser: (MicroBlogKey) -> Unit,
     committed: Boolean,
     searchUsers: UiState<LazyPagingItemsProxy<UiUser>>,
     searchStatus: UiState<LazyPagingItemsProxy<UiStatus>>,
@@ -248,7 +259,9 @@ private fun SearchContent(
                                     Card {
                                         if (item == null) {
                                             ProfileHeaderLoading(
-                                                modifier = Modifier.width(256.dp),
+                                                modifier =
+                                                    Modifier
+                                                        .width(256.dp),
                                             )
                                         } else {
                                             CommonProfileHeader(
@@ -265,7 +278,12 @@ private fun SearchContent(
                                                         )
                                                     }
                                                 },
-                                                modifier = Modifier.width(256.dp),
+                                                modifier =
+                                                    Modifier
+                                                        .width(256.dp)
+                                                        .clickable {
+                                                            toUser(item.userKey)
+                                                        },
                                             )
                                         }
                                     }

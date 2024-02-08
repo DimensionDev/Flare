@@ -17,9 +17,13 @@ val PlatformType.logoUrl: String
     get() =
         when (this) {
             PlatformType.Mastodon -> "https://joinmastodon.org/logos/logo-purple.svg"
-            PlatformType.Misskey -> "https://github.com/misskey-dev/misskey/blob/develop/packages/backend/assets/favicon.png?raw=true"
+            PlatformType.Misskey ->
+                "https://github.com/misskey-dev/misskey/blob/develop/packages" +
+                    "/backend/assets/favicon.png?raw=true"
             PlatformType.Bluesky -> "https://blueskyweb.xyz/images/apple-touch-icon.png"
-            PlatformType.xQt -> "https://archive.md/FRp5v/1d3b14a6e115cfd9bb74720cd4569fb846a31fce"
+            PlatformType.xQt ->
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53" +
+                    "/X_logo_2023_original.svg/1920px-X_logo_2023_original.svg.png"
         }
 
 val xqtHost: String =

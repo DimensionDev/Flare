@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import dev.dimension.flare.data.network.mastodon.JoinMastodonService
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.ui.model.UiInstance
 
 internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
@@ -49,7 +50,7 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
                             "The web. Email. RSS feeds. XMPP chats. " +
                                 "What all these technologies had in common is they allowed people to freely interact " +
                                 "and create content, without a single intermediary.",
-                        iconUrl = "https://blueskyweb.xyz/images/apple-touch-icon.png",
+                        iconUrl = PlatformType.Bluesky.logoUrl,
                         domain = "bsky.social",
                         type = PlatformType.Bluesky,
                         bannerUrl = null,
@@ -58,7 +59,7 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
                     UiInstance(
                         name = PlatformType.xQt.name,
                         description = "The X makes it sound cool",
-                        iconUrl = "https://archive.md/FRp5v/1d3b14a6e115cfd9bb74720cd4569fb846a31fce",
+                        iconUrl = PlatformType.xQt.logoUrl,
                         domain = "xqt.social",
                         type = PlatformType.xQt,
                         bannerUrl = null,

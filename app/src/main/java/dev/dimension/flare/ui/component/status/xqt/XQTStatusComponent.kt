@@ -71,6 +71,7 @@ internal fun XQTStatusComponent(
         headerIcon = data.retweet?.let { Icons.Default.SyncAlt },
         headerTextId = data.retweet?.let { R.string.mastodon_item_reblogged_status },
         headerUser = data.retweet?.let { data.user },
+        replyHandle = actualData.replyHandle,
         quotedStatus = actualData.quote,
         onQuotedStatusClick = {
             event.onStatusClick(it as UiStatus.XQT, uriHandler)

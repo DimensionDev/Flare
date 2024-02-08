@@ -424,6 +424,12 @@ sealed class UiStatus {
             !(retweet?.user ?: user).protected
         }
 
+        val replyHandle by lazy {
+            inReplyToScreenName?.let {
+                "@$it"
+            }
+        }
+
         data class Matrices(
             val replyCount: Long,
             val likeCount: Long,

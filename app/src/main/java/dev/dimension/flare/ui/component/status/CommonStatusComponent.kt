@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
@@ -83,6 +84,7 @@ fun CommonStatusComponent(
     headerIcon: ImageVector? = null,
     headerUser: UiUser? = null,
     @StringRes headerTextId: Int? = null,
+    replyHandle: String? = null,
     headerTrailing: @Composable RowScope.() -> Unit = {},
     contentFooter: @Composable ColumnScope.() -> Unit = {},
     statusActions: @Composable RowScope.() -> Unit = {},
@@ -174,6 +176,13 @@ fun CommonStatusComponent(
                 onUserClick = { onUserClick(it) },
                 headerTrailing = headerTrailing,
             )
+
+            if (replyHandle != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                StatusReplyComponent(
+                    replyHandle = replyHandle,
+                )
+            }
 
             StatusContentComponent(
                 rawContent = rawContent,
@@ -281,6 +290,33 @@ fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun StatusReplyComponent(
+    replyHandle: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .alpha(MediumAlpha),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Default.Reply,
+            contentDescription = stringResource(id = R.string.reply_to),
+            modifier =
+                Modifier
+                    .size(12.dp),
+        )
+        Text(
+            text = stringResource(id = R.string.reply_to, replyHandle),
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+        )
     }
 }
 

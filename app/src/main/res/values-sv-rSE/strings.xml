@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Radera</string>
   <string name="media_menu_save">Spara</string>
   <string name="media_save_success">Sparad i hämtningar</string>
+  <string name="reply_to">Svara %1$s</string>
 </resources>

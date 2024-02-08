@@ -84,7 +84,7 @@ fun CommonStatusComponent(
     headerIcon: ImageVector? = null,
     headerUser: UiUser? = null,
     @StringRes headerTextId: Int? = null,
-    replyUserName: Element? = null,
+    replyHandle: String? = null,
     headerTrailing: @Composable RowScope.() -> Unit = {},
     contentFooter: @Composable ColumnScope.() -> Unit = {},
     statusActions: @Composable RowScope.() -> Unit = {},
@@ -177,10 +177,10 @@ fun CommonStatusComponent(
                 headerTrailing = headerTrailing,
             )
 
-            if (replyUserName != null) {
+            if (replyHandle != null) {
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusReplyComponent(
-                    replyUserName = replyUserName,
+                    replyHandle = replyHandle,
                 )
             }
 
@@ -295,7 +295,7 @@ fun CommonStatusComponent(
 
 @Composable
 private fun StatusReplyComponent(
-    replyUserName: Element,
+    replyHandle: String,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -313,15 +313,8 @@ private fun StatusReplyComponent(
                     .size(12.dp),
         )
         Text(
-            text = stringResource(id = R.string.reply_to),
+            text = stringResource(id = R.string.reply_to, replyHandle),
             style = MaterialTheme.typography.bodySmall,
-        )
-        HtmlText2(
-            element = replyUserName,
-            textStyle = MaterialTheme.typography.bodySmall,
-            modifier =
-                Modifier.alignByBaseline()
-                    .weight(1f, fill = false),
             maxLines = 1,
         )
     }

@@ -424,11 +424,9 @@ sealed class UiStatus {
             !(retweet?.user ?: user).protected
         }
 
-        val replyToUserNameElement by lazy {
+        val replyHandle by lazy {
             inReplyToScreenName?.let {
-                Element("span").apply {
-                    children.add(Text("@$it"))
-                }
+                "@$it"
             }
         }
 

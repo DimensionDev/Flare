@@ -71,8 +71,8 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.2.0-rc01" }
-material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class", version = "1.2.0-rc01" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.2.0" }
+material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class", version = "1.2.0" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version = "1.0.0-alpha02" }
 material3-adaptive = { group = "androidx.compose.material3", name = "material3-adaptive", version="1.0.0-alpha05" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }

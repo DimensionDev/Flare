@@ -270,4 +270,6 @@
 
     <string name="media_menu_save">Save</string>
     <string name="media_save_success">Saved to Downloads</string>
+
+    <string name="reply_to">Reply to</string>
 </resources>

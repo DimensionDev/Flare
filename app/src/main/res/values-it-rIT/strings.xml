@@ -219,4 +219,5 @@
   <string name="settings_accounts_remove">Rimuovi</string>
   <string name="media_menu_save">Salva</string>
   <string name="media_save_success">Salvato in Download</string>
+  <string name="reply_to">Rispondi a %1$s</string>
 </resources>

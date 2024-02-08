@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -62,10 +63,11 @@ internal fun SettingsRoute() {
     val settingsPanelState by producePresenter {
         settingsPanelPresenter()
     }
+    val windowInfo = currentWindowAdaptiveInfo()
     val scaffoldNavigator =
-        rememberListDetailPaneScaffoldNavigator(
+        rememberListDetailPaneScaffoldNavigator<Nothing>(
             scaffoldDirective =
-                calculateStandardPaneScaffoldDirective(currentWindowAdaptiveInfo()).let {
+                calculateStandardPaneScaffoldDirective(windowInfo).let {
                     PaneScaffoldDirective(
                         contentPadding = PaddingValues(0.dp),
                         maxHorizontalPartitions = it.maxHorizontalPartitions,
@@ -89,6 +91,7 @@ internal fun SettingsRoute() {
         settingsPanelState.setSelectedItem(null)
     }
     ListDetailPaneScaffold(
+        windowInsets = WindowInsets(top = 0.dp),
         scaffoldState = scaffoldNavigator.scaffoldState,
         listPane = {
             AnimatedPane(modifier = Modifier) {
@@ -143,7 +146,7 @@ private fun settingsPanelPresenter() =
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal class ProxyDestinationsNavigator(
-    private val scaffoldNavigator: ThreePaneScaffoldNavigator,
+    private val scaffoldNavigator: ThreePaneScaffoldNavigator<Nothing>,
     private val navigator: DestinationsNavigator,
     private val navigateBack: () -> Unit,
 ) : DestinationsNavigator by navigator {

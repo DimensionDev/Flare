@@ -16,12 +16,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigation.suite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
-import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteScaffoldDefaults
-import androidx.compose.material3.adaptive.navigation.suite.NavigationSuiteType
+import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -125,7 +126,11 @@ private val menuItems =
 fun HomeScreen(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentRoute by remember {
+        derivedStateOf {
+            navBackStackEntry?.destination?.route
+        }
+    }
 
     FlareTheme {
         val layoutType =
@@ -143,11 +148,10 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         allScreens
                     }
                 items.forEach { destination ->
-                    val selected = currentRoute == destination.direction.route
                     item(
-                        selected = selected,
+                        selected = currentRoute == destination.direction.route,
                         onClick = {
-                            if (selected) {
+                            if (currentRoute == destination.direction.route) {
                                 destination.scrollToTop()
                             } else {
                                 navController.navigate(destination.direction) {

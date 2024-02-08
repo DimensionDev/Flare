@@ -1,6 +1,6 @@
 [versions]
 compileSdk = "34"
-minSdk = "23"
+minSdk = "24"
 java = "17"
 agp = "8.2.2"
 kotlin = "1.9.22"

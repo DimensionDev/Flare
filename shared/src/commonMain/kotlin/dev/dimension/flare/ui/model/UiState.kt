@@ -22,7 +22,7 @@ sealed class UiState<T : Any> {
     class Loading<T : Any> : UiState<T>()
 }
 
-internal fun <T : Any> Flow<T>.toUiState(): Flow<UiState<T>> =
+fun <T : Any> Flow<T>.toUiState(): Flow<UiState<T>> =
     map<T, UiState<T>> { UiState.Success(it) }
         .onStart { emit(UiState.Loading()) }
         .catch { emit(UiState.Error(it)) }

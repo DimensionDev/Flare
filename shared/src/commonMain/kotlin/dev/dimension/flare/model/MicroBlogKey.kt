@@ -1,5 +1,8 @@
 package dev.dimension.flare.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class MicroBlogKey(
     val id: String,
     val host: String,

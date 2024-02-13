@@ -66,6 +66,12 @@ class AccountRepository(
     fun get(accountKey: MicroBlogKey): UiAccount? {
         return appDatabase.dbAccountQueries.get(accountKey).executeAsOneOrNull()?.toUi()
     }
+
+    fun getFlow(accountKey: MicroBlogKey): Flow<UiAccount?> {
+        return appDatabase.dbAccountQueries.get(accountKey).asFlow().mapToOneOrNull(Dispatchers.IO).map {
+            it?.toUi()
+        }
+    }
 }
 
 object NoActiveAccountException : Exception("No active account.")

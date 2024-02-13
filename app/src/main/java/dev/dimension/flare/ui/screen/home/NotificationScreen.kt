@@ -16,10 +16,8 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -38,32 +36,37 @@ import dev.dimension.flare.ui.presenter.home.NotificationState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun NotificationRoute(screen: Screen) {
-    NotificationScreen(screen = screen)
+internal fun NotificationRoute(
+//    screen: Screen
+) {
+    NotificationScreen(
+//        screen = screen
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-private fun NotificationScreen(screen: Screen) {
+private fun NotificationScreen(
+//    screen: Screen
+) {
     val state by producePresenter {
         notificationPresenter()
     }
-    val scope = rememberCoroutineScope()
+//    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
-    LaunchedEffect(screen) {
-        screen.scrollToTop = {
-            scope.launch {
-                lazyListState.animateScrollToItem(0)
-            }
-        }
-    }
+//    LaunchedEffect(screen) {
+//        screen.scrollToTop = {
+//            scope.launch {
+//                lazyListState.animateScrollToItem(0)
+//            }
+//        }
+//    }
     val windowInfo = currentWindowAdaptiveInfo()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(

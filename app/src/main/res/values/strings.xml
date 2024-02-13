@@ -93,6 +93,8 @@
     <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
     <string name="settings_about_title">About</string>
     <string name="settings_about_subtitle">Learn more about Flare</string>
+    <string name="settings_tab_customization">Tab customization</string>
+    <string name="settings_tab_customization_description">Customize the tabs on the home screen</string>
 
     <string name="status_loadmore_end">No more toots</string>
     <string name="status_loadmore_error">Error loading more toots</string>
@@ -272,4 +274,6 @@
     <string name="media_save_success">Saved to Downloads</string>
 
     <string name="reply_to">Reply to %1$s</string>
+
+    <string name="tab_settings_add">Add</string>
 </resources>

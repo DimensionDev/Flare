@@ -68,7 +68,7 @@ import org.koin.compose.koinInject
 @Composable
 internal fun HomeRoute(
     navigator: DestinationsNavigator,
-    screen: Screen,
+//    screen: Screen,
 ) {
     HomeTimelineScreen(
         toCompose = {
@@ -77,7 +77,7 @@ internal fun HomeRoute(
         toQuickMenu = {
             navigator.navigate(QuickMenuDialogRouteDestination)
         },
-        screen = screen,
+//        screen = screen,
     )
 }
 
@@ -86,20 +86,20 @@ internal fun HomeRoute(
 internal fun HomeTimelineScreen(
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
-    screen: Screen,
+//    screen: Screen,
 ) {
     val state by producePresenter {
         homeTimelinePresenter()
     }
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
-    LaunchedEffect(screen) {
-        screen.scrollToTop = {
-            scope.launch {
-                lazyListState.animateScrollToItem(0)
-            }
-        }
-    }
+//    LaunchedEffect(screen) {
+//        screen.scrollToTop = {
+//            scope.launch {
+//                lazyListState.animateScrollToItem(0)
+//            }
+//        }
+//    }
     val isAtTheTop by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0

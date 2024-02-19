@@ -144,37 +144,37 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                             true
                         },
                     )
-                SwipeToDismissBox(
-                    state = swipeState,
-                    enableDismissFromEndToStart = state.tabs.size > 1,
-                    enableDismissFromStartToEnd = state.tabs.size > 1,
-                    backgroundContent = {
-                        val alignment =
-                            when (swipeState.dismissDirection) {
-                                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                                SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                                SwipeToDismissBoxValue.Settled -> Alignment.Center
-                            }
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.errorContainer)
-                                    .padding(16.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(id = R.string.tab_settings_remove),
+                ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
+                    SwipeToDismissBox(
+                        state = swipeState,
+                        enableDismissFromEndToStart = state.tabs.size > 1,
+                        enableDismissFromStartToEnd = state.tabs.size > 1,
+                        backgroundContent = {
+                            val alignment =
+                                when (swipeState.dismissDirection) {
+                                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                                    SwipeToDismissBoxValue.Settled -> Alignment.Center
+                                }
+                            Box(
                                 modifier =
                                     Modifier
-                                        .size(24.dp)
-                                        .align(alignment),
-                                tint = MaterialTheme.colorScheme.onError,
-                            )
-                        }
-                    },
-                ) {
-                    ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
+                                        .fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.errorContainer)
+                                        .padding(16.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = stringResource(id = R.string.tab_settings_remove),
+                                    modifier =
+                                        Modifier
+                                            .size(24.dp)
+                                            .align(alignment),
+                                    tint = MaterialTheme.colorScheme.onError,
+                                )
+                            }
+                        },
+                    ) {
                         val elevation by animateDpAsState(if (isDragging || swipeState.progress > 0) 4.dp else 0.dp)
                         Surface(shadowElevation = elevation) {
                             ListItem(
@@ -239,7 +239,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                             modifier =
                                 Modifier
                                     .clickable {
-                                        state.allTabs.addTab(it)
+                                        state.addTab(it)
                                         state.setAddTab(false)
                                     },
                         )
@@ -264,7 +264,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                         Modifier
                                             .padding(start = AvatarComponentDefaults.size + 16.dp)
                                             .clickable {
-                                                state.allTabs.addTab(tab)
+                                                state.addTab(tab)
                                                 state.setAddTab(false)
                                             },
                                 )
@@ -420,6 +420,10 @@ private fun presenter(repository: SettingsRepository = koinInject()) =
             fun deleteTab(tab: TabItem) {
                 cacheTabs.remove(tab)
             }
+
+            fun addTab(tab: TabItem) {
+                cacheTabs.add(tab)
+            }
         }
     }
 
@@ -427,7 +431,6 @@ private fun presenter(repository: SettingsRepository = koinInject()) =
 private fun allTabsPresenter(repository: SettingsRepository = koinInject()) =
     run {
         val tabSettings by repository.tabSettings.collectAsUiState()
-        val scope = rememberCoroutineScope()
         val accountState = remember { AccountsPresenter() }.invoke()
         val accountTabs =
             accountState.accounts.map {
@@ -478,12 +481,12 @@ private fun allTabsPresenter(repository: SettingsRepository = koinInject()) =
                 }
             val accountTabs = actualAccountTabs
 
-            fun addTab(tab: TabItem) {
-                scope.launch {
-                    repository.updateTabSettings {
-                        copy(items = items + tab)
-                    }
-                }
-            }
+//            fun addTab(tab: TabItem) {
+//                scope.launch {
+//                    repository.updateTabSettings {
+//                        copy(items = items + tab)
+//                    }
+//                }
+//            }
         }
     }

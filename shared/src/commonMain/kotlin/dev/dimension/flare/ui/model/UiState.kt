@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 
 sealed class UiState<T : Any> {
     data class Success<T : Any>(val data: T) : UiState<T>()
@@ -62,8 +64,10 @@ inline fun <T : Any> UiState<T>.onLoading(action: () -> Unit): UiState<T> =
         }
     }
 
+@OptIn(ExperimentalObjCRefinement::class)
 @Composable
-internal fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
+@HiddenFromObjC
+fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
     remember(this) { toUiState() }.collectAsState(initial)
 
 fun <T : Any> CacheableState<T>.toUi(): UiState<T> {

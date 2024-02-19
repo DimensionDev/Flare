@@ -79,7 +79,6 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
             navBackStackEntry?.destination?.route
         }
     }
-
     state.tabs.onSuccess { tabs ->
         FlareTheme {
             val layoutType =

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -21,19 +22,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.presenter.home.NotificationState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import org.koin.compose.koinInject
@@ -43,10 +50,14 @@ import org.koin.compose.koinInject
 )
 @Composable
 internal fun NotificationRoute(
+    navigator: DestinationsNavigator,
 //    screen: Screen
 ) {
     NotificationScreen(
 //        screen = screen
+        toQuickMenu = {
+            navigator.navigate(QuickMenuDialogRouteDestination)
+        },
     )
 }
 
@@ -54,6 +65,7 @@ internal fun NotificationRoute(
 @Composable
 private fun NotificationScreen(
 //    screen: Screen
+    toQuickMenu: () -> Unit,
 ) {
     val state by producePresenter {
         notificationPresenter()
@@ -82,6 +94,15 @@ private fun NotificationScreen(
                             if (it.size > 1) {
                                 NotificationFilterSelector(it, state.state)
                             }
+                        }
+                    }
+                },
+                navigationIcon = {
+                    state.user.onSuccess {
+                        IconButton(
+                            onClick = toQuickMenu,
+                        ) {
+                            AvatarComponent(it.avatarUrl, size = 24.dp)
                         }
                     }
                 },
@@ -164,8 +185,9 @@ private val NotificationFilter.title: Int
 @Composable
 private fun notificationPresenter(statusEvent: StatusEvent = koinInject()) =
     run {
+        val accountState = remember { ActiveAccountPresenter() }.invoke()
         val state = remember { NotificationPresenter() }.invoke()
-        object {
+        object : ActiveAccountState by accountState {
             val state = state
             val statusEvent = statusEvent
         }

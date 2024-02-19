@@ -52,7 +52,10 @@ class UserPresenter(
         }.collectAsUiState()
         val user =
             account.flatMap {
-                accountServiceProvider(it).userById(userKey.id).collectAsState().toUi()
+                val service = accountServiceProvider(it)
+                remember(it, userKey) {
+                    service.userById(userKey.id)
+                }.collectAsState().toUi()
             }
 
         return object : UserState {

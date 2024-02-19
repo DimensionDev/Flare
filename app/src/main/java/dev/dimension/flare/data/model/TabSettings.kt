@@ -77,6 +77,9 @@ sealed interface IconType {
             }
         }
     }
+
+    @Serializable
+    data class Mixed(val icon: Material.MaterialIcon, val userKey: MicroBlogKey) : IconType
 }
 
 @Serializable
@@ -161,7 +164,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_home_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
                 TimelineTabItem(
@@ -170,7 +173,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_notifications_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Notification, accountKey),
                         ),
                 ),
                 DiscoverTabItem(
@@ -178,7 +181,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_discover_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
 //            TimelineTabItem(
@@ -203,7 +206,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Profile),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
                         ),
                 ),
             )
@@ -216,7 +219,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_home_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
                 TimelineTabItem(
@@ -225,7 +228,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_notifications_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Notification, accountKey),
                         ),
                 ),
                 DiscoverTabItem(
@@ -233,7 +236,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_discover_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
                 ProfileTabItem(
@@ -242,7 +245,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Profile),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
                         ),
                 ),
             )
@@ -255,7 +258,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_home_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
                 TimelineTabItem(
@@ -264,7 +267,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_notifications_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Notification, accountKey),
                         ),
                 ),
                 DiscoverTabItem(
@@ -272,7 +275,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_discover_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
                 ProfileTabItem(
@@ -281,7 +284,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Profile),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
                         ),
                 ),
             )
@@ -294,7 +297,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_home_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
                 TimelineTabItem(
@@ -303,7 +306,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_notifications_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Notification, accountKey),
                         ),
                 ),
                 DiscoverTabItem(
@@ -311,7 +314,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_discover_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
                 ProfileTabItem(
@@ -320,7 +323,7 @@ data class TimelineTabItem(
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Profile),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
                         ),
                 ),
             )

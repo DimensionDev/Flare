@@ -78,6 +78,10 @@ data class ImmutableListWrapper<T : Any>(
     fun contains(element: T): Boolean {
         return data.contains(element)
     }
+
+    fun toImmutableList(): ImmutableList<T> {
+        return data
+    }
 }
 
 fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> {

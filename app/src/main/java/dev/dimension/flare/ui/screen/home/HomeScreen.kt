@@ -13,7 +13,6 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -38,10 +37,13 @@ import com.ramcosta.composedestinations.utils.composable
 import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.invoke
@@ -53,6 +55,7 @@ import dev.dimension.flare.ui.screen.destinations.NotificationRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
+import dev.dimension.flare.ui.screen.splash.SplashScreen
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
@@ -68,7 +71,6 @@ data class RootNavController(
 @Composable
 internal fun HomeScreen(modifier: Modifier = Modifier) {
     val state by producePresenter { presenter() }
-    val tabs = state.tabs
     val navController = rememberNavController()
     val rootNavController = remember(navController) { RootNavController(navController) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -78,77 +80,81 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
         }
     }
 
-    FlareTheme {
-        val layoutType =
-            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
-                currentWindowAdaptiveInfo(),
-            )
+    state.tabs.onSuccess { tabs ->
+        FlareTheme {
+            val layoutType =
+                NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
+                    currentWindowAdaptiveInfo(),
+                )
 
-        NavigationSuiteScaffold(
-            modifier = modifier,
-            layoutType = layoutType,
-            navigationSuiteItems = {
-                tabs.forEach { tab ->
-                    item(
-                        selected = currentRoute == tab.key,
-                        onClick = {
-                            navController.navigate(tab.key) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            NavigationSuiteScaffold(
+                modifier = modifier,
+                layoutType = layoutType,
+                navigationSuiteItems = {
+                    tabs.forEach { tab ->
+                        item(
+                            selected = currentRoute == tab.key,
+                            onClick = {
+                                navController.navigate(tab.key) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                            },
+                            icon = {
+                                TabIcon(
+                                    accountType = tab.account,
+                                    icon = tab.metaData.icon,
+                                    title = tab.metaData.title,
+                                    modifier = Modifier,
+                                )
+                            },
+                            label = {
+                                TabTitle(
+                                    title = tab.metaData.title,
+                                    modifier = Modifier,
+                                )
+                            },
+                        )
+                    }
+                },
+            ) {
+                NavHost(
+                    navController = navController,
+                    startDestination = tabs.first().key,
+                    // NavigationSuiteScaffold should have consumed the insets, but it doesn't
+                    modifier =
+                        Modifier.let {
+                            if (layoutType == NavigationSuiteType.NavigationBar) {
+                                it.consumeWindowInsets(WindowInsets.navigationBars)
+                            } else {
+                                it
                             }
                         },
-                        icon = {
-                            TabIcon(
-                                accountType = tab.account,
-                                icon = tab.metaData.icon,
-                                title = tab.metaData.title,
-                                modifier = Modifier,
-                            )
-                        },
-                        label = {
-                            TabTitle(
-                                title = tab.metaData.title,
-                                modifier = Modifier,
-                            )
-                        },
-                    )
-                }
-            },
-        ) {
-            NavHost(
-                navController = navController,
-                startDestination = tabs.first().key,
-                // NavigationSuiteScaffold should have consumed the insets, but it doesn't
-                modifier =
-                    Modifier.let {
-                        if (layoutType == NavigationSuiteType.NavigationBar) {
-                            it.consumeWindowInsets(WindowInsets.navigationBars)
-                        } else {
-                            it
-                        }
-                    },
-            ) {
-                tabs.forEach { tab ->
-                    composable(tab.key) {
-                        Router(
-                            navGraph = NavGraphs.root,
-                            direction = getDirection(tab),
-                        ) {
-                            dependency(rootNavController)
+                ) {
+                    tabs.forEach { tab ->
+                        composable(tab.key) {
+                            Router(
+                                navGraph = NavGraphs.root,
+                                direction = getDirection(tab),
+                            ) {
+                                dependency(rootNavController)
+                            }
                         }
                     }
-                }
-                composable(SettingsRouteDestination) {
-                    Router(
-                        navGraph = NavGraphs.root,
-                        direction = SettingsRouteDestination,
-                    )
+                    composable(SettingsRouteDestination) {
+                        Router(
+                            navGraph = NavGraphs.root,
+                            direction = SettingsRouteDestination,
+                        )
+                    }
                 }
             }
         }
+    }.onLoading {
+        SplashScreen()
     }
 }
 
@@ -218,10 +224,13 @@ private class ProxyUriHandler(
 @Composable
 private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
     run {
-        val tabSettings by settingsRepository.tabSettings.collectAsState(TabSettings())
+        val tabSettings by settingsRepository.tabSettings.collectAsUiState()
         val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
 
         object : ActiveAccountState by activeAccountState {
-            val tabs = tabSettings.items.toImmutableList()
+            val tabs =
+                tabSettings.map {
+                    it.items.toImmutableList()
+                }
         }
     }

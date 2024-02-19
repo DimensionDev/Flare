@@ -276,4 +276,7 @@
     <string name="reply_to">Reply to %1$s</string>
 
     <string name="tab_settings_add">Add</string>
+    <string name="tab_settings_drag">Drag</string>
+    <string name="tab_settings_edit">Edit</string>
+    <string name="tab_settings_remove">Remove</string>
 </resources>

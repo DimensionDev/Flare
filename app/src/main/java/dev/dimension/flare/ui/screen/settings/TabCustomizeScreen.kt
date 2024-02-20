@@ -1,6 +1,11 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,10 +65,8 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -72,6 +75,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
@@ -137,83 +141,104 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
             contentPadding = it,
         ) {
             items(state.tabs, key = { it.key }) { item ->
+                var shouldDismiss by remember { mutableStateOf(false) }
                 val swipeState =
                     rememberSwipeToDismissBoxState(
                         confirmValueChange = {
-                            state.deleteTab(item)
-                            true
+                            if (it != SwipeToDismissBoxValue.Settled) {
+                                shouldDismiss = true
+                            }
+                            it != SwipeToDismissBoxValue.Settled
                         },
                     )
+                LaunchedEffect(shouldDismiss) {
+                    if (shouldDismiss) {
+                        delay(AnimationConstants.DefaultDurationMillis.toLong())
+                        state.deleteTab(item)
+                        shouldDismiss = false
+                    }
+                }
                 ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
-                    SwipeToDismissBox(
-                        state = swipeState,
-                        enableDismissFromEndToStart = state.tabs.size > 1,
-                        enableDismissFromStartToEnd = state.tabs.size > 1,
-                        backgroundContent = {
-                            val alignment =
-                                when (swipeState.dismissDirection) {
-                                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                                    SwipeToDismissBoxValue.Settled -> Alignment.Center
-                                }
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .background(MaterialTheme.colorScheme.errorContainer)
-                                        .padding(16.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = stringResource(id = R.string.tab_settings_remove),
-                                    modifier =
-                                        Modifier
-                                            .size(24.dp)
-                                            .align(alignment),
-                                    tint = MaterialTheme.colorScheme.onError,
-                                )
-                            }
-                        },
+                    AnimatedVisibility(
+                        visible = !shouldDismiss,
+                        exit =
+                            shrinkVertically(
+                                animationSpec = tween(),
+                                shrinkTowards = Alignment.Top,
+                            ) + fadeOut(),
                     ) {
-                        val elevation by animateDpAsState(if (isDragging || swipeState.progress > 0) 4.dp else 0.dp)
-                        Surface(shadowElevation = elevation) {
-                            ListItem(
-                                headlineContent = {
-                                    TabTitle(item.metaData.title)
-                                },
-                                leadingContent = {
-                                    TabIcon(item.account, item.metaData.icon, item.metaData.title)
-                                },
-                                trailingContent = {
-                                    Row {
-                                        IconButton(
-                                            onClick = {},
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Edit,
-                                                contentDescription = stringResource(id = R.string.tab_settings_edit),
-                                            )
+                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                        Surface(
+                            shadowElevation = elevation,
+                        ) {
+                            SwipeToDismissBox(
+                                state = swipeState,
+                                enableDismissFromEndToStart = state.tabs.size > 1,
+                                enableDismissFromStartToEnd = state.tabs.size > 1,
+                                backgroundContent = {
+                                    val alignment =
+                                        when (swipeState.dismissDirection) {
+                                            SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                                            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                                            SwipeToDismissBoxValue.Settled -> Alignment.Center
                                         }
-                                        IconButton(
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .background(MaterialTheme.colorScheme.error)
+                                                .padding(16.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = stringResource(id = R.string.tab_settings_remove),
                                             modifier =
-                                                Modifier.draggableHandle(
-                                                    onDragStarted = {
-                                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                    },
-                                                    onDragStopped = {
-                                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                    },
-                                                ),
-                                            onClick = {},
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.DragHandle,
-                                                contentDescription = stringResource(id = R.string.tab_settings_drag),
-                                            )
-                                        }
+                                                Modifier
+                                                    .size(24.dp)
+                                                    .align(alignment),
+                                            tint = MaterialTheme.colorScheme.onError,
+                                        )
                                     }
                                 },
-                            )
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        TabTitle(item.metaData.title)
+                                    },
+                                    leadingContent = {
+                                        TabIcon(item.account, item.metaData.icon, item.metaData.title)
+                                    },
+                                    trailingContent = {
+                                        Row {
+                                            IconButton(
+                                                onClick = {},
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Edit,
+                                                    contentDescription = stringResource(id = R.string.tab_settings_edit),
+                                                )
+                                            }
+                                            IconButton(
+                                                modifier =
+                                                    Modifier.draggableHandle(
+                                                        onDragStarted = {
+                                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        },
+                                                        onDragStopped = {
+                                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        },
+                                                    ),
+                                                onClick = {},
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.DragHandle,
+                                                    contentDescription = stringResource(id = R.string.tab_settings_drag),
+                                                )
+                                            }
+                                        }
+                                    },
+                                )
+                            }
                         }
                     }
                 }
@@ -227,23 +252,21 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
             },
         ) {
             LazyColumn {
-                state.allTabs.defaultTabs.onSuccess { tabs ->
-                    items(tabs) {
-                        ListItem(
-                            headlineContent = {
-                                TabTitle(it.metaData.title)
-                            },
-                            leadingContent = {
-                                TabIcon(it.account, it.metaData.icon, it.metaData.title)
-                            },
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        state.addTab(it)
-                                        state.setAddTab(false)
-                                    },
-                        )
-                    }
+                items(state.allTabs.defaultTabs) {
+                    ListItem(
+                        headlineContent = {
+                            TabTitle(it.metaData.title)
+                        },
+                        leadingContent = {
+                            TabIcon(it.account, it.metaData.icon, it.metaData.title)
+                        },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    state.addTab(it)
+                                    state.setAddTab(false)
+                                },
+                    )
                 }
 
                 state.allTabs.accountTabs.onSuccess {
@@ -306,7 +329,7 @@ fun TabIcon(
                     AccountType.Active -> null
                     is AccountType.Specific -> accountType.accountKey
                 }
-            val userState by producePresenter {
+            val userState by producePresenter(key = "${accountKey?.id}:${icon.userKey}") {
                 remember(accountKey, icon.userKey) {
                     UserPresenter(
                         accountKey,
@@ -339,7 +362,7 @@ fun TabIcon(
                     AccountType.Active -> null
                     is AccountType.Specific -> accountType.accountKey
                 }
-            val userState by producePresenter {
+            val userState by producePresenter(key = "${accountKey?.id}:${icon.userKey}") {
                 remember(accountKey, icon.userKey) {
                     UserPresenter(
                         accountKey,
@@ -422,15 +445,16 @@ private fun presenter(repository: SettingsRepository = koinInject()) =
             }
 
             fun addTab(tab: TabItem) {
-                cacheTabs.add(tab)
+                if (tab !in cacheTabs) {
+                    cacheTabs.add(tab)
+                }
             }
         }
     }
 
 @Composable
-private fun allTabsPresenter(repository: SettingsRepository = koinInject()) =
+private fun allTabsPresenter() =
     run {
-        val tabSettings by repository.tabSettings.collectAsUiState()
         val accountState = remember { AccountsPresenter() }.invoke()
         val accountTabs =
             accountState.accounts.map {
@@ -446,40 +470,41 @@ private fun allTabsPresenter(repository: SettingsRepository = koinInject()) =
                 }.toImmutableMap()
             }
 
-        val actualAccountTabs =
-            accountTabs.flatMap { tabs ->
-                tabSettings.map { settings ->
-                    val keys = settings.items.map { it.key }
-                    tabs.mapNotNull { (key, value) ->
-                        when (value) {
-                            is UiState.Error -> null
-                            is UiState.Loading -> key to value
-                            is UiState.Success -> {
-                                val items =
-                                    value.data.filter { tab ->
-                                        tab.key !in keys
-                                    }.toImmutableList()
-                                if (items.isEmpty()) {
-                                    null
-                                } else {
-                                    key to UiState.Success(items)
-                                }
-                            }
-                        }
-                    }.toMap().toImmutableMap()
-                }
-            }
+//        val actualAccountTabs =
+//            accountTabs.flatMap { tabs ->
+//                tabSettings.map { settings ->
+//                    val keys = settings.items.map { it.key }
+//                    tabs.mapNotNull { (key, value) ->
+//                        when (value) {
+//                            is UiState.Error -> null
+//                            is UiState.Loading -> key to value
+//                            is UiState.Success -> {
+//                                val items =
+//                                    value.data.filter { tab ->
+//                                        tab.key !in keys
+//                                    }.toImmutableList()
+//                                if (items.isEmpty()) {
+//                                    null
+//                                } else {
+//                                    key to UiState.Success(items)
+//                                }
+//                            }
+//                        }
+//                    }.toMap().toImmutableMap()
+//                }
+//            }
 
         object {
-            val defaultTabs =
-                tabSettings.map { settings ->
-                    TimelineTabItem.default
-                        .filter {
-                            it.key !in settings.items.map { it.key }
-                        }
-                        .toImmutableList()
-                }
-            val accountTabs = actualAccountTabs
+            val defaultTabs = TimelineTabItem.default.toImmutableList()
+
+            //                tabSettings.map { settings ->
+//                    TimelineTabItem.default
+//                        .filter {
+//                            it.key !in settings.items.map { it.key }
+//                        }
+//                        .toImmutableList()
+//                }
+            val accountTabs = accountTabs
 
 //            fun addTab(tab: TabItem) {
 //                scope.launch {

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
@@ -21,12 +21,13 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 class MisskeyReactionPresenter(
+    private val accountKey: MicroBlogKey,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<MisskeyReactionState>() {
     @Composable
     override fun body(): MisskeyReactionState {
         val service =
-            activeAccountServicePresenter().map { (service, _) ->
+            accountServiceProvider(accountKey = accountKey).map { service ->
                 service as MisskeyDataSource
             }
         val data =
@@ -37,8 +38,8 @@ class MisskeyReactionPresenter(
             }
 
         val status =
-            remember(statusKey) {
-                StatusPresenter(statusKey)
+            remember(statusKey, accountKey) {
+                StatusPresenter(accountKey = accountKey, statusKey = statusKey)
             }.body().status
         // using io scope because it's a long-running operation
         val scope = koinInject<CoroutineScope>()

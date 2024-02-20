@@ -13,7 +13,6 @@ import androidx.compose.foundation.text2.input.delete
 import androidx.compose.foundation.text2.input.insert
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -38,37 +37,31 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.popUpTo
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.BlueskyLoginPresenter
-import dev.dimension.flare.ui.screen.destinations.BlueskyLoginRouteDestination
-import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-@Composable
-@Destination(
-    wrappers = [ThemeWrapper::class],
-)
-fun BlueskyLoginRoute(navigator: DestinationsNavigator) {
-    BlueskyLoginScreen(
-        onBack = navigator::navigateUp,
-        toHome = {
-            navigator.navigate(HomeRouteDestination) {
-                popUpTo(BlueskyLoginRouteDestination) {
-                    inclusive = true
-                }
-            }
-        },
-    )
-}
+// @Composable
+// @Destination(
+//    wrappers = [ThemeWrapper::class],
+// )
+// fun BlueskyLoginRoute(navigator: DestinationsNavigator) {
+//    BlueskyLoginScreen(
+//        onBack = navigator::navigateUp,
+//        toHome = {
+//            navigator.navigate(HomeRouteDestination) {
+//                popUpTo(BlueskyLoginRouteDestination) {
+//                    inclusive = true
+//                }
+//            }
+//        },
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

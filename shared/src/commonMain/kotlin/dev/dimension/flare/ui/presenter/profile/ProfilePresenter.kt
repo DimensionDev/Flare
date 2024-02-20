@@ -9,7 +9,7 @@ import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -26,39 +26,40 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 class ProfilePresenter(
+    private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileState>() {
     @Composable
     override fun body(): ProfileState {
-        val accountServiceState = activeAccountServicePresenter()
+        val accountServiceState = accountServiceProvider(accountKey = accountKey)
         val userState =
-            accountServiceState.map { (service, account) ->
-                remember(account.accountKey, userKey) {
-                    service.userById(userKey?.id ?: account.accountKey.id)
+            accountServiceState.map { service ->
+                remember(accountKey, userKey) {
+                    service.userById(userKey?.id ?: accountKey.id)
                 }.collectAsState()
             }
 
         val listState =
-            accountServiceState.map { (service, account) ->
-                remember(account.accountKey, userKey) {
-                    service.userTimeline(userKey ?: account.accountKey)
+            accountServiceState.map { service ->
+                remember(accountKey, userKey) {
+                    service.userTimeline(userKey ?: accountKey)
                 }.collectPagingProxy()
             }
         val mediaState =
             remember {
-                ProfileMediaPresenter(userKey)
+                ProfileMediaPresenter(accountKey = accountKey, userKey = userKey)
             }.body().mediaState
         val relationState =
-            accountServiceState.flatMap { (service, account) ->
-                remember(account.accountKey, userKey) {
-                    service.relation(userKey ?: account.accountKey)
+            accountServiceState.flatMap { service ->
+                remember(accountKey, userKey) {
+                    service.relation(userKey ?: accountKey)
                 }.collectAsUiState().value.flatMap { it }
             }
 
         val scope = koinInject<CoroutineScope>()
         val isMe =
             accountServiceState.map {
-                it.second.accountKey == userKey || userKey == null
+                it.account.accountKey == userKey || userKey == null
             }
         return object : ProfileState(
             userState = userState.flatMap { it.toUi() },
@@ -81,7 +82,7 @@ class ProfilePresenter(
                 data: UiRelation,
             ) {
                 scope.launch {
-                    accountServiceState.onSuccess { (service, _) ->
+                    accountServiceState.onSuccess { service ->
                         when (data) {
                             is UiRelation.Bluesky -> blueskyFollow(service as BlueskyDataSource, user.userKey, data)
                             is UiRelation.Mastodon -> mastodonFollow(service as MastodonDataSource, user.userKey, data)
@@ -97,7 +98,7 @@ class ProfilePresenter(
                 data: UiRelation,
             ) {
                 scope.launch {
-                    accountServiceState.onSuccess { (service, _) ->
+                    accountServiceState.onSuccess { service ->
                         when (data) {
                             is UiRelation.Bluesky -> {
                                 require(service is BlueskyDataSource)
@@ -126,7 +127,7 @@ class ProfilePresenter(
                 data: UiRelation,
             ) {
                 scope.launch {
-                    accountServiceState.onSuccess { (service, _) ->
+                    accountServiceState.onSuccess { service ->
                         when (data) {
                             is UiRelation.Bluesky -> {
                                 require(service is BlueskyDataSource)
@@ -236,12 +237,13 @@ abstract class ProfileState(
 class ProfileWithUserNameAndHostPresenter(
     private val userName: String,
     private val host: String,
+    private val accountKey: MicroBlogKey,
 ) : PresenterBase<UiState<UiUser>>() {
     @Composable
     override fun body(): UiState<UiUser> {
         val userState =
-            activeAccountServicePresenter().flatMap { (service, account) ->
-                remember(account.accountKey) {
+            accountServiceProvider(accountKey = accountKey).flatMap { service ->
+                remember(accountKey) {
                     service.userByAcct("$userName@$host")
                 }.collectAsState().toUi()
             }

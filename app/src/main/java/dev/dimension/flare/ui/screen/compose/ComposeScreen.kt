@@ -114,6 +114,7 @@ import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.component.status.mastodon.VisibilityIcon
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
@@ -139,11 +140,15 @@ import kotlin.time.Duration.Companion.minutes
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-fun ComposeRoute(navigator: DestinationsNavigator) {
+fun ComposeRoute(
+    navigator: DestinationsNavigator,
+    accountData: AccountData,
+) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
         },
+        accountData = accountData,
     )
 }
 
@@ -159,6 +164,7 @@ fun ComposeRoute(navigator: DestinationsNavigator) {
 @Composable
 fun ReplyRoute(
     navigator: DestinationsNavigator,
+    accountData: AccountData,
     replyTo: MicroBlogKey,
 ) {
     ComposeScreen(
@@ -166,6 +172,7 @@ fun ReplyRoute(
             navigator.navigateUp()
         },
         status = ComposeStatus.Reply(replyTo),
+        accountData = accountData,
     )
 }
 
@@ -181,6 +188,7 @@ fun ReplyRoute(
 @Composable
 fun Quote(
     navigator: DestinationsNavigator,
+    accountData: AccountData,
     quoted: MicroBlogKey,
 ) {
     ComposeScreen(
@@ -188,6 +196,7 @@ fun Quote(
             navigator.navigateUp()
         },
         status = ComposeStatus.Quote(quoted),
+        accountData = accountData,
     )
 }
 
@@ -228,12 +237,13 @@ object ComposeTransitions : DestinationStyle.Animated {
 @Composable
 private fun ComposeScreen(
     onBack: () -> Unit,
+    accountData: AccountData,
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
 ) {
     val context = LocalContext.current
-    val state by producePresenter {
-        composePresenter(context, status)
+    val state by producePresenter(key = "compose_${accountData.data}") {
+        composePresenter(context = context, accountData = accountData, status = status)
     }
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
@@ -841,11 +851,12 @@ private fun PollOption(
 @Composable
 private fun composePresenter(
     context: Context,
+    accountData: AccountData,
     status: ComposeStatus? = null,
 ) = run {
     val state =
-        remember(status) {
-            ComposePresenter(status)
+        remember(status, accountData) {
+            ComposePresenter(accountKey = accountData.data, status)
         }.invoke()
     val textFieldState by remember {
         mutableStateOf(TextFieldState(""))

@@ -28,6 +28,7 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import org.koin.compose.koinInject
@@ -44,10 +45,12 @@ import org.koin.compose.koinInject
 fun StatusRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
+    accountData: AccountData,
 ) {
     StatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
+        accountData = accountData,
     )
 }
 
@@ -56,9 +59,10 @@ fun StatusRoute(
 internal fun StatusScreen(
     statusKey: MicroBlogKey,
     onBack: () -> Unit,
+    accountData: AccountData,
 ) {
     val state by producePresenter(statusKey.toString()) {
-        statusPresenter(statusKey)
+        statusPresenter(accountData = accountData, statusKey = statusKey)
     }
     Scaffold(
         topBar = {
@@ -99,11 +103,12 @@ internal fun StatusScreen(
 @Composable
 private fun statusPresenter(
     statusKey: MicroBlogKey,
+    accountData: AccountData,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state =
         remember(statusKey) {
-            StatusContextPresenter(statusKey)
+            StatusContextPresenter(accountKey = accountData.data, statusKey = statusKey)
         }.invoke()
 
     object {

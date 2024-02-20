@@ -95,6 +95,7 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -130,11 +131,13 @@ fun ProfileWithUserNameAndHostRoute(
     userName: String,
     host: String,
     navigator: DestinationsNavigator,
+    accountData: AccountData,
 ) {
-    val state by producePresenter(key = "acct_$userName@$host") {
+    val state by producePresenter(key = "acct_${accountData.data}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
             host = host,
+            accountData = accountData,
         )
     }
     state.onSuccess {
@@ -157,6 +160,7 @@ fun ProfileWithUserNameAndHostRoute(
                     ),
                 )
             },
+            accountData = accountData,
         )
     }.onLoading {
         ProfileLoadingScreen(
@@ -177,8 +181,11 @@ fun ProfileWithUserNameAndHostRoute(
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
-internal fun MeRoute(navigator: DestinationsNavigator) {
-    ProfileRoute(null, navigator)
+internal fun MeRoute(
+    navigator: DestinationsNavigator,
+    accountData: AccountData,
+) {
+    ProfileRoute(null, navigator, accountData)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -253,6 +260,7 @@ private fun ProfileLoadingScreen(onBack: () -> Unit) {
 private fun profileWithUserNameAndHostPresenter(
     userName: String,
     host: String,
+    accountData: AccountData,
 ) = run {
     remember(
         userName,
@@ -261,6 +269,7 @@ private fun profileWithUserNameAndHostPresenter(
         ProfileWithUserNameAndHostPresenter(
             userName = userName,
             host = host,
+            accountKey = accountData.data,
         )
     }.invoke()
 }
@@ -280,6 +289,7 @@ private fun profileWithUserNameAndHostPresenter(
 fun ProfileRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
+    accountData: AccountData,
 ) {
     ProfileScreen(
         userKey = userKey,
@@ -300,6 +310,7 @@ fun ProfileRoute(
                 ),
             )
         },
+        accountData = accountData,
     )
 }
 
@@ -307,6 +318,7 @@ fun ProfileRoute(
 @Composable
 private fun ProfileScreen(
     // null means current user
+    accountData: AccountData,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     onProfileMediaClick: () -> Unit = {},
@@ -314,8 +326,8 @@ private fun ProfileScreen(
     showTopBar: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    val state by producePresenter(key = userKey.toString()) {
-        profilePresenter(userKey)
+    val state by producePresenter(key = "${accountData.data}_$userKey") {
+        profilePresenter(userKey = userKey, accountData = accountData)
     }
     val listState = rememberLazyStaggeredGridState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -1155,12 +1167,14 @@ private fun ProfileMeidasPreview(
 @Composable
 private fun profilePresenter(
     userKey: MicroBlogKey?,
+    accountData: AccountData,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state =
         remember(userKey) {
             ProfilePresenter(
                 userKey = userKey,
+                accountKey = accountData.data,
             )
         }.invoke()
     var showMoreMenus by remember {

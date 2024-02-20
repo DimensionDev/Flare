@@ -23,6 +23,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
@@ -39,6 +40,7 @@ import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
 @Composable
 internal fun MisskeyReactionRoute(
     statusKey: MicroBlogKey,
+    accountData: AccountData,
     navigator: DestinationsNavigator,
 ) {
     Dialog(onDismissRequest = navigator::navigateUp) {
@@ -46,6 +48,7 @@ internal fun MisskeyReactionRoute(
             MisskeyReactionSheet(
                 statusKey = statusKey,
                 onBack = navigator::navigateUp,
+                accountData = accountData,
             )
         }
     }
@@ -54,11 +57,15 @@ internal fun MisskeyReactionRoute(
 @Composable
 private fun MisskeyReactionSheet(
     statusKey: MicroBlogKey,
+    accountData: AccountData,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by producePresenter(statusKey.toString()) {
-        misskeyReactionPresenter(statusKey)
+    val state by producePresenter("MisskeyReactionSheet_${accountData.data}_$statusKey") {
+        misskeyReactionPresenter(
+            statusKey = statusKey,
+            accountData = accountData,
+        )
     }
 
     LazyVerticalGrid(
@@ -87,9 +94,14 @@ private fun MisskeyReactionSheet(
 }
 
 @Composable
-private fun misskeyReactionPresenter(statusKey: MicroBlogKey) =
-    run {
-        remember(statusKey) {
-            MisskeyReactionPresenter(statusKey)
-        }.invoke()
-    }
+private fun misskeyReactionPresenter(
+    statusKey: MicroBlogKey,
+    accountData: AccountData,
+) = run {
+    remember(statusKey, accountData.data) {
+        MisskeyReactionPresenter(
+            accountKey = accountData.data,
+            statusKey = statusKey,
+        )
+    }.invoke()
+}

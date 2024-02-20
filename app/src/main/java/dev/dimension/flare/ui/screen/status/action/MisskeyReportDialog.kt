@@ -16,6 +16,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
 
@@ -33,6 +34,7 @@ fun MisskeyReportRoute(
     navigator: DestinationsNavigator,
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountData: AccountData,
 ) {
     MisskeyReportDialog(
         statusKey = statusKey,
@@ -40,6 +42,7 @@ fun MisskeyReportRoute(
         onBack = {
             navigator.navigateUp()
         },
+        accountData = accountData,
     )
 }
 
@@ -47,12 +50,14 @@ fun MisskeyReportRoute(
 fun MisskeyReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountData: AccountData,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter("${userKey}_${statusKey ?: ""}") {
+    val state by producePresenter("${userKey}_${statusKey ?: ""}_${accountData.data}") {
         misskeyReportPresenter(
             userKey,
             statusKey,
+            accountData,
         )
     }
 
@@ -96,11 +101,13 @@ fun MisskeyReportDialog(
 private fun misskeyReportPresenter(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountData: AccountData,
 ) = run {
-    remember(userKey, statusKey) {
+    remember(userKey, statusKey, accountData.data) {
         MisskeyReportPresenter(
-            userKey,
-            statusKey,
+            userKey = userKey,
+            statusKey = statusKey,
+            accountKey = accountData.data,
         )
     }.invoke()
 }

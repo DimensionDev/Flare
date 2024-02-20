@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
 import dev.dimension.flare.data.repository.allAccountsPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
@@ -24,29 +23,24 @@ class QuickMenuPresenter : PresenterBase<QuickMenuState>() {
     @Composable
     override fun body(): QuickMenuState {
         val accountRepository = koinInject<AccountRepository>()
-        val user =
-            activeAccountServicePresenter().flatMap { (service, account) ->
-                remember(account.accountKey) {
-                    service.userById(account.accountKey.id)
-                }.collectAsState().toUi()
-            }
+        val user = remember { ActiveAccountPresenter() }.body()
         val accounts by allAccountsPresenter()
         val allUsers =
             accounts.flatMap { data ->
-                user.map { current ->
+                user.user.map { current ->
                     data.filter {
                         it.accountKey != current.userKey
-                    }.map {
-                        val service = accountServiceProvider(account = it)
-                        remember(it.accountKey) {
-                            service.userById(it.accountKey.id)
-                        }.collectAsState().toUi()
+                    }.map { account ->
+                        accountServiceProvider(accountKey = account.accountKey).flatMap { service ->
+                            remember(account.accountKey) {
+                                service.userById(account.accountKey.id)
+                            }.collectAsState().toUi()
+                        }
                     }.toImmutableList().toImmutableListWrapper()
                 }
             }
 
-        return object : QuickMenuState {
-            override val user = user
+        return object : QuickMenuState, ActiveAccountState by user {
             override val allUsers = allUsers
 
             override fun setActiveAccount(accountKey: MicroBlogKey) {
@@ -56,8 +50,7 @@ class QuickMenuPresenter : PresenterBase<QuickMenuState>() {
     }
 }
 
-interface QuickMenuState {
-    val user: UiState<UiUser>
+interface QuickMenuState : ActiveAccountState {
     val allUsers: UiState<ImmutableListWrapper<UiState<UiUser>>>
 
     fun setActiveAccount(accountKey: MicroBlogKey)

@@ -13,6 +13,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -28,11 +29,12 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
         val activeAccount by activeAccountPresenter()
         val user =
             accounts.map {
-                it.map {
-                    val service = accountServiceProvider(account = it)
-                    remember(it.accountKey) {
-                        service.userById(it.accountKey.id)
-                    }.collectAsState().toUi()
+                it.map { account ->
+                    accountServiceProvider(accountKey = account.accountKey).flatMap { service ->
+                        remember(account.accountKey) {
+                            service.userById(account.accountKey.id)
+                        }.collectAsState().toUi()
+                    }
                 }.toImmutableList().toImmutableListWrapper()
             }
         return object : AccountsState(

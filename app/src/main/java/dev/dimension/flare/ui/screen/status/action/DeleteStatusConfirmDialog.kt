@@ -16,6 +16,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.DeleteStatusPresenter
 import dev.dimension.flare.ui.presenter.status.action.DeleteStatusState
@@ -32,6 +33,7 @@ import dev.dimension.flare.ui.presenter.status.action.DeleteStatusState
 )
 fun DeleteStatusConfirmRoute(
     navigator: DestinationsNavigator,
+    accountData: AccountData,
     statusKey: MicroBlogKey,
 ) {
     DeleteStatusConfirmDialog(
@@ -39,16 +41,21 @@ fun DeleteStatusConfirmRoute(
         onBack = {
             navigator.navigateUp()
         },
+        accountData = accountData,
     )
 }
 
 @Composable
 fun DeleteStatusConfirmDialog(
     statusKey: MicroBlogKey,
+    accountData: AccountData,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter(key = statusKey.toString()) {
-        deleteStatusConfirmPresenter(statusKey)
+    val state by producePresenter(key = "DeleteStatusPresenter_${accountData.data}_$statusKey") {
+        deleteStatusConfirmPresenter(
+            statusKey = statusKey,
+            accountData = accountData,
+        )
     }
 
     AlertDialog(
@@ -78,13 +85,18 @@ fun DeleteStatusConfirmDialog(
 }
 
 @Composable
-fun deleteStatusConfirmPresenter(statusKey: MicroBlogKey) =
-    run {
-        val state =
-            remember(key1 = statusKey) {
-                DeleteStatusPresenter(statusKey)
-            }.invoke()
+fun deleteStatusConfirmPresenter(
+    statusKey: MicroBlogKey,
+    accountData: AccountData,
+) = run {
+    val state =
+        remember(accountData.data, statusKey) {
+            DeleteStatusPresenter(
+                accountKey = accountData.data,
+                statusKey = statusKey,
+            )
+        }.invoke()
 
-        object : DeleteStatusState by state {
-        }
+    object : DeleteStatusState by state {
     }
+}

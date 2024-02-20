@@ -34,11 +34,12 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.presenter.home.NotificationState
+import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -51,9 +52,11 @@ import org.koin.compose.koinInject
 @Composable
 internal fun NotificationRoute(
     navigator: DestinationsNavigator,
+    accountData: AccountData,
 //    screen: Screen
 ) {
     NotificationScreen(
+        accountData = accountData,
 //        screen = screen
         toQuickMenu = {
             navigator.navigate(QuickMenuDialogRouteDestination)
@@ -64,11 +67,12 @@ internal fun NotificationRoute(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 private fun NotificationScreen(
+    accountData: AccountData,
 //    screen: Screen
     toQuickMenu: () -> Unit,
 ) {
-    val state by producePresenter {
-        notificationPresenter()
+    val state by producePresenter(key = "notification_${accountData.data}") {
+        notificationPresenter(accountData = accountData)
     }
 //    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
@@ -183,12 +187,14 @@ private val NotificationFilter.title: Int
         }
 
 @Composable
-private fun notificationPresenter(statusEvent: StatusEvent = koinInject()) =
-    run {
-        val accountState = remember { ActiveAccountPresenter() }.invoke()
-        val state = remember { NotificationPresenter() }.invoke()
-        object : ActiveAccountState by accountState {
-            val state = state
-            val statusEvent = statusEvent
-        }
+private fun notificationPresenter(
+    accountData: AccountData,
+    statusEvent: StatusEvent = koinInject(),
+) = run {
+    val accountState = remember { UserPresenter(accountKey = accountData.data, userKey = accountData.data) }.invoke()
+    val state = remember { NotificationPresenter(accountKey = accountData.data) }.invoke()
+    object : UserState by accountState {
+        val state = state
+        val statusEvent = statusEvent
     }
+}

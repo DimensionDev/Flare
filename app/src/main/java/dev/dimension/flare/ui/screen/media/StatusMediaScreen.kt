@@ -69,6 +69,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.medias
@@ -105,10 +106,12 @@ fun StatusMediaRoute(
     index: Int,
     preview: String?,
     navigator: DestinationsNavigator,
+    accountData: AccountData,
 ) {
     SetDialogDestinationToEdgeToEdge()
     StatusMediaScreen(
         statusKey = statusKey,
+        accountData = accountData,
         index = index,
         onDismiss = navigator::navigateUp,
         preview = preview,
@@ -126,6 +129,7 @@ fun StatusMediaRoute(
 @Composable
 internal fun StatusMediaScreen(
     statusKey: MicroBlogKey,
+    accountData: AccountData,
     index: Int,
     preview: String?,
     toStatus: () -> Unit,
@@ -138,7 +142,12 @@ internal fun StatusMediaScreen(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
         )
     val state by producePresenter {
-        statusMediaPresenter(statusKey, index, context)
+        statusMediaPresenter(
+            statusKey = statusKey,
+            initialIndex = index,
+            context = context,
+            accountData = accountData,
+        )
     }
     BackHandler(state.showUi) {
         state.setShowUi(false)
@@ -436,6 +445,7 @@ private fun statusMediaPresenter(
     statusKey: MicroBlogKey,
     initialIndex: Int,
     context: Context,
+    accountData: AccountData,
     scope: CoroutineScope = koinInject(),
 ) = run {
     var showUi by remember {
@@ -452,7 +462,7 @@ private fun statusMediaPresenter(
     }
     val state =
         remember(statusKey) {
-            StatusPresenter(statusKey)
+            StatusPresenter(accountKey = accountData.data, statusKey = statusKey)
         }.invoke()
     val medias =
         state.status.map {

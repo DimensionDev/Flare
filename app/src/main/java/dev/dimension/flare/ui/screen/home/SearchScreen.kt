@@ -47,14 +47,16 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
+import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
@@ -79,9 +81,11 @@ import org.koin.compose.koinInject
 fun SearchRoute(
     keyword: String,
     navigator: DestinationsNavigator,
+    accountData: AccountData,
 ) {
     SearchScreen(
         initialQuery = keyword,
+        accountData = accountData,
         onBack = { navigator.navigateUp() },
         onAccountClick = {
             navigator.navigate(QuickMenuDialogRouteDestination)
@@ -95,11 +99,14 @@ fun SearchRoute(
 @Composable
 private fun SearchScreen(
     initialQuery: String,
+    accountData: AccountData,
     onBack: () -> Unit,
     onAccountClick: () -> Unit,
     toUser: (MicroBlogKey) -> Unit,
 ) {
-    val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter(initialQuery.decodeURLQueryComponent()) }
+    val state by producePresenter(
+        "discoverSearchPresenter",
+    ) { discoverSearchPresenter(accountData, initialQuery.decodeURLQueryComponent()) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     SearchContent(
@@ -316,20 +323,21 @@ private fun SearchContent(
 
 @Composable
 internal fun discoverSearchPresenter(
+    accountData: AccountData,
     initialSearch: String? = null,
     statusEvent: StatusEvent = koinInject(),
 ): DiscoverSearchState =
     run {
-        val activeAccount = remember { ActiveAccountPresenter() }.invoke()
+        val accountState = remember { UserPresenter(accountKey = accountData.data, userKey = accountData.data) }.invoke()
         var query by remember { mutableStateOf(initialSearch ?: "") }
         var isSearching by remember { mutableStateOf(false) }
         var commited by remember { mutableStateOf(initialSearch != null) }
         val state =
             remember {
-                SearchPresenter(initialSearch ?: "")
+                SearchPresenter(accountKey = accountData.data, initialQuery = initialSearch ?: "")
             }.invoke()
 
-        object : DiscoverSearchState, SearchState by state, ActiveAccountState by activeAccount {
+        object : DiscoverSearchState, SearchState by state, UserState by accountState {
             override val commited = commited
             override val query = query
             override val isSearching = isSearching

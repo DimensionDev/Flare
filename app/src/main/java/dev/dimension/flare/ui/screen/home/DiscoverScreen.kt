@@ -39,6 +39,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
@@ -52,8 +53,13 @@ import org.koin.compose.koinInject
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun DiscoverRoute(navigator: DestinationsNavigator) {
-    val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter() }
+internal fun DiscoverRoute(
+    navigator: DestinationsNavigator,
+    accountData: AccountData,
+) {
+    val state by producePresenter("discoverSearchPresenter_${accountData.data}") {
+        discoverSearchPresenter(accountData = accountData)
+    }
     Scaffold(
         topBar = {
             Box(
@@ -78,17 +84,19 @@ internal fun DiscoverRoute(navigator: DestinationsNavigator) {
             onHashtagClick = {
                 state.commitSearch(it)
             },
+            accountData = accountData,
         )
     }
 }
 
 @Composable
 internal fun DiscoverScreen(
+    accountData: AccountData,
     contentPadding: PaddingValues,
     onUserClick: (MicroBlogKey) -> Unit,
     onHashtagClick: (String) -> Unit,
 ) {
-    val state by producePresenter { discoverPresenter() }
+    val state by producePresenter("discover_${accountData.data}") { discoverPresenter(accountData) }
     RefreshContainer(
         modifier =
             Modifier
@@ -255,11 +263,13 @@ internal fun DiscoverScreen(
 }
 
 @Composable
-private fun discoverPresenter(statusEvent: StatusEvent = koinInject()) =
-    run {
-        val state = remember { DiscoverPresenter() }.invoke()
+private fun discoverPresenter(
+    accountData: AccountData,
+    statusEvent: StatusEvent = koinInject(),
+) = run {
+    val state = remember(accountData.data) { DiscoverPresenter(accountKey = accountData.data) }.invoke()
 
-        object : DiscoverState by state {
-            val statusEvent = statusEvent
-        }
+    object : DiscoverState by state {
+        val statusEvent = statusEvent
     }
+}

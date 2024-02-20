@@ -9,9 +9,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
 import dev.dimension.flare.R
+import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.theme.FlareTheme
 
+@RootNavGraph(start = true)
+@Destination(
+    wrappers = [ThemeWrapper::class],
+)
 @Composable
 internal fun SplashScreen() {
     FlareTheme {

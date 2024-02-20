@@ -33,6 +33,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.MediaItem
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -47,6 +48,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 )
 internal fun ProfileMediaRoute(
     userKey: MicroBlogKey?,
+    accountData: AccountData,
     navigator: DestinationsNavigator,
 ) {
     ProfileMediaScreen(
@@ -61,6 +63,7 @@ internal fun ProfileMediaRoute(
                 ),
             )
         },
+        accountData = accountData,
     )
 }
 
@@ -68,11 +71,12 @@ internal fun ProfileMediaRoute(
 @Composable
 private fun ProfileMediaScreen(
     userKey: MicroBlogKey?,
+    accountData: AccountData,
     onItemClicked: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter(key = userKey.toString()) {
-        profileMediaPresenter(userKey)
+    val state by producePresenter(key = "ProfileMediaScreen_${userKey?.id}_${accountData.data}") {
+        profileMediaPresenter(userKey, accountData)
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -140,7 +144,14 @@ private fun ProfileMediaScreen(
 }
 
 @Composable
-private fun profileMediaPresenter(userKey: MicroBlogKey?) =
-    run {
-        remember(userKey) { ProfileMediaPresenter(userKey) }.invoke()
-    }
+private fun profileMediaPresenter(
+    userKey: MicroBlogKey?,
+    accountData: AccountData,
+) = run {
+    remember(userKey, accountData.data) {
+        ProfileMediaPresenter(
+            accountKey = accountData.data,
+            userKey = userKey,
+        )
+    }.invoke()
+}

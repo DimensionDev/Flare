@@ -90,44 +90,96 @@ internal fun activeAccountPresenter(repository: AccountRepository = koinInject()
     }.collectAsState(initial = UiState.Loading())
 }
 
+// @Composable
+// internal fun activeAccountServicePresenter(): UiState<Pair<MicroblogDataSource, UiAccount>> {
+//    val account by activeAccountPresenter()
+//    return account.map {
+//        accountServiceProvider(it) to it
+//    }
+// }
+
 @Composable
-internal fun activeAccountServicePresenter(): UiState<Pair<MicroblogDataSource, UiAccount>> {
-    val account by activeAccountPresenter()
-    return account.map {
-        accountServiceProvider(it) to it
-    }
+internal fun accountProvider(
+    accountKey: MicroBlogKey,
+    repository: AccountRepository = koinInject(),
+): UiState<UiAccount> {
+    val account by remember(accountKey) {
+        repository.getFlow(accountKey)
+            .map<UiAccount?, UiState<UiAccount>> {
+                if (it == null) {
+                    UiState.Error(NoActiveAccountException)
+                } else {
+                    UiState.Success(it)
+                }
+            }
+    }.collectAsState(initial = UiState.Loading())
+    return account
 }
 
 @Composable
-internal fun accountServiceProvider(account: UiAccount): MicroblogDataSource {
-    return remember(account.accountKey) {
-        when (account) {
-            is UiAccount.Mastodon -> {
-                MastodonDataSource(
-                    account = account,
-                )
-            }
+internal fun accountServiceProvider(accountKey: MicroBlogKey): UiState<MicroblogDataSource> {
+    val account = accountProvider(accountKey = accountKey)
+    return account.map {
+        remember(it.accountKey) {
+            when (it) {
+                is UiAccount.Mastodon -> {
+                    MastodonDataSource(
+                        account = it,
+                    )
+                }
 
-            is UiAccount.Misskey -> {
-                MisskeyDataSource(
-                    account = account,
-                )
-            }
+                is UiAccount.Misskey -> {
+                    MisskeyDataSource(
+                        account = it,
+                    )
+                }
 
-            is UiAccount.Bluesky -> {
-                BlueskyDataSource(
-                    account = account,
-                )
-            }
+                is UiAccount.Bluesky -> {
+                    BlueskyDataSource(
+                        account = it,
+                    )
+                }
 
-            is UiAccount.XQT -> {
-                XQTDataSource(
-                    account = account,
-                )
+                is UiAccount.XQT -> {
+                    XQTDataSource(
+                        account = it,
+                    )
+                }
             }
         }
     }
 }
+
+// @Composable
+// internal fun accountServiceProvider(account: UiAccount): MicroblogDataSource {
+//    return remember(account.accountKey) {
+//        when (account) {
+//            is UiAccount.Mastodon -> {
+//                MastodonDataSource(
+//                    account = account,
+//                )
+//            }
+//
+//            is UiAccount.Misskey -> {
+//                MisskeyDataSource(
+//                    account = account,
+//                )
+//            }
+//
+//            is UiAccount.Bluesky -> {
+//                BlueskyDataSource(
+//                    account = account,
+//                )
+//            }
+//
+//            is UiAccount.XQT -> {
+//                XQTDataSource(
+//                    account = account,
+//                )
+//            }
+//        }
+//    }
+// }
 
 @Composable
 internal fun allAccountsPresenter(repository: AccountRepository = koinInject()): State<UiState<ImmutableList<UiAccount>>> {

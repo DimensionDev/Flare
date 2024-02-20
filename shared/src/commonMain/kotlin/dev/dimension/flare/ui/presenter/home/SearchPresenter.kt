@@ -7,7 +7,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
@@ -15,24 +16,25 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 class SearchPresenter(
+    private val accountKey: MicroBlogKey,
     private val initialQuery: String = "",
 ) : PresenterBase<SearchState>() {
     @Composable
     override fun body(): SearchState {
-        val accountState = activeAccountServicePresenter()
+        val accountState = accountServiceProvider(accountKey = accountKey)
         var query by remember { mutableStateOf(initialQuery) }
 
         val user =
-            accountState.map { (service, account) ->
-                remember(account.accountKey, query) {
+            accountState.map { service ->
+                remember(accountKey, query) {
                     // TODO: Should we handle when query is empty?
                     service.searchUser(query)
                 }.collectPagingProxy()
             }
 
         val status =
-            accountState.map { (service, account) ->
-                remember(account.accountKey, query) {
+            accountState.map { service ->
+                remember(accountKey, query) {
                     service.searchStatus(query)
                 }.collectPagingProxy()
             }

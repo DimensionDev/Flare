@@ -4,7 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -12,13 +13,15 @@ import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
 
-class DiscoverPresenter : PresenterBase<DiscoverState>() {
+class DiscoverPresenter(
+    private val accountKey: MicroBlogKey,
+) : PresenterBase<DiscoverState>() {
     @Composable
     override fun body(): DiscoverState {
-        val accountState = activeAccountServicePresenter()
+        val accountState = accountServiceProvider(accountKey = accountKey)
         val users =
-            accountState.flatMap { (dataSource, account) ->
-                remember(account.accountKey) {
+            accountState.flatMap { dataSource ->
+                remember(accountKey) {
                     runCatching {
                         dataSource.discoverUsers()
                     }.getOrNull()
@@ -31,8 +34,8 @@ class DiscoverPresenter : PresenterBase<DiscoverState>() {
                 }
             }
         val status =
-            accountState.flatMap { (dataSource, account) ->
-                remember(account.accountKey) {
+            accountState.flatMap { dataSource ->
+                remember(accountKey) {
                     runCatching {
                         dataSource.discoverStatuses()
                     }.getOrNull()
@@ -45,8 +48,8 @@ class DiscoverPresenter : PresenterBase<DiscoverState>() {
                 }
             }
         val hashtags =
-            accountState.flatMap { (dataSource, account) ->
-                remember(account.accountKey) {
+            accountState.flatMap { dataSource ->
+                remember(accountKey) {
                     runCatching {
                         dataSource.discoverHashtags()
                     }.getOrNull()

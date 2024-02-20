@@ -16,6 +16,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MastodonReportPresenter
 
@@ -33,6 +34,7 @@ fun MastodonReportRoute(
     navigator: DestinationsNavigator,
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountData: AccountData,
 ) {
     MastodonReportDialog(
         statusKey = statusKey,
@@ -40,6 +42,7 @@ fun MastodonReportRoute(
         onBack = {
             navigator.navigateUp()
         },
+        accountData = accountData,
     )
 }
 
@@ -47,10 +50,15 @@ fun MastodonReportRoute(
 fun MastodonReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountData: AccountData,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter("${userKey}_$statusKey") {
-        mastodonReportPresenter(userKey, statusKey)
+    val state by producePresenter("${userKey}_${accountData.data}_$statusKey") {
+        mastodonReportPresenter(
+            userKey = userKey,
+            statusKey = statusKey,
+            accountData = accountData,
+        )
     }
 
     AlertDialog(
@@ -85,10 +93,15 @@ fun MastodonReportDialog(
 private fun mastodonReportPresenter(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountData: AccountData,
 ) = run {
     val state =
-        remember(userKey, statusKey) {
-            MastodonReportPresenter(userKey, statusKey)
+        remember(userKey, statusKey, accountData.data) {
+            MastodonReportPresenter(
+                accountKey = accountData.data,
+                userKey = userKey,
+                statusKey = statusKey,
+            )
         }.invoke()
     state
 }

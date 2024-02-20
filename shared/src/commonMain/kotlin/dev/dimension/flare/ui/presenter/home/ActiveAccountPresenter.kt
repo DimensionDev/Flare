@@ -6,7 +6,7 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
@@ -20,10 +20,13 @@ import org.koin.compose.koinInject
 class ActiveAccountPresenter : PresenterBase<ActiveAccountState>() {
     @Composable
     override fun body(): ActiveAccountState {
+        val account by activeAccountPresenter()
         val user =
-            activeAccountServicePresenter().flatMap { (service, account) ->
-                remember(account.accountKey) {
-                    service.userById(account.accountKey.id)
+            account.flatMap {
+                accountServiceProvider(it.accountKey)
+            }.flatMap {
+                remember(it.account.accountKey) {
+                    it.userById(it.account.accountKey.id)
                 }.collectAsState().toUi()
             }
         return object : ActiveAccountState {
@@ -52,10 +55,11 @@ class UserPresenter(
         }.collectAsUiState()
         val user =
             account.flatMap {
-                val service = accountServiceProvider(it)
-                remember(it, userKey) {
-                    service.userById(userKey.id)
-                }.collectAsState().toUi()
+                accountServiceProvider(it.accountKey).flatMap { service ->
+                    remember(it, userKey) {
+                        service.userById(userKey.id)
+                    }.collectAsState().toUi()
+                }
             }
 
         return object : UserState {

@@ -17,46 +17,38 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.DeepLink
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.popUpTo
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.MastodonCallbackPresenter
-import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.MastodonCallbackRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-@Destination(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "${AppDeepLink.Callback.MASTODON}?code={code}",
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-fun MastodonCallbackRoute(
-    code: String?,
-    navigator: DestinationsNavigator,
-) {
-    MastodonCallbackScreen(
-        code = code,
-        toHome = {
-            navigator.navigate(HomeRouteDestination) {
-                popUpTo(MastodonCallbackRouteDestination) {
-                    inclusive = true
-                }
-            }
-        },
-    )
-}
+// @Destination(
+//    deepLinks = [
+//        DeepLink(
+//            uriPattern = "${AppDeepLink.Callback.MASTODON}?code={code}",
+//        ),
+//    ],
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// fun MastodonCallbackRoute(
+//    code: String?,
+//    navigator: DestinationsNavigator,
+// ) {
+//    MastodonCallbackScreen(
+//        code = code,
+//        toHome = {
+//            navigator.navigate(HomeRouteDestination) {
+//                popUpTo(MastodonCallbackRouteDestination) {
+//                    inclusive = true
+//                }
+//            }
+//        },
+//    )
+// }
 
 @Composable
 internal fun MastodonCallbackScreen(

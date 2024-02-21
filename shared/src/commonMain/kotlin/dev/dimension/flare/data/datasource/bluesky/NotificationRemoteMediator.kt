@@ -62,7 +62,7 @@ internal class NotificationRemoteMediator(
             )
 
             MediatorResult.Success(
-                endOfPaginationReached = response.notifications.isEmpty(),
+                endOfPaginationReached = cursor == null,
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)

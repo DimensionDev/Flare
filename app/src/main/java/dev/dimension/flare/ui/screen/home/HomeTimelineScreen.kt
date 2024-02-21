@@ -199,8 +199,8 @@ private fun homeTimelinePresenter(
     accountData: AccountData,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
-    val state = remember { HomeTimelinePresenter(accountKey = accountData.data) }.invoke()
-    val accountState = remember { UserPresenter(accountKey = accountData.data, userKey = accountData.data) }.invoke()
+    val state = remember(accountData.data) { HomeTimelinePresenter(accountKey = accountData.data) }.invoke()
+    val accountState = remember(accountData.data) { UserPresenter(accountKey = accountData.data, userKey = accountData.data) }.invoke()
     var showNewToots by remember { mutableStateOf(false) }
     val listState = state.listState
     if (listState is UiState.Success && listState.data.itemCount > 0) {

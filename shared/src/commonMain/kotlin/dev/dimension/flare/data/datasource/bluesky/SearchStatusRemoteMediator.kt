@@ -62,7 +62,7 @@ internal class SearchStatusRemoteMediator(
             )
 
             MediatorResult.Success(
-                endOfPaginationReached = response.posts.isEmpty(),
+                endOfPaginationReached = cursor == null,
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)

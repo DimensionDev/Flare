@@ -35,7 +35,7 @@ class ComposePresenter(
 ) : PresenterBase<ComposeState>() {
     @Composable
     override fun body(): ComposeState {
-        val accountState = accountProvider(accountKey = accountKey)
+        val accountState by accountProvider(accountKey = accountKey)
         val serviceState = accountServiceProvider(accountKey = accountKey)
         val composeUseCase: ComposeUseCase = koinInject()
         val visibilityState =

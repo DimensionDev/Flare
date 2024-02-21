@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.datasource.xqt.userByScreenName
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.repository.AccountRepository
@@ -61,7 +62,7 @@ class XQTLoginPresenter(
         val accountSettings = xqtService.getAccountSettings()
         requireNotNull(accountSettings.screenName)
         val account =
-            xqtService.getUserByScreenName(variables = "{\"screen_name\": \"${accountSettings.screenName}\"}")
+            xqtService.userByScreenName(accountSettings.screenName)
                 .body()?.data?.user?.result
         requireNotNull(account)
         require(account is User)

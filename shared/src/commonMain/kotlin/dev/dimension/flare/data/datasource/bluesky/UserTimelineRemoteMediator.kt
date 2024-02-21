@@ -79,7 +79,7 @@ internal class UserTimelineRemoteMediator(
             )
 
             MediatorResult.Success(
-                endOfPaginationReached = response.feed.isEmpty(),
+                endOfPaginationReached = cursor == null,
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)

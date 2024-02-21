@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -16,11 +17,15 @@ import kotlinx.coroutines.flow.onStart
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 
+@Immutable
 sealed class UiState<T : Any> {
+    @Immutable
     data class Success<T : Any>(val data: T) : UiState<T>()
 
+    @Immutable
     data class Error<T : Any>(val throwable: Throwable) : UiState<T>()
 
+    @Immutable
     class Loading<T : Any> : UiState<T>()
 }
 

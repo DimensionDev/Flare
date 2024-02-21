@@ -1,11 +1,13 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.humanizer.humanizePercentage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
+@Immutable
 data class UiPoll(
     val id: String,
     val options: ImmutableList<Option>,
@@ -17,6 +19,7 @@ data class UiPoll(
     val expired by lazy { expiresAt < Clock.System.now() }
     val voted by lazy { ownVotes.isNotEmpty() }
 
+    @Immutable
     data class Option(
         val title: String,
         val votesCount: Long,

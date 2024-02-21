@@ -1,28 +1,34 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.DbApplication
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 
+@Immutable
 sealed interface UiApplication {
     val host: String
 
+    @Immutable
     data class Mastodon internal constructor(
         override val host: String,
         internal val application: CreateApplicationResponse,
     ) : UiApplication
 
+    @Immutable
     data class Misskey(
         override val host: String,
         val session: String,
     ) : UiApplication
 
+    @Immutable
     data class Bluesky(
         override val host: String,
     ) : UiApplication
 
+    @Immutable
     data object XQT : UiApplication {
         override val host: String = xqtHost
     }

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
 import app.bsky.notification.ListNotificationsReason
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
@@ -58,10 +59,12 @@ internal val twitterParser by lazy {
     TwitterParser(enableNonAsciiInUrl = false)
 }
 
+@Immutable
 expect class UiStatusExtra
 
 internal expect fun createStatusExtra(status: UiStatus): UiStatusExtra
 
+@Immutable
 sealed class UiStatus {
     abstract val statusKey: MicroBlogKey
     abstract val accountKey: MicroBlogKey
@@ -153,6 +156,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class MastodonNotification(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -166,6 +170,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class Mastodon internal constructor(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -223,6 +228,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class Misskey(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -290,6 +296,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class MisskeyNotification internal constructor(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -304,6 +311,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class Bluesky(
         override val accountKey: MicroBlogKey,
         override val statusKey: MicroBlogKey,
@@ -358,6 +366,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class BlueskyNotification(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -373,6 +382,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class XQT internal constructor(
         override val accountKey: MicroBlogKey,
         override val statusKey: MicroBlogKey,

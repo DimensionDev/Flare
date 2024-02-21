@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.model.MicroBlogKey
@@ -13,10 +14,12 @@ import moe.tlaster.ktml.dom.Element
 import moe.tlaster.ktml.dom.Text
 import moe.tlaster.twitter.parser.UrlToken
 
+@Immutable
 expect class UiUserExtra
 
 internal expect fun createUiUserExtra(user: UiUser): UiUserExtra
 
+@Immutable
 sealed class UiUser {
     abstract val userKey: MicroBlogKey
     abstract val handle: String
@@ -32,6 +35,7 @@ sealed class UiUser {
         userKey.toString()
     }
 
+    @Immutable
     data class Mastodon internal constructor(
         override val userKey: MicroBlogKey,
         val name: String,
@@ -60,6 +64,7 @@ sealed class UiUser {
             parseNote(raw)
         }
 
+        @Immutable
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
@@ -71,6 +76,7 @@ sealed class UiUser {
         }
     }
 
+    @Immutable
     data class Misskey(
         override val userKey: MicroBlogKey,
         val name: String,
@@ -102,6 +108,7 @@ sealed class UiUser {
 
         override val handle = "@$handleInternal@$remoteHost"
 
+        @Immutable
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
@@ -113,6 +120,7 @@ sealed class UiUser {
         }
     }
 
+    @Immutable
     data class Bluesky(
         override val userKey: MicroBlogKey,
         val displayName: String,
@@ -135,6 +143,7 @@ sealed class UiUser {
         }
         override val handle: String = "@$handleInternal"
 
+        @Immutable
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,
@@ -146,6 +155,7 @@ sealed class UiUser {
         }
     }
 
+    @Immutable
     data class XQT internal constructor(
         override val userKey: MicroBlogKey,
         val displayName: String,
@@ -179,6 +189,7 @@ sealed class UiUser {
             }.toImmutableMap()
         }
 
+        @Immutable
         data class Matrices(
             val fansCount: Long,
             val followsCount: Long,

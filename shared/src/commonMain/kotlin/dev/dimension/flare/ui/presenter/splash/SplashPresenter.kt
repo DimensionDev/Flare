@@ -41,7 +41,9 @@ class SplashPresenter(
 }
 
 sealed interface SplashType {
-    data object Splash: SplashType
-    data object Login: SplashType
-    data class Home(val accountKey: MicroBlogKey): SplashType
+    data object Splash : SplashType
+
+    data object Login : SplashType
+
+    data class Home(val accountKey: MicroBlogKey) : SplashType
 }

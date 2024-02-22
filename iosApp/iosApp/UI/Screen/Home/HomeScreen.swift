@@ -2,10 +2,9 @@ import SwiftUI
 import shared
 
 struct HomeScreen: View {
+    let accountKey: MicroBlogKey
     @State var viewModel = HomeViewModel()
     @State var showSettings = false
-    @State var showCompose = false
-    @State var statusEvent = StatusEvent()
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var body: some View {
         FlareTheme {
@@ -14,8 +13,8 @@ struct HomeScreen: View {
                     TabModel(
                         title: String(localized: "home_timeline_title"),
                         image: "house",
-                        destination: TabItem { _ in
-                            HomeTimelineScreen()
+                        destination: TabItem(accountKey: accountKey) { _ in
+                            HomeTimelineScreen(accountKey: accountKey)
 #if os(iOS)
                                 .if(horizontalSizeClass == .compact, transform: { view in
                                     view
@@ -26,7 +25,7 @@ struct HomeScreen: View {
                                             }
                                             ToolbarItem(placement: .primaryAction) {
                                                 Button(action: {
-                                                    showCompose = true
+//                                                    showCompose = true
                                                 }, label: {
                                                     Image(systemName: "square.and.pencil")
                                                 })
@@ -50,25 +49,26 @@ struct HomeScreen: View {
                     TabModel(
                         title: String(localized: "home_notification_title"),
                         image: "bell",
-                        destination: TabItem { _ in
-                            NotificationScreen()
+                        destination: TabItem(accountKey: accountKey) { _ in
+                            NotificationScreen(accountKey: accountKey)
                         }
                     ),
                     TabModel(
                         title: String(localized: "home_discover_title"),
                         image: "magnifyingglass",
-                        destination: TabItem { _ in
-                            DiscoverScreen()
+                        destination: TabItem(accountKey: accountKey) { _ in
+                            DiscoverScreen(accountKey: accountKey)
                         }
                     ),
                     TabModel(
                         title: String(localized: "home_profile_title"),
                         image: "person.circle",
-                        destination: TabItem { router in
+                        destination: TabItem(accountKey: accountKey) { router in
                             ProfileScreen(
+                                accountKey: accountKey,
                                 userKey: nil,
                                 toProfileMedia: { userKey in
-                                    router.navigate(to: .profileMedia(userKey: userKey.description()))
+                                    router.navigate(to: .profileMedia(accountKey: accountKey.description(), userKey: userKey.description()))
                                 }
                             )
                         }
@@ -90,7 +90,7 @@ struct HomeScreen: View {
 #endif
                     .buttonStyle(.plain)
                     Button(action: {
-                        showCompose = true
+//                        showCompose = true
                     }, label: {
                         HStack {
                             Image(systemName: "square.and.pencil")
@@ -104,20 +104,40 @@ struct HomeScreen: View {
                     .listRowInsets(EdgeInsets())
             )
         }
-        .sheet(isPresented: $showCompose, content: {
-            NavigationStack {
-                ComposeScreen(onBack: {
-                    showCompose = false
-                })
-            }
-#if os(macOS)
-            .frame(minWidth: 600, minHeight: 400)
-#endif
-        })
         .sheet(isPresented: $showSettings, content: {
             SettingsScreen()
 #if os(macOS)
                 .frame(minWidth: 600, minHeight: 400)
+#endif
+        })
+        .activateViewModel(viewModel: viewModel)
+    }
+}
+
+@Observable
+class HomeViewModel: MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
+}
+
+struct TabItem<Content: View>: View {
+    let accountKey: MicroBlogKey
+    @State var showCompose = false
+    @State var statusEvent = StatusEvent()
+    @State var router = Router<TabDestination>()
+    let content: (Router<TabDestination>) -> Content
+    var body: some View {
+        NavigationStack(path: $router.navPath) {
+            content(router)
+                .withTabRouter(router: router)
+        }
+
+        .sheet(isPresented: $showCompose, content: {
+            NavigationStack {
+                ComposeScreen(onBack: {
+                    showCompose = false
+                }, accountKey: accountKey)
+            }
+#if os(macOS)
+            .frame(minWidth: 600, minHeight: 400)
 #endif
         })
         .sheet(isPresented: Binding(
@@ -133,7 +153,7 @@ struct HomeScreen: View {
                 NavigationStack {
                     ComposeScreen(onBack: {
                         statusEvent.composeStatus = nil
-                    }, status: status)
+                    }, accountKey: accountKey, status: status)
                 }
 #if os(macOS)
                 .frame(minWidth: 500, minHeight: 400)
@@ -148,44 +168,29 @@ struct HomeScreen: View {
             ZStack {
                 Color.black.ignoresSafeArea()
                 if let data = statusEvent.mediaClickData {
-                    StatusMediaScreen(statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
+                    StatusMediaScreen(accountKey: accountKey, statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
                 }
             }
         }
 #endif
-        .activateViewModel(viewModel: viewModel)
-        .environment(statusEvent)
-    }
-}
-
-@Observable
-class HomeViewModel: MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
-}
-
-struct TabItem<Content: View>: View {
-    @State var router = Router<TabDestination>()
-    let content: (Router<TabDestination>) -> Content
-    var body: some View {
-        NavigationStack(path: $router.navPath) {
-            content(router)
-                .withTabRouter(router: router)
-        }.environment(\.openURL, OpenURLAction { url in
+        .environment(\.openURL, OpenURLAction { url in
             if let event = AppDeepLink.shared.parse(url: url.absoluteString) {
                 switch onEnum(of: event) {
                 case .profile(let data):
-                    router.navigate(to: .profile(userKey: data.userKey.description()))
+                    router.navigate(to: .profile(accountKey: accountKey.description(), userKey: data.userKey.description()))
                 case .profileWithNameAndHost(let data):
-                    router.navigate(to: .profileWithUserNameAndHost(userName: data.userName, host: data.host))
+                    router.navigate(to: .profileWithUserNameAndHost(accountKey: accountKey.description(), userName: data.userName, host: data.host))
                 case .search(let data):
-                    router.navigate(to: .search(query: data.keyword))
+                    router.navigate(to: .search(accountKey: accountKey.description(), query: data.keyword))
                 case .statusDetail(let data):
-                    router.navigate(to: .statusDetail(statusKey: data.statusKey.description()))
+                    router.navigate(to: .statusDetail(accountKey: accountKey.description(), statusKey: data.statusKey.description()))
                 }
                 return .handled
             } else {
                 return .systemAction
             }
         })
+        .environment(statusEvent)
     }
 }
 

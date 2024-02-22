@@ -3,10 +3,14 @@ import shared
 import Combine
 
 struct DiscoverScreen: View {
-    @State private var searchViewModel = SearchViewModel(initialQuery: "")
-    @State private var viewModel = DiscoverViewModel()
+    @State private var searchViewModel: SearchViewModel
+    @State private var viewModel: DiscoverViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    init(accountKey: MicroBlogKey) {
+        _searchViewModel = .init(initialValue: .init(accountKey: accountKey, initialQuery: ""))
+        _viewModel = .init(initialValue: .init(accountKey: accountKey))
+    }
     var body: some View {
         List {
             if searchViewModel.model.searching {
@@ -141,11 +145,13 @@ struct DiscoverScreen: View {
 }
 
 @Observable
-class DiscoverViewModel: MoleculeViewModelBase<DiscoverState, DiscoverPresenter> {
-}
-
-#Preview {
-    NavigationStack {
-        DiscoverScreen()
+class DiscoverViewModel: MoleculeViewModelProto {
+    typealias Model = DiscoverState
+    typealias Presenter = DiscoverPresenter
+    let presenter: Presenter
+    var model: Model
+    init(accountKey: MicroBlogKey) {
+        presenter = .init(accountKey: accountKey)
+        model = presenter.models.value
     }
 }

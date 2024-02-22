@@ -5,8 +5,8 @@ struct SearchScreen: View {
     @State private var viewModel: SearchViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    init(initialQuery: String) {
-        _viewModel = State(initialValue: .init(initialQuery: initialQuery))
+    init(accountKey: MicroBlogKey, initialQuery: String) {
+        _viewModel = .init(initialValue: .init(accountKey: accountKey, initialQuery: initialQuery))
     }
     var body: some View {
         List {
@@ -55,8 +55,8 @@ class SearchViewModel: MoleculeViewModelProto {
     typealias Model = SearchState
     typealias Presenter = SearchPresenter
     var searchText: String = ""
-    init(initialQuery: String) {
-        presenter = SearchPresenter(initialQuery: initialQuery)
+    init(accountKey: MicroBlogKey, initialQuery: String) {
+        presenter = .init(accountKey: accountKey, initialQuery: initialQuery)
         model = presenter.models.value
     }
 }

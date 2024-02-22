@@ -9,9 +9,9 @@ struct ComposeScreen: View {
     @FocusState private var keyboardFocused: Bool
     @FocusState private var cwKeyboardFocused: Bool
     let onBack: () -> Void
-    init(onBack: @escaping () -> Void, status: ComposeStatus? = nil) {
+    init(onBack: @escaping () -> Void, accountKey: MicroBlogKey, status: ComposeStatus? = nil) {
         self.onBack = onBack
-        _viewModel = State(initialValue: ComposeViewModel(status: status))
+        _viewModel = .init(initialValue: .init(accountKey: accountKey, status: status))
     }
     var body: some View {
         FlareTheme {
@@ -294,11 +294,5 @@ struct ComposeScreen: View {
                 Text("compose_title")
             }
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        ComposeScreen(onBack: {})
     }
 }

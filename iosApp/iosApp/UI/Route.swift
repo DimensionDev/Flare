@@ -3,54 +3,48 @@ import SwiftUI
 import shared
 
 struct RouterView: View {
+    @State var viewModel = RouterViewModel()
     @State var appSettings = AppSettings()
     var body: some View {
-        SplashScreen { type in
-            ZStack {
-                switch type {
-                case .home:
-                    HomeScreen()
-                case .login:
-                    Image(.logo)
-                        .resizable()
-                        .frame(width: 96, height: 96)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .clipped()
-                        .padding()
-                case .splash:
-                    Image(.logo)
-                        .resizable()
-                        .frame(width: 96, height: 96)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .clipped()
-                        .padding()
-                }
-            }.sheet(isPresented: Binding(get: {
-                type == .login
-            }, set: { _ in
-            }), content: {
-                if type == .login {
-                    ServiceSelectScreen(
-                        toHome: {
-                        }
-                    )
+        ZStack {
+            switch onEnum(of: viewModel.model) {
+            case .home(let home):
+                HomeScreen(accountKey: home.accountKey)
+            case .login:
+                SplashScreen()
+            case .splash:
+                SplashScreen()
+            }
+        }.sheet(isPresented: Binding(get: {
+            if case .login = onEnum(of: viewModel.model) {
+                true
+            } else {
+                false
+            }
+        }, set: { _ in
+        }), content: {
+            if case .login = onEnum(of: viewModel.model) {
+                ServiceSelectScreen(
+                    toHome: {
+                    }
+                )
 #if os(macOS)
-                    .frame(minWidth: 600, minHeight: 400)
+    .frame(minWidth: 600, minHeight: 400)
 #endif
                     .interactiveDismissDisabled()
-                }
-            })
-        }
+            }
+        })
         .environment(\.appSettings, appSettings)
+        .activateViewModel(viewModel: viewModel)
     }
 }
 
 @Observable
 class RouterViewModel: MoleculeViewModelProto {
-    let presenter: SplashPresenter
-    var model: __SplashType
-    typealias Model = __SplashType
+    typealias Model = SplashType
     typealias Presenter = SplashPresenter
+    let presenter: Presenter
+    var model: Model
     init() {
         presenter = SplashPresenter(toHome: {}, toLogin: {})
         model = presenter.models.value
@@ -58,11 +52,11 @@ class RouterViewModel: MoleculeViewModelProto {
 }
 
 public enum TabDestination: Codable, Hashable {
-    case profile(userKey: String)
-    case statusDetail(statusKey: String)
-    case profileWithUserNameAndHost(userName: String, host: String)
-    case search(query: String)
-    case profileMedia(userKey: String)
+    case profile(accountKey: String, userKey: String)
+    case statusDetail(accountKey: String, statusKey: String)
+    case profileWithUserNameAndHost(accountKey: String, userName: String, host: String)
+    case search(accountKey: String, query: String)
+    case profileMedia(accountKey: String, userKey: String)
 }
 
 @Observable
@@ -89,23 +83,31 @@ extension View {
             for: TabDestination.self
         ) { destination in
             switch destination {
-            case let .profile(userKey):
+            case let .profile(accountKey, userKey):
                 ProfileScreen(
+                    accountKey: MicroBlogKey.companion.valueOf(str: accountKey),
                     userKey: MicroBlogKey.companion.valueOf(str: userKey),
                     toProfileMedia: { userKey in
-                        router.navigate(to: .profileMedia(userKey: userKey.description()))
+                        router.navigate(to: .profileMedia(accountKey: accountKey, userKey: userKey.description()))
                     }
                 )
-            case let .statusDetail(statusKey):
-                StatusDetailScreen(statusKey: MicroBlogKey.companion.valueOf(str: statusKey))
-            case let .profileWithUserNameAndHost(userName, host):
-                ProfileWithUserNameScreen(userName: userName, host: host) { userKey in
-                    router.navigate(to: .profileMedia(userKey: userKey.description()))
+            case let .statusDetail(accountKey, statusKey):
+                StatusDetailScreen(
+                    accountKey: MicroBlogKey.companion.valueOf(str: accountKey),
+                    statusKey: MicroBlogKey.companion.valueOf(str: statusKey)
+                )
+            case let .profileWithUserNameAndHost(accountKey, userName, host):
+                ProfileWithUserNameScreen(
+                    accountKey: MicroBlogKey.companion.valueOf(str: accountKey),
+                    userName: userName,
+                    host: host
+                ) { userKey in
+                    router.navigate(to: .profileMedia(accountKey: accountKey, userKey: userKey.description()))
                 }
-            case let .search(data):
-                SearchScreen(initialQuery: data)
-            case let .profileMedia(userKey):
-                ProfileMediaListScreen(userKey: MicroBlogKey.companion.valueOf(str: userKey))
+            case let .search(accountKey, data):
+                SearchScreen(accountKey: MicroBlogKey.companion.valueOf(str: accountKey),initialQuery: data)
+            case let .profileMedia(accountKey, userKey):
+                ProfileMediaListScreen(accountKey: MicroBlogKey.companion.valueOf(str: accountKey),userKey: MicroBlogKey.companion.valueOf(str: userKey))
             }
         }
     }

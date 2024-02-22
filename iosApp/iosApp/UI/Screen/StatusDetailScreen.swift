@@ -4,8 +4,8 @@ import shared
 struct StatusDetailScreen: View {
     @State private var viewModel: StatusDetailViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
-    init(statusKey: MicroBlogKey) {
-        viewModel = .init(statusKey: statusKey)
+    init(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
+        viewModel = .init(accountKey: accountKey, statusKey: statusKey)
     }
     var body: some View {
         List {
@@ -31,8 +31,8 @@ class StatusDetailViewModel: MoleculeViewModelProto {
     var model: StatusContextState
     typealias Model = StatusContextState
     typealias Presenter = StatusContextPresenter
-    init(statusKey: MicroBlogKey) {
-        presenter = .init(statusKey: statusKey)
+    init(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
+        presenter = .init(accountKey: accountKey, statusKey: statusKey)
         model = presenter.models.value
     }
 }

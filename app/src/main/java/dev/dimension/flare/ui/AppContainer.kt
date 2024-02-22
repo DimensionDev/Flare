@@ -60,7 +60,7 @@ fun AppContainer() {
             when (it) {
                 SplashType.Splash -> SplashScreen()
                 SplashType.Login -> DestinationsNavHost(NavGraphs.entry)
-                SplashType.Home -> HomeScreen()
+                is SplashType.Home -> HomeScreen()
             }
         }
     }

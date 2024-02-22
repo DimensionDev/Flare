@@ -2,8 +2,13 @@ import SwiftUI
 import shared
 
 struct HomeTimelineScreen: View {
-    @State var viewModel = TimelineViewModel()
+    @State var viewModel: TimelineViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
+
+    init(accountKey: MicroBlogKey) {
+        viewModel = .init(accountKey: accountKey)
+    }
+
     var body: some View {
         List {
             StatusTimelineComponent(
@@ -39,9 +44,13 @@ struct HomeTimelineScreen: View {
 }
 
 @Observable
-class TimelineViewModel: MoleculeViewModelBase<HomeTimelineState, HomeTimelinePresenter> {
-}
-
-#Preview {
-    HomeTimelineScreen()
+class TimelineViewModel: MoleculeViewModelProto {
+    typealias Model = HomeTimelineState
+    typealias Presenter = HomeTimelinePresenter
+    let presenter: Presenter
+    var model: Model
+    init(accountKey: MicroBlogKey) {
+        presenter = .init(accountKey: accountKey)
+        model = presenter.models.value
+    }
 }

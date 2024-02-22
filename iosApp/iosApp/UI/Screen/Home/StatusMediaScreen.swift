@@ -6,8 +6,8 @@ struct StatusMediaScreen: View {
     let initialIndex: Int
     let dismiss: () -> Void
     
-    init(statusKey: MicroBlogKey, index: Int, dismiss: @escaping () -> Void) {
-        viewModel = .init(statusKey: statusKey)
+    init(accountKey: MicroBlogKey, statusKey: MicroBlogKey, index: Int, dismiss: @escaping () -> Void) {
+        viewModel = .init(accountKey: accountKey, statusKey: statusKey)
         self.initialIndex = index
         self.dismiss = dismiss
     }
@@ -68,8 +68,8 @@ class StatusMediaViewModel: MoleculeViewModelProto {
     typealias Presenter = StatusPresenter
     let presenter: StatusPresenter
     var model: Model
-    init(statusKey: MicroBlogKey) {
-        presenter = .init(statusKey: statusKey)
+    init(accountKey: MicroBlogKey, statusKey: MicroBlogKey) {
+        presenter = .init(accountKey: accountKey, statusKey: statusKey)
         model = presenter.models.value
     }
 }

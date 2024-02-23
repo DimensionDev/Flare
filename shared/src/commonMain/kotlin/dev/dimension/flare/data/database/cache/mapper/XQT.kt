@@ -119,7 +119,10 @@ private fun TimelineTweet.toDbStatus(accountKey: MicroBlogKey): DbStatus {
 private fun TweetUnion.toDbStatus(accountKey: MicroBlogKey): DbStatus? {
     return when (this) {
         is Tweet -> toDbStatus(this, accountKey)
-        is TweetTombstone -> null // You’re unable to view this Post because this account owner limits who can view their Posts. Learn more  //throw IllegalStateException("Tweet tombstone should not be saved")
+        // You’re unable to view this Post because
+        // this account owner limits who can view their Posts. Learn more
+        // throw IllegalStateException("Tweet tombstone should not be saved")
+        is TweetTombstone -> null
         is TweetWithVisibilityResults -> toDbStatus(this.tweet, accountKey)
     }
 }

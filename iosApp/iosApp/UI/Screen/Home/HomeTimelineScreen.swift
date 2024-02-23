@@ -2,13 +2,14 @@ import SwiftUI
 import shared
 
 struct HomeTimelineScreen: View {
+    @Environment(\.openURL) private var openURL
     @State var viewModel: TimelineViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
-
+    
     init(accountKey: MicroBlogKey) {
-        viewModel = .init(accountKey: accountKey)
+        _viewModel = .init(initialValue: .init(accountKey: accountKey))
     }
-
+    
     var body: some View {
         List {
             StatusTimelineComponent(
@@ -26,9 +27,14 @@ struct HomeTimelineScreen: View {
         .navigationTitle("home_timeline_title")
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
-#else
+#endif
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
+                Button(action: {
+                    openURL(URL(string: AppDeepLink.Compose.shared.invoke())!)
+                }, label: {
+                    Image(systemName: "square.and.pencil")
+                })
                 Button(action: {
                     Task {
                         try? await viewModel.model.refresh()
@@ -38,7 +44,6 @@ struct HomeTimelineScreen: View {
                 })
             }
         }
-#endif
         .activateViewModel(viewModel: viewModel)
     }
 }

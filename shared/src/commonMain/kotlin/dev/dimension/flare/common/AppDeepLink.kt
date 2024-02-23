@@ -38,6 +38,12 @@ object AppDeepLink {
         operator fun invoke(statusKey: MicroBlogKey) = "$APPSCHEMA://StatusDetail/$statusKey"
     }
 
+    object Compose {
+        const val ROUTE = "$APPSCHEMA://Compose"
+
+        operator fun invoke() = "$APPSCHEMA://Compose"
+    }
+
     fun parse(url: String): DeeplinkEvent? {
         val uri = url.removePrefix("$APPSCHEMA://")
         return when {
@@ -58,6 +64,9 @@ object AppDeepLink {
             uri.startsWith("StatusDetail/") -> {
                 val statusKey = uri.substringAfter("StatusDetail/")
                 DeeplinkEvent.StatusDetail(MicroBlogKey.valueOf(statusKey))
+            }
+            uri.startsWith("Compose") -> {
+                DeeplinkEvent.Compose
             }
             else -> null
         }
@@ -81,4 +90,6 @@ sealed interface DeeplinkEvent {
     data class StatusDetail(
         val statusKey: MicroBlogKey,
     ) : DeeplinkEvent
+
+    data object Compose : DeeplinkEvent
 }

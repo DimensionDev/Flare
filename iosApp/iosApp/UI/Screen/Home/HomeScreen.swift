@@ -15,35 +15,21 @@ struct HomeScreen: View {
                         image: "house",
                         destination: TabItem(accountKey: accountKey) { _ in
                             HomeTimelineScreen(accountKey: accountKey)
+                                .toolbar {
 #if os(iOS)
-                                .if(horizontalSizeClass == .compact, transform: { view in
-                                    view
-                                        .navigationBarTitleDisplayMode(.inline)
-                                        .toolbar {
-                                            ToolbarItem(placement: .principal) {
-                                                Text("Flare")
-                                            }
-                                            ToolbarItem(placement: .primaryAction) {
-                                                Button(action: {
-//                                                    showCompose = true
-                                                }, label: {
-                                                    Image(systemName: "square.and.pencil")
-                                                })
-                                            }
-                                            ToolbarItem(placement: .navigation) {
-                                                Button {
-                                                    showSettings = true
-                                                } label: {
-                                                    if case .success(let data) = onEnum(of: viewModel.model.user) {
-                                                        UserAvatar(data: data.data.avatarUrl, size: 36)
-                                                    } else {
-                                                        userAvatarPlaceholder(size: 36)
-                                                    }
-                                                }
+                                    ToolbarItem(placement: .navigation) {
+                                        Button {
+                                            showSettings = true
+                                        } label: {
+                                            if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                                UserAvatar(data: data.data.avatarUrl, size: 36)
+                                            } else {
+                                                userAvatarPlaceholder(size: 36)
                                             }
                                         }
-                                })
-                                    #endif
+                                    }
+#endif
+                                }
                         }
                     ),
                     TabModel(
@@ -51,6 +37,21 @@ struct HomeScreen: View {
                         image: "bell",
                         destination: TabItem(accountKey: accountKey) { _ in
                             NotificationScreen(accountKey: accountKey)
+                                .toolbar {
+#if os(iOS)
+                                    ToolbarItem(placement: .navigation) {
+                                        Button {
+                                            showSettings = true
+                                        } label: {
+                                            if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                                UserAvatar(data: data.data.avatarUrl, size: 36)
+                                            } else {
+                                                userAvatarPlaceholder(size: 36)
+                                            }
+                                        }
+                                    }
+#endif
+                                }
                         }
                     ),
                     TabModel(
@@ -89,17 +90,6 @@ struct HomeScreen: View {
                     .padding([.horizontal, .top])
 #endif
                     .buttonStyle(.plain)
-                    Button(action: {
-//                        showCompose = true
-                    }, label: {
-                        HStack {
-                            Image(systemName: "square.and.pencil")
-                            Text("home_compose")
-                            Spacer()
-                        }
-                        .padding(4)
-                    })
-                    .buttonStyle(.borderedProminent)
                 }
                     .listRowInsets(EdgeInsets())
             )
@@ -129,7 +119,6 @@ struct TabItem<Content: View>: View {
             content(router)
                 .withTabRouter(router: router)
         }
-
         .sheet(isPresented: $showCompose, content: {
             NavigationStack {
                 ComposeScreen(onBack: {
@@ -184,6 +173,8 @@ struct TabItem<Content: View>: View {
                     router.navigate(to: .search(accountKey: accountKey.description(), query: data.keyword))
                 case .statusDetail(let data):
                     router.navigate(to: .statusDetail(accountKey: accountKey.description(), statusKey: data.statusKey.description()))
+                case .compose:
+                    showCompose = true
                 }
                 return .handled
             } else {

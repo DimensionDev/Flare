@@ -3,13 +3,21 @@ import SwiftUI
 import shared
 
 struct RouterView: View {
+    @State var activeAccountViewModel = ActiveAccountViewModel()
     @State var viewModel = RouterViewModel()
     @State var appSettings = AppSettings()
     var body: some View {
         ZStack {
             switch onEnum(of: viewModel.model) {
-            case .home(let home):
-                HomeScreen(accountKey: home.accountKey)
+            case .home(_):
+                switch onEnum(of: activeAccountViewModel.model.user) {
+                case .success(let data):
+                    HomeScreen(accountKey: data.data.userKey)
+                case .error:
+                    SplashScreen()
+                case .loading:
+                    SplashScreen()
+                }
             case .login:
                 SplashScreen()
             case .splash:
@@ -36,7 +44,12 @@ struct RouterView: View {
         })
         .environment(\.appSettings, appSettings)
         .activateViewModel(viewModel: viewModel)
+        .activateViewModel(viewModel: activeAccountViewModel)
     }
+}
+
+@Observable
+class ActiveAccountViewModel : MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
 }
 
 @Observable

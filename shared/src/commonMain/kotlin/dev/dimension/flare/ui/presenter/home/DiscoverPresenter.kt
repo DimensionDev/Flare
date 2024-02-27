@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -14,14 +14,14 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 class DiscoverPresenter(
-    private val accountKey: MicroBlogKey,
+    private val accountType: AccountType,
 ) : PresenterBase<DiscoverState>() {
     @Composable
     override fun body(): DiscoverState {
-        val accountState = accountServiceProvider(accountKey = accountKey)
+        val accountState = accountServiceProvider(accountType = accountType)
         val users =
             accountState.flatMap { dataSource ->
-                remember(accountKey) {
+                remember(accountType) {
                     runCatching {
                         dataSource.discoverUsers()
                     }.getOrNull()
@@ -35,7 +35,7 @@ class DiscoverPresenter(
             }
         val status =
             accountState.flatMap { dataSource ->
-                remember(accountKey) {
+                remember(accountType) {
                     runCatching {
                         dataSource.discoverStatuses()
                     }.getOrNull()
@@ -49,7 +49,7 @@ class DiscoverPresenter(
             }
         val hashtags =
             accountState.flatMap { dataSource ->
-                remember(accountKey) {
+                remember(accountType) {
                     runCatching {
                         dataSource.discoverHashtags()
                     }.getOrNull()

@@ -49,7 +49,7 @@ struct RouterView: View {
 }
 
 @Observable
-class ActiveAccountViewModel : MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
+class ActiveAccountViewModel : MoleculeViewModelBase<UserState, ActiveAccountPresenter> {
 }
 
 @Observable

@@ -81,6 +81,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onNotEmptyOrLoading
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
@@ -95,7 +96,6 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -131,13 +131,13 @@ fun ProfileWithUserNameAndHostRoute(
     userName: String,
     host: String,
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
-    val state by producePresenter(key = "acct_${accountData.data}_$userName@$host") {
+    val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
             host = host,
-            accountData = accountData,
+            accountType = accountType,
         )
     }
     state.onSuccess {
@@ -160,7 +160,7 @@ fun ProfileWithUserNameAndHostRoute(
                     ),
                 )
             },
-            accountData = accountData,
+            accountType = accountType,
         )
     }.onLoading {
         ProfileLoadingScreen(
@@ -183,9 +183,9 @@ fun ProfileWithUserNameAndHostRoute(
 )
 internal fun MeRoute(
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
-    ProfileRoute(null, navigator, accountData)
+    ProfileRoute(null, navigator, accountType)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -260,7 +260,7 @@ private fun ProfileLoadingScreen(onBack: () -> Unit) {
 private fun profileWithUserNameAndHostPresenter(
     userName: String,
     host: String,
-    accountData: AccountData,
+    accountType: AccountType,
 ) = run {
     remember(
         userName,
@@ -269,7 +269,7 @@ private fun profileWithUserNameAndHostPresenter(
         ProfileWithUserNameAndHostPresenter(
             userName = userName,
             host = host,
-            accountKey = accountData.data,
+            accountType = accountType,
         )
     }.invoke()
 }
@@ -289,7 +289,7 @@ private fun profileWithUserNameAndHostPresenter(
 fun ProfileRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
     ProfileScreen(
         userKey = userKey,
@@ -310,7 +310,7 @@ fun ProfileRoute(
                 ),
             )
         },
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
@@ -318,7 +318,7 @@ fun ProfileRoute(
 @Composable
 private fun ProfileScreen(
     // null means current user
-    accountData: AccountData,
+    accountType: AccountType,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     onProfileMediaClick: () -> Unit = {},
@@ -326,8 +326,8 @@ private fun ProfileScreen(
     showTopBar: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    val state by producePresenter(key = "${accountData.data}_$userKey") {
-        profilePresenter(userKey = userKey, accountData = accountData)
+    val state by producePresenter(key = "${accountType}_$userKey") {
+        profilePresenter(userKey = userKey, accountType = accountType)
     }
     val listState = rememberLazyStaggeredGridState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -1167,14 +1167,14 @@ private fun ProfileMeidasPreview(
 @Composable
 private fun profilePresenter(
     userKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state =
         remember(userKey) {
             ProfilePresenter(
                 userKey = userKey,
-                accountKey = accountData.data,
+                accountType = accountType,
             )
         }.invoke()
     var showMoreMenus by remember {

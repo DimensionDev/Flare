@@ -13,10 +13,10 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.DeleteStatusPresenter
 import dev.dimension.flare.ui.presenter.status.action.DeleteStatusState
@@ -33,7 +33,7 @@ import dev.dimension.flare.ui.presenter.status.action.DeleteStatusState
 )
 fun DeleteStatusConfirmRoute(
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
     statusKey: MicroBlogKey,
 ) {
     DeleteStatusConfirmDialog(
@@ -41,20 +41,20 @@ fun DeleteStatusConfirmRoute(
         onBack = {
             navigator.navigateUp()
         },
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
 @Composable
 fun DeleteStatusConfirmDialog(
     statusKey: MicroBlogKey,
-    accountData: AccountData,
+    accountType: AccountType,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter(key = "DeleteStatusPresenter_${accountData.data}_$statusKey") {
+    val state by producePresenter(key = "DeleteStatusPresenter_${accountType}_$statusKey") {
         deleteStatusConfirmPresenter(
             statusKey = statusKey,
-            accountData = accountData,
+            accountType = accountType,
         )
     }
 
@@ -87,12 +87,12 @@ fun DeleteStatusConfirmDialog(
 @Composable
 fun deleteStatusConfirmPresenter(
     statusKey: MicroBlogKey,
-    accountData: AccountData,
+    accountType: AccountType,
 ) = run {
     val state =
-        remember(accountData.data, statusKey) {
+        remember(accountType, statusKey) {
             DeleteStatusPresenter(
-                accountKey = accountData.data,
+                accountType = accountType,
                 statusKey = statusKey,
             )
         }.invoke()

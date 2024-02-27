@@ -30,6 +30,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onNotEmptyOrLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -39,7 +40,6 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
@@ -55,10 +55,10 @@ import org.koin.compose.koinInject
 @Composable
 internal fun DiscoverRoute(
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
-    val state by producePresenter("discoverSearchPresenter_${accountData.data}") {
-        discoverSearchPresenter(accountData = accountData)
+    val state by producePresenter("discoverSearchPresenter_$accountType") {
+        discoverSearchPresenter(accountType = accountType)
     }
     Scaffold(
         topBar = {
@@ -84,19 +84,19 @@ internal fun DiscoverRoute(
             onHashtagClick = {
                 state.commitSearch(it)
             },
-            accountData = accountData,
+            accountType = accountType,
         )
     }
 }
 
 @Composable
 internal fun DiscoverScreen(
-    accountData: AccountData,
+    accountType: AccountType,
     contentPadding: PaddingValues,
     onUserClick: (MicroBlogKey) -> Unit,
     onHashtagClick: (String) -> Unit,
 ) {
-    val state by producePresenter("discover_${accountData.data}") { discoverPresenter(accountData) }
+    val state by producePresenter("discover_$accountType") { discoverPresenter(accountType) }
     RefreshContainer(
         modifier =
             Modifier
@@ -264,10 +264,10 @@ internal fun DiscoverScreen(
 
 @Composable
 private fun discoverPresenter(
-    accountData: AccountData,
+    accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
-    val state = remember(accountData.data) { DiscoverPresenter(accountKey = accountData.data) }.invoke()
+    val state = remember(accountType) { DiscoverPresenter(accountType = accountType) }.invoke()
 
     object : DiscoverState by state {
         val statusEvent = statusEvent

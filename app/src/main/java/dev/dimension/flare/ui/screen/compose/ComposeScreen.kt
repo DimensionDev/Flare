@@ -106,6 +106,7 @@ import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
@@ -114,7 +115,6 @@ import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.component.status.mastodon.VisibilityIcon
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
@@ -142,13 +142,13 @@ import kotlin.time.Duration.Companion.minutes
 @Composable
 fun ComposeRoute(
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
         },
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
@@ -164,7 +164,7 @@ fun ComposeRoute(
 @Composable
 fun ReplyRoute(
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
     replyTo: MicroBlogKey,
 ) {
     ComposeScreen(
@@ -172,7 +172,7 @@ fun ReplyRoute(
             navigator.navigateUp()
         },
         status = ComposeStatus.Reply(replyTo),
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
@@ -188,7 +188,7 @@ fun ReplyRoute(
 @Composable
 fun Quote(
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
     quoted: MicroBlogKey,
 ) {
     ComposeScreen(
@@ -196,7 +196,7 @@ fun Quote(
             navigator.navigateUp()
         },
         status = ComposeStatus.Quote(quoted),
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
@@ -237,13 +237,13 @@ object ComposeTransitions : DestinationStyle.Animated {
 @Composable
 private fun ComposeScreen(
     onBack: () -> Unit,
-    accountData: AccountData,
+    accountType: AccountType,
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
 ) {
     val context = LocalContext.current
-    val state by producePresenter(key = "compose_${accountData.data}") {
-        composePresenter(context = context, accountData = accountData, status = status)
+    val state by producePresenter(key = "compose_$accountType") {
+        composePresenter(context = context, accountType = accountType, status = status)
     }
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
@@ -851,12 +851,12 @@ private fun PollOption(
 @Composable
 private fun composePresenter(
     context: Context,
-    accountData: AccountData,
+    accountType: AccountType,
     status: ComposeStatus? = null,
 ) = run {
     val state =
-        remember(status, accountData) {
-            ComposePresenter(accountKey = accountData.data, status)
+        remember(status, accountType) {
+            ComposePresenter(accountType = accountType, status)
         }.invoke()
     val textFieldState by remember {
         mutableStateOf(TextFieldState(""))

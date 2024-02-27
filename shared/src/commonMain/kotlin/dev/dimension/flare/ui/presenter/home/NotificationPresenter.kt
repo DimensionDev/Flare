@@ -10,7 +10,7 @@ import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
@@ -20,19 +20,19 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 class NotificationPresenter(
-    private val accountKey: MicroBlogKey,
+    private val accountType: AccountType,
 ) : PresenterBase<NotificationState>() {
     @Composable
     override fun body(): NotificationState {
         var type by remember { mutableStateOf(NotificationFilter.All) }
-        val serviceState = accountServiceProvider(accountKey = accountKey)
+        val serviceState = accountServiceProvider(accountType = accountType)
         val allTypes =
             serviceState.map { service ->
                 service.supportedNotificationFilter.toImmutableList()
             }
         val listState =
             serviceState.map { service ->
-                remember(accountKey, type) {
+                remember(accountType, type) {
                     service.notification(
                         type = type,
                     )

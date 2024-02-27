@@ -29,6 +29,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusComponent
@@ -318,7 +319,7 @@ internal class DefaultStatusEvent(
         status: UiStatus.Mastodon,
         uriHandler: UriHandler,
     ) {
-        uriHandler.openUri(StatusRouteDestination(status.statusKey).deeplink())
+        uriHandler.openUri(StatusRouteDestination(status.statusKey, accountType = AccountType.Specific(status.accountKey)).deeplink())
     }
 
     override fun onReplyClick(

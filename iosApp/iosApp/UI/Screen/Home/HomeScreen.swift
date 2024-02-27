@@ -105,7 +105,7 @@ struct HomeScreen: View {
 }
 
 @Observable
-class HomeViewModel: MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
+class HomeViewModel: MoleculeViewModelBase<UserState, ActiveAccountPresenter> {
 }
 
 struct TabItem<Content: View>: View {

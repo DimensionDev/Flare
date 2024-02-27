@@ -34,20 +34,19 @@ import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.spec.NavGraphSpec
 import com.ramcosta.composedestinations.spec.Route
 import com.ramcosta.composedestinations.utils.composable
-import dev.dimension.flare.data.model.AccountType
 import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountState
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
@@ -136,18 +135,13 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                     ) {
                         tabs.forEach { tab ->
                             composable(tab.key) {
-                                val key =
-                                    when (val account = tab.account) {
-                                        AccountType.Active -> user.userKey
-                                        is AccountType.Specific -> account.accountKey
-                                    }
-                                val accountData = remember(key) { AccountData(key) }
+                                val type: AccountType = tab.account
                                 Router(
                                     navGraph = NavGraphs.root,
                                     direction = getDirection(tab),
                                 ) {
                                     dependency(rootNavController)
-                                    dependency(accountData)
+                                    dependency(type)
                                 }
                             }
                         }
@@ -237,7 +231,7 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
         val tabSettings by settingsRepository.tabSettings.collectAsUiState()
         val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
 
-        object : ActiveAccountState by activeAccountState {
+        object : UserState by activeAccountState {
             val tabs =
                 tabSettings.map {
                     it.items.toImmutableList()

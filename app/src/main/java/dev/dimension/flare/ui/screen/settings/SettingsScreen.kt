@@ -45,7 +45,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountState
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.destinations.AboutRouteDestination
@@ -311,6 +311,6 @@ internal fun SettingsScreen(
 private fun settingsPresenter() =
     run {
         val state = remember { ActiveAccountPresenter() }.invoke()
-        object : ActiveAccountState by state {
+        object : UserState by state {
         }
     }

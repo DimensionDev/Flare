@@ -6,6 +6,7 @@ import androidx.paging.flatMap
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
@@ -16,16 +17,16 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.map
 
 class ProfileMediaPresenter(
-    private val accountKey: MicroBlogKey,
+    private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileMediaState>() {
     @Composable
     override fun body(): ProfileMediaState {
-        val accountServiceState = accountServiceProvider(accountKey = accountKey)
+        val accountServiceState = accountServiceProvider(accountType = accountType)
         val mediaState =
             accountServiceState.map { service ->
-                remember(accountKey, userKey) {
-                    service.userTimeline(userKey ?: accountKey, mediaOnly = true)
+                remember(accountType, userKey) {
+                    service.userTimeline(userKey ?: service.account.accountKey, mediaOnly = true)
                         .map { data ->
                             data.flatMap { status ->
                                 status.medias.map {

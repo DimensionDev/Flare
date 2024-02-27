@@ -13,6 +13,7 @@ import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
@@ -30,13 +31,13 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
 
 class ComposePresenter(
-    private val accountKey: MicroBlogKey,
+    private val accountType: AccountType,
     private val status: ComposeStatus? = null,
 ) : PresenterBase<ComposeState>() {
     @Composable
     override fun body(): ComposeState {
-        val accountState by accountProvider(accountKey = accountKey)
-        val serviceState = accountServiceProvider(accountKey = accountKey)
+        val accountState by accountProvider(accountType = accountType)
+        val serviceState = accountServiceProvider(accountType = accountType)
         val composeUseCase: ComposeUseCase = koinInject()
         val visibilityState =
             accountState.flatMap {
@@ -51,13 +52,10 @@ class ComposePresenter(
         val replyState =
             status?.let { status ->
                 remember(status.statusKey) {
-                    StatusPresenter(accountKey = accountKey, statusKey = status.statusKey)
+                    StatusPresenter(accountType = accountType, statusKey = status.statusKey)
                 }.body().status
             }
-        val emojiState =
-            accountState.flatMap {
-                emojiPresenter(it)
-            }
+        val emojiState = emojiPresenter(accountType)
 
         return object : ComposeState(
             account = accountState,
@@ -78,8 +76,8 @@ class ComposePresenter(
     }
 
     @Composable
-    private fun emojiPresenter(account: UiAccount): UiState<ImmutableListWrapper<UiEmoji>> {
-        return accountServiceProvider(accountKey = account.accountKey)
+    private fun emojiPresenter(accountType: AccountType): UiState<ImmutableListWrapper<UiEmoji>> {
+        return accountServiceProvider(accountType = accountType)
             .flatMap {
                 when (it) {
                     is MastodonDataSource -> it.emoji()

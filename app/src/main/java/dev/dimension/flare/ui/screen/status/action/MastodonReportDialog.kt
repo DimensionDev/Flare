@@ -13,10 +13,10 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MastodonReportPresenter
 
@@ -34,7 +34,7 @@ fun MastodonReportRoute(
     navigator: DestinationsNavigator,
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
     MastodonReportDialog(
         statusKey = statusKey,
@@ -42,7 +42,7 @@ fun MastodonReportRoute(
         onBack = {
             navigator.navigateUp()
         },
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
@@ -50,14 +50,14 @@ fun MastodonReportRoute(
 fun MastodonReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter("${userKey}_${accountData.data}_$statusKey") {
+    val state by producePresenter("${userKey}_${accountType}_$statusKey") {
         mastodonReportPresenter(
             userKey = userKey,
             statusKey = statusKey,
-            accountData = accountData,
+            accountType = accountType,
         )
     }
 
@@ -93,12 +93,12 @@ fun MastodonReportDialog(
 private fun mastodonReportPresenter(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
 ) = run {
     val state =
-        remember(userKey, statusKey, accountData.data) {
+        remember(userKey, statusKey, accountType) {
             MastodonReportPresenter(
-                accountKey = accountData.data,
+                accountType = accountType,
                 userKey = userKey,
                 statusKey = statusKey,
             )

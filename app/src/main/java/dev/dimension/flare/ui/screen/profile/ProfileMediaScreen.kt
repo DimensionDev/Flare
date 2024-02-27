@@ -28,12 +28,12 @@ import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.MediaItem
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -48,7 +48,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 )
 internal fun ProfileMediaRoute(
     userKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
     navigator: DestinationsNavigator,
 ) {
     ProfileMediaScreen(
@@ -63,7 +63,7 @@ internal fun ProfileMediaRoute(
                 ),
             )
         },
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
@@ -71,12 +71,12 @@ internal fun ProfileMediaRoute(
 @Composable
 private fun ProfileMediaScreen(
     userKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
     onItemClicked: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter(key = "ProfileMediaScreen_${userKey?.id}_${accountData.data}") {
-        profileMediaPresenter(userKey, accountData)
+    val state by producePresenter(key = "ProfileMediaScreen_${userKey?.id}_$accountType") {
+        profileMediaPresenter(userKey, accountType)
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -146,11 +146,11 @@ private fun ProfileMediaScreen(
 @Composable
 private fun profileMediaPresenter(
     userKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
 ) = run {
-    remember(userKey, accountData.data) {
+    remember(userKey, accountType) {
         ProfileMediaPresenter(
-            accountKey = accountData.data,
+            accountType = accountType,
             userKey = userKey,
         )
     }.invoke()

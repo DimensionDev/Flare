@@ -12,6 +12,7 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
@@ -90,33 +91,34 @@ internal fun activeAccountPresenter(repository: AccountRepository = koinInject()
 
 @Composable
 internal fun accountProvider(
-    accountKey: MicroBlogKey,
+    accountType: AccountType,
     repository: AccountRepository = koinInject(),
 ): State<UiState<UiAccount>> {
     return produceState<UiState<UiAccount>>(
         initialValue = UiState.Loading(),
-        key1 = accountKey,
+        key1 = accountType,
     ) {
-        repository.getFlow(accountKey)
-            .distinctUntilChanged()
-            .map {
-                if (it == null) {
-                    UiState.Error(NoActiveAccountException)
-                } else {
-                    UiState.Success(it)
-                }
+        when (accountType) {
+            AccountType.Active -> repository.activeAccount
+            is AccountType.Specific ->
+                repository.getFlow(accountKey = accountType.accountKey)
+        }.distinctUntilChanged().map {
+            if (it == null) {
+                UiState.Error(NoActiveAccountException)
+            } else {
+                UiState.Success(it)
             }
-            .collect {
-                value = it
-            }
+        }.collect {
+            value = it
+        }
     }
 }
 
 @Composable
-internal fun accountServiceProvider(accountKey: MicroBlogKey): UiState<MicroblogDataSource> {
-    val account by accountProvider(accountKey = accountKey)
+internal fun accountServiceProvider(accountType: AccountType): UiState<MicroblogDataSource> {
+    val account by accountProvider(accountType = accountType)
     return account.map {
-        remember(accountKey) {
+        remember(it) {
             when (it) {
                 is UiAccount.Mastodon -> {
                     it.dataSource

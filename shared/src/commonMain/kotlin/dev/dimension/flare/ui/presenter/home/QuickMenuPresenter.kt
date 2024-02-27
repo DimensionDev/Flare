@@ -7,6 +7,7 @@ import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.allAccountsPresenter
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
@@ -31,16 +32,17 @@ class QuickMenuPresenter : PresenterBase<QuickMenuState>() {
                     data.filter {
                         it.accountKey != current.userKey
                     }.map { account ->
-                        accountServiceProvider(accountKey = account.accountKey).flatMap { service ->
-                            remember(account.accountKey) {
-                                service.userById(account.accountKey.id)
-                            }.collectAsState().toUi()
-                        }
+                        accountServiceProvider(accountType = AccountType.Specific(accountKey = account.accountKey))
+                            .flatMap { service ->
+                                remember(account.accountKey) {
+                                    service.userById(account.accountKey.id)
+                                }.collectAsState().toUi()
+                            }
                     }.toImmutableList().toImmutableListWrapper()
                 }
             }
 
-        return object : QuickMenuState, ActiveAccountState by user {
+        return object : QuickMenuState, UserState by user {
             override val allUsers = allUsers
 
             override fun setActiveAccount(accountKey: MicroBlogKey) {
@@ -50,7 +52,7 @@ class QuickMenuPresenter : PresenterBase<QuickMenuState>() {
     }
 }
 
-interface QuickMenuState : ActiveAccountState {
+interface QuickMenuState : UserState {
     val allUsers: UiState<ImmutableListWrapper<UiState<UiUser>>>
 
     fun setActiveAccount(accountKey: MicroBlogKey)

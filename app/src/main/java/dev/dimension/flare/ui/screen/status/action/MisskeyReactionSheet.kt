@@ -19,11 +19,11 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
@@ -40,7 +40,7 @@ import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
 @Composable
 internal fun MisskeyReactionRoute(
     statusKey: MicroBlogKey,
-    accountData: AccountData,
+    accountType: AccountType,
     navigator: DestinationsNavigator,
 ) {
     Dialog(onDismissRequest = navigator::navigateUp) {
@@ -48,7 +48,7 @@ internal fun MisskeyReactionRoute(
             MisskeyReactionSheet(
                 statusKey = statusKey,
                 onBack = navigator::navigateUp,
-                accountData = accountData,
+                accountType = accountType,
             )
         }
     }
@@ -57,14 +57,14 @@ internal fun MisskeyReactionRoute(
 @Composable
 private fun MisskeyReactionSheet(
     statusKey: MicroBlogKey,
-    accountData: AccountData,
+    accountType: AccountType,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by producePresenter("MisskeyReactionSheet_${accountData.data}_$statusKey") {
+    val state by producePresenter("MisskeyReactionSheet_${accountType}_$statusKey") {
         misskeyReactionPresenter(
             statusKey = statusKey,
-            accountData = accountData,
+            accountType = accountType,
         )
     }
 
@@ -96,11 +96,11 @@ private fun MisskeyReactionSheet(
 @Composable
 private fun misskeyReactionPresenter(
     statusKey: MicroBlogKey,
-    accountData: AccountData,
+    accountType: AccountType,
 ) = run {
-    remember(statusKey, accountData.data) {
+    remember(statusKey, accountType) {
         MisskeyReactionPresenter(
-            accountKey = accountData.data,
+            accountType = accountType,
             statusKey = statusKey,
         )
     }.invoke()

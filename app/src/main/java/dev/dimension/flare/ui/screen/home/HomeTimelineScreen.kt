@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -45,7 +46,6 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
@@ -68,11 +68,11 @@ import org.koin.compose.koinInject
 @Composable
 internal fun HomeRoute(
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 //    screen: Screen,
 ) {
     HomeTimelineScreen(
-        accountData = accountData,
+        accountType = accountType,
         toCompose = {
             navigator.navigate(ComposeRouteDestination)
         },
@@ -86,13 +86,13 @@ internal fun HomeRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeTimelineScreen(
-    accountData: AccountData,
+    accountType: AccountType,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
 //    screen: Screen,
 ) {
-    val state by producePresenter(key = "home_timeline_${accountData.data}") {
-        homeTimelinePresenter(accountData)
+    val state by producePresenter(key = "home_timeline_$accountType") {
+        homeTimelinePresenter(accountType)
     }
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
@@ -196,11 +196,11 @@ internal fun HomeTimelineScreen(
 
 @Composable
 private fun homeTimelinePresenter(
-    accountData: AccountData,
+    accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
-    val state = remember(accountData.data) { HomeTimelinePresenter(accountKey = accountData.data) }.invoke()
-    val accountState = remember(accountData.data) { UserPresenter(accountKey = accountData.data, userKey = accountData.data) }.invoke()
+    val state = remember(accountType) { HomeTimelinePresenter(accountType = accountType) }.invoke()
+    val accountState = remember(accountType) { UserPresenter(accountType = accountType, userKey = null) }.invoke()
     var showNewToots by remember { mutableStateOf(false) }
     val listState = state.listState
     if (listState is UiState.Success && listState.data.itemCount > 0) {

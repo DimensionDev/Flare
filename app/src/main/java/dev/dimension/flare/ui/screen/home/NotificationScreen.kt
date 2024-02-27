@@ -27,6 +27,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -34,7 +35,6 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.presenter.home.NotificationState
@@ -52,11 +52,11 @@ import org.koin.compose.koinInject
 @Composable
 internal fun NotificationRoute(
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 //    screen: Screen
 ) {
     NotificationScreen(
-        accountData = accountData,
+        accountType = accountType,
 //        screen = screen
         toQuickMenu = {
             navigator.navigate(QuickMenuDialogRouteDestination)
@@ -67,12 +67,12 @@ internal fun NotificationRoute(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 private fun NotificationScreen(
-    accountData: AccountData,
+    accountType: AccountType,
 //    screen: Screen
     toQuickMenu: () -> Unit,
 ) {
-    val state by producePresenter(key = "notification_${accountData.data}") {
-        notificationPresenter(accountData = accountData)
+    val state by producePresenter(key = "notification_$accountType") {
+        notificationPresenter(accountType = accountType)
     }
 //    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
@@ -188,11 +188,11 @@ private val NotificationFilter.title: Int
 
 @Composable
 private fun notificationPresenter(
-    accountData: AccountData,
+    accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
-    val accountState = remember { UserPresenter(accountKey = accountData.data, userKey = accountData.data) }.invoke()
-    val state = remember { NotificationPresenter(accountKey = accountData.data) }.invoke()
+    val accountState = remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
+    val state = remember { NotificationPresenter(accountType = accountType) }.invoke()
     object : UserState by accountState {
         val state = state
         val statusEvent = statusEvent

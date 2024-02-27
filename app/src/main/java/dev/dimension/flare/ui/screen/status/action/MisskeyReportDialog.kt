@@ -13,10 +13,10 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
 
@@ -34,7 +34,7 @@ fun MisskeyReportRoute(
     navigator: DestinationsNavigator,
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
     MisskeyReportDialog(
         statusKey = statusKey,
@@ -42,7 +42,7 @@ fun MisskeyReportRoute(
         onBack = {
             navigator.navigateUp()
         },
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
@@ -50,14 +50,14 @@ fun MisskeyReportRoute(
 fun MisskeyReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter("${userKey}_${statusKey ?: ""}_${accountData.data}") {
+    val state by producePresenter("${userKey}_${statusKey ?: ""}_$accountType") {
         misskeyReportPresenter(
             userKey,
             statusKey,
-            accountData,
+            accountType,
         )
     }
 
@@ -101,13 +101,13 @@ fun MisskeyReportDialog(
 private fun misskeyReportPresenter(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
-    accountData: AccountData,
+    accountType: AccountType,
 ) = run {
-    remember(userKey, statusKey, accountData.data) {
+    remember(userKey, statusKey, accountType) {
         MisskeyReportPresenter(
             userKey = userKey,
             statusKey = statusKey,
-            accountKey = accountData.data,
+            accountType = accountType,
         )
     }.invoke()
 }

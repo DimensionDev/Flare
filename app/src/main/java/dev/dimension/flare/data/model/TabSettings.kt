@@ -12,6 +12,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
@@ -80,23 +81,6 @@ sealed interface IconType {
 
     @Serializable
     data class Mixed(val icon: Material.MaterialIcon, val userKey: MicroBlogKey) : IconType
-}
-
-@Serializable
-sealed interface AccountType {
-    @Serializable
-    data class Specific(val accountKey: MicroBlogKey) : AccountType {
-        override fun toString(): String {
-            return "specific_$accountKey"
-        }
-    }
-
-    @Serializable
-    data object Active : AccountType {
-        override fun toString(): String {
-            return "active"
-        }
-    }
 }
 
 @Serializable

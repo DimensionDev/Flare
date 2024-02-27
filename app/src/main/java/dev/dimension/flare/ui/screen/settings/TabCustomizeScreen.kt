@@ -55,12 +55,12 @@ import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.AccountType
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -324,15 +324,10 @@ fun TabIcon(
 ) {
     when (icon) {
         is IconType.Avatar -> {
-            val accountKey =
-                when (accountType) {
-                    AccountType.Active -> null
-                    is AccountType.Specific -> accountType.accountKey
-                }
-            val userState by producePresenter(key = "${accountKey?.id}:${icon.userKey}") {
-                remember(accountKey, icon.userKey) {
+            val userState by producePresenter(key = "$accountType:${icon.userKey}") {
+                remember(accountType, icon.userKey) {
                     UserPresenter(
-                        accountKey,
+                        accountType,
                         icon.userKey,
                     )
                 }.invoke()
@@ -357,15 +352,10 @@ fun TabIcon(
         }
 
         is IconType.Mixed -> {
-            val accountKey =
-                when (accountType) {
-                    AccountType.Active -> null
-                    is AccountType.Specific -> accountType.accountKey
-                }
-            val userState by producePresenter(key = "${accountKey?.id}:${icon.userKey}") {
-                remember(accountKey, icon.userKey) {
+            val userState by producePresenter(key = "$accountType:${icon.userKey}") {
+                remember(accountType, icon.userKey) {
                     UserPresenter(
-                        accountKey,
+                        accountType,
                         icon.userKey,
                     )
                 }.invoke()

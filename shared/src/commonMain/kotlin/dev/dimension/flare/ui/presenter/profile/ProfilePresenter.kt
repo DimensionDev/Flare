@@ -10,6 +10,7 @@ import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -26,33 +27,33 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 class ProfilePresenter(
-    private val accountKey: MicroBlogKey,
+    private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileState>() {
     @Composable
     override fun body(): ProfileState {
-        val accountServiceState = accountServiceProvider(accountKey = accountKey)
+        val accountServiceState = accountServiceProvider(accountType = accountType)
         val userState =
             accountServiceState.map { service ->
-                remember(accountKey, userKey) {
-                    service.userById(userKey?.id ?: accountKey.id)
+                remember(accountType, userKey) {
+                    service.userById(userKey?.id ?: service.account.accountKey.id)
                 }.collectAsState()
             }
 
         val listState =
             accountServiceState.map { service ->
-                remember(accountKey, userKey) {
-                    service.userTimeline(userKey ?: accountKey)
+                remember(accountType, userKey) {
+                    service.userTimeline(userKey ?: service.account.accountKey)
                 }.collectPagingProxy()
             }
         val mediaState =
             remember {
-                ProfileMediaPresenter(accountKey = accountKey, userKey = userKey)
+                ProfileMediaPresenter(accountType = accountType, userKey = userKey)
             }.body().mediaState
         val relationState =
             accountServiceState.flatMap { service ->
-                remember(accountKey, userKey) {
-                    service.relation(userKey ?: accountKey)
+                remember(accountType, userKey) {
+                    service.relation(userKey ?: service.account.accountKey)
                 }.collectAsUiState().value.flatMap { it }
             }
 
@@ -237,13 +238,13 @@ abstract class ProfileState(
 class ProfileWithUserNameAndHostPresenter(
     private val userName: String,
     private val host: String,
-    private val accountKey: MicroBlogKey,
+    private val accountType: AccountType,
 ) : PresenterBase<UiState<UiUser>>() {
     @Composable
     override fun body(): UiState<UiUser> {
         val userState =
-            accountServiceProvider(accountKey = accountKey).flatMap { service ->
-                remember(accountKey) {
+            accountServiceProvider(accountType = accountType).flatMap { service ->
+                remember(accountType) {
                     service.userByAcct("$userName@$host")
                 }.collectAsState().toUi()
             }

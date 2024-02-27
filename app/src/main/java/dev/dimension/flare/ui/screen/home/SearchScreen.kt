@@ -39,6 +39,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -47,12 +48,10 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -81,11 +80,11 @@ import org.koin.compose.koinInject
 fun SearchRoute(
     keyword: String,
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
     SearchScreen(
         initialQuery = keyword,
-        accountData = accountData,
+        accountType = accountType,
         onBack = { navigator.navigateUp() },
         onAccountClick = {
             navigator.navigate(QuickMenuDialogRouteDestination)
@@ -99,14 +98,14 @@ fun SearchRoute(
 @Composable
 private fun SearchScreen(
     initialQuery: String,
-    accountData: AccountData,
+    accountType: AccountType,
     onBack: () -> Unit,
     onAccountClick: () -> Unit,
     toUser: (MicroBlogKey) -> Unit,
 ) {
     val state by producePresenter(
         "discoverSearchPresenter",
-    ) { discoverSearchPresenter(accountData, initialQuery.decodeURLQueryComponent()) }
+    ) { discoverSearchPresenter(accountType, initialQuery.decodeURLQueryComponent()) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     SearchContent(
@@ -323,18 +322,18 @@ private fun SearchContent(
 
 @Composable
 internal fun discoverSearchPresenter(
-    accountData: AccountData,
+    accountType: AccountType,
     initialSearch: String? = null,
     statusEvent: StatusEvent = koinInject(),
 ): DiscoverSearchState =
     run {
-        val accountState = remember { UserPresenter(accountKey = accountData.data, userKey = accountData.data) }.invoke()
+        val accountState = remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
         var query by remember { mutableStateOf(initialSearch ?: "") }
         var isSearching by remember { mutableStateOf(false) }
         var commited by remember { mutableStateOf(initialSearch != null) }
         val state =
             remember {
-                SearchPresenter(accountKey = accountData.data, initialQuery = initialSearch ?: "")
+                SearchPresenter(accountType = accountType, initialQuery = initialSearch ?: "")
             }.invoke()
 
         object : DiscoverSearchState, SearchState by state, UserState by accountState {
@@ -364,7 +363,7 @@ internal fun discoverSearchPresenter(
         }
     }
 
-internal interface DiscoverSearchState : SearchState, ActiveAccountState {
+internal interface DiscoverSearchState : SearchState, UserState {
     val commited: Boolean
     val isSearching: Boolean
     val statusEvent: StatusEvent

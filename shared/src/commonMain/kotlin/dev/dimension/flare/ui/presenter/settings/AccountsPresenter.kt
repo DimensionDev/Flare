@@ -9,6 +9,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.data.repository.allAccountsPresenter
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiState
@@ -30,7 +31,7 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
         val user =
             accounts.map {
                 it.map { account ->
-                    accountServiceProvider(accountKey = account.accountKey).flatMap { service ->
+                    accountServiceProvider(accountType = AccountType.Specific(account.accountKey)).flatMap { service ->
                         remember(account.accountKey) {
                             service.userById(account.accountKey.id)
                         }.collectAsState().toUi()

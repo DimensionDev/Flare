@@ -65,11 +65,11 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.medias
@@ -106,12 +106,12 @@ fun StatusMediaRoute(
     index: Int,
     preview: String?,
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
     SetDialogDestinationToEdgeToEdge()
     StatusMediaScreen(
         statusKey = statusKey,
-        accountData = accountData,
+        accountType = accountType,
         index = index,
         onDismiss = navigator::navigateUp,
         preview = preview,
@@ -129,7 +129,7 @@ fun StatusMediaRoute(
 @Composable
 internal fun StatusMediaScreen(
     statusKey: MicroBlogKey,
-    accountData: AccountData,
+    accountType: AccountType,
     index: Int,
     preview: String?,
     toStatus: () -> Unit,
@@ -146,7 +146,7 @@ internal fun StatusMediaScreen(
             statusKey = statusKey,
             initialIndex = index,
             context = context,
-            accountData = accountData,
+            accountType = accountType,
         )
     }
     BackHandler(state.showUi) {
@@ -445,7 +445,7 @@ private fun statusMediaPresenter(
     statusKey: MicroBlogKey,
     initialIndex: Int,
     context: Context,
-    accountData: AccountData,
+    accountType: AccountType,
     scope: CoroutineScope = koinInject(),
 ) = run {
     var showUi by remember {
@@ -462,7 +462,7 @@ private fun statusMediaPresenter(
     }
     val state =
         remember(statusKey) {
-            StatusPresenter(accountKey = accountData.data, statusKey = statusKey)
+            StatusPresenter(accountType = accountType, statusKey = statusKey)
         }.invoke()
     val medias =
         state.status.map {

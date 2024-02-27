@@ -21,6 +21,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -28,7 +29,6 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.AccountData
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import org.koin.compose.koinInject
@@ -45,12 +45,12 @@ import org.koin.compose.koinInject
 fun StatusRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
     StatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
-        accountData = accountData,
+        accountType = accountType,
     )
 }
 
@@ -59,10 +59,10 @@ fun StatusRoute(
 internal fun StatusScreen(
     statusKey: MicroBlogKey,
     onBack: () -> Unit,
-    accountData: AccountData,
+    accountType: AccountType,
 ) {
     val state by producePresenter(statusKey.toString()) {
-        statusPresenter(accountData = accountData, statusKey = statusKey)
+        statusPresenter(accountType = accountType, statusKey = statusKey)
     }
     Scaffold(
         topBar = {
@@ -103,12 +103,12 @@ internal fun StatusScreen(
 @Composable
 private fun statusPresenter(
     statusKey: MicroBlogKey,
-    accountData: AccountData,
+    accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state =
         remember(statusKey) {
-            StatusContextPresenter(accountKey = accountData.data, statusKey = statusKey)
+            StatusContextPresenter(accountType = accountType, statusKey = statusKey)
         }.invoke()
 
     object {

@@ -97,7 +97,7 @@ internal fun MastodonNotificationComponent(
             CommonStatusHeaderComponent(
                 data = data.user,
                 onUserClick = {
-                    event.onUserClick(data.user.userKey, uriHandler)
+                    event.onUserClick(accountKey = data.accountKey, userKey = data.user.userKey, uriHandler = uriHandler)
                 },
             )
         }

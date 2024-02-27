@@ -19,7 +19,7 @@ internal class TrendsUserPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiUser> {
         try {
             service.pinnedUsers(PinnedUsersRequest(limit = params.loadSize)).body()?.map {
-                it.toUi(accountKey.host)
+                it.toUi(accountKey)
             }.let {
                 return LoadResult.Page(
                     data = it ?: emptyList(),

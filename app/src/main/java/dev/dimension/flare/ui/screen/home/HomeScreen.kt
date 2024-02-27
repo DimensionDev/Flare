@@ -39,7 +39,6 @@ import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
@@ -81,81 +80,76 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
         }
     }
     state.tabs.onSuccess { tabs ->
-        state.user.onSuccess { user ->
-            FlareTheme {
-                val layoutType =
-                    NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
-                        currentWindowAdaptiveInfo(),
-                    )
+        FlareTheme {
+            val layoutType =
+                NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
+                    currentWindowAdaptiveInfo(),
+                )
 
-                NavigationSuiteScaffold(
-                    modifier = modifier,
-                    layoutType = layoutType,
-                    navigationSuiteItems = {
-                        tabs.forEach { tab ->
-                            item(
-                                selected = currentRoute == tab.key,
-                                onClick = {
-                                    navController.navigate(tab.key) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
+            NavigationSuiteScaffold(
+                modifier = modifier,
+                layoutType = layoutType,
+                navigationSuiteItems = {
+                    tabs.forEach { tab ->
+                        item(
+                            selected = currentRoute == tab.key,
+                            onClick = {
+                                navController.navigate(tab.key) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
                                     }
-                                },
-                                icon = {
-                                    TabIcon(
-                                        accountType = tab.account,
-                                        icon = tab.metaData.icon,
-                                        title = tab.metaData.title,
-                                    )
-                                },
-                                label = {
-                                    TabTitle(
-                                        title = tab.metaData.title,
-                                    )
-                                },
-                            )
-                        }
-                    },
-                ) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = tabs.first().key,
-                        // NavigationSuiteScaffold should have consumed the insets, but it doesn't
-                        modifier =
-                            Modifier.let {
-                                if (layoutType == NavigationSuiteType.NavigationBar) {
-                                    it.consumeWindowInsets(WindowInsets.navigationBars)
-                                } else {
-                                    it
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             },
-                    ) {
-                        tabs.forEach { tab ->
-                            composable(tab.key) {
-                                val type: AccountType = tab.account
-                                Router(
-                                    navGraph = NavGraphs.root,
-                                    direction = getDirection(tab),
-                                ) {
-                                    dependency(rootNavController)
-                                    dependency(type)
-                                }
+                            icon = {
+                                TabIcon(
+                                    accountType = tab.account,
+                                    icon = tab.metaData.icon,
+                                    title = tab.metaData.title,
+                                )
+                            },
+                            label = {
+                                TabTitle(
+                                    title = tab.metaData.title,
+                                )
+                            },
+                        )
+                    }
+                },
+            ) {
+                NavHost(
+                    navController = navController,
+                    startDestination = tabs.first().key,
+                    // NavigationSuiteScaffold should have consumed the insets, but it doesn't
+                    modifier =
+                        Modifier.let {
+                            if (layoutType == NavigationSuiteType.NavigationBar) {
+                                it.consumeWindowInsets(WindowInsets.navigationBars)
+                            } else {
+                                it
                             }
-                        }
-                        composable(SettingsRouteDestination) {
+                        },
+                ) {
+                    tabs.forEach { tab ->
+                        composable(tab.key) {
                             Router(
                                 navGraph = NavGraphs.root,
-                                direction = SettingsRouteDestination,
-                            )
+                                direction = getDirection(tab),
+                            ) {
+                                dependency(rootNavController)
+                                dependency(tab.account)
+                            }
                         }
+                    }
+                    composable(SettingsRouteDestination) {
+                        Router(
+                            navGraph = NavGraphs.root,
+                            direction = SettingsRouteDestination,
+                        )
                     }
                 }
             }
-        }.onLoading {
-            SplashScreen()
         }
     }.onLoading {
         SplashScreen()

@@ -74,7 +74,7 @@ internal fun HomeRoute(
     HomeTimelineScreen(
         accountType = accountType,
         toCompose = {
-            navigator.navigate(ComposeRouteDestination)
+            navigator.navigate(ComposeRouteDestination(accountType = accountType))
         },
         toQuickMenu = {
             navigator.navigate(QuickMenuDialogRouteDestination)

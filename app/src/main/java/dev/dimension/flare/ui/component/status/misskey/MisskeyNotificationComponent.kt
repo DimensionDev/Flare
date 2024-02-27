@@ -121,7 +121,7 @@ internal fun MisskeyNotificationComponent(
                 CommonStatusHeaderComponent(
                     data = user,
                     onUserClick = {
-                        event.onUserClick(it, uriHandler)
+                        event.onUserClick(accountKey = data.accountKey, userKey = it, uriHandler = uriHandler)
                     },
                 )
             }

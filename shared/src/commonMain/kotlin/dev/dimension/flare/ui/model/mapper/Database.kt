@@ -59,25 +59,27 @@ internal fun DbUser.toUi(): UiUser {
 
         is UserContent.Misskey ->
             user.data.toUi(
-                accountHost = user_key.host,
+                accountKey = user_key,
             )
 
         is UserContent.MisskeyLite ->
             user.data.toUi(
-                accountHost = user_key.host,
+                accountKey = user_key,
             )
 
         is UserContent.Bluesky ->
             user.data.toUi(
-                accountHost = user_key.host,
+                accountKey = user_key,
             )
 
         is UserContent.BlueskyLite ->
             user.data.toUi(
-                accountHost = user_key.host,
+                accountKey = user_key,
             )
 
         is UserContent.XQT ->
-            user.data.toUi()
+            user.data.toUi(
+                accountKey = user_key,
+            )
     }
 }

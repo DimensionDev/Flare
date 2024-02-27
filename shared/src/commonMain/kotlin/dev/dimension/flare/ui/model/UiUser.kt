@@ -90,20 +90,20 @@ sealed class UiUser {
         val isBot: Boolean,
         val relation: UiRelation.Misskey,
         val fields: ImmutableMap<String, String>,
-        internal val accountHost: String,
+        private val accountKey: MicroBlogKey,
     ) : UiUser() {
         override val nameElement by lazy {
-            parseName(name, accountHost)
+            parseName(name, accountKey)
         }
 
         val fieldsParsed by lazy {
             fields.map { (key, value) ->
-                key to misskeyParser.parse(value).toHtml(accountHost)
+                key to misskeyParser.parse(value).toHtml(accountKey)
             }.toMap().toPersistentMap()
         }
 
         override val descriptionElement by lazy {
-            parseDescription(description, accountHost)
+            parseDescription(description, accountKey)
         }
 
         override val handle = "@$handleInternal@$remoteHost"
@@ -130,7 +130,7 @@ sealed class UiUser {
         val description: String?,
         val matrices: Matrices,
         val relation: UiRelation.Bluesky,
-        internal val accountHost: String,
+        private val accountKey: MicroBlogKey,
     ) : UiUser() {
         override val nameElement by lazy {
             Element("span").apply {
@@ -139,7 +139,7 @@ sealed class UiUser {
         }
 
         override val descriptionElement by lazy {
-            parseDescription(description, accountHost)
+            parseDescription(description, accountKey)
         }
         override val handle: String = "@$handleInternal"
 
@@ -169,6 +169,7 @@ sealed class UiUser {
         val url: String?,
         val protected: Boolean,
         internal val raw: User,
+        private val accountKey: MicroBlogKey,
     ) : UiUser() {
         override val handle: String = "@$rawHandle@$xqtHost"
 
@@ -222,7 +223,7 @@ sealed class UiUser {
                             token
                         }
                     }
-                    .toHtml(xqtHost)
+                    .toHtml(accountKey)
             }
         }
 
@@ -261,20 +262,20 @@ private fun parseName(status: Account): Element {
 
 private fun parseName(
     name: String,
-    accountHost: String,
+    accountKey: MicroBlogKey,
 ): Element {
     if (name.isEmpty()) {
         return Element("body")
     }
-    return misskeyParser.parse(name).toHtml(accountHost) as? Element ?: Element("body")
+    return misskeyParser.parse(name).toHtml(accountKey) as? Element ?: Element("body")
 }
 
 private fun parseDescription(
     description: String?,
-    accountHost: String,
+    accountKey: MicroBlogKey,
 ): Element? {
     if (description.isNullOrEmpty()) {
         return null
     }
-    return misskeyParser.parse(description).toHtml(accountHost)
+    return misskeyParser.parse(description).toHtml(accountKey)
 }

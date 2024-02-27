@@ -12,24 +12,31 @@ object AppDeepLink {
     }
 
     object Search {
-        const val ROUTE = "$APPSCHEMA://Search/{keyword}"
+        const val ROUTE = "$APPSCHEMA://Search/{accountKey}/{keyword}"
 
-        operator fun invoke(keyword: String) = "$APPSCHEMA://Search/${keyword.encodeURLQueryComponent()}"
+        operator fun invoke(
+            accountKey: MicroBlogKey,
+            keyword: String,
+        ) = "$APPSCHEMA://Search/$accountKey/${keyword.encodeURLQueryComponent()}"
     }
 
     object Profile {
-        const val ROUTE = "$APPSCHEMA://Profile/{userKey}"
+        const val ROUTE = "$APPSCHEMA://Profile/{accountKey}/{userKey}"
 
-        operator fun invoke(userKey: MicroBlogKey) = "$APPSCHEMA://Profile/$userKey"
+        operator fun invoke(
+            accountKey: MicroBlogKey,
+            userKey: MicroBlogKey,
+        ) = "$APPSCHEMA://Profile/$accountKey/$userKey"
     }
 
     object ProfileWithNameAndHost {
-        const val ROUTE = "$APPSCHEMA://ProfileWithNameAndHost/{userName}/{host}"
+        const val ROUTE = "$APPSCHEMA://ProfileWithNameAndHost/{accountKey}/{userName}/{host}"
 
         operator fun invoke(
+            accountKey: MicroBlogKey,
             userName: String,
             host: String,
-        ) = "$APPSCHEMA://ProfileWithNameAndHost/${userName.encodeURLQueryComponent()}/$host"
+        ) = "$APPSCHEMA://ProfileWithNameAndHost/$accountKey/$userName/$host"
     }
 
     object StatusDetail {
@@ -51,23 +58,28 @@ object AppDeepLink {
                 val keyword = uri.substringAfter("Search/")
                 DeeplinkEvent.Search(keyword)
             }
+
             uri.startsWith("Profile/") -> {
                 val userKey = uri.substringAfter("Profile/")
                 DeeplinkEvent.Profile(MicroBlogKey.valueOf(userKey))
             }
+
             uri.startsWith("ProfileWithNameAndHost/") -> {
                 val userNameAndHost = uri.substringAfter("ProfileWithNameAndHost/")
                 val userName = userNameAndHost.substringBefore("/")
                 val host = userNameAndHost.substringAfter("/")
                 DeeplinkEvent.ProfileWithNameAndHost(userName, host)
             }
+
             uri.startsWith("StatusDetail/") -> {
                 val statusKey = uri.substringAfter("StatusDetail/")
                 DeeplinkEvent.StatusDetail(MicroBlogKey.valueOf(statusKey))
             }
+
             uri.startsWith("Compose") -> {
                 DeeplinkEvent.Compose
             }
+
             else -> null
         }
     }

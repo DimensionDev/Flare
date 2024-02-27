@@ -497,8 +497,9 @@ class XQTDataSource(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
-                service,
-                query,
+                service = service,
+                accountKey = account.accountKey,
+                query = query,
             )
         }.flow
     }

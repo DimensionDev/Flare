@@ -77,6 +77,27 @@ import org.koin.compose.koinInject
     ],
 )
 @Composable
+fun SearchDeepLink(
+    keyword: String,
+    navigator: DestinationsNavigator,
+    accountKey: MicroBlogKey,
+) {
+    SearchRoute(
+        keyword = keyword,
+        navigator = navigator,
+        accountType = AccountType.Specific(accountKey),
+    )
+}
+
+@Destination(
+    wrappers = [ThemeWrapper::class],
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
+)
+@Composable
 fun SearchRoute(
     keyword: String,
     navigator: DestinationsNavigator,
@@ -90,7 +111,7 @@ fun SearchRoute(
             navigator.navigate(QuickMenuDialogRouteDestination)
         },
         toUser = { userKey ->
-            navigator.navigate(ProfileRouteDestination(userKey))
+            navigator.navigate(ProfileRouteDestination(userKey, accountType))
         },
     )
 }

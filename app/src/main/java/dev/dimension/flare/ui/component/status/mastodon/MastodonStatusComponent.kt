@@ -123,6 +123,7 @@ internal fun MastodonStatusComponent(
         statusKey = actualData.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(
+                accountKey = actualData.accountKey,
                 statusKey = statusKey,
                 index = index,
                 preview = preview,
@@ -142,7 +143,7 @@ internal fun MastodonStatusComponent(
             }
         },
         onUserClick = {
-            event.onUserClick(it, uriHandler)
+            event.onUserClick(accountKey = actualData.accountKey, userKey = it, uriHandler = uriHandler)
         },
         rawContent = actualData.content,
         content = actualData.contentToken,
@@ -346,6 +347,7 @@ internal fun VisibilityIcon(
 
 internal interface MastodonStatusEvent {
     fun onUserClick(
+        accountKey: MicroBlogKey,
         userKey: MicroBlogKey,
         uriHandler: UriHandler,
     )
@@ -367,6 +369,7 @@ internal interface MastodonStatusEvent {
     fun onBookmarkClick(status: UiStatus.Mastodon)
 
     fun onMediaClick(
+        accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,
         index: Int,
         preview: String?,

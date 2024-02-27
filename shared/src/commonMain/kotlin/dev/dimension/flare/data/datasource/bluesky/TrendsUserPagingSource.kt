@@ -22,7 +22,7 @@ internal class TrendsUserPagingSource(
                 service.getSuggestions(GetSuggestionsQueryParams(limit = params.loadSize.toLong(), cursor = params.key))
                     .requireResponse()
             LoadResult.Page(
-                data = response.actors.map { it.toUi(accountKey.host) },
+                data = response.actors.map { it.toUi(accountKey) },
                 prevKey = null,
                 nextKey = response.cursor,
             )

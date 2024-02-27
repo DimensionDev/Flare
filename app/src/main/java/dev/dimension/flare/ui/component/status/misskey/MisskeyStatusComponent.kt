@@ -69,6 +69,7 @@ internal fun MisskeyStatusComponent(
         statusKey = actualData.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(
+                accountKey = actualData.accountKey,
                 statusKey = statusKey,
                 index = index,
                 preview = preview,
@@ -76,7 +77,7 @@ internal fun MisskeyStatusComponent(
             )
         },
         onUserClick = {
-            event.onUserClick(it, uriHandler)
+            event.onUserClick(accountKey = actualData.accountKey, userKey = it, uriHandler = uriHandler)
         },
         headerTrailing = {
             if (appearanceSettings.misskey.showVisibility) {
@@ -358,11 +359,13 @@ internal interface MisskeyStatusEvent {
     )
 
     fun onUserClick(
+        accountKey: MicroBlogKey,
         userKey: MicroBlogKey,
         uriHandler: UriHandler,
     )
 
     fun onMediaClick(
+        accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,
         index: Int,
         preview: String?,

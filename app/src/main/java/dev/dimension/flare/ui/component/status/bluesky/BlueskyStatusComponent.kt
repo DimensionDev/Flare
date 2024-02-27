@@ -50,6 +50,7 @@ internal fun BlueskyStatusComponent(
         statusKey = data.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(
+                accountKey = data.accountKey,
                 statusKey = statusKey,
                 index = index,
                 preview = preview,
@@ -57,7 +58,7 @@ internal fun BlueskyStatusComponent(
             )
         },
         onUserClick = {
-            event.onUserClick(it, uriHandler)
+            event.onUserClick(accountKey = data.accountKey, userKey = it, uriHandler = uriHandler)
         },
         rawContent = data.content,
         content = data.contentToken,
@@ -250,11 +251,13 @@ internal interface BlueskyStatusEvent {
     )
 
     fun onUserClick(
+        accountKey: MicroBlogKey,
         userKey: MicroBlogKey,
         uriHandler: UriHandler,
     )
 
     fun onMediaClick(
+        accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,
         index: Int,
         preview: String?,

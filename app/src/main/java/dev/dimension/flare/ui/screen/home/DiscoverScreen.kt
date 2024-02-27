@@ -73,14 +73,14 @@ internal fun DiscoverRoute(
                     onAccountClick = {
                         navigator.navigate(QuickMenuDialogRouteDestination)
                     },
-                    toUser = { navigator.navigate(ProfileRouteDestination(it)) },
+                    toUser = { navigator.navigate(ProfileRouteDestination(it, accountType)) },
                 )
             }
         },
     ) {
         DiscoverScreen(
             contentPadding = it,
-            onUserClick = { navigator.navigate(ProfileRouteDestination(it)) },
+            onUserClick = { navigator.navigate(ProfileRouteDestination(it, accountType)) },
             onHashtagClick = {
                 state.commitSearch(it)
             },

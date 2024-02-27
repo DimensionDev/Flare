@@ -127,6 +127,66 @@ import kotlin.reflect.KFunction1
     ],
     wrappers = [ThemeWrapper::class],
 )
+fun ProfileWithUserNameAndHostDeeplinkRoute(
+    userName: String,
+    host: String,
+    navigator: DestinationsNavigator,
+    accountKey: MicroBlogKey,
+) {
+    val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
+        profileWithUserNameAndHostPresenter(
+            userName = userName,
+            host = host,
+            accountType = AccountType.Specific(accountKey),
+        )
+    }
+    state.onSuccess {
+        ProfileScreen(
+            userKey = it.userKey,
+            onBack = {
+                navigator.navigateUp()
+            },
+            onProfileMediaClick = {
+                navigator.navigate(
+                    dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                        it.userKey,
+                        accountType = AccountType.Specific(accountKey),
+                    ),
+                )
+            },
+            onMediaClick = {
+                navigator.navigate(
+                    dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                        it,
+                    ),
+                )
+            },
+            accountType = AccountType.Specific(accountKey),
+        )
+    }.onLoading {
+        ProfileLoadingScreen(
+            onBack = {
+                navigator.navigateUp()
+            },
+        )
+    }.onError {
+        ProfileErrorScreen(
+            onBack = {
+                navigator.navigateUp()
+            },
+        )
+    }
+}
+
+@Composable
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
+    wrappers = [ThemeWrapper::class],
+)
 fun ProfileWithUserNameAndHostRoute(
     userName: String,
     host: String,
@@ -150,6 +210,7 @@ fun ProfileWithUserNameAndHostRoute(
                 navigator.navigate(
                     dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
                         it.userKey,
+                        accountType = accountType,
                     ),
                 )
             },
@@ -286,6 +347,44 @@ private fun profileWithUserNameAndHostPresenter(
     ],
     wrappers = [ThemeWrapper::class],
 )
+fun ProfileDeeplinkRoute(
+    userKey: MicroBlogKey?,
+    navigator: DestinationsNavigator,
+    accountKey: MicroBlogKey,
+) {
+    ProfileScreen(
+        userKey = userKey,
+        onBack = {
+            navigator.navigateUp()
+        },
+        onProfileMediaClick = {
+            navigator.navigate(
+                dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                    userKey,
+                    accountType = AccountType.Specific(accountKey),
+                ),
+            )
+        },
+        onMediaClick = {
+            navigator.navigate(
+                dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                    it,
+                ),
+            )
+        },
+        accountType = AccountType.Specific(accountKey),
+    )
+}
+
+@Composable
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
+    wrappers = [ThemeWrapper::class],
+)
 fun ProfileRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
@@ -300,6 +399,7 @@ fun ProfileRoute(
             navigator.navigate(
                 dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
                     userKey,
+                    accountType = accountType,
                 ),
             )
         },

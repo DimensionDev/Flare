@@ -60,6 +60,7 @@ internal fun ProfileMediaRoute(
                     statusKey = statusKey,
                     index = index,
                     preview = preview,
+                    accountType = accountType,
                 ),
             )
         },

@@ -126,7 +126,7 @@ private fun NotificationComponent(
                 modifier =
                     Modifier
                         .clickable {
-                            event.onUserClick(data.user.userKey, uriHandler)
+                            event.onUserClick(accountKey = data.accountKey, userKey = data.user.userKey, uriHandler = uriHandler)
                         },
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -141,7 +141,7 @@ private fun NotificationComponent(
                     modifier =
                         Modifier
                             .clickable {
-                                event.onUserClick(data.user.userKey, uriHandler)
+                                event.onUserClick(accountKey = data.accountKey, userKey = data.user.userKey, uriHandler = uriHandler)
                             },
                 )
                 Text(
@@ -151,7 +151,7 @@ private fun NotificationComponent(
                         Modifier
                             .alpha(MediumAlpha)
                             .clickable {
-                                event.onUserClick(data.user.userKey, uriHandler)
+                                event.onUserClick(accountKey = data.accountKey, userKey = data.user.userKey, uriHandler = uriHandler)
                             },
                 )
             }

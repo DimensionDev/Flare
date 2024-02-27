@@ -116,7 +116,7 @@ fun StatusMediaRoute(
         onDismiss = navigator::navigateUp,
         preview = preview,
         toStatus = {
-            navigator.navigate(StatusRouteDestination(statusKey))
+            navigator.navigate(StatusRouteDestination(statusKey, accountType))
         },
     )
 }

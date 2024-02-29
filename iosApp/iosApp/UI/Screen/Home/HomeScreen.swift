@@ -161,7 +161,7 @@ struct TabItem<Content: View>: View {
             ZStack {
                 Color.black.ignoresSafeArea()
                 if let data = statusEvent.mediaClickData {
-                    StatusMediaScreen(accountType: accountType, statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
+                    StatusMediaScreen(accountType: accountType.toKotlin(), statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
                 }
             }
         }

@@ -18,7 +18,7 @@ class UserPresenter(
     override fun body(): UserState {
         val user =
             accountServiceProvider(accountType = accountType).flatMap { service ->
-                remember(accountType, userKey) {
+                remember(service, userKey) {
                     service.userById(userKey?.id ?: service.account.accountKey.id)
                 }.collectAsState().toUi()
             }

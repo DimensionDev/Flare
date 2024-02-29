@@ -32,7 +32,7 @@ class NotificationPresenter(
             }
         val listState =
             serviceState.map { service ->
-                remember(accountType, type) {
+                remember(service, type) {
                     service.notification(
                         type = type,
                     )

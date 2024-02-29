@@ -21,7 +21,7 @@ class StatusContextPresenter(
     override fun body(): StatusContextState {
         val listState =
             accountServiceProvider(accountType = accountType).map { service ->
-                remember(accountType, statusKey) {
+                remember(service, statusKey) {
                     service.context(statusKey)
                 }.collectPagingProxy()
             }

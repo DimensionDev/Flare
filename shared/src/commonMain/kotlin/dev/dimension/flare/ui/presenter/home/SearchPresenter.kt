@@ -26,7 +26,7 @@ class SearchPresenter(
 
         val user =
             accountState.map { service ->
-                remember(accountType, query) {
+                remember(service, query) {
                     // TODO: Should we handle when query is empty?
                     service.searchUser(query)
                 }.collectPagingProxy()
@@ -34,7 +34,7 @@ class SearchPresenter(
 
         val status =
             accountState.map { service ->
-                remember(accountType, query) {
+                remember(service, query) {
                     service.searchStatus(query)
                 }.collectPagingProxy()
             }

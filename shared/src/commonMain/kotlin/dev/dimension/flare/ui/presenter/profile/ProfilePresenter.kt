@@ -35,14 +35,14 @@ class ProfilePresenter(
         val accountServiceState = accountServiceProvider(accountType = accountType)
         val userState =
             accountServiceState.map { service ->
-                remember(accountType, userKey) {
+                remember(service, userKey) {
                     service.userById(userKey?.id ?: service.account.accountKey.id)
                 }.collectAsState()
             }
 
         val listState =
             accountServiceState.map { service ->
-                remember(accountType, userKey) {
+                remember(service, userKey) {
                     service.userTimeline(userKey ?: service.account.accountKey)
                 }.collectPagingProxy()
             }
@@ -52,7 +52,7 @@ class ProfilePresenter(
             }.body().mediaState
         val relationState =
             accountServiceState.flatMap { service ->
-                remember(accountType, userKey) {
+                remember(service, userKey) {
                     service.relation(userKey ?: service.account.accountKey)
                 }.collectAsUiState().value.flatMap { it }
             }
@@ -244,7 +244,7 @@ class ProfileWithUserNameAndHostPresenter(
     override fun body(): UiState<UiUser> {
         val userState =
             accountServiceProvider(accountType = accountType).flatMap { service ->
-                remember(accountType) {
+                remember(service) {
                     service.userByAcct("$userName@$host")
                 }.collectAsState().toUi()
             }

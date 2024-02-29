@@ -21,7 +21,7 @@ class HomeTimelinePresenter(
         val serviceState = accountServiceProvider(accountType = accountType)
         val listState =
             serviceState.map { service ->
-                remember(accountType) {
+                remember(service) {
                     service.homeTimeline()
                 }.collectPagingProxy()
             }

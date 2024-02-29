@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -31,6 +32,7 @@ import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultA
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.spec.Direction
 import com.ramcosta.composedestinations.spec.NavGraphSpec
 import com.ramcosta.composedestinations.spec.Route
 import com.ramcosta.composedestinations.utils.composable
@@ -39,23 +41,23 @@ import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.UserState
-import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.NotificationRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
+import dev.dimension.flare.ui.screen.destinations.TabSplashScreenDestination
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
+import dev.dimension.flare.ui.screen.splash.SplashScreenArgs
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
@@ -134,11 +136,12 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                     tabs.forEach { tab ->
                         composable(tab.key) {
                             Router(
+                                modifier = Modifier.fillMaxSize(),
                                 navGraph = NavGraphs.root,
-                                direction = getDirection(tab),
+                                direction = TabSplashScreenDestination,
                             ) {
                                 dependency(rootNavController)
-                                dependency(tab.account)
+                                dependency(SplashScreenArgs(getDirection(tab, tab.account)))
                             }
                         }
                     }
@@ -156,20 +159,23 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
     }
 }
 
-private fun getDirection(tab: TabItem): Route {
+private fun getDirection(
+    tab: TabItem,
+    accountType: AccountType,
+): Direction {
     return when (tab) {
         is DiscoverTabItem -> {
-            DiscoverRouteDestination
+            DiscoverRouteDestination(accountType)
         }
 
         is ProfileTabItem -> {
-            MeRouteDestination
+            MeRouteDestination(accountType)
         }
 
         is TimelineTabItem -> {
             when (tab.type) {
-                TimelineTabItem.Type.Home -> HomeRouteDestination
-                TimelineTabItem.Type.Notifications -> NotificationRouteDestination
+                TimelineTabItem.Type.Home -> HomeRouteDestination(accountType)
+                TimelineTabItem.Type.Notifications -> NotificationRouteDestination(accountType)
             }
         }
     }
@@ -180,6 +186,7 @@ private fun getDirection(tab: TabItem): Route {
 internal fun Router(
     navGraph: NavGraphSpec,
     direction: Route,
+    modifier: Modifier = Modifier,
     dependenciesContainerBuilder: @Composable DependenciesContainerBuilder<*>.() -> Unit = {},
 ) {
     val innerNavController = rememberNavController()
@@ -194,6 +201,7 @@ internal fun Router(
             },
     ) {
         DestinationsNavHost(
+            modifier = modifier,
             navController = innerNavController,
             navGraph = navGraph,
             engine =
@@ -223,9 +231,7 @@ private class ProxyUriHandler(
 private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
     run {
         val tabSettings by settingsRepository.tabSettings.collectAsUiState()
-        val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
-
-        object : UserState by activeAccountState {
+        object {
             val tabs =
                 tabSettings.map {
                     it.items.toImmutableList()

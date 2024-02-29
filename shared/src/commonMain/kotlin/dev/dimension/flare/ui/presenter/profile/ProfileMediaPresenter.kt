@@ -25,7 +25,7 @@ class ProfileMediaPresenter(
         val accountServiceState = accountServiceProvider(accountType = accountType)
         val mediaState =
             accountServiceState.map { service ->
-                remember(accountType, userKey) {
+                remember(service, userKey) {
                     service.userTimeline(userKey ?: service.account.accountKey, mediaOnly = true)
                         .map { data ->
                             data.flatMap { status ->

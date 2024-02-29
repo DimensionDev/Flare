@@ -21,7 +21,7 @@ class StatusPresenter(
         val serviceState = accountServiceProvider(accountType = accountType)
         val accountServiceState =
             serviceState.flatMap { service ->
-                remember(accountType, statusKey) {
+                remember(service, statusKey) {
                     service.status(statusKey)
                 }.collectAsState().toUi()
             }

@@ -21,7 +21,7 @@ class DiscoverPresenter(
         val accountState = accountServiceProvider(accountType = accountType)
         val users =
             accountState.flatMap { dataSource ->
-                remember(accountType) {
+                remember(dataSource) {
                     runCatching {
                         dataSource.discoverUsers()
                     }.getOrNull()
@@ -35,7 +35,7 @@ class DiscoverPresenter(
             }
         val status =
             accountState.flatMap { dataSource ->
-                remember(accountType) {
+                remember(dataSource) {
                     runCatching {
                         dataSource.discoverStatuses()
                     }.getOrNull()
@@ -49,7 +49,7 @@ class DiscoverPresenter(
             }
         val hashtags =
             accountState.flatMap { dataSource ->
-                remember(accountType) {
+                remember(dataSource) {
                     runCatching {
                         dataSource.discoverHashtags()
                     }.getOrNull()

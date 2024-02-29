@@ -6,7 +6,6 @@ typealias ApplicationDelegate = UIApplicationDelegate
 typealias ApplicationDelegate = NSApplicationDelegate
 #endif
 
-
 class AppDelegate: NSObject, ApplicationDelegate {
     #if os(macOS)
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -14,7 +13,7 @@ class AppDelegate: NSObject, ApplicationDelegate {
     }
     #else
     func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
       FirebaseApp.configure()
 
       return true

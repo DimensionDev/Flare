@@ -2,7 +2,7 @@ import SwiftUI
 import NetworkImage
 
 struct Zoomable: View {
-    
+
     let url: String
 
     @State private var scale: CGFloat = 1
@@ -10,7 +10,6 @@ struct Zoomable: View {
 
     @State private var offset: CGPoint = .zero
     @State private var lastTranslation: CGSize = .zero
-
 
     public var body: some View {
         GeometryReader { proxy in

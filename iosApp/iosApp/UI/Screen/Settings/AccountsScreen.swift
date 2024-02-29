@@ -17,7 +17,7 @@ struct AccountsScreen: View {
                                 viewModel.model.setActiveAccount(accountKey: user.data.userKey)
                             } label: {
                                 HStack {
-                                    UserComponent(user: user.data)
+                                    UserComponent(user: user.data, onUserClicked: { })
                                     Spacer()
                                     switch onEnum(of: viewModel.model.activeAccount) {
                                     case .success(let activeAccount):

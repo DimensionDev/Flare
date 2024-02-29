@@ -5,11 +5,11 @@ struct HomeTimelineScreen: View {
     @Environment(\.openURL) private var openURL
     @State var viewModel: TimelineViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
-    
-    init(accountKey: MicroBlogKey) {
-        _viewModel = .init(initialValue: .init(accountKey: accountKey))
+
+    init(accountType: AccountType) {
+        _viewModel = .init(initialValue: .init(accountType: accountType))
     }
-    
+
     var body: some View {
         List {
             StatusTimelineComponent(
@@ -54,8 +54,8 @@ class TimelineViewModel: MoleculeViewModelProto {
     typealias Presenter = HomeTimelinePresenter
     let presenter: Presenter
     var model: Model
-    init(accountKey: MicroBlogKey) {
-        presenter = .init(accountKey: accountKey)
+    init(accountType: AccountType) {
+        presenter = .init(accountType: accountType)
         model = presenter.models.value
     }
 }

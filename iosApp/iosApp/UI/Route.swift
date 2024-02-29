@@ -3,35 +3,27 @@ import SwiftUI
 import shared
 
 struct RouterView: View {
-    @State var activeAccountViewModel = ActiveAccountViewModel()
     @State var viewModel = RouterViewModel()
     @State var appSettings = AppSettings()
     var body: some View {
         ZStack {
-            switch onEnum(of: viewModel.model) {
-            case .home(_):
-                switch onEnum(of: activeAccountViewModel.model.user) {
-                case .success(let data):
-                    HomeScreen(accountKey: data.data.userKey)
-                case .error:
-                    SplashScreen()
-                case .loading:
-                    SplashScreen()
-                }
+            switch viewModel.model.toSwiftEnum() {
+            case .home:
+                HomeScreen()
             case .login:
                 SplashScreen()
             case .splash:
                 SplashScreen()
             }
         }.sheet(isPresented: Binding(get: {
-            if case .login = onEnum(of: viewModel.model) {
+            if case .login = viewModel.model.toSwiftEnum() {
                 true
             } else {
                 false
             }
         }, set: { _ in
         }), content: {
-            if case .login = onEnum(of: viewModel.model) {
+            if case .login = viewModel.model.toSwiftEnum() {
                 ServiceSelectScreen(
                     toHome: {
                     }
@@ -44,17 +36,12 @@ struct RouterView: View {
         })
         .environment(\.appSettings, appSettings)
         .activateViewModel(viewModel: viewModel)
-        .activateViewModel(viewModel: activeAccountViewModel)
     }
 }
 
 @Observable
-class ActiveAccountViewModel : MoleculeViewModelBase<UserState, ActiveAccountPresenter> {
-}
-
-@Observable
 class RouterViewModel: MoleculeViewModelProto {
-    typealias Model = SplashType
+    typealias Model = __SplashType
     typealias Presenter = SplashPresenter
     let presenter: Presenter
     var model: Model
@@ -65,11 +52,22 @@ class RouterViewModel: MoleculeViewModelProto {
 }
 
 public enum TabDestination: Codable, Hashable {
-    case profile(accountKey: String, userKey: String)
-    case statusDetail(accountKey: String, statusKey: String)
-    case profileWithUserNameAndHost(accountKey: String, userName: String, host: String)
-    case search(accountKey: String, query: String)
-    case profileMedia(accountKey: String, userKey: String)
+    case profile(accountType: SwiftAccountType, userKey: String)
+    case statusDetail(accountType: SwiftAccountType, statusKey: String)
+    case profileWithUserNameAndHost(accountType: SwiftAccountType, userName: String, host: String)
+    case search(accountType: SwiftAccountType, query: String)
+    case profileMedia(accountType: SwiftAccountType, userKey: String)
+}
+
+public enum SwiftAccountType: Codable, Hashable {
+    case active
+    case specific(accountKey: String)
+    func toKotlin() -> AccountType {
+        return switch self {
+        case .active: AccountTypeActive()
+        case .specific(let accountKey): AccountTypeSpecific(accountKey: MicroBlogKey.companion.valueOf(str: accountKey))
+        }
+    }
 }
 
 @Observable
@@ -96,31 +94,40 @@ extension View {
             for: TabDestination.self
         ) { destination in
             switch destination {
-            case let .profile(accountKey, userKey):
+            case let .profile(accountType, userKey):
                 ProfileScreen(
-                    accountKey: MicroBlogKey.companion.valueOf(str: accountKey),
+                    accountType: accountType.toKotlin(),
                     userKey: MicroBlogKey.companion.valueOf(str: userKey),
                     toProfileMedia: { userKey in
-                        router.navigate(to: .profileMedia(accountKey: accountKey, userKey: userKey.description()))
+                        router.navigate(to: .profileMedia(accountType: accountType, userKey: userKey.description()))
                     }
                 )
-            case let .statusDetail(accountKey, statusKey):
+            case let .statusDetail(accountType, statusKey):
                 StatusDetailScreen(
-                    accountKey: MicroBlogKey.companion.valueOf(str: accountKey),
+                    accountType: accountType.toKotlin(),
                     statusKey: MicroBlogKey.companion.valueOf(str: statusKey)
                 )
-            case let .profileWithUserNameAndHost(accountKey, userName, host):
+            case let .profileWithUserNameAndHost(accountType, userName, host):
                 ProfileWithUserNameScreen(
-                    accountKey: MicroBlogKey.companion.valueOf(str: accountKey),
+                    accountType: accountType.toKotlin(),
                     userName: userName,
                     host: host
                 ) { userKey in
-                    router.navigate(to: .profileMedia(accountKey: accountKey, userKey: userKey.description()))
+                    router.navigate(to: .profileMedia(accountType: accountType, userKey: userKey.description()))
                 }
-            case let .search(accountKey, data):
-                SearchScreen(accountKey: MicroBlogKey.companion.valueOf(str: accountKey),initialQuery: data)
-            case let .profileMedia(accountKey, userKey):
-                ProfileMediaListScreen(accountKey: MicroBlogKey.companion.valueOf(str: accountKey),userKey: MicroBlogKey.companion.valueOf(str: userKey))
+            case let .search(accountType, data):
+                SearchScreen(
+                    accountType: accountType.toKotlin(),
+                    initialQuery: data,
+                    onUserClicked: { user in
+                        router.navigate(to: .profileMedia(accountType: accountType, userKey: user.userKey.description()))
+                    }
+                )
+            case let .profileMedia(accountType, userKey):
+                ProfileMediaListScreen(
+                    accountType: accountType.toKotlin(),
+                    userKey: MicroBlogKey.companion.valueOf(str: userKey)
+                )
             }
         }
     }

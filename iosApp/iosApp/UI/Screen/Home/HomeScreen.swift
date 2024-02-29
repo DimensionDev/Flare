@@ -2,7 +2,6 @@ import SwiftUI
 import shared
 
 struct HomeScreen: View {
-    let accountKey: MicroBlogKey
     @State var viewModel = HomeViewModel()
     @State var showSettings = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -13,8 +12,8 @@ struct HomeScreen: View {
                     TabModel(
                         title: String(localized: "home_timeline_title"),
                         image: "house",
-                        destination: TabItem(accountKey: accountKey) { _ in
-                            HomeTimelineScreen(accountKey: accountKey)
+                        destination: TabItem(accountType: .active) { _ in
+                            HomeTimelineScreen(accountType: AccountTypeActive())
                                 .toolbar {
 #if os(iOS)
                                     ToolbarItem(placement: .navigation) {
@@ -35,8 +34,8 @@ struct HomeScreen: View {
                     TabModel(
                         title: String(localized: "home_notification_title"),
                         image: "bell",
-                        destination: TabItem(accountKey: accountKey) { _ in
-                            NotificationScreen(accountKey: accountKey)
+                        destination: TabItem(accountType: .active) { _ in
+                            NotificationScreen(accountType: AccountTypeActive())
                                 .toolbar {
 #if os(iOS)
                                     ToolbarItem(placement: .navigation) {
@@ -57,19 +56,24 @@ struct HomeScreen: View {
                     TabModel(
                         title: String(localized: "home_discover_title"),
                         image: "magnifyingglass",
-                        destination: TabItem(accountKey: accountKey) { _ in
-                            DiscoverScreen(accountKey: accountKey)
+                        destination: TabItem(accountType: .active) { router in
+                            DiscoverScreen(
+                                accountType: AccountTypeActive(),
+                                onUserClicked: { user in
+                                    router.navigate(to: .profileMedia(accountType: .active, userKey: user.userKey.description()))
+                                }
+                            )
                         }
                     ),
                     TabModel(
                         title: String(localized: "home_profile_title"),
                         image: "person.circle",
-                        destination: TabItem(accountKey: accountKey) { router in
+                        destination: TabItem(accountType: .active) { router in
                             ProfileScreen(
-                                accountKey: accountKey,
+                                accountType: AccountTypeActive(),
                                 userKey: nil,
                                 toProfileMedia: { userKey in
-                                    router.navigate(to: .profileMedia(accountKey: accountKey.description(), userKey: userKey.description()))
+                                    router.navigate(to: .profileMedia(accountType: .active, userKey: userKey.description()))
                                 }
                             )
                         }
@@ -109,7 +113,7 @@ class HomeViewModel: MoleculeViewModelBase<UserState, ActiveAccountPresenter> {
 }
 
 struct TabItem<Content: View>: View {
-    let accountKey: MicroBlogKey
+    let accountType: SwiftAccountType
     @State var showCompose = false
     @State var statusEvent = StatusEvent()
     @State var router = Router<TabDestination>()
@@ -123,7 +127,7 @@ struct TabItem<Content: View>: View {
             NavigationStack {
                 ComposeScreen(onBack: {
                     showCompose = false
-                }, accountKey: accountKey)
+                }, accountType: accountType.toKotlin())
             }
 #if os(macOS)
             .frame(minWidth: 600, minHeight: 400)
@@ -142,7 +146,7 @@ struct TabItem<Content: View>: View {
                 NavigationStack {
                     ComposeScreen(onBack: {
                         statusEvent.composeStatus = nil
-                    }, accountKey: accountKey, status: status)
+                    }, accountType: accountType.toKotlin(), status: status)
                 }
 #if os(macOS)
                 .frame(minWidth: 500, minHeight: 400)
@@ -157,7 +161,7 @@ struct TabItem<Content: View>: View {
             ZStack {
                 Color.black.ignoresSafeArea()
                 if let data = statusEvent.mediaClickData {
-                    StatusMediaScreen(accountKey: accountKey, statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
+                    StatusMediaScreen(accountType: accountType, statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
                 }
             }
         }
@@ -166,13 +170,13 @@ struct TabItem<Content: View>: View {
             if let event = AppDeepLink.shared.parse(url: url.absoluteString) {
                 switch onEnum(of: event) {
                 case .profile(let data):
-                    router.navigate(to: .profile(accountKey: accountKey.description(), userKey: data.userKey.description()))
+                    router.navigate(to: .profile(accountType: accountType, userKey: data.userKey.description()))
                 case .profileWithNameAndHost(let data):
-                    router.navigate(to: .profileWithUserNameAndHost(accountKey: accountKey.description(), userName: data.userName, host: data.host))
+                    router.navigate(to: .profileWithUserNameAndHost(accountType: accountType, userName: data.userName, host: data.host))
                 case .search(let data):
-                    router.navigate(to: .search(accountKey: accountKey.description(), query: data.keyword))
+                    router.navigate(to: .search(accountType: accountType, query: data.keyword))
                 case .statusDetail(let data):
-                    router.navigate(to: .statusDetail(accountKey: accountKey.description(), statusKey: data.statusKey.description()))
+                    router.navigate(to: .statusDetail(accountType: accountType, statusKey: data.statusKey.description()))
                 case .compose:
                     showCompose = true
                 }

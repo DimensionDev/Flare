@@ -5,8 +5,8 @@ struct NotificationScreen: View {
     @State var viewModel: NotificationViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    init(accountKey: MicroBlogKey) {
-        _viewModel = .init(initialValue: .init(accountKey: accountKey))
+    init(accountType: AccountType) {
+        _viewModel = .init(initialValue: .init(accountType: accountType))
     }
     var body: some View {
         List {
@@ -84,8 +84,8 @@ class NotificationViewModel: MoleculeViewModelProto {
             model.onNotificationTypeChanged(value: newValue)
         }
     }
-    init(accountKey: MicroBlogKey) {
-        presenter = .init(accountKey: accountKey)
+    init(accountType: AccountType) {
+        presenter = .init(accountType: accountType)
         model = presenter.models.value
     }
 }

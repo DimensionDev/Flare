@@ -142,14 +142,15 @@ struct StatusPlaceHolder: View {
                 description: nil,
                 matrices: UiUser.BlueskyMatrices(fansCount: 0, followsCount: 0, statusesCount: 0),
                 relation: UiRelationBluesky(isFans: false, following: false, blocking: false, muting: false),
-                accountHost: ""
+                accountKey: MicroBlogKey(id: "", host: "")
             ),
             medias: [],
             timestamp: 1696838289,
             headerTrailing: {EmptyView()},
             onMediaClick: { _, _ in },
             sensitive: false,
-            card: nil
+            card: nil,
+            onUserClicked: { _ in }
         )
         .redacted(reason: .placeholder)
     }

@@ -2,6 +2,7 @@ import SwiftUI
 import shared
 
 struct BlueskyNotificationComponent: View {
+    @Environment(\.openURL) private var openURL
     let data: UiStatus.BlueskyNotification
     var body: some View {
         VStack {
@@ -44,7 +45,12 @@ struct BlueskyNotificationComponent: View {
                 )
             }
             HStack {
-                UserComponent(user: data.user)
+                UserComponent(
+                    user: data.user,
+                    onUserClicked: {
+                        openURL(URL(string: AppDeepLink.Profile.shared.invoke(accountKey: data.accountKey, userKey: data.user.userKey))!)
+                    }
+                )
                 Spacer()
             }
         }

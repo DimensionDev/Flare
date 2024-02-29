@@ -2,6 +2,7 @@ import SwiftUI
 import shared
 
 struct MisskeyNotificationComponent: View {
+    @Environment(\.openURL) private var openURL
     let data: UiStatus.MisskeyNotification
     let event: MisskeyStatusEvent
     var body: some View {
@@ -82,7 +83,12 @@ struct MisskeyNotificationComponent: View {
                     shared.NotificationType.followRequestAccepted,
                     shared.NotificationType.receiveFollowRequest].contains(data.type) {
                     HStack {
-                        UserComponent(user: user)
+                        UserComponent(
+                            user: user,
+                            onUserClicked: {
+                                openURL(URL(string: AppDeepLink.Profile.shared.invoke(accountKey: data.accountKey, userKey: user.userKey))!)
+                            }
+                        )
                         Spacer()
                     }
                 }

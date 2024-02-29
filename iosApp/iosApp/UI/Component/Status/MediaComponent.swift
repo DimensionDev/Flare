@@ -53,17 +53,17 @@ struct MediaComponent: View {
                         MediaItemComponent(media: item)
                             .aspectRatio(1, contentMode: .fill)
                             .onTapGesture {
-                                let preview: String? = switch onEnum(of: item) {
-                                case .audio(_):
-                                    nil
-                                case .gif(let gif):
-                                    gif.previewUrl
-                                case .image(let image):
-                                    image.previewUrl
-                                case .video(let video):
-                                    video.thumbnailUrl
-                                }
-                                onMediaClick(index - 1, preview)
+//                                let preview: String? = switch onEnum(of: item) {
+//                                case .audio:
+//                                    nil
+//                                case .gif(let gif):
+//                                    gif.previewUrl
+//                                case .image(let image):
+//                                    image.previewUrl
+//                                case .video(let video):
+//                                    video.thumbnailUrl
+//                                }
+                                onMediaClick(index - 1, nil)
                             }
                     }
                 }
@@ -155,7 +155,7 @@ struct MediaItemComponent: View {
                 openWindow(id: "video-view", value: gif.url)
             }
         }
-//#else
+// #else
 //        .onTapGesture {
 //            showCover = true
 //        }

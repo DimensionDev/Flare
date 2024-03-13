@@ -3,54 +3,48 @@ import SwiftUI
 import shared
 
 struct RouterView: View {
+    @State var viewModel = RouterViewModel()
     @State var appSettings = AppSettings()
     var body: some View {
-        SplashScreen { type in
-            ZStack {
-                switch type {
-                case .home:
-                    HomeScreen()
-                case .login:
-                    Image(.logo)
-                        .resizable()
-                        .frame(width: 96, height: 96)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .clipped()
-                        .padding()
-                case .splash:
-                    Image(.logo)
-                        .resizable()
-                        .frame(width: 96, height: 96)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .clipped()
-                        .padding()
-                }
-            }.sheet(isPresented: Binding(get: {
-                type == .login
-            }, set: { _ in
-            }), content: {
-                if type == .login {
-                    ServiceSelectScreen(
-                        toHome: {
-                        }
-                    )
+        ZStack {
+            switch viewModel.model.toSwiftEnum() {
+            case .home:
+                HomeScreen()
+            case .login:
+                SplashScreen()
+            case .splash:
+                SplashScreen()
+            }
+        }.sheet(isPresented: Binding(get: {
+            if case .login = viewModel.model.toSwiftEnum() {
+                true
+            } else {
+                false
+            }
+        }, set: { _ in
+        }), content: {
+            if case .login = viewModel.model.toSwiftEnum() {
+                ServiceSelectScreen(
+                    toHome: {
+                    }
+                )
 #if os(macOS)
-                    .frame(minWidth: 600, minHeight: 400)
+    .frame(minWidth: 600, minHeight: 400)
 #endif
                     .interactiveDismissDisabled()
-                }
-            })
-        }
+            }
+        })
         .environment(\.appSettings, appSettings)
+        .activateViewModel(viewModel: viewModel)
     }
 }
 
 @Observable
 class RouterViewModel: MoleculeViewModelProto {
-    let presenter: SplashPresenter
-    var model: __SplashType
     typealias Model = __SplashType
     typealias Presenter = SplashPresenter
+    let presenter: Presenter
+    var model: Model
     init() {
         presenter = SplashPresenter(toHome: {}, toLogin: {})
         model = presenter.models.value
@@ -58,11 +52,22 @@ class RouterViewModel: MoleculeViewModelProto {
 }
 
 public enum TabDestination: Codable, Hashable {
-    case profile(userKey: String)
-    case statusDetail(statusKey: String)
-    case profileWithUserNameAndHost(userName: String, host: String)
-    case search(query: String)
-    case profileMedia(userKey: String)
+    case profile(accountType: SwiftAccountType, userKey: String)
+    case statusDetail(accountType: SwiftAccountType, statusKey: String)
+    case profileWithUserNameAndHost(accountType: SwiftAccountType, userName: String, host: String)
+    case search(accountType: SwiftAccountType, query: String)
+    case profileMedia(accountType: SwiftAccountType, userKey: String)
+}
+
+public enum SwiftAccountType: Codable, Hashable {
+    case active
+    case specific(accountKey: String)
+    func toKotlin() -> AccountType {
+        return switch self {
+        case .active: AccountTypeActive()
+        case .specific(let accountKey): AccountTypeSpecific(accountKey: MicroBlogKey.companion.valueOf(str: accountKey))
+        }
+    }
 }
 
 @Observable
@@ -89,23 +94,40 @@ extension View {
             for: TabDestination.self
         ) { destination in
             switch destination {
-            case let .profile(userKey):
+            case let .profile(accountType, userKey):
                 ProfileScreen(
+                    accountType: accountType.toKotlin(),
                     userKey: MicroBlogKey.companion.valueOf(str: userKey),
                     toProfileMedia: { userKey in
-                        router.navigate(to: .profileMedia(userKey: userKey.description()))
+                        router.navigate(to: .profileMedia(accountType: accountType, userKey: userKey.description()))
                     }
                 )
-            case let .statusDetail(statusKey):
-                StatusDetailScreen(statusKey: MicroBlogKey.companion.valueOf(str: statusKey))
-            case let .profileWithUserNameAndHost(userName, host):
-                ProfileWithUserNameScreen(userName: userName, host: host) { userKey in
-                    router.navigate(to: .profileMedia(userKey: userKey.description()))
+            case let .statusDetail(accountType, statusKey):
+                StatusDetailScreen(
+                    accountType: accountType.toKotlin(),
+                    statusKey: MicroBlogKey.companion.valueOf(str: statusKey)
+                )
+            case let .profileWithUserNameAndHost(accountType, userName, host):
+                ProfileWithUserNameScreen(
+                    accountType: accountType.toKotlin(),
+                    userName: userName,
+                    host: host
+                ) { userKey in
+                    router.navigate(to: .profileMedia(accountType: accountType, userKey: userKey.description()))
                 }
-            case let .search(data):
-                SearchScreen(initialQuery: data)
-            case let .profileMedia(userKey):
-                ProfileMediaListScreen(userKey: MicroBlogKey.companion.valueOf(str: userKey))
+            case let .search(accountType, data):
+                SearchScreen(
+                    accountType: accountType.toKotlin(),
+                    initialQuery: data,
+                    onUserClicked: { user in
+                        router.navigate(to: .profileMedia(accountType: accountType, userKey: user.userKey.description()))
+                    }
+                )
+            case let .profileMedia(accountType, userKey):
+                ProfileMediaListScreen(
+                    accountType: accountType.toKotlin(),
+                    userKey: MicroBlogKey.companion.valueOf(str: userKey)
+                )
             }
         }
     }

@@ -140,6 +140,7 @@ dependencies {
     implementation(libs.bundles.media3)
     implementation(libs.compose.placeholder.material3)
     implementation(libs.swiper)
+    implementation(libs.reorderable)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(projects.shared)

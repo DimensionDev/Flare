@@ -19,6 +19,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
@@ -39,6 +40,7 @@ import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
 @Composable
 internal fun MisskeyReactionRoute(
     statusKey: MicroBlogKey,
+    accountType: AccountType,
     navigator: DestinationsNavigator,
 ) {
     Dialog(onDismissRequest = navigator::navigateUp) {
@@ -46,6 +48,7 @@ internal fun MisskeyReactionRoute(
             MisskeyReactionSheet(
                 statusKey = statusKey,
                 onBack = navigator::navigateUp,
+                accountType = accountType,
             )
         }
     }
@@ -54,11 +57,15 @@ internal fun MisskeyReactionRoute(
 @Composable
 private fun MisskeyReactionSheet(
     statusKey: MicroBlogKey,
+    accountType: AccountType,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by producePresenter(statusKey.toString()) {
-        misskeyReactionPresenter(statusKey)
+    val state by producePresenter("MisskeyReactionSheet_${accountType}_$statusKey") {
+        misskeyReactionPresenter(
+            statusKey = statusKey,
+            accountType = accountType,
+        )
     }
 
     LazyVerticalGrid(
@@ -87,9 +94,14 @@ private fun MisskeyReactionSheet(
 }
 
 @Composable
-private fun misskeyReactionPresenter(statusKey: MicroBlogKey) =
-    run {
-        remember(statusKey) {
-            MisskeyReactionPresenter(statusKey)
-        }.invoke()
-    }
+private fun misskeyReactionPresenter(
+    statusKey: MicroBlogKey,
+    accountType: AccountType,
+) = run {
+    remember(statusKey, accountType) {
+        MisskeyReactionPresenter(
+            accountType = accountType,
+            statusKey = statusKey,
+        )
+    }.invoke()
+}

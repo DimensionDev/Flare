@@ -1,6 +1,10 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 sealed interface UiRelation {
+    @Immutable
     data class Mastodon(
         val following: Boolean,
         val isFans: Boolean,
@@ -10,6 +14,7 @@ sealed interface UiRelation {
         val domainBlocking: Boolean,
     ) : UiRelation
 
+    @Immutable
     data class Misskey(
         val following: Boolean,
         val isFans: Boolean,
@@ -20,6 +25,7 @@ sealed interface UiRelation {
         val hasPendingFollowRequestToYou: Boolean,
     ) : UiRelation
 
+    @Immutable
     data class Bluesky(
         val isFans: Boolean,
         val following: Boolean,
@@ -27,6 +33,7 @@ sealed interface UiRelation {
         val muting: Boolean,
     ) : UiRelation
 
+    @Immutable
     data class XQT(
         val isFans: Boolean,
         val following: Boolean,

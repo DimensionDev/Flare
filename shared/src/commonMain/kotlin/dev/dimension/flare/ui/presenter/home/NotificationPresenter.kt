@@ -9,7 +9,8 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
@@ -18,17 +19,20 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
-class NotificationPresenter : PresenterBase<NotificationState>() {
+class NotificationPresenter(
+    private val accountType: AccountType,
+) : PresenterBase<NotificationState>() {
     @Composable
     override fun body(): NotificationState {
         var type by remember { mutableStateOf(NotificationFilter.All) }
+        val serviceState = accountServiceProvider(accountType = accountType)
         val allTypes =
-            activeAccountServicePresenter().map { (service, _) ->
+            serviceState.map { service ->
                 service.supportedNotificationFilter.toImmutableList()
             }
         val listState =
-            activeAccountServicePresenter().map { (service, account) ->
-                remember(account.accountKey, type) {
+            serviceState.map { service ->
+                remember(service, type) {
                     service.notification(
                         type = type,
                     )

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
 import app.bsky.notification.ListNotificationsReason
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
@@ -58,10 +59,12 @@ internal val twitterParser by lazy {
     TwitterParser(enableNonAsciiInUrl = false)
 }
 
+@Immutable
 expect class UiStatusExtra
 
 internal expect fun createStatusExtra(status: UiStatus): UiStatusExtra
 
+@Immutable
 sealed class UiStatus {
     abstract val statusKey: MicroBlogKey
     abstract val accountKey: MicroBlogKey
@@ -153,6 +156,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class MastodonNotification(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -166,6 +170,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class Mastodon internal constructor(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -188,7 +193,7 @@ sealed class UiStatus {
         }
 
         val contentToken by lazy {
-            parseContent(raw, accountKey.host, content)
+            parseContent(raw, content, accountKey)
         }
 
         val isFromMe by lazy {
@@ -223,6 +228,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class Misskey(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -245,7 +251,7 @@ sealed class UiStatus {
         }
 
         val contentToken by lazy {
-            misskeyParser.parse(content).toHtml(accountKey.host)
+            misskeyParser.parse(content).toHtml(accountKey)
         }
 
         val isFromMe by lazy {
@@ -290,6 +296,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class MisskeyNotification internal constructor(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -304,6 +311,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class Bluesky(
         override val accountKey: MicroBlogKey,
         override val statusKey: MicroBlogKey,
@@ -323,7 +331,7 @@ sealed class UiStatus {
             indexedAt.humanize()
         }
         val contentToken by lazy {
-            blueskyParser.parse(content).toHtml(accountKey.host)
+            blueskyParser.parse(content).toHtml(accountKey)
         }
 
         val isFromMe by lazy {
@@ -358,6 +366,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class BlueskyNotification(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
@@ -373,6 +382,7 @@ sealed class UiStatus {
         }
     }
 
+    @Immutable
     data class XQT internal constructor(
         override val accountKey: MicroBlogKey,
         override val statusKey: MicroBlogKey,
@@ -415,7 +425,7 @@ sealed class UiStatus {
                         token
                     }
                 }
-                .toHtml(accountKey.host)
+                .toHtml(accountKey)
         }
 
         val humanizedTime by lazy {
@@ -450,26 +460,26 @@ sealed class UiStatus {
     }
 }
 
-internal fun List<Token>.toHtml(host: String): Element {
+internal fun List<Token>.toHtml(accountKey: MicroBlogKey): Element {
     val body = Element("body")
     forEach {
-        body.children.add(it.toHtml(host))
+        body.children.add(it.toHtml(accountKey))
     }
     return body
 }
 
-private fun Token.toHtml(host: String): Node {
+private fun Token.toHtml(accountKey: MicroBlogKey): Node {
     return when (this) {
         is CashTagToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search(value)
+                attributes["href"] = AppDeepLink.Search(accountKey, value)
                 children.add(Text(value))
             }
         // not supported
         is EmojiToken -> Text(value)
         is HashTagToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search(value)
+                attributes["href"] = AppDeepLink.Search(accountKey, value)
                 children.add(Text(value))
             }
 
@@ -482,7 +492,7 @@ private fun Token.toHtml(host: String): Node {
 
         is UserNameToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.ProfileWithNameAndHost(value, host)
+                attributes["href"] = AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host)
                 children.add(Text(value))
             }
     }
@@ -490,8 +500,8 @@ private fun Token.toHtml(host: String): Node {
 
 private fun parseContent(
     status: Status,
-    host: String,
     text: String,
+    accountKey: MicroBlogKey,
 ): Element {
     val emoji = status.emojis.orEmpty()
     val mentions = status.mentions.orEmpty()
@@ -505,7 +515,7 @@ private fun parseContent(
     }
     val body = Ktml.parse(content)
     body.children.forEach {
-        replaceMentionAndHashtag(mentions, it, host)
+        replaceMentionAndHashtag(mentions, it, accountKey)
     }
     return body
 }
@@ -513,7 +523,7 @@ private fun parseContent(
 private fun replaceMentionAndHashtag(
     mentions: List<Mention>,
     node: Node,
-    host: String,
+    accountKey: MicroBlogKey,
 ) {
     if (node is Element) {
         val href = node.attributes["href"]
@@ -521,21 +531,21 @@ private fun replaceMentionAndHashtag(
         if (mention != null) {
             val id = mention.id
             if (id != null) {
-                node.attributes["href"] = AppDeepLink.Profile(userKey = MicroBlogKey(id, host))
+                node.attributes["href"] = AppDeepLink.Profile(accountKey, userKey = MicroBlogKey(id, accountKey.host))
             }
         } else if (node.innerText.startsWith("#")) {
-            node.attributes["href"] = AppDeepLink.Search(node.innerText)
+            node.attributes["href"] = AppDeepLink.Search(accountKey, node.innerText)
         }
-        node.children.forEach { replaceMentionAndHashtag(mentions, it, host) }
+        node.children.forEach { replaceMentionAndHashtag(mentions, it, accountKey) }
     }
 }
 
-internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Element {
+internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): Element {
     return when (this) {
         is CenterNode -> {
             Element("center").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountHost))
+                    children.add(it.toHtml(accountKey))
                 }
             }
         }
@@ -565,7 +575,7 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
         is QuoteNode -> {
             Element("blockquote").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountHost))
+                    children.add(it.toHtml(accountKey))
                 }
             }
         }
@@ -579,7 +589,7 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
         is BoldNode -> {
             Element("strong").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountHost))
+                    children.add(it.toHtml(accountKey))
                 }
             }
         }
@@ -588,7 +598,7 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
             Element("fn").apply {
                 attributes["name"] = name
                 content.forEach {
-                    children.add(it.toHtml(accountHost))
+                    children.add(it.toHtml(accountKey))
                 }
             }
         }
@@ -596,7 +606,7 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
         is ItalicNode -> {
             Element("em").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountHost))
+                    children.add(it.toHtml(accountKey))
                 }
             }
         }
@@ -604,7 +614,7 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
         is RootNode -> {
             Element("body").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountHost))
+                    children.add(it.toHtml(accountKey))
                 }
             }
         }
@@ -612,7 +622,7 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
         is SmallNode -> {
             Element("small").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountHost))
+                    children.add(it.toHtml(accountKey))
                 }
             }
         }
@@ -620,28 +630,28 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
         is StrikeNode -> {
             Element("s").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountHost))
+                    children.add(it.toHtml(accountKey))
                 }
             }
         }
 
         is CashNode -> {
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search("$$content")
+                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
                 children.add(Text("$$content"))
             }
         }
 
         is EmojiCodeNode -> {
             Element("img").apply {
-                attributes["src"] = resolveMisskeyEmoji(emoji, accountHost)
+                attributes["src"] = resolveMisskeyEmoji(emoji, accountKey.host)
                 attributes["alt"] = emoji
             }
         }
 
         is HashtagNode -> {
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search("#$tag")
+                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
                 children.add(Text("#$tag"))
             }
         }
@@ -670,8 +680,8 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountHost: String): Eleme
             Element("a").apply {
                 val deeplink =
                     host?.let {
-                        AppDeepLink.ProfileWithNameAndHost(userName, it)
-                    } ?: AppDeepLink.ProfileWithNameAndHost(userName, accountHost)
+                        AppDeepLink.ProfileWithNameAndHost(accountKey, userName, it)
+                    } ?: AppDeepLink.ProfileWithNameAndHost(accountKey, userName, accountKey.host)
                 attributes["href"] = deeplink
                 children.add(
                     Text(

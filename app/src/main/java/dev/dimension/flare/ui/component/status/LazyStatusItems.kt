@@ -29,6 +29,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyNotificationComponent
 import dev.dimension.flare.ui.component.status.bluesky.BlueskyStatusComponent
@@ -308,24 +309,40 @@ internal class DefaultStatusEvent(
     private val accountRepository: AccountRepository,
 ) : StatusEvent {
     override fun onUserClick(
+        accountKey: MicroBlogKey,
         userKey: MicroBlogKey,
         uriHandler: UriHandler,
     ) {
-        uriHandler.openUri(ProfileRouteDestination(userKey).deeplink())
+        uriHandler.openUri(
+            ProfileRouteDestination(
+                accountType = AccountType.Specific(accountKey),
+                userKey = userKey,
+            ).deeplink(),
+        )
     }
 
     override fun onStatusClick(
         status: UiStatus.Mastodon,
         uriHandler: UriHandler,
     ) {
-        uriHandler.openUri(StatusRouteDestination(status.statusKey).deeplink())
+        uriHandler.openUri(
+            StatusRouteDestination(
+                status.statusKey,
+                accountType = AccountType.Specific(status.accountKey),
+            ).deeplink(),
+        )
     }
 
     override fun onReplyClick(
         status: UiStatus.Mastodon,
         uriHandler: UriHandler,
     ) {
-        uriHandler.openUri(ReplyRouteDestination(status.statusKey).deeplink())
+        uriHandler.openUri(
+            ReplyRouteDestination(
+                accountType = AccountType.Specific(status.accountKey),
+                status.statusKey,
+            ).deeplink(),
+        )
     }
 
     override fun onReblogClick(status: UiStatus.Mastodon) {
@@ -361,12 +378,20 @@ internal class DefaultStatusEvent(
     }
 
     override fun onMediaClick(
+        accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,
         index: Int,
         preview: String?,
         uriHandler: UriHandler,
     ) {
-        uriHandler.openUri(StatusMediaRouteDestination(statusKey, index, preview).deeplink())
+        uriHandler.openUri(
+            StatusMediaRouteDestination(
+                accountType = AccountType.Specific(accountKey),
+                statusKey = statusKey,
+                index = index,
+                preview = preview,
+            ).deeplink(),
+        )
     }
 
     override fun onDeleteClick(
@@ -374,7 +399,8 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(
+            DeleteStatusConfirmRouteDestination(
+                accountType = AccountType.Specific(status.accountKey),
                 status.statusKey,
             ).deeplink(),
         )
@@ -388,6 +414,7 @@ internal class DefaultStatusEvent(
             dev.dimension.flare.ui.screen.destinations.MastodonReportRouteDestination(
                 userKey = status.user.userKey,
                 statusKey = status.statusKey,
+                accountType = AccountType.Specific(status.accountKey),
             ).deeplink(),
         )
     }
@@ -397,7 +424,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            StatusRouteDestination(data.statusKey)
+            StatusRouteDestination(statusKey = data.statusKey, accountType = AccountType.Specific(data.accountKey))
                 .deeplink(),
         )
     }
@@ -421,7 +448,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
+            ReplyRouteDestination(accountType = AccountType.Specific(data.accountKey), replyTo = data.statusKey)
                 .deeplink(),
         )
     }
@@ -442,8 +469,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
-                .deeplink(),
+            dev.dimension.flare.ui.screen.destinations.QuoteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                quoted = data.statusKey,
+            ).deeplink(),
         )
     }
 
@@ -454,6 +483,7 @@ internal class DefaultStatusEvent(
         uriHandler.openUri(
             dev.dimension.flare.ui.screen.destinations.MisskeyReactionRouteDestination(
                 statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
             ).deeplink(),
         )
     }
@@ -463,8 +493,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination(data.statusKey)
-                .deeplink(),
+            DeleteStatusConfirmRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                statusKey = data.statusKey,
+            ).deeplink(),
         )
     }
 
@@ -476,6 +508,7 @@ internal class DefaultStatusEvent(
             dev.dimension.flare.ui.screen.destinations.MisskeyReportRouteDestination(
                 userKey = data.user.userKey,
                 statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
             ).deeplink(),
         )
     }
@@ -485,8 +518,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            StatusRouteDestination(data.statusKey)
-                .deeplink(),
+            StatusRouteDestination(
+                statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
+            ).deeplink(),
         )
     }
 
@@ -495,8 +530,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
-                .deeplink(),
+            ReplyRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                replyTo = data.statusKey,
+            ).deeplink(),
         )
     }
 
@@ -505,8 +542,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination(data.statusKey)
-                .deeplink(),
+            ReplyRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                replyTo = data.statusKey,
+            ).deeplink(),
         )
     }
 
@@ -547,8 +586,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            BlueskyReportStatusRouteDestination(data.statusKey)
-                .deeplink(),
+            BlueskyReportStatusRouteDestination(
+                statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
+            ).deeplink(),
         )
     }
 
@@ -557,8 +598,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            BlueskyReportStatusRouteDestination(data.statusKey)
-                .deeplink(),
+            BlueskyReportStatusRouteDestination(
+                statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
+            ).deeplink(),
         )
     }
 
@@ -567,8 +610,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            DeleteStatusConfirmRouteDestination(data.statusKey)
-                .deeplink(),
+            DeleteStatusConfirmRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                statusKey = data.statusKey,
+            ).deeplink(),
         )
     }
 
@@ -577,8 +622,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            DeleteStatusConfirmRouteDestination(data.statusKey)
-                .deeplink(),
+            DeleteStatusConfirmRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                statusKey = data.statusKey,
+            ).deeplink(),
         )
     }
 
@@ -587,8 +634,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
-                .deeplink(),
+            dev.dimension.flare.ui.screen.destinations.QuoteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                quoted = data.statusKey,
+            ).deeplink(),
         )
     }
 
@@ -597,8 +646,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.QuoteDestination(data.statusKey)
-                .deeplink(),
+            dev.dimension.flare.ui.screen.destinations.QuoteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                quoted = data.statusKey,
+            ).deeplink(),
         )
     }
 
@@ -607,8 +658,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            StatusRouteDestination(data.statusKey)
-                .deeplink(),
+            StatusRouteDestination(
+                statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
+            ).deeplink(),
         )
     }
 }
@@ -675,6 +728,7 @@ internal data object EmptyStatusEvent : StatusEvent {
     override fun onBookmarkClick(data: UiStatus.XQT) = Unit
 
     override fun onMediaClick(
+        accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,
         index: Int,
         preview: String?,
@@ -682,6 +736,7 @@ internal data object EmptyStatusEvent : StatusEvent {
     ) = Unit
 
     override fun onUserClick(
+        accountKey: MicroBlogKey,
         userKey: MicroBlogKey,
         uriHandler: UriHandler,
     ) = Unit

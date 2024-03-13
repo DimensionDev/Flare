@@ -8,9 +8,9 @@ struct ProfileScreen: View {
     @State var viewModel: ProfileViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    init(userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
+    init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.toProfileMedia = toProfileMedia
-        _viewModel = State(initialValue: ProfileViewModel(userKey: userKey))
+        _viewModel = .init(initialValue: .init(accountType: accountType, userKey: userKey))
     }
     var sideProfileHeader: some View {
         ScrollView {
@@ -332,8 +332,8 @@ class ProfileViewModel: MoleculeViewModelProto {
     var model: ProfileState
     typealias Model = ProfileState
     typealias Presenter = ProfilePresenter
-    init(userKey: MicroBlogKey?) {
-        self.presenter = ProfilePresenter(userKey: userKey)
+    init(accountType: AccountType, userKey: MicroBlogKey?) {
+        self.presenter = .init(accountType: accountType, userKey: userKey)
         self.model = presenter.models.value
     }
 }

@@ -14,6 +14,7 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
     let timestamp: Int64
     @ViewBuilder let headerTrailing: () -> HeaderTrailing
     let onMediaClick: (Int, String?) -> Void
+    let onUserClicked: (UiUser) -> Void
     let sensitive: Bool
     let card: UiCard?
     let replyToHandle: String?
@@ -27,7 +28,8 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
         onMediaClick: @escaping (Int, String?) -> Void,
         sensitive: Bool,
         card: UiCard?,
-        replyToHandle: String? = nil
+        replyToHandle: String? = nil,
+        onUserClicked: @escaping (UiUser) -> Void
     ) {
         self.content = content
         self.contentWarning = contentWarning
@@ -39,13 +41,14 @@ struct CommonStatusComponent<HeaderTrailing>: View where HeaderTrailing: View {
         self.sensitive = sensitive
         self.card = card
         self.replyToHandle = replyToHandle
+        self.onUserClicked = onUserClicked
         _expanded = State(initialValue: contentWarning == nil)
         showMedia = false
     }
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                UserComponent(user: user)
+                UserComponent(user: user, onUserClicked: { onUserClicked(user) })
                 Spacer()
                 HStack {
                     headerTrailing()

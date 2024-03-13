@@ -1,19 +1,11 @@
 package dev.dimension.flare.ui.screen.home
 
 import android.net.Uri
-import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
@@ -26,13 +18,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
@@ -41,159 +32,150 @@ import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultA
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
-import com.ramcosta.composedestinations.navigation.navigate
-import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
+import com.ramcosta.composedestinations.spec.Direction
 import com.ramcosta.composedestinations.spec.NavGraphSpec
+import com.ramcosta.composedestinations.spec.Route
 import com.ramcosta.composedestinations.utils.composable
-import dev.dimension.flare.R
+import dev.dimension.flare.data.model.DiscoverTabItem
+import dev.dimension.flare.data.model.ProfileTabItem
+import dev.dimension.flare.data.model.TabItem
+import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.NotificationRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
+import dev.dimension.flare.ui.screen.destinations.TabSplashScreenDestination
+import dev.dimension.flare.ui.screen.settings.TabIcon
+import dev.dimension.flare.ui.screen.settings.TabTitle
+import dev.dimension.flare.ui.screen.splash.SplashScreen
+import dev.dimension.flare.ui.screen.splash.SplashScreenArgs
 import dev.dimension.flare.ui.theme.FlareTheme
+import kotlinx.collections.immutable.toImmutableList
+import org.koin.compose.koinInject
 
-sealed class Screen(
-    val navGraph: NavGraphSpec,
-    val direction: DirectionDestinationSpec,
-    @StringRes val title: Int,
-    val icon: ImageVector,
-    var scrollToTop: () -> Unit = {},
-) {
-    data object HomeTimeline :
-        Screen(
-            NavGraphs.root,
-            HomeRouteDestination,
-            R.string.home_tab_home_title,
-            Icons.Default.Home,
-        )
-
-    data object Notification :
-        Screen(
-            NavGraphs.root,
-            NotificationRouteDestination,
-            R.string.home_tab_notifications_title,
-            Icons.Default.Notifications,
-        )
-
-    data object Discover :
-        Screen(
-            NavGraphs.root,
-            DiscoverRouteDestination,
-            R.string.home_tab_discover_title,
-            Icons.Default.Search,
-        )
-
-    data object Me : Screen(
-        NavGraphs.root,
-        MeRouteDestination,
-        R.string.home_tab_me_title,
-        Icons.Default.AccountCircle,
-    )
-
-    data object Settings :
-        Screen(
-            NavGraphs.root,
-            SettingsRouteDestination,
-            R.string.settings_title,
-            Icons.Default.Settings,
-        )
-}
-
-private val allScreens =
-    listOf(
-        Screen.HomeTimeline,
-        Screen.Notification,
-        Screen.Discover,
-        Screen.Me,
-        Screen.Settings,
-    )
-
-private val menuItems =
-    listOf(
-        Screen.HomeTimeline,
-        Screen.Notification,
-        Screen.Discover,
-        Screen.Me,
-    )
+data class RootNavController(
+    val navController: NavController,
+)
 
 @OptIn(
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
     ExperimentalMaterial3AdaptiveApi::class,
 )
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+internal fun HomeScreen(modifier: Modifier = Modifier) {
+    val state by producePresenter { presenter() }
     val navController = rememberNavController()
+    val rootNavController = remember(navController) { RootNavController(navController) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute by remember {
         derivedStateOf {
             navBackStackEntry?.destination?.route
         }
     }
+    state.tabs.onSuccess { tabs ->
+        FlareTheme {
+            val layoutType =
+                NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
+                    currentWindowAdaptiveInfo(),
+                )
 
-    FlareTheme {
-        val layoutType =
-            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
-                currentWindowAdaptiveInfo(),
-            )
-        NavigationSuiteScaffold(
-            modifier = modifier,
-            layoutType = layoutType,
-            navigationSuiteItems = {
-                val items =
-                    if (layoutType == NavigationSuiteType.NavigationBar) {
-                        menuItems
-                    } else {
-                        allScreens
-                    }
-                items.forEach { destination ->
-                    item(
-                        selected = currentRoute == destination.direction.route,
-                        onClick = {
-                            if (currentRoute == destination.direction.route) {
-                                destination.scrollToTop()
-                            } else {
-                                navController.navigate(destination.direction) {
+            NavigationSuiteScaffold(
+                modifier = modifier,
+                layoutType = layoutType,
+                navigationSuiteItems = {
+                    tabs.forEach { tab ->
+                        item(
+                            selected = currentRoute == tab.key,
+                            onClick = {
+                                navController.navigate(tab.key) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
                                     }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
+                            },
+                            icon = {
+                                TabIcon(
+                                    accountType = tab.account,
+                                    icon = tab.metaData.icon,
+                                    title = tab.metaData.title,
+                                )
+                            },
+                            label = {
+                                TabTitle(
+                                    title = tab.metaData.title,
+                                )
+                            },
+                        )
+                    }
+                },
+            ) {
+                NavHost(
+                    navController = navController,
+                    startDestination = tabs.first().key,
+                    // NavigationSuiteScaffold should have consumed the insets, but it doesn't
+                    modifier =
+                        Modifier.let {
+                            if (layoutType == NavigationSuiteType.NavigationBar) {
+                                it.consumeWindowInsets(WindowInsets.navigationBars)
+                            } else {
+                                it
                             }
                         },
-                        icon = {
-                            Icon(
-                                destination.icon,
-                                contentDescription = stringResource(destination.title),
-                            )
-                        },
-                        label = { Text(stringResource(destination.title)) },
-                    )
-                }
-            },
-        ) {
-            NavHost(
-                navController = navController,
-                startDestination = Screen.HomeTimeline.direction.route,
-                // NavigationSuiteScaffold should have consumed the insets, but it doesn't
-                modifier =
-                    Modifier.let {
-                        if (layoutType == NavigationSuiteType.NavigationBar) {
-                            it.consumeWindowInsets(WindowInsets.navigationBars)
-                        } else {
-                            it
-                        }
-                    },
-            ) {
-                allScreens.forEach { screen ->
-                    composable(screen.direction) {
-                        Router(screen.navGraph, screen.direction) {
-                            dependency(screen)
+                ) {
+                    tabs.forEach { tab ->
+                        composable(tab.key) {
+                            Router(
+                                modifier = Modifier.fillMaxSize(),
+                                navGraph = NavGraphs.root,
+                                direction = TabSplashScreenDestination,
+                            ) {
+                                dependency(rootNavController)
+                                dependency(SplashScreenArgs(getDirection(tab, tab.account)))
+                            }
                         }
                     }
+                    composable(SettingsRouteDestination) {
+                        Router(
+                            navGraph = NavGraphs.root,
+                            direction = SettingsRouteDestination,
+                        )
+                    }
                 }
+            }
+        }
+    }.onLoading {
+        SplashScreen()
+    }
+}
+
+private fun getDirection(
+    tab: TabItem,
+    accountType: AccountType,
+): Direction {
+    return when (tab) {
+        is DiscoverTabItem -> {
+            DiscoverRouteDestination(accountType)
+        }
+
+        is ProfileTabItem -> {
+            MeRouteDestination(accountType)
+        }
+
+        is TimelineTabItem -> {
+            when (tab.type) {
+                TimelineTabItem.Type.Home -> HomeRouteDestination(accountType)
+                TimelineTabItem.Type.Notifications -> NotificationRouteDestination(accountType)
             }
         }
     }
@@ -203,7 +185,8 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
 internal fun Router(
     navGraph: NavGraphSpec,
-    direction: DirectionDestinationSpec,
+    direction: Route,
+    modifier: Modifier = Modifier,
     dependenciesContainerBuilder: @Composable DependenciesContainerBuilder<*>.() -> Unit = {},
 ) {
     val innerNavController = rememberNavController()
@@ -218,6 +201,7 @@ internal fun Router(
             },
     ) {
         DestinationsNavHost(
+            modifier = modifier,
             navController = innerNavController,
             navGraph = navGraph,
             engine =
@@ -242,3 +226,15 @@ private class ProxyUriHandler(
         }
     }
 }
+
+@Composable
+private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
+    run {
+        val tabSettings by settingsRepository.tabSettings.collectAsUiState()
+        object {
+            val tabs =
+                tabSettings.map {
+                    it.items.toImmutableList()
+                }
+        }
+    }

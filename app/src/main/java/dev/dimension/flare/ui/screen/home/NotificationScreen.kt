@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -16,17 +17,19 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -35,35 +38,51 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.presenter.home.NotificationState
+import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun NotificationRoute(screen: Screen) {
-    NotificationScreen(screen = screen)
+internal fun NotificationRoute(
+    navigator: DestinationsNavigator,
+    accountType: AccountType,
+//    screen: Screen
+) {
+    NotificationScreen(
+        accountType = accountType,
+//        screen = screen
+        toQuickMenu = {
+            navigator.navigate(QuickMenuDialogRouteDestination)
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-private fun NotificationScreen(screen: Screen) {
-    val state by producePresenter {
-        notificationPresenter()
+private fun NotificationScreen(
+    accountType: AccountType,
+//    screen: Screen
+    toQuickMenu: () -> Unit,
+) {
+    val state by producePresenter(key = "notification_$accountType") {
+        notificationPresenter(accountType = accountType)
     }
-    val scope = rememberCoroutineScope()
+//    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
-    LaunchedEffect(screen) {
-        screen.scrollToTop = {
-            scope.launch {
-                lazyListState.animateScrollToItem(0)
-            }
-        }
-    }
+//    LaunchedEffect(screen) {
+//        screen.scrollToTop = {
+//            scope.launch {
+//                lazyListState.animateScrollToItem(0)
+//            }
+//        }
+//    }
     val windowInfo = currentWindowAdaptiveInfo()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
@@ -79,6 +98,15 @@ private fun NotificationScreen(screen: Screen) {
                             if (it.size > 1) {
                                 NotificationFilterSelector(it, state.state)
                             }
+                        }
+                    }
+                },
+                navigationIcon = {
+                    state.user.onSuccess {
+                        IconButton(
+                            onClick = toQuickMenu,
+                        ) {
+                            AvatarComponent(it.avatarUrl, size = 24.dp)
                         }
                     }
                 },
@@ -159,11 +187,14 @@ private val NotificationFilter.title: Int
         }
 
 @Composable
-private fun notificationPresenter(statusEvent: StatusEvent = koinInject()) =
-    run {
-        val state = remember { NotificationPresenter() }.invoke()
-        object {
-            val state = state
-            val statusEvent = statusEvent
-        }
+private fun notificationPresenter(
+    accountType: AccountType,
+    statusEvent: StatusEvent = koinInject(),
+) = run {
+    val accountState = remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
+    val state = remember { NotificationPresenter(accountType = accountType) }.invoke()
+    object : UserState by accountState {
+        val state = state
+        val statusEvent = statusEvent
     }
+}

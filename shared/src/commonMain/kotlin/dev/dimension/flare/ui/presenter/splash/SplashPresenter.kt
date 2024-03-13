@@ -18,7 +18,7 @@ class SplashPresenter(
     @Composable
     override fun body(): SplashType {
         val accountState by activeAccountPresenter()
-        var type by remember { mutableStateOf(SplashType.Splash) }
+        var type: SplashType by remember { mutableStateOf(SplashType.Splash) }
         LaunchedEffect(accountState) {
             when (accountState) {
                 is UiState.Error -> {

@@ -21,6 +21,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -44,10 +45,12 @@ import org.koin.compose.koinInject
 fun StatusRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
+    accountType: AccountType,
 ) {
     StatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
+        accountType = accountType,
     )
 }
 
@@ -56,9 +59,10 @@ fun StatusRoute(
 internal fun StatusScreen(
     statusKey: MicroBlogKey,
     onBack: () -> Unit,
+    accountType: AccountType,
 ) {
     val state by producePresenter(statusKey.toString()) {
-        statusPresenter(statusKey)
+        statusPresenter(accountType = accountType, statusKey = statusKey)
     }
     Scaffold(
         topBar = {
@@ -99,11 +103,12 @@ internal fun StatusScreen(
 @Composable
 private fun statusPresenter(
     statusKey: MicroBlogKey,
+    accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state =
         remember(statusKey) {
-            StatusContextPresenter(statusKey)
+            StatusContextPresenter(accountType = accountType, statusKey = statusKey)
         }.invoke()
 
     object {

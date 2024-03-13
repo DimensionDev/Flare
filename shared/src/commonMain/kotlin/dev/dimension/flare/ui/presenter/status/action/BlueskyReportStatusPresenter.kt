@@ -6,7 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
@@ -21,17 +22,18 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 class BlueskyReportStatusPresenter(
+    private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<BlueskyReportStatusState>() {
     @Composable
     override fun body(): BlueskyReportStatusState {
         val service =
-            activeAccountServicePresenter().map { (service, _) ->
+            accountServiceProvider(accountType = accountType).map { service ->
                 service as BlueskyDataSource
             }
         val status =
-            remember(statusKey) {
-                StatusPresenter(statusKey)
+            remember(statusKey, accountType) {
+                StatusPresenter(accountType = accountType, statusKey = statusKey)
             }.body().status
         var reason by remember { mutableStateOf<BlueskyReportStatusState.ReportReason?>(null) }
         // using io scope because it's a long-running operation

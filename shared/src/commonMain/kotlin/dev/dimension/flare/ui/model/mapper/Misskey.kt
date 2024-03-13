@@ -22,7 +22,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toInstant
 
 internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus.MisskeyNotification {
-    val user = user?.toUi(accountKey.host)
+    val user = user?.toUi(accountKey)
     return UiStatus.MisskeyNotification(
         statusKey =
             MicroBlogKey(
@@ -39,7 +39,7 @@ internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus.MisskeyNotifi
 }
 
 internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
-    val user = user.toUi(accountKey.host)
+    val user = user.toUi(accountKey)
     return UiStatus.Misskey(
         statusKey =
             MicroBlogKey(
@@ -141,10 +141,10 @@ private fun DriveFile.toUi(): UiMedia? {
     }
 }
 
-internal fun UserLite.toUi(accountHost: String): UiUser.Misskey {
+internal fun UserLite.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
     val remoteHost =
         if (host.isNullOrEmpty()) {
-            accountHost
+            accountKey.host
         } else {
             host
         }
@@ -152,7 +152,7 @@ internal fun UserLite.toUi(accountHost: String): UiUser.Misskey {
         userKey =
             MicroBlogKey(
                 id = id,
-                host = accountHost,
+                host = accountKey.host,
             ),
         name = name.orEmpty(),
         avatarUrl = avatarUrl.orEmpty(),
@@ -178,15 +178,15 @@ internal fun UserLite.toUi(accountHost: String): UiUser.Misskey {
                 hasPendingFollowRequestFromYou = false,
                 hasPendingFollowRequestToYou = false,
             ),
-        accountHost = accountHost,
+        accountKey = accountKey,
         fields = persistentMapOf(),
     )
 }
 
-internal fun User.toUi(accountHost: String): UiUser.Misskey {
+internal fun User.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
     val remoteHost =
         if (host.isNullOrEmpty()) {
-            accountHost
+            accountKey.host
         } else {
             host
         }
@@ -194,7 +194,7 @@ internal fun User.toUi(accountHost: String): UiUser.Misskey {
         userKey =
             MicroBlogKey(
                 id = id,
-                host = accountHost,
+                host = accountKey.host,
             ),
         name = name.orEmpty(),
         avatarUrl = avatarUrl.orEmpty(),
@@ -220,7 +220,7 @@ internal fun User.toUi(accountHost: String): UiUser.Misskey {
                 hasPendingFollowRequestFromYou = hasPendingFollowRequestFromYou ?: false,
                 hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false,
             ),
-        accountHost = accountHost,
+        accountKey = accountKey,
         fields =
             fields.map {
                 it.name to it.value

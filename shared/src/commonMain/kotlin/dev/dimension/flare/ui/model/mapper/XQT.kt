@@ -49,7 +49,7 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
                 is User -> it
                 is UserUnavailable -> null
             }
-        }?.toUi()
+        }?.toUi(accountKey = accountKey)
     requireNotNull(user) { "user is null" }
     val uiCard =
         card?.legacy?.let {
@@ -105,7 +105,9 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
                     options = options,
                     multiple = false,
                     ownVotes = persistentListOf(),
-                    expiresAt = cardLegacy.get("end_datetime_utc")?.stringValue?.let { parseCustomDateTime(it) } ?: Clock.System.now(),
+                    expiresAt =
+                        cardLegacy.get("end_datetime_utc")?.stringValue?.let { parseCustomDateTime(it) }
+                            ?: Clock.System.now(),
                 )
             } else {
                 null
@@ -123,6 +125,7 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
                         sensitive = legacy.possiblySensitive == true,
                         description = media.ext_alt_text,
                     )
+
                 Media.Type.video, Media.Type.animatedGif ->
                     UiMedia.Video(
                         url = media.videoInfo?.variants?.maxByOrNull { it.bitrate ?: 0 }?.url ?: "",
@@ -188,7 +191,7 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
 
 private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value
 
-internal fun User.toUi() =
+internal fun User.toUi(accountKey: MicroBlogKey) =
     UiUser.XQT(
         userKey =
             MicroBlogKey(
@@ -219,6 +222,7 @@ internal fun User.toUi() =
             } ?: legacy.url,
         protected = legacy.protected ?: false,
         raw = this,
+        accountKey = accountKey,
     )
 
 internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelation {

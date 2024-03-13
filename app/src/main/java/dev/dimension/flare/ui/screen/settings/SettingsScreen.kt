@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Tab
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,7 +45,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountState
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.destinations.AboutRouteDestination
@@ -52,6 +53,7 @@ import dev.dimension.flare.ui.screen.destinations.AccountsRouteDestination
 import dev.dimension.flare.ui.screen.destinations.AppearanceRouteDestination
 import dev.dimension.flare.ui.screen.destinations.DirectionDestination
 import dev.dimension.flare.ui.screen.destinations.StorageRouteDestination
+import dev.dimension.flare.ui.screen.destinations.TabCustomizeRouteDestination
 import dev.dimension.flare.ui.screen.home.Router
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -107,6 +109,9 @@ internal fun SettingsRoute() {
                     },
                     toAbout = {
                         settingsPanelState.setSelectedItem(AboutRouteDestination)
+                    },
+                    toTabCustomization = {
+                        settingsPanelState.setSelectedItem(TabCustomizeRouteDestination)
                     },
                 )
             }
@@ -180,6 +185,7 @@ internal fun SettingsScreen(
     toAppearance: () -> Unit,
     toStorage: () -> Unit,
     toAbout: () -> Unit,
+    toTabCustomization: () -> Unit,
 ) {
     val state by producePresenter { settingsPresenter() }
     Scaffold(
@@ -223,6 +229,24 @@ internal fun SettingsScreen(
                 modifier =
                     Modifier.clickable {
                         toAppearance.invoke()
+                    },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.settings_tab_customization))
+                },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Default.Tab,
+                        contentDescription = null,
+                    )
+                },
+                supportingContent = {
+                    Text(text = stringResource(id = R.string.settings_tab_customization_description))
+                },
+                modifier =
+                    Modifier.clickable {
+                        toTabCustomization.invoke()
                     },
             )
 //            ListItem(
@@ -287,6 +311,6 @@ internal fun SettingsScreen(
 private fun settingsPresenter() =
     run {
         val state = remember { ActiveAccountPresenter() }.invoke()
-        object : ActiveAccountState by state {
+        object : UserState by state {
         }
     }

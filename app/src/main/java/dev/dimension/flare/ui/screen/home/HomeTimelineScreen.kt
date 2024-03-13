@@ -36,9 +36,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -48,10 +48,10 @@ import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelineState
+import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
@@ -61,45 +61,48 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-@RootNavGraph(start = true) // sets this as the start destination of the default nav graph
+// @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
 internal fun HomeRoute(
     navigator: DestinationsNavigator,
-    screen: Screen,
+    accountType: AccountType,
+//    screen: Screen,
 ) {
     HomeTimelineScreen(
+        accountType = accountType,
         toCompose = {
-            navigator.navigate(ComposeRouteDestination)
+            navigator.navigate(ComposeRouteDestination(accountType = accountType))
         },
         toQuickMenu = {
             navigator.navigate(QuickMenuDialogRouteDestination)
         },
-        screen = screen,
+//        screen = screen,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeTimelineScreen(
+    accountType: AccountType,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
-    screen: Screen,
+//    screen: Screen,
 ) {
-    val state by producePresenter {
-        homeTimelinePresenter()
+    val state by producePresenter(key = "home_timeline_$accountType") {
+        homeTimelinePresenter(accountType)
     }
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
-    LaunchedEffect(screen) {
-        screen.scrollToTop = {
-            scope.launch {
-                lazyListState.animateScrollToItem(0)
-            }
-        }
-    }
+//    LaunchedEffect(screen) {
+//        screen.scrollToTop = {
+//            scope.launch {
+//                lazyListState.animateScrollToItem(0)
+//            }
+//        }
+//    }
     val isAtTheTop by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0
@@ -192,35 +195,37 @@ internal fun HomeTimelineScreen(
 }
 
 @Composable
-private fun homeTimelinePresenter(statusEvent: StatusEvent = koinInject()) =
-    run {
-        val state = remember { HomeTimelinePresenter() }.invoke()
-        val accountState = remember { ActiveAccountPresenter() }.invoke()
-        var showNewToots by remember { mutableStateOf(false) }
-        val listState = state.listState
-        if (listState is UiState.Success && listState.data.itemCount > 0) {
-            LaunchedEffect(Unit) {
-                snapshotFlow {
-                    if (listState.data.itemCount > 0) {
-                        listState.data.peek(0)?.statusKey
-                    } else {
-                        null
-                    }
+private fun homeTimelinePresenter(
+    accountType: AccountType,
+    statusEvent: StatusEvent = koinInject(),
+) = run {
+    val state = remember(accountType) { HomeTimelinePresenter(accountType = accountType) }.invoke()
+    val accountState = remember(accountType) { UserPresenter(accountType = accountType, userKey = null) }.invoke()
+    var showNewToots by remember { mutableStateOf(false) }
+    val listState = state.listState
+    if (listState is UiState.Success && listState.data.itemCount > 0) {
+        LaunchedEffect(Unit) {
+            snapshotFlow {
+                if (listState.data.itemCount > 0) {
+                    listState.data.peek(0)?.statusKey
+                } else {
+                    null
                 }
-                    .mapNotNull { it }
-                    .distinctUntilChanged()
-                    .drop(1)
-                    .collect {
-                        showNewToots = true
-                    }
             }
-        }
-        object : ActiveAccountState by accountState, HomeTimelineState by state {
-            val statusEvent = statusEvent
-            val showNewToots = showNewToots
-
-            fun onNewTootsShown() {
-                showNewToots = false
-            }
+                .mapNotNull { it }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect {
+                    showNewToots = true
+                }
         }
     }
+    object : UserState by accountState, HomeTimelineState by state {
+        val statusEvent = statusEvent
+        val showNewToots = showNewToots
+
+        fun onNewTootsShown() {
+            showNewToots = false
+        }
+    }
+}

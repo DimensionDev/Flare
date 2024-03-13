@@ -19,6 +19,7 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -39,10 +40,12 @@ import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 )
 fun BlueskyReportStatusRoute(
     navigator: DestinationsNavigator,
+    accountType: AccountType,
     statusKey: MicroBlogKey,
 ) {
     BlueskyReportStatusDialog(
         statusKey = statusKey,
+        accountType = accountType,
         onBack = {
             navigator.navigateUp()
         },
@@ -52,10 +55,14 @@ fun BlueskyReportStatusRoute(
 @Composable
 internal fun BlueskyReportStatusDialog(
     statusKey: MicroBlogKey,
+    accountType: AccountType,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter(key = statusKey.toString()) {
-        blueskyReportStatusPresenter(statusKey)
+    val state by producePresenter(key = "BlueskyReportStatusPresenter_${accountType}_$statusKey") {
+        blueskyReportStatusPresenter(
+            statusKey = statusKey,
+            accountType = accountType,
+        )
     }
 
     AlertDialog(
@@ -123,16 +130,21 @@ internal fun BlueskyReportStatusDialog(
 }
 
 @Composable
-private fun blueskyReportStatusPresenter(statusKey: MicroBlogKey) =
-    run {
-        val state =
-            remember(statusKey) {
-                BlueskyReportStatusPresenter(statusKey)
-            }.invoke()
+private fun blueskyReportStatusPresenter(
+    statusKey: MicroBlogKey,
+    accountType: AccountType,
+) = run {
+    val state =
+        remember(statusKey, accountType) {
+            BlueskyReportStatusPresenter(
+                accountType = accountType,
+                statusKey = statusKey,
+            )
+        }.invoke()
 
-        object : BlueskyReportStatusState by state {
-        }
+    object : BlueskyReportStatusState by state {
     }
+}
 
 private val BlueskyReportStatusState.ReportReason.stringRes: Int
     get() =

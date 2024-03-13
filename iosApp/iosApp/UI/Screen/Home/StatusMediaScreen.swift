@@ -5,20 +5,20 @@ struct StatusMediaScreen: View {
     @State var viewModel: StatusMediaViewModel
     let initialIndex: Int
     let dismiss: () -> Void
-    
-    init(statusKey: MicroBlogKey, index: Int, dismiss: @escaping () -> Void) {
-        viewModel = .init(statusKey: statusKey)
+
+    init(accountType: AccountType, statusKey: MicroBlogKey, index: Int, dismiss: @escaping () -> Void) {
+        viewModel = .init(accountType: accountType, statusKey: statusKey)
         self.initialIndex = index
         self.dismiss = dismiss
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 switch onEnum(of: viewModel.model.status) {
-                case .error(_):
+                case .error:
                     Text("error")
-                case .loading(_):
+                case .loading:
                     Text("loading")
                 case .success(let success):
                     ScrollViewReader { reader in
@@ -39,7 +39,7 @@ struct StatusMediaScreen: View {
                         }
                     }
                 }
-                
+
                 VStack {
                     HStack {
                         Button {
@@ -68,8 +68,8 @@ class StatusMediaViewModel: MoleculeViewModelProto {
     typealias Presenter = StatusPresenter
     let presenter: StatusPresenter
     var model: Model
-    init(statusKey: MicroBlogKey) {
-        presenter = .init(statusKey: statusKey)
+    init(accountType: AccountType, statusKey: MicroBlogKey) {
+        presenter = .init(accountType: accountType, statusKey: statusKey)
         model = presenter.models.value
     }
 }

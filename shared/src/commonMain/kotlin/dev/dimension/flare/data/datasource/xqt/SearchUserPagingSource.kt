@@ -6,11 +6,13 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.users
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 
 internal class SearchUserPagingSource(
     private val service: XQTService,
+    private val accountKey: MicroBlogKey,
     private val query: String,
 ) : PagingSource<String, UiUser>() {
     override fun getRefreshKey(state: PagingState<String, UiUser>): String? {
@@ -32,7 +34,7 @@ internal class SearchUserPagingSource(
             val cursor = response.cursor()
             val users = response.users()
             return LoadResult.Page(
-                data = users.map { it.toUi() },
+                data = users.map { it.toUi(accountKey = accountKey) },
                 prevKey = null,
                 nextKey = cursor,
             )

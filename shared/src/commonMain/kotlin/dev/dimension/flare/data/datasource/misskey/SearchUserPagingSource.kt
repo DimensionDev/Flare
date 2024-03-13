@@ -27,7 +27,7 @@ internal class SearchUserPagingSource(
                 ),
             ).body()?.let {
                 return LoadResult.Page(
-                    data = it.map { it.toUi(accountKey.host) },
+                    data = it.map { it.toUi(accountKey) },
                     prevKey = null,
                     nextKey = (params.key ?: 0) + params.loadSize,
                 )

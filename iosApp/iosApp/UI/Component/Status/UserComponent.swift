@@ -4,13 +4,14 @@ import NetworkImage
 import MarkdownUI
 
 struct UserComponent: View {
-    @Environment(\.openURL) private var openURL
     let user: UiUser
+    let onUserClicked: () -> Void
     var body: some View {
         HStack {
             Button(
                 action: {
-                    openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
+                    onUserClicked()
+//                    openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
                 },
                 label: {
                     UserAvatar(data: user.avatarUrl, size: 48)

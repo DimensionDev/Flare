@@ -28,7 +28,10 @@ struct BlueskyStatusComponent: View {
                     event.onMediaClick(statusKey: bluesky.statusKey, index: index, preview: preview)
                 },
                 sensitive: false,
-                card: bluesky.card
+                card: bluesky.card,
+                onUserClicked: { user in
+                    openURL(URL(string: AppDeepLink.Profile.shared.invoke(accountKey: bluesky.accountKey, userKey: user.userKey))!)
+                }
             )
             if let quote = bluesky.quote {
                 Spacer()
@@ -39,7 +42,7 @@ struct BlueskyStatusComponent: View {
                         event.onMediaClick(statusKey: quote.statusKey, index: index, preview: preview)
                     },
                     onUserClick: { user in
-                        openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
+                        openURL(URL(string: AppDeepLink.Profile.shared.invoke(accountKey: quote.accountKey, userKey: user.userKey))!)
                     },
                     onStatusClick: { _ in
                         event.onQuoteClick(data: quote)

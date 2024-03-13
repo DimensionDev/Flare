@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.DbAccount
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
@@ -11,14 +12,17 @@ import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Immutable
 sealed interface UiAccount {
     val accountKey: MicroBlogKey
     val platformType: PlatformType
     val credential: Credential
 
+    @Immutable
     @Serializable
     sealed interface Credential
 
+    @Immutable
     data class Mastodon(
         override val credential: Credential,
         override val accountKey: MicroBlogKey,
@@ -26,6 +30,7 @@ sealed interface UiAccount {
         override val platformType: PlatformType
             get() = PlatformType.Mastodon
 
+        @Immutable
         @Serializable
         @SerialName("MastodonCredential")
         data class Credential(
@@ -38,6 +43,7 @@ sealed interface UiAccount {
         }
     }
 
+    @Immutable
     data class Misskey(
         override val credential: Credential,
         override val accountKey: MicroBlogKey,
@@ -45,6 +51,7 @@ sealed interface UiAccount {
         override val platformType: PlatformType
             get() = PlatformType.Misskey
 
+        @Immutable
         @Serializable
         @SerialName("MisskeyCredential")
         data class Credential(
@@ -57,6 +64,7 @@ sealed interface UiAccount {
         }
     }
 
+    @Immutable
     data class Bluesky(
         override val credential: Credential,
         override val accountKey: MicroBlogKey,
@@ -64,6 +72,7 @@ sealed interface UiAccount {
         override val platformType: PlatformType
             get() = PlatformType.Bluesky
 
+        @Immutable
         @Serializable
         @SerialName("BlueskyCredential")
         data class Credential(
@@ -77,6 +86,7 @@ sealed interface UiAccount {
         }
     }
 
+    @Immutable
     data class XQT(
         override val accountKey: MicroBlogKey,
         override val credential: Credential,
@@ -84,6 +94,7 @@ sealed interface UiAccount {
         override val platformType: PlatformType
             get() = PlatformType.xQt
 
+        @Immutable
         @Serializable
         @SerialName("XQTCredential")
         data class Credential(

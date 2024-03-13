@@ -3,10 +3,12 @@ import shared
 
 struct ProfileWithUserNameScreen: View {
     @State private var viewModel: ProfileWithUserNameViewModel
+    private let accountType: AccountType
     let toProfileMedia: (MicroBlogKey) -> Void
 
-    init(userName: String, host: String, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
-        viewModel = .init(userName: userName, host: host)
+    init(accountType: AccountType, userName: String, host: String, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
+        self.accountType = accountType
+        viewModel = .init(accountType: accountType, userName: userName, host: host)
         self.toProfileMedia = toProfileMedia
     }
     var body: some View {
@@ -35,7 +37,7 @@ struct ProfileWithUserNameScreen: View {
                     .listRowInsets(EdgeInsets())
                 }
             case .success(let data):
-                ProfileScreen(userKey: data.data.userKey, toProfileMedia: toProfileMedia)
+                ProfileScreen(accountType: accountType, userKey: data.data.userKey, toProfileMedia: toProfileMedia)
             }
         }
         .activateViewModel(viewModel: viewModel)
@@ -49,8 +51,8 @@ class ProfileWithUserNameViewModel: MoleculeViewModelProto {
     typealias Model = UiState<UiUser>
     typealias Presenter = ProfileWithUserNameAndHostPresenter
 
-    init(userName: String, host: String) {
-        presenter = .init(userName: userName, host: host)
+    init(accountType: AccountType, userName: String, host: String) {
+        presenter = .init(userName: userName, host: host, accountType: accountType)
         model = presenter.models.value
     }
 }

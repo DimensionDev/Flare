@@ -23,7 +23,7 @@ internal class SearchUserPagingSource(
                 SearchActorsQueryParams(q = query, limit = params.loadSize.toLong(), cursor = params.key),
             ).requireResponse().let {
                 return LoadResult.Page(
-                    data = it.actors.map { it.toUi(accountKey.host) },
+                    data = it.actors.map { it.toUi(accountKey) },
                     prevKey = null,
                     nextKey = it.cursor,
                 )

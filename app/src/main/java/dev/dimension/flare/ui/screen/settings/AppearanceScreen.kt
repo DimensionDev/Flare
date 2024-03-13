@@ -54,7 +54,7 @@ import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountState
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AppearancePresenter
 import dev.dimension.flare.ui.presenter.settings.AppearanceState
@@ -1130,7 +1130,7 @@ private fun appearancePresenter() =
         val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
         val appearanceState = remember { AppearancePresenter() }.invoke()
 
-        object : ActiveAccountState by activeAccountState, AppearanceState by appearanceState {
+        object : UserState by activeAccountState, AppearanceState by appearanceState {
             fun updateSettings(block: AppearanceSettings.() -> AppearanceSettings) {
                 scope.launch {
                     settingsRepository.updateAppearanceSettings(block)

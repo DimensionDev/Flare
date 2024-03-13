@@ -18,46 +18,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.DeepLink
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.popUpTo
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.MisskeyCallbackPresenter
-import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.MisskeyCallbackRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-@Destination(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "${AppDeepLink.Callback.MISSKEY}?session={session}",
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-fun MisskeyCallbackRoute(
-    session: String?,
-    navigator: DestinationsNavigator,
-) {
-    MisskeyCallbackScreen(
-        session = session,
-        toHome = {
-            navigator.navigate(HomeRouteDestination) {
-                popUpTo(MisskeyCallbackRouteDestination) {
-                    inclusive = true
-                }
-            }
-        },
-    )
-}
+// @Destination(
+//    deepLinks = [
+//        DeepLink(
+//            uriPattern = "${AppDeepLink.Callback.MISSKEY}?session={session}",
+//        ),
+//    ],
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// fun MisskeyCallbackRoute(
+//    session: String?,
+//    navigator: DestinationsNavigator,
+// ) {
+//    MisskeyCallbackScreen(
+//        session = session,
+//        toHome = {
+//            navigator.navigate(HomeRouteDestination) {
+//                popUpTo(MisskeyCallbackRouteDestination) {
+//                    inclusive = true
+//                }
+//            }
+//        },
+//    )
+// }
 
 @Composable
 internal fun MisskeyCallbackScreen(

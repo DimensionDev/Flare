@@ -16,9 +16,9 @@ class ComposeViewModel: MoleculeViewModelProto {
     var mediaViewModel = MediaViewModel()
     var status: ComposeStatus?
     var showEmoji = false
-    init(status: ComposeStatus?) {
+    init(accountType: AccountType, status: ComposeStatus?) {
         self.status = status
-        presenter = ComposePresenter(status: status)
+        presenter = .init(accountType: accountType, status: status)
         model = presenter.models.value
     }
     func showEmojiPanel() {

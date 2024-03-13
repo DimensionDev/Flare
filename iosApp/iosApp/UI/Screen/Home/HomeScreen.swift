@@ -4,8 +4,6 @@ import shared
 struct HomeScreen: View {
     @State var viewModel = HomeViewModel()
     @State var showSettings = false
-    @State var showCompose = false
-    @State var statusEvent = StatusEvent()
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var body: some View {
         FlareTheme {
@@ -14,61 +12,68 @@ struct HomeScreen: View {
                     TabModel(
                         title: String(localized: "home_timeline_title"),
                         image: "house",
-                        destination: TabItem { _ in
-                            HomeTimelineScreen()
+                        destination: TabItem(accountType: .active) { _ in
+                            HomeTimelineScreen(accountType: AccountTypeActive())
+                                .toolbar {
 #if os(iOS)
-                                .if(horizontalSizeClass == .compact, transform: { view in
-                                    view
-                                        .navigationBarTitleDisplayMode(.inline)
-                                        .toolbar {
-                                            ToolbarItem(placement: .principal) {
-                                                Text("Flare")
-                                            }
-                                            ToolbarItem(placement: .primaryAction) {
-                                                Button(action: {
-                                                    showCompose = true
-                                                }, label: {
-                                                    Image(systemName: "square.and.pencil")
-                                                })
-                                            }
-                                            ToolbarItem(placement: .navigation) {
-                                                Button {
-                                                    showSettings = true
-                                                } label: {
-                                                    if case .success(let data) = onEnum(of: viewModel.model.user) {
-                                                        UserAvatar(data: data.data.avatarUrl, size: 36)
-                                                    } else {
-                                                        userAvatarPlaceholder(size: 36)
-                                                    }
-                                                }
+                                    ToolbarItem(placement: .navigation) {
+                                        Button {
+                                            showSettings = true
+                                        } label: {
+                                            if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                                UserAvatar(data: data.data.avatarUrl, size: 36)
+                                            } else {
+                                                userAvatarPlaceholder(size: 36)
                                             }
                                         }
-                                })
-                                    #endif
+                                    }
+#endif
+                                }
                         }
                     ),
                     TabModel(
                         title: String(localized: "home_notification_title"),
                         image: "bell",
-                        destination: TabItem { _ in
-                            NotificationScreen()
+                        destination: TabItem(accountType: .active) { _ in
+                            NotificationScreen(accountType: AccountTypeActive())
+                                .toolbar {
+#if os(iOS)
+                                    ToolbarItem(placement: .navigation) {
+                                        Button {
+                                            showSettings = true
+                                        } label: {
+                                            if case .success(let data) = onEnum(of: viewModel.model.user) {
+                                                UserAvatar(data: data.data.avatarUrl, size: 36)
+                                            } else {
+                                                userAvatarPlaceholder(size: 36)
+                                            }
+                                        }
+                                    }
+#endif
+                                }
                         }
                     ),
                     TabModel(
                         title: String(localized: "home_discover_title"),
                         image: "magnifyingglass",
-                        destination: TabItem { _ in
-                            DiscoverScreen()
+                        destination: TabItem(accountType: .active) { router in
+                            DiscoverScreen(
+                                accountType: AccountTypeActive(),
+                                onUserClicked: { user in
+                                    router.navigate(to: .profileMedia(accountType: .active, userKey: user.userKey.description()))
+                                }
+                            )
                         }
                     ),
                     TabModel(
                         title: String(localized: "home_profile_title"),
                         image: "person.circle",
-                        destination: TabItem { router in
+                        destination: TabItem(accountType: .active) { router in
                             ProfileScreen(
+                                accountType: AccountTypeActive(),
                                 userKey: nil,
                                 toProfileMedia: { userKey in
-                                    router.navigate(to: .profileMedia(userKey: userKey.description()))
+                                    router.navigate(to: .profileMedia(accountType: .active, userKey: userKey.description()))
                                 }
                             )
                         }
@@ -89,35 +94,43 @@ struct HomeScreen: View {
                     .padding([.horizontal, .top])
 #endif
                     .buttonStyle(.plain)
-                    Button(action: {
-                        showCompose = true
-                    }, label: {
-                        HStack {
-                            Image(systemName: "square.and.pencil")
-                            Text("home_compose")
-                            Spacer()
-                        }
-                        .padding(4)
-                    })
-                    .buttonStyle(.borderedProminent)
                 }
                     .listRowInsets(EdgeInsets())
             )
+        }
+        .sheet(isPresented: $showSettings, content: {
+            SettingsScreen()
+#if os(macOS)
+                .frame(minWidth: 600, minHeight: 400)
+#endif
+        })
+        .activateViewModel(viewModel: viewModel)
+    }
+}
+
+@Observable
+class HomeViewModel: MoleculeViewModelBase<UserState, ActiveAccountPresenter> {
+}
+
+struct TabItem<Content: View>: View {
+    let accountType: SwiftAccountType
+    @State var showCompose = false
+    @State var statusEvent = StatusEvent()
+    @State var router = Router<TabDestination>()
+    let content: (Router<TabDestination>) -> Content
+    var body: some View {
+        NavigationStack(path: $router.navPath) {
+            content(router)
+                .withTabRouter(router: router)
         }
         .sheet(isPresented: $showCompose, content: {
             NavigationStack {
                 ComposeScreen(onBack: {
                     showCompose = false
-                })
+                }, accountType: accountType.toKotlin())
             }
 #if os(macOS)
             .frame(minWidth: 600, minHeight: 400)
-#endif
-        })
-        .sheet(isPresented: $showSettings, content: {
-            SettingsScreen()
-#if os(macOS)
-                .frame(minWidth: 600, minHeight: 400)
 #endif
         })
         .sheet(isPresented: Binding(
@@ -133,7 +146,7 @@ struct HomeScreen: View {
                 NavigationStack {
                     ComposeScreen(onBack: {
                         statusEvent.composeStatus = nil
-                    }, status: status)
+                    }, accountType: accountType.toKotlin(), status: status)
                 }
 #if os(macOS)
                 .frame(minWidth: 500, minHeight: 400)
@@ -148,44 +161,31 @@ struct HomeScreen: View {
             ZStack {
                 Color.black.ignoresSafeArea()
                 if let data = statusEvent.mediaClickData {
-                    StatusMediaScreen(statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
+                    StatusMediaScreen(accountType: accountType.toKotlin(), statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
                 }
             }
         }
 #endif
-        .activateViewModel(viewModel: viewModel)
-        .environment(statusEvent)
-    }
-}
-
-@Observable
-class HomeViewModel: MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
-}
-
-struct TabItem<Content: View>: View {
-    @State var router = Router<TabDestination>()
-    let content: (Router<TabDestination>) -> Content
-    var body: some View {
-        NavigationStack(path: $router.navPath) {
-            content(router)
-                .withTabRouter(router: router)
-        }.environment(\.openURL, OpenURLAction { url in
+        .environment(\.openURL, OpenURLAction { url in
             if let event = AppDeepLink.shared.parse(url: url.absoluteString) {
                 switch onEnum(of: event) {
                 case .profile(let data):
-                    router.navigate(to: .profile(userKey: data.userKey.description()))
+                    router.navigate(to: .profile(accountType: accountType, userKey: data.userKey.description()))
                 case .profileWithNameAndHost(let data):
-                    router.navigate(to: .profileWithUserNameAndHost(userName: data.userName, host: data.host))
+                    router.navigate(to: .profileWithUserNameAndHost(accountType: accountType, userName: data.userName, host: data.host))
                 case .search(let data):
-                    router.navigate(to: .search(query: data.keyword))
+                    router.navigate(to: .search(accountType: accountType, query: data.keyword))
                 case .statusDetail(let data):
-                    router.navigate(to: .statusDetail(statusKey: data.statusKey.description()))
+                    router.navigate(to: .statusDetail(accountType: accountType, statusKey: data.statusKey.description()))
+                case .compose:
+                    showCompose = true
                 }
                 return .handled
             } else {
                 return .systemAction
             }
         })
+        .environment(statusEvent)
     }
 }
 

@@ -51,6 +51,7 @@ internal fun XQTStatusComponent(
         statusKey = actualData.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(
+                accountKey = actualData.accountKey,
                 statusKey = statusKey,
                 index = index,
                 preview = preview,
@@ -58,7 +59,7 @@ internal fun XQTStatusComponent(
             )
         },
         onUserClick = {
-            event.onUserClick(it, uriHandler)
+            event.onUserClick(accountKey = actualData.accountKey, userKey = it, uriHandler = uriHandler)
         },
         rawContent = actualData.content,
         content = actualData.contentToken,
@@ -271,6 +272,7 @@ private fun RowScope.StatusFooterComponent(
 
 internal interface XQTStatusEvent {
     fun onMediaClick(
+        accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,
         index: Int,
         preview: String?,
@@ -278,6 +280,7 @@ internal interface XQTStatusEvent {
     )
 
     fun onUserClick(
+        accountKey: MicroBlogKey,
         userKey: MicroBlogKey,
         uriHandler: UriHandler,
     )

@@ -26,14 +26,14 @@ internal fun FeedViewPostReasonUnion.toUi(
     data: PostView,
 ): UiStatus.Bluesky {
     return data.toUi(accountKey).copy(
-        repostBy = (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey.host),
+        repostBy = (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
     )
 }
 
 internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
     return with(post) {
         UiStatus.Bluesky(
-            user = author.toUi(accountKey.host),
+            user = author.toUi(accountKey),
             statusKey =
                 MicroBlogKey(
                     id = uri.atUri,
@@ -42,7 +42,7 @@ internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
             accountKey = accountKey,
             content = record.jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
             indexedAt = indexedAt,
-            repostBy = (reason as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey.host),
+            repostBy = (reason as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
             quote = findQuote(accountKey, this),
             medias = findMedias(this),
             card = findCard(this),
@@ -65,7 +65,7 @@ internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
 
 internal fun ListNotificationsNotification.toUi(accountKey: MicroBlogKey): UiStatus.BlueskyNotification {
     return UiStatus.BlueskyNotification(
-        user = author.toUi(accountKey.host),
+        user = author.toUi(accountKey),
         statusKey =
             MicroBlogKey(
                 id = uri.atUri,
@@ -79,7 +79,7 @@ internal fun ListNotificationsNotification.toUi(accountKey: MicroBlogKey): UiSta
 
 internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
     return UiStatus.Bluesky(
-        user = author.toUi(accountKey.host),
+        user = author.toUi(accountKey),
         statusKey =
             MicroBlogKey(
                 id = uri.atUri,
@@ -225,7 +225,7 @@ private fun toUi(
                             else -> null
                         }
                     }.firstOrNull(),
-                user = record.value.author.toUi(accountKey.host),
+                user = record.value.author.toUi(accountKey),
                 // TODO: add reaction
                 reaction =
                     UiStatus.Bluesky.Reaction(
@@ -246,12 +246,12 @@ private fun toUi(
     }
 }
 
-internal fun ProfileViewDetailed.toUi(accountHost: String): UiUser =
+internal fun ProfileViewDetailed.toUi(accountKey: MicroBlogKey): UiUser =
     UiUser.Bluesky(
         userKey =
             MicroBlogKey(
                 id = did.did,
-                host = accountHost,
+                host = accountKey.host,
             ),
         displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
@@ -271,15 +271,15 @@ internal fun ProfileViewDetailed.toUi(accountHost: String): UiUser =
                 blocking = viewer?.blockedBy ?: false,
                 muting = viewer?.muted ?: false,
             ),
-        accountHost = accountHost,
+        accountKey = accountKey,
     )
 
-internal fun ProfileViewBasic.toUi(accountHost: String): UiUser.Bluesky {
+internal fun ProfileViewBasic.toUi(accountKey: MicroBlogKey): UiUser.Bluesky {
     return UiUser.Bluesky(
         userKey =
             MicroBlogKey(
                 id = did.did,
-                host = accountHost,
+                host = accountKey.host,
             ),
         displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
@@ -299,16 +299,16 @@ internal fun ProfileViewBasic.toUi(accountHost: String): UiUser.Bluesky {
                 blocking = viewer?.blockedBy ?: false,
                 muting = viewer?.muted ?: false,
             ),
-        accountHost = accountHost,
+        accountKey = accountKey,
     )
 }
 
-internal fun ProfileView.toUi(accountHost: String): UiUser.Bluesky {
+internal fun ProfileView.toUi(accountKey: MicroBlogKey): UiUser.Bluesky {
     return UiUser.Bluesky(
         userKey =
             MicroBlogKey(
                 id = did.did,
-                host = accountHost,
+                host = accountKey.host,
             ),
         displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
@@ -328,6 +328,6 @@ internal fun ProfileView.toUi(accountHost: String): UiUser.Bluesky {
                 blocking = viewer?.blockedBy ?: false,
                 muting = viewer?.muted ?: false,
             ),
-        accountHost = accountHost,
+        accountKey = accountKey,
     )
 }

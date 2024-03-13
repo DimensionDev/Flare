@@ -2,9 +2,12 @@ import SwiftUI
 import shared
 
 struct NotificationScreen: View {
-    @State var viewModel = NotificationViewModel()
+    @State var viewModel: NotificationViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    init(accountType: AccountType) {
+        _viewModel = .init(initialValue: .init(accountType: accountType))
+    }
     var body: some View {
         List {
             if horizontalSizeClass == .compact,
@@ -71,10 +74,18 @@ struct NotificationScreen: View {
 }
 
 @Observable
-class NotificationViewModel: MoleculeViewModelBase<NotificationState, NotificationPresenter> {
+class NotificationViewModel: MoleculeViewModelProto {
+    typealias Model = NotificationState
+    typealias Presenter = NotificationPresenter
+    let presenter: Presenter
+    var model: Model
     var notificationType: NotificationFilter = NotificationFilter.all {
         willSet {
             model.onNotificationTypeChanged(value: newValue)
         }
+    }
+    init(accountType: AccountType) {
+        presenter = .init(accountType: accountType)
+        model = presenter.models.value
     }
 }

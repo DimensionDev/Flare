@@ -81,6 +81,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onNotEmptyOrLoading
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
@@ -126,15 +127,17 @@ import kotlin.reflect.KFunction1
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun ProfileWithUserNameAndHostRoute(
+fun ProfileWithUserNameAndHostDeeplinkRoute(
     userName: String,
     host: String,
     navigator: DestinationsNavigator,
+    accountKey: MicroBlogKey,
 ) {
-    val state by producePresenter(key = "acct_$userName@$host") {
+    val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
             host = host,
+            accountType = AccountType.Specific(accountKey),
         )
     }
     state.onSuccess {
@@ -147,6 +150,7 @@ fun ProfileWithUserNameAndHostRoute(
                 navigator.navigate(
                     dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
                         it.userKey,
+                        accountType = AccountType.Specific(accountKey),
                     ),
                 )
             },
@@ -157,6 +161,67 @@ fun ProfileWithUserNameAndHostRoute(
                     ),
                 )
             },
+            accountType = AccountType.Specific(accountKey),
+        )
+    }.onLoading {
+        ProfileLoadingScreen(
+            onBack = {
+                navigator.navigateUp()
+            },
+        )
+    }.onError {
+        ProfileErrorScreen(
+            onBack = {
+                navigator.navigateUp()
+            },
+        )
+    }
+}
+
+@Composable
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
+    wrappers = [ThemeWrapper::class],
+)
+fun ProfileWithUserNameAndHostRoute(
+    userName: String,
+    host: String,
+    navigator: DestinationsNavigator,
+    accountType: AccountType,
+) {
+    val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
+        profileWithUserNameAndHostPresenter(
+            userName = userName,
+            host = host,
+            accountType = accountType,
+        )
+    }
+    state.onSuccess {
+        ProfileScreen(
+            userKey = it.userKey,
+            onBack = {
+                navigator.navigateUp()
+            },
+            onProfileMediaClick = {
+                navigator.navigate(
+                    dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                        it.userKey,
+                        accountType = accountType,
+                    ),
+                )
+            },
+            onMediaClick = {
+                navigator.navigate(
+                    dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                        it,
+                    ),
+                )
+            },
+            accountType = accountType,
         )
     }.onLoading {
         ProfileLoadingScreen(
@@ -177,8 +242,11 @@ fun ProfileWithUserNameAndHostRoute(
 @Destination(
     wrappers = [ThemeWrapper::class],
 )
-internal fun MeRoute(navigator: DestinationsNavigator) {
-    ProfileRoute(null, navigator)
+internal fun MeRoute(
+    navigator: DestinationsNavigator,
+    accountType: AccountType,
+) {
+    ProfileRoute(null, navigator, accountType)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -253,6 +321,7 @@ private fun ProfileLoadingScreen(onBack: () -> Unit) {
 private fun profileWithUserNameAndHostPresenter(
     userName: String,
     host: String,
+    accountType: AccountType,
 ) = run {
     remember(
         userName,
@@ -261,6 +330,7 @@ private fun profileWithUserNameAndHostPresenter(
         ProfileWithUserNameAndHostPresenter(
             userName = userName,
             host = host,
+            accountType = accountType,
         )
     }.invoke()
 }
@@ -277,9 +347,10 @@ private fun profileWithUserNameAndHostPresenter(
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun ProfileRoute(
+fun ProfileDeeplinkRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
+    accountKey: MicroBlogKey,
 ) {
     ProfileScreen(
         userKey = userKey,
@@ -290,6 +361,7 @@ fun ProfileRoute(
             navigator.navigate(
                 dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
                     userKey,
+                    accountType = AccountType.Specific(accountKey),
                 ),
             )
         },
@@ -300,6 +372,45 @@ fun ProfileRoute(
                 ),
             )
         },
+        accountType = AccountType.Specific(accountKey),
+    )
+}
+
+@Composable
+@Destination(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
+    wrappers = [ThemeWrapper::class],
+)
+fun ProfileRoute(
+    userKey: MicroBlogKey?,
+    navigator: DestinationsNavigator,
+    accountType: AccountType,
+) {
+    ProfileScreen(
+        userKey = userKey,
+        onBack = {
+            navigator.navigateUp()
+        },
+        onProfileMediaClick = {
+            navigator.navigate(
+                dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                    userKey,
+                    accountType = accountType,
+                ),
+            )
+        },
+        onMediaClick = {
+            navigator.navigate(
+                dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                    it,
+                ),
+            )
+        },
+        accountType = accountType,
     )
 }
 
@@ -307,6 +418,7 @@ fun ProfileRoute(
 @Composable
 private fun ProfileScreen(
     // null means current user
+    accountType: AccountType,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     onProfileMediaClick: () -> Unit = {},
@@ -314,8 +426,8 @@ private fun ProfileScreen(
     showTopBar: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    val state by producePresenter(key = userKey.toString()) {
-        profilePresenter(userKey)
+    val state by producePresenter(key = "${accountType}_$userKey") {
+        profilePresenter(userKey = userKey, accountType = accountType)
     }
     val listState = rememberLazyStaggeredGridState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -1155,12 +1267,14 @@ private fun ProfileMeidasPreview(
 @Composable
 private fun profilePresenter(
     userKey: MicroBlogKey?,
+    accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state =
         remember(userKey) {
             ProfilePresenter(
                 userKey = userKey,
+                accountType = accountType,
             )
         }.invoke()
     var showMoreMenus by remember {

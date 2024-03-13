@@ -2,6 +2,7 @@ import SwiftUI
 import shared
 
 struct MastodonNotificationComponent: View {
+    @Environment(\.openURL) private var openURL
     let data: UiStatus.MastodonNotification
     let event: MastodonStatusEvent
     var body: some View {
@@ -61,7 +62,12 @@ struct MastodonNotificationComponent: View {
             }
             if [NotificationTypes.follow, NotificationTypes.followRequest].contains(data.type) {
                 HStack {
-                    UserComponent(user: data.user)
+                    UserComponent(
+                        user: data.user,
+                        onUserClicked: {
+                            openURL(URL(string: AppDeepLink.Profile.shared.invoke(accountKey: data.accountKey, userKey: data.user.userKey))!)
+                        }
+                    )
                     Spacer()
                 }
             }

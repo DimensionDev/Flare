@@ -13,6 +13,7 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -33,6 +34,7 @@ fun MisskeyReportRoute(
     navigator: DestinationsNavigator,
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountType: AccountType,
 ) {
     MisskeyReportDialog(
         statusKey = statusKey,
@@ -40,6 +42,7 @@ fun MisskeyReportRoute(
         onBack = {
             navigator.navigateUp()
         },
+        accountType = accountType,
     )
 }
 
@@ -47,12 +50,14 @@ fun MisskeyReportRoute(
 fun MisskeyReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountType: AccountType,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter("${userKey}_${statusKey ?: ""}") {
+    val state by producePresenter("${userKey}_${statusKey ?: ""}_$accountType") {
         misskeyReportPresenter(
             userKey,
             statusKey,
+            accountType,
         )
     }
 
@@ -96,11 +101,13 @@ fun MisskeyReportDialog(
 private fun misskeyReportPresenter(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountType: AccountType,
 ) = run {
-    remember(userKey, statusKey) {
+    remember(userKey, statusKey, accountType) {
         MisskeyReportPresenter(
-            userKey,
-            statusKey,
+            userKey = userKey,
+            statusKey = statusKey,
+            accountType = accountType,
         )
     }.invoke()
 }

@@ -15,7 +15,7 @@ import dev.dimension.flare.data.model.LocalAppearanceSettings
 fun AvatarComponent(
     data: String?,
     modifier: Modifier = Modifier,
-    size: Dp = 44.dp,
+    size: Dp = AvatarComponentDefaults.size,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
     NetworkImage(
@@ -34,4 +34,8 @@ fun AvatarComponent(
                 )
                 .then(modifier),
     )
+}
+
+object AvatarComponentDefaults {
+    val size = 44.dp
 }

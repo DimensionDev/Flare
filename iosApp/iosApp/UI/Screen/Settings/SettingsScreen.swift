@@ -79,5 +79,5 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     }
 }
 
-class SettingsViewModel: MoleculeViewModelBase<ActiveAccountState, ActiveAccountPresenter> {
+class SettingsViewModel: MoleculeViewModelBase<UserState, ActiveAccountPresenter> {
 }

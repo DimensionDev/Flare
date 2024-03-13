@@ -28,6 +28,7 @@ import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
@@ -47,6 +48,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 )
 internal fun ProfileMediaRoute(
     userKey: MicroBlogKey?,
+    accountType: AccountType,
     navigator: DestinationsNavigator,
 ) {
     ProfileMediaScreen(
@@ -58,9 +60,11 @@ internal fun ProfileMediaRoute(
                     statusKey = statusKey,
                     index = index,
                     preview = preview,
+                    accountType = accountType,
                 ),
             )
         },
+        accountType = accountType,
     )
 }
 
@@ -68,11 +72,12 @@ internal fun ProfileMediaRoute(
 @Composable
 private fun ProfileMediaScreen(
     userKey: MicroBlogKey?,
+    accountType: AccountType,
     onItemClicked: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter(key = userKey.toString()) {
-        profileMediaPresenter(userKey)
+    val state by producePresenter(key = "ProfileMediaScreen_${userKey?.id}_$accountType") {
+        profileMediaPresenter(userKey, accountType)
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -140,7 +145,14 @@ private fun ProfileMediaScreen(
 }
 
 @Composable
-private fun profileMediaPresenter(userKey: MicroBlogKey?) =
-    run {
-        remember(userKey) { ProfileMediaPresenter(userKey) }.invoke()
-    }
+private fun profileMediaPresenter(
+    userKey: MicroBlogKey?,
+    accountType: AccountType,
+) = run {
+    remember(userKey, accountType) {
+        ProfileMediaPresenter(
+            accountType = accountType,
+            userKey = userKey,
+        )
+    }.invoke()
+}

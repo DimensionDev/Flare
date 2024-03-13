@@ -3,6 +3,7 @@ import MarkdownUI
 import shared
 
 struct MastodonStatusComponent: View {
+    @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     @State var showDeleteAlert = false
     @State var showReportAlert = false
@@ -31,7 +32,10 @@ struct MastodonStatusComponent: View {
                     event.onMediaClick(statusKey: actual.statusKey, index: index, preview: preview)
                 },
                 sensitive: actual.sensitive,
-                card: actual.card
+                card: actual.card,
+                onUserClicked: { user in
+                    openURL(URL(string: AppDeepLink.Profile.shared.invoke(accountKey: actual.accountKey, userKey: user.userKey))!)
+                }
             )
             if appSettings.appearanceSettings.showActions {
                 Spacer()

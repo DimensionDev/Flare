@@ -11,8 +11,9 @@ import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.data.repository.activeAccountServicePresenter
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
@@ -30,14 +31,16 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
 
 class ComposePresenter(
+    private val accountType: AccountType,
     private val status: ComposeStatus? = null,
 ) : PresenterBase<ComposeState>() {
     @Composable
     override fun body(): ComposeState {
-        val account = activeAccountServicePresenter()
+        val accountState by accountProvider(accountType = accountType)
+        val serviceState = accountServiceProvider(accountType = accountType)
         val composeUseCase: ComposeUseCase = koinInject()
         val visibilityState =
-            account.flatMap { (_, it) ->
+            accountState.flatMap {
                 when (it) {
                     is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
                     is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
@@ -49,23 +52,19 @@ class ComposePresenter(
         val replyState =
             status?.let { status ->
                 remember(status.statusKey) {
-                    StatusPresenter(status.statusKey)
+                    StatusPresenter(accountType = accountType, statusKey = status.statusKey)
                 }.body().status
             }
-        val emojiState =
-            account.flatMap { (_, it) ->
-                emojiPresenter(it)
-                    ?: UiState.Error(IllegalStateException("Emoji not supported"))
-            }
+        val emojiState = emojiPresenter(accountType)
 
         return object : ComposeState(
-            account = account.map { it.second },
+            account = accountState,
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
             supportedComposeEvent =
-                account.map {
-                    it.first.supportedComposeEvent(statusKey = status?.statusKey).toImmutableList().toImmutableListWrapper()
+                serviceState.map {
+                    it.supportedComposeEvent(statusKey = status?.statusKey).toImmutableList().toImmutableListWrapper()
                 },
         ) {
             override fun send(data: ComposeData) {
@@ -77,17 +76,17 @@ class ComposePresenter(
     }
 
     @Composable
-    private fun emojiPresenter(account: UiAccount): UiState<ImmutableListWrapper<UiEmoji>>? {
-        val service = accountServiceProvider(account = account)
-        return remember(account.accountKey) {
-            when (service) {
-                is MastodonDataSource -> service.emoji()
-                is MisskeyDataSource -> service.emoji()
-                else -> null
+    private fun emojiPresenter(accountType: AccountType): UiState<ImmutableListWrapper<UiEmoji>> {
+        return accountServiceProvider(accountType = accountType)
+            .flatMap {
+                when (it) {
+                    is MastodonDataSource -> it.emoji()
+                    is MisskeyDataSource -> it.emoji()
+                    else -> null
+                }?.collectAsState()?.toUi()?.map {
+                    it.toImmutableListWrapper()
+                } ?: UiState.Error(IllegalStateException("Emoji not supported"))
             }
-        }?.collectAsState()?.toUi()?.map {
-            it.toImmutableListWrapper()
-        }
     }
 
     @Composable

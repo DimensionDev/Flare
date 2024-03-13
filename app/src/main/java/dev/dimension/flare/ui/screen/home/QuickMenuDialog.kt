@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
@@ -47,10 +48,13 @@ import dev.dimension.flare.ui.screen.settings.AccountItem
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-fun QuickMenuDialogRoute(navigator: DestinationsNavigator) {
+fun QuickMenuDialogRoute(
+    rootNavController: RootNavController,
+    navigator: DestinationsNavigator,
+) {
     QuickMenuDialog(
         toSettings = {
-            navigator.navigate(SettingsRouteDestination)
+            rootNavController.navController.navigate(SettingsRouteDestination)
         },
         addAccount = {
             navigator.navigate(ServiceSelectRouteDestination)

@@ -1,8 +1,10 @@
 package dev.dimension.flare.model
 
+import androidx.compose.runtime.Immutable
 import io.ktor.util.decodeBase64String
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 enum class PlatformType {
     Mastodon,

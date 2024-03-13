@@ -33,7 +33,10 @@ struct XQTStatusComponent: View {
                 },
                 sensitive: actual.sensitive,
                 card: actual.card,
-                replyToHandle: actual.replyHandle
+                replyToHandle: actual.replyHandle,
+                onUserClicked: { user in
+                    openURL(URL(string: AppDeepLink.Profile.shared.invoke(accountKey: actual.accountKey, userKey: user.userKey))!)
+                }
             )
             if let quote = actual.quote {
                 Spacer()
@@ -44,7 +47,7 @@ struct XQTStatusComponent: View {
                         event.onMediaClick(statusKey: quote.statusKey, index: index, preview: preview)
                     },
                     onUserClick: { user in
-                        openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
+                        openURL(URL(string: AppDeepLink.Profile.shared.invoke(accountKey: quote.accountKey, userKey: user.userKey))!)
                     },
                     onStatusClick: { _ in
                         event.onQuoteClick(status: quote)

@@ -111,6 +111,7 @@ struct TabModel: Identifiable, Hashable {
     let title: String
     let image: String
     let destination: AnyView
+
     init<V>(title: String, image: String, destination: V) where V: View {
         self.title = title
         self.image = image

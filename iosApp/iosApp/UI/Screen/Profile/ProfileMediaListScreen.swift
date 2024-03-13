@@ -4,8 +4,8 @@ import shared
 struct ProfileMediaListScreen: View {
     @State var viewModel: ProfileMediaViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
-    init(userKey: MicroBlogKey) {
-        viewModel = ProfileMediaViewModel(userKey: userKey)
+    init(accountType: AccountType, userKey: MicroBlogKey) {
+        viewModel = .init(accountType: accountType, userKey: userKey)
     }
     var body: some View {
         ScrollView {
@@ -47,8 +47,8 @@ class ProfileMediaViewModel: MoleculeViewModelProto {
     typealias Presenter = ProfileMediaPresenter
     var model: Model
     let presenter: ProfileMediaPresenter
-    init(userKey: MicroBlogKey) {
-        presenter = ProfileMediaPresenter(userKey: userKey)
+    init(accountType: AccountType, userKey: MicroBlogKey) {
+        presenter = .init(accountType: accountType, userKey: userKey)
         model = presenter.models.value
     }
 }

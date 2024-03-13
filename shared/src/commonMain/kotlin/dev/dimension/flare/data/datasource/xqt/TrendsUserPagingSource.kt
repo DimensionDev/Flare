@@ -26,7 +26,7 @@ internal class TrendsUserPagingSource(
                     User(
                         legacy = it.user,
                         restId = it.userID,
-                    ).toUi()
+                    ).toUi(accountKey = accountKey)
                 } else {
                     null
                 }

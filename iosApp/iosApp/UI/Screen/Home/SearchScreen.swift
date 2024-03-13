@@ -2,11 +2,13 @@ import SwiftUI
 import shared
 
 struct SearchScreen: View {
+    private let onUserClicked: (UiUser) -> Void
     @State private var viewModel: SearchViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    init(initialQuery: String) {
-        _viewModel = State(initialValue: .init(initialQuery: initialQuery))
+    init(accountType: AccountType, initialQuery: String, onUserClicked: @escaping (UiUser) -> Void) {
+        self.onUserClicked = onUserClicked
+        _viewModel = .init(initialValue: .init(accountType: accountType, initialQuery: initialQuery))
     }
     var body: some View {
         List {
@@ -17,7 +19,12 @@ struct SearchScreen: View {
                         LazyHStack {
                             ForEach(0..<data.data.itemCount, id: \.self) { index in
                                 if let item = data.data.peek(index: index) {
-                                    UserComponent(user: item)
+                                    UserComponent(
+                                        user: item,
+                                        onUserClicked: {
+                                            onUserClicked(item)
+                                        }
+                                    )
                                         .frame(width: 200, alignment: .leading)
                                         .onAppear {
                                             data.data.get(index: index)
@@ -55,8 +62,8 @@ class SearchViewModel: MoleculeViewModelProto {
     typealias Model = SearchState
     typealias Presenter = SearchPresenter
     var searchText: String = ""
-    init(initialQuery: String) {
-        presenter = SearchPresenter(initialQuery: initialQuery)
+    init(accountType: AccountType, initialQuery: String) {
+        presenter = .init(accountType: accountType, initialQuery: initialQuery)
         model = presenter.models.value
     }
 }

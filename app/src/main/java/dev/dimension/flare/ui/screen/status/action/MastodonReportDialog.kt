@@ -13,6 +13,7 @@ import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -33,6 +34,7 @@ fun MastodonReportRoute(
     navigator: DestinationsNavigator,
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountType: AccountType,
 ) {
     MastodonReportDialog(
         statusKey = statusKey,
@@ -40,6 +42,7 @@ fun MastodonReportRoute(
         onBack = {
             navigator.navigateUp()
         },
+        accountType = accountType,
     )
 }
 
@@ -47,10 +50,15 @@ fun MastodonReportRoute(
 fun MastodonReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountType: AccountType,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter("${userKey}_$statusKey") {
-        mastodonReportPresenter(userKey, statusKey)
+    val state by producePresenter("${userKey}_${accountType}_$statusKey") {
+        mastodonReportPresenter(
+            userKey = userKey,
+            statusKey = statusKey,
+            accountType = accountType,
+        )
     }
 
     AlertDialog(
@@ -85,10 +93,15 @@ fun MastodonReportDialog(
 private fun mastodonReportPresenter(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
+    accountType: AccountType,
 ) = run {
     val state =
-        remember(userKey, statusKey) {
-            MastodonReportPresenter(userKey, statusKey)
+        remember(userKey, statusKey, accountType) {
+            MastodonReportPresenter(
+                accountType = accountType,
+                userKey = userKey,
+                statusKey = statusKey,
+            )
         }.invoke()
     state
 }

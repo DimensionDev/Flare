@@ -3,10 +3,16 @@ import shared
 import Combine
 
 struct DiscoverScreen: View {
-    @State private var searchViewModel = SearchViewModel(initialQuery: "")
-    @State private var viewModel = DiscoverViewModel()
+    private let onUserClicked: (UiUser) -> Void
+    @State private var searchViewModel: SearchViewModel
+    @State private var viewModel: DiscoverViewModel
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    init(accountType: AccountType, onUserClicked: @escaping (UiUser) -> Void) {
+        self.onUserClicked = onUserClicked
+        _searchViewModel = .init(initialValue: .init(accountType: accountType, initialQuery: ""))
+        _viewModel = .init(initialValue: .init(accountType: accountType))
+    }
     var body: some View {
         List {
             if searchViewModel.model.searching {
@@ -17,7 +23,12 @@ struct DiscoverScreen: View {
                             LazyHStack {
                                 ForEach(0..<data.data.itemCount, id: \.self) { index in
                                     if let item = data.data.peek(index: index) {
-                                        UserComponent(user: item)
+                                        UserComponent(
+                                            user: item,
+                                            onUserClicked: {
+                                                onUserClicked(item)
+                                            }
+                                        )
                                             .frame(width: 200, alignment: .leading)
                                             .onAppear {
                                                 data.data.get(index: index)
@@ -52,7 +63,12 @@ struct DiscoverScreen: View {
                                 LazyHGrid(rows: [.init(), .init()]) {
                                     ForEach(0..<data.data.itemCount, id: \.self) { index in
                                         if let item = data.data.peek(index: index) {
-                                            UserComponent(user: item)
+                                            UserComponent(
+                                                user: item,
+                                                onUserClicked: {
+                                                    onUserClicked(item)
+                                                }
+                                            )
                                                 .frame(width: 200, alignment: .leading)
                                                 .onAppear {
                                                     data.data.get(index: index)
@@ -141,11 +157,13 @@ struct DiscoverScreen: View {
 }
 
 @Observable
-class DiscoverViewModel: MoleculeViewModelBase<DiscoverState, DiscoverPresenter> {
-}
-
-#Preview {
-    NavigationStack {
-        DiscoverScreen()
+class DiscoverViewModel: MoleculeViewModelProto {
+    typealias Model = DiscoverState
+    typealias Presenter = DiscoverPresenter
+    let presenter: Presenter
+    var model: Model
+    init(accountType: AccountType) {
+        presenter = .init(accountType: accountType)
+        model = presenter.models.value
     }
 }

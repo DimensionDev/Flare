@@ -39,6 +39,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -51,10 +52,10 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.ActiveAccountState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
+import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
@@ -76,18 +77,41 @@ import org.koin.compose.koinInject
     ],
 )
 @Composable
+fun SearchDeepLink(
+    keyword: String,
+    navigator: DestinationsNavigator,
+    accountKey: MicroBlogKey,
+) {
+    SearchRoute(
+        keyword = keyword,
+        navigator = navigator,
+        accountType = AccountType.Specific(accountKey),
+    )
+}
+
+@Destination(
+    wrappers = [ThemeWrapper::class],
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
+)
+@Composable
 fun SearchRoute(
     keyword: String,
     navigator: DestinationsNavigator,
+    accountType: AccountType,
 ) {
     SearchScreen(
         initialQuery = keyword,
+        accountType = accountType,
         onBack = { navigator.navigateUp() },
         onAccountClick = {
             navigator.navigate(QuickMenuDialogRouteDestination)
         },
         toUser = { userKey ->
-            navigator.navigate(ProfileRouteDestination(userKey))
+            navigator.navigate(ProfileRouteDestination(userKey, accountType))
         },
     )
 }
@@ -95,11 +119,14 @@ fun SearchRoute(
 @Composable
 private fun SearchScreen(
     initialQuery: String,
+    accountType: AccountType,
     onBack: () -> Unit,
     onAccountClick: () -> Unit,
     toUser: (MicroBlogKey) -> Unit,
 ) {
-    val state by producePresenter("discoverSearchPresenter") { discoverSearchPresenter(initialQuery.decodeURLQueryComponent()) }
+    val state by producePresenter(
+        "discoverSearchPresenter",
+    ) { discoverSearchPresenter(accountType, initialQuery.decodeURLQueryComponent()) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     SearchContent(
@@ -316,20 +343,21 @@ private fun SearchContent(
 
 @Composable
 internal fun discoverSearchPresenter(
+    accountType: AccountType,
     initialSearch: String? = null,
     statusEvent: StatusEvent = koinInject(),
 ): DiscoverSearchState =
     run {
-        val activeAccount = remember { ActiveAccountPresenter() }.invoke()
+        val accountState = remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
         var query by remember { mutableStateOf(initialSearch ?: "") }
         var isSearching by remember { mutableStateOf(false) }
         var commited by remember { mutableStateOf(initialSearch != null) }
         val state =
             remember {
-                SearchPresenter(initialSearch ?: "")
+                SearchPresenter(accountType = accountType, initialQuery = initialSearch ?: "")
             }.invoke()
 
-        object : DiscoverSearchState, SearchState by state, ActiveAccountState by activeAccount {
+        object : DiscoverSearchState, SearchState by state, UserState by accountState {
             override val commited = commited
             override val query = query
             override val isSearching = isSearching
@@ -356,7 +384,7 @@ internal fun discoverSearchPresenter(
         }
     }
 
-internal interface DiscoverSearchState : SearchState, ActiveAccountState {
+internal interface DiscoverSearchState : SearchState, UserState {
     val commited: Boolean
     val isSearching: Boolean
     val statusEvent: StatusEvent

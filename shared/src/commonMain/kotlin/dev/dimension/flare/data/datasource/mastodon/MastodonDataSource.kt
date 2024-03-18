@@ -637,7 +637,7 @@ class MastodonDataSource(
         ) {
             TrendsUserPagingSource(
                 service,
-                account.accountKey,
+                account.accountKey.host,
             )
         }.flow
     }
@@ -701,7 +701,7 @@ class MastodonDataSource(
         ) {
             SearchUserPagingSource(
                 service,
-                account.accountKey,
+                account.accountKey.host,
                 query,
             )
         }.flow

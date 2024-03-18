@@ -2,14 +2,13 @@ package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import dev.dimension.flare.data.network.mastodon.MastodonService
-import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.data.network.mastodon.api.SearchResources
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 
 internal class SearchUserPagingSource(
-    private val service: MastodonService,
-    private val accountKey: MicroBlogKey,
+    private val service: SearchResources,
+    private val host: String,
     private val query: String,
 ) : PagingSource<String, UiUser>() {
     override fun getRefreshKey(state: PagingState<String, UiUser>): String? {
@@ -25,7 +24,7 @@ internal class SearchUserPagingSource(
                 type = "accounts",
             ).accounts?.let {
                 return LoadResult.Page(
-                    data = it.map { it.toUi(accountKey.host) },
+                    data = it.map { it.toUi(host) },
                     prevKey = null,
                     nextKey = it.lastOrNull()?.id?.takeIf { it != params.key },
                 )

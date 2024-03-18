@@ -460,48 +460,8 @@ private fun allTabsPresenter() =
                 }.toImmutableMap()
             }
 
-//        val actualAccountTabs =
-//            accountTabs.flatMap { tabs ->
-//                tabSettings.map { settings ->
-//                    val keys = settings.items.map { it.key }
-//                    tabs.mapNotNull { (key, value) ->
-//                        when (value) {
-//                            is UiState.Error -> null
-//                            is UiState.Loading -> key to value
-//                            is UiState.Success -> {
-//                                val items =
-//                                    value.data.filter { tab ->
-//                                        tab.key !in keys
-//                                    }.toImmutableList()
-//                                if (items.isEmpty()) {
-//                                    null
-//                                } else {
-//                                    key to UiState.Success(items)
-//                                }
-//                            }
-//                        }
-//                    }.toMap().toImmutableMap()
-//                }
-//            }
-
         object {
             val defaultTabs = TimelineTabItem.default.toImmutableList()
-
-            //                tabSettings.map { settings ->
-//                    TimelineTabItem.default
-//                        .filter {
-//                            it.key !in settings.items.map { it.key }
-//                        }
-//                        .toImmutableList()
-//                }
             val accountTabs = accountTabs
-
-//            fun addTab(tab: TabItem) {
-//                scope.launch {
-//                    repository.updateTabSettings {
-//                        copy(items = items + tab)
-//                    }
-//                }
-//            }
         }
     }

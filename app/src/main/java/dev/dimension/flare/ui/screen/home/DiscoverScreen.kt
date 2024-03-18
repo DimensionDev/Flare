@@ -119,51 +119,51 @@ internal fun DiscoverScreen(
                                 },
                             )
                         }
-                    }
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LazyHorizontalGrid(
-                            modifier = Modifier.height(128.dp),
-                            rows = GridCells.Fixed(2),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
                         ) {
-                            users.onSuccess {
-                                items(
-                                    users.itemCount,
-                                    key = users.itemKey { it.itemKey },
-                                ) {
-                                    val user = users[it]
-                                    Card(
-                                        modifier =
-                                            Modifier
-                                                .width(256.dp),
+                            LazyHorizontalGrid(
+                                modifier = Modifier.height(128.dp),
+                                rows = GridCells.Fixed(2),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                            ) {
+                                users.onSuccess {
+                                    items(
+                                        users.itemCount,
+                                        key = users.itemKey { it.itemKey },
                                     ) {
-                                        if (user != null) {
-                                            CommonStatusHeaderComponent(
-                                                data = user,
-                                                onUserClick = onUserClick,
-                                                modifier = Modifier.padding(8.dp),
-                                            )
-                                        } else {
+                                        val user = users[it]
+                                        Card(
+                                            modifier =
+                                                Modifier
+                                                    .width(256.dp),
+                                        ) {
+                                            if (user != null) {
+                                                CommonStatusHeaderComponent(
+                                                    data = user,
+                                                    onUserClick = onUserClick,
+                                                    modifier = Modifier.padding(8.dp),
+                                                )
+                                            } else {
+                                                UserPlaceholder(
+                                                    modifier = Modifier.padding(8.dp),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }.onLoading {
+                                    items(10) {
+                                        Card(
+                                            modifier =
+                                                Modifier
+                                                    .width(256.dp),
+                                        ) {
                                             UserPlaceholder(
                                                 modifier = Modifier.padding(8.dp),
                                             )
                                         }
-                                    }
-                                }
-                            }.onLoading {
-                                items(10) {
-                                    Card(
-                                        modifier =
-                                            Modifier
-                                                .width(256.dp),
-                                    ) {
-                                        UserPlaceholder(
-                                            modifier = Modifier.padding(8.dp),
-                                        )
                                     }
                                 }
                             }
@@ -181,36 +181,51 @@ internal fun DiscoverScreen(
                                 },
                             )
                         }
-                    }
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
                         ) {
-                            hashtags.onSuccess {
-                                items(
-                                    hashtags.itemCount,
-                                ) {
-                                    val hashtag = hashtags[it]
-                                    Card(
-                                        modifier =
-                                            Modifier
-                                                .width(192.dp),
-                                        onClick = {
-                                            onHashtagClick("#${hashtag?.hashtag}")
-                                        },
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                            ) {
+                                hashtags.onSuccess {
+                                    items(
+                                        hashtags.itemCount,
                                     ) {
-                                        Box(
+                                        val hashtag = hashtags[it]
+                                        Card(
                                             modifier =
                                                 Modifier
-                                                    .padding(8.dp)
-                                                    .height(48.dp),
+                                                    .width(192.dp),
+                                            onClick = {
+                                                onHashtagClick("#${hashtag?.hashtag}")
+                                            },
                                         ) {
-                                            if (hashtag != null) {
-                                                Text(text = hashtag.hashtag)
-                                            } else {
+                                            Box(
+                                                modifier =
+                                                    Modifier
+                                                        .padding(8.dp)
+                                                        .height(48.dp),
+                                            ) {
+                                                if (hashtag != null) {
+                                                    Text(text = hashtag.hashtag)
+                                                } else {
+                                                    Text(
+                                                        text = "Lorem Ipsum is simply dummy text",
+                                                        modifier = Modifier.placeholder(true),
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }.onLoading {
+                                    items(10) {
+                                        Card(
+                                            modifier = Modifier.width(192.dp),
+                                        ) {
+                                            Box(
+                                                modifier = Modifier.padding(8.dp),
+                                            ) {
                                                 Text(
                                                     text = "Lorem Ipsum is simply dummy text",
                                                     modifier = Modifier.placeholder(true),
@@ -219,26 +234,10 @@ internal fun DiscoverScreen(
                                         }
                                     }
                                 }
-                            }.onLoading {
-                                items(10) {
-                                    Card(
-                                        modifier = Modifier.width(192.dp),
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.padding(8.dp),
-                                        ) {
-                                            Text(
-                                                text = "Lorem Ipsum is simply dummy text",
-                                                modifier = Modifier.placeholder(true),
-                                            )
-                                        }
-                                    }
-                                }
                             }
                         }
                     }
                 }
-
                 state.status.onSuccess {
                     it.onNotEmptyOrLoading {
                         item(

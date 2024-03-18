@@ -11,7 +11,9 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.datasource.guest.GuestDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -24,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import org.koin.compose.koinInject
@@ -101,7 +104,12 @@ internal fun accountProvider(
         when (accountType) {
             AccountType.Active -> repository.activeAccount
             is AccountType.Specific ->
-                repository.getFlow(accountKey = accountType.accountKey)
+                if (accountType.accountKey == GuestMastodonService.GuestKey) {
+                    flowOf(UiAccount.Guest)
+                } else {
+                    repository.getFlow(accountKey = accountType.accountKey)
+                }
+            AccountType.Guest -> flowOf(UiAccount.Guest)
         }.distinctUntilChanged().map {
             if (it == null) {
                 UiState.Error(NoActiveAccountException)
@@ -135,6 +143,8 @@ internal fun accountServiceProvider(accountType: AccountType): UiState<Microblog
                 is UiAccount.XQT -> {
                     it.dataSource
                 }
+
+                UiAccount.Guest -> GuestDataSource
             }
         }
     }

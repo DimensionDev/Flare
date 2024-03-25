@@ -41,7 +41,7 @@ class ComposeViewModel: MoleculeViewModelProto {
     func send() {
         Task {
             if case .success(let account) = onEnum(of: self.model.account) {
-                let data = switch onEnum(of: account.data) {
+                let data: ComposeData_? = switch onEnum(of: account.data) {
                 case .bluesky(let bluesky):
                     BlueskyComposeData(
                         account: bluesky,
@@ -85,9 +85,12 @@ class ComposeViewModel: MoleculeViewModelProto {
                         medias: getMedia(),
                         sensitive: mediaViewModel.sensitive,
                         poll: getXQTPoll()
-                    )
+                    ) as ComposeData_
+                case .guest(_): nil
                 }
-                model.send(data: data)
+                if let data = data {
+                    model.send(data: data)
+                }
             }
         }
     }

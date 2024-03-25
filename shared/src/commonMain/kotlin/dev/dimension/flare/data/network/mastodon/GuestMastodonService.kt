@@ -28,7 +28,7 @@ private fun config(baseUrl: String) =
 
 private val baseUrl = "https://mastodon.social/"
 
-object GuestMastodonService :
+internal object GuestMastodonService :
     TrendsResources by config(baseUrl).create(),
     LookupResources by config(baseUrl).create(),
     TimelineResources by config(baseUrl).create(),

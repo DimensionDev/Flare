@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
+import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
@@ -104,6 +105,18 @@ sealed interface UiAccount {
         val dataSource by lazy {
             XQTDataSource(this)
         }
+    }
+
+    @Immutable
+    data object Guest : UiAccount {
+        override val accountKey: MicroBlogKey
+            get() = GuestMastodonService.GuestKey
+        override val platformType: PlatformType
+            get() = PlatformType.Mastodon
+
+        override val credential = Credential
+
+        data object Credential : UiAccount.Credential
     }
 
     companion object {

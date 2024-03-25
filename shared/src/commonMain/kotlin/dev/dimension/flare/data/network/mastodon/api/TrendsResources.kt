@@ -11,7 +11,10 @@ internal interface TrendsResources {
     suspend fun trendsTags(): List<Trend>
 
     @GET("api/v1/trends/statuses")
-    suspend fun trendsStatuses(): List<Status>
+    suspend fun trendsStatuses(
+        @Query("limit") limit: Int? = null,
+        @Query("offset") offset: Int? = null,
+    ): List<Status>
 
     @GET("api/v2/suggestions")
     suspend fun suggestionsUsers(

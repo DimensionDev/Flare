@@ -297,6 +297,8 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
                     try? await misskey.dataSource.deleteStatus(statusKey: statusKey)
                 case .xQT(let xqt):
                     try? await xqt.dataSource.deleteStatus(statusKey: statusKey)
+                case .guest(_):
+                    ()
                 }
             }
         }

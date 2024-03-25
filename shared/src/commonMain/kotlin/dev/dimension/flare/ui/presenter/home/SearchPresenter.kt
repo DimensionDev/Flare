@@ -12,7 +12,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 class SearchPresenter(
@@ -25,18 +25,29 @@ class SearchPresenter(
         var query by remember { mutableStateOf(initialQuery) }
 
         val user =
-            accountState.map { service ->
-                remember(service, query) {
-                    // TODO: Should we handle when query is empty?
-                    service.searchUser(query)
-                }.collectPagingProxy()
+            accountState.flatMap { service ->
+                if (query.isEmpty()) {
+                    UiState.Error(IllegalStateException("Query is empty"))
+                } else {
+                    UiState.Success(
+                        remember(service, query) {
+                            service.searchUser(query)
+                        }.collectPagingProxy(),
+                    )
+                }
             }
 
         val status =
-            accountState.map { service ->
-                remember(service, query) {
-                    service.searchStatus(query)
-                }.collectPagingProxy()
+            accountState.flatMap { service ->
+                if (query.isEmpty()) {
+                    UiState.Error(IllegalStateException("Query is empty"))
+                } else {
+                    UiState.Success(
+                        remember(service, query) {
+                            service.searchStatus(query)
+                        }.collectPagingProxy(),
+                    )
+                }
             }
 
         val isSearching = user is UiState.Success && status is UiState.Success && query.isNotEmpty()

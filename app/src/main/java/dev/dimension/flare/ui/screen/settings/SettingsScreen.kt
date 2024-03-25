@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Storage
@@ -44,6 +45,8 @@ import com.ramcosta.composedestinations.navigation.dependency
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
@@ -203,15 +206,37 @@ internal fun SettingsScreen(
                     .padding(it)
                     .verticalScroll(rememberScrollState()),
         ) {
-            AccountItem(
-                userState = state.user,
-                onClick = {
-                    toAccounts.invoke()
-                },
-                supportingContent = {
-                    Text(text = stringResource(id = R.string.settings_accounts_title))
-                },
-            )
+            state.user.onSuccess {
+                AccountItem(
+                    userState = state.user,
+                    onClick = {
+                        toAccounts.invoke()
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_accounts_title))
+                    },
+                )
+            }.onError {
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_accounts_title))
+                    },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                toAccounts.invoke()
+                            },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = null,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_accounts_title))
+                    },
+                )
+            }
             HorizontalDivider()
             ListItem(
                 headlineContent = {
@@ -231,24 +256,26 @@ internal fun SettingsScreen(
                         toAppearance.invoke()
                     },
             )
-            ListItem(
-                headlineContent = {
-                    Text(text = stringResource(id = R.string.settings_tab_customization))
-                },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Tab,
-                        contentDescription = null,
-                    )
-                },
-                supportingContent = {
-                    Text(text = stringResource(id = R.string.settings_tab_customization_description))
-                },
-                modifier =
-                    Modifier.clickable {
-                        toTabCustomization.invoke()
+            state.user.onSuccess {
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_tab_customization))
                     },
-            )
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Default.Tab,
+                            contentDescription = null,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_tab_customization_description))
+                    },
+                    modifier =
+                        Modifier.clickable {
+                            toTabCustomization.invoke()
+                        },
+                )
+            }
 //            ListItem(
 //                headlineContent = {
 //                    Text(text = stringResource(id = R.string.settings_notifications_title))

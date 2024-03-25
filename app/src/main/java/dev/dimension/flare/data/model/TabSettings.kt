@@ -139,6 +139,27 @@ data class TimelineTabItem(
                         ),
                 ),
             )
+        val guest =
+            persistentListOf(
+                TimelineTabItem(
+                    account = AccountType.Guest,
+                    type = Type.Home,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(R.string.home_tab_home_title),
+                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                        ),
+                ),
+                DiscoverTabItem(
+                    account = AccountType.Guest,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(R.string.home_tab_discover_title),
+                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                        ),
+                ),
+                SettingsTabItem,
+            )
 
         fun mastodon(accountKey: MicroBlogKey) =
             persistentListOf(
@@ -329,6 +350,20 @@ data class DiscoverTabItem(
     override val metaData: TabMetaData,
 ) : TabItem {
     override val key: String = "discover_$account"
+}
+
+@Serializable
+data object SettingsTabItem : TabItem {
+    override val account: AccountType
+        get() = AccountType.Active
+    override val key: String
+        get() = "settings"
+    override val metaData: TabMetaData
+        get() =
+            TabMetaData(
+                title = TitleType.Localized(R.string.settings_title),
+                icon = IconType.Material(IconType.Material.MaterialIcon.Settings),
+            )
 }
 
 @OptIn(ExperimentalSerializationApi::class)

@@ -133,13 +133,15 @@ internal fun HomeTimelineScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = toCompose,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                )
+            state.user.onSuccess {
+                FloatingActionButton(
+                    onClick = toCompose,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                    )
+                }
             }
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),

@@ -46,6 +46,7 @@ class ComposePresenter(
                     is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
                     is UiAccount.XQT -> UiState.Error(IllegalStateException("XQT not supported"))
                     is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
+                    UiAccount.Guest -> UiState.Error(IllegalStateException("Guest not supported"))
                 }
             }
 

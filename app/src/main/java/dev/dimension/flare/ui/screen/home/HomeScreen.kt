@@ -38,15 +38,20 @@ import com.ramcosta.composedestinations.spec.Route
 import com.ramcosta.composedestinations.utils.composable
 import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
+import dev.dimension.flare.data.model.SettingsTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
@@ -178,6 +183,10 @@ private fun getDirection(
                 TimelineTabItem.Type.Notifications -> NotificationRouteDestination(accountType)
             }
         }
+
+        SettingsTabItem -> {
+            SettingsRouteDestination
+        }
     }
 }
 
@@ -230,11 +239,21 @@ private class ProxyUriHandler(
 @Composable
 private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
     run {
-        val tabSettings by settingsRepository.tabSettings.collectAsUiState()
-        object {
-            val tabs =
-                tabSettings.map {
+        val account =
+            remember {
+                ActiveAccountPresenter()
+            }.invoke()
+        val tabs =
+            account.user.flatMap(
+                onError = {
+                    UiState.Success(TimelineTabItem.guest.toImmutableList())
+                },
+            ) {
+                settingsRepository.tabSettings.collectAsUiState().value.map {
                     it.items.toImmutableList()
                 }
+            }
+        object {
+            val tabs = tabs
         }
     }

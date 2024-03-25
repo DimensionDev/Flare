@@ -1058,6 +1058,8 @@ private fun composePresenter(
                                     },
                                 sensitive = mediaState.isMediaSensitive,
                             )
+
+                        UiAccount.Guest -> throw IllegalStateException("Guest account cannot compose")
                     }
                 state.send(data)
             }

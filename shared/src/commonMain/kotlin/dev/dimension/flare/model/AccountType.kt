@@ -17,4 +17,11 @@ sealed interface AccountType {
             return "active"
         }
     }
+
+    @Serializable
+    data object Guest : AccountType {
+        override fun toString(): String {
+            return "guest"
+        }
+    }
 }

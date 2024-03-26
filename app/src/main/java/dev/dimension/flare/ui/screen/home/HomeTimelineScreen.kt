@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,6 +48,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelineState
@@ -55,6 +57,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
+import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
@@ -79,6 +82,9 @@ internal fun HomeRoute(
         toQuickMenu = {
             navigator.navigate(QuickMenuDialogRouteDestination)
         },
+        toLogin = {
+            navigator.navigate(ServiceSelectRouteDestination)
+        },
 //        screen = screen,
     )
 }
@@ -89,6 +95,7 @@ internal fun HomeTimelineScreen(
     accountType: AccountType,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
+    toLogin: () -> Unit,
 //    screen: Screen,
 ) {
     val state by producePresenter(key = "home_timeline_$accountType") {
@@ -127,6 +134,13 @@ internal fun HomeTimelineScreen(
                             onClick = toQuickMenu,
                         ) {
                             AvatarComponent(it.avatarUrl, size = 24.dp)
+                        }
+                    }
+                },
+                actions = {
+                    state.user.onError {
+                        TextButton(onClick = toLogin) {
+                            Text(text = stringResource(id = R.string.login_button))
                         }
                     }
                 },

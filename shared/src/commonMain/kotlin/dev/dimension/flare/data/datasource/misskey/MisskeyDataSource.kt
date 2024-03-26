@@ -31,6 +31,7 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
+import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -55,6 +56,7 @@ class MisskeyDataSource(
     override val account: UiAccount.Misskey,
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
+    private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://${account.credential.host}/api/",
@@ -71,6 +73,7 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 HomeTimelineRemoteMediator(
                     account,
@@ -91,6 +94,7 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forNotification = true),
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -204,6 +208,7 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 UserTimelineRemoteMediator(
                     account,
@@ -226,6 +231,7 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -583,6 +589,7 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -629,6 +636,7 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,

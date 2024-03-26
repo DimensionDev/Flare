@@ -48,6 +48,7 @@ import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
+import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -81,6 +82,7 @@ class XQTDataSource(
     override val account: UiAccount.XQT,
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
+    private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
         XQTService(chocolate = account.credential.chocolate)
     }
@@ -94,6 +96,7 @@ class XQTDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -114,6 +117,7 @@ class XQTDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forNotification = true),
             mediator =
                 MentionRemoteMediator(
                     service,
@@ -230,6 +234,7 @@ class XQTDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 if (mediaOnly) {
                     UserMediaTimelineRemoteMediator(
@@ -261,6 +266,7 @@ class XQTDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -478,6 +484,7 @@ class XQTDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
             mediator =
                 SearchStatusPagingSource(
                     service,

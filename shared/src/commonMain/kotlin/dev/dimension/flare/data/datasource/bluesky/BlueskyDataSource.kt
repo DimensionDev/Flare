@@ -42,6 +42,7 @@ import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.getService
+import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -78,6 +79,7 @@ class BlueskyDataSource(
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
+    private val localFilterRepository: LocalFilterRepository by inject()
 
     override fun homeTimeline(
         pageSize: Int,
@@ -88,6 +90,7 @@ class BlueskyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 HomeTimelineRemoteMediator(
                     account.getService(appDatabase),
@@ -107,6 +110,7 @@ class BlueskyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forNotification = true),
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -207,6 +211,7 @@ class BlueskyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 UserTimelineRemoteMediator(
                     account.getService(appDatabase),
@@ -228,6 +233,7 @@ class BlueskyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -822,6 +828,7 @@ class BlueskyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
             mediator =
                 SearchStatusRemoteMediator(
                     service,

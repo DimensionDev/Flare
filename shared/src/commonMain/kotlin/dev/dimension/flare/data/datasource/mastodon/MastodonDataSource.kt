@@ -29,6 +29,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
+import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -53,6 +54,7 @@ class MastodonDataSource(
     override val account: UiAccount.Mastodon,
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
+    private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://${account.credential.instance}/",
@@ -69,6 +71,7 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -89,6 +92,7 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forNotification = true),
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -182,6 +186,7 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 UserTimelineRemoteMediator(
                     service,
@@ -203,6 +208,7 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -651,6 +657,7 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,
@@ -681,6 +688,7 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
             mediator =
                 SearchStatusPagingSource(
                     service,

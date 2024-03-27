@@ -27,8 +27,8 @@ class LocalFilterPresenter : PresenterBase<LocalFilterState>() {
                 )
             }
 
-            override fun delete(item: UiKeywordFilter) {
-                repository.delete(item.keyword)
+            override fun delete(keyword: String) {
+                repository.delete(keyword)
             }
 
             override fun update(item: UiKeywordFilter) {
@@ -47,7 +47,7 @@ class LocalFilterPresenter : PresenterBase<LocalFilterState>() {
 interface LocalFilterState {
     val items: UiState<ImmutableListWrapper<UiKeywordFilter>>
 
-    fun delete(item: UiKeywordFilter)
+    fun delete(keyword: String)
 
     fun add(item: UiKeywordFilter)
 

@@ -19,7 +19,7 @@ class LocalFilterPresenter : PresenterBase<LocalFilterState>() {
 
             override fun add(item: UiKeywordFilter) {
                 repository.add(
-                    filter = item.keyword,
+                    keyword = item.keyword,
                     forTimeline = item.forTimeline,
                     forNotification = item.forNotification,
                     forSearch = item.forSearch,
@@ -33,7 +33,7 @@ class LocalFilterPresenter : PresenterBase<LocalFilterState>() {
 
             override fun update(item: UiKeywordFilter) {
                 repository.update(
-                    filter = item.keyword,
+                    keyword = item.keyword,
                     forTimeline = item.forTimeline,
                     forNotification = item.forNotification,
                     forSearch = item.forSearch,

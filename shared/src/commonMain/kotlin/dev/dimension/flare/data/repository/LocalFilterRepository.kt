@@ -47,23 +47,23 @@ class LocalFilterRepository(
     }
 
     fun add(
-        filter: String,
+        keyword: String,
         forTimeline: Boolean,
         forNotification: Boolean,
         forSearch: Boolean,
         expiredAt: Instant?,
     ) {
         database.dbKeywordFilterQueries.insert(
-            keyword = filter,
-            for_timeline = if (forTimeline) 1L else 0L,
-            for_notification = if (forNotification) 1L else 0L,
-            for_search = if (forSearch) 1L else 0L,
-            expired_at = expiredAt?.toEpochMilliseconds() ?: 0L,
+            keyword = keyword,
+            forTimeline = if (forTimeline) 1L else 0L,
+            forNotification = if (forNotification) 1L else 0L,
+            forSearch = if (forSearch) 1L else 0L,
+            expiredAt = expiredAt?.toEpochMilliseconds() ?: 0L,
         )
     }
 
     fun update(
-        filter: String,
+        keyword: String,
         forTimeline: Boolean,
         forNotification: Boolean,
         forSearch: Boolean,
@@ -74,7 +74,7 @@ class LocalFilterRepository(
             forNotification = if (forNotification) 1L else 0L,
             forSearch = if (forSearch) 1L else 0L,
             expiredAt = expiredAt?.toEpochMilliseconds() ?: 0L,
-            keyword = filter,
+            keyword = keyword,
         )
     }
 

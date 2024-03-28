@@ -3,15 +3,18 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text2.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -105,13 +108,18 @@ private fun LocalFilterEditDialog(
                 Modifier
                     .padding(contentPadding),
         ) {
-            OutlinedTextField2(
-                state = state.input,
-                placeholder = {
-                    Text(text = stringResource(id = R.string.local_filter_keyword_hint))
-                },
-                label = {
-                    Text(text = stringResource(id = R.string.local_filter_keyword))
+            ListItem(
+                headlineContent = {
+                    OutlinedTextField2(
+                        state = state.input,
+                        placeholder = {
+                            Text(text = stringResource(id = R.string.local_filter_keyword_hint))
+                        },
+                        label = {
+                            Text(text = stringResource(id = R.string.local_filter_keyword))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 },
             )
             ListItem(
@@ -124,6 +132,10 @@ private fun LocalFilterEditDialog(
                         onCheckedChange = state::setForTimeline,
                     )
                 },
+                modifier =
+                    Modifier.clickable {
+                        state.setForTimeline(!state.forTimeline)
+                    },
             )
             ListItem(
                 headlineContent = {
@@ -135,6 +147,10 @@ private fun LocalFilterEditDialog(
                         onCheckedChange = state::setForNotification,
                     )
                 },
+                modifier =
+                    Modifier.clickable {
+                        state.setForNotification(!state.forNotification)
+                    },
             )
             ListItem(
                 headlineContent = {
@@ -146,16 +162,24 @@ private fun LocalFilterEditDialog(
                         onCheckedChange = state::setForSearch,
                     )
                 },
+                modifier =
+                    Modifier.clickable {
+                        state.setForSearch(!state.forSearch)
+                    },
             )
             if (keyword != null) {
                 ListItem(
                     headlineContent = {
-                        Text(text = stringResource(id = R.string.local_filter_delete))
+                        Text(
+                            text = stringResource(id = R.string.local_filter_delete),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     },
                     trailingContent = {
                         Icon(
-                            Icons.Default.Check,
+                            Icons.Default.Delete,
                             contentDescription = stringResource(id = R.string.delete),
+                            tint = MaterialTheme.colorScheme.error,
                         )
                     },
                     modifier =

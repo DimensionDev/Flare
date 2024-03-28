@@ -56,6 +56,7 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -84,6 +85,7 @@ class BlueskyDataSource(
     override fun homeTimeline(
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> =
         timelinePager(
             pageSize = pageSize,
@@ -91,6 +93,7 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 HomeTimelineRemoteMediator(
                     account.getService(appDatabase),
@@ -104,6 +107,7 @@ class BlueskyDataSource(
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> =
         timelinePager(
             pageSize = pageSize,
@@ -111,6 +115,7 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
+            scope = scope,
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -202,6 +207,7 @@ class BlueskyDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
@@ -212,6 +218,7 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 UserTimelineRemoteMediator(
                     account.getService(appDatabase),
@@ -225,6 +232,7 @@ class BlueskyDataSource(
 
     override fun context(
         statusKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> =
@@ -234,6 +242,7 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -819,6 +828,7 @@ class BlueskyDataSource(
 
     override fun searchStatus(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
@@ -829,6 +839,7 @@ class BlueskyDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
+            scope = scope,
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -842,6 +853,7 @@ class BlueskyDataSource(
 
     override fun searchUser(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUser>> {
         val service = account.getService(appDatabase)
@@ -874,6 +886,7 @@ class BlueskyDataSource(
 
     override fun discoverStatuses(
         pageSize: Int,
+        scope: CoroutineScope,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
         throw UnsupportedOperationException("Bluesky does not support discover statuses")

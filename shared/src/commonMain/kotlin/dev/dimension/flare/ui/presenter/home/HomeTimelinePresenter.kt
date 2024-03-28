@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -18,11 +19,12 @@ class HomeTimelinePresenter(
 ) : PresenterBase<HomeTimelineState>() {
     @Composable
     override fun body(): HomeTimelineState {
+        val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType)
         val listState =
             serviceState.map { service ->
                 remember(service) {
-                    service.homeTimeline()
+                    service.homeTimeline(scope = scope)
                 }.collectPagingProxy()
             }
 

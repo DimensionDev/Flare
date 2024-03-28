@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
@@ -24,6 +25,7 @@ class NotificationPresenter(
 ) : PresenterBase<NotificationState>() {
     @Composable
     override fun body(): NotificationState {
+        val scope = rememberCoroutineScope()
         var type by remember { mutableStateOf(NotificationFilter.All) }
         val serviceState = accountServiceProvider(accountType = accountType)
         val allTypes =
@@ -35,6 +37,7 @@ class NotificationPresenter(
                 remember(service, type) {
                     service.notification(
                         type = type,
+                        scope = scope,
                     )
                 }.collectPagingProxy()
             }

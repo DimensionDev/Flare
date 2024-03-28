@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS DbKeywordFilter(
     keyword TEXT NOT NULL PRIMARY KEY,
-    for_timeline INTEGER NOT NULL DEFAULT 1,
-    for_notification INTEGER NOT NULL DEFAULT 1,
-    for_search INTEGER NOT NULL DEFAULT 1,
-    expired_at INTEGER NOT NULL DEFAULT 0
+    for_timeline INTEGER NOT NULL,
+    for_notification INTEGER NOT NULL,
+    for_search INTEGER NOT NULL,
+    expired_at INTEGER NOT NULL
 );
 
 insert:
-INSERT OR REPLACE INTO DbKeywordFilter(keyword, for_timeline, for_notification, for_search, expired_at) VALUES(?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO DbKeywordFilter(keyword, for_timeline, for_notification, for_search, expired_at) VALUES(:keyword, :forTimeline, :forNotification, :forSearch, :expiredAt);
 
 selectAll:
 SELECT * FROM DbKeywordFilter;

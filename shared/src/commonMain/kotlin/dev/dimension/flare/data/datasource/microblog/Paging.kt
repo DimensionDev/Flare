@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
+import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import app.cash.sqldelight.paging3.QueryPagingSource
@@ -17,6 +18,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +30,7 @@ internal fun timelinePager(
     pagingKey: String,
     accountKey: MicroBlogKey,
     database: CacheDatabase,
+    scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
     mediator: RemoteMediator<Int, DbPagingTimelineWithStatusView>,
 ): Flow<PagingData<UiStatus>> {
@@ -54,7 +57,7 @@ internal fun timelinePager(
                     },
                 )
             },
-        ).flow
+        ).flow.cachedIn(scope)
     return combine(pagerFlow, filterFlow) { pagingData, filters ->
         pagingData
             .map {
@@ -63,7 +66,7 @@ internal fun timelinePager(
             .filter {
                 !it.contains(filters)
             }
-    }
+    }.cachedIn(scope)
 }
 
 private fun UiStatus.contains(keywords: List<String>): Boolean {

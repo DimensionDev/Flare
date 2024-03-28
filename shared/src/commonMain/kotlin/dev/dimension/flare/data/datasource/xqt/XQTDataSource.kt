@@ -59,6 +59,7 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -90,6 +91,7 @@ class XQTDataSource(
     override fun homeTimeline(
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = pageSize,
@@ -97,6 +99,7 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -111,6 +114,7 @@ class XQTDataSource(
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = pageSize,
@@ -118,6 +122,7 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
+            scope = scope,
             mediator =
                 MentionRemoteMediator(
                     service,
@@ -225,6 +230,7 @@ class XQTDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
@@ -235,6 +241,7 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 if (mediaOnly) {
                     UserMediaTimelineRemoteMediator(
@@ -258,6 +265,7 @@ class XQTDataSource(
 
     override fun context(
         statusKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> =
@@ -267,6 +275,7 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -476,6 +485,7 @@ class XQTDataSource(
 
     override fun searchStatus(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
@@ -485,6 +495,7 @@ class XQTDataSource(
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
+            scope = scope,
             mediator =
                 SearchStatusPagingSource(
                     service,
@@ -498,6 +509,7 @@ class XQTDataSource(
 
     override fun searchUser(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUser>> {
         return Pager(
@@ -524,6 +536,7 @@ class XQTDataSource(
 
     override fun discoverStatuses(
         pageSize: Int,
+        scope: CoroutineScope,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
         // not supported

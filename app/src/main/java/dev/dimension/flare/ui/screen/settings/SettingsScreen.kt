@@ -55,6 +55,7 @@ import dev.dimension.flare.ui.screen.destinations.AboutRouteDestination
 import dev.dimension.flare.ui.screen.destinations.AccountsRouteDestination
 import dev.dimension.flare.ui.screen.destinations.AppearanceRouteDestination
 import dev.dimension.flare.ui.screen.destinations.DirectionDestination
+import dev.dimension.flare.ui.screen.destinations.LocalFilterRouteDestination
 import dev.dimension.flare.ui.screen.destinations.StorageRouteDestination
 import dev.dimension.flare.ui.screen.destinations.TabCustomizeRouteDestination
 import dev.dimension.flare.ui.screen.home.Router
@@ -115,6 +116,9 @@ internal fun SettingsRoute() {
                     },
                     toTabCustomization = {
                         settingsPanelState.setSelectedItem(TabCustomizeRouteDestination)
+                    },
+                    toLocalFilter = {
+                        settingsPanelState.setSelectedItem(LocalFilterRouteDestination)
                     },
                 )
             }
@@ -189,6 +193,7 @@ internal fun SettingsScreen(
     toStorage: () -> Unit,
     toAbout: () -> Unit,
     toTabCustomization: () -> Unit,
+    toLocalFilter: () -> Unit,
 ) {
     val state by producePresenter { settingsPresenter() }
     Scaffold(
@@ -273,6 +278,24 @@ internal fun SettingsScreen(
                     modifier =
                         Modifier.clickable {
                             toTabCustomization.invoke()
+                        },
+                )
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_local_filter_title))
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Default.Tab,
+                            contentDescription = null,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_local_filter_description))
+                    },
+                    modifier =
+                        Modifier.clickable {
+                            toLocalFilter.invoke()
                         },
                 )
             }

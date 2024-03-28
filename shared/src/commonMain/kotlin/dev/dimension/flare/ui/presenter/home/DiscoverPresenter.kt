@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -18,6 +19,7 @@ class DiscoverPresenter(
 ) : PresenterBase<DiscoverState>() {
     @Composable
     override fun body(): DiscoverState {
+        val scope = rememberCoroutineScope()
         val accountState = accountServiceProvider(accountType = accountType)
         val users =
             accountState.flatMap { dataSource ->
@@ -37,7 +39,7 @@ class DiscoverPresenter(
             accountState.flatMap { dataSource ->
                 remember(dataSource) {
                     runCatching {
-                        dataSource.discoverStatuses()
+                        dataSource.discoverStatuses(scope = scope)
                     }.getOrNull()
                 }?.collectPagingProxy().let {
                     if (it == null) {

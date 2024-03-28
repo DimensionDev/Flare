@@ -31,6 +31,7 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
+import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -42,6 +43,7 @@ import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -55,6 +57,7 @@ class MisskeyDataSource(
     override val account: UiAccount.Misskey,
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
+    private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://${account.credential.host}/api/",
@@ -65,12 +68,15 @@ class MisskeyDataSource(
     override fun homeTimeline(
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 HomeTimelineRemoteMediator(
                     account,
@@ -85,12 +91,15 @@ class MisskeyDataSource(
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forNotification = true),
+            scope = scope,
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -195,6 +204,7 @@ class MisskeyDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
@@ -204,6 +214,8 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 UserTimelineRemoteMediator(
                     account,
@@ -218,6 +230,7 @@ class MisskeyDataSource(
 
     override fun context(
         statusKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
@@ -226,6 +239,8 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -575,6 +590,7 @@ class MisskeyDataSource(
 
     override fun searchStatus(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
@@ -583,6 +599,8 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
+            scope = scope,
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -596,6 +614,7 @@ class MisskeyDataSource(
 
     override fun searchUser(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUser>> {
         return Pager(
@@ -622,6 +641,7 @@ class MisskeyDataSource(
 
     override fun discoverStatuses(
         pageSize: Int,
+        scope: CoroutineScope,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
@@ -629,6 +649,8 @@ class MisskeyDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,

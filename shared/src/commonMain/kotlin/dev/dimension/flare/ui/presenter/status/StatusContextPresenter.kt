@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.status
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -19,10 +20,11 @@ class StatusContextPresenter(
 ) : PresenterBase<StatusContextState>() {
     @Composable
     override fun body(): StatusContextState {
+        val scope = rememberCoroutineScope()
         val listState =
             accountServiceProvider(accountType = accountType).map { service ->
                 remember(service, statusKey) {
-                    service.context(statusKey)
+                    service.context(statusKey, scope = scope)
                 }.collectPagingProxy()
             }
 //        val refreshing =

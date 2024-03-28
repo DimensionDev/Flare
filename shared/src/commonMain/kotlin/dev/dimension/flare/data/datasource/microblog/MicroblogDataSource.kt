@@ -9,6 +9,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 interface MicroblogDataSource {
@@ -17,12 +18,14 @@ interface MicroblogDataSource {
     fun homeTimeline(
         pageSize: Int = 20,
         pagingKey: String = "home",
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>>
 
     fun notification(
         type: NotificationFilter = NotificationFilter.All,
         pageSize: Int = 20,
         pagingKey: String = "notification_$type",
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>>
 
     val supportedNotificationFilter: List<NotificationFilter>
@@ -35,6 +38,7 @@ interface MicroblogDataSource {
 
     fun userTimeline(
         userKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int = 20,
         mediaOnly: Boolean = false,
         pagingKey: String = "user_${userKey}_${if (mediaOnly) "media" else "all"}",
@@ -42,6 +46,7 @@ interface MicroblogDataSource {
 
     fun context(
         statusKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int = 20,
         pagingKey: String = "status_$statusKey",
     ): Flow<PagingData<UiStatus>>
@@ -57,12 +62,14 @@ interface MicroblogDataSource {
 
     fun searchStatus(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int = 20,
         pagingKey: String = "search_$query",
     ): Flow<PagingData<UiStatus>>
 
     fun searchUser(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int = 20,
     ): Flow<PagingData<UiUser>>
 
@@ -70,6 +77,7 @@ interface MicroblogDataSource {
 
     fun discoverStatuses(
         pageSize: Int = 20,
+        scope: CoroutineScope,
         pagingKey: String = "discover_status",
     ): Flow<PagingData<UiStatus>>
 

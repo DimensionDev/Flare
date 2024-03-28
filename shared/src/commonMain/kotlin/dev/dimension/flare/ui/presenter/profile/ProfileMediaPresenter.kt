@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.flatMap
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
@@ -22,21 +23,25 @@ class ProfileMediaPresenter(
 ) : PresenterBase<ProfileMediaState>() {
     @Composable
     override fun body(): ProfileMediaState {
+        val scope = rememberCoroutineScope()
         val accountServiceState = accountServiceProvider(accountType = accountType)
         val mediaState =
             accountServiceState.map { service ->
                 remember(service, userKey) {
-                    service.userTimeline(userKey ?: service.account.accountKey, mediaOnly = true)
-                        .map { data ->
-                            data.flatMap { status ->
-                                status.medias.map {
-                                    ProfileMedia(
-                                        it,
-                                        status,
-                                    )
-                                }
+                    service.userTimeline(
+                        userKey ?: service.account.accountKey,
+                        scope = scope,
+                        mediaOnly = true,
+                    ).map { data ->
+                        data.flatMap { status ->
+                            status.medias.map {
+                                ProfileMedia(
+                                    it,
+                                    status,
+                                )
                             }
                         }
+                    }
                 }.collectPagingProxy()
             }
         return object : ProfileMediaState {

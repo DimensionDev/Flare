@@ -28,6 +28,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -44,6 +45,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
     override fun homeTimeline(
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
         return Pager(PagingConfig(pageSize = pageSize)) {
             GuestTimelinePagingSource()
@@ -54,6 +56,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
         TODO("Not yet implemented")
     }
@@ -114,6 +117,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
 
     override fun userTimeline(
         userKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
@@ -125,6 +129,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
 
     override fun context(
         statusKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
@@ -156,6 +161,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
 
     override fun searchStatus(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
@@ -166,6 +172,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
 
     override fun searchUser(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUser>> {
         return Pager(
@@ -192,6 +199,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
 
     override fun discoverStatuses(
         pageSize: Int,
+        scope: CoroutineScope,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
         return Pager(PagingConfig(pageSize = pageSize)) {

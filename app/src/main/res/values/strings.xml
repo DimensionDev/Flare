@@ -95,6 +95,8 @@
     <string name="settings_about_subtitle">Learn more about Flare</string>
     <string name="settings_tab_customization">Tab customization</string>
     <string name="settings_tab_customization_description">Customize the tabs on the home screen</string>
+    <string name="settings_local_filter_title">Local filter</string>
+    <string name="settings_local_filter_description">Local filter settings for timeline</string>
 
     <string name="status_loadmore_end">No more toots</string>
     <string name="status_loadmore_error">Error loading more toots</string>
@@ -279,4 +281,19 @@
     <string name="tab_settings_drag">Drag</string>
     <string name="tab_settings_edit">Edit</string>
     <string name="tab_settings_remove">Remove</string>
+
+    <string name="local_filter_add">Add Filter</string>
+    <string name="local_filter_no_expiration">No expiration</string>
+
+    <string name="local_filter_edit_title">Edit Filter</string>
+    <string name="local_filter_add_title">Add Filter</string>
+    <string name="local_filter_keyword">Keyword</string>
+    <string name="local_filter_keyword_hint">Keyword to filter</string>
+    <string name="local_filter_for_timeline">Filter in timeline</string>
+    <string name="local_filter_for_notification">Filter in notification</string>
+    <string name="local_filter_for_search">Filter in search</string>
+    <string name="local_filter_delete">Delete Filter</string>
+
+    <string name="done">Done</string>
+    <string name="delete">Delete</string>
 </resources>

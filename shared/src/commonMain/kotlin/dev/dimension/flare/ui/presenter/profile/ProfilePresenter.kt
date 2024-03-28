@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.collectPagingProxy
@@ -22,9 +23,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 class ProfilePresenter(
     private val accountType: AccountType,
@@ -32,6 +31,7 @@ class ProfilePresenter(
 ) : PresenterBase<ProfileState>() {
     @Composable
     override fun body(): ProfileState {
+        val scope = rememberCoroutineScope()
         val accountServiceState = accountServiceProvider(accountType = accountType)
         val userState =
             accountServiceState.map { service ->
@@ -43,7 +43,10 @@ class ProfilePresenter(
         val listState =
             accountServiceState.map { service ->
                 remember(service, userKey) {
-                    service.userTimeline(userKey ?: service.account.accountKey)
+                    service.userTimeline(
+                        userKey ?: service.account.accountKey,
+                        scope = scope,
+                    )
                 }.collectPagingProxy()
             }
         val mediaState =
@@ -57,7 +60,7 @@ class ProfilePresenter(
                 }.collectAsUiState().value.flatMap { it }
             }
 
-        val scope = koinInject<CoroutineScope>()
+//        val scope = koinInject<CoroutineScope>()
         val isMe =
             accountServiceState.map {
                 it.account.accountKey == userKey || userKey == null
@@ -85,10 +88,33 @@ class ProfilePresenter(
                 scope.launch {
                     accountServiceState.onSuccess { service ->
                         when (data) {
-                            is UiRelation.Bluesky -> blueskyFollow(service as BlueskyDataSource, user.userKey, data)
-                            is UiRelation.Mastodon -> mastodonFollow(service as MastodonDataSource, user.userKey, data)
-                            is UiRelation.Misskey -> misskeyFollow(service as MisskeyDataSource, user.userKey, data)
-                            is UiRelation.XQT -> xqtFollow(service as XQTDataSource, user.userKey, data)
+                            is UiRelation.Bluesky ->
+                                blueskyFollow(
+                                    service as BlueskyDataSource,
+                                    user.userKey,
+                                    data,
+                                )
+
+                            is UiRelation.Mastodon ->
+                                mastodonFollow(
+                                    service as MastodonDataSource,
+                                    user.userKey,
+                                    data,
+                                )
+
+                            is UiRelation.Misskey ->
+                                misskeyFollow(
+                                    service as MisskeyDataSource,
+                                    user.userKey,
+                                    data,
+                                )
+
+                            is UiRelation.XQT ->
+                                xqtFollow(
+                                    service as XQTDataSource,
+                                    user.userKey,
+                                    data,
+                                )
                         }
                     }
                 }
@@ -103,20 +129,46 @@ class ProfilePresenter(
                         when (data) {
                             is UiRelation.Bluesky -> {
                                 require(service is BlueskyDataSource)
-                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                                if (data.blocking) {
+                                    service.unblock(user.userKey)
+                                } else {
+                                    service.block(
+                                        user.userKey,
+                                    )
+                                }
                             }
+
                             is UiRelation.Mastodon -> {
                                 require(service is MastodonDataSource)
-                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                                if (data.blocking) {
+                                    service.unblock(user.userKey)
+                                } else {
+                                    service.block(
+                                        user.userKey,
+                                    )
+                                }
                             }
+
                             is UiRelation.Misskey -> {
                                 require(service is MisskeyDataSource)
-                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                                if (data.blocking) {
+                                    service.unblock(user.userKey)
+                                } else {
+                                    service.block(
+                                        user.userKey,
+                                    )
+                                }
                             }
 
                             is UiRelation.XQT -> {
                                 require(service is XQTDataSource)
-                                if (data.blocking) service.unblock(user.userKey) else service.block(user.userKey)
+                                if (data.blocking) {
+                                    service.unblock(user.userKey)
+                                } else {
+                                    service.block(
+                                        user.userKey,
+                                    )
+                                }
                             }
                         }
                     }
@@ -134,10 +186,12 @@ class ProfilePresenter(
                                 require(service is BlueskyDataSource)
                                 if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
                             }
+
                             is UiRelation.Mastodon -> {
                                 require(service is MastodonDataSource)
                                 if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
                             }
+
                             is UiRelation.Misskey -> {
                                 require(service is MisskeyDataSource)
                                 if (data.muted) service.unmute(user.userKey) else service.mute(user.userKey)

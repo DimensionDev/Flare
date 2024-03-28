@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectPagingProxy
@@ -21,6 +22,7 @@ class SearchPresenter(
 ) : PresenterBase<SearchState>() {
     @Composable
     override fun body(): SearchState {
+        val scope = rememberCoroutineScope()
         val accountState = accountServiceProvider(accountType = accountType)
         var query by remember { mutableStateOf(initialQuery) }
 
@@ -31,7 +33,7 @@ class SearchPresenter(
                 } else {
                     UiState.Success(
                         remember(service, query) {
-                            service.searchUser(query)
+                            service.searchUser(query, scope = scope)
                         }.collectPagingProxy(),
                     )
                 }
@@ -44,7 +46,7 @@ class SearchPresenter(
                 } else {
                     UiState.Success(
                         remember(service, query) {
-                            service.searchStatus(query)
+                            service.searchStatus(query, scope = scope)
                         }.collectPagingProxy(),
                     )
                 }

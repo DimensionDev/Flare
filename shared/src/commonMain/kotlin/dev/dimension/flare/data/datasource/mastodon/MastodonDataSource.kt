@@ -29,6 +29,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
+import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -40,6 +41,7 @@ import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -53,6 +55,7 @@ class MastodonDataSource(
     override val account: UiAccount.Mastodon,
 ) : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
+    private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://${account.credential.instance}/",
@@ -63,12 +66,15 @@ class MastodonDataSource(
     override fun homeTimeline(
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -83,12 +89,15 @@ class MastodonDataSource(
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
+        scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forNotification = true),
+            scope = scope,
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -173,6 +182,7 @@ class MastodonDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
@@ -182,6 +192,8 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 UserTimelineRemoteMediator(
                     service,
@@ -195,6 +207,7 @@ class MastodonDataSource(
 
     override fun context(
         statusKey: MicroBlogKey,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> =
@@ -203,6 +216,8 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -644,6 +659,7 @@ class MastodonDataSource(
 
     override fun discoverStatuses(
         pageSize: Int,
+        scope: CoroutineScope,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
         return timelinePager(
@@ -651,6 +667,8 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,
@@ -673,6 +691,7 @@ class MastodonDataSource(
 
     override fun searchStatus(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
@@ -681,6 +700,8 @@ class MastodonDataSource(
             pagingKey = pagingKey,
             accountKey = account.accountKey,
             database = database,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
+            scope = scope,
             mediator =
                 SearchStatusPagingSource(
                     service,
@@ -694,6 +715,7 @@ class MastodonDataSource(
 
     override fun searchUser(
         query: String,
+        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUser>> {
         return Pager(

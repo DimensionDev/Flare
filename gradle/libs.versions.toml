@@ -3,19 +3,19 @@ compileSdk = "34"
 minSdk = "24"
 java = "17"
 agp = "8.3.1"
-kotlin = "1.9.22"
+kotlin = "1.9.23"
 core-ktx = "1.12.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 lifecycle-runtime-ktx = "2.7.0"
 activity-compose = "1.8.2"
-compose-bom = "2024.03.00"
-compose-compiler = "1.5.10"
-ksp = "1.9.22-1.0.18"
+compose-bom = "2024.03.00-alpha02"
+compose-compiler = "1.5.11"
+ksp = "1.9.23-1.0.19"
 cash-paging = "3.3.0-alpha02-0.5.1"
 paging = "3.3.0-alpha02"
-navigation = "2.7.7"
+navigation = "2.8.0-alpha05"
 kotlinx-datetime = "0.5.0"
 kotlinx-collections-immutable = "0.3.7"
 kotlinx-serialization = "1.6.3"
@@ -25,7 +25,7 @@ ktor = "2.3.9"
 reorderable = "1.3.3"
 stately = "2.0.7"
 twitter-parser = "0.3.5"
-molecule = "1.4.1"
+molecule = "1.4.2"
 accompanist = "0.34.0"
 compose-destinations = "1.10.2"
 compose-lint-checks = "1.3.1"
@@ -61,7 +61,7 @@ ktml = { group = "moe.tlaster", name = "ktml", version.ref = "ktml" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-bom = { group = "dev.chrisbanes.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-compiler = { group = "androidx.compose.compiler", name = "compiler", version.ref = "compose-compiler" }
 paging-compose-common = { module = "app.cash.paging:paging-compose-common", version.ref = "cash-paging" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
@@ -74,10 +74,12 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.2.1" }
-material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class", version = "1.2.1" }
-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version = "1.0.0-alpha03" }
-material3-adaptive = { group = "androidx.compose.material3", name = "material3-adaptive", version="1.0.0-alpha06" }
+material3 = { group = "androidx.compose.material3", name = "material3" }
+material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
+material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
+material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
+material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout" }
+material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
@@ -85,6 +87,7 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 composeIcons-fontAwesome = { module = "br.com.devsrsouza.compose.icons:font-awesome", version.ref = "composeIcons" }
 datastore = { group = "androidx.datastore", name = "datastore", version = "1.0.0" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+androidx-window = { group = "androidx.window", name = "window-core", version = "1.3.0-alpha03" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
@@ -108,7 +111,7 @@ coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil"
 apng = { group = "com.github.penfeizhou.android.animation", name = "apng", version.ref = "apng-android" }
 awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", version.ref = "apng-android" }
 vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.1.0" }
-zoomable-image-coil = { group = "me.saket.telephoto", name = "zoomable", version = "0.8.0" }
+zoomable-image-coil = { group = "me.saket.telephoto", name = "zoomable", version = "0.9.0" }
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
@@ -161,11 +164,12 @@ firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analy
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
 
 [bundles]
+compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout", "material-icons-extended"]
 navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json"]
 koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
-coil = ["coil","coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated", "coil-network-ktor", "zoomable-image-coil"]
+coil = ["coil", "coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated", "coil-network-ktor", "zoomable-image-coil"]
 accompanist = ["accompanist-permissions"]
 compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
 compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]

@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.navigate
@@ -54,7 +55,13 @@ fun QuickMenuDialogRoute(
 ) {
     QuickMenuDialog(
         toSettings = {
-            rootNavController.navController.navigate(SettingsRouteDestination)
+            rootNavController.navController.navigate(SettingsRouteDestination) {
+                popUpTo(rootNavController.navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
         },
         addAccount = {
             navigator.navigate(ServiceSelectRouteDestination)

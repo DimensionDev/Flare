@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.UiState
@@ -13,7 +14,7 @@ class LocalFilterPresenter : PresenterBase<LocalFilterState>() {
     @Composable
     override fun body(): LocalFilterState {
         val repository = koinInject<LocalFilterRepository>()
-        val all by repository.getAllFlow().collectAsUiState()
+        val all by remember { repository.getAllFlow() }.collectAsUiState()
         return object : LocalFilterState {
             override val items = all
 

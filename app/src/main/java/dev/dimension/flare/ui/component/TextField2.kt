@@ -5,15 +5,14 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicSecureTextField
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text2.BasicSecureTextField
-import androidx.compose.foundation.text2.BasicTextField2
-import androidx.compose.foundation.text2.input.CodepointTransformation
-import androidx.compose.foundation.text2.input.InputTransformation
-import androidx.compose.foundation.text2.input.TextFieldLineLimits
-import androidx.compose.foundation.text2.input.TextFieldState
-import androidx.compose.foundation.text2.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -35,7 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Density
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextField2(
     state: TextFieldState,
@@ -51,7 +50,6 @@ fun TextField2(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
-    codepointTransformation: CodepointTransformation? = null,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -77,7 +75,7 @@ fun TextField2(
             }
         }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
-    BasicTextField2(
+    BasicTextField(
         state = state,
         modifier = modifier,
         enabled = enabled,
@@ -91,7 +89,6 @@ fun TextField2(
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         scrollState = scrollState,
-        codepointTransformation = codepointTransformation,
         decorator = { innerTextField ->
             TextFieldDefaults.DecorationBox(
                 value = state.text.toString(),
@@ -115,7 +112,7 @@ fun TextField2(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OutlinedTextField2(
     state: TextFieldState,
@@ -131,7 +128,6 @@ fun OutlinedTextField2(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     cursorBrush: Brush = SolidColor(LocalContentColor.current),
     scrollState: ScrollState = rememberScrollState(),
-    codepointTransformation: CodepointTransformation? = null,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -157,7 +153,7 @@ fun OutlinedTextField2(
             }
         }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
-    BasicTextField2(
+    BasicTextField(
         state = state,
         modifier = modifier,
         enabled = enabled,
@@ -171,7 +167,6 @@ fun OutlinedTextField2(
         interactionSource = interactionSource,
         cursorBrush = cursorBrush,
         scrollState = scrollState,
-        codepointTransformation = codepointTransformation,
         decorator = { innerTextField ->
             OutlinedTextFieldDefaults.DecorationBox(
                 value = state.text.toString(),

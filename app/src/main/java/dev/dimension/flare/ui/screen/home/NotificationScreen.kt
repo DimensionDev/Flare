@@ -15,7 +15,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
@@ -93,7 +93,7 @@ private fun NotificationScreen(
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 actions = {
-                    if (windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Compact) {
+                    if (windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
                         state.state.allTypes.onSuccess {
                             if (it.size > 1) {
                                 NotificationFilterSelector(it, state.state)
@@ -122,7 +122,7 @@ private fun NotificationScreen(
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    if (windowInfo.windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact) {
+                    if (windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {
                         state.state.allTypes.onSuccess {
                             if (it.size > 1) {
                                 item(

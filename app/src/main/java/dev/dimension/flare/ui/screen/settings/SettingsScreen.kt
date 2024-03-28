@@ -21,15 +21,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.adaptive.AnimatedPane
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.ListDetailPaneScaffold
-import androidx.compose.material3.adaptive.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.PaneScaffoldDirective
-import androidx.compose.material3.adaptive.ThreePaneScaffoldNavigator
-import androidx.compose.material3.adaptive.calculateStandardPaneScaffoldDirective
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.rememberListDetailPaneScaffoldNavigator
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
+import androidx.compose.material3.adaptive.layout.calculateStandardPaneScaffoldDirective
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,10 +97,11 @@ internal fun SettingsRoute() {
         settingsPanelState.setSelectedItem(null)
     }
     ListDetailPaneScaffold(
+        directive = scaffoldNavigator.scaffoldDirective,
+        value = scaffoldNavigator.scaffoldValue,
         windowInsets = WindowInsets(top = 0.dp),
-        scaffoldState = scaffoldNavigator.scaffoldState,
         listPane = {
-            AnimatedPane(modifier = Modifier) {
+            AnimatedPane {
                 SettingsScreen(
                     toAccounts = {
                         settingsPanelState.setSelectedItem(AccountsRouteDestination)
@@ -124,7 +125,7 @@ internal fun SettingsRoute() {
             }
         },
         detailPane = {
-            AnimatedPane(modifier = Modifier) {
+            AnimatedPane {
                 settingsPanelState.selectedItem?.let { item ->
                     Router(navGraph = NavGraphs.root, item) {
                         dependency(

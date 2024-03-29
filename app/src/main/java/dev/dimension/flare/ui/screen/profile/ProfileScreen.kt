@@ -54,7 +54,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -72,6 +71,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
@@ -432,7 +432,7 @@ private fun ProfileScreen(
     val listState = rememberLazyStaggeredGridState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val windowInfo = currentWindowAdaptiveInfo()
-    val bigScreen = windowInfo.windowSizeClass.widthSizeClass > WindowWidthSizeClass.Medium
+    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets =

@@ -27,10 +27,6 @@ class StatusContextPresenter(
                     service.context(statusKey, scope = scope)
                 }.collectPagingProxy()
             }
-//        val refreshing =
-//            listState is UiState.Loading ||
-//                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
-
         return object : StatusContextState(
             listState,
         ) {

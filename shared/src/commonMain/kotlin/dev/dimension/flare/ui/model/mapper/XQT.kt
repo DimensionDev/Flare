@@ -137,23 +137,24 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
             }
         }?.toImmutableList() ?: persistentListOf()
     val text =
-        legacy?.fullText?.let {
-            if (legacy.displayTextRange.size == 2) {
-                it.codePointSequence()
-                    .drop(legacy.displayTextRange[0])
-                    .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
-                    .flatMap { codePoint ->
-                        codePoint.toChars()
-                            .toList()
-                    }
-                    .joinToString("")
-                    .replace("&amp;", "&")
-                    .replace("&lt;", "<")
-                    .replace("&gt;", ">")
-            } else {
-                it
-            }
-        }.orEmpty()
+        noteTweet?.noteTweetResults?.result?.text
+            ?: legacy?.fullText?.let {
+                if (legacy.displayTextRange.size == 2) {
+                    it.codePointSequence()
+                        .drop(legacy.displayTextRange[0])
+                        .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
+                        .flatMap { codePoint ->
+                            codePoint.toChars()
+                                .toList()
+                        }
+                        .joinToString("")
+                        .replace("&amp;", "&")
+                        .replace("&lt;", "<")
+                        .replace("&gt;", ">")
+                } else {
+                    it
+                }
+            }.orEmpty()
     return UiStatus.XQT(
         accountKey = accountKey,
         statusKey =

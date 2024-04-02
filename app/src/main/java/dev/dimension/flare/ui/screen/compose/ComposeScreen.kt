@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -46,6 +47,7 @@ import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Poll
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -89,6 +91,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavBackStackEntry
+import com.eygraber.compose.placeholder.material3.placeholder
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -107,6 +110,8 @@ import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
@@ -118,7 +123,9 @@ import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.nameDirection
 import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -319,6 +326,92 @@ private fun ComposeScreen(
 //                    .padding(it),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            state.state.enableCrossPost.onSuccess { enableCrossPost ->
+                if (enableCrossPost) {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        state.state.selectedUsers.onSuccess { selectedUsers ->
+                            items(selectedUsers.size) {
+                                val (user, account) = selectedUsers[it]
+                                user.onSuccess {
+                                    AssistChip(
+                                        onClick = {
+                                            state.state.selectAccount(account)
+                                        },
+                                        label = {
+                                            Text(it.handle)
+                                        },
+                                        leadingIcon = {
+                                            AvatarComponent(it.avatarUrl, size = 24.dp)
+                                        },
+                                    )
+                                }
+                            }
+                            state.state.otherAccounts.onSuccess { others ->
+                                if (others.size > 0) {
+                                    item {
+                                        AssistChip(
+                                            onClick = {
+                                                state.setShowAccountSelectMenu(true)
+                                            },
+                                            label = {
+                                                Icon(Icons.Default.Add, contentDescription = null)
+                                            },
+                                        )
+
+                                        DropdownMenu(
+                                            expanded = state.showAccountSelectMenu,
+                                            onDismissRequest = {
+                                                state.setShowAccountSelectMenu(false)
+                                            },
+                                            properties = PopupProperties(usePlatformDefaultWidth = true),
+                                        ) {
+                                            for (i in 0 until others.size) {
+                                                val (user, account) = others[i]
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        user.onSuccess {
+                                                            Column(
+                                                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                                                horizontalAlignment = Alignment.Start,
+                                                            ) {
+                                                                HtmlText2(
+                                                                    it.nameElement,
+                                                                    layoutDirection = it.nameDirection,
+                                                                    textStyle = MaterialTheme.typography.bodyLarge,
+                                                                )
+                                                                Text(
+                                                                    text = it.handle,
+                                                                    style = MaterialTheme.typography.bodySmall,
+                                                                )
+                                                            }
+                                                        }.onLoading {
+                                                            Text(
+                                                                "placeholder",
+                                                                modifier = Modifier.placeholder(true),
+                                                            )
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        state.state.selectAccount(account)
+                                                    },
+                                                    leadingIcon = {
+                                                        user.onSuccess {
+                                                            AvatarComponent(it.avatarUrl)
+                                                        }
+                                                    },
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             state.contentWarningState.onSuccess {
                 AnimatedVisibility(it.enabled) {
                     Column(
@@ -818,7 +911,6 @@ private fun MastodonVisibilityContent(visibilityState: MastodonVisibilityState) 
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PollOption(
     textFieldState: TextFieldState,
@@ -911,6 +1003,7 @@ private fun composePresenter(
             mediaState.medias.size < 4 && !(pollState is UiState.Success && pollState.data.enabled)
         }
     var showEmojiMenu by remember { mutableStateOf(false) }
+    var showAccountSelectMenu by remember { mutableStateOf(false) }
     object {
         val textFieldState = textFieldState
         val canSend = canSend
@@ -920,6 +1013,7 @@ private fun composePresenter(
         val mediaState = mediaState
         val contentWarningState = contentWarningState
         val state = state
+        val showAccountSelectMenu = showAccountSelectMenu
 
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
@@ -933,9 +1027,13 @@ private fun composePresenter(
             showEmojiMenu = value
         }
 
+        fun setShowAccountSelectMenu(value: Boolean) {
+            showAccountSelectMenu = value
+        }
+
         @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
-            state.account.onSuccess {
+            state.selectedAccounts.forEach {
                 val data =
                     when (it) {
                         is UiAccount.Mastodon ->

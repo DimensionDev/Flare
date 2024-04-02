@@ -51,6 +51,20 @@ inline fun <T : Any, R : Any> UiState<T>.flatMap(
         is UiState.Loading -> UiState.Loading()
     }
 
+fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): UiState<List<T>> {
+    val success = filterIsInstance<UiState.Success<T>>().map { it.data }
+    val error = filterIsInstance<UiState.Error<T>>().map { it.throwable }
+    val loading = filterIsInstance<UiState.Loading<T>>()
+
+    return when {
+        requireAllSuccess && success.size != size && loading.isEmpty() ->
+            UiState.Error(IllegalStateException("Not all success"))
+        error.isNotEmpty() -> UiState.Error(error.first())
+        loading.isNotEmpty() -> UiState.Loading()
+        else -> UiState.Success(success)
+    }
+}
+
 inline fun <T : Any> UiState<T>.onSuccess(action: (T) -> Unit): UiState<T> =
     apply {
         if (this is UiState.Success) {

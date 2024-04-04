@@ -84,6 +84,7 @@
   <string name="settings_tab_customization">选项卡自定义</string>
   <string name="settings_tab_customization_description">自定义主屏幕上的选项卡</string>
   <string name="settings_local_filter_title">本地过滤器</string>
+  <string name="settings_local_filter_description">时间轴的本地过滤器设置</string>
   <string name="status_loadmore_end">没有更多嘟文了</string>
   <string name="status_loadmore_error">加载失败</string>
   <string name="status_loadmore_error_retry">重试</string>
@@ -223,6 +224,20 @@
   <string name="media_menu_save">保存</string>
   <string name="media_save_success">图片已保存到下载文件夹</string>
   <string name="reply_to">回复 %1$s</string>
+  <string name="tab_settings_add">添加</string>
+  <string name="tab_settings_drag">拖动</string>
+  <string name="tab_settings_edit">编辑</string>
   <string name="tab_settings_remove">删除账户</string>
+  <string name="local_filter_add">添加过滤器</string>
+  <string name="local_filter_no_expiration">无限期</string>
+  <string name="local_filter_edit_title">编辑过滤器</string>
+  <string name="local_filter_add_title">添加过滤器</string>
+  <string name="local_filter_keyword">关键字</string>
+  <string name="local_filter_keyword_hint">要过滤的关键字</string>
+  <string name="local_filter_for_timeline">在时间轴中过滤</string>
+  <string name="local_filter_for_notification">在通知中过滤</string>
+  <string name="local_filter_for_search">在搜索中过滤</string>
+  <string name="local_filter_delete">删除过滤器</string>
+  <string name="done">完成</string>
   <string name="delete">删除</string>
 </resources>

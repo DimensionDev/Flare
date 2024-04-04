@@ -2,6 +2,13 @@ package dev.dimension.flare.ui.screen.home
 
 import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -137,6 +144,16 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                                 it
                             }
                         },
+                    enterTransition = {
+                        slideInVertically(tween(durationMillis = 700)) { 80 } +
+                            fadeIn(
+                                tween(durationMillis = 700),
+                                0.8f,
+                            )
+                    },
+                    exitTransition = {
+                        slideOutVertically(tween(durationMillis = 700)) { 80 } + fadeOut(tween(durationMillis = 700))
+                    },
                 ) {
                     tabs.forEach { tab ->
                         composable(tab.key) {
@@ -215,7 +232,21 @@ internal fun Router(
             navGraph = navGraph,
             engine =
                 rememberAnimatedNavHostEngine(
-                    rootDefaultAnimations = RootNavGraphDefaultAnimations.ACCOMPANIST_FADING,
+                    rootDefaultAnimations =
+                        RootNavGraphDefaultAnimations(
+                            enterTransition = {
+                                slideInHorizontally(tween()) { it / 3 } + fadeIn()
+                            },
+                            exitTransition = {
+                                slideOutHorizontally(tween()) { -it / 3 } + fadeOut()
+                            },
+                            popEnterTransition = {
+                                slideInHorizontally(tween()) { -it / 3 } + fadeIn()
+                            },
+                            popExitTransition = {
+                                slideOutHorizontally(tween()) { it / 3 } + fadeOut()
+                            },
+                        ),
                 ),
             startRoute = direction,
             dependenciesContainerBuilder = dependenciesContainerBuilder,

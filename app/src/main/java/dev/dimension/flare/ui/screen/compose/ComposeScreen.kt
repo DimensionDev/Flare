@@ -38,7 +38,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.textAsFlow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
@@ -70,7 +69,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -861,9 +859,6 @@ private fun composePresenter(
     val textFieldState by remember {
         mutableStateOf(TextFieldState(""))
     }
-    val text by remember {
-        textFieldState.textAsFlow()
-    }.collectAsState(initial = "")
     val pollState =
         state.supportedComposeEvent.flatMap {
             if (it.contains(SupportedComposeEvent.Poll)) {
@@ -904,8 +899,8 @@ private fun composePresenter(
     }
 
     val canSend =
-        remember(text) {
-            text.isNotBlank() && text.isNotEmpty()
+        remember(textFieldState.text) {
+            textFieldState.text.isNotBlank() && textFieldState.text.isNotEmpty()
         }
     val canPoll =
         remember(mediaState) {

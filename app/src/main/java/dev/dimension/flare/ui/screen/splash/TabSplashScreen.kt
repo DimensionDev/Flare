@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.popUpTo
 import com.ramcosta.composedestinations.spec.Direction
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.screen.destinations.TabSplashScreenDestination
@@ -20,8 +19,8 @@ internal fun TabSplashScreen(
     navigator: DestinationsNavigator,
 ) {
     LaunchedEffect(Unit) {
-        navigator.navigate(args.direction) {
-            popUpTo(TabSplashScreenDestination) {
+        navigator.navigate(direction = args.direction) {
+            popUpTo(route = TabSplashScreenDestination.route) {
                 inclusive = true
             }
         }

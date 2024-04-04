@@ -190,13 +190,12 @@ private fun BlueskyLoginScreen(
                         Modifier
                             .fillMaxWidth(),
                     lineLimits = TextFieldLineLimits.SingleLine,
-                    onSubmit = {
+                    onKeyboardAction = {
                         state.state.login(
                             state.baseUrl.text.toString(),
                             state.username.text.toString(),
                             state.password.text.toString(),
                         )
-                        true
                     },
                 )
                 Button(

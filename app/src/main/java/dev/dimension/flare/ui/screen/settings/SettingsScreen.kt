@@ -3,8 +3,6 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -22,12 +20,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
-import androidx.compose.material3.adaptive.layout.calculateStandardPaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
@@ -38,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
@@ -69,21 +63,8 @@ internal fun SettingsRoute() {
     val settingsPanelState by producePresenter {
         settingsPanelPresenter()
     }
-    val windowInfo = currentWindowAdaptiveInfo()
     val scaffoldNavigator =
-        rememberListDetailPaneScaffoldNavigator<Nothing>(
-            scaffoldDirective =
-                calculateStandardPaneScaffoldDirective(windowInfo).let {
-                    PaneScaffoldDirective(
-                        contentPadding = PaddingValues(0.dp),
-                        maxHorizontalPartitions = it.maxHorizontalPartitions,
-                        horizontalPartitionSpacerSize = it.horizontalPartitionSpacerSize,
-                        maxVerticalPartitions = it.maxVerticalPartitions,
-                        verticalPartitionSpacerSize = it.verticalPartitionSpacerSize,
-                        excludedBounds = it.excludedBounds,
-                    )
-                },
-        )
+        rememberListDetailPaneScaffoldNavigator()
     LaunchedEffect(settingsPanelState.selectedItem) {
         if (settingsPanelState.selectedItem != null) {
             scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
@@ -99,7 +80,6 @@ internal fun SettingsRoute() {
     ListDetailPaneScaffold(
         directive = scaffoldNavigator.scaffoldDirective,
         value = scaffoldNavigator.scaffoldValue,
-        windowInsets = WindowInsets(top = 0.dp),
         listPane = {
             AnimatedPane {
                 SettingsScreen(

@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.textAsFlow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -38,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -248,13 +248,12 @@ fun ServiceSelectScreen(
                                         Modifier
                                             .width(300.dp),
                                     lineLimits = TextFieldLineLimits.SingleLine,
-                                    onSubmit = {
+                                    onKeyboardAction = {
                                         state.blueskyLoginState.login(
                                             "https://${state.instanceInputState.text}",
                                             state.blueskyInputState.username.text.toString(),
                                             state.blueskyInputState.password.text.toString(),
                                         )
-                                        true
                                     },
                                 )
                                 Button(
@@ -480,8 +479,9 @@ private fun serviceSelectPresenter(
             )
         }.invoke()
     LaunchedEffect(Unit) {
-        instanceInputState
-            .textAsFlow()
+        snapshotFlow {
+            instanceInputState.text
+        }
             .distinctUntilChanged()
             .debounce(666L)
             .collect {

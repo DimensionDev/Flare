@@ -55,7 +55,7 @@ fun QuickMenuDialogRoute(
 ) {
     QuickMenuDialog(
         toSettings = {
-            rootNavController.navController.navigate(SettingsRouteDestination) {
+            rootNavController.navController.navigate(direction = SettingsRouteDestination) {
                 popUpTo(rootNavController.navController.graph.findStartDestination().id) {
                     saveState = true
                 }

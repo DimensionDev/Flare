@@ -7,9 +7,9 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicSecureTextField
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
@@ -29,8 +29,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Density
 
@@ -44,7 +42,7 @@ fun TextField2(
     inputTransformation: InputTransformation? = null,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    onKeyboardAction: KeyboardActionHandler? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
     onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -83,7 +81,7 @@ fun TextField2(
         inputTransformation = inputTransformation,
         textStyle = mergedTextStyle,
         keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
+        onKeyboardAction = onKeyboardAction,
         lineLimits = lineLimits,
         onTextLayout = onTextLayout,
         interactionSource = interactionSource,
@@ -122,7 +120,7 @@ fun OutlinedTextField2(
     inputTransformation: InputTransformation? = null,
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    onKeyboardAction: KeyboardActionHandler? = null,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
     onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -161,7 +159,7 @@ fun OutlinedTextField2(
         inputTransformation = inputTransformation,
         textStyle = mergedTextStyle,
         keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
+        onKeyboardAction = onKeyboardAction,
         lineLimits = lineLimits,
         onTextLayout = onTextLayout,
         interactionSource = interactionSource,
@@ -210,11 +208,8 @@ fun OutlinedSecureTextField2(
     onTextLayout: Density.(getResult: () -> TextLayoutResult?) -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     cursorBrush: Brush = SolidColor(LocalContentColor.current),
-    scrollState: ScrollState = rememberScrollState(),
-    onSubmit: ((ImeAction) -> Boolean)? = null,
-    imeAction: ImeAction = ImeAction.Default,
     textObfuscationMode: TextObfuscationMode = TextObfuscationMode.RevealLastTyped,
-    keyboardType: KeyboardType = KeyboardType.Password,
+    onKeyboardAction: KeyboardActionHandler? = null,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -248,8 +243,8 @@ fun OutlinedSecureTextField2(
         textStyle = mergedTextStyle,
         onTextLayout = onTextLayout,
         interactionSource = interactionSource,
+        onKeyboardAction = onKeyboardAction,
         cursorBrush = cursorBrush,
-        scrollState = scrollState,
         decorator = { innerTextField ->
             OutlinedTextFieldDefaults.DecorationBox(
                 value = state.text.toString(),
@@ -278,9 +273,6 @@ fun OutlinedSecureTextField2(
                 },
             )
         },
-        onSubmit = onSubmit,
-        imeAction = imeAction,
         textObfuscationMode = textObfuscationMode,
-        keyboardType = keyboardType,
     )
 }

@@ -115,10 +115,12 @@ class ComposePresenter(
             services.takeIf {
                 it.size == 1
             }?.first()?.flatMap {
-                when (it) {
-                    is MastodonDataSource -> it.emoji()
-                    is MisskeyDataSource -> it.emoji()
-                    else -> null
+                remember(it) {
+                    when (it) {
+                        is MastodonDataSource -> it.emoji()
+                        is MisskeyDataSource -> it.emoji()
+                        else -> null
+                    }
                 }?.collectAsState()?.toUi()?.map {
                     it.toImmutableListWrapper()
                 } ?: UiState.Error(IllegalStateException("Emoji not supported"))
@@ -131,7 +133,7 @@ class ComposePresenter(
                     }.groupBy {
                         it
                     }.entries.filter {
-                        it.value.size != services.size
+                        it.value.size == services.size
                     }.map {
                         it.key
                     }.toImmutableList().toImmutableListWrapper()

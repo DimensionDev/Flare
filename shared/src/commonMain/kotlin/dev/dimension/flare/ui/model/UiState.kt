@@ -86,6 +86,8 @@ inline fun <T : Any> UiState<T>.onLoading(action: () -> Unit): UiState<T> =
         }
     }
 
+fun <T : Any> UiState<T>.takeSuccess(): T? = (this as? UiState.Success)?.data
+
 @OptIn(ExperimentalObjCRefinement::class)
 @Composable
 @HiddenFromObjC

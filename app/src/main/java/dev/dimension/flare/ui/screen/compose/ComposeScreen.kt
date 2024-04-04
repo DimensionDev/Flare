@@ -1,20 +1,16 @@
 package dev.dimension.flare.ui.screen.compose
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresPermission
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -22,7 +18,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +27,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -76,7 +70,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -91,10 +84,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavBackStackEntry
-import com.eygraber.compose.placeholder.material3.placeholder
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
@@ -111,7 +100,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
@@ -123,15 +111,13 @@ import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.nameDirection
 import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
 import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
-import dev.dimension.flare.ui.presenter.compose.VisibilityState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
@@ -231,13 +217,8 @@ object ComposeTransitions : DestinationStyle.Animated {
     }
 }
 
-@SuppressLint("MissingPermission")
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class,
-    ExperimentalLayoutApi::class,
-    ExperimentalPermissionsApi::class,
-    ExperimentalComposeUiApi::class,
 )
 @Composable
 private fun ComposeScreen(
@@ -272,16 +253,16 @@ private fun ComposeScreen(
         }
     }
 
-    val permissionState =
-        rememberPermissionState(
-            Manifest.permission.POST_NOTIFICATIONS,
-            onPermissionResult = {
-                if (it) {
-                    state.send()
-                    onBack.invoke()
-                }
-            },
-        )
+//    val permissionState =
+//        rememberPermissionState(
+//            Manifest.permission.POST_NOTIFICATIONS,
+//            onPermissionResult = {
+//                if (it) {
+//                    state.send()
+//                    onBack.invoke()
+//                }
+//            },
+//        )
     Column(
         modifier =
             modifier
@@ -307,12 +288,8 @@ private fun ComposeScreen(
             actions = {
                 IconButton(
                     onClick = {
-                        if (permissionState.status.isGranted) {
-                            state.send()
-                            onBack.invoke()
-                        } else {
-                            permissionState.launchPermissionRequest()
-                        }
+                        state.send()
+                        onBack.invoke()
                     },
                     enabled = state.canSend,
                 ) {
@@ -328,13 +305,16 @@ private fun ComposeScreen(
         ) {
             state.state.enableCrossPost.onSuccess { enableCrossPost ->
                 if (enableCrossPost) {
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 4.dp),
+                    Row(
+                        modifier =
+                            Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         state.state.selectedUsers.onSuccess { selectedUsers ->
-                            items(selectedUsers.size) {
-                                val (user, account) = selectedUsers[it]
+                            for (i in 0 until selectedUsers.size) {
+                                val (user, account) = selectedUsers[i]
                                 user.onSuccess {
                                     AssistChip(
                                         onClick = {
@@ -346,66 +326,45 @@ private fun ComposeScreen(
                                         leadingIcon = {
                                             AvatarComponent(it.avatarUrl, size = 24.dp)
                                         },
+                                        shape = RoundedCornerShape(100),
                                     )
                                 }
                             }
                             state.state.otherAccounts.onSuccess { others ->
                                 if (others.size > 0) {
-                                    item {
-                                        AssistChip(
-                                            onClick = {
-                                                state.setShowAccountSelectMenu(true)
-                                            },
-                                            label = {
-                                                Icon(Icons.Default.Add, contentDescription = null)
-                                            },
-                                        )
-
-                                        DropdownMenu(
-                                            expanded = state.showAccountSelectMenu,
-                                            onDismissRequest = {
-                                                state.setShowAccountSelectMenu(false)
-                                            },
-                                            properties = PopupProperties(usePlatformDefaultWidth = true),
-                                        ) {
-                                            for (i in 0 until others.size) {
-                                                val (user, account) = others[i]
-                                                DropdownMenuItem(
-                                                    text = {
-                                                        user.onSuccess {
-                                                            Column(
-                                                                verticalArrangement = Arrangement.spacedBy(4.dp),
-                                                                horizontalAlignment = Alignment.Start,
-                                                            ) {
-                                                                HtmlText2(
-                                                                    it.nameElement,
-                                                                    layoutDirection = it.nameDirection,
-                                                                    textStyle = MaterialTheme.typography.bodyLarge,
-                                                                )
-                                                                Text(
-                                                                    text = it.handle,
-                                                                    style = MaterialTheme.typography.bodySmall,
-                                                                )
-                                                            }
-                                                        }.onLoading {
-                                                            Text(
-                                                                "placeholder",
-                                                                modifier = Modifier.placeholder(true),
-                                                            )
-                                                        }
-                                                    },
-                                                    onClick = {
-                                                        state.state.selectAccount(account)
-                                                    },
-                                                    leadingIcon = {
-                                                        user.onSuccess {
-                                                            AvatarComponent(it.avatarUrl)
-                                                        }
-                                                    },
-                                                )
+                                    AssistChip(
+                                        shape = CircleShape,
+                                        onClick = {
+                                            state.setShowAccountSelectMenu(true)
+                                        },
+                                        label = {
+                                            Icon(Icons.Default.Add, contentDescription = null)
+                                            DropdownMenu(
+                                                expanded = state.showAccountSelectMenu,
+                                                onDismissRequest = {
+                                                    state.setShowAccountSelectMenu(false)
+                                                },
+                                                properties = PopupProperties(focusable = true),
+                                            ) {
+                                                for (i in 0 until others.size) {
+                                                    val (user, account) = others[i]
+                                                    user.onSuccess { data ->
+                                                        DropdownMenuItem(
+                                                            text = {
+                                                                Text(text = data.handle)
+                                                            },
+                                                            onClick = {
+                                                                state.state.selectAccount(account)
+                                                            },
+                                                            leadingIcon = {
+                                                                AvatarComponent(data.avatarUrl, size = 24.dp)
+                                                            },
+                                                        )
+                                                    }
+                                                }
                                             }
-                                        }
-                                    }
+                                        },
+                                    )
                                 }
                             }
                         }
@@ -937,7 +896,6 @@ private fun PollOption(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun composePresenter(
     context: Context,
@@ -1031,7 +989,7 @@ private fun composePresenter(
             showAccountSelectMenu = value
         }
 
-        @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+//        @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
             state.selectedAccounts.forEach {
                 val data =
@@ -1044,25 +1002,24 @@ private fun composePresenter(
                                         FileItem(context, it)
                                     },
                                 poll =
-                                    if (pollState is UiState.Success && pollState.data.enabled) {
+                                    pollState.takeSuccess()?.takeIf { it.enabled }?.let {
                                         MastodonComposeData.Poll(
-                                            multiple = !pollState.data.pollSingleChoice,
-                                            expiresIn = pollState.data.expiredAt.duration.inWholeSeconds,
+                                            multiple = !it.pollSingleChoice,
+                                            expiresIn = it.expiredAt.duration.inWholeSeconds,
                                             options =
-                                                pollState.data.options.map { option ->
+                                                it.options.map { option ->
                                                     option.text.toString()
                                                 },
                                         )
-                                    } else {
-                                        null
                                     },
                                 sensitive = mediaState.isMediaSensitive,
-                                spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
+                                spoilerText = contentWarningState.takeSuccess()?.textFieldState?.text?.toString(),
                                 visibility =
-                                    (
-                                        (state.visibilityState as UiState.Success<VisibilityState>)
-                                            .data as MastodonVisibilityState
-                                    ).visibility,
+                                    state.visibilityState
+                                        .takeSuccess()
+                                        ?.let { it as? MastodonVisibilityState }
+                                        ?.visibility
+                                        ?: UiStatus.Mastodon.Visibility.Public,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 account = it,
                             )
@@ -1075,33 +1032,33 @@ private fun composePresenter(
                                         FileItem(context, it)
                                     },
                                 poll =
-                                    if (pollState is UiState.Success && pollState.data.enabled) {
+                                    pollState.takeSuccess()?.takeIf { it.enabled }?.let {
                                         MisskeyComposeData.Poll(
-                                            multiple = !pollState.data.pollSingleChoice,
-                                            expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
+                                            multiple = !it.pollSingleChoice,
+                                            expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
                                             options =
-                                                pollState.data.options.map { option ->
+                                                it.options.map { option ->
                                                     option.text.toString()
                                                 },
                                         )
-                                    } else {
-                                        null
                                     },
                                 sensitive = mediaState.isMediaSensitive,
-                                spoilerText = (contentWarningState as UiState.Success).data.textFieldState.text.toString(),
+                                spoilerText = contentWarningState.takeSuccess()?.textFieldState?.text?.toString(),
                                 visibility =
-                                    (
-                                        (state.visibilityState as UiState.Success<VisibilityState>)
-                                            .data as MisskeyVisibilityState
-                                    ).visibility,
+                                    state.visibilityState
+                                        .takeSuccess()
+                                        ?.let { it as? MisskeyVisibilityState }
+                                        ?.visibility
+                                        ?: UiStatus.Misskey.Visibility.Public,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 content = textFieldState.text.toString(),
                                 localOnly =
-                                    (
-                                        (state.visibilityState as UiState.Success<VisibilityState>)
-                                            .data as MisskeyVisibilityState
-                                    ).localOnly,
+                                    state.visibilityState
+                                        .takeSuccess()
+                                        ?.let { it as? MisskeyVisibilityState }
+                                        ?.localOnly
+                                        ?: false,
                             )
 
                         is UiAccount.Bluesky ->
@@ -1137,18 +1094,18 @@ private fun composePresenter(
                                     },
                                 content = textFieldState.text.toString(),
                                 poll =
-                                    if (pollState is UiState.Success && pollState.data.enabled) {
-                                        XQTComposeData.Poll(
-                                            multiple = !pollState.data.pollSingleChoice,
-                                            expiredAfter = pollState.data.expiredAt.duration.inWholeMilliseconds,
-                                            options =
-                                                pollState.data.options.map { option ->
-                                                    option.text.toString()
-                                                },
-                                        )
-                                    } else {
-                                        null
-                                    },
+                                    pollState.takeSuccess()
+                                        ?.takeIf { it.enabled }
+                                        ?.let { pollState ->
+                                            XQTComposeData.Poll(
+                                                multiple = !pollState.pollSingleChoice,
+                                                expiredAfter = pollState.expiredAt.duration.inWholeMilliseconds,
+                                                options =
+                                                    pollState.options.map { option ->
+                                                        option.text.toString()
+                                                    },
+                                            )
+                                        },
                                 sensitive = mediaState.isMediaSensitive,
                             )
 
@@ -1160,7 +1117,6 @@ private fun composePresenter(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun contentWarningPresenter() =
     run {
@@ -1211,7 +1167,6 @@ private fun mediaPresenter() =
         }
     }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun pollPresenter() =
     run {

@@ -30,9 +30,9 @@ Here're some features we're planning to implement in the future, you can check t
  - [ ] Mixed timeline
  - [ ] AI powered features
  - [ ] Support for vvo platform
- - [ ] Anonymous mode, no need to login
- - [ ] Customizable tabs
- - [ ] Local filtering
+ - [x] Anonymous mode, no need to login
+ - [x] Customizable tabs
+ - [x] Local filtering
  - [ ] Local history
  - [ ] Windows support
 

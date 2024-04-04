@@ -5,5 +5,4 @@ files:
     translation: /iosApp/iosApp/Localizable.xcstrings
     multilingual: 1
 bundles:
-  - 2
   - 6

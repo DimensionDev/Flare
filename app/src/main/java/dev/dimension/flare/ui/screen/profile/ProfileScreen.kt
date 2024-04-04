@@ -607,6 +607,7 @@ private fun ProfileScreen(
                         if (!bigScreen) {
                             item(
                                 span = StaggeredGridItemSpan.FullLine,
+                                key = state.state.userState.toString(),
                             ) {
                                 ProfileHeader(
                                     state.state.userState,

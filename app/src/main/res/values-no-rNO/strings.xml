@@ -173,6 +173,8 @@
   <string name="settings_appearance_show_numbers_description">Vis tall fra bunnen av statusen</string>
   <string name="settings_appearance_show_cw_img">Vis sensitivt innhold</string>
   <string name="settings_appearance_show_cw_img_description">Vis alltid sensitivt innhold i status</string>
+  <string name="settings_appearance_expand_media">Utvid media til full størrelse</string>
+  <string name="settings_appearance_expand_media_description">Hold medias erfaring i tidslinje</string>
   <string name="settings_appearance_video_autoplay">Video autokjør</string>
   <string name="settings_appearance_video_autoplay_description">Automatisk avspilling av videoer i status</string>
   <string name="settings_appearance_video_autoplay_wifi">Kun Wi-Fi</string>

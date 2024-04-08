@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -167,6 +168,10 @@ fun CommonStatusComponent(
                     icon = headerIcon,
                     user = headerUser,
                     text = stringResource(id = headerTextId),
+                    modifier =
+                        Modifier.clickable {
+                            onUserClick.invoke(headerUser.userKey)
+                        },
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -241,7 +246,7 @@ fun CommonStatusComponent(
                 }
             }
             card?.let { card ->
-                if (appearanceSettings.showLinkPreview) {
+                if (appearanceSettings.showLinkPreview && medias.isEmpty()) {
                     StatusCardComponent(
                         card = card,
                     )
@@ -488,6 +493,10 @@ private fun StatusCardComponent(
                     .clickable {
                         uriHandler.openUri(card.url)
                     },
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
         ) {
             card.media?.let {
                 MediaItem(

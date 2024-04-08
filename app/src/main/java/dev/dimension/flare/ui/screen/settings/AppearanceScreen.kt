@@ -479,6 +479,32 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                     )
                 }
                 AnimatedVisibility(appearanceSettings.showMedia) {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_expand_media))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_expand_media_description))
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = appearanceSettings.expandMediaSize,
+                                onCheckedChange = {
+                                    state.updateSettings {
+                                        copy(expandMediaSize = it)
+                                    }
+                                },
+                            )
+                        },
+                        modifier =
+                            Modifier.clickable {
+                                state.updateSettings {
+                                    copy(expandMediaSize = !expandMediaSize)
+                                }
+                            },
+                    )
+                }
+                AnimatedVisibility(appearanceSettings.showMedia) {
                     BoxWithConstraints {
                         var showMenu by remember { mutableStateOf(false) }
                         ListItem(
@@ -722,6 +748,7 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                                                     },
                                                 )
                                             }
+
                                         is UiUser.XQT ->
                                             AppearanceSettings.XQT.SwipeActions.entries.forEach {
                                                 DropdownMenuItem(

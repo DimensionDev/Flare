@@ -38,6 +38,7 @@ data class AppearanceSettings(
     val showSensitiveContent: Boolean = false,
     val videoAutoplay: VideoAutoplay = VideoAutoplay.WIFI,
     val swipeGestures: Boolean = false,
+    val expandMediaSize: Boolean = false,
     val mastodon: Mastodon = Mastodon(),
     val misskey: Misskey = Misskey(),
     val bluesky: Bluesky = Bluesky(),

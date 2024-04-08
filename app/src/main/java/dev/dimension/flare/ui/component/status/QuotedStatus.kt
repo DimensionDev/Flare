@@ -31,7 +31,10 @@ internal fun UiStatusQuoted(
     status: UiStatus,
     onMediaClick: (UiMedia) -> Unit,
     modifier: Modifier = Modifier,
-    colors: CardColors = CardDefaults.cardColors(),
+    colors: CardColors =
+        CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
     onClick: () -> Unit = {},
     showMedia: Boolean = true,
 ) {

@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,7 +79,7 @@ internal fun StatusMediaComponent(
                                 .clickable {
                                     onMediaClick(media)
                                 },
-                        keepAspectRatio = data.size == 1,
+                        keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
                     )
                 }
             },
@@ -89,6 +91,7 @@ internal fun StatusMediaComponent(
                         it
                     }
                 },
+            expandedSize = appearanceSettings.expandMediaSize,
         )
         if (showSensitiveButton) {
             Box(
@@ -233,6 +236,15 @@ fun MediaItem(
                                         it
                                     }
                                 },
+                    )
+                    Icon(
+                        Icons.Default.PlayCircle,
+                        contentDescription = null,
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(16.dp)
+                                .size(48.dp),
                     )
                 }
             }

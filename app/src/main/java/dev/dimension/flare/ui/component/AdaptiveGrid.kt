@@ -13,6 +13,7 @@ fun AdaptiveGrid(
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     spacing: Dp = 4.dp,
+    expandedSize: Boolean = true,
 ) {
     Layout(
         modifier = modifier,
@@ -21,7 +22,11 @@ fun AdaptiveGrid(
             if (measurables.size == 1) {
                 val placeables =
                     measurables.map {
-                        it.measure(constraints)
+                        if (expandedSize) {
+                            it.measure(constraints)
+                        } else {
+                            it.measure(constraints.copy(maxHeight = constraints.maxWidth * 9 / 16))
+                        }
                     }
                 layout(
                     width = placeables[0].width,

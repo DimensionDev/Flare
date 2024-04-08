@@ -56,7 +56,7 @@ internal class HomeTimelineRemoteMediator(
                     }
 
                     LoadType.APPEND -> {
-                        service.getHomeTimeline(
+                        service.getHomeLatestTimeline(
                             variables =
                                 HomeTimelineRequest(
                                     count = state.config.pageSize.toLong(),

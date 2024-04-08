@@ -172,6 +172,8 @@
   <string name="settings_appearance_show_numbers_description">إظهار الأرقام في الجزء السفلي من الحالة</string>
   <string name="settings_appearance_show_cw_img">إظهار المحتوى الحساس</string>
   <string name="settings_appearance_show_cw_img_description">إظهار المحتوى الحساس دائماً في الحالة</string>
+  <string name="settings_appearance_expand_media">توسيع الوسائط إلى الحجم الكامل</string>
+  <string name="settings_appearance_expand_media_description">الحفاظ على الجانب التقليدي لوسائط الإعلام في الجدول الزمني</string>
   <string name="settings_appearance_video_autoplay">تشغيل تلقائي للفيديو</string>
   <string name="settings_appearance_video_autoplay_description">تشغيل الفيديوهات تلقائياً في الحالة</string>
   <string name="settings_appearance_video_autoplay_wifi">Wi-Fi فقط</string>

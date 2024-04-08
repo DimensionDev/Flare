@@ -171,6 +171,8 @@
   <string name="settings_appearance_show_numbers_description">Показати номери знизу статусу</string>
   <string name="settings_appearance_show_cw_img">Показати конфіденційний вміст</string>
   <string name="settings_appearance_show_cw_img_description">Завжди показувати конфіденційний вміст в статусі</string>
+  <string name="settings_appearance_expand_media">Розгорнути медіа до повного розміру</string>
+  <string name="settings_appearance_expand_media_description">Тримайте аспектрадіо медіа в шкалі часу</string>
   <string name="settings_appearance_video_autoplay">Автовідтворення відео</string>
   <string name="settings_appearance_video_autoplay_description">Автоматично відтворювати відео в статусі</string>
   <string name="settings_appearance_video_autoplay_wifi">Тільки по WiFi</string>

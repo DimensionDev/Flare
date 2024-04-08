@@ -170,6 +170,8 @@
   <string name="settings_appearance_show_numbers_description">Εμφάνιση αριθμών στο κάτω μέρος της κατάστασης</string>
   <string name="settings_appearance_show_cw_img">Εμφάνιση ευαίσθητου περιεχομένου</string>
   <string name="settings_appearance_show_cw_img_description">Να εμφανίζεται πάντα ευαίσθητο περιεχόμενο στην κατάσταση</string>
+  <string name="settings_appearance_expand_media">Επέκταση πολυμέσων σε πλήρες μέγεθος</string>
+  <string name="settings_appearance_expand_media_description">Κρατήστε την πτυχήΠαραδοσιακό των μέσων ενημέρωσης στο χρονοδιάγραμμα</string>
   <string name="settings_appearance_video_autoplay">Αυτόματη αναπαραγωγή βίντεο</string>
   <string name="settings_appearance_video_autoplay_description">Αυτόματη αναπαραγωγή βίντεο στην κατάσταση</string>
   <string name="settings_appearance_video_autoplay_wifi">Wi-Fi μόνο</string>

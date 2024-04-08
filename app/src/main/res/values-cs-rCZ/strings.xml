@@ -174,6 +174,8 @@
   <string name="settings_appearance_show_numbers_description">Zobrazit čísla v dolní části stavu</string>
   <string name="settings_appearance_show_cw_img">Zobrazit citlivý obsah</string>
   <string name="settings_appearance_show_cw_img_description">Vždy zobrazovat citlivý obsah ve stavu</string>
+  <string name="settings_appearance_expand_media">Rozbalit média na plnou velikost</string>
+  <string name="settings_appearance_expand_media_description">Udržet aspectradio médií v časové ose</string>
   <string name="settings_appearance_video_autoplay">Automatické přehrávání videa</string>
   <string name="settings_appearance_video_autoplay_description">Automaticky přehrát videa ve stavu</string>
   <string name="settings_appearance_video_autoplay_wifi">Pouze Wi-Fi</string>

@@ -174,6 +174,8 @@
   <string name="settings_appearance_show_numbers_description">Visa siffror längst ner på statusen</string>
   <string name="settings_appearance_show_cw_img">Visa känsligt innehåll</string>
   <string name="settings_appearance_show_cw_img_description">Visa alltid känsligt innehåll i status</string>
+  <string name="settings_appearance_expand_media">Expandera media till full storlek</string>
+  <string name="settings_appearance_expand_media_description">Håll aspectradio av media i tidslinje</string>
   <string name="settings_appearance_video_autoplay">Spela upp video automatiskt</string>
   <string name="settings_appearance_video_autoplay_description">Spela automatiskt upp videor i status</string>
   <string name="settings_appearance_video_autoplay_wifi">Endast Wi-Fi</string>

@@ -173,6 +173,8 @@
   <string name="settings_appearance_show_numbers_description">Mostrar números en la parte inferior del estado</string>
   <string name="settings_appearance_show_cw_img">Mostrar contenido sensible</string>
   <string name="settings_appearance_show_cw_img_description">Mostrar siempre contenido sensible en el estado</string>
+  <string name="settings_appearance_expand_media">Expandir medios a tamaño completo</string>
+  <string name="settings_appearance_expand_media_description">Mantener el aspectradio de los medios en la línea de tiempo</string>
   <string name="settings_appearance_video_autoplay">Reproducción automática de vídeo</string>
   <string name="settings_appearance_video_autoplay_description">Reproducir automáticamente vídeos en el estado</string>
   <string name="settings_appearance_video_autoplay_wifi">Sólo Wi-Fi</string>

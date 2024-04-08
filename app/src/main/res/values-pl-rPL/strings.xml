@@ -173,6 +173,8 @@
   <string name="settings_appearance_show_numbers_description">Pokaż numery na dole statusu</string>
   <string name="settings_appearance_show_cw_img">Pokaż wrażliwe treści</string>
   <string name="settings_appearance_show_cw_img_description">Zawsze pokazuj wrażliwe treści w statusie</string>
+  <string name="settings_appearance_expand_media">Rozwiń multimedia do pełnego rozmiaru</string>
+  <string name="settings_appearance_expand_media_description">Zachowaj aspekt mediów na osi czasu</string>
   <string name="settings_appearance_video_autoplay">Automatyczne odtwarzanie wideo</string>
   <string name="settings_appearance_video_autoplay_description">Automatycznie odtwarzaj filmy o statusie</string>
   <string name="settings_appearance_video_autoplay_wifi">Tylko Wi-Fi</string>

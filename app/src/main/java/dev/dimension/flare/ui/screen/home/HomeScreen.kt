@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
@@ -21,9 +22,11 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -71,7 +74,8 @@ import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import dev.dimension.flare.ui.screen.splash.SplashScreenArgs
 import dev.dimension.flare.ui.theme.FlareTheme
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 data class RootNavController(
@@ -104,16 +108,20 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                 modifier = modifier,
                 layoutType = layoutType,
                 navigationSuiteItems = {
-                    tabs.forEach { tab ->
+                    tabs.forEach { (tab, tabState) ->
                         item(
                             selected = currentRoute == tab.key,
                             onClick = {
-                                navController.navigate(tab.key) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                if (currentRoute == tab.key) {
+                                    tabState.onClick()
+                                } else {
+                                    navController.navigate(tab.key) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
                             },
                             icon = {
@@ -134,7 +142,7 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
             ) {
                 NavHost(
                     navController = navController,
-                    startDestination = tabs.first().key,
+                    startDestination = tabs.keys.first().key,
                     // NavigationSuiteScaffold should have consumed the insets, but it doesn't
                     modifier =
                         Modifier.let {
@@ -155,7 +163,7 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                         slideOutVertically(tween(durationMillis = 700)) { 80 } + fadeOut(tween(durationMillis = 700))
                     },
                 ) {
-                    tabs.forEach { tab ->
+                    tabs.forEach { (tab, tabState) ->
                         composable(tab.key) {
                             Router(
                                 modifier = Modifier.fillMaxSize(),
@@ -164,6 +172,7 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                             ) {
                                 dependency(rootNavController)
                                 dependency(SplashScreenArgs(getDirection(tab, tab.account)))
+                                dependency(tabState)
                             }
                         }
                     }
@@ -277,14 +286,60 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
         val tabs =
             account.user.flatMap(
                 onError = {
-                    UiState.Success(TimelineTabItem.guest.toImmutableList())
+                    UiState.Success(TimelineTabItem.guest)
                 },
             ) {
                 settingsRepository.tabSettings.collectAsUiState().value.map {
-                    it.items.toImmutableList()
+                    it.items
                 }
+            }.map {
+                it.associateWith {
+                    TabState()
+                }.toImmutableMap()
             }
         object {
             val tabs = tabs
         }
     }
+
+internal class TabState {
+    private val callbacks = mutableListOf<() -> Unit>()
+
+    fun registerCallback(callback: () -> Unit) {
+        callbacks.add(callback)
+    }
+
+    fun unregisterCallback(callback: () -> Unit) {
+        callbacks.remove(callback)
+    }
+
+    fun onClick() {
+        callbacks.lastOrNull()?.invoke()
+    }
+}
+
+@Composable
+internal fun RegisterTabCallback(
+    tabState: TabState,
+    lazyListState: LazyStaggeredGridState,
+) {
+    val scope = rememberCoroutineScope()
+    val callback: () -> Unit =
+        remember {
+            {
+                scope.launch {
+                    if (lazyListState.firstVisibleItemIndex > 20) {
+                        lazyListState.scrollToItem(0)
+                    } else {
+                        lazyListState.animateScrollToItem(0)
+                    }
+                }
+            }
+        }
+    DisposableEffect(Unit) {
+        tabState.registerCallback(callback)
+        onDispose {
+            tabState.unregisterCallback(callback)
+        }
+    }
+}

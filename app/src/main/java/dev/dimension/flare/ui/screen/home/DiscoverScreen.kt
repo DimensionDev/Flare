@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
@@ -56,6 +57,7 @@ import org.koin.compose.koinInject
 internal fun DiscoverRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
+    tabState: TabState,
 ) {
     val state by producePresenter("discoverSearchPresenter_$accountType") {
         discoverSearchPresenter(accountType = accountType)
@@ -85,6 +87,7 @@ internal fun DiscoverRoute(
                 state.commitSearch(it)
             },
             accountType = accountType,
+            tabState = tabState,
         )
     }
 }
@@ -93,10 +96,13 @@ internal fun DiscoverRoute(
 internal fun DiscoverScreen(
     accountType: AccountType,
     contentPadding: PaddingValues,
+    tabState: TabState,
     onUserClick: (MicroBlogKey) -> Unit,
     onHashtagClick: (String) -> Unit,
 ) {
     val state by producePresenter("discover_$accountType") { discoverPresenter(accountType) }
+    val lazyListState = rememberLazyStaggeredGridState()
+    RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
     RefreshContainer(
         modifier =
             Modifier
@@ -106,6 +112,7 @@ internal fun DiscoverScreen(
         },
         content = {
             LazyStatusVerticalStaggeredGrid(
+                state = lazyListState,
                 contentPadding = contentPadding,
             ) {
                 state.users.onSuccess { users ->

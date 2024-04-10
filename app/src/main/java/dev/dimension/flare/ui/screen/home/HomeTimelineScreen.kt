@@ -72,10 +72,11 @@ import org.koin.compose.koinInject
 internal fun HomeRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
-//    screen: Screen,
+    tabState: TabState,
 ) {
     HomeTimelineScreen(
         accountType = accountType,
+        tabState = tabState,
         toCompose = {
             navigator.navigate(ComposeRouteDestination(accountType = accountType))
         },
@@ -85,7 +86,6 @@ internal fun HomeRoute(
         toLogin = {
             navigator.navigate(ServiceSelectRouteDestination)
         },
-//        screen = screen,
     )
 }
 
@@ -93,23 +93,17 @@ internal fun HomeRoute(
 @Composable
 internal fun HomeTimelineScreen(
     accountType: AccountType,
+    tabState: TabState,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
-//    screen: Screen,
 ) {
     val state by producePresenter(key = "home_timeline_$accountType") {
         homeTimelinePresenter(accountType)
     }
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
-//    LaunchedEffect(screen) {
-//        screen.scrollToTop = {
-//            scope.launch {
-//                lazyListState.animateScrollToItem(0)
-//            }
-//        }
-//    }
+    RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
     val isAtTheTop by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0

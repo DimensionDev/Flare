@@ -53,11 +53,11 @@ import org.koin.compose.koinInject
 internal fun NotificationRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
-//    screen: Screen
+    tabState: TabState,
 ) {
     NotificationScreen(
         accountType = accountType,
-//        screen = screen
+        tabState = tabState,
         toQuickMenu = {
             navigator.navigate(QuickMenuDialogRouteDestination)
         },
@@ -68,21 +68,14 @@ internal fun NotificationRoute(
 @Composable
 private fun NotificationScreen(
     accountType: AccountType,
-//    screen: Screen
+    tabState: TabState,
     toQuickMenu: () -> Unit,
 ) {
     val state by producePresenter(key = "notification_$accountType") {
         notificationPresenter(accountType = accountType)
     }
-//    val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
-//    LaunchedEffect(screen) {
-//        screen.scrollToTop = {
-//            scope.launch {
-//                lazyListState.animateScrollToItem(0)
-//            }
-//        }
-//    }
+    RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
     val windowInfo = currentWindowAdaptiveInfo()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(

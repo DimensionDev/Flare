@@ -12,7 +12,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import coil3.imageLoader
 import com.ramcosta.composedestinations.annotation.Destination
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
@@ -49,7 +49,7 @@ private fun StorageScreen(onBack: () -> Unit) {
     val state by producePresenter {
         storagePresenter(context = context)
     }
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {

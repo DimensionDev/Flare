@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -33,6 +32,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -40,6 +40,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
@@ -73,7 +74,7 @@ internal fun MastodonLoginScreen(onBack: () -> Unit = {}) {
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -114,7 +115,7 @@ internal fun MastodonLoginScreen(onBack: () -> Unit = {}) {
                 Text(
                     text = stringResource(id = R.string.mastodon_login_message),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                 )
             }
             Column(

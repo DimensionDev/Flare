@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Storage
@@ -16,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -38,6 +38,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
@@ -177,7 +178,7 @@ internal fun SettingsScreen(
     toLocalFilter: () -> Unit,
 ) {
     val state by producePresenter { settingsPresenter() }
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -267,7 +268,7 @@ internal fun SettingsScreen(
                     },
                     leadingContent = {
                         Icon(
-                            imageVector = Icons.Default.Tab,
+                            imageVector = Icons.Default.FilterAlt,
                             contentDescription = null,
                         )
                     },

@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -30,6 +29,8 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -78,7 +79,7 @@ private fun NotificationScreen(
     RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
     val windowInfo = currentWindowAdaptiveInfo()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -95,11 +96,13 @@ private fun NotificationScreen(
                     }
                 },
                 navigationIcon = {
-                    state.user.onSuccess {
-                        IconButton(
-                            onClick = toQuickMenu,
-                        ) {
-                            AvatarComponent(it.avatarUrl, size = 24.dp)
+                    if (LocalBottomBarHeight.current != 0.dp) {
+                        state.user.onSuccess {
+                            IconButton(
+                                onClick = toQuickMenu,
+                            ) {
+                                AvatarComponent(it.avatarUrl, size = 24.dp)
+                            }
                         }
                     }
                 },

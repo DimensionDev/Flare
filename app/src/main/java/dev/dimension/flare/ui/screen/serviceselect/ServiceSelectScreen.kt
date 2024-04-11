@@ -29,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -43,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
@@ -59,6 +59,7 @@ import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
@@ -135,7 +136,7 @@ fun ServiceSelectScreen(
         serviceSelectPresenter(uriHandler::openUri, onBack)
     }
     FlareTheme {
-        Scaffold(
+        FlareScaffold(
             modifier = modifier,
             topBar = {
                 if (onBack != null) {
@@ -171,7 +172,7 @@ fun ServiceSelectScreen(
                 Text(
                     text = stringResource(id = R.string.service_select_welcome_message),
                     style = MaterialTheme.typography.bodyMedium,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                 )
                 OutlinedTextField2(
                     state = state.instanceInputState,

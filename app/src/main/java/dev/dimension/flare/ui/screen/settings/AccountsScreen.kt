@@ -16,7 +16,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -25,6 +24,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -34,6 +34,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
@@ -66,7 +67,7 @@ internal fun AccountsScreen(
     val state by producePresenter {
         accountsPresenter()
     }
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -127,7 +128,7 @@ internal fun AccountsScreen(
                                                 .fillMaxSize()
                                                 .background(color = MaterialTheme.colorScheme.error)
                                                 .padding(16.dp),
-                                        contentAlignment = androidx.compose.ui.Alignment.CenterEnd,
+                                        contentAlignment = Alignment.CenterEnd,
                                     ) {
                                         Text(
                                             text = stringResource(id = R.string.settings_accounts_remove),

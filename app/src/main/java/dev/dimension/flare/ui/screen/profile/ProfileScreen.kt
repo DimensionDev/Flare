@@ -46,7 +46,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -87,6 +86,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -264,7 +264,7 @@ internal fun MeRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileErrorScreen(onBack: () -> Unit) {
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -296,7 +296,7 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileLoadingScreen(onBack: () -> Unit) {
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -451,7 +451,7 @@ private fun ProfileScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val windowInfo = currentWindowAdaptiveInfo()
     val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
-    Scaffold(
+    FlareScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets =
             ScaffoldDefaults
@@ -561,11 +561,16 @@ private fun ProfileScreen(
     ) {
         Row {
             if (bigScreen) {
+                val width =
+                    when (windowInfo.windowSizeClass.widthDp) {
+                        in 840..1024 -> 332.dp
+                        else -> 432.dp
+                    }
                 Column(
                     modifier =
                         Modifier
                             .verticalScroll(rememberScrollState())
-                            .width(432.dp)
+                            .width(width)
                             .padding(it + PaddingValues(horizontal = 16.dp)),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -625,7 +630,6 @@ private fun ProfileScreen(
                         if (!bigScreen) {
                             item(
                                 span = StaggeredGridItemSpan.FullLine,
-                                key = state.state.userState.toString(),
                             ) {
                                 ProfileHeader(
                                     state.state.userState,
@@ -797,13 +801,6 @@ private fun ProfileHeader(
         label = "ProfileHeader",
         transitionSpec = {
             fadeIn() togetherWith fadeOut()
-        },
-        contentKey = {
-            when (it) {
-                is UiState.Loading -> "Loading"
-                is UiState.Error -> "Error"
-                is UiState.Success -> "Success"
-            }
         },
     ) { state ->
         when (state) {

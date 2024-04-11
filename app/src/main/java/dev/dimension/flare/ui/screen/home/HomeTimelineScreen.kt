@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Spacer
@@ -10,14 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -42,6 +43,8 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -115,7 +118,7 @@ internal fun HomeTimelineScreen(
         }
     }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -123,11 +126,13 @@ internal fun HomeTimelineScreen(
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
-                    state.user.onSuccess {
-                        IconButton(
-                            onClick = toQuickMenu,
-                        ) {
-                            AvatarComponent(it.avatarUrl, size = 24.dp)
+                    if (LocalBottomBarHeight.current != 0.dp) {
+                        state.user.onSuccess {
+                            IconButton(
+                                onClick = toQuickMenu,
+                            ) {
+                                AvatarComponent(it.avatarUrl, size = 24.dp)
+                            }
                         }
                     }
                 },
@@ -142,13 +147,19 @@ internal fun HomeTimelineScreen(
         },
         floatingActionButton = {
             state.user.onSuccess {
-                FloatingActionButton(
-                    onClick = toCompose,
+                AnimatedVisibility(
+                    visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarHeight.current != 0.dp,
+                    enter = scaleIn(),
+                    exit = scaleOut(),
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                    )
+                    FloatingActionButton(
+                        onClick = toCompose,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(id = R.string.compose_title),
+                        )
+                    }
                 }
             }
         },
@@ -210,7 +221,8 @@ private fun homeTimelinePresenter(
     statusEvent: StatusEvent = koinInject(),
 ) = run {
     val state = remember(accountType) { HomeTimelinePresenter(accountType = accountType) }.invoke()
-    val accountState = remember(accountType) { UserPresenter(accountType = accountType, userKey = null) }.invoke()
+    val accountState =
+        remember(accountType) { UserPresenter(accountType = accountType, userKey = null) }.invoke()
     var showNewToots by remember { mutableStateOf(false) }
     val listState = state.listState
     if (listState is UiState.Success && listState.data.itemCount > 0) {

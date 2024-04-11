@@ -22,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -48,6 +47,7 @@ import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.EmptyStatusEvent
 import dev.dimension.flare.ui.component.status.StatusItem
@@ -76,7 +76,7 @@ internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
 private fun AppearanceScreen(onBack: () -> Unit) {
     val state by producePresenter { appearancePresenter() }
     val appearanceSettings = LocalAppearanceSettings.current
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {

@@ -8,7 +8,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -24,6 +23,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -64,7 +64,7 @@ internal fun StatusScreen(
     val state by producePresenter(statusKey.toString()) {
         statusPresenter(accountType = accountType, statusKey = statusKey)
     }
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {

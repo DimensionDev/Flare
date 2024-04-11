@@ -14,15 +14,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import compose.icons.FontAwesomeIcons
@@ -30,6 +31,7 @@ import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.brands.Github
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.theme.MediumAlpha
 
@@ -47,7 +49,7 @@ internal fun AboutRoute(navigator: ProxyDestinationsNavigator) {
 @Composable
 private fun AboutScreen(onBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -69,7 +71,7 @@ private fun AboutScreen(onBack: () -> Unit) {
                 Modifier
                     .padding(it)
                     .verticalScroll(rememberScrollState()),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
@@ -81,7 +83,7 @@ private fun AboutScreen(onBack: () -> Unit) {
             )
             Text(
                 text = stringResource(id = R.string.settings_about_description),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.alpha(MediumAlpha),
             )

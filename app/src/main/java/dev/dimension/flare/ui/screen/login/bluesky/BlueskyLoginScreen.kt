@@ -21,7 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.presenter.invoke
@@ -76,7 +76,7 @@ private fun BlueskyLoginScreen(
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {

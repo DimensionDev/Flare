@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -31,6 +30,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiKeywordFilter
@@ -65,7 +65,7 @@ private fun LocalFilterEditDialog(
         presenter(keyword = keyword)
     }
     SetDialogDestinationToEdgeToEdge()
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {

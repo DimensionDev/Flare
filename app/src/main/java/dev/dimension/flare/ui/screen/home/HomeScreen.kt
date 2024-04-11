@@ -9,17 +9,24 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -30,22 +37,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.eygraber.compose.placeholder.material3.placeholder
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.Direction
 import com.ramcosta.composedestinations.spec.NavGraphSpec
 import com.ramcosta.composedestinations.spec.Route
 import com.ramcosta.composedestinations.utils.composable
+import com.ramcosta.composedestinations.utils.dialogComposable
+import dev.dimension.flare.R
 import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.SettingsTabItem
@@ -54,21 +67,28 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.NavGraphs
+import dev.dimension.flare.ui.screen.compose.ComposeRoute
+import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
 import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.MeRouteDestination
 import dev.dimension.flare.ui.screen.destinations.NotificationRouteDestination
 import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.destinations.TabSplashScreenDestination
+import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
@@ -98,15 +118,82 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
         }
     }
     state.tabs.onSuccess { tabs ->
-        FlareTheme {
-            val layoutType =
-                NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
-                    currentWindowAdaptiveInfo(),
-                )
+        val currentTab by remember {
+            derivedStateOf {
+                tabs.entries.firstOrNull { it.key.key == currentRoute }?.key
+            }
+        }
 
-            NavigationSuiteScaffold(
+        val accountTypeState by producePresenter(key = "home_account_type_${currentTab?.account}") {
+            accountTypePresenter(currentTab?.account ?: AccountType.Active)
+        }
+        FlareTheme {
+            NavigationSuiteScaffold2(
+                layoutType =
+                    NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
+                        currentWindowAdaptiveInfo(),
+                    ),
                 modifier = modifier,
-                layoutType = layoutType,
+                drawerHeader = {
+                    if (accountTypeState.user is UiState.Error) {
+                        ListItem(
+                            headlineContent = {
+                                Text(text = stringResource(id = R.string.app_name))
+                            },
+                        )
+                    } else {
+                        AccountItem(
+                            userState = accountTypeState.user,
+                            onClick = {},
+                        )
+                    }
+                    accountTypeState.user.onSuccess {
+                        ExtendedFloatingActionButton(
+                            onClick = {
+                                currentTab?.let {
+                                    navController.navigate(direction = ComposeRouteDestination(it.account))
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = stringResource(id = R.string.compose_title),
+                                )
+                            },
+                            text = {
+                                Text(text = stringResource(id = R.string.compose_title))
+                            },
+                            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                },
+                railHeader = {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        accountTypeState.user.onSuccess {
+                            AvatarComponent(it.avatarUrl)
+                        }.onLoading {
+                            AvatarComponent(null, modifier = Modifier.placeholder(true))
+                        }.onError {
+                            Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                        }
+                    }
+                    accountTypeState.user.onSuccess {
+                        FloatingActionButton(
+                            onClick = {
+                                currentTab?.let {
+                                    navController.navigate(direction = ComposeRouteDestination(it.account))
+                                }
+                            },
+                            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = stringResource(id = R.string.compose_title),
+                            )
+                        }
+                    }
+                },
                 navigationSuiteItems = {
                     tabs.forEach { (tab, tabState) ->
                         item(
@@ -139,19 +226,35 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                         )
                     }
                 },
+                footerItems = {
+                    accountTypeState.user.onSuccess {
+                        item(
+                            selected = currentRoute == SettingsRouteDestination.route,
+                            onClick = {
+                                navController.navigate(direction = SettingsRouteDestination) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = stringResource(id = R.string.settings_title),
+                                )
+                            },
+                            label = {
+                                Text(text = stringResource(id = R.string.settings_title))
+                            },
+                        )
+                    }
+                },
             ) {
                 NavHost(
                     navController = navController,
                     startDestination = tabs.keys.first().key,
-                    // NavigationSuiteScaffold should have consumed the insets, but it doesn't
-                    modifier =
-                        Modifier.let {
-                            if (layoutType == NavigationSuiteType.NavigationBar) {
-                                it.consumeWindowInsets(WindowInsets.navigationBars)
-                            } else {
-                                it
-                            }
-                        },
                     enterTransition = {
                         slideInVertically(tween(durationMillis = 700)) { 80 } +
                             fadeIn(
@@ -160,7 +263,12 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                             )
                     },
                     exitTransition = {
-                        slideOutVertically(tween(durationMillis = 700)) { 80 } + fadeOut(tween(durationMillis = 700))
+                        slideOutVertically(tween(durationMillis = 700)) { 80 } +
+                            fadeOut(
+                                tween(
+                                    durationMillis = 700,
+                                ),
+                            )
                     },
                 ) {
                     tabs.forEach { (tab, tabState) ->
@@ -180,6 +288,12 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
                         Router(
                             navGraph = NavGraphs.root,
                             direction = SettingsRouteDestination,
+                        )
+                    }
+                    dialogComposable(ComposeRouteDestination) {
+                        ComposeRoute(
+                            navigator = destinationsNavigator(navController),
+                            accountType = navArgs.accountType,
                         )
                     }
                 }
@@ -300,6 +414,12 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
         object {
             val tabs = tabs
         }
+    }
+
+@Composable
+private fun accountTypePresenter(accountType: AccountType) =
+    run {
+        remember(accountType) { UserPresenter(accountType, null) }.invoke()
     }
 
 internal class TabState {

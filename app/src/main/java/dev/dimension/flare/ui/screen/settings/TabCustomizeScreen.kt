@@ -31,7 +31,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -45,7 +44,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +64,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -77,6 +76,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -103,7 +103,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
             state.commit()
         }
     }
-    Scaffold(
+    FlareScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -208,7 +208,11 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                         TabTitle(item.metaData.title)
                                     },
                                     leadingContent = {
-                                        TabIcon(item.account, item.metaData.icon, item.metaData.title)
+                                        TabIcon(
+                                            item.account,
+                                            item.metaData.icon,
+                                            item.metaData.title,
+                                        )
                                     },
                                     trailingContent = {
                                         Row {
@@ -224,10 +228,14 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                                 modifier =
                                                     Modifier.draggableHandle(
                                                         onDragStarted = {
-                                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            haptics.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress,
+                                                            )
                                                         },
                                                         onDragStopped = {
-                                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            haptics.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress,
+                                                            )
                                                         },
                                                     ),
                                                 onClick = {},
@@ -392,59 +400,60 @@ fun TabIcon(
 }
 
 @Composable
-private fun presenter(repository: SettingsRepository = koinInject()) =
-    run {
-        val scope = rememberCoroutineScope()
-        val tabSettings by repository.tabSettings.collectAsUiState()
-        val cacheTabs =
-            remember {
-                mutableStateListOf<TabItem>()
-            }
-        var showAddTab by remember { mutableStateOf(false) }
+private fun presenter(
+    repository: SettingsRepository = koinInject(),
+    appScope: CoroutineScope = koinInject(),
+) = run {
+    val tabSettings by repository.tabSettings.collectAsUiState()
+    val cacheTabs =
+        remember {
+            mutableStateListOf<TabItem>()
+        }
+    var showAddTab by remember { mutableStateOf(false) }
 
-        tabSettings.onSuccess {
-            LaunchedEffect(it.items.size) {
-                cacheTabs.clear()
-                cacheTabs.addAll(it.items)
+    tabSettings.onSuccess {
+        LaunchedEffect(it.items.size) {
+            cacheTabs.clear()
+            cacheTabs.addAll(it.items)
+        }
+    }
+    val allTabs = allTabsPresenter()
+
+    object {
+        val tabs = cacheTabs
+        val allTabs = allTabs
+        val showAddTab = showAddTab
+
+        fun moveTab(
+            from: Int,
+            to: Int,
+        ) {
+            cacheTabs.add(to, cacheTabs.removeAt(from))
+        }
+
+        fun commit() {
+            appScope.launch {
+                repository.updateTabSettings {
+                    copy(items = cacheTabs.toImmutableList())
+                }
             }
         }
-        val allTabs = allTabsPresenter()
 
-        object {
-            val tabs = cacheTabs
-            val allTabs = allTabs
-            val showAddTab = showAddTab
+        fun setAddTab(value: Boolean) {
+            showAddTab = value
+        }
 
-            fun moveTab(
-                from: Int,
-                to: Int,
-            ) {
-                cacheTabs.add(to, cacheTabs.removeAt(from))
-            }
+        fun deleteTab(tab: TabItem) {
+            cacheTabs.remove(tab)
+        }
 
-            fun commit() {
-                scope.launch {
-                    repository.updateTabSettings {
-                        copy(items = cacheTabs.toImmutableList())
-                    }
-                }
-            }
-
-            fun setAddTab(value: Boolean) {
-                showAddTab = value
-            }
-
-            fun deleteTab(tab: TabItem) {
-                cacheTabs.remove(tab)
-            }
-
-            fun addTab(tab: TabItem) {
-                if (tab !in cacheTabs) {
-                    cacheTabs.add(tab)
-                }
+        fun addTab(tab: TabItem) {
+            if (tab !in cacheTabs) {
+                cacheTabs.add(tab)
             }
         }
     }
+}
 
 @Composable
 private fun allTabsPresenter() =

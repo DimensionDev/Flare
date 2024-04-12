@@ -241,4 +241,5 @@
   <string name="local_filter_delete">Eliminar filtro</string>
   <string name="done">Hecho</string>
   <string name="delete">Eliminar</string>
+  <string name="status_detail_translate">Traducir a %1$s</string>
 </resources>

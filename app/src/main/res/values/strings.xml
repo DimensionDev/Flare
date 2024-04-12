@@ -298,4 +298,6 @@
 
     <string name="done">Done</string>
     <string name="delete">Delete</string>
+
+    <string name="status_detail_translate">Translate to %1$s</string>
 </resources>

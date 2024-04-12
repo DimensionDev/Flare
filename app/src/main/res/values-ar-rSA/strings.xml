@@ -240,4 +240,5 @@
   <string name="local_filter_delete">حذف الفلتر</string>
   <string name="done">تم</string>
   <string name="delete">حذف</string>
+  <string name="status_detail_translate">ترجم إلى %1$s</string>
 </resources>

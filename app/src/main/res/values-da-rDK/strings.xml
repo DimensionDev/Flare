@@ -242,4 +242,5 @@
   <string name="local_filter_delete">Slet Filter</string>
   <string name="done">Udført</string>
   <string name="delete">Slet</string>
+  <string name="status_detail_translate">Oversæt til %1$s</string>
 </resources>

@@ -239,4 +239,5 @@
   <string name="local_filter_delete">Видалити фільтр</string>
   <string name="done">Виконано</string>
   <string name="delete">Видалити</string>
+  <string name="status_detail_translate">Перекласти на %1$s</string>
 </resources>

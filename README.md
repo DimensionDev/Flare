@@ -34,6 +34,7 @@ Here're some features we're planning to implement in the future, you can check t
  - [x] Customizable tabs
  - [x] Local filtering
  - [x] Crossposting
+ - [x] Translation
  - [ ] Local history
  - [ ] Quick reply
  - [ ] Windows support

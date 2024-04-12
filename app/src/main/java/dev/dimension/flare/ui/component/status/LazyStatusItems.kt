@@ -61,11 +61,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent)
-internal fun status() {
+internal fun status(detailStatusKey: MicroBlogKey? = null) {
     onSuccess { lazyPagingItems ->
         if (lazyPagingItems.itemCount > 0) {
             with(lazyPagingItems) {
-                statusItems()
+                statusItems(detailStatusKey = detailStatusKey)
             }
             when (lazyPagingItems.loadState.append) {
                 is LoadState.Error ->
@@ -209,7 +209,7 @@ internal fun status() {
 }
 
 context(LazyStaggeredGridScope, LazyPagingItemsProxy<UiStatus>, StatusEvent)
-private fun statusItems() {
+private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
     items(
         itemCount,
         key =
@@ -223,7 +223,7 @@ private fun statusItems() {
     ) {
         Column {
             val item = get(it)
-            StatusItem(item, this@StatusEvent)
+            StatusItem(item, this@StatusEvent, isDetail = item?.statusKey == detailStatusKey)
             if (it != itemCount - 1) {
                 HorizontalDivider(
                     modifier = Modifier.alpha(DisabledAlpha),
@@ -238,6 +238,7 @@ internal fun StatusItem(
     item: UiStatus?,
     event: StatusEvent,
     horizontalPadding: Dp = screenHorizontalPadding,
+    isDetail: Boolean = false,
 ) {
     when (item) {
         is UiStatus.Mastodon ->
@@ -245,6 +246,7 @@ internal fun StatusItem(
                 data = item,
                 event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
+                isDetail = isDetail,
             )
 
         is UiStatus.MastodonNotification ->
@@ -266,6 +268,7 @@ internal fun StatusItem(
                 data = item,
                 event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
+                isDetail = isDetail,
             )
 
         is UiStatus.MisskeyNotification ->
@@ -280,6 +283,7 @@ internal fun StatusItem(
                 data = item,
                 event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
+                isDetail = isDetail,
             )
 
         is UiStatus.BlueskyNotification ->
@@ -294,6 +298,7 @@ internal fun StatusItem(
                 data = item,
                 event = event,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
+                isDetail = isDetail,
             )
     }
 }

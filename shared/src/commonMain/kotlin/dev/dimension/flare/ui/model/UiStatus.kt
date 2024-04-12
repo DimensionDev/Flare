@@ -9,6 +9,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.misskey.api.model.NotificationType
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.humanizer.fullHumanize
 import dev.dimension.flare.ui.humanizer.humanize
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -192,6 +193,10 @@ sealed class UiStatus {
             createdAt.humanize()
         }
 
+        val expandedTime by lazy {
+            createdAt.fullHumanize()
+        }
+
         val contentToken by lazy {
             parseContent(raw, content, accountKey)
         }
@@ -248,6 +253,10 @@ sealed class UiStatus {
     ) : UiStatus() {
         val humanizedTime: String by lazy {
             createdAt.humanize()
+        }
+
+        val expandedTime by lazy {
+            createdAt.fullHumanize()
         }
 
         val contentToken by lazy {
@@ -330,6 +339,11 @@ sealed class UiStatus {
         val humanizedTime by lazy {
             indexedAt.humanize()
         }
+
+        val expandedTime by lazy {
+            indexedAt.fullHumanize()
+        }
+
         val contentToken by lazy {
             blueskyParser.parse(content).toHtml(accountKey)
         }
@@ -430,6 +444,10 @@ sealed class UiStatus {
 
         val humanizedTime by lazy {
             createdAt.humanize()
+        }
+
+        val expandedTime by lazy {
+            createdAt.fullHumanize()
         }
 
         val canRetweet by lazy {

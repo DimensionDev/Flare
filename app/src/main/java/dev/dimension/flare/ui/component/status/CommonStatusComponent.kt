@@ -17,16 +17,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -62,8 +63,177 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import moe.tlaster.ktml.dom.Element
 
+@Composable
+fun CommonStatusComponent(
+    statusKey: MicroBlogKey,
+    isDetail: Boolean,
+    rawContent: String,
+    content: Element,
+    contentDirection: LayoutDirection,
+    user: UiUser,
+    medias: ImmutableList<UiMedia>,
+    humanizedTime: String,
+    expandedTime: String,
+    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
+    onUserClick: (MicroBlogKey) -> Unit,
+    modifier: Modifier = Modifier,
+    sensitive: Boolean = false,
+    showActions: Boolean = LocalAppearanceSettings.current.showActions,
+    contentWarning: String? = null,
+    card: UiCard? = null,
+    quotedStatus: UiStatus? = null,
+    onQuotedStatusClick: ((UiStatus) -> Unit)? = null,
+    poll: UiPoll? = null,
+    headerIcon: ImageVector? = null,
+    headerUser: UiUser? = null,
+    @StringRes headerTextId: Int? = null,
+    replyHandle: String? = null,
+    headerTrailing: @Composable RowScope.() -> Unit = {},
+    contentFooter: @Composable ColumnScope.() -> Unit = {},
+    statusActions: @Composable RowScope.() -> Unit = {},
+    swipeLeftText: String? = null,
+    swipeLeftIcon: ImageVector? = null,
+    onSwipeLeft: (() -> Unit)? = null,
+    swipeRightText: String? = null,
+    swipeRightIcon: ImageVector? = null,
+    onSwipeRight: (() -> Unit)? = null,
+) {
+    if (isDetail) {
+        CommonStatusDetailComponent(
+            statusKey = statusKey,
+            rawContent = rawContent,
+            content = content,
+            contentDirection = contentDirection,
+            user = user,
+            medias = medias,
+            expandedTime = expandedTime,
+            onMediaClick = onMediaClick,
+            onUserClick = onUserClick,
+            modifier = modifier,
+            sensitive = sensitive,
+            contentWarning = contentWarning,
+            card = card,
+            quotedStatus = quotedStatus,
+            onQuotedStatusClick = onQuotedStatusClick,
+            poll = poll,
+            headerIcon = headerIcon,
+            headerUser = headerUser,
+            headerTextId = headerTextId,
+            replyHandle = replyHandle,
+            headerTrailing = headerTrailing,
+            contentFooter = contentFooter,
+            statusActions = statusActions,
+        )
+    } else {
+        CommonStatusComponent(
+            statusKey = statusKey,
+            rawContent = rawContent,
+            content = content,
+            contentDirection = contentDirection,
+            user = user,
+            medias = medias,
+            humanizedTime = humanizedTime,
+            onMediaClick = onMediaClick,
+            onUserClick = onUserClick,
+            modifier = modifier,
+            sensitive = sensitive,
+            showActions = showActions,
+            contentWarning = contentWarning,
+            card = card,
+            quotedStatus = quotedStatus,
+            onQuotedStatusClick = onQuotedStatusClick,
+            poll = poll,
+            headerIcon = headerIcon,
+            headerUser = headerUser,
+            headerTextId = headerTextId,
+            replyHandle = replyHandle,
+            headerTrailing = headerTrailing,
+            contentFooter = contentFooter,
+            statusActions = statusActions,
+            swipeLeftText = swipeLeftText,
+            swipeLeftIcon = swipeLeftIcon,
+            onSwipeLeft = onSwipeLeft,
+            swipeRightText = swipeRightText,
+            swipeRightIcon = swipeRightIcon,
+            onSwipeRight = onSwipeRight,
+        )
+    }
+}
+
+@Composable
+fun CommonStatusDetailComponent(
+    statusKey: MicroBlogKey,
+    rawContent: String,
+    content: Element,
+    contentDirection: LayoutDirection,
+    user: UiUser,
+    medias: ImmutableList<UiMedia>,
+    expandedTime: String,
+    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
+    onUserClick: (MicroBlogKey) -> Unit,
+    modifier: Modifier = Modifier,
+    sensitive: Boolean = false,
+    contentWarning: String? = null,
+    card: UiCard? = null,
+    quotedStatus: UiStatus? = null,
+    onQuotedStatusClick: ((UiStatus) -> Unit)? = null,
+    poll: UiPoll? = null,
+    headerIcon: ImageVector? = null,
+    headerUser: UiUser? = null,
+    @StringRes headerTextId: Int? = null,
+    replyHandle: String? = null,
+    headerTrailing: @Composable RowScope.() -> Unit = {},
+    contentFooter: @Composable ColumnScope.() -> Unit = {},
+    statusActions: @Composable RowScope.() -> Unit = {},
+) {
+    SelectionContainer {
+        CommonStatusComponent(
+            statusKey = statusKey,
+            rawContent = rawContent,
+            content = content,
+            contentDirection = contentDirection,
+            user = user,
+            medias = medias,
+            humanizedTime = "",
+            onMediaClick = onMediaClick,
+            onUserClick = onUserClick,
+            modifier = modifier,
+            sensitive = sensitive,
+            contentWarning = contentWarning,
+            card = card,
+            quotedStatus = quotedStatus,
+            onQuotedStatusClick = onQuotedStatusClick,
+            poll = poll,
+            headerIcon = headerIcon,
+            headerUser = headerUser,
+            headerTextId = headerTextId,
+            replyHandle = replyHandle,
+            headerTrailing = headerTrailing,
+            statusActions = statusActions,
+            showActions = false,
+            contentFooter = {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = expandedTime,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                contentFooter.invoke(this)
+                Spacer(modifier = Modifier.height(4.dp))
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,
+                    LocalTextStyle provides MaterialTheme.typography.bodyMedium,
+                ) {
+                    Row {
+                        statusActions.invoke(this)
+                    }
+                }
+            },
+        )
+    }
+}
+
 // damm the parameters are soooooooooooooooo looooooooooooong
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonStatusComponent(
     statusKey: MicroBlogKey,
@@ -77,6 +247,7 @@ fun CommonStatusComponent(
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
     sensitive: Boolean = false,
+    showActions: Boolean = LocalAppearanceSettings.current.showActions,
     contentWarning: String? = null,
     card: UiCard? = null,
     quotedStatus: UiStatus? = null,
@@ -277,7 +448,7 @@ fun CommonStatusComponent(
 
             contentFooter.invoke(this)
 
-            if (appearanceSettings.showActions) {
+            if (showActions) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     modifier =
@@ -286,7 +457,8 @@ fun CommonStatusComponent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     CompositionLocalProvider(
-                        LocalContentColor provides LocalContentColor.current.copy(alpha = MediumAlpha),
+                        LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,
+                        LocalTextStyle provides MaterialTheme.typography.bodySmall,
                     ) {
                         statusActions.invoke(this)
                     }
@@ -342,9 +514,7 @@ private fun StatusHeaderComponent(
         Text(
             text = humanizedTime,
             style = MaterialTheme.typography.bodySmall,
-            modifier =
-                Modifier
-                    .alpha(MediumAlpha),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

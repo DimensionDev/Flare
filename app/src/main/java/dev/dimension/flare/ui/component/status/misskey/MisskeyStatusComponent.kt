@@ -54,6 +54,7 @@ internal fun MisskeyStatusComponent(
     data: UiStatus.Misskey,
     event: MisskeyStatusEvent,
     modifier: Modifier = Modifier,
+    isDetail: Boolean = false,
 ) {
     val currentData by rememberUpdatedState(data)
     val uriHandler = LocalUriHandler.current
@@ -110,6 +111,8 @@ internal fun MisskeyStatusComponent(
         medias = actualData.media,
         card = actualData.card,
         humanizedTime = actualData.humanizedTime,
+        expandedTime = data.expandedTime,
+        isDetail = isDetail,
         sensitive = actualData.sensitive,
         quotedStatus = actualData.quote,
         onQuotedStatusClick = {

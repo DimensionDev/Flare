@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 
@@ -66,14 +67,14 @@ internal fun StatusActionButton(
                                 radius = 20.dp,
                             ),
                     )
-                    .size(16.dp),
+                    .size(with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() + 4.dp }),
             tint = color,
         )
         if (!text.isNullOrEmpty() && appearanceSettings.showNumbers) {
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = text,
-                style = MaterialTheme.typography.bodySmall,
+//                style = MaterialTheme.typography.bodySmall,
                 color = color,
             )
         }

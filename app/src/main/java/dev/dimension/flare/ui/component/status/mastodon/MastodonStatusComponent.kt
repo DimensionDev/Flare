@@ -109,6 +109,7 @@ internal fun MastodonStatusComponent(
     data: UiStatus.Mastodon,
     event: MastodonStatusEvent,
     modifier: Modifier = Modifier,
+    isDetail: Boolean = false,
 ) {
     val actualData = data.reblogStatus ?: data
     val uriHandler = LocalUriHandler.current
@@ -153,6 +154,8 @@ internal fun MastodonStatusComponent(
         medias = actualData.media,
         card = actualData.card,
         humanizedTime = actualData.humanizedTime,
+        expandedTime = data.expandedTime,
+        isDetail = isDetail,
         sensitive = actualData.sensitive,
         poll = actualData.poll,
         headerIcon = data.reblogStatus?.let { Icons.Default.SyncAlt },

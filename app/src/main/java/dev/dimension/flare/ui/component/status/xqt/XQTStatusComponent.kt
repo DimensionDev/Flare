@@ -37,6 +37,7 @@ internal fun XQTStatusComponent(
     data: UiStatus.XQT,
     event: XQTStatusEvent,
     modifier: Modifier = Modifier,
+    isDetail: Boolean = false,
 ) {
     val actualData = data.retweet ?: data
     val uriHandler = LocalUriHandler.current
@@ -68,6 +69,8 @@ internal fun XQTStatusComponent(
         medias = actualData.medias,
         card = actualData.card,
         humanizedTime = actualData.humanizedTime,
+        expandedTime = data.expandedTime,
+        isDetail = isDetail,
         poll = actualData.poll,
         headerIcon = data.retweet?.let { Icons.Default.SyncAlt },
         headerTextId = data.retweet?.let { R.string.mastodon_item_reblogged_status },

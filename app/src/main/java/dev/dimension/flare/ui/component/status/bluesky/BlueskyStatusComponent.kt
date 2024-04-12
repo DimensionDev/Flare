@@ -37,6 +37,7 @@ internal fun BlueskyStatusComponent(
     data: UiStatus.Bluesky,
     event: BlueskyStatusEvent,
     modifier: Modifier = Modifier,
+    isDetail: Boolean = false,
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalAppearanceSettings.current
@@ -67,6 +68,8 @@ internal fun BlueskyStatusComponent(
         medias = data.medias,
         card = data.card,
         humanizedTime = data.humanizedTime,
+        expandedTime = data.expandedTime,
+        isDetail = isDetail,
         quotedStatus = data.quote,
         onQuotedStatusClick = {
             event.onStatusClick(it as UiStatus.Bluesky, uriHandler)

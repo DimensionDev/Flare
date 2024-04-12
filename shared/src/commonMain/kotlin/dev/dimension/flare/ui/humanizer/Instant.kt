@@ -49,6 +49,12 @@ fun Instant.humanize(
     }
 }
 
+fun Instant.fullHumanize(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
+    val time = toLocalDateTime(timeZone)
+    return "${time.dayOfMonth.withLeadingZero()} ${time.month.abbr()} ${time.year}," +
+        " ${time.hour.withLeadingZero()}:${time.minute.withLeadingZero()}"
+}
+
 fun Long.toLocalDateTime(timeZone: TimeZone = TimeZone.currentSystemDefault()): LocalDateTime {
     return Instant.fromEpochMilliseconds(this).toLocalDateTime(timeZone)
 }

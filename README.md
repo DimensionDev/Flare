@@ -35,6 +35,7 @@ Here're some features we're planning to implement in the future, you can check t
  - [x] Local filtering
  - [x] Crossposting
  - [ ] Local history
+ - [ ] Quick reply
  - [ ] Windows support
 
 ### Mastodon

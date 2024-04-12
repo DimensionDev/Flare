@@ -237,4 +237,5 @@
   <string name="local_filter_delete">Διαγραφή Φίλτρου</string>
   <string name="done">Ολοκληρώθηκε</string>
   <string name="delete">Διαγραφή</string>
+  <string name="status_detail_translate">Μετάφραση σε %1$s</string>
 </resources>

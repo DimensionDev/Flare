@@ -53,6 +53,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -64,6 +65,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -119,12 +121,35 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
 import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+
+@Composable
+fun ShortcutComposeRoute(
+    onBack: () -> Unit,
+    initialText: String = "",
+    initialMedias: ImmutableList<Uri> = persistentListOf(),
+) {
+    FlareTheme {
+        CompositionLocalProvider(
+            LocalContentColor provides MaterialTheme.colorScheme.onBackground,
+        ) {
+            ComposeScreen(
+                onBack = onBack,
+                accountType = AccountType.Active,
+                initialText = initialText,
+                initialMedias = initialMedias,
+            )
+        }
+    }
+}
 
 @Destination(
     style = DestinationStyle.Dialog::class,
@@ -226,10 +251,18 @@ private fun ComposeScreen(
     accountType: AccountType,
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
+    initialText: String = "",
+    initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) {
     val context = LocalContext.current
     val state by producePresenter(key = "compose_$accountType") {
-        composePresenter(context = context, accountType = accountType, status = status)
+        composePresenter(
+            context = context,
+            accountType = accountType,
+            status = status,
+            initialText = initialText,
+            initialMedias = initialMedias,
+        )
     }
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
@@ -357,7 +390,10 @@ private fun ComposeScreen(
                                                                 state.state.selectAccount(account)
                                                             },
                                                             leadingIcon = {
-                                                                AvatarComponent(data.avatarUrl, size = 24.dp)
+                                                                AvatarComponent(
+                                                                    data.avatarUrl,
+                                                                    size = 24.dp,
+                                                                )
                                                             },
                                                         )
                                                     }
@@ -901,13 +937,15 @@ private fun composePresenter(
     context: Context,
     accountType: AccountType,
     status: ComposeStatus? = null,
+    initialText: String = "",
+    initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) = run {
     val state =
         remember(status, accountType) {
             ComposePresenter(accountType = accountType, status)
         }.invoke()
     val textFieldState by remember {
-        mutableStateOf(TextFieldState(""))
+        mutableStateOf(TextFieldState(initialText))
     }
     val pollState =
         state.supportedComposeEvent.flatMap {
@@ -917,7 +955,7 @@ private fun composePresenter(
                 UiState.Error(IllegalStateException("Poll not supported"))
             }
         }
-    val mediaState = mediaPresenter()
+    val mediaState = mediaPresenter(initialMedias)
     val contentWarningState =
         state.supportedComposeEvent.flatMap {
             if (it.contains(SupportedComposeEvent.ContentWarning)) {
@@ -949,8 +987,10 @@ private fun composePresenter(
     }
 
     val canSend =
-        remember(textFieldState.text) {
-            textFieldState.text.isNotBlank() && textFieldState.text.isNotEmpty()
+        remember(textFieldState.text, state.account) {
+            textFieldState.text.isNotBlank() &&
+                textFieldState.text.isNotEmpty() &&
+                state.account is UiState.Success
         }
     val canPoll =
         remember(mediaState) {
@@ -989,7 +1029,7 @@ private fun composePresenter(
             showAccountSelectMenu = value
         }
 
-//        @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+        //        @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
             state.selectedAccounts.forEach {
                 val data =
@@ -1137,10 +1177,10 @@ private fun contentWarningPresenter() =
     }
 
 @Composable
-private fun mediaPresenter() =
+private fun mediaPresenter(initialMedias: ImmutableList<Uri> = persistentListOf()) =
     run {
         var medias by remember {
-            mutableStateOf(listOf<Uri>())
+            mutableStateOf(initialMedias.toList())
         }
         var isMediaSensitive by remember {
             mutableStateOf(false)

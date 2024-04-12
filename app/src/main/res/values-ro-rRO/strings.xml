@@ -242,4 +242,5 @@
   <string name="local_filter_delete">Ștergere filtru</string>
   <string name="done">Terminat</string>
   <string name="delete">Ștergere</string>
+  <string name="status_detail_translate">Tradu în %1$s</string>
 </resources>

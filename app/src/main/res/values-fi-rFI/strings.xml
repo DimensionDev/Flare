@@ -242,4 +242,5 @@
   <string name="local_filter_delete">Poista Suodatin</string>
   <string name="done">Valmis</string>
   <string name="delete">Poista</string>
+  <string name="status_detail_translate">Käännä kielelle %1$s</string>
 </resources>

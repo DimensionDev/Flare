@@ -80,6 +80,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onNotEmptyOrLoading
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -1120,6 +1121,7 @@ private fun ProfileMeidasPreview(
     orientation: Orientation,
     modifier: Modifier = Modifier,
 ) {
+    val appearanceSettings = LocalAppearanceSettings.current
     when (orientation) {
         Orientation.Vertical -> {
             AdaptiveGrid(
@@ -1141,7 +1143,36 @@ private fun ProfileMeidasPreview(
                                     Box {
                                         MediaItem(
                                             media = item.media,
-                                            modifier = Modifier.fillMaxSize(),
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxSize()
+                                                    .let {
+                                                        if (item.media is UiMedia.Image &&
+                                                            (item.media as UiMedia.Image).sensitive &&
+                                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                                                            !appearanceSettings.showSensitiveContent
+                                                        ) {
+                                                            it.blur(32.dp)
+                                                        } else {
+                                                            it
+                                                        }
+                                                    },
+                                        )
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .matchParentSize()
+                                                    .let {
+                                                        if (item.media is UiMedia.Image &&
+                                                            (item.media as UiMedia.Image).sensitive &&
+                                                            Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                                                            !appearanceSettings.showSensitiveContent
+                                                        ) {
+                                                            it.background(MaterialTheme.colorScheme.surfaceContainer)
+                                                        } else {
+                                                            it
+                                                        }
+                                                    },
                                         )
                                         if (it == count - 1) {
                                             Box(
@@ -1214,7 +1245,8 @@ private fun ProfileMeidasPreview(
                                                 .let {
                                                     if (item.media is UiMedia.Image &&
                                                         (item.media as UiMedia.Image).sensitive &&
-                                                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                                                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                                                        !appearanceSettings.showSensitiveContent
                                                     ) {
                                                         it.blur(32.dp)
                                                     } else {
@@ -1229,7 +1261,8 @@ private fun ProfileMeidasPreview(
                                                 .let {
                                                     if (item.media is UiMedia.Image &&
                                                         (item.media as UiMedia.Image).sensitive &&
-                                                        Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+                                                        Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                                                        !appearanceSettings.showSensitiveContent
                                                     ) {
                                                         it.background(MaterialTheme.colorScheme.surfaceContainer)
                                                     } else {

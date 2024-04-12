@@ -93,8 +93,3 @@ private fun translateText(text: String) =
             }
         }
     }
-
-data class TranslateResult(
-    val contentWarning: UiState<String>?,
-    val text: UiState<String>,
-)

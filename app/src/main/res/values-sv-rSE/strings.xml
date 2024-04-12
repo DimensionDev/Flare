@@ -242,4 +242,5 @@
   <string name="local_filter_delete">Ta bort filter</string>
   <string name="done">Klar</string>
   <string name="delete">Radera</string>
+  <string name="status_detail_translate">Översätt till %1$s</string>
 </resources>

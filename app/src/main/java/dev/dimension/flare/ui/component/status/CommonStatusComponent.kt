@@ -31,6 +31,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -46,11 +47,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.eygraber.compose.placeholder.material3.placeholder
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
@@ -58,6 +62,10 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.medias
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
@@ -229,6 +237,52 @@ fun CommonStatusDetailComponent(
                     }
                 }
             },
+            beforeMedia = {
+                var enabledTranslate by remember { mutableStateOf(false) }
+                TextButton(
+                    onClick = {
+                        if (!enabledTranslate) {
+                            enabledTranslate = true
+                        }
+                    },
+                ) {
+                    Text(
+                        text =
+                            stringResource(
+                                id = R.string.status_detail_translate,
+                                Locale.current.platformLocale.displayLanguage,
+                            ),
+                    )
+                }
+                if (enabledTranslate) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    val state by producePresenter(
+                        "translate_${contentWarning}_$rawContent",
+                    ) {
+                        statusTranslatePresenter(contentWarning = contentWarning, content = content)
+                    }
+                    state.contentWarning?.onSuccess {
+                        Text(text = it)
+                    }?.onLoading {
+                        Text(
+                            text = "Lores ipsum dolor sit amet",
+                            modifier = Modifier.placeholder(true),
+                        )
+                    }?.onError {
+                        Text(text = it.message ?: "Error")
+                    }
+                    state.text.onSuccess {
+                        Text(text = it)
+                    }.onLoading {
+                        Text(
+                            text = "Lores ipsum dolor sit amet",
+                            modifier = Modifier.placeholder(true),
+                        )
+                    }.onError {
+                        Text(text = it.message ?: "Error")
+                    }
+                }
+            },
         )
     }
 }
@@ -260,6 +314,7 @@ fun CommonStatusComponent(
     headerTrailing: @Composable RowScope.() -> Unit = {},
     contentFooter: @Composable ColumnScope.() -> Unit = {},
     statusActions: @Composable RowScope.() -> Unit = {},
+    beforeMedia: @Composable ColumnScope.() -> Unit = {},
     swipeLeftText: String? = null,
     swipeLeftIcon: ImageVector? = null,
     onSwipeLeft: (() -> Unit)? = null,
@@ -367,6 +422,8 @@ fun CommonStatusComponent(
                 contentWarning = contentWarning,
                 poll = poll,
             )
+
+            beforeMedia.invoke(this)
 
             if (medias.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))

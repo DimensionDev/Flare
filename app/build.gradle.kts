@@ -136,10 +136,11 @@ dependencies {
     implementation(libs.reorderable)
     implementation(libs.androidx.window)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
-
-    implementation(projects.shared)
-
     implementation(libs.compose.webview)
+    implementation(libs.mlkit.translate)
+    releaseImplementation(libs.mlkit.language.id)
+    debugImplementation(libs.mlkit.language.id.debug)
+    implementation(projects.shared)
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

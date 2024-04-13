@@ -20,9 +20,16 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.screen.home.HomeScreen
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun AppContainer() {
+    FlareApp {
+        HomeScreen()
+    }
+}
+
+@OptIn(ExperimentalCoilApi::class)
+@Composable
+fun FlareApp(content: @Composable () -> Unit) {
     setSingletonImageLoaderFactory { context ->
         ImageLoader.Builder(context)
             .components {
@@ -38,23 +45,12 @@ fun AppContainer() {
             .crossfade(true)
             .build()
     }
-//    val state by producePresenter("AppContainer") {
-//        SplashPresenter({}, {}).invoke()
-//    }
     val settingsRepository = koinInject<SettingsRepository>()
     val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
         AppearanceSettings(),
     )
     CompositionLocalProvider(
         LocalAppearanceSettings provides appearanceSettings,
-    ) {
-        HomeScreen()
-//        AnimatedContent(targetState = state, label = "AppContainer") {
-//            when (it) {
-//                SplashType.Splash -> SplashScreen()
-//                SplashType.Login -> DestinationsNavHost(NavGraphs.entry)
-//                SplashType.Home -> HomeScreen()
-//            }
-//        }
-    }
+        content = content,
+    )
 }

@@ -241,4 +241,5 @@
   <string name="local_filter_delete">Slett filter</string>
   <string name="done">Ferdig</string>
   <string name="delete">Slett</string>
+  <string name="status_detail_translate">Oversett til %1$s</string>
 </resources>

@@ -240,4 +240,5 @@
   <string name="local_filter_delete">Удалить фильтр</string>
   <string name="done">Готово</string>
   <string name="delete">Удалить</string>
+  <string name="status_detail_translate">Перевести на %1$s</string>
 </resources>

@@ -242,4 +242,5 @@
   <string name="local_filter_delete">Elimina Filtro</string>
   <string name="done">Fatto</string>
   <string name="delete">Elimina</string>
+  <string name="status_detail_translate">Traduci in %1$s</string>
 </resources>

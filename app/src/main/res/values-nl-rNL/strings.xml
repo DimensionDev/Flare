@@ -242,4 +242,5 @@
   <string name="local_filter_delete">Filter verwijderen</string>
   <string name="done">Voltooid</string>
   <string name="delete">Verwijderen</string>
+  <string name="status_detail_translate">Vertalen naar %1$s</string>
 </resources>

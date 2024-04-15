@@ -38,6 +38,7 @@ class ProfileMediaPresenter(
                                 ProfileMedia(
                                     it,
                                     status,
+                                    status.medias.indexOf(it),
                                 )
                             }
                         }
@@ -57,4 +58,5 @@ interface ProfileMediaState {
 data class ProfileMedia(
     val media: UiMedia,
     val status: UiStatus,
+    val index: Int,
 )

@@ -652,23 +652,13 @@ class XQTDataSource(
                 )
             }
         }.onFailure {
-            it.printStackTrace()
-            updateStatusUseCase<StatusContent.Mastodon>(
+            updateStatusUseCase<StatusContent.XQT>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data =
-                            it.data.copy(
-                                favourited = status.reaction.liked,
-                                favouritesCount =
-                                    if (status.reaction.liked) {
-                                        it.data.favouritesCount?.plus(1)
-                                    } else {
-                                        it.data.favouritesCount?.minus(1)
-                                    },
-                            ),
+                        data = status.raw,
                     )
                 },
             )
@@ -780,19 +770,7 @@ class XQTDataSource(
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data =
-                            it.data.copy(
-                                legacy =
-                                    it.data.legacy?.copy(
-                                        retweeted = status.reaction.retweeted,
-                                        retweetCount =
-                                            if (status.reaction.retweeted) {
-                                                it.data.legacy.retweetCount.minus(1)
-                                            } else {
-                                                it.data.legacy.retweetCount.plus(1)
-                                            },
-                                    ),
-                            ),
+                        data = status.raw,
                     )
                 },
             )
@@ -851,20 +829,13 @@ class XQTDataSource(
                 )
             }
         }.onFailure {
-            it.printStackTrace()
             updateStatusUseCase<StatusContent.XQT>(
                 statusKey = status.statusKey,
                 accountKey = status.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data =
-                            it.data.copy(
-                                legacy =
-                                    it.data.legacy?.copy(
-                                        bookmarked = status.reaction.bookmarked,
-                                    ),
-                            ),
+                        data = status.raw,
                     )
                 },
             )

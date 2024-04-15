@@ -474,7 +474,7 @@ fun CommonStatusComponent(
                 }
             }
             card?.let { card ->
-                if (appearanceSettings.showLinkPreview && medias.isEmpty()) {
+                if (appearanceSettings.showLinkPreview && medias.isEmpty() && quotedStatus == null) {
                     StatusCardComponent(
                         card = card,
                     )
@@ -506,7 +506,7 @@ fun CommonStatusComponent(
             contentFooter.invoke(this)
 
             if (showActions) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier =
                         Modifier
@@ -520,6 +520,7 @@ fun CommonStatusComponent(
                         statusActions.invoke(this)
                     }
                 }
+                Spacer(modifier = Modifier.height(4.dp))
             } else {
                 Spacer(modifier = Modifier.height(8.dp))
             }

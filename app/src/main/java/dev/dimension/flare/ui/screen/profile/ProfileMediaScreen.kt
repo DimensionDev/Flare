@@ -119,7 +119,7 @@ private fun ProfileMediaScreen(
                                     .clickable {
                                         onItemClicked(
                                             item.status.statusKey,
-                                            index,
+                                            item.index,
                                             when (media) {
                                                 is UiMedia.Image -> media.previewUrl
                                                 is UiMedia.Video -> media.thumbnailUrl

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,10 +46,12 @@ import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AudioPlayer
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.VideoPlayer
+import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 internal fun StatusMediaComponent(
@@ -184,7 +188,10 @@ fun MediaItem(
                             .fillMaxSize()
                             .let {
                                 if (keepAspectRatio) {
-                                    it.aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f)
+                                    it.aspectRatio(
+                                        media.aspectRatio,
+                                        matchHeightConstraintsFirst = media.aspectRatio > 1f,
+                                    )
                                 } else {
                                     it
                                 }
@@ -218,6 +225,53 @@ fun MediaItem(
                                         it
                                     }
                                 },
+                        loadingPlaceholder = {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                NetworkImage(
+                                    model = media.thumbnailUrl,
+                                    contentDescription = media.description,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize(),
+                                )
+                            }
+                            CircularProgressIndicator(
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomStart)
+                                        .padding(24.dp)
+                                        .size(24.dp),
+                                color = Color.White,
+                            )
+                        },
+                        remainingTimeContent = {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .padding(16.dp)
+                                        .background(
+                                            Color.Black.copy(alpha = 0.5f),
+                                            shape = MaterialTheme.shapes.small,
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .align(Alignment.BottomStart),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text =
+                                        remember(it) {
+                                            it.milliseconds.humanize()
+                                        },
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        },
                     )
                 } else {
                     NetworkImage(
@@ -268,12 +322,38 @@ fun MediaItem(
                             .fillMaxSize()
                             .let {
                                 if (keepAspectRatio) {
-                                    it.aspectRatio(media.aspectRatio, matchHeightConstraintsFirst = media.aspectRatio > 1f)
+                                    it.aspectRatio(
+                                        media.aspectRatio,
+                                        matchHeightConstraintsFirst = media.aspectRatio > 1f,
+                                    )
                                 } else {
                                     it
                                 }
                             },
-                )
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        NetworkImage(
+                            model = media.previewUrl,
+                            contentDescription = media.description,
+                            modifier =
+                                Modifier
+                                    .fillMaxSize(),
+                        )
+                    }
+                    CircularProgressIndicator(
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(24.dp)
+                                .size(24.dp),
+                        color = Color.White,
+                    )
+                }
         }
     }
 }
@@ -288,7 +368,8 @@ fun wifiState(): State<Boolean> {
 
 fun Context.observeWifiStateAsFlow() =
     callbackFlow {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkRequest =
             NetworkRequest.Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)

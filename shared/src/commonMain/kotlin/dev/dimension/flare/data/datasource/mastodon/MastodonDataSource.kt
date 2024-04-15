@@ -347,18 +347,7 @@ class MastodonDataSource(
                 accountKey = status.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                favourited = status.reaction.liked,
-                                favouritesCount =
-                                    if (status.reaction.liked) {
-                                        it.data.favouritesCount?.plus(1)
-                                    } else {
-                                        it.data.favouritesCount?.minus(1)
-                                    },
-                            ),
-                    )
+                    it.copy(data = status.raw)
                 },
             )
         }.onSuccess { result ->
@@ -367,9 +356,7 @@ class MastodonDataSource(
                 accountKey = status.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(
-                        data = result,
-                    )
+                    it.copy(data = result)
                 },
             )
         }
@@ -408,18 +395,7 @@ class MastodonDataSource(
                 accountKey = status.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                reblogged = status.reaction.reblogged,
-                                reblogsCount =
-                                    if (status.reaction.reblogged) {
-                                        it.data.reblogsCount?.plus(1)
-                                    } else {
-                                        it.data.reblogsCount?.minus(1)
-                                    },
-                            ),
-                    )
+                    it.copy(data = status.raw)
                 },
             )
         }.onSuccess { result ->
@@ -428,9 +404,7 @@ class MastodonDataSource(
                 accountKey = status.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(
-                        data = result,
-                    )
+                    it.copy(data = result)
                 },
             )
         }
@@ -478,12 +452,7 @@ class MastodonDataSource(
                 accountKey = status.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                bookmarked = status.reaction.bookmarked,
-                            ),
-                    )
+                    it.copy(data = status.raw)
                 },
             )
         }.onSuccess { result ->
@@ -492,9 +461,7 @@ class MastodonDataSource(
                 accountKey = status.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(
-                        data = result,
-                    )
+                    it.copy(data = result)
                 },
             )
         }

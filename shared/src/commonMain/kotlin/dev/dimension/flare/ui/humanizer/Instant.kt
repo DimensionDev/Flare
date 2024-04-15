@@ -6,6 +6,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration
 
 private fun Int.withLeadingZero(): String {
     return if (this < 10) {
@@ -53,6 +54,25 @@ fun Instant.fullHumanize(timeZone: TimeZone = TimeZone.currentSystemDefault()): 
     val time = toLocalDateTime(timeZone)
     return "${time.dayOfMonth.withLeadingZero()} ${time.month.abbr()} ${time.year}," +
         " ${time.hour.withLeadingZero()}:${time.minute.withLeadingZero()}"
+}
+
+fun Duration.humanize(): String {
+    return this.toComponents { days, hours, minutes, seconds, _ ->
+        buildString {
+            if (days > 0) {
+                append("${days.toInt().withLeadingZero()}:")
+            }
+            if (hours > 0) {
+                append("${hours.withLeadingZero()}:")
+            }
+            if (minutes > 0) {
+                append("${minutes.withLeadingZero()}:")
+            } else {
+                append("0:")
+            }
+            append(seconds.withLeadingZero())
+        }
+    }
 }
 
 fun Long.toLocalDateTime(timeZone: TimeZone = TimeZone.currentSystemDefault()): LocalDateTime {

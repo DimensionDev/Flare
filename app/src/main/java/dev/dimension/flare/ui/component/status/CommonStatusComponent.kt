@@ -55,6 +55,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
@@ -709,6 +710,7 @@ private fun StatusCardComponent(
     card: UiCard,
     modifier: Modifier = Modifier,
 ) {
+    val appearanceSettings = LocalAppearanceSettings.current
     val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
@@ -727,9 +729,14 @@ private fun StatusCardComponent(
                 ),
         ) {
             card.media?.let {
-                MediaItem(
-                    media = it,
-                    modifier = Modifier.fillMaxWidth(),
+                AdaptiveGrid(
+                    content = {
+                        MediaItem(
+                            media = it,
+                            keepAspectRatio = appearanceSettings.expandMediaSize,
+                        )
+                    },
+                    expandedSize = appearanceSettings.expandMediaSize,
                 )
             }
             Column(

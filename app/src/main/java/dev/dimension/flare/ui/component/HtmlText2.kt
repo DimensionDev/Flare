@@ -99,7 +99,9 @@ fun HtmlText2(
             ) {
                 with(element) {
                     RenderElement(context)
-                    context.RenderTextAndReset()
+                    with(context) {
+                        RenderTextAndReset()
+                    }
                 }
             }
         }
@@ -377,18 +379,22 @@ private class RenderContext(
         builder = RichTextString.Builder()
         return result.takeIf { it.text.isNotEmpty() }
     }
+}
 
-    context (RichTextScope)
-    @Composable
-    fun RenderTextAndReset(modifier: Modifier = Modifier) {
-        getTextAndReset()?.let {
-            Text(
-                text = it,
-                modifier = modifier,
-                overflow = overflow,
-                softWrap = softWrap,
-                maxLines = maxLines,
-            )
+context (RenderContext, RichTextScope)
+@Composable
+private fun RenderTextAndReset(modifier: Modifier = Modifier) {
+    val text =
+        remember {
+            getTextAndReset()
         }
+    text?.let {
+        Text(
+            text = it,
+            modifier = modifier,
+            overflow = overflow,
+            softWrap = softWrap,
+            maxLines = maxLines,
+        )
     }
 }

@@ -45,8 +45,14 @@ internal fun XQTStatusComponent(
     CommonStatusComponent(
         modifier =
             Modifier
-                .clickable {
-                    event.onStatusClick(data, uriHandler)
+                .let {
+                    if (isDetail) {
+                        it
+                    } else {
+                        it.clickable {
+                            event.onStatusClick(data, uriHandler)
+                        }
+                    }
                 }
                 .then(modifier),
         statusKey = actualData.statusKey,

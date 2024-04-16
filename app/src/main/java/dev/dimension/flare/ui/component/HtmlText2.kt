@@ -385,7 +385,7 @@ context (RenderContext, RichTextScope)
 @Composable
 private fun RenderTextAndReset(modifier: Modifier = Modifier) {
     val text =
-        remember {
+        remember<RichTextString?> {
             getTextAndReset()
         }
     text?.let {

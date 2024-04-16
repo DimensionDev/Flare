@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
@@ -56,7 +57,7 @@ internal fun HomeDrawerContent(
             },
         )
         state.allUsers.onSuccess { allUsers ->
-            if (expanded) {
+            AnimatedVisibility(expanded && allUsers.size > 0) {
                 Column {
                     HorizontalDivider()
                     (0 until allUsers.size).forEach { index ->

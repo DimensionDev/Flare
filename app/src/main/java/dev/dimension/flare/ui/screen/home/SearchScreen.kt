@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -58,11 +60,11 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
-import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.screen.profile.CommonProfileHeader
 import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.ktor.http.decodeURLQueryComponent
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Destination(
@@ -81,11 +83,13 @@ fun SearchDeepLink(
     keyword: String,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
+    drawerState: DrawerState,
 ) {
     SearchRoute(
         keyword = keyword,
         navigator = navigator,
         accountType = AccountType.Specific(accountKey),
+        drawerState = drawerState,
     )
 }
 
@@ -102,13 +106,17 @@ fun SearchRoute(
     keyword: String,
     navigator: DestinationsNavigator,
     accountType: AccountType,
+    drawerState: DrawerState,
 ) {
+    val scope = rememberCoroutineScope()
     SearchScreen(
         initialQuery = keyword,
         accountType = accountType,
         onBack = { navigator.navigateUp() },
         onAccountClick = {
-            navigator.navigate(QuickMenuDialogRouteDestination)
+            scope.launch {
+                drawerState.open()
+            }
         },
         toUser = { userKey ->
             navigator.navigate(ProfileRouteDestination(userKey, accountType))

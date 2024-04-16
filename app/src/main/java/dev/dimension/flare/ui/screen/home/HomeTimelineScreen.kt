@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
@@ -59,7 +60,6 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -76,7 +76,9 @@ internal fun HomeRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
+    drawerState: DrawerState,
 ) {
+    val scope = rememberCoroutineScope()
     HomeTimelineScreen(
         accountType = accountType,
         tabState = tabState,
@@ -84,7 +86,9 @@ internal fun HomeRoute(
             navigator.navigate(ComposeRouteDestination(accountType = accountType))
         },
         toQuickMenu = {
-            navigator.navigate(QuickMenuDialogRouteDestination)
+            scope.launch {
+                drawerState.open()
+            }
         },
         toLogin = {
             navigator.navigate(ServiceSelectRouteDestination)

@@ -14,11 +14,13 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.Card
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -46,8 +48,8 @@ import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
-import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Destination(
@@ -58,7 +60,9 @@ internal fun DiscoverRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
+    drawerState: DrawerState,
 ) {
+    val scope = rememberCoroutineScope()
     val state by producePresenter("discoverSearchPresenter_$accountType") {
         discoverSearchPresenter(accountType = accountType)
     }
@@ -73,7 +77,9 @@ internal fun DiscoverRoute(
                 DiscoverSearch(
                     state = state,
                     onAccountClick = {
-                        navigator.navigate(QuickMenuDialogRouteDestination)
+                        scope.launch {
+                            drawerState.open()
+                        }
                     },
                     toUser = { navigator.navigate(ProfileRouteDestination(it, accountType)) },
                 )

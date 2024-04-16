@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SegmentedButton
@@ -17,13 +18,13 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.model.AccountType
@@ -42,9 +43,9 @@ import dev.dimension.flare.ui.presenter.home.NotificationState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.destinations.QuickMenuDialogRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Destination(
@@ -52,15 +53,18 @@ import org.koin.compose.koinInject
 )
 @Composable
 internal fun NotificationRoute(
-    navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
+    drawerState: DrawerState,
 ) {
+    val scope = rememberCoroutineScope()
     NotificationScreen(
         accountType = accountType,
         tabState = tabState,
         toQuickMenu = {
-            navigator.navigate(QuickMenuDialogRouteDestination)
+            scope.launch {
+                drawerState.open()
+            }
         },
     )
 }

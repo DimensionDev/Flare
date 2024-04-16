@@ -141,6 +141,7 @@ dependencies {
     releaseImplementation(libs.mlkit.language.id)
     debugImplementation(libs.mlkit.language.id.debug)
     implementation(projects.shared)
+    implementation(libs.androidx.splash)
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

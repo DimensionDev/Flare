@@ -30,6 +30,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -107,7 +108,10 @@ data class RootNavController(
     ExperimentalMaterial3AdaptiveApi::class,
 )
 @Composable
-internal fun HomeScreen(modifier: Modifier = Modifier) {
+internal fun HomeScreen(
+    afterInit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val state by producePresenter { presenter() }
     val navController = rememberNavController()
     val rootNavController = remember(navController) { RootNavController(navController) }
@@ -118,6 +122,9 @@ internal fun HomeScreen(modifier: Modifier = Modifier) {
         }
     }
     state.tabs.onSuccess { tabs ->
+        LaunchedEffect(Unit) {
+            afterInit.invoke()
+        }
         val currentTab by remember {
             derivedStateOf {
                 tabs.entries.firstOrNull { it.key.key == currentRoute }?.key

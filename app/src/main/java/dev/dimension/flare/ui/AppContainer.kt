@@ -21,9 +21,11 @@ import dev.dimension.flare.ui.screen.home.HomeScreen
 import org.koin.compose.koinInject
 
 @Composable
-fun AppContainer() {
+fun AppContainer(afterInit: () -> Unit) {
     FlareApp {
-        HomeScreen()
+        HomeScreen(
+            afterInit = afterInit,
+        )
     }
 }
 

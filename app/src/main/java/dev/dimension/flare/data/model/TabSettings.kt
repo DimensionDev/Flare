@@ -14,6 +14,7 @@ import androidx.datastore.dataStore
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiUser
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,6 +29,7 @@ import java.io.OutputStream
 @Serializable
 data class TabSettings(
     val items: List<TabItem> = TimelineTabItem.default,
+    val secondaryItems: List<TabItem>? = null,
 )
 
 @Serializable
@@ -161,6 +163,14 @@ data class TimelineTabItem(
                 SettingsTabItem,
             )
 
+        fun defaultSecondary(user: UiUser) =
+            when (user) {
+                is UiUser.Mastodon -> defaultMastodonSecondaryItems(user.userKey)
+                is UiUser.Misskey -> defaultMisskeySecondaryItems(user.userKey)
+                is UiUser.Bluesky -> defaultBlueskySecondaryItems(user.userKey)
+                is UiUser.XQT -> defaultXqtSecondaryItems(user.userKey)
+            }
+
         fun mastodon(accountKey: MicroBlogKey) =
             persistentListOf(
                 TimelineTabItem(
@@ -189,6 +199,28 @@ data class TimelineTabItem(
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
+                ProfileTabItem(
+                    account = AccountType.Specific(accountKey),
+                    userKey = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                        ),
+                ),
+            )
+
+        fun defaultMastodonSecondaryItems(accountKey: MicroBlogKey) =
+            persistentListOf(
+                ProfileTabItem(
+                    account = AccountType.Specific(accountKey),
+                    userKey = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                        ),
+                ),
 //            TimelineTabItem(
 //                account = AccountType.Specific(accountKey),
 //                type = "local",
@@ -205,15 +237,6 @@ data class TimelineTabItem(
 //                    icon = IconType.Material(IconType.Material.MaterialIcon.Search),
 //                ),
 //            ),
-                ProfileTabItem(
-                    account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
-                        ),
-                ),
             )
 
         fun misskey(accountKey: MicroBlogKey) =
@@ -244,6 +267,19 @@ data class TimelineTabItem(
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
+                ProfileTabItem(
+                    account = AccountType.Specific(accountKey),
+                    userKey = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                        ),
+                ),
+            )
+
+        fun defaultMisskeySecondaryItems(accountKey: MicroBlogKey) =
+            persistentListOf(
                 ProfileTabItem(
                     account = AccountType.Specific(accountKey),
                     userKey = AccountType.Specific(accountKey),
@@ -294,6 +330,19 @@ data class TimelineTabItem(
                 ),
             )
 
+        fun defaultBlueskySecondaryItems(accountKey: MicroBlogKey) =
+            persistentListOf(
+                ProfileTabItem(
+                    account = AccountType.Specific(accountKey),
+                    userKey = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                        ),
+                ),
+            )
+
         fun xqt(accountKey: MicroBlogKey) =
             listOf(
                 TimelineTabItem(
@@ -322,6 +371,19 @@ data class TimelineTabItem(
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
+                ProfileTabItem(
+                    account = AccountType.Specific(accountKey),
+                    userKey = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                        ),
+                ),
+            )
+
+        fun defaultXqtSecondaryItems(accountKey: MicroBlogKey) =
+            listOf(
                 ProfileTabItem(
                     account = AccountType.Specific(accountKey),
                     userKey = AccountType.Specific(accountKey),

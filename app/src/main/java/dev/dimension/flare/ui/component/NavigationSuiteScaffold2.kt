@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -68,6 +69,7 @@ val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp>
 @Composable
 fun NavigationSuiteScaffold2(
     navigationSuiteItems: NavigationSuiteScope2.() -> Unit,
+    secondaryItems: NavigationSuiteScope2.() -> Unit,
     modifier: Modifier = Modifier,
     layoutType: NavigationSuiteType =
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
@@ -150,11 +152,12 @@ fun NavigationSuiteScaffold2(
                     }
                 }
             } else if (layoutType == NavigationSuiteType.NavigationDrawer) {
+                val secondaryScope by rememberStateOfItems(secondaryItems)
                 PermanentDrawerSheet(
                     modifier =
                         Modifier
                             .width(240.dp)
-                            .padding(horizontal = 8.dp),
+                            .padding(horizontal = 12.dp),
                     drawerContainerColor = navigationSuiteColors.navigationDrawerContainerColor,
                     drawerContentColor = navigationSuiteColors.navigationDrawerContentColor,
                 ) {
@@ -163,6 +166,23 @@ fun NavigationSuiteScaffold2(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                     scope.itemList.forEach {
+                        NavigationDrawerItem(
+                            modifier = it.modifier,
+                            selected = it.selected,
+                            onClick = it.onClick,
+                            icon = it.icon,
+                            badge = it.badge,
+                            label = { it.label?.invoke() ?: Text("") },
+                            colors =
+                                it.colors?.navigationDrawerItemColors
+                                    ?: NavigationDrawerItemDefaults.colors(),
+                            interactionSource = it.interactionSource,
+                        )
+                    }
+                    if (secondaryScope.itemList.isNotEmpty()) {
+                        HorizontalDivider()
+                    }
+                    secondaryScope.itemList.forEach {
                         NavigationDrawerItem(
                             modifier = it.modifier,
                             selected = it.selected,

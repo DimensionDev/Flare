@@ -161,5 +161,5 @@ skie {
 }
 
 molecule {
-    kotlinCompilerPlugin.set(libs.compose.compiler.get().toString())
+  kotlinCompilerPlugin.set("1.5.11-kt-2.0.0-RC1")
 }

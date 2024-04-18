@@ -96,11 +96,9 @@ fun HtmlText2(
                 modifier = modifier,
                 style = context.style,
             ) {
-                with(element) {
-                    RenderElement(context)
-                    with(context) {
-                        RenderTextAndReset()
-                    }
+                RenderElement(element, context)
+                with(context) {
+                    RenderTextAndReset()
                 }
             }
         }
@@ -116,9 +114,12 @@ private val blockElementName =
         "pre",
     )
 
-context (RichTextScope, Element)
+context (RichTextScope)
 @Composable
-private fun RenderElement(context: RenderContext) {
+private fun RenderElement(
+    element: Element,
+    context: RenderContext,
+) = with(element) {
     // check if element is a block element
     if (name in blockElementName) {
         with(context) {
@@ -132,9 +133,7 @@ private fun RenderElement(context: RenderContext) {
                 style = context.style,
             ) {
                 children.forEach {
-                    with(it) {
-                        RenderNode(context)
-                    }
+                    RenderNode(it, context)
                 }
                 with(context) {
                     RenderTextAndReset()
@@ -153,9 +152,7 @@ private fun RenderElement(context: RenderContext) {
         "blockquote" -> {
             BlockQuote {
                 children.forEach {
-                    with(it) {
-                        RenderNode(context)
-                    }
+                    RenderNode(it, context)
                 }
                 with(context) {
                     RenderTextAndReset()
@@ -187,9 +184,7 @@ private fun RenderElement(context: RenderContext) {
             with(context.builder) {
                 withFormat(RichTextString.Format.Bold) {
                     children.forEach {
-                        with(it) {
-                            RenderNode(context)
-                        }
+                        RenderNode(it, context)
                     }
                 }
             }
@@ -198,9 +193,7 @@ private fun RenderElement(context: RenderContext) {
         "fn" -> {
             // TODO: Add fn style
             children.forEach {
-                with(it) {
-                    RenderNode(context)
-                }
+                RenderNode(it, context)
             }
         }
 
@@ -208,9 +201,7 @@ private fun RenderElement(context: RenderContext) {
             with(context.builder) {
                 withFormat(RichTextString.Format.Italic) {
                     children.forEach {
-                        with(it) {
-                            RenderNode(context)
-                        }
+                        RenderNode(it, context)
                     }
                 }
             }
@@ -218,9 +209,7 @@ private fun RenderElement(context: RenderContext) {
 
         "body" -> {
             children.forEach {
-                with(it) {
-                    RenderNode(context)
-                }
+                RenderNode(it, context)
             }
             with(context) {
                 RenderTextAndReset()
@@ -231,9 +220,7 @@ private fun RenderElement(context: RenderContext) {
             with(context.builder) {
                 withFormat(RichTextString.Format.Subscript) {
                     children.forEach {
-                        with(it) {
-                            RenderNode(context)
-                        }
+                        RenderNode(it, context)
                     }
                 }
             }
@@ -243,9 +230,7 @@ private fun RenderElement(context: RenderContext) {
             with(context.builder) {
                 withFormat(RichTextString.Format.Strikethrough) {
                     children.forEach {
-                        with(it) {
-                            RenderNode(context)
-                        }
+                        RenderNode(it, context)
                     }
                 }
             }
@@ -261,17 +246,13 @@ private fun RenderElement(context: RenderContext) {
                         }),
                     ) {
                         children.forEach {
-                            with(it) {
-                                RenderNode(context)
-                            }
+                            RenderNode(it, context)
                         }
                     }
                 }
             } else {
                 children.forEach {
-                    with(it) {
-                        RenderNode(context)
-                    }
+                    RenderNode(it, context)
                 }
             }
         }
@@ -304,17 +285,13 @@ private fun RenderElement(context: RenderContext) {
 
         "span" -> {
             children.forEach {
-                with(it) {
-                    RenderNode(context)
-                }
+                RenderNode(it, context)
             }
         }
 
         else -> {
             children.forEach {
-                with(it) {
-                    RenderNode(context)
-                }
+                RenderNode(it, context)
             }
             with(context) {
                 RenderTextAndReset()
@@ -348,13 +325,16 @@ fun CenterRichText(
     }
 }
 
-context (RichTextScope, Node)
+context (RichTextScope)
 @Composable
-private fun RenderNode(context: RenderContext) {
-    when (this@Node) {
-        is Element -> RenderElement(context)
+private fun RenderNode(
+    node: Node,
+    context: RenderContext,
+) {
+    when (node) {
+        is Element -> RenderElement(node, context)
         is Text -> {
-            context.builder.append(this@Node.text)
+            context.builder.append(node.text)
         }
 
         is Comment -> Unit

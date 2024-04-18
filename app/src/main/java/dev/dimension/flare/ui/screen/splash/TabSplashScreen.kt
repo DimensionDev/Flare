@@ -3,16 +3,16 @@ package dev.dimension.flare.ui.screen.splash
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.TabSplashScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.Direction
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.screen.destinations.TabSplashScreenDestination
 
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
+    start = true,
 )
-@RootNavGraph(start = true)
 @Composable
 internal fun TabSplashScreen(
     args: SplashScreenArgs,

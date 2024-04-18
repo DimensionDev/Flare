@@ -25,6 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
@@ -39,11 +41,10 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMediaPresenter
-import dev.dimension.flare.ui.screen.destinations.StatusMediaRouteDestination
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 internal fun ProfileMediaRoute(

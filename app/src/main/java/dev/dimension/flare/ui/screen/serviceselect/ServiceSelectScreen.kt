@@ -46,7 +46,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.NavGraph
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.XQTLoginRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
@@ -71,8 +72,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
-import dev.dimension.flare.ui.screen.destinations.EntryXQTLoginRouteDestination
-import dev.dimension.flare.ui.screen.destinations.XQTLoginRouteDestination
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
@@ -80,7 +79,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 fun ServiceSelectRoute(
@@ -105,24 +104,24 @@ fun ServiceSelectRoute(
     )
 }
 
-@NavGraph
-annotation class EntryNavGraph(
-    val start: Boolean = false,
-)
-
-@Composable
-@Destination(
-    wrappers = [ThemeWrapper::class],
-)
-@EntryNavGraph(start = true)
-fun EntryServiceSelectRoute(navigator: DestinationsNavigator) {
-    ServiceSelectScreen(
-        onBack = null,
-        onXQT = {
-            navigator.navigate(EntryXQTLoginRouteDestination)
-        },
-    )
-}
+// @NavGraph
+// annotation class EntryNavGraph(
+//    val start: Boolean = false,
+// )
+//
+// @Composable
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @EntryNavGraph(start = true)
+// fun EntryServiceSelectRoute(navigator: DestinationsNavigator) {
+//    ServiceSelectScreen(
+//        onBack = null,
+//        onXQT = {
+//            navigator.navigate(EntryXQTLoginRouteDestination)
+//        },
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

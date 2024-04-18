@@ -36,7 +36,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.screen.settings.AccountItem
 
-// @Destination(
+// @Destination<RootGraph>(
 //    style = DestinationStyle.Dialog::class,
 //    wrappers = [ThemeWrapper::class],
 // )

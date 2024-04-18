@@ -55,9 +55,10 @@ import coil3.request.ImageRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.annotation.parameters.DeepLink
+import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
@@ -78,7 +79,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-object FullScreenDialogStyle : DestinationStyle.Dialog {
+object FullScreenDialogStyle : DestinationStyle.Dialog() {
     override val properties =
         DialogProperties(
             usePlatformDefaultWidth = true,
@@ -117,7 +118,7 @@ fun SetDialogDestinationToEdgeToEdge() {
 }
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     style = FullScreenDialogStyle::class,
     deepLinks = [
         DeepLink(

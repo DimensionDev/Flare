@@ -1,7 +1,9 @@
 package dev.dimension.flare.ui.screen.home
 
 import android.net.Uri
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -43,6 +45,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -50,15 +53,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.eygraber.compose.placeholder.material3.placeholder
-import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.ramcosta.composedestinations.DestinationsNavHost
-import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
-import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
+import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
+import com.ramcosta.composedestinations.generated.NavGraphs
+import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.HomeRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.MeRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.TabSplashScreenDestination
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.Direction
-import com.ramcosta.composedestinations.spec.NavGraphSpec
+import com.ramcosta.composedestinations.spec.NavHostGraphSpec
 import com.ramcosta.composedestinations.spec.Route
 import com.ramcosta.composedestinations.utils.composable
 import com.ramcosta.composedestinations.utils.dialogComposable
@@ -83,15 +92,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.NavGraphs
 import dev.dimension.flare.ui.screen.compose.ComposeRoute
-import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.DiscoverRouteDestination
-import dev.dimension.flare.ui.screen.destinations.HomeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.MeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.NotificationRouteDestination
-import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
-import dev.dimension.flare.ui.screen.destinations.TabSplashScreenDestination
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
@@ -146,7 +147,13 @@ internal fun HomeScreen(
                     HomeDrawerContent(
                         currentRoute = currentRoute,
                         navigateTo = {
-                            navController.navigate(direction = it)
+                            navController.navigate(direction = it) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                             scope.launch {
                                 drawerState.close()
                             }
@@ -375,9 +382,8 @@ private fun getDirection(
 }
 
 @Composable
-@OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
 internal fun Router(
-    navGraph: NavGraphSpec,
+    navGraph: NavHostGraphSpec,
     direction: Route,
     modifier: Modifier = Modifier,
     dependenciesContainerBuilder: @Composable DependenciesContainerBuilder<*>.() -> Unit = {},
@@ -397,27 +403,28 @@ internal fun Router(
             modifier = modifier,
             navController = innerNavController,
             navGraph = navGraph,
-            engine =
-                rememberAnimatedNavHostEngine(
-                    rootDefaultAnimations =
-                        RootNavGraphDefaultAnimations(
-                            enterTransition = {
-                                slideInHorizontally(tween()) { it / 3 } + fadeIn()
-                            },
-                            exitTransition = {
-                                slideOutHorizontally(tween()) { -it / 3 } + fadeOut()
-                            },
-                            popEnterTransition = {
-                                slideInHorizontally(tween()) { -it / 3 } + fadeIn()
-                            },
-                            popExitTransition = {
-                                slideOutHorizontally(tween()) { it / 3 } + fadeOut()
-                            },
-                        ),
-                ),
+            defaultTransitions = DefaultFadingTransitions,
             startRoute = direction,
             dependenciesContainerBuilder = dependenciesContainerBuilder,
         )
+    }
+}
+
+private object DefaultFadingTransitions : NavHostAnimatedDestinationStyle() {
+    override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+        slideInHorizontally(tween()) { it / 3 } + fadeIn()
+    }
+
+    override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+        slideOutHorizontally(tween()) { -it / 3 } + fadeOut()
+    }
+
+    override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+        slideInHorizontally(tween()) { -it / 3 } + fadeIn()
+    }
+
+    override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+        slideOutHorizontally(tween()) { it / 3 } + fadeOut()
     }
 }
 

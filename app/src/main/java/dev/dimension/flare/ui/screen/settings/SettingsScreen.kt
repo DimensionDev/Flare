@@ -34,8 +34,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.NavGraphs
+import com.ramcosta.composedestinations.generated.destinations.AboutRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.AccountsRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.AppearanceRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.LocalFilterRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.StorageRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.TabCustomizeRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -45,18 +54,10 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.NavGraphs
-import dev.dimension.flare.ui.screen.destinations.AboutRouteDestination
-import dev.dimension.flare.ui.screen.destinations.AccountsRouteDestination
-import dev.dimension.flare.ui.screen.destinations.AppearanceRouteDestination
-import dev.dimension.flare.ui.screen.destinations.DirectionDestination
-import dev.dimension.flare.ui.screen.destinations.LocalFilterRouteDestination
-import dev.dimension.flare.ui.screen.destinations.StorageRouteDestination
-import dev.dimension.flare.ui.screen.destinations.TabCustomizeRouteDestination
 import dev.dimension.flare.ui.screen.home.Router
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
@@ -128,11 +129,11 @@ internal fun SettingsRoute() {
 @Composable
 private fun settingsPanelPresenter() =
     run {
-        var selectedItem by remember { mutableStateOf<DirectionDestination?>(null) }
+        var selectedItem by remember { mutableStateOf<DirectionDestinationSpec?>(null) }
         object {
             val selectedItem = selectedItem
 
-            fun setSelectedItem(item: DirectionDestination?) {
+            fun setSelectedItem(item: DirectionDestinationSpec?) {
                 selectedItem = item
             }
         }

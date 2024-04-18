@@ -7,16 +7,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.annotation.parameters.DeepLink
+import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.theme.FlareTheme
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 
-@Destination(
+@Destination<RootGraph>(
     style = FullScreenDialogStyle::class,
     deepLinks = [
         DeepLink(

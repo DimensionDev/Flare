@@ -72,9 +72,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
-import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.annotation.parameters.DeepLink
+import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.generated.destinations.MediaRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
@@ -119,7 +122,7 @@ import kotlin.math.min
 import kotlin.reflect.KFunction1
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
@@ -152,7 +155,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
             },
             onProfileMediaClick = {
                 navigator.navigate(
-                    dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                    ProfileMediaRouteDestination(
                         it.userKey,
                         accountType = AccountType.Specific(accountKey),
                     ),
@@ -160,7 +163,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
             },
             onMediaClick = {
                 navigator.navigate(
-                    dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                    MediaRouteDestination(
                         it,
                     ),
                 )
@@ -184,7 +187,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
 }
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
@@ -214,7 +217,7 @@ internal fun ProfileWithUserNameAndHostRoute(
             },
             onProfileMediaClick = {
                 navigator.navigate(
-                    dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                    ProfileMediaRouteDestination(
                         it.userKey,
                         accountType = accountType,
                     ),
@@ -222,7 +225,7 @@ internal fun ProfileWithUserNameAndHostRoute(
             },
             onMediaClick = {
                 navigator.navigate(
-                    dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                    MediaRouteDestination(
                         it,
                     ),
                 )
@@ -246,7 +249,7 @@ internal fun ProfileWithUserNameAndHostRoute(
 }
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 internal fun MeRoute(
@@ -349,7 +352,7 @@ private fun profileWithUserNameAndHostPresenter(
 }
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
@@ -373,7 +376,7 @@ internal fun ProfileDeeplinkRoute(
         },
         onProfileMediaClick = {
             navigator.navigate(
-                dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                ProfileMediaRouteDestination(
                     userKey,
                     accountType = AccountType.Specific(accountKey),
                 ),
@@ -381,7 +384,7 @@ internal fun ProfileDeeplinkRoute(
         },
         onMediaClick = {
             navigator.navigate(
-                dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                MediaRouteDestination(
                     it,
                 ),
             )
@@ -392,7 +395,7 @@ internal fun ProfileDeeplinkRoute(
 }
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
@@ -413,7 +416,7 @@ internal fun ProfileRoute(
         },
         onProfileMediaClick = {
             navigator.navigate(
-                dev.dimension.flare.ui.screen.destinations.ProfileMediaRouteDestination(
+                ProfileMediaRouteDestination(
                     userKey,
                     accountType = accountType,
                 ),
@@ -421,7 +424,7 @@ internal fun ProfileRoute(
         },
         onMediaClick = {
             navigator.navigate(
-                dev.dimension.flare.ui.screen.destinations.MediaRouteDestination(
+                MediaRouteDestination(
                     it,
                 ),
             )

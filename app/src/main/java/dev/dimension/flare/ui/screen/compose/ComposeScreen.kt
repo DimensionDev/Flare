@@ -5,12 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -85,10 +80,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import androidx.navigation.NavBackStackEntry
-import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.annotation.parameters.DeepLink
+import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
@@ -151,7 +146,7 @@ fun ShortcutComposeRoute(
     }
 }
 
-@Destination(
+@Destination<RootGraph>(
     style = DestinationStyle.Dialog::class,
     wrappers = [ThemeWrapper::class],
 )
@@ -168,7 +163,7 @@ fun ComposeRoute(
     )
 }
 
-@Destination(
+@Destination<RootGraph>(
     style = DestinationStyle.Dialog::class,
     deepLinks = [
         DeepLink(
@@ -192,7 +187,7 @@ fun ReplyRoute(
     )
 }
 
-@Destination(
+@Destination<RootGraph>(
     style = DestinationStyle.Dialog::class,
     deepLinks = [
         DeepLink(
@@ -214,32 +209,6 @@ fun Quote(
         status = ComposeStatus.Quote(quoted),
         accountType = accountType,
     )
-}
-
-object ComposeTransitions : DestinationStyle.Animated {
-    override fun AnimatedContentTransitionScope<NavBackStackEntry>.enterTransition(): EnterTransition? {
-        return slideIntoContainer(
-            AnimatedContentTransitionScope.SlideDirection.Up,
-        ) + fadeIn()
-    }
-
-    override fun AnimatedContentTransitionScope<NavBackStackEntry>.exitTransition(): ExitTransition? {
-        return slideOutOfContainer(
-            AnimatedContentTransitionScope.SlideDirection.Up,
-        ) + fadeOut()
-    }
-
-    override fun AnimatedContentTransitionScope<NavBackStackEntry>.popEnterTransition(): EnterTransition? {
-        return slideIntoContainer(
-            AnimatedContentTransitionScope.SlideDirection.Down,
-        ) + fadeIn()
-    }
-
-    override fun AnimatedContentTransitionScope<NavBackStackEntry>.popExitTransition(): ExitTransition? {
-        return slideOutOfContainer(
-            AnimatedContentTransitionScope.SlideDirection.Down,
-        ) + fadeOut()
-    }
 }
 
 @OptIn(

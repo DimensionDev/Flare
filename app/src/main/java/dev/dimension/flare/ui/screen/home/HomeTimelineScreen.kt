@@ -39,6 +39,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
@@ -59,8 +62,6 @@ import dev.dimension.flare.ui.presenter.home.HomeTimelineState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.destinations.ComposeRouteDestination
-import dev.dimension.flare.ui.screen.destinations.ServiceSelectRouteDestination
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
@@ -68,7 +69,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 // @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 @Composable

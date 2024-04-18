@@ -33,9 +33,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.annotation.parameters.DeepLink
+import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
@@ -60,7 +62,6 @@ import dev.dimension.flare.ui.presenter.home.SearchState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
 import dev.dimension.flare.ui.screen.profile.CommonProfileHeader
 import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -68,7 +69,7 @@ import io.ktor.http.decodeURLQueryComponent
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
     deepLinks = [
         DeepLink(
@@ -94,7 +95,7 @@ fun SearchDeepLink(
     )
 }
 
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
     deepLinks = [
         DeepLink(

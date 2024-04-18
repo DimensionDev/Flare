@@ -27,7 +27,7 @@ stately = "2.0.7"
 twitter-parser = "0.3.5"
 molecule = "1.4.2"
 accompanist = "0.34.0"
-compose-destinations = "1.10.2"
+compose-destinations = "2.1.0-beta01"
 compose-lint-checks = "1.3.1"
 ktlintPlugin = "12.1.0"
 androidx-credentials = "1.2.2"
@@ -131,7 +131,6 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 nestedScrollView = "com.github.Tlaster:NestedScrollView:1.0.1"
 
 compose-destinations = { group = "io.github.raamcosta.compose-destinations", name = "core", version.ref = "compose-destinations" }
-compose-destinations-animations-core = { group = "io.github.raamcosta.compose-destinations", name = "animations-core", version.ref = "compose-destinations" }
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destinations" }
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
@@ -176,7 +175,7 @@ koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
 coil = ["coil", "coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated", "coil-network-ktor", "zoomable-image-coil"]
 accompanist = ["accompanist-permissions"]
-compose-destinations = ["compose-destinations", "compose-destinations-animations-core"]
+compose-destinations = ["compose-destinations"]
 compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]
 sqldelight = ["sqldelight-coroutines-extensions"]
 media3 = ["media3-exoplayer", "media3-ui"]

@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.rememberWebViewState
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.result.ResultBackNavigator
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -20,7 +20,7 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-@Destination(
+@Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 internal fun XQTLoginRoute(resultNavigator: ResultBackNavigator<Boolean>) {
@@ -31,18 +31,18 @@ internal fun XQTLoginRoute(resultNavigator: ResultBackNavigator<Boolean>) {
     )
 }
 
-@EntryNavGraph
-@Composable
-@Destination(
-    wrappers = [ThemeWrapper::class],
-)
-internal fun EntryXQTLoginRoute(navigator: DestinationsNavigator) {
-    XQTLoginScreen(
-        toHome = {
-            navigator.navigateUp()
-        },
-    )
-}
+// @EntryNavGraph
+// @Composable
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// internal fun EntryXQTLoginRoute(navigator: DestinationsNavigator) {
+//    XQTLoginScreen(
+//        toHome = {
+//            navigator.navigateUp()
+//        },
+//    )
+// }
 
 @Composable
 private fun XQTLoginScreen(toHome: () -> Unit) {

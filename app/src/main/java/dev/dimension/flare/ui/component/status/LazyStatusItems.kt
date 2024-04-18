@@ -25,6 +25,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
+import com.ramcosta.composedestinations.generated.destinations.BlueskyReportStatusRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.DeleteStatusConfirmRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.MastodonReportRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.MisskeyReactionRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.MisskeyReportRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.QuoteDestination
+import com.ramcosta.composedestinations.generated.destinations.ReplyRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.deeplink
@@ -49,12 +59,6 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.screen.destinations.BlueskyReportStatusRouteDestination
-import dev.dimension.flare.ui.screen.destinations.DeleteStatusConfirmRouteDestination
-import dev.dimension.flare.ui.screen.destinations.ProfileRouteDestination
-import dev.dimension.flare.ui.screen.destinations.ReplyRouteDestination
-import dev.dimension.flare.ui.screen.destinations.StatusMediaRouteDestination
-import dev.dimension.flare.ui.screen.destinations.StatusRouteDestination
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
@@ -416,7 +420,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.MastodonReportRouteDestination(
+            MastodonReportRouteDestination(
                 userKey = status.user.userKey,
                 statusKey = status.statusKey,
                 accountType = AccountType.Specific(status.accountKey),
@@ -474,7 +478,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.QuoteDestination(
+            QuoteDestination(
                 accountType = AccountType.Specific(data.accountKey),
                 quoted = data.statusKey,
             ).deeplink(),
@@ -486,7 +490,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.MisskeyReactionRouteDestination(
+            MisskeyReactionRouteDestination(
                 statusKey = data.statusKey,
                 accountType = AccountType.Specific(data.accountKey),
             ).deeplink(),
@@ -510,7 +514,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.MisskeyReportRouteDestination(
+            MisskeyReportRouteDestination(
                 userKey = data.user.userKey,
                 statusKey = data.statusKey,
                 accountType = AccountType.Specific(data.accountKey),
@@ -639,7 +643,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.QuoteDestination(
+            QuoteDestination(
                 accountType = AccountType.Specific(data.accountKey),
                 quoted = data.statusKey,
             ).deeplink(),
@@ -651,7 +655,7 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            dev.dimension.flare.ui.screen.destinations.QuoteDestination(
+            QuoteDestination(
                 accountType = AccountType.Specific(data.accountKey),
                 quoted = data.statusKey,
             ).deeplink(),

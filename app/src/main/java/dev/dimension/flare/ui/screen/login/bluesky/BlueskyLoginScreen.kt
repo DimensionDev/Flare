@@ -47,7 +47,7 @@ import dev.dimension.flare.ui.presenter.login.BlueskyLoginPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 // @Composable
-// @Destination(
+// @Destination<RootGraph>(
 //    wrappers = [ThemeWrapper::class],
 // )
 // fun BlueskyLoginRoute(navigator: DestinationsNavigator) {

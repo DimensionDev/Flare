@@ -25,7 +25,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.MastodonCallbackPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-// @Destination(
+// @Destination<RootGraph>(
 //    deepLinks = [
 //        DeepLink(
 //            uriPattern = "${AppDeepLink.Callback.MASTODON}?code={code}",

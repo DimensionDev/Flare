@@ -19,19 +19,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
+import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.QuickMenuPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.destinations.DirectionDestination
-import dev.dimension.flare.ui.screen.destinations.SettingsRouteDestination
 import dev.dimension.flare.ui.screen.settings.AccountItem
 
 @Composable
 internal fun HomeDrawerContent(
     currentRoute: String?,
-    navigateTo: (DirectionDestination) -> Unit,
+    navigateTo: (DirectionDestinationSpec) -> Unit,
 ) {
     val state by producePresenter("HomeDrawerContent") {
         remember { QuickMenuPresenter() }.invoke()

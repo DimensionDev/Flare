@@ -26,7 +26,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.MisskeyCallbackPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-// @Destination(
+// @Destination<RootGraph>(
 //    deepLinks = [
 //        DeepLink(
 //            uriPattern = "${AppDeepLink.Callback.MISSKEY}?session={session}",

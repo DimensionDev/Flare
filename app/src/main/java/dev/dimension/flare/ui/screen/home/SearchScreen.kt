@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -223,43 +224,49 @@ private fun SearchContent(
     statusEvent: StatusEvent = koinInject(),
 ) {
     SearchBar(
-        modifier = modifier,
-        query = query,
-        onQueryChange = onQueryChange,
-        onSearch = onSearch,
-        active = active,
-        onActiveChange = onActiveChange,
-        placeholder = {
-            Text(text = stringResource(R.string.discover_search_placeholder))
-        },
-        trailingIcon = {
-            user?.onSuccess {
-                IconButton(onClick = {
-                    onAccountClick.invoke()
-                }) {
-                    AvatarComponent(it.avatarUrl, size = 30.dp)
-                }
-            }
-        },
-        leadingIcon = {
-            AnimatedContent(active) {
-                if (it) {
-                    IconButton(onClick = {
-                        onBack.invoke()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.navigate_back),
-                        )
+        inputField = {
+            SearchBarDefaults.InputField(
+                expanded = active,
+                onExpandedChange = onActiveChange,
+                query = query,
+                onQueryChange = onQueryChange,
+                onSearch = onSearch,
+                placeholder = {
+                    Text(text = stringResource(R.string.discover_search_placeholder))
+                },
+                trailingIcon = {
+                    user?.onSuccess {
+                        IconButton(onClick = {
+                            onAccountClick.invoke()
+                        }) {
+                            AvatarComponent(it.avatarUrl, size = 30.dp)
+                        }
                     }
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null,
-                    )
-                }
-            }
+                },
+                leadingIcon = {
+                    AnimatedContent(active) {
+                        if (it) {
+                            IconButton(onClick = {
+                                onBack.invoke()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(id = R.string.navigate_back),
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                },
+            )
         },
+        modifier = modifier,
+        expanded = active,
+        onExpandedChange = onActiveChange,
     ) {
         if (committed) {
             LazyStatusVerticalStaggeredGrid {

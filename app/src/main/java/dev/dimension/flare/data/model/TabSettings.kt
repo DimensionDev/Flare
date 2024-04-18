@@ -2,24 +2,32 @@ package dev.dimension.flare.data.model
 
 import android.content.Context
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FeaturedPlayList
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStore
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -51,7 +59,37 @@ sealed interface TitleType {
     data class Text(val content: String) : TitleType
 
     @Serializable
-    data class Localized(val resId: Int) : TitleType
+    data class Localized(val key: LocalizedKey) : TitleType {
+        val resId: Int
+            get() = key.toId()
+
+        @Serializable
+        enum class LocalizedKey {
+            Home,
+            Notifications,
+            Discover,
+            Me,
+            Settings,
+            MastodonLocal,
+            MastodonPublic,
+            Federated,
+            Bookmark, ;
+
+            fun toId(): Int {
+                return when (this) {
+                    Home -> R.string.home_tab_home_title
+                    Notifications -> R.string.home_tab_notifications_title
+                    Discover -> R.string.home_tab_discover_title
+                    Me -> R.string.home_tab_me_title
+                    Settings -> R.string.settings_title
+                    MastodonLocal -> R.string.mastodon_tab_local_title
+                    MastodonPublic -> R.string.mastodon_tab_public_title
+                    Federated -> R.string.xqt_tab_federated_title
+                    Bookmark -> R.string.home_tab_bookmarks_title
+                }
+            }
+        }
+    }
 }
 
 @Serializable
@@ -67,7 +105,11 @@ sealed interface IconType {
             Notification,
             Search,
             Profile,
-            Settings, ;
+            Settings,
+            Local,
+            World,
+            YouLike,
+            Bookmark, ;
 
             fun toIcon(): ImageVector {
                 return when (this) {
@@ -76,6 +118,10 @@ sealed interface IconType {
                     Search -> Icons.Default.Search
                     Profile -> Icons.Default.AccountCircle
                     Settings -> Icons.Default.Settings
+                    Local -> Icons.Default.Groups
+                    World -> Icons.Default.Public
+                    YouLike -> Icons.AutoMirrored.Filled.FeaturedPlayList
+                    Bookmark -> Icons.Default.Bookmarks
                 }
             }
         }
@@ -86,40 +132,33 @@ sealed interface IconType {
 }
 
 @Serializable
-data class TimelineTabItem(
+data class NotificationTabItem(
     override val account: AccountType,
-    val type: Type,
     override val metaData: TabMetaData,
 ) : TabItem {
-    override val key: String = "timeline_${account}_$type"
+    override val key: String = "notification_$account"
+}
 
-    @Serializable
-    sealed interface Type {
-        @Serializable
-        data object Home : Type
-
-        @Serializable
-        data object Notifications : Type
-    }
+@Serializable
+sealed interface TimelineTabItem : TabItem {
+    fun createPresenter(): TimelinePresenter
 
     companion object {
         val default =
             persistentListOf(
-                TimelineTabItem(
+                HomeTimelineTabItem(
                     account = AccountType.Active,
-                    type = Type.Home,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_home_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Material(IconType.Material.MaterialIcon.Home),
                         ),
                 ),
-                TimelineTabItem(
+                NotificationTabItem(
                     account = AccountType.Active,
-                    type = Type.Notifications,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_notifications_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
                             icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
                         ),
                 ),
@@ -127,7 +166,7 @@ data class TimelineTabItem(
                     account = AccountType.Active,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_discover_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
                             icon = IconType.Material(IconType.Material.MaterialIcon.Search),
                         ),
                 ),
@@ -136,19 +175,18 @@ data class TimelineTabItem(
                     userKey = AccountType.Active,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
                             icon = IconType.Material(IconType.Material.MaterialIcon.Profile),
                         ),
                 ),
             )
         val guest =
             persistentListOf(
-                TimelineTabItem(
+                HomeTimelineTabItem(
                     account = AccountType.Guest,
-                    type = Type.Home,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_home_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Material(IconType.Material.MaterialIcon.Home),
                         ),
                 ),
@@ -156,12 +194,20 @@ data class TimelineTabItem(
                     account = AccountType.Guest,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_discover_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
                             icon = IconType.Material(IconType.Material.MaterialIcon.Search),
                         ),
                 ),
                 SettingsTabItem,
             )
+
+        fun defaultPrimary(user: UiUser) =
+            when (user) {
+                is UiUser.Mastodon -> mastodon(user.userKey)
+                is UiUser.Misskey -> misskey(user.userKey)
+                is UiUser.Bluesky -> bluesky(user.userKey)
+                is UiUser.XQT -> xqt(user.userKey)
+            }
 
         fun defaultSecondary(user: UiUser) =
             when (user) {
@@ -171,31 +217,33 @@ data class TimelineTabItem(
                 is UiUser.XQT -> defaultXqtSecondaryItems(user.userKey)
             }
 
-        fun mastodon(accountKey: MicroBlogKey) =
+        private fun mastodon(accountKey: MicroBlogKey) =
             persistentListOf(
-                TimelineTabItem(
+                HomeTimelineTabItem(
                     account = AccountType.Specific(accountKey),
-                    type = Type.Home,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_home_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
-                TimelineTabItem(
+                NotificationTabItem(
                     account = AccountType.Specific(accountKey),
-                    type = Type.Notifications,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_notifications_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Notification, accountKey),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+                            icon =
+                                IconType.Mixed(
+                                    IconType.Material.MaterialIcon.Notification,
+                                    accountKey,
+                                ),
                         ),
                 ),
                 DiscoverTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_discover_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
@@ -204,66 +252,59 @@ data class TimelineTabItem(
                     userKey = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
                         ),
                 ),
             )
 
-        fun defaultMastodonSecondaryItems(accountKey: MicroBlogKey) =
+        private fun defaultMastodonSecondaryItems(accountKey: MicroBlogKey) =
             persistentListOf(
-                ProfileTabItem(
+                Mastodon.LocalTimelineTabItem(
                     account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonLocal),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Local, accountKey),
                         ),
                 ),
-//            TimelineTabItem(
-//                account = AccountType.Specific(accountKey),
-//                type = "local",
-//                metaData = TabMetaData(
-//                    title = TitleType.Localized(R.string.home_tab_local_title),
-//                    icon = IconType.Material(IconType.Material.MaterialIcon.Search),
-//                ),
-//            ),
-//            TimelineTabItem(
-//                account = AccountType.Specific(accountKey),
-//                type = "federated",
-//                metaData = TabMetaData(
-//                    title = TitleType.Localized(R.string.home_tab_federated_title),
-//                    icon = IconType.Material(IconType.Material.MaterialIcon.Search),
-//                ),
-//            ),
-            )
-
-        fun misskey(accountKey: MicroBlogKey) =
-            persistentListOf(
-                TimelineTabItem(
+                Mastodon.PublicTimelineTabItem(
                     account = AccountType.Specific(accountKey),
-                    type = Type.Home,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_home_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonPublic),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.World, accountKey),
+                        ),
+                ),
+            )
+
+        private fun misskey(accountKey: MicroBlogKey) =
+            persistentListOf(
+                HomeTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
-                TimelineTabItem(
+                NotificationTabItem(
                     account = AccountType.Specific(accountKey),
-                    type = Type.Notifications,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_notifications_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Notification, accountKey),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+                            icon =
+                                IconType.Mixed(
+                                    IconType.Material.MaterialIcon.Notification,
+                                    accountKey,
+                                ),
                         ),
                 ),
                 DiscoverTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_discover_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
@@ -272,50 +313,59 @@ data class TimelineTabItem(
                     userKey = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
                         ),
                 ),
             )
 
-        fun defaultMisskeySecondaryItems(accountKey: MicroBlogKey) =
+        private fun defaultMisskeySecondaryItems(accountKey: MicroBlogKey) =
             persistentListOf(
-                ProfileTabItem(
+                Misskey.LocalTimelineTabItem(
                     account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonLocal),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Local, accountKey),
+                        ),
+                ),
+                Misskey.GlobalTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonPublic),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.World, accountKey),
                         ),
                 ),
             )
 
-        fun bluesky(accountKey: MicroBlogKey) =
+        private fun bluesky(accountKey: MicroBlogKey) =
             persistentListOf(
-                TimelineTabItem(
+                HomeTimelineTabItem(
                     account = AccountType.Specific(accountKey),
-                    type = Type.Home,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_home_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
-                TimelineTabItem(
+                NotificationTabItem(
                     account = AccountType.Specific(accountKey),
-                    type = Type.Notifications,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_notifications_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Notification, accountKey),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+                            icon =
+                                IconType.Mixed(
+                                    IconType.Material.MaterialIcon.Notification,
+                                    accountKey,
+                                ),
                         ),
                 ),
                 DiscoverTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_discover_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
@@ -324,50 +374,44 @@ data class TimelineTabItem(
                     userKey = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
                         ),
                 ),
             )
 
-        fun defaultBlueskySecondaryItems(accountKey: MicroBlogKey) =
-            persistentListOf(
-                ProfileTabItem(
-                    account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
-                        ),
-                ),
-            )
+        private fun defaultBlueskySecondaryItems(
+            @Suppress("UNUSED_PARAMETER")
+            accountKey: MicroBlogKey,
+        ) = persistentListOf<TabItem>()
 
-        fun xqt(accountKey: MicroBlogKey) =
+        private fun xqt(accountKey: MicroBlogKey) =
             listOf(
-                TimelineTabItem(
+                HomeTimelineTabItem(
                     account = AccountType.Specific(accountKey),
-                    type = Type.Home,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_home_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
-                TimelineTabItem(
+                NotificationTabItem(
                     account = AccountType.Specific(accountKey),
-                    type = Type.Notifications,
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_notifications_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Notification, accountKey),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+                            icon =
+                                IconType.Mixed(
+                                    IconType.Material.MaterialIcon.Notification,
+                                    accountKey,
+                                ),
                         ),
                 ),
                 DiscoverTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_discover_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
@@ -376,24 +420,121 @@ data class TimelineTabItem(
                     userKey = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
                         ),
                 ),
             )
 
-        fun defaultXqtSecondaryItems(accountKey: MicroBlogKey) =
+        private fun defaultXqtSecondaryItems(accountKey: MicroBlogKey) =
             listOf(
-                ProfileTabItem(
+                XQT.FeaturedTimelineTabItem(
                     account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(R.string.home_tab_me_title),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Federated),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.YouLike, accountKey),
+                        ),
+                ),
+                XQT.BookmarkTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Bookmark, accountKey),
                         ),
                 ),
             )
+    }
+}
+
+@Serializable
+data class HomeTimelineTabItem(
+    override val metaData: TabMetaData,
+    override val account: AccountType,
+) : TimelineTabItem {
+    override val key: String = "home_$account"
+
+    override fun createPresenter(): TimelinePresenter {
+        return HomeTimelinePresenter(account)
+    }
+}
+
+object Mastodon {
+    @Serializable
+    data class LocalTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "local_$account"
+
+        override fun createPresenter(): TimelinePresenter {
+            return dev.dimension.flare.ui.presenter.home.mastodon.LocalTimelinePresenter(account)
+        }
+    }
+
+    @Serializable
+    data class PublicTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "public_$account"
+
+        override fun createPresenter(): TimelinePresenter {
+            return dev.dimension.flare.ui.presenter.home.mastodon.PublicTimelinePresenter(account)
+        }
+    }
+}
+
+object Misskey {
+    @Serializable
+    data class LocalTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "local_$account"
+
+        override fun createPresenter(): TimelinePresenter {
+            return dev.dimension.flare.ui.presenter.home.misskey.LocalTimelinePresenter(account)
+        }
+    }
+
+    @Serializable
+    data class GlobalTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "global_$account"
+
+        override fun createPresenter(): TimelinePresenter {
+            return dev.dimension.flare.ui.presenter.home.misskey.PublicTimelinePresenter(account)
+        }
+    }
+}
+
+object XQT {
+    @Serializable
+    data class FeaturedTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "featured_$account"
+
+        override fun createPresenter(): TimelinePresenter {
+            return dev.dimension.flare.ui.presenter.home.xqt.FeaturedTimelinePresenter(account)
+        }
+    }
+
+    @Serializable
+    data class BookmarkTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "bookmark_$account"
+
+        override fun createPresenter(): TimelinePresenter {
+            return dev.dimension.flare.ui.presenter.home.xqt.BookmarkTimelinePresenter(account)
+        }
     }
 }
 
@@ -423,7 +564,7 @@ data object SettingsTabItem : TabItem {
     override val metaData: TabMetaData
         get() =
             TabMetaData(
-                title = TitleType.Localized(R.string.settings_title),
+                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Settings),
                 icon = IconType.Material(IconType.Material.MaterialIcon.Settings),
             )
 }
@@ -431,7 +572,11 @@ data object SettingsTabItem : TabItem {
 @OptIn(ExperimentalSerializationApi::class)
 private object TabSettingsSerializer : Serializer<TabSettings> {
     override suspend fun readFrom(input: InputStream): TabSettings {
-        return ProtoBuf.decodeFromByteArray(input.readBytes())
+        return try {
+            ProtoBuf.decodeFromByteArray(input.readBytes())
+        } catch (e: SerializationException) {
+            throw androidx.datastore.core.CorruptionException("Cannot read proto.", e)
+        }
     }
 
     override suspend fun writeTo(
@@ -448,4 +593,8 @@ private object TabSettingsSerializer : Serializer<TabSettings> {
 internal val Context.tabSettings: DataStore<TabSettings> by dataStore(
     fileName = "tab_settings.pb",
     serializer = TabSettingsSerializer,
+    corruptionHandler =
+        ReplaceFileCorruptionHandler {
+            TabSettingsSerializer.defaultValue
+        },
 )

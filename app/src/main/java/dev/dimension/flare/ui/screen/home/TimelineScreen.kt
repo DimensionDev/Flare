@@ -44,7 +44,7 @@ import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDesti
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -57,11 +57,11 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
-import dev.dimension.flare.ui.presenter.home.HomeTimelineState
+import dev.dimension.flare.ui.presenter.home.TimelineState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.settings.TabTitle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
@@ -73,18 +73,18 @@ import org.koin.compose.koinInject
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun HomeRoute(
+internal fun TimelineRoute(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
+    tabItem: TimelineTabItem,
     tabState: TabState,
     drawerState: DrawerState,
 ) {
     val scope = rememberCoroutineScope()
-    HomeTimelineScreen(
-        accountType = accountType,
+    TimelineScreen(
+        tabItem = tabItem,
         tabState = tabState,
         toCompose = {
-            navigator.navigate(ComposeRouteDestination(accountType = accountType))
+            navigator.navigate(ComposeRouteDestination(accountType = tabItem.account))
         },
         toQuickMenu = {
             scope.launch {
@@ -99,15 +99,15 @@ internal fun HomeRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun HomeTimelineScreen(
-    accountType: AccountType,
+internal fun TimelineScreen(
+    tabItem: TimelineTabItem,
     tabState: TabState,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
 ) {
-    val state by producePresenter(key = "home_timeline_$accountType") {
-        homeTimelinePresenter(accountType)
+    val state by producePresenter(key = "home_timeline_${tabItem.key}") {
+        timelinePresenter(tabItem)
     }
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
@@ -127,7 +127,7 @@ internal fun HomeTimelineScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(id = R.string.home_tab_home_title))
+                    TabTitle(title = tabItem.metaData.title)
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
@@ -221,13 +221,18 @@ internal fun HomeTimelineScreen(
 }
 
 @Composable
-private fun homeTimelinePresenter(
-    accountType: AccountType,
+private fun timelinePresenter(
+    tabItem: TimelineTabItem,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
-    val state = remember(accountType) { HomeTimelinePresenter(accountType = accountType) }.invoke()
+    val state = remember(tabItem.account) { tabItem.createPresenter() }.invoke()
     val accountState =
-        remember(accountType) { UserPresenter(accountType = accountType, userKey = null) }.invoke()
+        remember(tabItem.account) {
+            UserPresenter(
+                accountType = tabItem.account,
+                userKey = null,
+            )
+        }.invoke()
     var showNewToots by remember { mutableStateOf(false) }
     val listState = state.listState
     if (listState is UiState.Success && listState.data.itemCount > 0) {
@@ -247,7 +252,7 @@ private fun homeTimelinePresenter(
                 }
         }
     }
-    object : UserState by accountState, HomeTimelineState by state {
+    object : UserState by accountState, TimelineState by state {
         val statusEvent = statusEvent
         val showNewToots = showNewToots
 

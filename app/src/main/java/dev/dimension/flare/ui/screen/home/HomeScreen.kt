@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.home
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -71,11 +72,11 @@ import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationSty
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.HomeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TabSplashScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
@@ -86,6 +87,7 @@ import com.ramcosta.composedestinations.utils.composable
 import com.ramcosta.composedestinations.utils.dialogComposable
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.DiscoverTabItem
+import dev.dimension.flare.data.model.NotificationTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.SettingsTabItem
 import dev.dimension.flare.data.model.TabItem
@@ -158,6 +160,14 @@ internal fun HomeScreen(
             NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                 currentWindowAdaptiveInfo(),
             )
+        BackHandler(
+            enabled = drawerState.isOpen,
+            onBack = {
+                scope.launch {
+                    drawerState.close()
+                }
+            },
+        )
         FlareTheme {
             ModalNavigationDrawer(
                 drawerState = drawerState,
@@ -537,10 +547,11 @@ private fun getDirection(
         }
 
         is TimelineTabItem -> {
-            when (tab.type) {
-                TimelineTabItem.Type.Home -> HomeRouteDestination(accountType)
-                TimelineTabItem.Type.Notifications -> NotificationRouteDestination(accountType)
-            }
+            TimelineRouteDestination(tab)
+        }
+
+        is NotificationTabItem -> {
+            NotificationRouteDestination(accountType)
         }
 
         SettingsTabItem -> {
@@ -579,21 +590,25 @@ internal fun Router(
 }
 
 private object DefaultFadingTransitions : NavHostAnimatedDestinationStyle() {
-    override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-        slideInHorizontally(tween()) { it / 3 } + fadeIn()
-    }
+    override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
+        {
+            slideInHorizontally(tween()) { it / 3 } + fadeIn()
+        }
 
-    override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-        slideOutHorizontally(tween()) { -it / 3 } + fadeOut()
-    }
+    override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
+        {
+            slideOutHorizontally(tween()) { -it / 3 } + fadeOut()
+        }
 
-    override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-        slideInHorizontally(tween()) { -it / 3 } + fadeIn()
-    }
+    override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
+        {
+            slideInHorizontally(tween()) { -it / 3 } + fadeIn()
+        }
 
-    override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-        slideOutHorizontally(tween()) { it / 3 } + fadeOut()
-    }
+    override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
+        {
+            slideOutHorizontally(tween()) { it / 3 } + fadeOut()
+        }
 }
 
 private class ProxyUriHandler(
@@ -626,31 +641,32 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                     )
                 },
             ) { user ->
-                settingsRepository.tabSettings.collectAsUiState().value.map { tabSettings ->
-                    tabSettings.items.map { tabItem ->
-                        HomeTabItem(tabItem, false)
-                    } +
-                        (tabSettings.secondaryItems ?: TimelineTabItem.defaultSecondary(user)).map {
-                            HomeTabItem(it, true)
-                        }
+                settingsRepository.tabSettings.collectAsUiState().value.flatMap(
+                    onError = {
+                        UiState.Success(
+                            TimelineTabItem.default.map {
+                                HomeTabItem(it, false)
+                            } +
+                                TimelineTabItem.defaultSecondary(user).map {
+                                    HomeTabItem(it, true)
+                                },
+                        )
+                    },
+                ) { tabSettings ->
+                    val secondary =
+                        tabSettings.secondaryItems ?: TimelineTabItem.defaultSecondary(user)
+                    UiState.Success(
+                        tabSettings.items.map { tabItem ->
+                            HomeTabItem(tabItem, false)
+                        } +
+                            secondary.map {
+                                HomeTabItem(it, true)
+                            },
+                    )
                 }
             }.map {
                 it.toImmutableList()
             }
-//        val secondaryTabs =
-//            account.user.flatMap(
-//                onError = {
-//                    UiState.Success(TimelineTabItem.guest)
-//                },
-//            ) {
-//                settingsRepository.tabSettings.collectAsUiState().value.map {
-//                    it.secondaryItems ?: emptyList()
-//                }
-//            }.map {
-//                it.associateWith {
-//                    TabState()
-//                }.toImmutableMap()
-//            }
         object {
             val tabs = tabs
         }

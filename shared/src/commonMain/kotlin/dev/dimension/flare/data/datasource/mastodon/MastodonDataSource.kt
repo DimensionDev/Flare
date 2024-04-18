@@ -85,6 +85,52 @@ class MastodonDataSource(
         )
     }
 
+    fun localTimeline(
+        pageSize: Int = 20,
+        pagingKey: String = "local_${account.accountKey}",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                PublicTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    local = true,
+                ),
+        )
+    }
+
+    fun publicTimeline(
+        pageSize: Int = 20,
+        pagingKey: String = "public_${account.accountKey}",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                PublicTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    local = false,
+                ),
+        )
+    }
+
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,

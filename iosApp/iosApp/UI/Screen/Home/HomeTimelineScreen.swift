@@ -50,7 +50,7 @@ struct HomeTimelineScreen: View {
 
 @Observable
 class TimelineViewModel: MoleculeViewModelProto {
-    typealias Model = HomeTimelineState
+    typealias Model = TimelineState
     typealias Presenter = HomeTimelinePresenter
     let presenter: Presenter
     var model: Model

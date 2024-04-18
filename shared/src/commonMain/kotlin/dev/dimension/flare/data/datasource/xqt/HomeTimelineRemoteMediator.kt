@@ -78,7 +78,134 @@ internal class HomeTimelineRemoteMediator(
                 endOfPaginationReached = cursor == null,
             )
         } catch (e: Throwable) {
-            e.printStackTrace()
+            MediatorResult.Error(e)
+        }
+    }
+}
+
+@OptIn(ExperimentalPagingApi::class)
+internal class FeaturedTimelineRemoteMediator(
+    private val service: XQTService,
+    private val database: CacheDatabase,
+    private val accountKey: MicroBlogKey,
+    private val pagingKey: String,
+) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+    private var cursor: String? = null
+
+    override suspend fun load(
+        loadType: LoadType,
+        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+    ): MediatorResult {
+        return try {
+            val response =
+                when (loadType) {
+                    LoadType.REFRESH -> {
+                        cursor = null
+                        service.getHomeTimeline(
+                            variables =
+                                HomeTimelineRequest(
+                                    count = state.config.pageSize.toLong(),
+                                ).encodeJson(),
+                        ).also {
+                            database.transaction {
+                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                            }
+                        }
+                    }
+
+                    LoadType.PREPEND -> {
+                        return MediatorResult.Success(
+                            endOfPaginationReached = true,
+                        )
+                    }
+
+                    LoadType.APPEND -> {
+                        service.getHomeTimeline(
+                            variables =
+                                HomeTimelineRequest(
+                                    count = state.config.pageSize.toLong(),
+                                    cursor = cursor,
+                                ).encodeJson(),
+                        )
+                    }
+                }.body()
+            val instructions = response?.data?.home?.homeTimelineUrt?.instructions.orEmpty()
+            cursor = instructions.cursor()
+            val tweet = instructions.tweets()
+            XQT.save(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                tweet = tweet,
+            )
+            MediatorResult.Success(
+                endOfPaginationReached = cursor == null,
+            )
+        } catch (e: Throwable) {
+            MediatorResult.Error(e)
+        }
+    }
+}
+
+@OptIn(ExperimentalPagingApi::class)
+internal class BookmarkTimelineRemoteMediator(
+    private val service: XQTService,
+    private val database: CacheDatabase,
+    private val accountKey: MicroBlogKey,
+    private val pagingKey: String,
+) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+    private var cursor: String? = null
+
+    override suspend fun load(
+        loadType: LoadType,
+        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+    ): MediatorResult {
+        return try {
+            val response =
+                when (loadType) {
+                    LoadType.REFRESH -> {
+                        cursor = null
+                        service.getBookmarks(
+                            variables =
+                                HomeTimelineRequest(
+                                    count = state.config.pageSize.toLong(),
+                                ).encodeJson(),
+                        ).also {
+                            database.transaction {
+                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                            }
+                        }
+                    }
+
+                    LoadType.PREPEND -> {
+                        return MediatorResult.Success(
+                            endOfPaginationReached = true,
+                        )
+                    }
+
+                    LoadType.APPEND -> {
+                        service.getBookmarks(
+                            variables =
+                                HomeTimelineRequest(
+                                    count = state.config.pageSize.toLong(),
+                                    cursor = cursor,
+                                ).encodeJson(),
+                        )
+                    }
+                }.body()
+            val instructions = response?.data?.bookmarkTimelineV2?.timeline?.instructions.orEmpty()
+            cursor = instructions.cursor()
+            val tweet = instructions.tweets()
+            XQT.save(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                tweet = tweet,
+            )
+            MediatorResult.Success(
+                endOfPaginationReached = cursor == null,
+            )
+        } catch (e: Throwable) {
             MediatorResult.Error(e)
         }
     }

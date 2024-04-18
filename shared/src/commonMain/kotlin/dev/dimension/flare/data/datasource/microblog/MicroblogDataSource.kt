@@ -17,14 +17,14 @@ interface MicroblogDataSource {
 
     fun homeTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "home",
+        pagingKey: String = "home_${account.accountKey}",
         scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>>
 
     fun notification(
         type: NotificationFilter = NotificationFilter.All,
         pageSize: Int = 20,
-        pagingKey: String = "notification_$type",
+        pagingKey: String = "notification_${type}_${account.accountKey}",
         scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>>
 
@@ -78,7 +78,7 @@ interface MicroblogDataSource {
     fun discoverStatuses(
         pageSize: Int = 20,
         scope: CoroutineScope,
-        pagingKey: String = "discover_status",
+        pagingKey: String = "discover_status_${account.accountKey}",
     ): Flow<PagingData<UiStatus>>
 
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>

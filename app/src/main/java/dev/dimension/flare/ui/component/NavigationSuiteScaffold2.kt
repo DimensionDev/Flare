@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -27,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuite
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteColors
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItemColors
@@ -64,7 +67,7 @@ val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp>
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
 fun NavigationSuiteScaffold2(
-    navigationSuiteItems: NavigationSuiteScope.() -> Unit,
+    navigationSuiteItems: NavigationSuiteScope2.() -> Unit,
     modifier: Modifier = Modifier,
     layoutType: NavigationSuiteType =
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
@@ -73,7 +76,7 @@ fun NavigationSuiteScaffold2(
     contentColor: Color = contentColorFor(containerColor),
     railHeader: @Composable (ColumnScope.() -> Unit)? = null,
     drawerHeader: @Composable (ColumnScope.() -> Unit)? = null,
-    footerItems: NavigationSuiteScope.() -> Unit = {},
+    footerItems: NavigationSuiteScope2.() -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
     val bottomBarHeightPx =
@@ -251,9 +254,52 @@ private class NavigationSuiteItem(
     val interactionSource: MutableInteractionSource?,
 )
 
+/** The scope associated with the [NavigationSuiteScope]. */
+@ExperimentalMaterial3AdaptiveNavigationSuiteApi
+interface NavigationSuiteScope2 {
+    /**
+     * This function sets the parameters of the default Material navigation item to be used with the
+     * Navigation Suite Scaffold. The item is called in [NavigationSuite], according to the
+     * current [NavigationSuiteType].
+     *
+     * For specifics about each item component, see [NavigationBarItem], [NavigationRailItem], and
+     * [NavigationDrawerItem].
+     *
+     * @param selected whether this item is selected
+     * @param onClick called when this item is clicked
+     * @param icon icon for this item, typically an [Icon]
+     * @param modifier the [Modifier] to be applied to this item
+     * @param enabled controls the enabled state of this item. When `false`, this component will not
+     * respond to user input, and it will appear visually disabled and disabled to accessibility
+     * services. Note: as of now, for [NavigationDrawerItem], this is always `true`.
+     * @param label the text label for this item
+     * @param alwaysShowLabel whether to always show the label for this item. If `false`, the label will
+     * only be shown when this item is selected. Note: for [NavigationDrawerItem] this is always `true`
+     * @param badge optional badge to show on this item
+     * @param colors [NavigationSuiteItemColors] that will be used to resolve the colors used for this
+     * item in different states.
+     * @param interactionSource an optional hoisted [MutableInteractionSource] for observing and
+     * emitting [Interaction]s for this item. You can use this to change the item's appearance
+     * or preview the item in different states. Note that if `null` is provided, interactions will
+     * still happen internally.
+     */
+    fun item(
+        selected: Boolean,
+        onClick: () -> Unit,
+        icon: @Composable () -> Unit,
+        modifier: Modifier = Modifier,
+        enabled: Boolean = true,
+        label: @Composable (() -> Unit)? = null,
+        alwaysShowLabel: Boolean = true,
+        badge: (@Composable () -> Unit)? = null,
+        colors: NavigationSuiteItemColors? = null,
+        interactionSource: MutableInteractionSource? = null,
+    )
+}
+
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 private class NavigationSuiteScopeImpl :
-    NavigationSuiteScope,
+    NavigationSuiteScope2,
     NavigationSuiteItemProvider {
     override fun item(
         selected: Boolean,
@@ -291,7 +337,7 @@ private class NavigationSuiteScopeImpl :
 
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
-private fun rememberStateOfItems(content: NavigationSuiteScope.() -> Unit): State<NavigationSuiteItemProvider> {
+private fun rememberStateOfItems(content: NavigationSuiteScope2.() -> Unit): State<NavigationSuiteItemProvider> {
     val latestContent = rememberUpdatedState(content)
     return remember {
         derivedStateOf { NavigationSuiteScopeImpl().apply(latestContent.value) }

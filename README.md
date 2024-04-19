@@ -41,9 +41,9 @@ Here're some features we're planning to implement in the future, you can check t
 
 ### Mastodon
  - [ ] Support for polls
- - [ ] Support global/local timelines
+ - [x] Support global/local timelines
  - [ ] Support for lists
- - [ ] Support for bookmarks/faovrites timelines
+ - [x] Support for bookmarks/faovrites timelines
 
 ### Misskey
  - [ ] Support for polls
@@ -54,7 +54,7 @@ Here're some features we're planning to implement in the future, you can check t
 ### xQt
  - [ ] Support for polls
  - [ ] Support for lists
- - [ ] Support for bookmarks/favorites timelines
+ - [x] Support for bookmarks/favorites timelines
 
 ## Building
 ### Android

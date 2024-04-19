@@ -304,8 +304,9 @@
     <string name="mastodon_tab_local_title">Local</string>
     <string name="mastodon_tab_public_title">Public</string>
 
-    <string name="xqt_tab_federated_title">Federated</string>
+    <string name="home_tab_featured_title">Featured</string>
     <string name="home_tab_bookmarks_title">Bookmarks</string>
+    <string name="home_tab_favorite_title">Favorite</string>
 
     <string name="tab_settings_primary">Primary tab</string>
     <string name="tab_settings_secondary">Secondary tab</string>

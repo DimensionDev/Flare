@@ -85,4 +85,20 @@ internal interface TimelineResources {
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
     ): List<Status>
+
+    @GET("api/v1/bookmarks")
+    suspend fun bookmarks(
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+    ): List<Status>
+
+    @GET("api/v1/favourites")
+    suspend fun favorites(
+        @Query("max_id") max_id: String? = null,
+        @Query("since_id") since_id: String? = null,
+        @Query("min_id") min_id: String? = null,
+        @Query("limit") limit: Int? = null,
+    ): List<Status>
 }

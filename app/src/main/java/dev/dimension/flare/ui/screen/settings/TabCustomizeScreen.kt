@@ -507,7 +507,11 @@ private fun presenter(
                             cacheTabs.subList(
                                 cacheTabs.indexOfFirst { it is SecondaryTabItemState } + 1,
                                 cacheTabs.size,
-                            ).map { (it as ActualTabItem).tabItem }.toImmutableList(),
+                            ).map { (it as ActualTabItem).tabItem }
+                                .toImmutableList()
+                                .takeIf {
+                                    it.isNotEmpty()
+                                },
                     )
                 }
             }

@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FeaturedPlayList
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
@@ -72,8 +73,9 @@ sealed interface TitleType {
             Settings,
             MastodonLocal,
             MastodonPublic,
-            Federated,
-            Bookmark, ;
+            Featured,
+            Bookmark,
+            Favourite, ;
 
             fun toId(): Int {
                 return when (this) {
@@ -84,8 +86,9 @@ sealed interface TitleType {
                     Settings -> R.string.settings_title
                     MastodonLocal -> R.string.mastodon_tab_local_title
                     MastodonPublic -> R.string.mastodon_tab_public_title
-                    Federated -> R.string.xqt_tab_federated_title
+                    Featured -> R.string.home_tab_featured_title
                     Bookmark -> R.string.home_tab_bookmarks_title
+                    Favourite -> R.string.home_tab_favorite_title
                 }
             }
         }
@@ -108,8 +111,9 @@ sealed interface IconType {
             Settings,
             Local,
             World,
-            YouLike,
-            Bookmark, ;
+            Featured,
+            Bookmark,
+            Heart, ;
 
             fun toIcon(): ImageVector {
                 return when (this) {
@@ -120,8 +124,9 @@ sealed interface IconType {
                     Settings -> Icons.Default.Settings
                     Local -> Icons.Default.Groups
                     World -> Icons.Default.Public
-                    YouLike -> Icons.AutoMirrored.Filled.FeaturedPlayList
+                    Featured -> Icons.AutoMirrored.Filled.FeaturedPlayList
                     Bookmark -> Icons.Default.Bookmarks
+                    Heart -> Icons.Default.Favorite
                 }
             }
         }
@@ -274,6 +279,22 @@ sealed interface TimelineTabItem : TabItem {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonPublic),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.World, accountKey),
+                        ),
+                ),
+                Mastodon.BookmarkTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Bookmark, accountKey),
+                        ),
+                ),
+                Mastodon.FavouriteTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Favourite),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
                         ),
                 ),
             )
@@ -432,8 +453,8 @@ sealed interface TimelineTabItem : TabItem {
                     account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Federated),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.YouLike, accountKey),
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Featured),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
                         ),
                 ),
                 XQT.BookmarkTimelineTabItem(
@@ -482,6 +503,30 @@ object Mastodon {
 
         override fun createPresenter(): TimelinePresenter {
             return dev.dimension.flare.ui.presenter.home.mastodon.PublicTimelinePresenter(account)
+        }
+    }
+
+    @Serializable
+    data class BookmarkTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "bookmark_$account"
+
+        override fun createPresenter(): TimelinePresenter {
+            return dev.dimension.flare.ui.presenter.home.mastodon.BookmarkTimelinePresenter(account)
+        }
+    }
+
+    @Serializable
+    data class FavouriteTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "favourite_$account"
+
+        override fun createPresenter(): TimelinePresenter {
+            return dev.dimension.flare.ui.presenter.home.mastodon.FavouriteTimelinePresenter(account)
         }
     }
 }

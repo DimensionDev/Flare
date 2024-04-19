@@ -108,6 +108,50 @@ class MastodonDataSource(
         )
     }
 
+    fun bookmarkTimeline(
+        pageSize: Int = 20,
+        pagingKey: String = "bookmarked_${account.accountKey}",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                BookmarkTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
+    }
+
+    fun favouriteTimeline(
+        pageSize: Int = 20,
+        pagingKey: String = "favourite_${account.accountKey}",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                FavouriteTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
+    }
+
     fun publicTimeline(
         pageSize: Int = 20,
         pagingKey: String = "public_${account.accountKey}",

@@ -238,4 +238,11 @@
   <string name="done">Ολοκληρώθηκε</string>
   <string name="delete">Διαγραφή</string>
   <string name="status_detail_translate">Μετάφραση σε %1$s</string>
+  <string name="mastodon_tab_local_title">Τοπικό</string>
+  <string name="mastodon_tab_public_title">Δημόσιο</string>
+  <string name="home_tab_featured_title">Προτεινόμενα</string>
+  <string name="home_tab_bookmarks_title">Σελιδοδείκτες</string>
+  <string name="home_tab_favorite_title">Αγαπημένο</string>
+  <string name="tab_settings_primary">Κύρια καρτέλα</string>
+  <string name="tab_settings_secondary">Δευτερεύουσα καρτέλα</string>
 </resources>

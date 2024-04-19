@@ -240,4 +240,11 @@
   <string name="done">Виконано</string>
   <string name="delete">Видалити</string>
   <string name="status_detail_translate">Перекласти на %1$s</string>
+  <string name="mastodon_tab_local_title">Місцевий</string>
+  <string name="mastodon_tab_public_title">Загальнодоступна</string>
+  <string name="home_tab_featured_title">Рекомендовані</string>
+  <string name="home_tab_bookmarks_title">Закладки</string>
+  <string name="home_tab_favorite_title">Фаворит</string>
+  <string name="tab_settings_primary">Основна вкладка</string>
+  <string name="tab_settings_secondary">Додаткова вкладка</string>
 </resources>

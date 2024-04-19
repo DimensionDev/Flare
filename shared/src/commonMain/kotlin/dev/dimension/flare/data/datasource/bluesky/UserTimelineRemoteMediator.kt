@@ -11,7 +11,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
-import sh.christian.ozone.api.AtIdentifier
+import sh.christian.ozone.api.Did
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserTimelineRemoteMediator(
@@ -35,7 +35,7 @@ internal class UserTimelineRemoteMediator(
                         service.getAuthorFeed(
                             GetAuthorFeedQueryParams(
                                 limit = state.config.pageSize.toLong(),
-                                actor = AtIdentifier(userKey.id),
+                                actor = Did(did = userKey.id),
                                 filter =
                                     if (onlyMedia) {
                                         GetAuthorFeedFilter.POSTS_WITH_MEDIA
@@ -56,7 +56,7 @@ internal class UserTimelineRemoteMediator(
                             GetAuthorFeedQueryParams(
                                 limit = state.config.pageSize.toLong(),
                                 cursor = cursor,
-                                actor = AtIdentifier(userKey.id),
+                                actor = Did(did = userKey.id),
                                 filter =
                                     if (onlyMedia) {
                                         GetAuthorFeedFilter.POSTS_WITH_MEDIA

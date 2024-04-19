@@ -118,8 +118,8 @@ private fun findCard(postView: PostView): UiCard? {
             media =
                 embed.value.external.thumb?.let {
                     UiMedia.Image(
-                        url = it,
-                        previewUrl = it,
+                        url = it.uri,
+                        previewUrl = it.uri,
                         description = null,
                         width = 0f,
                         height = 0f,
@@ -137,8 +137,8 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> {
         val embed = postView.embed as PostViewEmbedUnion.ImagesView
         embed.value.images.map {
             UiMedia.Image(
-                url = it.fullsize,
-                previewUrl = it.thumb,
+                url = it.fullsize.uri,
+                previewUrl = it.thumb.uri,
                 description = it.alt,
                 width = it.aspectRatio?.width?.toFloat() ?: 0f,
                 height = it.aspectRatio?.height?.toFloat() ?: 0f,
@@ -189,8 +189,8 @@ private fun toUi(
                             is RecordViewRecordEmbedUnion.ImagesView ->
                                 it.value.images.map {
                                     UiMedia.Image(
-                                        url = it.fullsize,
-                                        previewUrl = it.thumb,
+                                        url = it.fullsize.uri,
+                                        previewUrl = it.thumb.uri,
                                         description = it.alt,
                                         width = it.aspectRatio?.width?.toFloat() ?: 0f,
                                         height = it.aspectRatio?.height?.toFloat() ?: 0f,
@@ -212,8 +212,8 @@ private fun toUi(
                                     media =
                                         it.value.external.thumb?.let {
                                             UiMedia.Image(
-                                                url = it,
-                                                previewUrl = it,
+                                                url = it.uri,
+                                                previewUrl = it.uri,
                                                 description = null,
                                                 width = 0f,
                                                 height = 0f,
@@ -255,8 +255,8 @@ internal fun ProfileViewDetailed.toUi(accountKey: MicroBlogKey): UiUser =
             ),
         displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
-        avatarUrl = avatar.orEmpty(),
-        bannerUrl = banner,
+        avatarUrl = avatar?.uri.orEmpty(),
+        bannerUrl = banner?.uri,
         description = description,
         matrices =
             UiUser.Bluesky.Matrices(
@@ -283,7 +283,7 @@ internal fun ProfileViewBasic.toUi(accountKey: MicroBlogKey): UiUser.Bluesky {
             ),
         displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
-        avatarUrl = avatar.orEmpty(),
+        avatarUrl = avatar?.uri.orEmpty(),
         bannerUrl = null,
         description = null,
         matrices =
@@ -312,7 +312,7 @@ internal fun ProfileView.toUi(accountKey: MicroBlogKey): UiUser.Bluesky {
             ),
         displayName = displayName.orEmpty(),
         handleInternal = handle.handle,
-        avatarUrl = avatar.orEmpty(),
+        avatarUrl = avatar?.uri.orEmpty(),
         bannerUrl = null,
         description = description,
         matrices =

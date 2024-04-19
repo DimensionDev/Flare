@@ -69,9 +69,10 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import sh.christian.ozone.api.AtIdentifier
 import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Cid
+import sh.christian.ozone.api.Did
+import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
 
 @OptIn(ExperimentalPagingApi::class)
@@ -139,7 +140,7 @@ class BlueskyDataSource(
             fetchSource = {
                 val user =
                     account.getService(appDatabase)
-                        .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = name)))
+                        .getProfile(GetProfileQueryParams(actor = Handle(handle = name)))
                         .requireResponse()
                         .toDbUser(account.accountKey.host)
                 database.dbUserQueries.insert(
@@ -165,7 +166,7 @@ class BlueskyDataSource(
             fetchSource = {
                 val user =
                     account.getService(appDatabase)
-                        .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = id)))
+                        .getProfile(GetProfileQueryParams(actor = Did(did = id)))
                         .requireResponse()
                         .toDbUser(account.accountKey.host)
                 database.dbUserQueries.insert(
@@ -191,7 +192,7 @@ class BlueskyDataSource(
             relationKeyWithUserKey(userKey),
         ) {
             account.getService(appDatabase)
-                .getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = userKey.id)))
+                .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
                 .requireResponse()
                 .toDbUser(account.accountKey.host)
                 .toUi()
@@ -361,7 +362,7 @@ class BlueskyDataSource(
             }
         service.createRecord(
             CreateRecordRequest(
-                repo = AtIdentifier(data.account.accountKey.id),
+                repo = Did(did = data.account.accountKey.id),
                 collection = Nsid("app.bsky.feed.post"),
                 record = json.encodeToJsonElement(post),
             ),
@@ -434,7 +435,7 @@ class BlueskyDataSource(
             if (data.reaction.reposted && data.reaction.repostUri != null) {
                 service.deleteRecord(
                     DeleteRecordRequest(
-                        repo = AtIdentifier(account.accountKey.id),
+                        repo = Did(did = account.accountKey.id),
                         collection = Nsid("app.bsky.feed.repost"),
                         rkey = data.reaction.repostUri.substringAfterLast('/'),
                     ),
@@ -443,7 +444,7 @@ class BlueskyDataSource(
                 val result =
                     service.createRecord(
                         CreateRecordRequest(
-                            repo = AtIdentifier(account.accountKey.id),
+                            repo = Did(did = account.accountKey.id),
                             collection = Nsid("app.bsky.feed.repost"),
                             record =
                                 buildJsonObject {
@@ -547,7 +548,7 @@ class BlueskyDataSource(
             if (data.reaction.liked && data.reaction.likedUri != null) {
                 service.deleteRecord(
                     DeleteRecordRequest(
-                        repo = AtIdentifier(account.accountKey.id),
+                        repo = Did(did = account.accountKey.id),
                         collection = Nsid("app.bsky.feed.like"),
                         rkey = data.reaction.likedUri.substringAfterLast('/'),
                     ),
@@ -556,7 +557,7 @@ class BlueskyDataSource(
                 val result =
                     service.createRecord(
                         CreateRecordRequest(
-                            repo = AtIdentifier(account.accountKey.id),
+                            repo = Did(did = account.accountKey.id),
                             collection = Nsid("app.bsky.feed.like"),
                             record =
                                 buildJsonObject {
@@ -629,7 +630,7 @@ class BlueskyDataSource(
             val service = account.getService(appDatabase)
             service.deleteRecord(
                 DeleteRecordRequest(
-                    repo = AtIdentifier(account.accountKey.id),
+                    repo = Did(did = account.accountKey.id),
                     collection = Nsid("app.bsky.feed.post"),
                     rkey = statusKey.id.substringAfterLast('/'),
                 ),
@@ -652,14 +653,14 @@ class BlueskyDataSource(
         runCatching {
             val service = account.getService(appDatabase)
             val user =
-                service.getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = userKey.id)))
+                service.getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
                     .requireResponse()
 
             val followRepo = user.viewer?.following?.atUri
             if (followRepo != null) {
                 service.deleteRecord(
                     DeleteRecordRequest(
-                        repo = AtIdentifier(account.accountKey.id),
+                        repo = Did(did = account.accountKey.id),
                         collection = Nsid("app.bsky.graph.follow"),
                         rkey = followRepo.substringAfterLast('/'),
                     ),
@@ -689,7 +690,7 @@ class BlueskyDataSource(
             val service = account.getService(appDatabase)
             service.createRecord(
                 CreateRecordRequest(
-                    repo = AtIdentifier(account.accountKey.id),
+                    repo = Did(did = account.accountKey.id),
                     collection = Nsid("app.bsky.graph.follow"),
                     record =
                         buildJsonObject {
@@ -723,7 +724,7 @@ class BlueskyDataSource(
             val service = account.getService(appDatabase)
             service.createRecord(
                 CreateRecordRequest(
-                    repo = AtIdentifier(account.accountKey.id),
+                    repo = Did(did = account.accountKey.id),
                     collection = Nsid("app.bsky.graph.block"),
                     record =
                         buildJsonObject {
@@ -756,14 +757,14 @@ class BlueskyDataSource(
         runCatching {
             val service = account.getService(appDatabase)
             val user =
-                service.getProfile(GetProfileQueryParams(actor = AtIdentifier(atIdentifier = userKey.id)))
+                service.getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
                     .requireResponse()
 
             val blockRepo = user.viewer?.blocking?.atUri
             if (blockRepo != null) {
                 service.deleteRecord(
                     DeleteRecordRequest(
-                        repo = AtIdentifier(account.accountKey.id),
+                        repo = Did(did = account.accountKey.id),
                         collection = Nsid("app.bsky.graph.block"),
                         rkey = blockRepo.substringAfterLast('/'),
                     ),
@@ -791,7 +792,7 @@ class BlueskyDataSource(
         }
         runCatching {
             val service = account.getService(appDatabase)
-            service.muteActor(MuteActorRequest(actor = AtIdentifier(userKey.id)))
+            service.muteActor(MuteActorRequest(actor = Did(did = userKey.id)))
         }.onFailure {
             MemCacheable.updateWith<UiRelation.Bluesky>(
                 key = key,
@@ -814,7 +815,7 @@ class BlueskyDataSource(
         }
         runCatching {
             val service = account.getService(appDatabase)
-            service.unmuteActor(UnmuteActorRequest(actor = AtIdentifier(userKey.id)))
+            service.unmuteActor(UnmuteActorRequest(actor = Did(did = userKey.id)))
         }.onFailure {
             MemCacheable.updateWith<UiRelation.Bluesky>(
                 key = key,

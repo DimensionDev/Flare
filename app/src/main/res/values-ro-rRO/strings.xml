@@ -243,4 +243,11 @@
   <string name="done">Terminat</string>
   <string name="delete">Ștergere</string>
   <string name="status_detail_translate">Tradu în %1$s</string>
+  <string name="mastodon_tab_local_title">Local</string>
+  <string name="mastodon_tab_public_title">Publice</string>
+  <string name="home_tab_featured_title">Recomandate</string>
+  <string name="home_tab_bookmarks_title">Marcaje</string>
+  <string name="home_tab_favorite_title">Favorit</string>
+  <string name="tab_settings_primary">Fila principală</string>
+  <string name="tab_settings_secondary">Tabul secundar</string>
 </resources>

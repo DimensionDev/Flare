@@ -243,4 +243,11 @@
   <string name="done">Klar</string>
   <string name="delete">Radera</string>
   <string name="status_detail_translate">Översätt till %1$s</string>
+  <string name="mastodon_tab_local_title">Lokal</string>
+  <string name="mastodon_tab_public_title">Publik</string>
+  <string name="home_tab_featured_title">Utvalda</string>
+  <string name="home_tab_bookmarks_title">Bokmärken</string>
+  <string name="home_tab_favorite_title">Favorit</string>
+  <string name="tab_settings_primary">Primär flik</string>
+  <string name="tab_settings_secondary">Sekundär flik</string>
 </resources>

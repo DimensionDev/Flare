@@ -110,6 +110,50 @@ class XQTDataSource(
         )
     }
 
+    fun featuredTimeline(
+        pageSize: Int = 20,
+        pagingKey: String = "featured_${account.accountKey}",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                FeaturedTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
+    }
+
+    fun bookmarkTimeline(
+        pageSize: Int = 20,
+        pagingKey: String = "bookmark_${account.accountKey}",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                BookmarkTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
+    }
+
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,

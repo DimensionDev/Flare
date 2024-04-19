@@ -300,4 +300,14 @@
     <string name="delete">Delete</string>
 
     <string name="status_detail_translate">Translate to %1$s</string>
+
+    <string name="mastodon_tab_local_title">Local</string>
+    <string name="mastodon_tab_public_title">Public</string>
+
+    <string name="home_tab_featured_title">Featured</string>
+    <string name="home_tab_bookmarks_title">Bookmarks</string>
+    <string name="home_tab_favorite_title">Favorite</string>
+
+    <string name="tab_settings_primary">Primary tab</string>
+    <string name="tab_settings_secondary">Secondary tab</string>
 </resources>

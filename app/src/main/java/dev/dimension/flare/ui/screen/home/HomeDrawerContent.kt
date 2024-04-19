@@ -2,7 +2,9 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -18,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
 import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
@@ -32,6 +35,7 @@ import dev.dimension.flare.ui.screen.settings.AccountItem
 internal fun HomeDrawerContent(
     currentRoute: String?,
     navigateTo: (DirectionDestinationSpec) -> Unit,
+    content: @Composable ColumnScope.() -> Unit = {},
 ) {
     val state by producePresenter("HomeDrawerContent") {
         remember { QuickMenuPresenter() }.invoke()
@@ -44,21 +48,32 @@ internal fun HomeDrawerContent(
                 expanded = !expanded
             },
             trailingContent = {
-                IconButton(
-                    onClick = {
-                        expanded = !expanded
-                    },
-                ) {
-                    Icon(
-                        if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                    )
+                state.allUsers.onSuccess {
+                    if (it.size > 0) {
+                        IconButton(
+                            onClick = {
+                                expanded = !expanded
+                            },
+                        ) {
+                            Icon(
+                                if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                            )
+                        }
+                    }
                 }
             },
         )
         state.allUsers.onSuccess { allUsers ->
-            AnimatedVisibility(expanded && allUsers.size > 0) {
-                Column {
+            AnimatedVisibility(
+                expanded,
+                modifier = Modifier.weight(1f),
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .verticalScroll(rememberScrollState()),
+                ) {
                     HorizontalDivider()
                     (0 until allUsers.size).forEach { index ->
                         AccountItem(
@@ -71,8 +86,21 @@ internal fun HomeDrawerContent(
                 }
             }
         }
-        HorizontalDivider()
-        Spacer(modifier = androidx.compose.ui.Modifier.weight(1f))
+        state.user.onSuccess {
+            HorizontalDivider()
+        }
+        AnimatedVisibility(
+            visible = !expanded,
+            modifier = Modifier.weight(1f),
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .verticalScroll(rememberScrollState()),
+            ) {
+                content.invoke(this)
+            }
+        }
         NavigationDrawerItem(
             label = {
                 Text(stringResource(R.string.settings_title))

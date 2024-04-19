@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -48,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -67,9 +69,9 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -82,6 +84,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.ReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
 
 @Destination<RootGraph>(
@@ -136,117 +139,42 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
         val lazyListState = rememberLazyListState()
         val reorderableLazyColumnState =
             rememberReorderableLazyColumnState(lazyListState) { from, to ->
-                state.moveTab(from.index, to.index)
+                state.moveTab(from.key, to.key)
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             }
         LazyColumn(
             state = lazyListState,
             contentPadding = it,
         ) {
-            items(state.tabs, key = { it.key }) { item ->
-                var shouldDismiss by remember { mutableStateOf(false) }
-                val swipeState =
-                    rememberSwipeToDismissBoxState(
-                        confirmValueChange = {
-                            if (it != SwipeToDismissBoxValue.Settled) {
-                                shouldDismiss = true
-                            }
-                            it != SwipeToDismissBoxValue.Settled
-                        },
-                    )
-                LaunchedEffect(shouldDismiss) {
-                    if (shouldDismiss) {
-                        delay(AnimationConstants.DefaultDurationMillis.toLong())
-                        state.deleteTab(item)
-                        shouldDismiss = false
+            state.tabs.forEach { item ->
+                when (item) {
+                    is ActualTabItem -> {
+                        tabItem(
+                            item,
+                            state::deleteTab,
+                            reorderableLazyColumnState,
+                            haptics,
+                            state.canSwipeToDelete,
+                        )
                     }
-                }
-                ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
-                    AnimatedVisibility(
-                        visible = !shouldDismiss,
-                        exit =
-                            shrinkVertically(
-                                animationSpec = tween(),
-                                shrinkTowards = Alignment.Top,
-                            ) + fadeOut(),
-                    ) {
-                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                        Surface(
-                            shadowElevation = elevation,
-                        ) {
-                            SwipeToDismissBox(
-                                state = swipeState,
-                                enableDismissFromEndToStart = state.tabs.size > 1,
-                                enableDismissFromStartToEnd = state.tabs.size > 1,
-                                backgroundContent = {
-                                    val alignment =
-                                        when (swipeState.dismissDirection) {
-                                            SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                                            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                                            SwipeToDismissBoxValue.Settled -> Alignment.Center
-                                        }
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(MaterialTheme.colorScheme.error)
-                                                .padding(16.dp),
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = stringResource(id = R.string.tab_settings_remove),
-                                            modifier =
-                                                Modifier
-                                                    .size(24.dp)
-                                                    .align(alignment),
-                                            tint = MaterialTheme.colorScheme.onError,
-                                        )
-                                    }
+                    PrimaryTabItemState -> {
+                        stickyHeader {
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = stringResource(id = R.string.tab_settings_primary))
                                 },
+                            )
+                        }
+                    }
+                    SecondaryTabItemState -> {
+                        stickyHeader(key = SecondaryTabItemState.key) {
+                            ReorderableItem(
+                                reorderableLazyListState = reorderableLazyColumnState,
+                                key = SecondaryTabItemState.key,
                             ) {
                                 ListItem(
                                     headlineContent = {
-                                        TabTitle(item.metaData.title)
-                                    },
-                                    leadingContent = {
-                                        TabIcon(
-                                            item.account,
-                                            item.metaData.icon,
-                                            item.metaData.title,
-                                        )
-                                    },
-                                    trailingContent = {
-                                        Row {
-                                            IconButton(
-                                                onClick = {},
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.Edit,
-                                                    contentDescription = stringResource(id = R.string.tab_settings_edit),
-                                                )
-                                            }
-                                            IconButton(
-                                                modifier =
-                                                    Modifier.draggableHandle(
-                                                        onDragStarted = {
-                                                            haptics.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress,
-                                                            )
-                                                        },
-                                                        onDragStopped = {
-                                                            haptics.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress,
-                                                            )
-                                                        },
-                                                    ),
-                                                onClick = {},
-                                            ) {
-                                                Icon(
-                                                    Icons.Rounded.DragHandle,
-                                                    contentDescription = stringResource(id = R.string.tab_settings_drag),
-                                                )
-                                            }
-                                        }
+                                        Text(text = stringResource(id = R.string.tab_settings_secondary))
                                     },
                                 )
                             }
@@ -306,6 +234,127 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                 )
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.tabItem(
+    item: ActualTabItem,
+    deleteTab: (ActualTabItem) -> Unit,
+    reorderableLazyColumnState: ReorderableLazyListState,
+    haptics: HapticFeedback,
+    canSwipeToDelete: Boolean,
+) {
+    item(key = item.tabItem.key) {
+        var shouldDismiss by remember { mutableStateOf(false) }
+        val swipeState =
+            rememberSwipeToDismissBoxState(
+                confirmValueChange = {
+                    if (it != SwipeToDismissBoxValue.Settled) {
+                        shouldDismiss = true
+                    }
+                    it != SwipeToDismissBoxValue.Settled
+                },
+            )
+        LaunchedEffect(shouldDismiss) {
+            if (shouldDismiss) {
+                delay(AnimationConstants.DefaultDurationMillis.toLong())
+                deleteTab(item)
+                shouldDismiss = false
+            }
+        }
+        ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
+            AnimatedVisibility(
+                visible = !shouldDismiss,
+                exit =
+                    shrinkVertically(
+                        animationSpec = tween(),
+                        shrinkTowards = Alignment.Top,
+                    ) + fadeOut(),
+            ) {
+                val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                Surface(
+                    shadowElevation = elevation,
+                ) {
+                    SwipeToDismissBox(
+                        state = swipeState,
+                        enableDismissFromEndToStart = canSwipeToDelete,
+                        enableDismissFromStartToEnd = canSwipeToDelete,
+                        backgroundContent = {
+                            val alignment =
+                                when (swipeState.dismissDirection) {
+                                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                                    SwipeToDismissBoxValue.Settled -> Alignment.Center
+                                }
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.error)
+                                        .padding(16.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = stringResource(id = R.string.tab_settings_remove),
+                                    modifier =
+                                        Modifier
+                                            .size(24.dp)
+                                            .align(alignment),
+                                    tint = MaterialTheme.colorScheme.onError,
+                                )
+                            }
+                        },
+                    ) {
+                        ListItem(
+                            headlineContent = {
+                                TabTitle(item.tabItem.metaData.title)
+                            },
+                            leadingContent = {
+                                TabIcon(
+                                    item.tabItem.account,
+                                    item.tabItem.metaData.icon,
+                                    item.tabItem.metaData.title,
+                                )
+                            },
+                            trailingContent = {
+                                Row {
+                                    IconButton(
+                                        onClick = {},
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Edit,
+                                            contentDescription = stringResource(id = R.string.tab_settings_edit),
+                                        )
+                                    }
+                                    IconButton(
+                                        modifier =
+                                            Modifier.draggableHandle(
+                                                onDragStarted = {
+                                                    haptics.performHapticFeedback(
+                                                        HapticFeedbackType.LongPress,
+                                                    )
+                                                },
+                                                onDragStopped = {
+                                                    haptics.performHapticFeedback(
+                                                        HapticFeedbackType.LongPress,
+                                                    )
+                                                },
+                                            ),
+                                        onClick = {},
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.DragHandle,
+                                            contentDescription = stringResource(id = R.string.tab_settings_drag),
+                                        )
+                                    }
+                                }
+                            },
+                        )
                     }
                 }
             }
@@ -408,14 +457,26 @@ private fun presenter(
     val tabSettings by repository.tabSettings.collectAsUiState()
     val cacheTabs =
         remember {
-            mutableStateListOf<TabItem>()
+            mutableStateListOf<TabItemState>()
         }
     var showAddTab by remember { mutableStateOf(false) }
 
     tabSettings.onSuccess {
         LaunchedEffect(it.items.size) {
             cacheTabs.clear()
-            cacheTabs.addAll(it.items)
+            cacheTabs.add(PrimaryTabItemState)
+            cacheTabs.addAll(it.items.map { ActualTabItem(it) })
+            cacheTabs.add(SecondaryTabItemState)
+            it.secondaryItems?.let { secondaryItems ->
+                cacheTabs.addAll(secondaryItems.map { ActualTabItem(it) })
+            }
+        }
+    }.onError {
+        LaunchedEffect(Unit) {
+            cacheTabs.clear()
+            cacheTabs.add(PrimaryTabItemState)
+            cacheTabs.addAll(TimelineTabItem.default.map { ActualTabItem(it) })
+            cacheTabs.add(SecondaryTabItemState)
         }
     }
     val allTabs = allTabsPresenter()
@@ -424,18 +485,34 @@ private fun presenter(
         val tabs = cacheTabs
         val allTabs = allTabs
         val showAddTab = showAddTab
+        val canSwipeToDelete = cacheTabs.filterIsInstance<ActualTabItem>().size > 1
 
         fun moveTab(
-            from: Int,
-            to: Int,
+            from: Any,
+            to: Any,
         ) {
-            cacheTabs.add(to, cacheTabs.removeAt(from))
+            val fromIndex = cacheTabs.indexOfFirst { it.key == from }
+            val toIndex = cacheTabs.indexOfFirst { it.key == to }
+            cacheTabs.add(toIndex, cacheTabs.removeAt(fromIndex))
         }
 
         fun commit() {
             appScope.launch {
                 repository.updateTabSettings {
-                    copy(items = cacheTabs.toImmutableList())
+                    copy(
+                        items =
+                            cacheTabs.subList(1, cacheTabs.indexOfFirst { it is SecondaryTabItemState })
+                                .map { (it as ActualTabItem).tabItem }.toImmutableList(),
+                        secondaryItems =
+                            cacheTabs.subList(
+                                cacheTabs.indexOfFirst { it is SecondaryTabItemState } + 1,
+                                cacheTabs.size,
+                            ).map { (it as ActualTabItem).tabItem }
+                                .toImmutableList()
+                                .takeIf {
+                                    it.isNotEmpty()
+                                },
+                    )
                 }
             }
         }
@@ -444,16 +521,35 @@ private fun presenter(
             showAddTab = value
         }
 
-        fun deleteTab(tab: TabItem) {
-            cacheTabs.remove(tab)
+        fun deleteTab(tab: ActualTabItem) {
+            cacheTabs.removeIf { it.key == tab.key }
         }
 
         fun addTab(tab: TabItem) {
-            if (tab !in cacheTabs) {
-                cacheTabs.add(tab)
-            }
+            cacheTabs.add(ActualTabItem(tab))
         }
     }
+}
+
+private sealed interface TabItemState {
+    val key: String
+}
+
+private data object PrimaryTabItemState : TabItemState {
+    override val key: String
+        get() = "primary"
+}
+
+private data object SecondaryTabItemState : TabItemState {
+    override val key: String
+        get() = "secondary"
+}
+
+private data class ActualTabItem(
+    val tabItem: TabItem,
+) : TabItemState {
+    override val key: String
+        get() = tabItem.key
 }
 
 @Composable
@@ -464,12 +560,7 @@ private fun allTabsPresenter() =
             accountState.accounts.map {
                 it.toImmutableList().associateWith { userState ->
                     userState.map { user ->
-                        when (user) {
-                            is UiUser.Bluesky -> TimelineTabItem.bluesky(user.userKey)
-                            is UiUser.Mastodon -> TimelineTabItem.mastodon(user.userKey)
-                            is UiUser.Misskey -> TimelineTabItem.misskey(user.userKey)
-                            is UiUser.XQT -> TimelineTabItem.xqt(user.userKey)
-                        }.toImmutableList()
+                        TimelineTabItem.defaultPrimary(user) + TimelineTabItem.defaultSecondary(user)
                     }
                 }.toImmutableMap()
             }

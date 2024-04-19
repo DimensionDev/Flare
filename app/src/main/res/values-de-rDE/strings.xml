@@ -243,4 +243,11 @@
   <string name="done">Fertig</string>
   <string name="delete">Löschen</string>
   <string name="status_detail_translate">Übersetzen nach %1$s</string>
+  <string name="mastodon_tab_local_title">Lokal</string>
+  <string name="mastodon_tab_public_title">Öffentlich</string>
+  <string name="home_tab_featured_title">Empfohlen</string>
+  <string name="home_tab_bookmarks_title">Lesezeichen</string>
+  <string name="home_tab_favorite_title">Favorit</string>
+  <string name="tab_settings_primary">Primärer Tab</string>
+  <string name="tab_settings_secondary">Sekundärer Tab</string>
 </resources>

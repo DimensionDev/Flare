@@ -242,4 +242,11 @@
   <string name="local_filter_delete">Odstranit filtr</string>
   <string name="done">Hotovo</string>
   <string name="delete">Vymazat</string>
+  <string name="mastodon_tab_local_title">Místní</string>
+  <string name="mastodon_tab_public_title">Veřejnost</string>
+  <string name="home_tab_featured_title">Doporučené</string>
+  <string name="home_tab_bookmarks_title">Záložky</string>
+  <string name="home_tab_favorite_title">Oblíbená</string>
+  <string name="tab_settings_primary">Hlavní karta</string>
+  <string name="tab_settings_secondary">Sekundární karta</string>
 </resources>

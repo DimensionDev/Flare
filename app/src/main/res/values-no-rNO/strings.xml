@@ -242,4 +242,11 @@
   <string name="done">Ferdig</string>
   <string name="delete">Slett</string>
   <string name="status_detail_translate">Oversett til %1$s</string>
+  <string name="mastodon_tab_local_title">Lokal</string>
+  <string name="mastodon_tab_public_title">Offentlig</string>
+  <string name="home_tab_featured_title">Anbefalt</string>
+  <string name="home_tab_bookmarks_title">Bokmerker</string>
+  <string name="home_tab_favorite_title">Favoritt</string>
+  <string name="tab_settings_primary">Primær fane</string>
+  <string name="tab_settings_secondary">Sekundær fane</string>
 </resources>

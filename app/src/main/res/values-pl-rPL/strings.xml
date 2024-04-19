@@ -242,4 +242,11 @@
   <string name="done">Gotowe</string>
   <string name="delete">Usuń</string>
   <string name="status_detail_translate">Przetłumacz na %1$s</string>
+  <string name="mastodon_tab_local_title">Lokalny</string>
+  <string name="mastodon_tab_public_title">Publiczne</string>
+  <string name="home_tab_featured_title">Polecane</string>
+  <string name="home_tab_bookmarks_title">Zakładki</string>
+  <string name="home_tab_favorite_title">Ulubione</string>
+  <string name="tab_settings_primary">Karta podstawowa</string>
+  <string name="tab_settings_secondary">Karta drugorzędna</string>
 </resources>

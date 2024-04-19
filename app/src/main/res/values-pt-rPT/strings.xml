@@ -243,4 +243,11 @@
   <string name="done">Concluído</string>
   <string name="delete">excluir</string>
   <string name="status_detail_translate">Traduzir para %1$s</string>
+  <string name="mastodon_tab_local_title">Localização</string>
+  <string name="mastodon_tab_public_title">Público</string>
+  <string name="home_tab_featured_title">Destaques</string>
+  <string name="home_tab_bookmarks_title">Favoritos</string>
+  <string name="home_tab_favorite_title">Favorito</string>
+  <string name="tab_settings_primary">Aba principal</string>
+  <string name="tab_settings_secondary">Aba Secundária</string>
 </resources>

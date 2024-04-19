@@ -243,4 +243,11 @@
   <string name="done">Voltooid</string>
   <string name="delete">Verwijderen</string>
   <string name="status_detail_translate">Vertalen naar %1$s</string>
+  <string name="mastodon_tab_local_title">lokaal</string>
+  <string name="mastodon_tab_public_title">Openbaar</string>
+  <string name="home_tab_featured_title">Aanbevolen</string>
+  <string name="home_tab_bookmarks_title">Bladwijzers</string>
+  <string name="home_tab_favorite_title">Favoriete</string>
+  <string name="tab_settings_primary">Primaire tab</string>
+  <string name="tab_settings_secondary">Secundaire tab</string>
 </resources>

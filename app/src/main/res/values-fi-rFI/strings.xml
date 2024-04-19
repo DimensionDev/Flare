@@ -243,4 +243,11 @@
   <string name="done">Valmis</string>
   <string name="delete">Poista</string>
   <string name="status_detail_translate">Käännä kielelle %1$s</string>
+  <string name="mastodon_tab_local_title">Paikallinen</string>
+  <string name="mastodon_tab_public_title">Julkinen</string>
+  <string name="home_tab_featured_title">Suositellut</string>
+  <string name="home_tab_bookmarks_title">Kirjanmerkit</string>
+  <string name="home_tab_favorite_title">Suosikki</string>
+  <string name="tab_settings_primary">Ensisijainen välilehti</string>
+  <string name="tab_settings_secondary">Toissijainen välilehti</string>
 </resources>

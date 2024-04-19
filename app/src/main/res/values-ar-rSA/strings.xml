@@ -241,4 +241,11 @@
   <string name="done">تم</string>
   <string name="delete">حذف</string>
   <string name="status_detail_translate">ترجم إلى %1$s</string>
+  <string name="mastodon_tab_local_title">محلي</string>
+  <string name="mastodon_tab_public_title">عامة</string>
+  <string name="home_tab_featured_title">مميز</string>
+  <string name="home_tab_bookmarks_title">المفضلة</string>
+  <string name="home_tab_favorite_title">المفضلة</string>
+  <string name="tab_settings_primary">التبويب الأساسي</string>
+  <string name="tab_settings_secondary">علامة التبويب الثانوية</string>
 </resources>

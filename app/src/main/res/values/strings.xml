@@ -307,7 +307,6 @@
     <string name="xqt_tab_federated_title">Federated</string>
     <string name="home_tab_bookmarks_title">Bookmarks</string>
 
-    <string name="tab_settings_primary">Primary</string>
-    <string name="tab_settings_secondary">Secondary</string>
-    <string name="tab_settings_secondary_empty">Default secondary tabs</string>
+    <string name="tab_settings_primary">Primary tab</string>
+    <string name="tab_settings_secondary">Secondary tab</string>
 </resources>

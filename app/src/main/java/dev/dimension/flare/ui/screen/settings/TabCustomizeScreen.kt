@@ -77,7 +77,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
@@ -147,31 +146,42 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
             state = lazyListState,
             contentPadding = it,
         ) {
-            state.tabs.forEach { (isSecondary, items) ->
-                stickyHeader {
-                    ListItem(
-                        headlineContent = {
-                            Text(
-                                text = stringResource(
-                                    id =
-                                        if (isSecondary) {
-                                            R.string.tab_settings_secondary
-                                        } else {
-                                            R.string.tab_settings_primary
-                                        },
-                                ),
+            state.tabs.forEach { item ->
+                when (item) {
+                    is ActualTabItem -> {
+                        tabItem(
+                            item,
+                            state::deleteTab,
+                            reorderableLazyColumnState,
+                            haptics,
+                            state.canSwipeToDelete,
+                        )
+                    }
+                    PrimaryTabItemState -> {
+                        stickyHeader {
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = stringResource(id = R.string.tab_settings_primary))
+                                },
                             )
-                        },
-                    )
+                        }
+                    }
+                    SecondaryTabItemState -> {
+                        stickyHeader(key = SecondaryTabItemState.key) {
+                            ReorderableItem(
+                                reorderableLazyListState = reorderableLazyColumnState,
+                                key = SecondaryTabItemState.key,
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(text = stringResource(id = R.string.tab_settings_secondary))
+                                    },
+                                )
+                            }
+                        }
+                    }
                 }
-                tabItems(
-                    tabs = items,
-                    deleteTab = state::deleteTab,
-                    reorderableLazyColumnState = reorderableLazyColumnState,
-                    haptics = haptics,
-                )
             }
-
         }
     }
     if (state.showAddTab) {
@@ -232,13 +242,14 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-private fun LazyListScope.tabItems(
-    tabs: ImmutableList<TabItem>,
-    deleteTab: (TabItem) -> Unit,
+private fun LazyListScope.tabItem(
+    item: ActualTabItem,
+    deleteTab: (ActualTabItem) -> Unit,
     reorderableLazyColumnState: ReorderableLazyListState,
     haptics: HapticFeedback,
+    canSwipeToDelete: Boolean,
 ) {
-    items(tabs, key = { it.key }) { item ->
+    item(key = item.tabItem.key) {
         var shouldDismiss by remember { mutableStateOf(false) }
         val swipeState =
             rememberSwipeToDismissBoxState(
@@ -271,8 +282,8 @@ private fun LazyListScope.tabItems(
                 ) {
                     SwipeToDismissBox(
                         state = swipeState,
-                        enableDismissFromEndToStart = tabs.size > 1,
-                        enableDismissFromStartToEnd = tabs.size > 1,
+                        enableDismissFromEndToStart = canSwipeToDelete,
+                        enableDismissFromStartToEnd = canSwipeToDelete,
                         backgroundContent = {
                             val alignment =
                                 when (swipeState.dismissDirection) {
@@ -301,13 +312,13 @@ private fun LazyListScope.tabItems(
                     ) {
                         ListItem(
                             headlineContent = {
-                                TabTitle(item.metaData.title)
+                                TabTitle(item.tabItem.metaData.title)
                             },
                             leadingContent = {
                                 TabIcon(
-                                    item.account,
-                                    item.metaData.icon,
-                                    item.metaData.title,
+                                    item.tabItem.account,
+                                    item.tabItem.metaData.icon,
+                                    item.tabItem.metaData.title,
                                 )
                             },
                             trailingContent = {
@@ -453,33 +464,35 @@ private fun presenter(
     tabSettings.onSuccess {
         LaunchedEffect(it.items.size) {
             cacheTabs.clear()
-            cacheTabs.addAll(it.items.map { TabItemState(false, it) })
+            cacheTabs.add(PrimaryTabItemState)
+            cacheTabs.addAll(it.items.map { ActualTabItem(it) })
+            cacheTabs.add(SecondaryTabItemState)
             it.secondaryItems?.let { secondaryItems ->
-                cacheTabs.addAll(secondaryItems.map { TabItemState(true, it) })
+                cacheTabs.addAll(secondaryItems.map { ActualTabItem(it) })
             }
         }
     }.onError {
         LaunchedEffect(Unit) {
             cacheTabs.clear()
-            cacheTabs.addAll(TimelineTabItem.default.map { TabItemState(false, it) })
+            cacheTabs.add(PrimaryTabItemState)
+            cacheTabs.addAll(TimelineTabItem.default.map { ActualTabItem(it) })
+            cacheTabs.add(SecondaryTabItemState)
         }
     }
     val allTabs = allTabsPresenter()
 
     object {
         val tabs = cacheTabs
-            .groupBy { it.isSecondary }
-            .mapValues { it.value.map { it.tabItem }.toImmutableList() }
-            .toImmutableMap()
         val allTabs = allTabs
         val showAddTab = showAddTab
+        val canSwipeToDelete = cacheTabs.filterIsInstance<ActualTabItem>().size > 1
 
         fun moveTab(
             from: Any,
             to: Any,
         ) {
-            val fromIndex = cacheTabs.indexOfFirst { it.tabItem.key == from }
-            val toIndex = cacheTabs.indexOfFirst { it.tabItem.key == to }
+            val fromIndex = cacheTabs.indexOfFirst { it.key == from }
+            val toIndex = cacheTabs.indexOfFirst { it.key == to }
             cacheTabs.add(toIndex, cacheTabs.removeAt(fromIndex))
         }
 
@@ -487,10 +500,14 @@ private fun presenter(
             appScope.launch {
                 repository.updateTabSettings {
                     copy(
-                        items = cacheTabs.filter { !it.isSecondary }.map { it.tabItem }.toImmutableList(),
-                        secondaryItems = cacheTabs.filter { it.isSecondary }.map { it.tabItem }.takeIf {
-                            it.isNotEmpty()
-                        }?.toImmutableList(),
+                        items =
+                            cacheTabs.subList(1, cacheTabs.indexOfFirst { it is SecondaryTabItemState })
+                                .map { (it as ActualTabItem).tabItem }.toImmutableList(),
+                        secondaryItems =
+                            cacheTabs.subList(
+                                cacheTabs.indexOfFirst { it is SecondaryTabItemState } + 1,
+                                cacheTabs.size,
+                            ).map { (it as ActualTabItem).tabItem }.toImmutableList(),
                     )
                 }
             }
@@ -500,26 +517,36 @@ private fun presenter(
             showAddTab = value
         }
 
-        fun deleteTab(tab: TabItem) {
-            cacheTabs.removeIf { it.tabItem == tab }
+        fun deleteTab(tab: ActualTabItem) {
+            cacheTabs.removeIf { it.key == tab.key }
         }
 
         fun addTab(tab: TabItem) {
-            if (tab !in cacheTabs.map { it.tabItem }) {
-                if (cacheTabs.count { !it.isSecondary } < 5) {
-                    cacheTabs.add(TabItemState(false, tab))
-                } else {
-                    cacheTabs.add(TabItemState(true, tab))
-                }
-            }
+            cacheTabs.add(ActualTabItem(tab))
         }
     }
 }
 
-private data class TabItemState(
-    val isSecondary: Boolean,
+private sealed interface TabItemState {
+    val key: String
+}
+
+private data object PrimaryTabItemState : TabItemState {
+    override val key: String
+        get() = "primary"
+}
+
+private data object SecondaryTabItemState : TabItemState {
+    override val key: String
+        get() = "secondary"
+}
+
+private data class ActualTabItem(
     val tabItem: TabItem,
-)
+) : TabItemState {
+    override val key: String
+        get() = tabItem.key
+}
 
 @Composable
 private fun allTabsPresenter() =

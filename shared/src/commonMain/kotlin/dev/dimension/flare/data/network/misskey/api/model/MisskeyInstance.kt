@@ -54,7 +54,7 @@ internal data class Meta(
     val emailRequiredForSignup: Boolean? = null,
     val enableHcaptcha: Boolean? = null,
     val hcaptchaSiteKey: String? = null,
-    val enableRecaptcha: Boolean,
+    val enableRecaptcha: Boolean? = null,
     val recaptchaSiteKey: String? = null,
     val enableTurnstile: Boolean? = null,
     val turnstileSiteKey: String? = null,
@@ -125,9 +125,9 @@ internal data class Meta(
     val disableLocalTimeline: Boolean? = null,
     val disableGlobalTimeline: Boolean? = null,
     @SerialName("driveCapacityPerLocalUserMb")
-    val driveCapacityPerLocalUserMB: Long? = null,
+    val driveCapacityPerLocalUserMB: Float? = null,
     @SerialName("driveCapacityPerRemoteUserMb")
-    val driveCapacityPerRemoteUserMB: Long? = null,
+    val driveCapacityPerRemoteUserMB: Float? = null,
     val enableTwitterIntegration: Boolean? = null,
     val enableGithubIntegration: Boolean? = null,
     val enableDiscordIntegration: Boolean? = null,
@@ -192,7 +192,7 @@ internal data class Policies(
     val canUseTranslator: Boolean? = null,
     val canHideAds: Boolean,
     @SerialName("driveCapacityMb")
-    val driveCapacityMB: Long,
+    val driveCapacityMB: Float,
     val alwaysMarkNsfw: Boolean? = null,
     val pinLimit: Long,
     val antennaLimit: Long,
@@ -210,10 +210,10 @@ internal data class Policies(
     val canRequestCustomEmojis: Boolean? = null,
     val canAddRoles: Boolean? = null,
     @SerialName("driveAdditionCapacityMb")
-    val driveAdditionCapacityMB: Long? = null,
+    val driveAdditionCapacityMB: Float? = null,
     val noteLengthLimit: Long? = null,
     @SerialName("additionalDriveCapacityMb")
-    val additionalDriveCapacityMB: Long? = null,
+    val additionalDriveCapacityMB: Float? = null,
     val canCreateVoiceChannel: Boolean? = null,
 )
 

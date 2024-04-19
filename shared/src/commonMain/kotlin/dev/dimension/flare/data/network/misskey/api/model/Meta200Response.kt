@@ -41,7 +41,7 @@ internal data class Meta200Response(
     @SerialName(value = "emailRequiredForSignup") val emailRequiredForSignup: kotlin.Boolean,
     @SerialName(value = "enableHcaptcha") val enableHcaptcha: kotlin.Boolean,
     @SerialName(value = "hcaptchaSiteKey") val hcaptchaSiteKey: kotlin.String? = null,
-    @SerialName(value = "enableRecaptcha") val enableRecaptcha: kotlin.Boolean,
+    @SerialName(value = "enableRecaptcha") val enableRecaptcha: kotlin.Boolean? = null,
     @SerialName(value = "recaptchaSiteKey") val recaptchaSiteKey: kotlin.String? = null,
     @SerialName(value = "enableTurnstile") val enableTurnstile: kotlin.Boolean,
     @SerialName(value = "turnstileSiteKey") val turnstileSiteKey: kotlin.String? = null,

@@ -51,6 +51,7 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.component.status.xqt.XQTNofiticationComponent
 import dev.dimension.flare.ui.component.status.xqt.XQTStatusComponent
 import dev.dimension.flare.ui.component.status.xqt.XQTStatusEvent
 import dev.dimension.flare.ui.model.UiAccount
@@ -304,6 +305,14 @@ internal fun StatusItem(
                 modifier = Modifier.padding(horizontal = horizontalPadding),
                 isDetail = isDetail,
             )
+
+        is UiStatus.XQTNotification -> {
+            XQTNofiticationComponent(
+                data = item,
+                event = event,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+        }
     }
 }
 

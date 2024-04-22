@@ -29,6 +29,10 @@ import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
+import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.mapper.toUi
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.datetime.Instant
 
 internal object XQT {
     fun save(
@@ -335,6 +339,80 @@ internal fun TopLevel.tweets(): List<XQTTimeline> {
                     ),
                 id = tweet.restId,
                 sortedIndex = index,
+            )
+        }
+        ?.toList()
+        .orEmpty()
+}
+
+internal fun TopLevel.notifications(accountKey: MicroBlogKey): List<UiStatus.XQTNotification> {
+    return timeline
+        ?.instructions
+        ?.asSequence()
+        ?.flatMap {
+            it.addEntries?.entries.orEmpty()
+        }
+        ?.mapNotNull { entry ->
+            entry.content?.item?.content?.notification
+        }
+        ?.map { notification ->
+            val url = notification.url?.url
+            val data = globalObjects?.notifications?.get(notification.id)
+            val message = data?.message?.text
+            val users =
+                data?.template?.aggregateUserActionsV1?.fromUsers?.mapNotNull { ref ->
+                    globalObjects?.users?.get(ref.user?.id)?.let { userLegacy ->
+                        User(
+                            legacy = userLegacy,
+                            isBlueVerified = userLegacy.verified,
+                            restId = ref.user?.id.orEmpty(),
+                        )
+                    }?.toUi(accountKey)
+                }
+            val tweet =
+                data?.template?.aggregateUserActionsV1?.targetObjects?.mapNotNull {
+                    globalObjects?.tweets?.get(it.tweet?.id)
+                }
+            val createdAt =
+                data?.timestampMS?.toLongOrNull()?.let {
+                    Instant.fromEpochMilliseconds(it)
+                }
+
+            UiStatus.XQTNotification(
+                statusKey = MicroBlogKey(id = notification.id.orEmpty(), host = xqtHost),
+                url = url.orEmpty(),
+                text = message.orEmpty(),
+                type =
+                    when (data?.icon?.id) {
+                        "person_icon" -> UiStatus.XQTNotification.Type.Follow
+                        "heart_icon" -> UiStatus.XQTNotification.Type.Like
+                        "bird_icon" -> UiStatus.XQTNotification.Type.Logo
+                        else -> UiStatus.XQTNotification.Type.Recommendation
+                    },
+                users = users.orEmpty().toImmutableList(),
+                data =
+                    tweet?.firstOrNull()?.let {
+                        Tweet(
+                            restId = it.idStr,
+                            core =
+                                UserResultCore(
+                                    userResults =
+                                        UserResults(
+                                            result =
+                                                User(
+                                                    legacy =
+                                                        globalObjects?.users?.get(it.userIdStr)
+                                                            ?: return@let null,
+                                                    isBlueVerified = false,
+                                                    restId = it.userIdStr,
+                                                ),
+                                        ),
+                                ),
+                            legacy = it,
+                        ).toUi(accountKey)
+                    },
+                createdAt = createdAt ?: Instant.DISTANT_PAST,
+                accountKey = accountKey,
             )
         }
         ?.toList()

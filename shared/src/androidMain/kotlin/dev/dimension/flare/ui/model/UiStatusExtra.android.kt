@@ -90,5 +90,9 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
                     },
             )
         }
+
+        is UiStatus.XQTNotification -> {
+            UiStatusExtra.Empty
+        }
     }
 }

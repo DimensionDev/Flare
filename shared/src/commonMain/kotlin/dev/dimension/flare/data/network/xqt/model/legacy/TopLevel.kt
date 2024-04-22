@@ -75,6 +75,19 @@ internal data class TopLevel(
     data class ItemContent(
         val tweet: ContentTweet? = null,
         val trend: Trend? = null,
+        val notification: NotificationClass? = null,
+    )
+
+    @Serializable
+    data class NotificationClass(
+        val id: String? = null,
+        val url: NotificationURL? = null,
+    )
+
+    @Serializable
+    data class NotificationURL(
+        val urlType: String? = null,
+        val url: String? = null,
     )
 
     @Serializable
@@ -111,4 +124,68 @@ internal data class TopLevel(
 internal data class GlobalObjects(
     val users: Map<String, UserLegacy>? = null,
     val tweets: Map<String, TweetLegacy>? = null,
+    val notifications: Map<String, Notification>? = null,
+)
+
+@Serializable
+data class Notification(
+    val id: String? = null,
+    @SerialName("timestampMs")
+    val timestampMS: String? = null,
+    val icon: Icon? = null,
+    val message: Message? = null,
+    val template: Template? = null,
+)
+
+@Serializable
+data class Icon(
+    val id: String? = null,
+)
+
+@Serializable
+data class Message(
+    val text: String? = null,
+    val entities: List<Entity>? = null,
+    val rtl: Boolean? = null,
+)
+
+@Serializable
+data class Entity(
+    val fromIndex: Long? = null,
+    val toIndex: Long? = null,
+    val ref: Ref? = null,
+    val format: String? = null,
+)
+
+@Serializable
+data class Ref(
+    val user: Icon? = null,
+)
+
+@Serializable
+data class Template(
+    val aggregateUserActionsV1: AggregateUserActionsV1? = null,
+)
+
+@Serializable
+data class AggregateUserActionsV1(
+    val targetObjects: List<TargetObject>? = null,
+    val fromUsers: List<Ref>? = null,
+    val additionalContext: AdditionalContext? = null,
+)
+
+@Serializable
+data class AdditionalContext(
+    val contextText: ContextText? = null,
+)
+
+@Serializable
+data class ContextText(
+    val text: String? = null,
+    val entities: List<Entity>? = null,
+)
+
+@Serializable
+data class TargetObject(
+    val tweet: Icon? = null,
 )

@@ -160,25 +160,37 @@ class XQTDataSource(
         pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            accountKey = account.accountKey,
-            database = database,
-            filterFlow = localFilterRepository.getFlow(forNotification = true),
-            scope = scope,
-            mediator =
-                MentionRemoteMediator(
+        if (type == NotificationFilter.All) {
+            return Pager(
+                config = PagingConfig(pageSize = pageSize),
+            ) {
+                NotificationPagingSource(
+                    "en",
                     service,
-                    database,
                     account.accountKey,
-                    pagingKey,
-                ),
-        )
+                )
+            }.flow
+        } else {
+            return timelinePager(
+                pageSize = pageSize,
+                pagingKey = pagingKey,
+                accountKey = account.accountKey,
+                database = database,
+                filterFlow = localFilterRepository.getFlow(forNotification = true),
+                scope = scope,
+                mediator =
+                    MentionRemoteMediator(
+                        service,
+                        database,
+                        account.accountKey,
+                        pagingKey,
+                    ),
+            )
+        }
     }
 
     override val supportedNotificationFilter: List<NotificationFilter>
-        get() = listOf(NotificationFilter.Mention)
+        get() = listOf(NotificationFilter.All, NotificationFilter.Mention)
 
     override fun userByAcct(acct: String): CacheData<UiUser> {
         val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))

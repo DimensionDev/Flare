@@ -164,7 +164,7 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
             ),
         user = user,
         createdAt = legacy?.createdAt?.let { parseCustomDateTime(it) } ?: Clock.System.now(),
-        content = noteTweet?.noteTweetResults?.result?.text ?: text,
+        content = text,
         medias = medias,
         card = uiCard,
         matrices =

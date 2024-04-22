@@ -1,7 +1,15 @@
 package dev.dimension.flare.ui.component.status.xqt
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.BookmarkAdd
@@ -9,7 +17,10 @@ import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Recommend
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -22,10 +33,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusActionGroup
@@ -66,7 +80,11 @@ internal fun XQTStatusComponent(
             )
         },
         onUserClick = {
-            event.onUserClick(accountKey = actualData.accountKey, userKey = it, uriHandler = uriHandler)
+            event.onUserClick(
+                accountKey = actualData.accountKey,
+                userKey = it,
+                uriHandler = uriHandler,
+            )
         },
         rawContent = actualData.content,
         content = actualData.contentToken,
@@ -277,6 +295,100 @@ private fun RowScope.StatusFooterComponent(
             }
         },
     )
+}
+
+@Composable
+internal fun XQTNofiticationComponent(
+    data: UiStatus.XQTNotification,
+    event: XQTStatusEvent,
+    modifier: Modifier = Modifier,
+) {
+    val uriHandler = LocalUriHandler.current
+    if (data.users.isEmpty() && data.data != null) {
+        data.data?.let {
+            XQTStatusComponent(data = it, event = event, modifier = modifier)
+        }
+    } else {
+        Row(
+            modifier =
+                Modifier
+                    .let {
+                        data.data?.let { data ->
+                            it.clickable {
+                                event.onStatusClick(data, uriHandler)
+                            }
+                        } ?: run {
+                            if (data.users.isEmpty()) {
+                                it.clickable {
+                                    uriHandler.openUri(data.url)
+                                }
+                            } else {
+                                it
+                            }
+                        }
+                    }
+                    .padding(bottom = 8.dp)
+                    .fillMaxWidth()
+                    .then(modifier),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(
+                imageVector =
+                    when (data.type) {
+                        UiStatus.XQTNotification.Type.Follow -> Icons.Default.PersonAdd
+                        UiStatus.XQTNotification.Type.Like -> Icons.Default.Favorite
+                        UiStatus.XQTNotification.Type.Recommendation -> Icons.Default.Recommend
+                        UiStatus.XQTNotification.Type.Logo -> Icons.Default.Info
+                    },
+                contentDescription = null,
+                modifier =
+                    Modifier
+                        .size(40.dp),
+                tint =
+                    when (data.type) {
+                        UiStatus.XQTNotification.Type.Follow -> MaterialTheme.colorScheme.primary
+                        UiStatus.XQTNotification.Type.Like -> Color.Red
+                        UiStatus.XQTNotification.Type.Recommendation -> MaterialTheme.colorScheme.primary
+                        UiStatus.XQTNotification.Type.Logo -> MaterialTheme.colorScheme.secondary
+                    },
+            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (data.users.isNotEmpty()) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        items(data.users) { user ->
+                            AvatarComponent(
+                                data = user.avatarUrl,
+                                size = 40.dp,
+                                modifier =
+                                    Modifier.clickable {
+                                        event.onUserClick(
+                                            accountKey = data.accountKey,
+                                            userKey = user.userKey,
+                                            uriHandler = uriHandler,
+                                        )
+                                    },
+                            )
+                        }
+                    }
+                }
+                Text(text = data.text)
+                if (data.data != null) {
+                    data.data?.let {
+                        Text(
+                            text = it.content,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 internal interface XQTStatusEvent {

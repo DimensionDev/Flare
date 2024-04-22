@@ -154,6 +154,11 @@ sealed class UiStatus {
                     }
                     if (card != null) append("_card")
                 }
+
+            is XQTNotification ->
+                buildString {
+                    append("xqt_notification")
+                }
         }
     }
 
@@ -475,6 +480,25 @@ sealed class UiStatus {
             val retweeted: Boolean,
             val bookmarked: Boolean,
         )
+    }
+
+    @Immutable
+    data class XQTNotification internal constructor(
+        override val statusKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
+        val url: String,
+        val text: String,
+        val type: Type,
+        val users: ImmutableList<UiUser.XQT>,
+        val data: XQT?,
+        val createdAt: Instant,
+    ) : UiStatus() {
+        enum class Type {
+            Follow,
+            Like,
+            Recommendation,
+            Logo,
+        }
     }
 }
 

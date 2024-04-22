@@ -108,6 +108,7 @@ internal fun UiStatusQuoted(
                 showMedia = showMedia,
                 colors = colors,
             )
+        is UiStatus.XQTNotification -> Unit
     }
 }
 

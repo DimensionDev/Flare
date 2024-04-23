@@ -347,48 +347,47 @@ fun ServiceSelectScreen(
                             }
                         }
                     }
-                } else {
-                    LazyVerticalStaggeredGrid(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .padding(horizontal = 16.dp),
-                        columns = StaggeredGridCells.Adaptive(300.dp),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(
-                                8.dp,
-                                Alignment.CenterHorizontally,
-                            ),
-                        verticalItemSpacing = 8.dp,
-                    ) {
-                        state.instances.onSuccess {
-                            items(
-                                count = state.instances.itemCount,
-                            ) {
-                                val instance = state.instances.peek(it)
-                                ServiceSelectItem(
-                                    instance = instance,
-                                    modifier =
-                                        Modifier.clickable {
-                                            if (instance != null) {
-                                                state.selectInstance(instance)
-                                            }
-                                        },
-                                )
-                            }
-                        }.onLoading {
-                            items(10) {
-                                ServiceSelectItem(
-                                    instance = null,
-                                )
-                            }
-                        }.onEmpty {
-                            items(1) {
-                                Text(
-                                    text = stringResource(id = R.string.service_select_empty_message),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                            }
+                }
+                LazyVerticalStaggeredGrid(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(horizontal = 16.dp),
+                    columns = StaggeredGridCells.Adaptive(300.dp),
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.CenterHorizontally,
+                        ),
+                    verticalItemSpacing = 8.dp,
+                ) {
+                    state.instances.onSuccess {
+                        items(
+                            count = state.instances.itemCount,
+                        ) {
+                            val instance = state.instances.peek(it)
+                            ServiceSelectItem(
+                                instance = instance,
+                                modifier =
+                                    Modifier.clickable {
+                                        if (instance != null) {
+                                            state.selectInstance(instance)
+                                        }
+                                    },
+                            )
+                        }
+                    }.onLoading {
+                        items(10) {
+                            ServiceSelectItem(
+                                instance = null,
+                            )
+                        }
+                    }.onEmpty {
+                        items(1) {
+                            Text(
+                                text = stringResource(id = R.string.service_select_empty_message),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
                         }
                     }
                 }
@@ -509,7 +508,6 @@ private fun serviceSelectPresenter(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun blueskyLoginPresenter() =
     run {

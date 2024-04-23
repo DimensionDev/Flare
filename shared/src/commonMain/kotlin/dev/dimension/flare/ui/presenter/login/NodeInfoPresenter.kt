@@ -66,10 +66,9 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
             }.collectAsUiState()
         }
 
-        val canNext by remember(instances, detectedPlatformType, filter) {
+        val canNext by remember(detectedPlatformType) {
             derivedStateOf {
-                instances.itemCount == 1 && instances.peek(0)?.domain == filter ||
-                    detectedPlatformType is UiState.Success<PlatformType> && instances.itemCount == 0
+                detectedPlatformType is UiState.Success<PlatformType>
             }
         }
 

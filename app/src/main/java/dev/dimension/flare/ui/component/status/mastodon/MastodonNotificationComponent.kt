@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.component.status.mastodon
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -19,6 +22,8 @@ import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.model.UiStatus
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun MastodonNotificationComponent(
     data: UiStatus.MastodonNotification,

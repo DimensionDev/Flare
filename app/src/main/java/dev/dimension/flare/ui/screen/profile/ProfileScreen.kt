@@ -2,6 +2,9 @@ package dev.dimension.flare.ui.screen.profile
 
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -121,6 +124,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.reflect.KFunction1
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -133,13 +137,14 @@ import kotlin.reflect.KFunction1
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun ProfileWithUserNameAndHostDeeplinkRoute(
+internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostDeeplinkRoute(
     userName: String,
     host: String,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
     tabState: TabState,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
@@ -186,6 +191,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -195,13 +201,14 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun ProfileWithUserNameAndHostRoute(
+internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostRoute(
     userName: String,
     host: String,
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
@@ -248,20 +255,23 @@ internal fun ProfileWithUserNameAndHostRoute(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
-internal fun MeRoute(
+internal fun AnimatedVisibilityScope.MeRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     ProfileRoute(
         null,
         navigator,
         accountType,
         tabState,
+        sharedTransitionScope,
     )
 }
 
@@ -351,6 +361,7 @@ private fun profileWithUserNameAndHostPresenter(
     }.invoke()
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -363,12 +374,13 @@ private fun profileWithUserNameAndHostPresenter(
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun ProfileDeeplinkRoute(
+internal fun AnimatedVisibilityScope.ProfileDeeplinkRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
     tabState: TabState,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     ProfileScreen(
         userKey = userKey,
         onBack = {
@@ -394,6 +406,7 @@ internal fun ProfileDeeplinkRoute(
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -403,12 +416,13 @@ internal fun ProfileDeeplinkRoute(
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun ProfileRoute(
+internal fun AnimatedVisibilityScope.ProfileRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     ProfileScreen(
         userKey = userKey,
         onBack = {
@@ -434,7 +448,12 @@ internal fun ProfileRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3AdaptiveApi::class,
+    ExperimentalSharedTransitionApi::class,
+)
 @Composable
 private fun ProfileScreen(
     // null means current user
@@ -787,6 +806,8 @@ private fun ProfileMenu(
     }
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ProfileHeader(
     userState: UiState<UiUser>,
@@ -832,6 +853,8 @@ private fun ProfileHeader(
     }
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ProfileHeaderSuccess(
     user: UiUser,
@@ -909,11 +932,15 @@ private fun ProfileHeaderSuccess(
     }
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun CommonProfileHeader(
     bannerUrl: String?,
     avatarUrl: String?,
     displayName: Element,
+    @Suppress("UNUSED_PARAMETER")
+    userKey: MicroBlogKey,
     handle: String,
     modifier: Modifier = Modifier,
     onAvatarClick: (() -> Unit)? = null,

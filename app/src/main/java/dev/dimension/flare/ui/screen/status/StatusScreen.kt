@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.screen.status
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.icons.Icons
@@ -33,6 +36,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -42,11 +46,12 @@ import org.koin.compose.koinInject
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun StatusRoute(
+fun AnimatedVisibilityScope.StatusRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
     accountType: AccountType,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     StatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
@@ -54,7 +59,8 @@ fun StatusRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun StatusScreen(
     statusKey: MicroBlogKey,

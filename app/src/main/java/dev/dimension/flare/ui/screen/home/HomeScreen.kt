@@ -5,12 +5,12 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -126,6 +126,7 @@ data class RootNavController(
 @OptIn(
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
     ExperimentalMaterial3AdaptiveApi::class,
+    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 internal fun HomeScreen(
@@ -451,15 +452,18 @@ internal fun HomeScreen(
                     ) {
                         tabs.forEach { (tab, _, tabState) ->
                             composable(tab.key) {
-                                Router(
-                                    modifier = Modifier.fillMaxSize(),
-                                    navGraph = NavGraphs.root,
-                                    direction = TabSplashScreenDestination,
-                                ) {
-                                    dependency(rootNavController)
-                                    dependency(SplashScreenArgs(getDirection(tab, tab.account)))
-                                    dependency(tabState)
-                                    dependency(drawerState)
+                                SharedTransitionLayout {
+                                    Router(
+                                        modifier = Modifier.fillMaxSize(),
+                                        navGraph = NavGraphs.root,
+                                        direction = TabSplashScreenDestination,
+                                    ) {
+                                        dependency(rootNavController)
+                                        dependency(SplashScreenArgs(getDirection(tab, tab.account)))
+                                        dependency(tabState)
+                                        dependency(drawerState)
+                                        dependency(this@SharedTransitionLayout)
+                                    }
                                 }
                             }
                         }
@@ -592,23 +596,25 @@ internal fun Router(
 private object DefaultFadingTransitions : NavHostAnimatedDestinationStyle() {
     override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
         {
-            slideInHorizontally(tween()) { it / 3 } + fadeIn()
+            fadeIn(animationSpec = tween())
+//            slideInHorizontally(tween()) { it / 3 } + fadeIn()
         }
 
     override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
         {
-            slideOutHorizontally(tween()) { -it / 3 } + fadeOut()
+            fadeOut(animationSpec = tween())
+//            slideOutHorizontally(tween()) { -it / 3 } + fadeOut()
         }
 
-    override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
-        {
-            slideInHorizontally(tween()) { -it / 3 } + fadeIn()
-        }
-
-    override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
-        {
-            slideOutHorizontally(tween()) { it / 3 } + fadeOut()
-        }
+//    override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
+//        {
+//            slideInHorizontally(tween()) { -it / 3 } + fadeIn()
+//        }
+//
+//    override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
+//        {
+//            slideOutHorizontally(tween()) { it / 3 } + fadeOut()
+//        }
 }
 
 private class ProxyUriHandler(

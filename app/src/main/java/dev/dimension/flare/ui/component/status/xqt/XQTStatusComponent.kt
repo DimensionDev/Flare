@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.component.status.xqt
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,6 +49,8 @@ import dev.dimension.flare.ui.component.status.StatusActionGroup
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun XQTStatusComponent(
     data: UiStatus.XQT,
@@ -297,6 +302,8 @@ private fun RowScope.StatusFooterComponent(
     )
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun XQTNofiticationComponent(
     data: UiStatus.XQTNotification,
@@ -317,14 +324,12 @@ internal fun XQTNofiticationComponent(
                             it.clickable {
                                 event.onStatusClick(data, uriHandler)
                             }
-                        } ?: run {
-                            if (data.users.isEmpty()) {
-                                it.clickable {
-                                    uriHandler.openUri(data.url)
-                                }
-                            } else {
-                                it
+                        } ?: if (data.users.isEmpty()) {
+                            it.clickable {
+                                uriHandler.openUri(data.url)
                             }
+                        } else {
+                            it
                         }
                     }
                     .padding(bottom = 8.dp)

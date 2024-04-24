@@ -2,6 +2,9 @@ package dev.dimension.flare.ui.screen.settings
 
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -62,17 +65,22 @@ import dev.dimension.flare.ui.presenter.settings.AppearanceState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
+internal fun AnimatedVisibilityScope.AppearanceRoute(
+    navigator: ProxyDestinationsNavigator,
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     AppearanceScreen(
         onBack = navigator::navigateUp,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun AppearanceScreen(onBack: () -> Unit) {
     val state by producePresenter { appearancePresenter() }

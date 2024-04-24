@@ -171,6 +171,7 @@ fun MediaItem(
     media: UiMedia,
     modifier: Modifier = Modifier,
     keepAspectRatio: Boolean = true,
+    showCountdown: Boolean = true,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
     Box(
@@ -249,29 +250,34 @@ fun MediaItem(
                                 color = Color.White,
                             )
                         },
-                        remainingTimeContent = {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .padding(16.dp)
-                                        .background(
-                                            Color.Black.copy(alpha = 0.5f),
-                                            shape = MaterialTheme.shapes.small,
+                        remainingTimeContent =
+                            if (showCountdown) {
+                                {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .padding(16.dp)
+                                                .background(
+                                                    Color.Black.copy(alpha = 0.5f),
+                                                    shape = MaterialTheme.shapes.small,
+                                                )
+                                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                                .align(Alignment.BottomStart),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text =
+                                                remember(it) {
+                                                    it.milliseconds.humanize()
+                                                },
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.bodySmall,
                                         )
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        .align(Alignment.BottomStart),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    text =
-                                        remember(it) {
-                                            it.milliseconds.humanize()
-                                        },
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                        },
+                                    }
+                                }
+                            } else {
+                                null
+                            },
                     )
                 } else {
                     NetworkImage(

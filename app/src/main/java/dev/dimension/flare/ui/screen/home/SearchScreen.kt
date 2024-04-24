@@ -2,6 +2,9 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,6 +72,7 @@ import io.ktor.http.decodeURLQueryComponent
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
     deepLinks = [
@@ -81,20 +85,23 @@ import org.koin.compose.koinInject
     ],
 )
 @Composable
-fun SearchDeepLink(
+fun AnimatedVisibilityScope.SearchDeepLink(
     keyword: String,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
     drawerState: DrawerState,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     SearchRoute(
         keyword = keyword,
         navigator = navigator,
         accountType = AccountType.Specific(accountKey),
         drawerState = drawerState,
+        sharedTransitionScope = sharedTransitionScope,
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
     deepLinks = [
@@ -104,12 +111,13 @@ fun SearchDeepLink(
     ],
 )
 @Composable
-fun SearchRoute(
+fun AnimatedVisibilityScope.SearchRoute(
     keyword: String,
     navigator: DestinationsNavigator,
     accountType: AccountType,
     drawerState: DrawerState,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     val scope = rememberCoroutineScope()
     SearchScreen(
         initialQuery = keyword,
@@ -126,6 +134,8 @@ fun SearchRoute(
     )
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun SearchScreen(
     initialQuery: String,
@@ -164,6 +174,8 @@ private fun SearchScreen(
     )
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun DiscoverSearch(
     state: DiscoverSearchState,
@@ -206,7 +218,12 @@ internal fun DiscoverSearch(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalSharedTransitionApi::class,
+)
 @Composable
 private fun SearchContent(
     user: UiState<UiUser>?,
@@ -321,6 +338,7 @@ private fun SearchContent(
                                                         )
                                                     }
                                                 },
+                                                userKey = item.userKey,
                                                 modifier =
                                                     Modifier
                                                         .width(256.dp)

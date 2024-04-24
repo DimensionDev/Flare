@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.screen.home
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,16 +56,18 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun DiscoverRoute(
+internal fun AnimatedVisibilityScope.DiscoverRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
     drawerState: DrawerState,
-) {
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
     val scope = rememberCoroutineScope()
     val state by producePresenter("discoverSearchPresenter_$accountType") {
         discoverSearchPresenter(accountType = accountType)
@@ -99,6 +104,8 @@ internal fun DiscoverRoute(
     }
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun DiscoverScreen(
     accountType: AccountType,

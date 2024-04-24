@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.screen.profile
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -36,6 +39,8 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentMapOf
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun XQTProfileHeader(
     user: UiUser.XQT,
@@ -49,6 +54,7 @@ internal fun XQTProfileHeader(
     expandMatrices: Boolean = false,
 ) {
     CommonProfileHeader(
+        userKey = user.userKey,
         bannerUrl = user.bannerUrl,
         avatarUrl = user.avatarUrl,
         displayName = user.nameElement,

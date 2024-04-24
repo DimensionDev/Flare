@@ -1,5 +1,9 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +19,7 @@ import androidx.compose.material.icons.filled.MoodBad
 import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -65,7 +70,8 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent)
+context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 internal fun status(detailStatusKey: MicroBlogKey? = null) {
     onSuccess { lazyPagingItems ->
         if (lazyPagingItems.itemCount > 0) {
@@ -213,7 +219,8 @@ internal fun status(detailStatusKey: MicroBlogKey? = null) {
     }
 }
 
-context(LazyStaggeredGridScope, LazyPagingItemsProxy<UiStatus>, StatusEvent)
+context(LazyStaggeredGridScope, LazyPagingItemsProxy<UiStatus>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
     items(
         itemCount,
@@ -228,7 +235,18 @@ private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
     ) {
         Column {
             val item = get(it)
-            StatusItem(item, this@StatusEvent, isDetail = item?.statusKey == detailStatusKey)
+            StatusItem(
+                item,
+                this@StatusEvent,
+                isDetail = item?.statusKey == detailStatusKey,
+                modifier =
+                    Modifier
+                        .sharedElement(
+                            rememberSharedContentState(key = "status-${item?.statusKey}"),
+                            animatedVisibilityScope = this@AnimatedVisibilityScope,
+                        )
+                        .background(MaterialTheme.colorScheme.background),
+            )
             if (it != itemCount - 1) {
                 HorizontalDivider(
                     modifier = Modifier.alpha(DisabledAlpha),
@@ -238,10 +256,13 @@ private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
     }
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun StatusItem(
     item: UiStatus?,
     event: StatusEvent,
+    modifier: Modifier = Modifier,
     horizontalPadding: Dp = screenHorizontalPadding,
     isDetail: Boolean = false,
 ) {
@@ -250,7 +271,7 @@ internal fun StatusItem(
             MastodonStatusComponent(
                 data = item,
                 event = event,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
                 isDetail = isDetail,
             )
 
@@ -258,12 +279,12 @@ internal fun StatusItem(
             MastodonNotificationComponent(
                 data = item,
                 event = event,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
             )
 
         null -> {
             StatusPlaceholder(
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -272,7 +293,7 @@ internal fun StatusItem(
             MisskeyStatusComponent(
                 data = item,
                 event = event,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
                 isDetail = isDetail,
             )
 
@@ -280,14 +301,14 @@ internal fun StatusItem(
             MisskeyNotificationComponent(
                 data = item,
                 event = event,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.Bluesky ->
             BlueskyStatusComponent(
                 data = item,
                 event = event,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
                 isDetail = isDetail,
             )
 
@@ -295,14 +316,14 @@ internal fun StatusItem(
             BlueskyNotificationComponent(
                 data = item,
                 event = event,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
             )
 
         is UiStatus.XQT ->
             XQTStatusComponent(
                 data = item,
                 event = event,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
                 isDetail = isDetail,
             )
 
@@ -310,7 +331,7 @@ internal fun StatusItem(
             XQTNofiticationComponent(
                 data = item,
                 event = event,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier = modifier.padding(horizontal = horizontalPadding),
             )
         }
     }
@@ -442,7 +463,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            StatusRouteDestination(statusKey = data.statusKey, accountType = AccountType.Specific(data.accountKey))
+            StatusRouteDestination(
+                statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
+            )
                 .deeplink(),
         )
     }
@@ -466,7 +490,10 @@ internal class DefaultStatusEvent(
         uriHandler: UriHandler,
     ) {
         uriHandler.openUri(
-            ReplyRouteDestination(accountType = AccountType.Specific(data.accountKey), replyTo = data.statusKey)
+            ReplyRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                replyTo = data.statusKey,
+            )
                 .deeplink(),
         )
     }

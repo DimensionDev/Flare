@@ -529,7 +529,7 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node {
         is UrlToken ->
             Element("a").apply {
                 attributes["href"] = value
-                children.add(Text(value))
+                children.add(Text(value.trimUrl()))
             }
 
         is UserNameToken ->
@@ -749,10 +749,24 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): 
         is UrlNode -> {
             Element("a").apply {
                 attributes["href"] = url
-                children.add(Text(url))
+                children.add(Text(url.trimUrl()))
             }
         }
     }
+}
+
+private fun String.trimUrl(): String {
+    return this
+        .removePrefix("http://")
+        .removePrefix("https://")
+        .removePrefix("www.")
+        .let {
+            if (it.length > 30) {
+                it.substring(0, 30) + "..."
+            } else {
+                it
+            }
+        }
 }
 
 private fun resolveMisskeyEmoji(

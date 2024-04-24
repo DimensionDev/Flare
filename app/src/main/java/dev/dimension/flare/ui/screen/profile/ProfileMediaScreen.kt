@@ -115,6 +115,7 @@ private fun ProfileMediaScreen(
                         val media = item.media
                         MediaItem(
                             media = media,
+                            showCountdown = false,
                             modifier =
                                 Modifier
                                     .clickable {

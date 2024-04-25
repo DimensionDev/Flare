@@ -100,7 +100,6 @@ import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -115,6 +114,8 @@ import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import dev.dimension.flare.ui.screen.splash.SplashScreenArgs
 import dev.dimension.flare.ui.theme.FlareTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -149,7 +150,7 @@ internal fun HomeScreen(
         }
         val currentTab by remember {
             derivedStateOf {
-                tabs.firstOrNull { it.tabItem.key == currentRoute }?.tabItem
+                tabs.all.firstOrNull { it.tabItem.key == currentRoute }?.tabItem
             }
         }
 
@@ -189,47 +190,7 @@ internal fun HomeScreen(
                                     showFab = layoutType != NavigationSuiteType.NavigationBar,
                                 )
                                 if (layoutType != NavigationSuiteType.NavigationBar) {
-                                    tabs.forEach { (tab, isSecondary, tabState) ->
-                                        if (!isSecondary) {
-                                            NavigationDrawerItem(
-                                                selected = currentRoute == tab.key,
-                                                onClick = {
-                                                    if (currentRoute == tab.key) {
-                                                        tabState.onClick()
-                                                    } else {
-                                                        navController.navigate(tab.key) {
-                                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                                saveState = true
-                                                            }
-                                                            launchSingleTop = true
-                                                            restoreState = true
-                                                        }
-                                                    }
-                                                    scope.launch {
-                                                        drawerState.close()
-                                                    }
-                                                },
-                                                icon = {
-                                                    TabIcon(
-                                                        accountType = tab.account,
-                                                        icon = tab.metaData.icon,
-                                                        title = tab.metaData.title,
-                                                    )
-                                                },
-                                                label = {
-                                                    TabTitle(
-                                                        title = tab.metaData.title,
-                                                    )
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
-                                if (tabs.any { it.isSecondary }) {
-                                    HorizontalDivider()
-                                }
-                                tabs.forEach { (tab, isSecondary, tabState) ->
-                                    if (isSecondary) {
+                                    tabs.primary.forEach { (tab, tabState) ->
                                         NavigationDrawerItem(
                                             selected = currentRoute == tab.key,
                                             onClick = {
@@ -262,6 +223,43 @@ internal fun HomeScreen(
                                             },
                                         )
                                     }
+                                }
+                                if (tabs.secondary.isNotEmpty()) {
+                                    HorizontalDivider()
+                                }
+                                tabs.secondary.forEach { (tab, tabState) ->
+                                    NavigationDrawerItem(
+                                        selected = currentRoute == tab.key,
+                                        onClick = {
+                                            if (currentRoute == tab.key) {
+                                                tabState.onClick()
+                                            } else {
+                                                navController.navigate(tab.key) {
+                                                    popUpTo(navController.graph.findStartDestination().id) {
+                                                        saveState = true
+                                                    }
+                                                    launchSingleTop = true
+                                                    restoreState = true
+                                                }
+                                            }
+                                            scope.launch {
+                                                drawerState.close()
+                                            }
+                                        },
+                                        icon = {
+                                            TabIcon(
+                                                accountType = tab.account,
+                                                icon = tab.metaData.icon,
+                                                title = tab.metaData.title,
+                                                iconOnly = tabs.secondaryIconOnly,
+                                            )
+                                        },
+                                        label = {
+                                            TabTitle(
+                                                title = tab.metaData.title,
+                                            )
+                                        },
+                                    )
                                 }
                             }
                             NavigationDrawerItem(
@@ -338,71 +336,68 @@ internal fun HomeScreen(
                         }
                     },
                     navigationSuiteItems = {
-                        tabs.forEach { (tab, isSecondary, tabState) ->
-                            if (!isSecondary) {
-                                item(
-                                    selected = currentRoute == tab.key,
-                                    onClick = {
-                                        if (currentRoute == tab.key) {
-                                            tabState.onClick()
-                                        } else {
-                                            navController.navigate(tab.key) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
+                        tabs.primary.forEach { (tab, tabState) ->
+                            item(
+                                selected = currentRoute == tab.key,
+                                onClick = {
+                                    if (currentRoute == tab.key) {
+                                        tabState.onClick()
+                                    } else {
+                                        navController.navigate(tab.key) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
                                             }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
-                                    },
-                                    icon = {
-                                        TabIcon(
-                                            accountType = tab.account,
-                                            icon = tab.metaData.icon,
-                                            title = tab.metaData.title,
-                                        )
-                                    },
-                                    label = {
-                                        TabTitle(
-                                            title = tab.metaData.title,
-                                        )
-                                    },
-                                )
-                            }
+                                    }
+                                },
+                                icon = {
+                                    TabIcon(
+                                        accountType = tab.account,
+                                        icon = tab.metaData.icon,
+                                        title = tab.metaData.title,
+                                    )
+                                },
+                                label = {
+                                    TabTitle(
+                                        title = tab.metaData.title,
+                                    )
+                                },
+                            )
                         }
                     },
                     secondaryItems = {
-                        tabs.forEach { (tab, isSecondary, tabState) ->
-                            if (isSecondary) {
-                                item(
-                                    selected = currentRoute == tab.key,
-                                    onClick = {
-                                        if (currentRoute == tab.key) {
-                                            tabState.onClick()
-                                        } else {
-                                            navController.navigate(tab.key) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
+                        tabs.secondary.forEach { (tab, tabState) ->
+                            item(
+                                selected = currentRoute == tab.key,
+                                onClick = {
+                                    if (currentRoute == tab.key) {
+                                        tabState.onClick()
+                                    } else {
+                                        navController.navigate(tab.key) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
                                             }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
-                                    },
-                                    icon = {
-                                        TabIcon(
-                                            accountType = tab.account,
-                                            icon = tab.metaData.icon,
-                                            title = tab.metaData.title,
-                                        )
-                                    },
-                                    label = {
-                                        TabTitle(
-                                            title = tab.metaData.title,
-                                        )
-                                    },
-                                )
-                            }
+                                    }
+                                },
+                                icon = {
+                                    TabIcon(
+                                        accountType = tab.account,
+                                        icon = tab.metaData.icon,
+                                        title = tab.metaData.title,
+                                        iconOnly = tabs.secondaryIconOnly,
+                                    )
+                                },
+                                label = {
+                                    TabTitle(
+                                        title = tab.metaData.title,
+                                    )
+                                },
+                            )
                         }
                     },
                     footerItems = {
@@ -433,7 +428,7 @@ internal fun HomeScreen(
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = tabs.first().tabItem.key,
+                        startDestination = tabs.primary.first().tabItem.key,
                         enterTransition = {
                             slideInVertically(tween(durationMillis = 700)) { 80 } +
                                 fadeIn(
@@ -450,7 +445,7 @@ internal fun HomeScreen(
                                 )
                         },
                     ) {
-                        tabs.forEach { (tab, _, tabState) ->
+                        tabs.all.forEach { (tab, tabState) ->
                             composable(tab.key) {
                                 SharedTransitionLayout {
                                     Router(
@@ -641,37 +636,52 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
             account.user.flatMap(
                 onError = {
                     UiState.Success(
-                        TimelineTabItem.guest.map {
-                            HomeTabItem(it, false)
-                        },
+                        HomeTabState(
+                            primary =
+                                TimelineTabItem.guest.map {
+                                    HomeTabItem(it)
+                                }.toImmutableList(),
+                            secondary = persistentListOf(),
+                            secondaryIconOnly = true,
+                        ),
                     )
                 },
             ) { user ->
                 settingsRepository.tabSettings.collectAsUiState().value.flatMap(
                     onError = {
                         UiState.Success(
-                            TimelineTabItem.default.map {
-                                HomeTabItem(it, false)
-                            } +
-                                TimelineTabItem.defaultSecondary(user).map {
-                                    HomeTabItem(it, true)
-                                },
+                            HomeTabState(
+                                primary =
+                                    TimelineTabItem.default.map {
+                                        HomeTabItem(it)
+                                    }.toImmutableList(),
+                                secondary =
+                                    TimelineTabItem.defaultSecondary(user).map {
+                                        HomeTabItem(it)
+                                    }.toImmutableList(),
+                                secondaryIconOnly = true,
+                            ),
                         )
                     },
                 ) { tabSettings ->
                     val secondary =
                         tabSettings.secondaryItems ?: TimelineTabItem.defaultSecondary(user)
                     UiState.Success(
-                        tabSettings.items.map { tabItem ->
-                            HomeTabItem(tabItem, false)
-                        } +
-                            secondary.map {
-                                HomeTabItem(it, true)
-                            },
+                        HomeTabState(
+                            primary =
+                                tabSettings.items.map {
+                                    HomeTabItem(it)
+                                }.toImmutableList(),
+                            secondary =
+                                secondary.filter {
+                                    tabSettings.items.none { item -> item.key == it.key }
+                                }.map {
+                                    HomeTabItem(it)
+                                }.toImmutableList(),
+                            secondaryIconOnly = tabSettings.secondaryItems == null,
+                        ),
                     )
                 }
-            }.map {
-                it.toImmutableList()
             }
         object {
             val tabs = tabs
@@ -687,9 +697,18 @@ private fun accountTypePresenter(accountType: AccountType) =
 @Immutable
 private data class HomeTabItem(
     val tabItem: TabItem,
-    val isSecondary: Boolean,
     val tabState: TabState = TabState(),
 )
+
+@Immutable
+private data class HomeTabState(
+    val primary: ImmutableList<HomeTabItem>,
+    val secondary: ImmutableList<HomeTabItem>,
+    val secondaryIconOnly: Boolean = false,
+) {
+    val all: ImmutableList<HomeTabItem>
+        get() = (primary + secondary).toImmutableList()
+}
 
 internal class TabState {
     private val callbacks = mutableListOf<() -> Unit>()

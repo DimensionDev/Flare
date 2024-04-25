@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -118,7 +117,6 @@ private val blockElementName =
     )
 
 context (RichTextScope, Element)
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RenderElement(context: RenderContext) {
     // check if element is a block element

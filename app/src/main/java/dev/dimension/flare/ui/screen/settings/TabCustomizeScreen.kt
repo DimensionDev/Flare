@@ -383,6 +383,7 @@ fun TabIcon(
     icon: IconType,
     title: TitleType,
     modifier: Modifier = Modifier,
+    iconOnly: Boolean = false,
 ) {
     when (icon) {
         is IconType.Avatar -> {
@@ -414,22 +415,7 @@ fun TabIcon(
         }
 
         is IconType.Mixed -> {
-            val userState by producePresenter(key = "$accountType:${icon.userKey}") {
-                remember(accountType, icon.userKey) {
-                    UserPresenter(
-                        accountType,
-                        icon.userKey,
-                    )
-                }.invoke()
-            }
-            Box(
-                modifier = modifier,
-            ) {
-                userState.user.onSuccess {
-                    AvatarComponent(it.avatarUrl, size = 24.dp)
-                }.onLoading {
-                    AvatarComponent(null, size = 24.dp, modifier = Modifier.placeholder(true))
-                }
+            if (iconOnly) {
                 Icon(
                     imageVector = icon.icon.toIcon(),
                     contentDescription =
@@ -437,13 +423,40 @@ fun TabIcon(
                             is TitleType.Localized -> stringResource(id = title.resId)
                             is TitleType.Text -> title.content
                         },
-                    modifier =
-                        Modifier
-                            .size(12.dp)
-                            .align(Alignment.BottomEnd)
-                            .background(MaterialTheme.colorScheme.background, shape = CircleShape)
-                            .padding(2.dp),
+                    modifier = modifier,
                 )
+            } else {
+                val userState by producePresenter(key = "$accountType:${icon.userKey}") {
+                    remember(accountType, icon.userKey) {
+                        UserPresenter(
+                            accountType,
+                            icon.userKey,
+                        )
+                    }.invoke()
+                }
+                Box(
+                    modifier = modifier,
+                ) {
+                    userState.user.onSuccess {
+                        AvatarComponent(it.avatarUrl, size = 24.dp)
+                    }.onLoading {
+                        AvatarComponent(null, size = 24.dp, modifier = Modifier.placeholder(true))
+                    }
+                    Icon(
+                        imageVector = icon.icon.toIcon(),
+                        contentDescription =
+                            when (title) {
+                                is TitleType.Localized -> stringResource(id = title.resId)
+                                is TitleType.Text -> title.content
+                            },
+                        modifier =
+                            Modifier
+                                .size(12.dp)
+                                .align(Alignment.BottomEnd)
+                                .background(MaterialTheme.colorScheme.background, shape = CircleShape)
+                                .padding(2.dp),
+                    )
+                }
             }
         }
     }

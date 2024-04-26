@@ -1187,6 +1187,7 @@ private fun ProfileMeidasPreview(
                                                             it
                                                         }
                                                     },
+                                            showCountdown = false,
                                         )
                                         Box(
                                             modifier =
@@ -1283,6 +1284,7 @@ private fun ProfileMeidasPreview(
                                                         it
                                                     }
                                                 },
+                                        showCountdown = false,
                                     )
                                     Box(
                                         modifier =

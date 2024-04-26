@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
@@ -722,6 +723,25 @@ private fun StatusCardComponent(
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
+    if (appearanceSettings.compatLinkPreview) {
+        CompatCard(
+            card = card,
+            modifier = modifier,
+        )
+    } else {
+        ExpandedCard(
+            card = card,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun ExpandedCard(
+    card: UiCard,
+    modifier: Modifier = Modifier,
+) {
+    val appearanceSettings = LocalAppearanceSettings.current
     val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
@@ -764,6 +784,64 @@ private fun StatusCardComponent(
                             Modifier
                                 .alpha(MediumAlpha),
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CompatCard(
+    card: UiCard,
+    modifier: Modifier = Modifier,
+) {
+    val uriHandler = LocalUriHandler.current
+    Column(
+        modifier = modifier,
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        uriHandler.openUri(card.url)
+                    },
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                ),
+        ) {
+            Row {
+                card.media?.let {
+                    MediaItem(
+                        media = it,
+                        modifier =
+                            Modifier
+                                .size(72.dp),
+                    )
+                }
+                Column(
+                    modifier =
+                        Modifier
+                            .padding(8.dp),
+                ) {
+                    Text(
+                        text = card.title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    card.description?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier
+                                    .alpha(MediumAlpha),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         }

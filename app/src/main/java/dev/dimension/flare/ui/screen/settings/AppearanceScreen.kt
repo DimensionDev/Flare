@@ -70,13 +70,14 @@ import org.koin.compose.koinInject
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun AnimatedVisibilityScope.AppearanceRoute(
-    navigator: ProxyDestinationsNavigator,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
-    AppearanceScreen(
-        onBack = navigator::navigateUp,
-    )
+internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
+    AnimatedVisibility(visible = true) {
+        SharedTransitionScope {
+            AppearanceScreen(
+                onBack = navigator::navigateUp,
+            )
+        }
+    }
 }
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
@@ -437,6 +438,32 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                             }
                         },
                 )
+                AnimatedVisibility(visible = appearanceSettings.showLinkPreview) {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_compat_link_previews))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_compat_link_previews_description))
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = appearanceSettings.compatLinkPreview,
+                                onCheckedChange = {
+                                    state.updateSettings {
+                                        copy(compatLinkPreview = it)
+                                    }
+                                },
+                            )
+                        },
+                        modifier =
+                            Modifier.clickable {
+                                state.updateSettings {
+                                    copy(compatLinkPreview = !compatLinkPreview)
+                                }
+                            },
+                    )
+                }
                 ListItem(
                     headlineContent = {
                         Text(text = stringResource(id = R.string.settings_appearance_show_media))

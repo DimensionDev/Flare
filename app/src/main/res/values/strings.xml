@@ -242,6 +242,8 @@
     <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
     <string name="settings_appearance_show_link_previews">Show link previews</string>
     <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
+    <string name="settings_appearance_compat_link_previews">Compat link previews</string>
+    <string name="settings_appearance_compat_link_previews_description">Show link previews in compat mode in the status</string>
 
     <string name="settings_appearance_mastodon_show_visibility">Show visibility</string>
     <string name="settings_appearance_mastodon_show_visibility_description">Show visibility in the status</string>

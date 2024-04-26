@@ -24,7 +24,7 @@ ktorfit = "1.13.0"
 ktor = "2.3.10"
 reorderable = "1.5.2"
 stately = "2.0.7"
-twitter-parser = "0.3.5"
+twitter-parser = "0.4.1"
 molecule = "1.4.2"
 accompanist = "0.34.0"
 compose-destinations = "2.1.0-beta01"
@@ -112,7 +112,9 @@ coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil"
 apng = { group = "com.github.penfeizhou.android.animation", name = "apng", version.ref = "apng-android" }
 awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", version.ref = "apng-android" }
 vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.1.0" }
-zoomable-image-coil = { group = "me.saket.telephoto", name = "zoomable", version = "0.10.0" }
+zoomable-image = { group = "me.saket.telephoto", name = "zoomable-image", version = "0.10.0" }
+sub-sampling-image = { group = "me.saket.telephoto", name = "sub-sampling-image", version = "0.10.0" }
+zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.1" }
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
@@ -127,6 +129,7 @@ swiper = { group = "com.github.tlaster", name = "swiper", version = "0.7.1" }
 molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", version.ref = "molecule" }
 
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 
 nestedScrollView = "com.github.Tlaster:NestedScrollView:1.0.1"
 
@@ -173,8 +176,8 @@ navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json"]
 koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
-coil = ["coil", "coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated", "coil-network-ktor", "zoomable-image-coil"]
-accompanist = ["accompanist-permissions"]
+coil = ["coil", "coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated", "coil-network-ktor", "zoomable-image", "sub-sampling-image"]
+accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
 compose-destinations = ["compose-destinations"]
 compose-richtext = ["compose-richtext-ui", "compose-richtext-ui-material3"]
 sqldelight = ["sqldelight-coroutines-extensions"]

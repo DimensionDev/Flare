@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -56,6 +57,7 @@ fun VideoPlayer(
     showControls: Boolean = false,
     keepScreenOn: Boolean = false,
     aspectRatio: Float? = null,
+    contentScale: ContentScale = ContentScale.Crop,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     factory: ProgressiveMediaSource.Factory = koinInject(),
@@ -70,6 +72,7 @@ fun VideoPlayer(
             ) {
                 NetworkImage(
                     model = previewUri,
+                    contentScale = contentScale,
                     contentDescription = contentDescription,
                     modifier =
                         Modifier
@@ -149,9 +152,11 @@ fun VideoPlayer(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
-                    if (aspectRatio == null) {
+//                    if (aspectRatio == null) {
+                    if (contentScale == ContentScale.Crop) {
                         this.resizeMode = RESIZE_MODE_ZOOM
                     }
+//                    }
                     this.keepScreenOn = keepScreenOn
                     if (onClick != null) {
                         setOnClickListener {

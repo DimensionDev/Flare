@@ -8,7 +8,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,9 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil3.compose.rememberAsyncImagePainter
 import coil3.imageLoader
-import coil3.request.ImageRequest
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -70,6 +67,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.VideoPlayer
+import dev.dimension.flare.ui.component.ZoomableCoil3Image
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
@@ -86,9 +84,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.ZoomableContentLocation
+import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
-import me.saket.telephoto.zoomable.zoomable
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
@@ -208,9 +205,9 @@ private fun StatusMediaScreen(
                                 }
                             } ?: it
                         },
-                    ) {
+                    ) { index ->
                         state.medias.onSuccess { medias ->
-                            when (val media = medias[it]) {
+                            when (val media = medias[index]) {
                                 is UiMedia.Audio ->
                                     VideoPlayer(
                                         uri = media.url,
@@ -239,15 +236,19 @@ private fun StatusMediaScreen(
                                         onClick = {
                                             state.setShowUi(!state.showUi)
                                         },
-                                        aspectRatio = media.aspectRatio,
+//                                                aspectRatio = media.aspectRatio,
                                         onLongClick = {
                                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                             state.setShowMenu(true)
                                         },
+                                        contentScale = ContentScale.Fit,
                                     )
 
                                 is UiMedia.Image -> {
                                     ImageItem(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize(),
                                         url = media.url,
                                         previewUrl = media.previewUrl,
                                         description = media.description,
@@ -273,7 +274,7 @@ private fun StatusMediaScreen(
                                         onClick = {
                                             state.setShowUi(!state.showUi)
                                         },
-                                        aspectRatio = media.aspectRatio,
+//                                                aspectRatio = media.aspectRatio,
                                         showControls = true,
                                         keepScreenOn = true,
                                         muted = false,
@@ -281,6 +282,7 @@ private fun StatusMediaScreen(
                                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                             state.setShowMenu(true)
                                         },
+                                        contentScale = ContentScale.Fit,
                                     )
                             }
                         }.onLoading {
@@ -292,6 +294,9 @@ private fun StatusMediaScreen(
                                     onClick = { /*TODO*/ },
                                     onLongClick = { /*TODO*/ },
                                     setLockPager = state::setLockPager,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize(),
                                 )
                             } else {
                                 Box(
@@ -428,11 +433,12 @@ private fun StatusMediaScreen(
 @Composable
 private fun ImageItem(
     url: String,
-    previewUrl: String?,
+    previewUrl: String,
     description: String?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     setLockPager: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val zoomableState =
         rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
@@ -441,38 +447,19 @@ private fun ImageItem(
             setLockPager(it > 0.01f)
         } ?: setLockPager(false)
     }
-    val painter =
-        rememberAsyncImagePainter(
-            model =
-                ImageRequest.Builder(LocalContext.current)
-                    .data(url)
-                    .placeholderMemoryCacheKey(previewUrl)
-                    .build(),
-        )
-    LaunchedEffect(painter.intrinsicSize) {
-        zoomableState.setContentLocation(
-            ZoomableContentLocation.scaledInsideAndCenterAligned(
-                painter.intrinsicSize,
-            ),
-        )
-    }
-    Image(
-        painter = painter,
+
+    ZoomableCoil3Image(
+        model = url,
+        placeholderMemoryCacheKey = previewUrl,
         contentDescription = description,
-        contentScale = ContentScale.Inside,
-        alignment = Alignment.Center,
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .zoomable(
-                    zoomableState,
-                    onClick = {
-                        onClick.invoke()
-                    },
-                    onLongClick = {
-                        onLongClick.invoke()
-                    },
-                ),
+        state = rememberZoomableImageState(zoomableState),
+        modifier = modifier,
+        onClick = {
+            onClick.invoke()
+        },
+        onLongClick = {
+            onLongClick.invoke()
+        },
     )
 }
 

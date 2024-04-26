@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -172,6 +173,7 @@ fun MediaItem(
     modifier: Modifier = Modifier,
     keepAspectRatio: Boolean = true,
     showCountdown: Boolean = true,
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
     Box(
@@ -184,6 +186,7 @@ fun MediaItem(
                 NetworkImage(
                     model = media.previewUrl,
                     contentDescription = media.description,
+                    contentScale = contentScale,
                     modifier =
                         Modifier
                             .fillMaxSize()
@@ -209,6 +212,7 @@ fun MediaItem(
                     }
                 if (shouldPlay) {
                     VideoPlayer(
+                        contentScale = contentScale,
                         uri = media.url,
                         muted = true,
                         previewUri = media.thumbnailUrl,
@@ -234,6 +238,7 @@ fun MediaItem(
                                 contentAlignment = Alignment.Center,
                             ) {
                                 NetworkImage(
+                                    contentScale = contentScale,
                                     model = media.thumbnailUrl,
                                     contentDescription = media.description,
                                     modifier =
@@ -281,6 +286,7 @@ fun MediaItem(
                     )
                 } else {
                     NetworkImage(
+                        contentScale = contentScale,
                         model = media.thumbnailUrl,
                         contentDescription = media.description,
                         modifier =
@@ -319,6 +325,7 @@ fun MediaItem(
 
             is UiMedia.Gif ->
                 VideoPlayer(
+                    contentScale = contentScale,
                     uri = media.url,
                     muted = true,
                     previewUri = media.previewUrl,
@@ -344,6 +351,7 @@ fun MediaItem(
                         contentAlignment = Alignment.Center,
                     ) {
                         NetworkImage(
+                            contentScale = contentScale,
                             model = media.previewUrl,
                             contentDescription = media.description,
                             modifier =

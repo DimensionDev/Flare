@@ -8,7 +8,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,8 +29,8 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -46,13 +45,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import coil3.imageLoader
 import coil3.request.ImageRequest
@@ -73,6 +72,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.model.onLoading
@@ -102,7 +102,7 @@ import org.koin.compose.koinInject
         ),
     ],
 )
-fun StatusMediaRoute(
+internal fun StatusMediaRoute(
     statusKey: MicroBlogKey,
     index: Int,
     preview: String?,
@@ -123,12 +123,11 @@ fun StatusMediaRoute(
 }
 
 @OptIn(
-    ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
 )
 @Composable
-internal fun StatusMediaScreen(
+private fun StatusMediaScreen(
     statusKey: MicroBlogKey,
     accountType: AccountType,
     index: Int,
@@ -150,6 +149,7 @@ internal fun StatusMediaScreen(
             accountType = accountType,
         )
     }
+
     BackHandler(state.showUi) {
         state.setShowUi(false)
     }
@@ -174,22 +174,42 @@ internal fun StatusMediaScreen(
                         Modifier
                             .fillMaxSize(),
                 ) {
-                    state.medias.onSuccess { medias ->
-                        val pagerState =
-                            rememberPagerState(
-                                initialPage = index,
-                                pageCount = {
-                                    medias.size
-                                },
-                            )
-                        LaunchedEffect(pagerState.currentPage) {
-                            state.setWithVideoPadding(medias[pagerState.currentPage] is UiMedia.Video)
-                            state.setCurrentPage(pagerState.currentPage)
+                    val pagerState =
+                        rememberPagerState(
+                            initialPage = index,
+                            pageCount = {
+                                when (val medias = state.medias) {
+                                    is UiState.Error -> 1
+                                    is UiState.Loading -> 1
+                                    is UiState.Success -> medias.data.size
+                                }
+                            },
+                        )
+                    LaunchedEffect(pagerState.currentPage) {
+                        state.medias.onSuccess {
+                            state.setWithVideoPadding(it[pagerState.currentPage] is UiMedia.Video)
                         }
-                        HorizontalPager(
-                            state = pagerState,
-                            userScrollEnabled = !state.lockPager,
-                        ) {
+                        state.setCurrentPage(pagerState.currentPage)
+                    }
+                    HorizontalPager(
+                        state = pagerState,
+                        userScrollEnabled = !state.lockPager,
+                        key = {
+                            when (val medias = state.medias) {
+                                is UiState.Error -> preview
+                                is UiState.Loading -> preview
+                                is UiState.Success -> {
+                                    when (val item = medias.data[it]) {
+                                        is UiMedia.Audio -> item.previewUrl
+                                        is UiMedia.Gif -> item.previewUrl
+                                        is UiMedia.Image -> item.previewUrl
+                                        is UiMedia.Video -> item.thumbnailUrl
+                                    }
+                                }
+                            } ?: it
+                        },
+                    ) {
+                        state.medias.onSuccess { medias ->
                             when (val media = medias[it]) {
                                 is UiMedia.Audio ->
                                     VideoPlayer(
@@ -227,46 +247,18 @@ internal fun StatusMediaScreen(
                                     )
 
                                 is UiMedia.Image -> {
-                                    val zoomableState =
-                                        rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
-                                    LaunchedEffect(zoomableState.zoomFraction) {
-                                        zoomableState.zoomFraction?.let {
-                                            state.setLockPager(it > 0.01f)
-                                        } ?: state.setLockPager(false)
-                                    }
-                                    val painter =
-                                        rememberAsyncImagePainter(
-                                            model =
-                                                ImageRequest.Builder(LocalContext.current)
-                                                    .data(media.url)
-                                                    .placeholderMemoryCacheKey(media.previewUrl)
-                                                    .build(),
-                                        )
-                                    LaunchedEffect(painter.intrinsicSize) {
-                                        zoomableState.setContentLocation(
-                                            ZoomableContentLocation.scaledInsideAndCenterAligned(
-                                                painter.intrinsicSize,
-                                            ),
-                                        )
-                                    }
-                                    Image(
-                                        painter = painter,
-                                        contentDescription = media.description,
-                                        contentScale = ContentScale.Inside,
-                                        alignment = Alignment.Center,
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .zoomable(
-                                                    zoomableState,
-                                                    onClick = {
-                                                        state.setShowUi(!state.showUi)
-                                                    },
-                                                    onLongClick = {
-                                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        state.setShowMenu(true)
-                                                    },
-                                                ),
+                                    ImageItem(
+                                        url = media.url,
+                                        previewUrl = media.previewUrl,
+                                        description = media.description,
+                                        onClick = {
+                                            state.setShowUi(!state.showUi)
+                                        },
+                                        onLongClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            state.setShowMenu(true)
+                                        },
+                                        setLockPager = state::setLockPager,
                                     )
                                 }
 
@@ -291,71 +283,62 @@ internal fun StatusMediaScreen(
                                         },
                                     )
                             }
-                        }
-                        if (pagerState.pageCount > 1) {
-                            AnimatedVisibility(
-                                visible = !state.lockPager,
-                                enter = slideInVertically { it },
-                                exit = slideOutVertically { it },
-                                modifier =
-                                    Modifier
-                                        .wrapContentHeight()
-                                        .fillMaxWidth()
-                                        .align(Alignment.BottomCenter),
-                            ) {
-                                Row(
+                        }.onLoading {
+                            if (preview != null) {
+                                ImageItem(
+                                    url = preview,
+                                    previewUrl = preview,
+                                    description = null,
+                                    onClick = { /*TODO*/ },
+                                    onLongClick = { /*TODO*/ },
+                                    setLockPager = state::setLockPager,
+                                )
+                            } else {
+                                Box(
                                     modifier =
                                         Modifier
-                                            .padding(bottom = 8.dp)
-                                            .systemBarsPadding(),
-                                    horizontalArrangement = Arrangement.Center,
-                                ) {
-                                    repeat(pagerState.pageCount) { iteration ->
-                                        val color =
-                                            if (pagerState.currentPage == iteration) {
-                                                MaterialTheme.colorScheme.primary
-                                            } else {
-                                                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                                            }
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .padding(2.dp)
-                                                    .clip(CircleShape)
-                                                    .background(color)
-                                                    .size(8.dp),
-                                        )
-                                    }
-                                }
+                                            .aspectRatio(1f)
+                                            .fillMaxSize()
+                                            .placeholder(true),
+                                )
                             }
                         }
-                    }.onLoading {
-                        if (preview != null) {
-                            AsyncImage(
-                                model =
-                                    ImageRequest.Builder(LocalContext.current)
-                                        .data(preview)
-                                        .memoryCacheKey(preview)
-                                        .build(),
-                                contentDescription = null,
+                    }
+                    if (pagerState.pageCount > 1) {
+                        AnimatedVisibility(
+                            visible = !state.lockPager,
+                            enter = slideInVertically { it },
+                            exit = slideOutVertically { it },
+                            modifier =
+                                Modifier
+                                    .wrapContentHeight()
+                                    .fillMaxWidth()
+                                    .align(Alignment.BottomCenter),
+                        ) {
+                            Row(
                                 modifier =
                                     Modifier
-                                        .fillMaxSize(),
-                            )
-                            LinearProgressIndicator(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .align(Alignment.BottomCenter),
-                            )
-                        } else {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .aspectRatio(1f)
-                                        .fillMaxSize()
-                                        .placeholder(true),
-                            )
+                                        .padding(bottom = 8.dp)
+                                        .systemBarsPadding(),
+                                horizontalArrangement = Arrangement.Center,
+                            ) {
+                                repeat(pagerState.pageCount) { iteration ->
+                                    val color =
+                                        if (pagerState.currentPage == iteration) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                        }
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .padding(2.dp)
+                                                .clip(CircleShape)
+                                                .background(color)
+                                                .size(8.dp),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -395,6 +378,7 @@ internal fun StatusMediaScreen(
                         },
                     ) {
                         ListItem(
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             headlineContent = {
                                 Text(text = stringResource(R.string.media_menu_save))
                             },
@@ -439,6 +423,57 @@ internal fun StatusMediaScreen(
             }
         }
     }
+}
+
+@Composable
+private fun ImageItem(
+    url: String,
+    previewUrl: String?,
+    description: String?,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    setLockPager: (Boolean) -> Unit,
+) {
+    val zoomableState =
+        rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
+    LaunchedEffect(zoomableState.zoomFraction) {
+        zoomableState.zoomFraction?.let {
+            setLockPager(it > 0.01f)
+        } ?: setLockPager(false)
+    }
+    val painter =
+        rememberAsyncImagePainter(
+            model =
+                ImageRequest.Builder(LocalContext.current)
+                    .data(url)
+                    .placeholderMemoryCacheKey(previewUrl)
+                    .build(),
+        )
+    LaunchedEffect(painter.intrinsicSize) {
+        zoomableState.setContentLocation(
+            ZoomableContentLocation.scaledInsideAndCenterAligned(
+                painter.intrinsicSize,
+            ),
+        )
+    }
+    Image(
+        painter = painter,
+        contentDescription = description,
+        contentScale = ContentScale.Inside,
+        alignment = Alignment.Center,
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .zoomable(
+                    zoomableState,
+                    onClick = {
+                        onClick.invoke()
+                    },
+                    onLongClick = {
+                        onLongClick.invoke()
+                    },
+                ),
+    )
 }
 
 @Composable

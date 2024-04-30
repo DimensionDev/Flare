@@ -202,7 +202,8 @@ internal class Resolver(
                                 ResolveResult(
                                     placeholder = it?.asDrawable(resources)?.asPainter(),
                                     delegate = resolved.delegate,
-                                    crossfadeDuration = Duration.ZERO, // resolved.crossfadeDuration
+                                    // resolved.crossfadeDuration
+                                    crossfadeDuration = Duration.ZERO,
                                 )
                         },
                     )
@@ -213,7 +214,8 @@ internal class Resolver(
         resolved =
             ResolveResult(
                 placeholder = resolved.placeholder,
-                crossfadeDuration = Duration.ZERO, // result.crossfadeDuration(),
+                // result.crossfadeDuration(),
+                crossfadeDuration = Duration.ZERO,
                 delegate =
                     if (result is SuccessResult && imageSource != null) {
                         ZoomableImageSource.SubSamplingDelegate(

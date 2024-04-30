@@ -36,7 +36,7 @@ internal suspend fun SubSamplingImageSource.canBeSubSampled(): Boolean {
 context(Resolver)
 private fun ResourceImageSource.isVectorDrawable(): Boolean =
     TypedValue().apply {
-        request.context.resources.getValue(id, this, /* resolveRefs = */ true)
+        request.context.resources.getValue(id, this, true)
     }.string.endsWith(".xml")
 
 context(Resolver)

@@ -113,7 +113,7 @@ apng = { group = "com.github.penfeizhou.android.animation", name = "apng", versi
 awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", version.ref = "apng-android" }
 vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.1.0" }
 zoomable-image = { group = "me.saket.telephoto", name = "zoomable-image", version = "0.11.2" }
-sub-sampling-image = { group = "me.saket.telephoto", name = "sub-sampling-image", version = "0.10.0" }
+sub-sampling-image = { group = "me.saket.telephoto", name = "sub-sampling-image", version = "0.11.2" }
 zoomable = { group = "com.mxalbert.zoomable", name = "zoomable", version = "1.6.1" }
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }

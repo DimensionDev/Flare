@@ -72,6 +72,7 @@ struct QuotedStatus: View {
                 },
                 sensitive: xqt.sensitive
             )
+        case .xQTNotification(let xqtNotification): EmptyView()
         }
     }
 }

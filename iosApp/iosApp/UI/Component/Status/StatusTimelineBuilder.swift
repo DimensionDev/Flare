@@ -124,6 +124,8 @@ struct StatusItemView: View {
             BlueskyNotificationComponent(data: blueskyNotification)
         case .xQT(let xqt):
             XQTStatusComponent(xqt: xqt, event: xqtEvent)
+        case .xQTNotification(let xqtNotification):
+            VStack{}
         }
     }
 }

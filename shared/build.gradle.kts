@@ -65,14 +65,13 @@ kotlin {
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
-                implementation(libs.paging.common)
+                api(libs.paging.common)
                 implementation(libs.ktorfit.lib)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
                 implementation(libs.uuid)
                 implementation(libs.napier)
                 implementation(libs.kotlin.codepoints.deluxe)
-                api(libs.paging.compose.common)
                 implementation(libs.ktml)
                 implementation(libs.mfm.multiplatform)
                 api(libs.bluesky)
@@ -83,6 +82,8 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation(libs.sqldelight.android.driver)
+                implementation(project.dependencies.platform(libs.compose.bom))
+                implementation(libs.compose.foundation)
             }
         }
         val appleMain by getting {

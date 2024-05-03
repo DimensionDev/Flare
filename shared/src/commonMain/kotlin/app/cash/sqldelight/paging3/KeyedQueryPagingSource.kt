@@ -15,11 +15,8 @@
  */
 package app.cash.sqldelight.paging3
 
-import app.cash.paging.PagingSourceLoadParams
-import app.cash.paging.PagingSourceLoadResult
-import app.cash.paging.PagingSourceLoadResultError
-import app.cash.paging.PagingSourceLoadResultPage
-import app.cash.paging.PagingState
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.SuspendingTransacter
 import app.cash.sqldelight.Transacter
@@ -47,10 +44,10 @@ internal class KeyedQueryPagingSource<Key : Any, RowType : Any>(
         return boundaries.getOrNull(keyIndex)
     }
 
-    override suspend fun load(params: PagingSourceLoadParams<Key>): PagingSourceLoadResult<Key, RowType> {
+    override suspend fun load(params: PagingSource.LoadParams<Key>): PagingSource.LoadResult<Key, RowType> {
         return withContext(context) {
             try {
-                val getPagingSourceLoadResult: TransactionCallbacks.() -> PagingSourceLoadResult<Key, RowType> = {
+                val getPagingSourceLoadResult: TransactionCallbacks.() -> PagingSource.LoadResult<Key, RowType> = {
                     val boundaries =
                         pageBoundaries
                             ?: pageBoundariesProvider(params.key, params.loadSize.toLong())
@@ -69,7 +66,7 @@ internal class KeyedQueryPagingSource<Key : Any, RowType : Any>(
                             .also { currentQuery = it }
                             .executeAsList()
 
-                    PagingSourceLoadResultPage(
+                    PagingSource.LoadResult.Page(
                         data = results,
                         prevKey = previousKey,
                         nextKey = nextKey,
@@ -81,7 +78,7 @@ internal class KeyedQueryPagingSource<Key : Any, RowType : Any>(
                 }
             } catch (e: Exception) {
                 if (e is IllegalArgumentException) throw e
-                PagingSourceLoadResultError<Key, RowType>(e)
+                PagingSource.LoadResult.Error<Key, RowType>(e)
             }
         }
     }

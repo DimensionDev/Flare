@@ -18,6 +18,7 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.allAccountsPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
@@ -53,11 +54,35 @@ class ComposePresenter(
                 selectedAccounts.add(it)
             }
         }
+        val replyState =
+            status?.let { status ->
+                remember(status.statusKey) {
+                    StatusPresenter(accountType = accountType, statusKey = status.statusKey)
+                }.body().status
+            }
         val allUsers =
             accounts.flatMap { data ->
-                accountState.map { current ->
+                accountState.flatMap { current ->
+                    replyState?.map {
+                        current to
+                            listOf(
+                                when (it) {
+                                    is UiStatus.Mastodon -> PlatformType.Mastodon
+                                    is UiStatus.Misskey -> PlatformType.Misskey
+                                    is UiStatus.XQT -> PlatformType.xQt
+                                    is UiStatus.Bluesky -> PlatformType.Bluesky
+                                    is UiStatus.BlueskyNotification -> PlatformType.Bluesky
+                                    is UiStatus.MastodonNotification -> PlatformType.Mastodon
+                                    is UiStatus.MisskeyNotification -> PlatformType.Misskey
+                                    is UiStatus.XQTNotification -> PlatformType.xQt
+                                },
+                            )
+                    } ?: UiState.Success(current to PlatformType.entries.toList())
+                }.map { (current, platforms) ->
                     data.sortedBy {
                         it.accountKey != current.accountKey
+                    }.filter {
+                        it.platformType in platforms
                     }.map { account ->
                         accountServiceProvider(accountType = AccountType.Specific(accountKey = account.accountKey))
                             .flatMap { service ->
@@ -83,7 +108,7 @@ class ComposePresenter(
             }
         val enableCrossPost =
             allUsers.map {
-                it.size > 1 && status == null
+                it.size > 1 // && status == null
             }
 
 //        val serviceState = accountServiceProvider(accountType = accountType)
@@ -105,12 +130,6 @@ class ComposePresenter(
                 }
             } ?: UiState.Error(IllegalStateException("Visibility not supported"))
 
-        val replyState =
-            status?.let { status ->
-                remember(status.statusKey) {
-                    StatusPresenter(accountType = accountType, statusKey = status.statusKey)
-                }.body().status
-            }
         val emojiState =
             services.takeIf {
                 it.size == 1

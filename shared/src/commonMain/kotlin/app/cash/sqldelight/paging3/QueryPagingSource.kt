@@ -15,8 +15,7 @@
  */
 package app.cash.sqldelight.paging3
 
-import app.cash.paging.PagingConfig
-import app.cash.paging.PagingSource
+import androidx.paging.PagingSource
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.TransacterBase
 import app.cash.sqldelight.db.QueryResult

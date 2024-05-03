@@ -14,7 +14,7 @@ compose-bom = "2024.04.00-alpha02"
 compose-compiler = "1.5.13"
 ksp = "1.9.23-1.0.20"
 cash-paging = "3.3.0-alpha02-0.5.1"
-paging = "3.3.0-alpha02"
+paging = "3.3.0-rc01"
 navigation = "2.8.0-alpha08"
 kotlinx-datetime = "0.5.0"
 kotlinx-collections-immutable = "0.3.7"
@@ -63,10 +63,11 @@ lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-ru
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "dev.chrisbanes.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-compiler = { group = "androidx.compose.compiler", name = "compiler", version.ref = "compose-compiler" }
-paging-compose-common = { module = "app.cash.paging:paging-compose-common", version.ref = "cash-paging" }
+#paging-compose-common = { module = "app.cash.paging:paging-compose-common", version.ref = "cash-paging" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
+compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }

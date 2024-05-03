@@ -20,7 +20,7 @@ internal fun TabSplashScreen(
 ) {
     LaunchedEffect(Unit) {
         navigator.navigate(direction = args.direction) {
-            popUpTo(route = TabSplashScreenDestination.route) {
+            popUpTo(TabSplashScreenDestination) {
                 inclusive = true
             }
         }

@@ -11,6 +11,7 @@ import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.notification.ListNotificationsNotification
 import dev.dimension.flare.common.jsonObjectOrNull
+import dev.dimension.flare.data.datasource.bluesky.jsonElement
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
@@ -40,7 +41,7 @@ internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
                     host = accountKey.host,
                 ),
             accountKey = accountKey,
-            content = record.jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
+            content = record.jsonElement().jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
             indexedAt = indexedAt,
             repostBy = (reason as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
             quote = findQuote(accountKey, this),
@@ -86,7 +87,7 @@ internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
                 host = accountKey.host,
             ),
         accountKey = accountKey,
-        content = record.jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
+        content = record.jsonElement().jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
         indexedAt = indexedAt,
         repostBy = null,
         quote = findQuote(accountKey, this),
@@ -179,7 +180,7 @@ private fun toUi(
                         id = record.value.uri.atUri,
                         host = accountKey.host,
                     ),
-                content = record.value.value.jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
+                content = record.value.value.jsonElement().jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
                 indexedAt = record.value.indexedAt,
                 repostBy = null,
                 quote = null,

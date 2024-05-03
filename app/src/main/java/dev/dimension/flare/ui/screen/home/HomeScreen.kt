@@ -79,12 +79,12 @@ import com.ramcosta.composedestinations.generated.destinations.TabSplashScreenDe
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
-import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.Direction
 import com.ramcosta.composedestinations.spec.NavHostGraphSpec
 import com.ramcosta.composedestinations.spec.Route
 import com.ramcosta.composedestinations.utils.composable
 import com.ramcosta.composedestinations.utils.dialogComposable
+import com.ramcosta.composedestinations.utils.toDestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.NotificationTabItem
@@ -269,13 +269,14 @@ internal fun HomeScreen(
                                 },
                                 selected = currentRoute == SettingsRouteDestination.route,
                                 onClick = {
-                                    navController.navigate(direction = SettingsRouteDestination) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                                    navController
+                                        .navigate(SettingsRouteDestination.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
                                     scope.launch {
                                         drawerState.close()
                                     }
@@ -318,7 +319,7 @@ internal fun HomeScreen(
                             FloatingActionButton(
                                 onClick = {
                                     currentTab?.let {
-                                        navController.navigate(
+                                        navController.toDestinationsNavigator().navigate(
                                             direction =
                                                 ComposeRouteDestination(
                                                     it.account,
@@ -405,13 +406,14 @@ internal fun HomeScreen(
                             item(
                                 selected = currentRoute == SettingsRouteDestination.route,
                                 onClick = {
-                                    navController.navigate(direction = SettingsRouteDestination) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                                    navController
+                                        .navigate(SettingsRouteDestination.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
                                 },
                                 icon = {
                                     Icon(
@@ -507,7 +509,7 @@ private fun ColumnScope.DrawerHeader(
             ExtendedFloatingActionButton(
                 onClick = {
                     currentTab?.let {
-                        navController.navigate(
+                        navController.toDestinationsNavigator().navigate(
                             direction =
                                 ComposeRouteDestination(
                                     it.account,

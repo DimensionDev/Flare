@@ -25,6 +25,7 @@ import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.database.app.AppDatabase
@@ -63,7 +64,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
@@ -74,6 +77,7 @@ import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
+import sh.christian.ozone.api.model.JsonContent
 
 @OptIn(ExperimentalPagingApi::class)
 class BlueskyDataSource(
@@ -335,7 +339,7 @@ class BlueskyDataSource(
                             ?.firstOrNull()
                     }?.let { item ->
                         val root =
-                            item.record.jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
+                            item.record.jsonElement().jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
                                 ?.jsonObjectOrNull?.let { root ->
                                     StrongRef(
                                         uri = AtUri(root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri),
@@ -364,7 +368,7 @@ class BlueskyDataSource(
             CreateRecordRequest(
                 repo = Did(did = data.account.accountKey.id),
                 collection = Nsid("app.bsky.feed.post"),
-                record = json.encodeToJsonElement(post),
+                record = json.encodeToJsonElement(post).jsonContent(),
             ),
         )
     }
@@ -457,7 +461,7 @@ class BlueskyDataSource(
                                             put("uri", data.uri)
                                         },
                                     )
-                                },
+                                }.jsonContent(),
                         ),
                     ).requireResponse()
                 updateStatusUseCase<StatusContent.Bluesky>(
@@ -570,7 +574,7 @@ class BlueskyDataSource(
                                             put("uri", data.uri)
                                         },
                                     )
-                                },
+                                }.jsonContent(),
                         ),
                     ).requireResponse()
                 updateStatusUseCase<StatusContent.Bluesky>(
@@ -697,7 +701,7 @@ class BlueskyDataSource(
                             put("\$type", "app.bsky.graph.follow")
                             put("createdAt", Clock.System.now().toString())
                             put("subject", userKey.id)
-                        },
+                        }.jsonContent(),
                 ),
             )
         }.onFailure {
@@ -731,7 +735,7 @@ class BlueskyDataSource(
                             put("\$type", "app.bsky.graph.block")
                             put("createdAt", Clock.System.now().toString())
                             put("subject", userKey.id)
-                        },
+                        }.jsonContent(),
                 ),
             )
         }.onFailure {
@@ -899,3 +903,7 @@ class BlueskyDataSource(
         )
     }
 }
+
+fun JsonElement.jsonContent(): JsonContent = JSON.decodeFromJsonElement(this)
+
+fun JsonContent.jsonElement(): JsonElement = JSON.encodeToJsonElement(this)

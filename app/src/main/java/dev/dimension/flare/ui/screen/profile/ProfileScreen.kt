@@ -55,6 +55,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -73,6 +74,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
@@ -473,6 +475,10 @@ private fun ProfileScreen(
     RegisterTabCallback(tabState = tabState, lazyListState = listState)
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val windowInfo = currentWindowAdaptiveInfo()
+    val windowSize =
+        with(LocalDensity.current) {
+            currentWindowSize().toSize().toDpSize()
+        }
     val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
     FlareScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -585,8 +591,8 @@ private fun ProfileScreen(
         Row {
             if (bigScreen) {
                 val width =
-                    when (windowInfo.windowSizeClass.widthDp) {
-                        in 840..1024 -> 332.dp
+                    when (windowSize.width) {
+                        in 840.dp..1024.dp -> 332.dp
                         else -> 432.dp
                     }
                 Column(

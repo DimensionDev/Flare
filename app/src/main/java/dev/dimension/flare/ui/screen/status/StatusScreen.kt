@@ -14,7 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
@@ -34,6 +37,7 @@ import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -88,7 +92,8 @@ internal fun StatusScreen(
         },
     ) {
         RefreshContainer(
-            onRefresh = state.state::refresh,
+            onRefresh = state::refresh,
+            isRefreshing = state.isRefreshing,
             indicatorPadding = it,
             content = {
                 LazyStatusVerticalStaggeredGrid(
@@ -115,6 +120,8 @@ private fun statusPresenter(
     accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
+    val scope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
     val state =
         remember(statusKey) {
             StatusContextPresenter(accountType = accountType, statusKey = statusKey)
@@ -123,5 +130,14 @@ private fun statusPresenter(
     object {
         val state = state
         val statusEvent = statusEvent
+        val isRefreshing = isRefreshing
+
+        fun refresh() {
+            scope.launch {
+                isRefreshing = true
+                state.refresh()
+                isRefreshing = false
+            }
+        }
     }
 }

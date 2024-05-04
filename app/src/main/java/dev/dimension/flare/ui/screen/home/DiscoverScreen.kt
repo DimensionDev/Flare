@@ -122,6 +122,7 @@ internal fun DiscoverScreen(
             Modifier
                 .fillMaxSize(),
         indicatorPadding = contentPadding,
+        isRefreshing = false,
         onRefresh = {
         },
         content = {

@@ -180,7 +180,8 @@ internal fun TimelineScreen(
             modifier =
                 Modifier
                     .fillMaxSize(),
-            onRefresh = state::refresh,
+            onRefresh = state::refreshSync,
+            isRefreshing = state.isRefreshing,
             indicatorPadding = contentPadding,
             content = {
                 LazyStatusVerticalStaggeredGrid(
@@ -231,6 +232,8 @@ private fun timelinePresenter(
     tabItem: TimelineTabItem,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
+    val scope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
     val state = remember(tabItem.account) { tabItem.createPresenter() }.invoke()
     val accountState =
         remember(tabItem.account) {
@@ -261,9 +264,18 @@ private fun timelinePresenter(
     object : UserState by accountState, TimelineState by state {
         val statusEvent = statusEvent
         val showNewToots = showNewToots
+        val isRefreshing = isRefreshing
 
         fun onNewTootsShown() {
             showNewToots = false
+        }
+
+        fun refreshSync() {
+            scope.launch {
+                isRefreshing = true
+                state.refresh()
+                isRefreshing = false
+            }
         }
     }
 }

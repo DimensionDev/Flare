@@ -16,12 +16,13 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -78,7 +79,6 @@ internal fun AnimatedVisibilityScope.NotificationRoute(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3AdaptiveApi::class,
     ExperimentalSharedTransitionApi::class,
 )
 @Composable
@@ -127,7 +127,8 @@ private fun NotificationScreen(
     ) { contentPadding ->
         RefreshContainer(
             indicatorPadding = contentPadding,
-            onRefresh = state.state::refresh,
+            onRefresh = state::refresh,
+            isRefreshing = state.isRefreshing,
             content = {
                 LazyStatusVerticalStaggeredGrid(
                     state = lazyListState,
@@ -202,10 +203,21 @@ private fun notificationPresenter(
     accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
+    val scope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
     val accountState = remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
     val state = remember { NotificationPresenter(accountType = accountType) }.invoke()
     object : UserState by accountState {
         val state = state
         val statusEvent = statusEvent
+        val isRefreshing = isRefreshing
+
+        fun refresh() {
+            scope.launch {
+                isRefreshing = true
+                state.refresh()
+                isRefreshing = false
+            }
+        }
     }
 }

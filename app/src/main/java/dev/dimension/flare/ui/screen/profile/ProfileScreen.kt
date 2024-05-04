@@ -62,6 +62,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -120,6 +121,7 @@ import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresen
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.screen.home.TabState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.launch
 import moe.tlaster.ktml.dom.Element
 import org.koin.compose.koinInject
 import kotlin.math.max
@@ -643,7 +645,8 @@ private fun ProfileScreen(
             }
             RefreshContainer(
                 modifier = Modifier.fillMaxSize(),
-                onRefresh = state.state::refresh,
+                onRefresh = state::refresh,
+                isRefreshing = state.isRefreshing,
                 indicatorPadding = it + contentPadding,
                 content = {
                     LazyStatusVerticalStaggeredGrid(
@@ -1357,6 +1360,8 @@ private fun profilePresenter(
     accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
+    val scope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
     val state =
         remember(userKey) {
             ProfilePresenter(
@@ -1371,9 +1376,18 @@ private fun profilePresenter(
         val state = state
         val statusEvent = statusEvent
         val showMoreMenus = showMoreMenus
+        val isRefreshing = isRefreshing
 
         fun setShowMoreMenus(value: Boolean) {
             showMoreMenus = value
+        }
+
+        fun refresh() {
+            scope.launch {
+                isRefreshing = true
+                state.refresh()
+                isRefreshing = false
+            }
         }
     }
 }

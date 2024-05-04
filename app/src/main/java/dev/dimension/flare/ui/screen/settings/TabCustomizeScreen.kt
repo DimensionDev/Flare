@@ -85,7 +85,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
-import sh.calvin.reorderable.rememberReorderableLazyColumnState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
@@ -138,7 +138,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
     ) {
         val lazyListState = rememberLazyListState()
         val reorderableLazyColumnState =
-            rememberReorderableLazyColumnState(lazyListState) { from, to ->
+            rememberReorderableLazyListState(lazyListState) { from, to ->
                 state.moveTab(from.key, to.key)
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             }
@@ -169,7 +169,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                     SecondaryTabItemState -> {
                         stickyHeader(key = SecondaryTabItemState.key) {
                             ReorderableItem(
-                                reorderableLazyListState = reorderableLazyColumnState,
+                                state = reorderableLazyColumnState,
                                 key = SecondaryTabItemState.key,
                             ) {
                                 ListItem(

@@ -246,8 +246,8 @@ private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
                         .sharedBounds(
                             rememberSharedContentState(key = "status-${item?.statusKey}"),
                             animatedVisibilityScope = this@AnimatedVisibilityScope,
-                            enter = fadeIn(), // + scaleInSharedContentToBounds(ContentScale.Fit, Alignment.TopStart),
-                            exit = fadeOut(), // + scaleOutSharedContentToBounds(ContentScale.Fit, Alignment.TopStart),
+                            enter = fadeIn(),
+                            exit = fadeOut(),
                             renderInOverlayDuringTransition = false,
                         )
                         .background(MaterialTheme.colorScheme.background),

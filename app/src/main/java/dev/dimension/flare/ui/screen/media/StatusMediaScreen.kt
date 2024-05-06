@@ -6,6 +6,9 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -90,6 +93,7 @@ import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     style = FullScreenDialogStyle::class,
@@ -107,21 +111,27 @@ internal fun StatusMediaRoute(
     accountType: AccountType,
 ) {
     SetDialogDestinationToEdgeToEdge()
-    StatusMediaScreen(
-        statusKey = statusKey,
-        accountType = accountType,
-        index = index,
-        onDismiss = navigator::navigateUp,
-        preview = preview,
-        toStatus = {
-            navigator.navigate(StatusRouteDestination(statusKey, accountType))
-        },
-    )
+    AnimatedVisibility(true) {
+        SharedTransitionScope {
+            StatusMediaScreen(
+                statusKey = statusKey,
+                accountType = accountType,
+                index = index,
+                onDismiss = navigator::navigateUp,
+                preview = preview,
+                toStatus = {
+                    navigator.navigate(StatusRouteDestination(statusKey, accountType))
+                },
+            )
+        }
+    }
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
+    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 private fun StatusMediaScreen(

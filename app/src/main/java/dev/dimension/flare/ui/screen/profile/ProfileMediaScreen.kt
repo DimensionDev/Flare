@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -118,6 +119,7 @@ private fun ProfileMediaScreen(
                             showCountdown = false,
                             modifier =
                                 Modifier
+                                    .clipToBounds()
                                     .clickable {
                                         onItemClicked(
                                             item.status.statusKey,

@@ -29,7 +29,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
+import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Github
+import compose.icons.fontawesomeicons.brands.Telegram
+import compose.icons.fontawesomeicons.solid.Language
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -86,7 +89,10 @@ private fun AboutScreen(onBack: () -> Unit) {
                 text = stringResource(id = R.string.settings_about_description),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.alpha(MediumAlpha),
+                modifier =
+                    Modifier
+                        .alpha(MediumAlpha)
+                        .padding(horizontal = 16.dp),
             )
             Text(
                 text = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
@@ -111,6 +117,50 @@ private fun AboutScreen(onBack: () -> Unit) {
                     Icon(
                         imageVector = FontAwesomeIcons.Brands.Github,
                         contentDescription = "GitHub",
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.settings_about_telegram))
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(id = R.string.settings_about_telegram_description),
+                        modifier = Modifier.alpha(MediumAlpha),
+                    )
+                },
+                modifier =
+                    Modifier.clickable {
+                        uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
+                    },
+                leadingContent = {
+                    Icon(
+                        imageVector = FontAwesomeIcons.Brands.Telegram,
+                        contentDescription = stringResource(id = R.string.settings_about_telegram),
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.settings_about_localization))
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(id = R.string.settings_about_localization_description),
+                        modifier = Modifier.alpha(MediumAlpha),
+                    )
+                },
+                modifier =
+                    Modifier.clickable {
+                        uriHandler.openUri("https://crowdin.com/project/flareapp")
+                    },
+                leadingContent = {
+                    Icon(
+                        imageVector = FontAwesomeIcons.Solid.Language,
+                        contentDescription = stringResource(id = R.string.settings_about_localization),
                         modifier = Modifier.size(24.dp),
                     )
                 },

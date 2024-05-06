@@ -6,6 +6,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -213,6 +215,7 @@ fun Quote(
 
 @OptIn(
     ExperimentalMaterial3Api::class,
+    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 private fun ComposeScreen(
@@ -599,14 +602,18 @@ private fun ComposeScreen(
 
             state.state.replyState?.let { replyState ->
                 replyState.onSuccess { state ->
-                    UiStatusQuoted(
-                        status = state,
-                        onMediaClick = {},
-                        modifier =
-                            Modifier
-                                .padding(horizontal = screenHorizontalPadding)
-                                .fillMaxWidth(),
-                    )
+                    AnimatedVisibility(true) {
+                        SharedTransitionScope {
+                            UiStatusQuoted(
+                                status = state,
+                                onMediaClick = {},
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .fillMaxWidth(),
+                            )
+                        }
+                    }
                 }
             }
         }

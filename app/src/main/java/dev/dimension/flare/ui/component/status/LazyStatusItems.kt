@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.component.status
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -241,9 +243,12 @@ private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
                 isDetail = item?.statusKey == detailStatusKey,
                 modifier =
                     Modifier
-                        .sharedElement(
+                        .sharedBounds(
                             rememberSharedContentState(key = "status-${item?.statusKey}"),
                             animatedVisibilityScope = this@AnimatedVisibilityScope,
+                            enter = fadeIn(), // + scaleInSharedContentToBounds(ContentScale.Fit, Alignment.TopStart),
+                            exit = fadeOut(), // + scaleOutSharedContentToBounds(ContentScale.Fit, Alignment.TopStart),
+                            renderInOverlayDuringTransition = false,
                         )
                         .background(MaterialTheme.colorScheme.background),
             )

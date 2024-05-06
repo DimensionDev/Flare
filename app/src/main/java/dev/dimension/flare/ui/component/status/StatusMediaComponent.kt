@@ -7,6 +7,9 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -34,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -54,6 +56,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlin.time.Duration.Companion.milliseconds
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun StatusMediaComponent(
     data: ImmutableList<UiMedia>,
@@ -81,6 +85,17 @@ internal fun StatusMediaComponent(
                         media = media,
                         modifier =
                             Modifier
+                                .sharedElement(
+                                    rememberSharedContentState(
+                                        when (media) {
+                                            is UiMedia.Image -> media.previewUrl
+                                            is UiMedia.Video -> media.thumbnailUrl
+                                            is UiMedia.Audio -> media.previewUrl ?: media.url
+                                            is UiMedia.Gif -> media.previewUrl
+                                        },
+                                    ),
+                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                )
                                 .clickable {
                                     onMediaClick(media)
                                 },
@@ -176,19 +191,44 @@ fun MediaItem(
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
-    Box(
-        modifier =
-            modifier
-                .clipToBounds(),
-    ) {
-        when (media) {
-            is UiMedia.Image -> {
-                NetworkImage(
-                    model = media.previewUrl,
-                    contentDescription = media.description,
+    when (media) {
+        is UiMedia.Image -> {
+            NetworkImage(
+                model = media.previewUrl,
+                contentDescription = media.description,
+                contentScale = contentScale,
+                modifier =
+                    modifier
+                        .fillMaxSize()
+                        .let {
+                            if (keepAspectRatio) {
+                                it.aspectRatio(
+                                    media.aspectRatio,
+                                    matchHeightConstraintsFirst = media.aspectRatio > 1f,
+                                )
+                            } else {
+                                it
+                            }
+                        },
+            )
+        }
+
+        is UiMedia.Video -> {
+            val wifiState by wifiState()
+            val shouldPlay =
+                remember(appearanceSettings.videoAutoplay, wifiState) {
+                    appearanceSettings.videoAutoplay == VideoAutoplay.ALWAYS ||
+                        (appearanceSettings.videoAutoplay == VideoAutoplay.WIFI && wifiState)
+                }
+            if (shouldPlay) {
+                VideoPlayer(
                     contentScale = contentScale,
+                    uri = media.url,
+                    muted = true,
+                    previewUri = media.thumbnailUrl,
+                    contentDescription = media.description,
                     modifier =
-                        Modifier
+                        modifier
                             .fillMaxSize()
                             .let {
                                 if (keepAspectRatio) {
@@ -200,91 +240,64 @@ fun MediaItem(
                                     it
                                 }
                             },
-                )
-            }
-
-            is UiMedia.Video -> {
-                val wifiState by wifiState()
-                val shouldPlay =
-                    remember(appearanceSettings.videoAutoplay, wifiState) {
-                        appearanceSettings.videoAutoplay == VideoAutoplay.ALWAYS ||
-                            (appearanceSettings.videoAutoplay == VideoAutoplay.WIFI && wifiState)
-                    }
-                if (shouldPlay) {
-                    VideoPlayer(
-                        contentScale = contentScale,
-                        uri = media.url,
-                        muted = true,
-                        previewUri = media.thumbnailUrl,
-                        contentDescription = media.description,
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .let {
-                                    if (keepAspectRatio) {
-                                        it.aspectRatio(
-                                            media.aspectRatio,
-                                            matchHeightConstraintsFirst = media.aspectRatio > 1f,
-                                        )
-                                    } else {
-                                        it
-                                    }
-                                },
-                        loadingPlaceholder = {
-                            Box(
+                    loadingPlaceholder = {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            NetworkImage(
+                                contentScale = contentScale,
+                                model = media.thumbnailUrl,
+                                contentDescription = media.description,
                                 modifier =
                                     Modifier
                                         .fillMaxSize(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                NetworkImage(
-                                    contentScale = contentScale,
-                                    model = media.thumbnailUrl,
-                                    contentDescription = media.description,
+                            )
+                        }
+                        CircularProgressIndicator(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(24.dp)
+                                    .size(24.dp),
+                            color = Color.White,
+                        )
+                    },
+                    remainingTimeContent =
+                        if (showCountdown) {
+                            {
+                                Box(
                                     modifier =
                                         Modifier
-                                            .fillMaxSize(),
-                                )
-                            }
-                            CircularProgressIndicator(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(24.dp)
-                                        .size(24.dp),
-                                color = Color.White,
-                            )
-                        },
-                        remainingTimeContent =
-                            if (showCountdown) {
-                                {
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .padding(16.dp)
-                                                .background(
-                                                    Color.Black.copy(alpha = 0.5f),
-                                                    shape = MaterialTheme.shapes.small,
-                                                )
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                                .align(Alignment.BottomStart),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Text(
-                                            text =
-                                                remember(it) {
-                                                    it.milliseconds.humanize()
-                                                },
-                                            color = Color.White,
-                                            style = MaterialTheme.typography.bodySmall,
-                                        )
-                                    }
+                                            .padding(16.dp)
+                                            .background(
+                                                Color.Black.copy(alpha = 0.5f),
+                                                shape = MaterialTheme.shapes.small,
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            .align(Alignment.BottomStart),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text =
+                                            remember(it) {
+                                                it.milliseconds.humanize()
+                                            },
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
                                 }
-                            } else {
-                                null
-                            },
-                    )
-                } else {
+                            }
+                        } else {
+                            null
+                        },
+                )
+            } else {
+                Box(
+                    modifier = modifier,
+                ) {
                     NetworkImage(
                         contentScale = contentScale,
                         model = media.thumbnailUrl,
@@ -314,61 +327,62 @@ fun MediaItem(
                     )
                 }
             }
+        }
 
-            is UiMedia.Audio -> {
-                AudioPlayer(
-                    uri = media.url,
-                    previewUri = media.previewUrl,
-                    contentDescription = media.description,
-                )
-            }
+        is UiMedia.Audio -> {
+            AudioPlayer(
+                uri = media.url,
+                previewUri = media.previewUrl,
+                contentDescription = media.description,
+                modifier = modifier,
+            )
+        }
 
-            is UiMedia.Gif ->
-                VideoPlayer(
-                    contentScale = contentScale,
-                    uri = media.url,
-                    muted = true,
-                    previewUri = media.previewUrl,
-                    contentDescription = media.description,
+        is UiMedia.Gif ->
+            VideoPlayer(
+                contentScale = contentScale,
+                uri = media.url,
+                muted = true,
+                previewUri = media.previewUrl,
+                contentDescription = media.description,
+                modifier =
+                    modifier
+                        .fillMaxSize()
+                        .let {
+                            if (keepAspectRatio) {
+                                it.aspectRatio(
+                                    media.aspectRatio,
+                                    matchHeightConstraintsFirst = media.aspectRatio > 1f,
+                                )
+                            } else {
+                                it
+                            }
+                        },
+            ) {
+                Box(
                     modifier =
                         Modifier
-                            .fillMaxSize()
-                            .let {
-                                if (keepAspectRatio) {
-                                    it.aspectRatio(
-                                        media.aspectRatio,
-                                        matchHeightConstraintsFirst = media.aspectRatio > 1f,
-                                    )
-                                } else {
-                                    it
-                                }
-                            },
+                            .fillMaxSize(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
+                    NetworkImage(
+                        contentScale = contentScale,
+                        model = media.previewUrl,
+                        contentDescription = media.description,
                         modifier =
                             Modifier
                                 .fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        NetworkImage(
-                            contentScale = contentScale,
-                            model = media.previewUrl,
-                            contentDescription = media.description,
-                            modifier =
-                                Modifier
-                                    .fillMaxSize(),
-                        )
-                    }
-                    CircularProgressIndicator(
-                        modifier =
-                            Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(24.dp)
-                                .size(24.dp),
-                        color = Color.White,
                     )
                 }
-        }
+                CircularProgressIndicator(
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(24.dp)
+                            .size(24.dp),
+                    color = Color.White,
+                )
+            }
     }
 }
 

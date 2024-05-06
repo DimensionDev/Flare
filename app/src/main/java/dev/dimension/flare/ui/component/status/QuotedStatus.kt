@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +29,8 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
 import moe.tlaster.ktml.dom.Element
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun UiStatusQuoted(
     status: UiStatus,
@@ -112,6 +117,8 @@ internal fun UiStatusQuoted(
     }
 }
 
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun QuotedStatus(
     avatarUrl: String,

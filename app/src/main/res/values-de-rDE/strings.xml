@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Anmelden</string>
   <string name="navigate_back">Zurück navigieren</string>
-  <string name="confirm">Bestätigen</string>
-  <string name="cancel">Abbrechen</string>
   <string name="home_tab_home_title">Zuhause</string>
   <string name="home_tab_notifications_title">Benachrichtigungen</string>
   <string name="home_tab_me_title">Ich</string>
@@ -240,7 +238,6 @@
   <string name="local_filter_for_notification">In Benachrichtigung filtern</string>
   <string name="local_filter_for_search">Filter in der Suche</string>
   <string name="local_filter_delete">Filter löschen</string>
-  <string name="done">Fertig</string>
   <string name="delete">Löschen</string>
   <string name="status_detail_translate">Übersetzen nach %1$s</string>
   <string name="mastodon_tab_local_title">Lokal</string>

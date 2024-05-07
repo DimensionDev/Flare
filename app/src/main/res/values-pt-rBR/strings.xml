@@ -163,6 +163,10 @@
   <string name="quick_menu_add_account">Adicionar conta</string>
   <string name="settings_about_description">O derradeiro cliente descentralizado de rede social de código-fonte aberto de última geração para Android.</string>
   <string name="settings_about_source_code">Código fonte</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Junte-se ao nosso grupo do Telegram</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Ajude-nos a traduzir o Sinalizador</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Mostrar ações</string>
   <string name="settings_appearance_show_actions_description">Mostrar ações na parte inferior do status</string>
@@ -198,6 +202,10 @@
   <string name="settings_appearance_dynamic_theme_description">Altere o tema do aplicativo com base no papel de parede do dispositivo</string>
   <string name="settings_appearance_show_link_previews">Mostrar pré-visualizações de links</string>
   <string name="settings_appearance_show_link_previews_description">Mostrar pré-visualizações de links no status</string>
+  <string name="settings_appearance_compat_link_previews">Pré-visualizações de links compat</string>
+  <string name="settings_appearance_compat_link_previews_description">Mostrar pré-visualizações de links no modo compat no status</string>
+  <string name="settings_appearance_theme_color">Cor do tema</string>
+  <string name="settings_appearance_theme_color_description">Alterar a cor do tema do aplicativo</string>
   <string name="settings_appearance_mastodon_show_visibility">Mostrar visibilidade</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Mostrar visibilidade no estado</string>
   <string name="settings_appearance_misskey_show_visibility">Mostrar visibilidade</string>

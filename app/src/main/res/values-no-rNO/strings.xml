@@ -162,6 +162,10 @@
   <string name="quick_menu_add_account">Legg til konto</string>
   <string name="settings_about_description">Den ultimate neste generasjonen åpen AI drevet desentralisert sosial nettverksklient for Android.</string>
   <string name="settings_about_source_code">Kildekode</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Bli med i vår Telegram gruppe</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Hjelp oss å oversette Flare</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Vis handlinger</string>
   <string name="settings_appearance_show_actions_description">Vis handlinger på bunnen av statusen</string>
@@ -197,6 +201,10 @@
   <string name="settings_appearance_dynamic_theme_description">Endre appens tema basert på enhetens bakgrunnsbilde</string>
   <string name="settings_appearance_show_link_previews">Vis forhåndsvisning av lenker</string>
   <string name="settings_appearance_show_link_previews_description">Vis forhåndsvisning av link i status</string>
+  <string name="settings_appearance_compat_link_previews">Forhåndsvisninger av Compat link</string>
+  <string name="settings_appearance_compat_link_previews_description">Vis forhåndsvisning av link i komprimeringsmodus i status</string>
+  <string name="settings_appearance_theme_color">Tema farge</string>
+  <string name="settings_appearance_theme_color_description">Endre temafargen på appen</string>
   <string name="settings_appearance_mastodon_show_visibility">Vis synlighet</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Vis synlighet i status</string>
   <string name="settings_appearance_misskey_show_visibility">Vis synlighet</string>

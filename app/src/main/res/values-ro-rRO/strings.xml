@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Autentificare</string>
   <string name="navigate_back">Navighează înapoi</string>
-  <string name="confirm">Confirmare</string>
-  <string name="cancel">Anulează</string>
   <string name="home_tab_home_title">Acasă</string>
   <string name="home_tab_notifications_title">Notificări</string>
   <string name="home_tab_me_title">Eu</string>
@@ -165,6 +163,10 @@
   <string name="quick_menu_add_account">Adăugare cont</string>
   <string name="settings_about_description">Ultima generaţie open-sourced AI a alimentat un client descentralizat al reţelei sociale pentru Android.</string>
   <string name="settings_about_source_code">Cod sursă</string>
+  <string name="settings_about_telegram">Telegramă</string>
+  <string name="settings_about_telegram_description">Alătură-te grupului nostru de telegramă</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Ajută-ne să traducem Flare</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Afișare acțiuni</string>
   <string name="settings_appearance_show_actions_description">Arată acțiunile în partea de jos a stării</string>
@@ -200,6 +202,10 @@
   <string name="settings_appearance_dynamic_theme_description">Schimbă tema aplicației pe baza imaginii de fundal a dispozitivului</string>
   <string name="settings_appearance_show_link_previews">Arată previzualizările link-ului</string>
   <string name="settings_appearance_show_link_previews_description">Arată previzualizările link-ului în stare</string>
+  <string name="settings_appearance_compat_link_previews">Previzualizări link compat</string>
+  <string name="settings_appearance_compat_link_previews_description">Arată previzualizările link-ului în modul compat în stare</string>
+  <string name="settings_appearance_theme_color">Culoarea temei</string>
+  <string name="settings_appearance_theme_color_description">Schimbă culoarea aplicației pentru temă</string>
   <string name="settings_appearance_mastodon_show_visibility">Arată vizibilitatea</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Arată vizibilitatea în stare</string>
   <string name="settings_appearance_misskey_show_visibility">Arată vizibilitatea</string>
@@ -240,7 +246,6 @@
   <string name="local_filter_for_notification">Filtrare în notificare</string>
   <string name="local_filter_for_search">Filtrare în căutare</string>
   <string name="local_filter_delete">Ștergere filtru</string>
-  <string name="done">Terminat</string>
   <string name="delete">Ștergere</string>
   <string name="status_detail_translate">Tradu în %1$s</string>
   <string name="mastodon_tab_local_title">Local</string>

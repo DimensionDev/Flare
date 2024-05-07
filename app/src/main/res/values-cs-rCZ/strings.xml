@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Přihlásit se</string>
   <string name="navigate_back">Přejít zpět</string>
-  <string name="confirm">Potvrdit</string>
-  <string name="cancel">Zrušit</string>
   <string name="home_tab_home_title">Domů</string>
   <string name="home_tab_notifications_title">Oznámení</string>
   <string name="home_tab_me_title">Já</string>
@@ -165,6 +163,10 @@
   <string name="quick_menu_add_account">Přidat účet</string>
   <string name="settings_about_description">Poslední generace, otevřená AI napájená decentralizovaným klientem sociální sítě pro Android.</string>
   <string name="settings_about_source_code">Zdrojový kód</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Připojte se k naší skupině Telegram</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Pomozte nám přeložit Flare</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Zobrazit akce</string>
   <string name="settings_appearance_show_actions_description">Zobrazit akce v dolní části stavu</string>
@@ -200,6 +202,10 @@
   <string name="settings_appearance_dynamic_theme_description">Změnit motiv aplikace na základě tapety zařízení</string>
   <string name="settings_appearance_show_link_previews">Zobrazit náhledy odkazů</string>
   <string name="settings_appearance_show_link_previews_description">Zobrazit náhledy odkazů ve stavu</string>
+  <string name="settings_appearance_compat_link_previews">Zkompilovat náhledy odkazů</string>
+  <string name="settings_appearance_compat_link_previews_description">Zobrazit náhledy odkazů ve stavovém režimu kompilace</string>
+  <string name="settings_appearance_theme_color">Barva motivu</string>
+  <string name="settings_appearance_theme_color_description">Změnit barvu motivu aplikace</string>
   <string name="settings_appearance_mastodon_show_visibility">Zobrazit viditelnost</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Zobrazit viditelnost ve stavu</string>
   <string name="settings_appearance_misskey_show_visibility">Zobrazit viditelnost</string>
@@ -240,8 +246,8 @@
   <string name="local_filter_for_notification">Filtrovat v oznámení</string>
   <string name="local_filter_for_search">Filtrovat ve vyhledávání</string>
   <string name="local_filter_delete">Odstranit filtr</string>
-  <string name="done">Hotovo</string>
   <string name="delete">Vymazat</string>
+  <string name="status_detail_translate">Přeložit do %1$s</string>
   <string name="mastodon_tab_local_title">Místní</string>
   <string name="mastodon_tab_public_title">Veřejnost</string>
   <string name="home_tab_featured_title">Doporučené</string>

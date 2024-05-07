@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Conectar-se</string>
   <string name="navigate_back">Navegar para trás</string>
-  <string name="confirm">Confirmar</string>
-  <string name="cancel">cancelar</string>
   <string name="home_tab_home_title">Residencial</string>
   <string name="home_tab_notifications_title">notificações</string>
   <string name="home_tab_me_title">Eu</string>
@@ -240,7 +238,6 @@
   <string name="local_filter_for_notification">Filtrar na notificação</string>
   <string name="local_filter_for_search">Filtro em busca</string>
   <string name="local_filter_delete">Excluir filtro</string>
-  <string name="done">Concluído</string>
   <string name="delete">excluir</string>
   <string name="status_detail_translate">Traduzir para %1$s</string>
   <string name="mastodon_tab_local_title">Localização</string>

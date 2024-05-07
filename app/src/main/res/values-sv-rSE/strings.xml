@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Inloggning</string>
   <string name="navigate_back">Navigera tillbaka</string>
-  <string name="confirm">Bekräfta</string>
-  <string name="cancel">Avbryt</string>
   <string name="home_tab_home_title">Hem</string>
   <string name="home_tab_notifications_title">Aviseringar</string>
   <string name="home_tab_me_title">Jag</string>
@@ -240,7 +238,6 @@
   <string name="local_filter_for_notification">Filtrera i avisering</string>
   <string name="local_filter_for_search">Filtrera i sök</string>
   <string name="local_filter_delete">Ta bort filter</string>
-  <string name="done">Klar</string>
   <string name="delete">Radera</string>
   <string name="status_detail_translate">Översätt till %1$s</string>
   <string name="mastodon_tab_local_title">Lokal</string>

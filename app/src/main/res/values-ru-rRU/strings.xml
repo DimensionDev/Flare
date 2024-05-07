@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Логин</string>
   <string name="navigate_back">Назад</string>
-  <string name="confirm">Подтвердить</string>
-  <string name="cancel">Отмена</string>
   <string name="home_tab_home_title">Домашний</string>
   <string name="home_tab_notifications_title">Уведомления</string>
   <string name="home_tab_me_title">Я</string>
@@ -238,7 +236,6 @@
   <string name="local_filter_for_notification">Фильтр в уведомлениях</string>
   <string name="local_filter_for_search">Фильтр в поиске</string>
   <string name="local_filter_delete">Удалить фильтр</string>
-  <string name="done">Готово</string>
   <string name="delete">Удалить</string>
   <string name="status_detail_translate">Перевести на %1$s</string>
   <string name="mastodon_tab_local_title">Локальный</string>

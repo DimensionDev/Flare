@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Se connecter</string>
   <string name="navigate_back">Revenir en arrière</string>
-  <string name="confirm">Valider</string>
-  <string name="cancel">Abandonner</string>
   <string name="home_tab_home_title">Domicile</string>
   <string name="home_tab_notifications_title">Notifications</string>
   <string name="home_tab_me_title">Moi</string>
@@ -165,6 +163,10 @@
   <string name="quick_menu_add_account">Ajouter un compte</string>
   <string name="settings_about_description">Le client décentralisé de réseau social décentralisé pour Android de la prochaine génération à source ouverte.</string>
   <string name="settings_about_source_code">Code source</string>
+  <string name="settings_about_telegram">Télégramme</string>
+  <string name="settings_about_telegram_description">Rejoignez notre groupe Telegram</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Aidez-nous à traduire Flare</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Afficher les actions</string>
   <string name="settings_appearance_show_actions_description">Afficher les actions en bas du statut</string>
@@ -200,6 +202,10 @@
   <string name="settings_appearance_dynamic_theme_description">Changer le thème de l\'application en fonction du fond d\'écran de l\'appareil</string>
   <string name="settings_appearance_show_link_previews">Afficher les aperçus des liens</string>
   <string name="settings_appearance_show_link_previews_description">Afficher les aperçus des liens dans le statut</string>
+  <string name="settings_appearance_compat_link_previews">Aperçus des liens de comparaison</string>
+  <string name="settings_appearance_compat_link_previews_description">Afficher les aperçus des liens en mode compat dans le statut</string>
+  <string name="settings_appearance_theme_color">Couleur du thème</string>
+  <string name="settings_appearance_theme_color_description">Changer la couleur du thème de l\'application</string>
   <string name="settings_appearance_mastodon_show_visibility">Afficher la visibilité</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Afficher la visibilité dans le statut</string>
   <string name="settings_appearance_misskey_show_visibility">Afficher la visibilité</string>
@@ -240,7 +246,6 @@
   <string name="local_filter_for_notification">Filtrer dans la notification</string>
   <string name="local_filter_for_search">Filtrer dans la recherche</string>
   <string name="local_filter_delete">Supprimer le filtre</string>
-  <string name="done">Fait</string>
   <string name="delete">Supprimez</string>
   <string name="status_detail_translate">Traduire en %1$s</string>
   <string name="mastodon_tab_local_title">Locale</string>

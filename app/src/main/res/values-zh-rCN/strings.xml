@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">登录</string>
   <string name="navigate_back">返回</string>
-  <string name="confirm">确认</string>
-  <string name="cancel">取消</string>
   <string name="home_tab_home_title">首页</string>
   <string name="home_tab_notifications_title">通知</string>
   <string name="home_tab_me_title">我</string>
@@ -165,6 +163,10 @@
   <string name="quick_menu_add_account">添加账户</string>
   <string name="settings_about_description">下一代终极开源、由AI驱动的去中心化社交网络客户端，专为安卓系统设计。</string>
   <string name="settings_about_source_code">源代码</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">加入Telegram群组</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">帮助我们翻译Flare</string>
   <string name="settings_appearance_generic">通用</string>
   <string name="settings_appearance_show_actions">显示操作</string>
   <string name="settings_appearance_show_actions_description">在状态的底部显示操作</string>
@@ -200,6 +202,10 @@
   <string name="settings_appearance_dynamic_theme_description">根据设备的壁纸更改应用的主题</string>
   <string name="settings_appearance_show_link_previews">显示链接预览</string>
   <string name="settings_appearance_show_link_previews_description">在状态中显示链接预览</string>
+  <string name="settings_appearance_compat_link_previews">简化链接预览</string>
+  <string name="settings_appearance_compat_link_previews_description">使用简化链接预览</string>
+  <string name="settings_appearance_theme_color">主题颜色</string>
+  <string name="settings_appearance_theme_color_description">更改应用的主题颜色</string>
   <string name="settings_appearance_mastodon_show_visibility">显示可见性</string>
   <string name="settings_appearance_mastodon_show_visibility_description">在状态中显示可见性</string>
   <string name="settings_appearance_misskey_show_visibility">显示可见性</string>
@@ -240,7 +246,6 @@
   <string name="local_filter_for_notification">在通知中过滤</string>
   <string name="local_filter_for_search">在搜索中过滤</string>
   <string name="local_filter_delete">删除过滤器</string>
-  <string name="done">完成</string>
   <string name="delete">删除</string>
   <string name="status_detail_translate">翻译为 %1$s</string>
   <string name="mastodon_tab_local_title">本地</string>

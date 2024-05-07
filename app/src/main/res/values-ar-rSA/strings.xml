@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">تسجيل الدخول</string>
   <string name="navigate_back">التنقل إلى الوراء</string>
-  <string name="confirm">تأكيد</string>
-  <string name="cancel">إلغاء</string>
   <string name="home_tab_home_title">المنزل</string>
   <string name="home_tab_notifications_title">الإشعارات</string>
   <string name="home_tab_me_title">أنا</string>
@@ -163,6 +161,10 @@
   <string name="quick_menu_add_account">إضافة حساب</string>
   <string name="settings_about_description">الجيل التالي النهائي مفتوح المصدر AI قام بتشغيل عميل الشبكة الاجتماعية اللامركزية للأندرويد.</string>
   <string name="settings_about_source_code">الكود المصدري</string>
+  <string name="settings_about_telegram">تيليجرام</string>
+  <string name="settings_about_telegram_description">انضم إلى مجموعة تيليجرام</string>
+  <string name="settings_about_localization">كرودن</string>
+  <string name="settings_about_localization_description">ساعدنا في ترجمة الشفق</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">إظهار الإجراءات</string>
   <string name="settings_appearance_show_actions_description">إظهار الإجراءات في الجزء السفلي من الحالة</string>
@@ -198,6 +200,10 @@
   <string name="settings_appearance_dynamic_theme_description">تغيير موضوع التطبيق على أساس خلفية الجهاز</string>
   <string name="settings_appearance_show_link_previews">إظهار معاينات الرابط</string>
   <string name="settings_appearance_show_link_previews_description">إظهار معاينات الرابط في الحالة</string>
+  <string name="settings_appearance_compat_link_previews">معاينات رابط البوصلة</string>
+  <string name="settings_appearance_compat_link_previews_description">إظهار معاينات الرابط في وضع البوصلة في الحالة</string>
+  <string name="settings_appearance_theme_color">لون السمة</string>
+  <string name="settings_appearance_theme_color_description">تغيير لون السمة للتطبيق</string>
   <string name="settings_appearance_mastodon_show_visibility">إظهار الرؤية</string>
   <string name="settings_appearance_mastodon_show_visibility_description">إظهار الرؤية في الحالة</string>
   <string name="settings_appearance_misskey_show_visibility">إظهار الرؤية</string>
@@ -238,7 +244,6 @@
   <string name="local_filter_for_notification">تصفية في الإشعار</string>
   <string name="local_filter_for_search">تصفية في البحث</string>
   <string name="local_filter_delete">حذف الفلتر</string>
-  <string name="done">تم</string>
   <string name="delete">حذف</string>
   <string name="status_detail_translate">ترجم إلى %1$s</string>
   <string name="mastodon_tab_local_title">محلي</string>

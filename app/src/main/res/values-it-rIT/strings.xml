@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Accedi</string>
   <string name="navigate_back">Torna indietro</string>
-  <string name="confirm">Conferma</string>
-  <string name="cancel">Annulla</string>
   <string name="home_tab_home_title">Home</string>
   <string name="home_tab_notifications_title">Notifiche</string>
   <string name="home_tab_me_title">Io</string>
@@ -240,7 +238,6 @@
   <string name="local_filter_for_notification">Filtra nelle notifiche</string>
   <string name="local_filter_for_search">Filtra nella ricerca</string>
   <string name="local_filter_delete">Elimina Filtro</string>
-  <string name="done">Fatto</string>
   <string name="delete">Elimina</string>
   <string name="status_detail_translate">Traduci in %1$s</string>
   <string name="mastodon_tab_local_title">Locale</string>

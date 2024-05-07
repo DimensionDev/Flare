@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Είσοδος</string>
   <string name="navigate_back">Πλοήγηση πίσω</string>
-  <string name="confirm">Επιβεβαίωση</string>
-  <string name="cancel">Ακύρωση</string>
   <string name="home_tab_home_title">Αρχική</string>
   <string name="home_tab_notifications_title">Ειδοποιήσεις</string>
   <string name="home_tab_me_title">Εγώ</string>
@@ -235,7 +233,6 @@
   <string name="local_filter_for_notification">Φίλτρο στην ειδοποίηση</string>
   <string name="local_filter_for_search">Φιλτράρισμα στην αναζήτηση</string>
   <string name="local_filter_delete">Διαγραφή Φίλτρου</string>
-  <string name="done">Ολοκληρώθηκε</string>
   <string name="delete">Διαγραφή</string>
   <string name="status_detail_translate">Μετάφραση σε %1$s</string>
   <string name="mastodon_tab_local_title">Τοπικό</string>

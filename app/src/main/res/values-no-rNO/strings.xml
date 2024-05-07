@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Innlogging</string>
   <string name="navigate_back">Naviger tilbake</string>
-  <string name="confirm">Bekreft</string>
-  <string name="cancel">Avbryt</string>
   <string name="home_tab_home_title">Hjem</string>
   <string name="home_tab_notifications_title">Varsler</string>
   <string name="home_tab_me_title">Meg</string>
@@ -239,7 +237,6 @@
   <string name="local_filter_for_notification">Filtrer i varsel</string>
   <string name="local_filter_for_search">Filtrer i søk</string>
   <string name="local_filter_delete">Slett filter</string>
-  <string name="done">Ferdig</string>
   <string name="delete">Slett</string>
   <string name="status_detail_translate">Oversett til %1$s</string>
   <string name="mastodon_tab_local_title">Lokal</string>

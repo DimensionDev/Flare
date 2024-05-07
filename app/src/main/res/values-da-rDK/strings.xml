@@ -164,6 +164,9 @@
   <string name="settings_about_description">Den ultimative næste generation open-sourced AI drevet decentraliserede sociale netværk klient til Android.</string>
   <string name="settings_about_source_code">Kilde kode</string>
   <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Tilmeld dig vores Telegram gruppe</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Hjælp os med at oversætte Flare</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Vis handlinger</string>
   <string name="settings_appearance_show_actions_description">Vis handlinger i bunden af status</string>
@@ -199,6 +202,10 @@
   <string name="settings_appearance_dynamic_theme_description">Skift temaet for app\'en baseret på enhedens baggrund</string>
   <string name="settings_appearance_show_link_previews">Vis link forhåndsvisninger</string>
   <string name="settings_appearance_show_link_previews_description">Vis link forhåndsvisninger i status</string>
+  <string name="settings_appearance_compat_link_previews">Kompakt link forhåndsvisninger</string>
+  <string name="settings_appearance_compat_link_previews_description">Vis link forhåndsvisninger i compat tilstand i status</string>
+  <string name="settings_appearance_theme_color">Tema farve</string>
+  <string name="settings_appearance_theme_color_description">Skift temafarven på app\'en</string>
   <string name="settings_appearance_mastodon_show_visibility">Vis synlighed</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Vis synlighed i status</string>
   <string name="settings_appearance_misskey_show_visibility">Vis synlighed</string>

@@ -163,6 +163,10 @@
   <string name="quick_menu_add_account">Account toevoegen</string>
   <string name="settings_about_description">De ultieme volgende generatie open-sourced AI heeft gedecentraliseerde sociale netwerkclient aangedreven voor Android.</string>
   <string name="settings_about_source_code">Bron code</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Deelnemen aan onze Telegram-groep</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Help ons Flare te vertalen</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Toon acties</string>
   <string name="settings_appearance_show_actions_description">Acties weergeven onderaan de status</string>
@@ -198,6 +202,10 @@
   <string name="settings_appearance_dynamic_theme_description">Verander het thema van de app op basis van achtergrond van het apparaat</string>
   <string name="settings_appearance_show_link_previews">Toon linkvoorbeelden</string>
   <string name="settings_appearance_show_link_previews_description">Toon linkvoorbeelden in de status</string>
+  <string name="settings_appearance_compat_link_previews">Compat linkvoorbeelden</string>
+  <string name="settings_appearance_compat_link_previews_description">Toon linkvoorbeelden in compat modus in status</string>
+  <string name="settings_appearance_theme_color">Thema kleur</string>
+  <string name="settings_appearance_theme_color_description">Verander de themakleur van de app</string>
   <string name="settings_appearance_mastodon_show_visibility">Zichtbaarheid weergeven</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Zichtbaarheid in status weergeven</string>
   <string name="settings_appearance_misskey_show_visibility">Zichtbaarheid weergeven</string>

@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Login</string>
   <string name="navigate_back">Naviger tilbage</string>
-  <string name="confirm">Bekræft</string>
-  <string name="cancel">Annuller</string>
   <string name="home_tab_home_title">Hjem</string>
   <string name="home_tab_notifications_title">Notifikationer</string>
   <string name="home_tab_me_title">Mig</string>
@@ -165,6 +163,7 @@
   <string name="quick_menu_add_account">Tilføj konto</string>
   <string name="settings_about_description">Den ultimative næste generation open-sourced AI drevet decentraliserede sociale netværk klient til Android.</string>
   <string name="settings_about_source_code">Kilde kode</string>
+  <string name="settings_about_telegram">Telegram</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Vis handlinger</string>
   <string name="settings_appearance_show_actions_description">Vis handlinger i bunden af status</string>
@@ -240,7 +239,6 @@
   <string name="local_filter_for_notification">Filtrer i notifikation</string>
   <string name="local_filter_for_search">Filtrer i søgning</string>
   <string name="local_filter_delete">Slet Filter</string>
-  <string name="done">Udført</string>
   <string name="delete">Slet</string>
   <string name="status_detail_translate">Oversæt til %1$s</string>
   <string name="mastodon_tab_local_title">Lokal</string>

@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Логін</string>
   <string name="navigate_back">Перейти назад</string>
-  <string name="confirm">Підтвердити</string>
-  <string name="cancel">Скасувати</string>
   <string name="home_tab_home_title">Домашній екран</string>
   <string name="home_tab_notifications_title">Сповіщення</string>
   <string name="home_tab_me_title">Ме</string>
@@ -237,7 +235,6 @@
   <string name="local_filter_for_notification">Фільтр сповіщень</string>
   <string name="local_filter_for_search">Фільтр пошуку</string>
   <string name="local_filter_delete">Видалити фільтр</string>
-  <string name="done">Виконано</string>
   <string name="delete">Видалити</string>
   <string name="status_detail_translate">Перекласти на %1$s</string>
   <string name="mastodon_tab_local_title">Місцевий</string>

@@ -254,7 +254,7 @@
   <string name="home_tab_favorite_title">Ulubione</string>
   <string name="tab_settings_primary">Karta podstawowa</string>
   <string name="tab_settings_secondary">Karta drugorzędna</string>
-    <string name="date_format_year_month_day">dd MMM yy</string>
+  <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
-  <string name="date_format_full">dd MMM yy HH:mm</string>
+  <string name="date_format_full">dd MMM yy GG:mm</string>
 </resources>

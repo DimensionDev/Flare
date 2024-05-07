@@ -9,7 +9,6 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.misskey.api.model.NotificationType
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.humanizer.fullHumanize
 import dev.dimension.flare.ui.humanizer.humanize
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -170,11 +169,7 @@ sealed class UiStatus {
         val createdAt: Instant,
         val status: Mastodon?,
         val type: NotificationTypes,
-    ) : UiStatus() {
-        val humanizedTime by lazy {
-            createdAt.humanize()
-        }
-    }
+    ) : UiStatus()
 
     @Immutable
     data class Mastodon internal constructor(
@@ -194,14 +189,6 @@ sealed class UiStatus {
         val reblogStatus: Mastodon?,
         internal val raw: dev.dimension.flare.data.network.mastodon.api.model.Status,
     ) : UiStatus() {
-        val humanizedTime by lazy {
-            createdAt.humanize()
-        }
-
-        val expandedTime by lazy {
-            createdAt.fullHumanize()
-        }
-
         val contentToken by lazy {
             parseContent(raw, content, accountKey)
         }
@@ -256,14 +243,6 @@ sealed class UiStatus {
         val quote: Misskey?,
         val renote: Misskey?,
     ) : UiStatus() {
-        val humanizedTime: String by lazy {
-            createdAt.humanize()
-        }
-
-        val expandedTime by lazy {
-            createdAt.fullHumanize()
-        }
-
         val contentToken by lazy {
             misskeyParser.parse(content).toHtml(accountKey)
         }
@@ -319,11 +298,7 @@ sealed class UiStatus {
         val note: Misskey?,
         val type: NotificationType,
         val achievement: String?,
-    ) : UiStatus() {
-        val humanizedTime by lazy {
-            createdAt.humanize()
-        }
-    }
+    ) : UiStatus()
 
     @Immutable
     data class Bluesky(
@@ -341,14 +316,6 @@ sealed class UiStatus {
         val cid: String,
         val uri: String,
     ) : UiStatus() {
-        val humanizedTime by lazy {
-            indexedAt.humanize()
-        }
-
-        val expandedTime by lazy {
-            indexedAt.fullHumanize()
-        }
-
         val contentToken by lazy {
             blueskyParser.parse(content).toHtml(accountKey)
         }
@@ -396,9 +363,6 @@ sealed class UiStatus {
         override val itemKey: String by lazy {
             statusKey.toString() + "_${user.userKey}"
         }
-        val humanizedTime by lazy {
-            indexedAt.humanize()
-        }
     }
 
     @Immutable
@@ -445,14 +409,6 @@ sealed class UiStatus {
                     }
                 }
                 .toHtml(accountKey)
-        }
-
-        val humanizedTime by lazy {
-            createdAt.humanize()
-        }
-
-        val expandedTime by lazy {
-            createdAt.fullHumanize()
         }
 
         val canRetweet by lazy {
@@ -760,6 +716,7 @@ private fun String.trimUrl(): String {
         .removePrefix("http://")
         .removePrefix("https://")
         .removePrefix("www.")
+        .removeSuffix("/")
         .let {
             if (it.length > 30) {
                 it.substring(0, 30) + "..."

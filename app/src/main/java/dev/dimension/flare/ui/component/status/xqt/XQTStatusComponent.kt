@@ -52,6 +52,8 @@ import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusActionGroup
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
+import dev.dimension.flare.ui.model.localizedFullTime
+import dev.dimension.flare.ui.model.localizedShortTime
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -101,8 +103,8 @@ internal fun XQTStatusComponent(
         user = actualData.user,
         medias = actualData.medias,
         card = actualData.card,
-        humanizedTime = actualData.humanizedTime,
-        expandedTime = data.expandedTime,
+        humanizedTime = actualData.localizedShortTime,
+        expandedTime = data.localizedFullTime,
         isDetail = isDetail,
         poll = actualData.poll,
         headerIcon = data.retweet?.let { FontAwesomeIcons.Solid.Retweet },

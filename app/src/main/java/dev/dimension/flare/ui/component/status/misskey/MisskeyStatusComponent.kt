@@ -55,6 +55,8 @@ import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusActionGroup
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
+import dev.dimension.flare.ui.model.localizedFullTime
+import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.theme.MediumAlpha
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
@@ -126,8 +128,8 @@ internal fun MisskeyStatusComponent(
         user = actualData.user,
         medias = actualData.media,
         card = actualData.card,
-        humanizedTime = actualData.humanizedTime,
-        expandedTime = data.expandedTime,
+        humanizedTime = actualData.localizedShortTime,
+        expandedTime = data.localizedFullTime,
         isDetail = isDetail,
         sensitive = actualData.sensitive,
         quotedStatus = actualData.quote,

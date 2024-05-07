@@ -38,6 +38,8 @@ import dev.dimension.flare.ui.component.status.StatusActionButton
 import dev.dimension.flare.ui.component.status.StatusActionGroup
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
+import dev.dimension.flare.ui.model.localizedFullTime
+import dev.dimension.flare.ui.model.localizedShortTime
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -82,8 +84,8 @@ internal fun BlueskyStatusComponent(
         user = data.user,
         medias = data.medias,
         card = data.card,
-        humanizedTime = data.humanizedTime,
-        expandedTime = data.expandedTime,
+        humanizedTime = data.localizedShortTime,
+        expandedTime = data.localizedFullTime,
         isDetail = isDetail,
         quotedStatus = data.quote,
         onQuotedStatusClick = {

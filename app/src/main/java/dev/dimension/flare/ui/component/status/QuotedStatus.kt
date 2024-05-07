@@ -25,6 +25,7 @@ import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
+import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
 import moe.tlaster.ktml.dom.Element
@@ -52,7 +53,7 @@ internal fun UiStatusQuoted(
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
                 medias = status.media,
-                createdAt = status.humanizedTime,
+                createdAt = status.localizedShortTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
                 onClick = onClick,
@@ -70,7 +71,7 @@ internal fun UiStatusQuoted(
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
                 medias = status.media,
-                createdAt = status.humanizedTime,
+                createdAt = status.localizedShortTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
                 onClick = onClick,
@@ -88,7 +89,7 @@ internal fun UiStatusQuoted(
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
                 medias = status.medias,
-                createdAt = status.humanizedTime,
+                createdAt = status.localizedShortTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
                 onClick = onClick,
@@ -105,7 +106,7 @@ internal fun UiStatusQuoted(
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
                 medias = status.medias,
-                createdAt = status.humanizedTime,
+                createdAt = status.localizedShortTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
                 onClick = onClick,

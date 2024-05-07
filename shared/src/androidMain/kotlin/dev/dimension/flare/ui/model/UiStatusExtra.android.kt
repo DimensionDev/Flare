@@ -2,16 +2,19 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.LayoutDirection
+import kotlinx.datetime.Instant
 import java.text.Bidi
 
 @Immutable
 actual data class UiStatusExtra(
     val contentDirection: LayoutDirection,
+    val createdAt: Instant,
 ) {
     companion object {
         val Empty =
             UiStatusExtra(
                 contentDirection = LayoutDirection.Ltr,
+                createdAt = Instant.DISTANT_PAST,
             )
     }
 }
@@ -32,6 +35,7 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
                     } else {
                         LayoutDirection.Rtl
                     },
+                createdAt = status.createdAt,
             )
         }
 
@@ -51,6 +55,7 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
                     } else {
                         LayoutDirection.Rtl
                     },
+                createdAt = status.createdAt,
             )
         }
 
@@ -70,8 +75,10 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
                     } else {
                         LayoutDirection.Rtl
                     },
+                createdAt = status.indexedAt,
             )
         }
+
         is UiStatus.BlueskyNotification -> {
             UiStatusExtra.Empty
         }
@@ -88,6 +95,7 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
                     } else {
                         LayoutDirection.Rtl
                     },
+                createdAt = status.createdAt,
             )
         }
 

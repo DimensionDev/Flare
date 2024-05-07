@@ -250,4 +250,7 @@
   <string name="home_tab_favorite_title">Αγαπημένο</string>
   <string name="tab_settings_primary">Κύρια καρτέλα</string>
   <string name="tab_settings_secondary">Δευτερεύουσα καρτέλα</string>
+  <string name="date_format_year_month_day">dd MMM yy</string>
+  <string name="date_format_month_day">dd MMM</string>
+  <string name="date_format_full">dd MMM yy HH:mm</string>
 </resources>

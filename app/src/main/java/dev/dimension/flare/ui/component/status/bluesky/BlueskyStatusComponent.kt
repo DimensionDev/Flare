@@ -232,7 +232,7 @@ private fun RowScope.StatusFooterComponent(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Report,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.blusky_item_action_report),
                         )
                     },
                     onClick = {
@@ -250,7 +250,7 @@ private fun RowScope.StatusFooterComponent(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.blusky_item_action_delete),
                         )
                     },
                     onClick = {

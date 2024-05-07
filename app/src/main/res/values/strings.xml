@@ -3,8 +3,6 @@
 
     <string name="login_button">Login</string>
     <string name="navigate_back">Navigate back</string>
-    <string name="confirm">Confirm</string>
-    <string name="cancel">Cancel</string>
 
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifications</string>
@@ -248,6 +246,8 @@
     <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
     <string name="settings_appearance_compat_link_previews">Compat link previews</string>
     <string name="settings_appearance_compat_link_previews_description">Show link previews in compat mode in the status</string>
+    <string name="settings_appearance_theme_color">Theme color</string>
+    <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
 
     <string name="settings_appearance_mastodon_show_visibility">Show visibility</string>
     <string name="settings_appearance_mastodon_show_visibility_description">Show visibility in the status</string>
@@ -302,7 +302,6 @@
     <string name="local_filter_for_search">Filter in search</string>
     <string name="local_filter_delete">Delete Filter</string>
 
-    <string name="done">Done</string>
     <string name="delete">Delete</string>
 
     <string name="status_detail_translate">Translate to %1$s</string>

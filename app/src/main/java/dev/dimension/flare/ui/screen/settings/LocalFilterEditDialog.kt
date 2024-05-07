@@ -97,7 +97,7 @@ private fun LocalFilterEditDialog(
                     }) {
                         Icon(
                             Icons.Default.Check,
-                            contentDescription = stringResource(id = R.string.done),
+                            contentDescription = stringResource(id = android.R.string.ok),
                         )
                     }
                 },

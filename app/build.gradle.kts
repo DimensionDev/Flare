@@ -142,6 +142,8 @@ dependencies {
     debugImplementation(libs.mlkit.language.id.debug)
     implementation(projects.shared)
     implementation(libs.androidx.splash)
+    implementation(libs.materialKolor)
+    implementation(libs.colorpicker.compose)
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

@@ -71,14 +71,14 @@ fun MastodonReportDialog(
                     onBack.invoke()
                 },
             ) {
-                Text(stringResource(R.string.confirm))
+                Text(stringResource(android.R.string.ok))
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onBack,
             ) {
-                Text(stringResource(R.string.cancel))
+                Text(stringResource(android.R.string.cancel))
             }
         },
         title = {

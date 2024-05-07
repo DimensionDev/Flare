@@ -80,12 +80,12 @@ internal fun BlueskyReportStatusDialog(
                     }
                 },
             ) {
-                Text(text = stringResource(id = R.string.confirm))
+                Text(text = stringResource(id = android.R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onBack) {
-                Text(text = stringResource(id = R.string.cancel))
+                Text(text = stringResource(id = android.R.string.cancel))
             }
         },
         title = {

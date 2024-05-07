@@ -50,6 +50,7 @@ firebase-bom = "33.0.0"
 google-services = "4.4.1"
 firebase-crashlytics = "3.0.0"
 napier = "2.7.1"
+materialKolor = "1.4.4"
 
 [libraries]
 bluesky = { module = "sh.christian.ozone:bluesky", version.ref = "bluesky" }
@@ -170,6 +171,9 @@ firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-cra
 mlkit-language-id-debug = { group = "com.google.mlkit", name = "language-id", version = "17.0.5" }
 mlkit-language-id = { group = "com.google.android.gms", name = "play-services-mlkit-language-id", version = "17.0.0" }
 mlkit-translate = { group = "com.google.mlkit", name = "translate", version = "17.0.2" }
+
+materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
+colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.0.7" }
 
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout", "material-icons-extended"]

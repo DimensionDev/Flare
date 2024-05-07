@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HideSource
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
@@ -32,6 +33,7 @@ val LocalAppearanceSettings = staticCompositionLocalOf { AppearanceSettings() }
 data class AppearanceSettings(
     val theme: Theme = Theme.SYSTEM,
     val dynamicTheme: Boolean = true,
+    val colorSeed: ULong = Color.Blue.value,
     val avatarShape: AvatarShape = AvatarShape.CIRCLE,
     val showActions: Boolean = true,
     val showNumbers: Boolean = true,

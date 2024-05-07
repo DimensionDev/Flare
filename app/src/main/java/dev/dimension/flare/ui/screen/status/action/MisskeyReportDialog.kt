@@ -82,7 +82,7 @@ fun MisskeyReportDialog(
                 },
             ) {
                 Text(
-                    text = stringResource(R.string.confirm),
+                    text = stringResource(android.R.string.ok),
                 )
             }
         },
@@ -91,7 +91,7 @@ fun MisskeyReportDialog(
                 onClick = onBack,
             ) {
                 Text(
-                    text = stringResource(R.string.cancel),
+                    text = stringResource(android.R.string.cancel),
                 )
             }
         },

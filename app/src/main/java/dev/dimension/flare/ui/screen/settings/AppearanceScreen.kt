@@ -5,14 +5,18 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -43,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.ColorPickerDialogRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
@@ -75,6 +80,9 @@ internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
         SharedTransitionScope {
             AppearanceScreen(
                 onBack = navigator::navigateUp,
+                toColorPicker = {
+                    navigator.navigate(ColorPickerDialogRouteDestination)
+                },
             )
         }
     }
@@ -83,7 +91,10 @@ internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-private fun AppearanceScreen(onBack: () -> Unit) {
+private fun AppearanceScreen(
+    onBack: () -> Unit,
+    toColorPicker: () -> Unit,
+) {
     val state by producePresenter { appearancePresenter() }
     val appearanceSettings = LocalAppearanceSettings.current
     FlareScaffold(
@@ -269,6 +280,31 @@ private fun AppearanceScreen(onBack: () -> Unit) {
                                 state.updateSettings {
                                     copy(dynamicTheme = !dynamicTheme)
                                 }
+                            },
+                    )
+                }
+                AnimatedVisibility(visible = !appearanceSettings.dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_theme_color))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_theme_color_description))
+                        },
+                        trailingContent = {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary,
+                                            shape = CircleShape,
+                                        )
+                                        .size(36.dp),
+                            )
+                        },
+                        modifier =
+                            Modifier.clickable {
+                                toColorPicker.invoke()
                             },
                     )
                 }

@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.AlternateEmail
@@ -16,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.network.misskey.api.model.NotificationType
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
@@ -129,6 +132,7 @@ internal fun MisskeyNotificationComponent(
                         event.onUserClick(accountKey = data.accountKey, userKey = it, uriHandler = uriHandler)
                     },
                 )
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }

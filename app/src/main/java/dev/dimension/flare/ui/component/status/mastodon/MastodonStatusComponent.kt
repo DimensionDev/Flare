@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lock
@@ -25,7 +26,7 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -42,6 +43,9 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -169,7 +173,7 @@ internal fun MastodonStatusComponent(
         isDetail = isDetail,
         sensitive = actualData.sensitive,
         poll = actualData.poll,
-        headerIcon = data.reblogStatus?.let { Icons.Default.SyncAlt },
+        headerIcon = data.reblogStatus?.let { FontAwesomeIcons.Solid.Retweet },
         headerTextId = data.reblogStatus?.let { R.string.mastodon_item_reblogged_status },
         headerUser = data.reblogStatus?.let { data.user },
         statusActions = {
@@ -231,7 +235,7 @@ private fun RowScope.StatusFooterComponent(
         },
     )
     StatusActionButton(
-        icon = Icons.Default.SyncAlt,
+        icon = FontAwesomeIcons.Solid.Retweet,
         text = actualData.matrices.humanizedReblogCount,
         modifier =
             Modifier
@@ -283,12 +287,12 @@ private fun RowScope.StatusFooterComponent(
                     if (actualData.reaction.bookmarked) {
                         Icon(
                             imageVector = Icons.Default.BookmarkRemove,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.mastodon_item_unbookmark),
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.BookmarkAdd,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.mastodon_item_bookmark),
                         )
                     }
                 },
@@ -300,8 +304,18 @@ private fun RowScope.StatusFooterComponent(
 
             if (actualData.isFromMe) {
                 DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(id = R.string.mastodon_item_delete),
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    },
                     text = {
-                        Text(text = stringResource(id = R.string.mastodon_item_delete))
+                        Text(
+                            text = stringResource(id = R.string.mastodon_item_delete),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     },
                     onClick = {
                         closeMenu.invoke()
@@ -310,8 +324,18 @@ private fun RowScope.StatusFooterComponent(
                 )
             } else {
                 DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Report,
+                            contentDescription = stringResource(id = R.string.mastodon_item_report),
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    },
                     text = {
-                        Text(text = stringResource(id = R.string.mastodon_item_report))
+                        Text(
+                            text = stringResource(id = R.string.mastodon_item_report),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     },
                     onClick = {
                         closeMenu.invoke()

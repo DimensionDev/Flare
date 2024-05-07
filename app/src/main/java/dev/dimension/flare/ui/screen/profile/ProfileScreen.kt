@@ -556,6 +556,7 @@ private fun ProfileScreen(
                             if (!bigScreen) {
                                 TopAppBarDefaults.centerAlignedTopAppBarColors(
                                     containerColor = Color.Transparent,
+                                    scrolledContainerColor = Color.Transparent,
                                 )
                             } else {
                                 TopAppBarDefaults.centerAlignedTopAppBarColors()

@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -45,13 +44,7 @@ internal fun StatusActionButton(
     Row(
         modifier =
             modifier
-                .clickable(
-                    indication = null,
-                    interactionSource = interactionSource,
-                    onClick = onClicked,
-                    enabled = enabled,
-                )
-                .padding(4.dp),
+                .padding(vertical = 4.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
@@ -59,7 +52,9 @@ internal fun StatusActionButton(
             contentDescription = contentDescription,
             modifier =
                 Modifier
-                    .indication(
+                    .clickable(
+                        onClick = onClicked,
+                        enabled = enabled,
                         interactionSource = interactionSource,
                         indication =
                             ripple(

@@ -466,6 +466,7 @@ internal fun HomeScreen(
                         }
                         composable(SettingsRouteDestination) {
                             Router(
+                                modifier = Modifier.fillMaxSize(),
                                 navGraph = NavGraphs.root,
                                 direction = SettingsRouteDestination,
                             )

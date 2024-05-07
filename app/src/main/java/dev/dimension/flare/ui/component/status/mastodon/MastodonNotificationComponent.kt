@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AlternateEmail
@@ -11,11 +13,14 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Poll
-import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
@@ -51,7 +56,7 @@ internal fun MastodonNotificationComponent(
 
             NotificationTypes.Reblog ->
                 StatusRetweetHeaderComponent(
-                    icon = Icons.Default.SyncAlt,
+                    icon = FontAwesomeIcons.Solid.Retweet,
                     user = data.user,
                     text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status),
                 )
@@ -105,6 +110,7 @@ internal fun MastodonNotificationComponent(
                     event.onUserClick(accountKey = data.accountKey, userKey = data.user.userKey, uriHandler = uriHandler)
                 },
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

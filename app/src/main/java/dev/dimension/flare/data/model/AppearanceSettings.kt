@@ -7,12 +7,14 @@ import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HideSource
-import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,7 +59,7 @@ data class AppearanceSettings(
         ) {
             NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
             REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
-            REBLOG(R.string.swipe_action_reblog, Icons.Default.SyncAlt),
+            REBLOG(R.string.swipe_action_reblog, FontAwesomeIcons.Solid.Retweet),
             FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
             BOOKMARK(R.string.swipe_action_bookmark, Icons.Default.Bookmark),
         }
@@ -76,7 +78,7 @@ data class AppearanceSettings(
         ) {
             NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
             REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
-            RENOTE(R.string.swipe_action_renote, Icons.Default.SyncAlt),
+            RENOTE(R.string.swipe_action_renote, FontAwesomeIcons.Solid.Retweet),
             ADDREACTION(R.string.swipe_action_favourite, Icons.Default.Favorite),
         }
     }
@@ -92,7 +94,7 @@ data class AppearanceSettings(
         ) {
             NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
             REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
-            REBLOG(R.string.swipe_action_reblog, Icons.Default.SyncAlt),
+            REBLOG(R.string.swipe_action_reblog, FontAwesomeIcons.Solid.Retweet),
             FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
         }
     }
@@ -108,7 +110,7 @@ data class AppearanceSettings(
         ) {
             NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
             REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
-            REBLOG(R.string.swipe_action_reblog, Icons.Default.SyncAlt),
+            REBLOG(R.string.swipe_action_reblog, FontAwesomeIcons.Solid.Retweet),
             FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
         }
     }

@@ -7,7 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -603,10 +603,11 @@ private fun ComposeScreen(
             state.state.replyState?.let { replyState ->
                 replyState.onSuccess { state ->
                     AnimatedVisibility(true) {
-                        SharedTransitionScope {
+                        SharedTransitionLayout {
                             UiStatusQuoted(
                                 status = state,
                                 onMediaClick = {},
+                                colors = CardDefaults.cardColors(),
                                 modifier =
                                     Modifier
                                         .padding(horizontal = screenHorizontalPadding)

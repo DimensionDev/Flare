@@ -1,10 +1,10 @@
 package dev.dimension.flare.ui.component.status
 
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -243,13 +243,23 @@ private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
                 isDetail = item?.statusKey == detailStatusKey,
                 modifier =
                     Modifier
-                        .sharedBounds(
-                            rememberSharedContentState(key = "status-${item?.statusKey}"),
-                            animatedVisibilityScope = this@AnimatedVisibilityScope,
-                            enter = fadeIn(),
-                            exit = fadeOut(),
-                            renderInOverlayDuringTransition = false,
-                        )
+                        .let {
+                            if (item != null) {
+                                it.sharedBounds(
+                                    rememberSharedContentState(key = item.itemKey),
+                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                    // ANY transition will lead to the entire screen being animated to
+                                    // exit state after list -> detail -> go back -> scroll a little bit,
+                                    // I have no idea why, so just use None here
+                                    enter = EnterTransition.None,
+                                    exit = ExitTransition.None,
+                                    renderInOverlayDuringTransition = false,
+                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                                )
+                            } else {
+                                it
+                            }
+                        }
                         .background(MaterialTheme.colorScheme.background),
             )
             if (it != itemCount - 1) {

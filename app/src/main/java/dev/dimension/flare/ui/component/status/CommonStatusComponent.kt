@@ -227,7 +227,7 @@ fun CommonStatusDetailComponent(
             headerTextId = headerTextId,
             replyHandle = replyHandle,
             headerTrailing = headerTrailing,
-            statusActions = statusActions,
+            statusActions = {},
             showActions = false,
             contentFooter = {
                 Spacer(modifier = Modifier.height(4.dp))
@@ -242,13 +242,21 @@ fun CommonStatusDetailComponent(
                     LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,
                     LocalTextStyle provides MaterialTheme.typography.bodyMedium,
                 ) {
-                    Row {
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
                         statusActions.invoke(this)
                     }
                 }
             },
             beforeMedia = {
-                var enabledTranslate by remember { mutableStateOf(false) }
+                var enabledTranslate by rememberSaveable("translate-$statusKey") {
+                    mutableStateOf(false)
+                }
                 TextButton(
                     onClick = {
                         if (!enabledTranslate) {
@@ -524,6 +532,7 @@ fun CommonStatusComponent(
                         Modifier
                             .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     CompositionLocalProvider(
                         LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,

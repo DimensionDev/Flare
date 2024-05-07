@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
@@ -25,10 +26,11 @@ import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +42,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -130,7 +135,7 @@ internal fun MisskeyStatusComponent(
             event.onStatusClick(it as UiStatus.Misskey, uriHandler)
         },
         poll = actualData.poll,
-        headerIcon = currentData.renote?.let { Icons.Default.SyncAlt },
+        headerIcon = currentData.renote?.let { FontAwesomeIcons.Solid.Retweet },
         headerTextId = currentData.renote?.let { R.string.mastodon_item_reblogged_status },
         headerUser = currentData.renote?.let { currentData.user },
         statusActions = {
@@ -228,7 +233,7 @@ private fun RowScope.StatusFooterComponent(
         },
     )
     StatusActionGroup(
-        icon = Icons.Default.SyncAlt,
+        icon = FontAwesomeIcons.Solid.Retweet,
         text = actualData.matrices.humanizedReNoteCount,
         modifier =
             Modifier
@@ -242,8 +247,9 @@ private fun RowScope.StatusFooterComponent(
                 },
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Default.SyncAlt,
-                        contentDescription = null,
+                        imageVector = FontAwesomeIcons.Solid.Retweet,
+                        contentDescription = stringResource(id = R.string.misskey_item_action_renote),
+                        modifier = Modifier.size(24.dp),
                     )
                 },
                 onClick = {
@@ -260,7 +266,7 @@ private fun RowScope.StatusFooterComponent(
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.FormatQuote,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.misskey_item_action_quote),
                     )
                 },
                 onClick = {
@@ -291,15 +297,17 @@ private fun RowScope.StatusFooterComponent(
         subMenus = { closeMenu ->
             if (actualData.isFromMe) {
                 DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(id = R.string.misskey_item_action_delete),
-                        )
-                    },
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = null,
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(id = R.string.mastodon_item_delete),
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.mastodon_item_delete),
+                            color = MaterialTheme.colorScheme.error,
                         )
                     },
                     onClick = {
@@ -309,15 +317,17 @@ private fun RowScope.StatusFooterComponent(
                 )
             } else {
                 DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(id = R.string.misskey_item_action_report),
-                        )
-                    },
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = null,
+                            imageVector = Icons.Default.Report,
+                            contentDescription = stringResource(id = R.string.mastodon_item_report),
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.mastodon_item_report),
+                            color = MaterialTheme.colorScheme.error,
                         )
                     },
                     onClick = {

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
@@ -24,7 +25,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Recommend
-import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -38,6 +39,9 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -101,7 +105,7 @@ internal fun XQTStatusComponent(
         expandedTime = data.expandedTime,
         isDetail = isDetail,
         poll = actualData.poll,
-        headerIcon = data.retweet?.let { Icons.Default.SyncAlt },
+        headerIcon = data.retweet?.let { FontAwesomeIcons.Solid.Retweet },
         headerTextId = data.retweet?.let { R.string.mastodon_item_reblogged_status },
         headerUser = data.retweet?.let { data.user },
         replyHandle = actualData.replyHandle,
@@ -177,7 +181,7 @@ private fun RowScope.StatusFooterComponent(
     )
     StatusActionGroup(
         enabled = actualData.canRetweet,
-        icon = Icons.Default.SyncAlt,
+        icon = FontAwesomeIcons.Solid.Retweet,
         text = actualData.matrices.humanizedRetweetCount,
         modifier =
             Modifier
@@ -197,8 +201,9 @@ private fun RowScope.StatusFooterComponent(
                 },
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Default.SyncAlt,
-                        contentDescription = null,
+                        imageVector = FontAwesomeIcons.Solid.Retweet,
+                        contentDescription = stringResource(id = R.string.blusky_item_action_repost),
+                        modifier = Modifier.size(24.dp),
                     )
                 },
                 onClick = {
@@ -215,7 +220,7 @@ private fun RowScope.StatusFooterComponent(
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.FormatQuote,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.blusky_item_action_quote),
                     )
                 },
                 onClick = {
@@ -262,12 +267,12 @@ private fun RowScope.StatusFooterComponent(
                     if (actualData.reaction.bookmarked) {
                         Icon(
                             imageVector = Icons.Default.BookmarkRemove,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.mastodon_item_unbookmark),
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.BookmarkAdd,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.mastodon_item_bookmark),
                         )
                     }
                 },
@@ -279,8 +284,18 @@ private fun RowScope.StatusFooterComponent(
 
             if (actualData.isFromMe) {
                 DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(id = R.string.mastodon_item_delete),
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    },
                     text = {
-                        Text(text = stringResource(id = R.string.mastodon_item_delete))
+                        Text(
+                            text = stringResource(id = R.string.mastodon_item_delete),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     },
                     onClick = {
                         closeMenu.invoke()
@@ -289,8 +304,18 @@ private fun RowScope.StatusFooterComponent(
                 )
             } else {
                 DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Report,
+                            contentDescription = stringResource(id = R.string.mastodon_item_report),
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    },
                     text = {
-                        Text(text = stringResource(id = R.string.mastodon_item_report))
+                        Text(
+                            text = stringResource(id = R.string.mastodon_item_report),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     },
                     onClick = {
                         closeMenu.invoke()

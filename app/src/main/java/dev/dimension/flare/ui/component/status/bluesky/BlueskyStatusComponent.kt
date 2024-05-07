@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Delete
@@ -13,7 +14,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Report
-import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -25,6 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -85,7 +89,7 @@ internal fun BlueskyStatusComponent(
         onQuotedStatusClick = {
             event.onStatusClick(it as UiStatus.Bluesky, uriHandler)
         },
-        headerIcon = data.repostBy?.let { Icons.Default.SyncAlt },
+        headerIcon = data.repostBy?.let { FontAwesomeIcons.Solid.Retweet },
         headerTextId = data.repostBy?.let { R.string.mastodon_item_reblogged_status },
         headerUser = data.repostBy,
         statusActions = {
@@ -144,7 +148,7 @@ private fun RowScope.StatusFooterComponent(
         },
     )
     StatusActionGroup(
-        icon = Icons.Default.SyncAlt,
+        icon = FontAwesomeIcons.Solid.Retweet,
         text = data.matrices.humanizedRepostCount,
         modifier =
             Modifier
@@ -164,8 +168,9 @@ private fun RowScope.StatusFooterComponent(
                 },
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Default.SyncAlt,
-                        contentDescription = null,
+                        imageVector = FontAwesomeIcons.Solid.Retweet,
+                        contentDescription = stringResource(id = R.string.blusky_item_action_repost),
+                        modifier = Modifier.size(24.dp),
                     )
                 },
                 onClick = {
@@ -182,7 +187,7 @@ private fun RowScope.StatusFooterComponent(
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.FormatQuote,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.blusky_item_action_quote),
                     )
                 },
                 onClick = {

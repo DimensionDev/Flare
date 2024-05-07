@@ -11,7 +11,6 @@ import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +22,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.bsky.notification.ListNotificationsReason
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText2
@@ -53,7 +55,7 @@ internal fun BlueskyNotificationComponent(
                 data = data,
                 event = event,
                 modifier = modifier,
-                icon = Icons.Default.SyncAlt,
+                icon = FontAwesomeIcons.Solid.Retweet,
                 text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status),
             )
         }

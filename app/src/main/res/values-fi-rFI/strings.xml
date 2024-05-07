@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">Kirjaudu</string>
   <string name="navigate_back">Siirry takaisin</string>
-  <string name="confirm">Vahvista</string>
-  <string name="cancel">Peruuta</string>
   <string name="home_tab_home_title">Koti</string>
   <string name="home_tab_notifications_title">Ilmoitukset</string>
   <string name="home_tab_me_title">Minä</string>
@@ -240,7 +238,6 @@
   <string name="local_filter_for_notification">Suodata ilmoituksessa</string>
   <string name="local_filter_for_search">Haku suodatin</string>
   <string name="local_filter_delete">Poista Suodatin</string>
-  <string name="done">Valmis</string>
   <string name="delete">Poista</string>
   <string name="status_detail_translate">Käännä kielelle %1$s</string>
   <string name="mastodon_tab_local_title">Paikallinen</string>

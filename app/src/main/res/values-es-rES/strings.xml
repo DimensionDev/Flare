@@ -254,4 +254,7 @@
   <string name="home_tab_favorite_title">Favorito</string>
   <string name="tab_settings_primary">Pestaña principal</string>
   <string name="tab_settings_secondary">Pestaña secundaria</string>
+    <string name="date_format_year_month_day">dd MMM yy</string>
+  <string name="date_format_month_day">dd MMM</string>
+  <string name="date_format_full">dd MMM yy HH:mm</string>
 </resources>

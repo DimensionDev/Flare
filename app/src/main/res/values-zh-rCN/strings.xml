@@ -255,4 +255,7 @@
   <string name="home_tab_favorite_title">收藏</string>
   <string name="tab_settings_primary">主选项卡</string>
   <string name="tab_settings_secondary">次要选项卡</string>
+  <string name="date_format_year_month_day">yyyy年MMMdd日</string>
+  <string name="date_format_month_day">MMMdd日</string>
+  <string name="date_format_full">yyyy年MMMdd日 HH:mm</string>
 </resources>

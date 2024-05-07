@@ -253,7 +253,7 @@
   <string name="home_tab_favorite_title">المفضلة</string>
   <string name="tab_settings_primary">التبويب الأساسي</string>
   <string name="tab_settings_secondary">علامة التبويب الثانوية</string>
-    <string name="date_format_year_month_day">dd MMM yy</string>
+  <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy HH:mm</string>
 </resources>

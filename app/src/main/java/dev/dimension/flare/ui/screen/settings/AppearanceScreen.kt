@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -716,6 +716,7 @@ private fun AppearanceScreen(
                                     Icon(
                                         imageVector = icon,
                                         contentDescription = stringResource(id = textId),
+                                        modifier = Modifier.size(24.dp),
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(text = stringResource(id = textId))
@@ -732,6 +733,7 @@ private fun AppearanceScreen(
                                                         Icon(
                                                             imageVector = it.icon,
                                                             contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
                                                         )
                                                     },
                                                     text = {
@@ -749,9 +751,9 @@ private fun AppearanceScreen(
                                                         showMenu = false
                                                     },
                                                     trailingIcon = {
-                                                        Checkbox(
-                                                            checked = appearanceSettings.bluesky.swipeLeft == it,
-                                                            onCheckedChange = null,
+                                                        RadioButton(
+                                                            selected = appearanceSettings.bluesky.swipeLeft == it,
+                                                            onClick = null,
                                                         )
                                                     },
                                                 )
@@ -764,6 +766,7 @@ private fun AppearanceScreen(
                                                         Icon(
                                                             imageVector = it.icon,
                                                             contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
                                                         )
                                                     },
                                                     text = {
@@ -781,9 +784,9 @@ private fun AppearanceScreen(
                                                         showMenu = false
                                                     },
                                                     trailingIcon = {
-                                                        Checkbox(
-                                                            checked = appearanceSettings.mastodon.swipeLeft == it,
-                                                            onCheckedChange = null,
+                                                        RadioButton(
+                                                            selected = appearanceSettings.mastodon.swipeLeft == it,
+                                                            onClick = null,
                                                         )
                                                     },
                                                 )
@@ -796,6 +799,7 @@ private fun AppearanceScreen(
                                                         Icon(
                                                             imageVector = it.icon,
                                                             contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
                                                         )
                                                     },
                                                     text = {
@@ -813,9 +817,9 @@ private fun AppearanceScreen(
                                                         showMenu = false
                                                     },
                                                     trailingIcon = {
-                                                        Checkbox(
-                                                            checked = appearanceSettings.misskey.swipeLeft == it,
-                                                            onCheckedChange = null,
+                                                        RadioButton(
+                                                            selected = appearanceSettings.misskey.swipeLeft == it,
+                                                            onClick = null,
                                                         )
                                                     },
                                                 )
@@ -828,6 +832,7 @@ private fun AppearanceScreen(
                                                         Icon(
                                                             imageVector = it.icon,
                                                             contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
                                                         )
                                                     },
                                                     text = {
@@ -845,9 +850,9 @@ private fun AppearanceScreen(
                                                         showMenu = false
                                                     },
                                                     trailingIcon = {
-                                                        Checkbox(
-                                                            checked = appearanceSettings.xqt.swipeLeft == it,
-                                                            onCheckedChange = null,
+                                                        RadioButton(
+                                                            selected = appearanceSettings.xqt.swipeLeft == it,
+                                                            onClick = null,
                                                         )
                                                     },
                                                 )
@@ -906,6 +911,7 @@ private fun AppearanceScreen(
                                     Icon(
                                         imageVector = icon,
                                         contentDescription = stringResource(id = textId),
+                                        modifier = Modifier.size(24.dp),
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(text = stringResource(id = textId))
@@ -922,6 +928,7 @@ private fun AppearanceScreen(
                                                         Icon(
                                                             imageVector = it.icon,
                                                             contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
                                                         )
                                                     },
                                                     text = {
@@ -939,9 +946,9 @@ private fun AppearanceScreen(
                                                         showMenu = false
                                                     },
                                                     trailingIcon = {
-                                                        Checkbox(
-                                                            checked = appearanceSettings.bluesky.swipeRight == it,
-                                                            onCheckedChange = null,
+                                                        RadioButton(
+                                                            selected = appearanceSettings.bluesky.swipeRight == it,
+                                                            onClick = null,
                                                         )
                                                     },
                                                 )
@@ -954,6 +961,7 @@ private fun AppearanceScreen(
                                                         Icon(
                                                             imageVector = it.icon,
                                                             contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
                                                         )
                                                     },
                                                     text = {
@@ -971,9 +979,9 @@ private fun AppearanceScreen(
                                                         showMenu = false
                                                     },
                                                     trailingIcon = {
-                                                        Checkbox(
-                                                            checked = appearanceSettings.mastodon.swipeRight == it,
-                                                            onCheckedChange = null,
+                                                        RadioButton(
+                                                            selected = appearanceSettings.mastodon.swipeRight == it,
+                                                            onClick = null,
                                                         )
                                                     },
                                                 )
@@ -986,6 +994,7 @@ private fun AppearanceScreen(
                                                         Icon(
                                                             imageVector = it.icon,
                                                             contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
                                                         )
                                                     },
                                                     text = {
@@ -1003,9 +1012,9 @@ private fun AppearanceScreen(
                                                         showMenu = false
                                                     },
                                                     trailingIcon = {
-                                                        Checkbox(
-                                                            checked = appearanceSettings.misskey.swipeRight == it,
-                                                            onCheckedChange = null,
+                                                        RadioButton(
+                                                            selected = appearanceSettings.misskey.swipeRight == it,
+                                                            onClick = null,
                                                         )
                                                     },
                                                 )
@@ -1018,6 +1027,7 @@ private fun AppearanceScreen(
                                                         Icon(
                                                             imageVector = it.icon,
                                                             contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
                                                         )
                                                     },
                                                     text = {
@@ -1035,9 +1045,9 @@ private fun AppearanceScreen(
                                                         showMenu = false
                                                     },
                                                     trailingIcon = {
-                                                        Checkbox(
-                                                            checked = appearanceSettings.xqt.swipeRight == it,
-                                                            onCheckedChange = null,
+                                                        RadioButton(
+                                                            selected = appearanceSettings.xqt.swipeRight == it,
+                                                            onClick = null,
                                                         )
                                                     },
                                                 )

@@ -2,8 +2,6 @@
 <resources>
   <string name="login_button">ログイン</string>
   <string name="navigate_back">戻る</string>
-  <string name="confirm">確認</string>
-  <string name="cancel">キャンセル</string>
   <string name="home_tab_home_title">ホーム</string>
   <string name="home_tab_notifications_title">通知</string>
   <string name="home_tab_me_title">自分</string>
@@ -240,7 +238,6 @@
   <string name="local_filter_for_notification">通知でフィルター</string>
   <string name="local_filter_for_search">検索でフィルター</string>
   <string name="local_filter_delete">フィルターを削除</string>
-  <string name="done">完了</string>
   <string name="delete">削除</string>
   <string name="status_detail_translate">%1$sに翻訳</string>
   <string name="mastodon_tab_local_title">ローカル</string>

@@ -138,7 +138,7 @@ internal fun MisskeyStatusComponent(
         },
         poll = actualData.poll,
         headerIcon = currentData.renote?.let { FontAwesomeIcons.Solid.Retweet },
-        headerTextId = currentData.renote?.let { R.string.mastodon_item_reblogged_status },
+        headerTextId = currentData.renote?.let { R.string.misskey_item_reblogged_status },
         headerUser = currentData.renote?.let { currentData.user },
         statusActions = {
             StatusFooterComponent(
@@ -302,13 +302,13 @@ private fun RowScope.StatusFooterComponent(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.mastodon_item_delete),
+                            contentDescription = stringResource(id = R.string.misskey_item_action_delete),
                             tint = MaterialTheme.colorScheme.error,
                         )
                     },
                     text = {
                         Text(
-                            text = stringResource(id = R.string.mastodon_item_delete),
+                            text = stringResource(id = R.string.misskey_item_action_delete),
                             color = MaterialTheme.colorScheme.error,
                         )
                     },
@@ -322,13 +322,13 @@ private fun RowScope.StatusFooterComponent(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Report,
-                            contentDescription = stringResource(id = R.string.mastodon_item_report),
+                            contentDescription = stringResource(id = R.string.misskey_item_action_report),
                             tint = MaterialTheme.colorScheme.error,
                         )
                     },
                     text = {
                         Text(
-                            text = stringResource(id = R.string.mastodon_item_report),
+                            text = stringResource(id = R.string.misskey_item_action_report),
                             color = MaterialTheme.colorScheme.error,
                         )
                     },
@@ -351,28 +351,28 @@ internal fun VisibilityIcon(
         UiStatus.Misskey.Visibility.Public ->
             Icon(
                 imageVector = Icons.Default.Public,
-                contentDescription = stringResource(id = R.string.mastodon_visibility_public),
+                contentDescription = stringResource(id = R.string.misskey_visibility_public),
                 modifier = modifier,
             )
 
         UiStatus.Misskey.Visibility.Home ->
             Icon(
                 imageVector = Icons.Default.LockOpen,
-                contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
+                contentDescription = stringResource(id = R.string.misskey_visibility_home),
                 modifier = modifier,
             )
 
         UiStatus.Misskey.Visibility.Followers ->
             Icon(
                 imageVector = Icons.Default.Lock,
-                contentDescription = stringResource(id = R.string.mastodon_visibility_private),
+                contentDescription = stringResource(id = R.string.misskey_visibility_followers),
                 modifier = modifier,
             )
 
         UiStatus.Misskey.Visibility.Specified ->
             Icon(
                 imageVector = Icons.Default.MailOutline,
-                contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
+                contentDescription = stringResource(id = R.string.misskey_visibility_specified),
                 modifier = modifier,
             )
     }

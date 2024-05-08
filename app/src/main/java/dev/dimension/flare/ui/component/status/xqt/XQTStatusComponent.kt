@@ -108,7 +108,7 @@ internal fun XQTStatusComponent(
         isDetail = isDetail,
         poll = actualData.poll,
         headerIcon = data.retweet?.let { FontAwesomeIcons.Solid.Retweet },
-        headerTextId = data.retweet?.let { R.string.mastodon_item_reblogged_status },
+        headerTextId = data.retweet?.let { R.string.xqt_item_reblogged_status },
         headerUser = data.retweet?.let { data.user },
         replyHandle = actualData.replyHandle,
         quotedStatus = actualData.quote,
@@ -260,21 +260,21 @@ private fun RowScope.StatusFooterComponent(
             DropdownMenuItem(
                 text = {
                     if (actualData.reaction.bookmarked) {
-                        Text(text = stringResource(id = R.string.mastodon_item_unbookmark))
+                        Text(text = stringResource(id = R.string.xqt_item_unbookmark))
                     } else {
-                        Text(text = stringResource(id = R.string.mastodon_item_bookmark))
+                        Text(text = stringResource(id = R.string.xqt_item_bookmark))
                     }
                 },
                 leadingIcon = {
                     if (actualData.reaction.bookmarked) {
                         Icon(
                             imageVector = Icons.Default.BookmarkRemove,
-                            contentDescription = stringResource(id = R.string.mastodon_item_unbookmark),
+                            contentDescription = stringResource(id = R.string.xqt_item_unbookmark),
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.BookmarkAdd,
-                            contentDescription = stringResource(id = R.string.mastodon_item_bookmark),
+                            contentDescription = stringResource(id = R.string.xqt_item_bookmark),
                         )
                     }
                 },
@@ -289,13 +289,13 @@ private fun RowScope.StatusFooterComponent(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(id = R.string.mastodon_item_delete),
+                            contentDescription = stringResource(id = R.string.xqt_item_delete),
                             tint = MaterialTheme.colorScheme.error,
                         )
                     },
                     text = {
                         Text(
-                            text = stringResource(id = R.string.mastodon_item_delete),
+                            text = stringResource(id = R.string.xqt_item_delete),
                             color = MaterialTheme.colorScheme.error,
                         )
                     },
@@ -309,13 +309,13 @@ private fun RowScope.StatusFooterComponent(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Report,
-                            contentDescription = stringResource(id = R.string.mastodon_item_report),
+                            contentDescription = stringResource(id = R.string.xqt_item_report),
                             tint = MaterialTheme.colorScheme.error,
                         )
                     },
                     text = {
                         Text(
-                            text = stringResource(id = R.string.mastodon_item_report),
+                            text = stringResource(id = R.string.xqt_item_report),
                             color = MaterialTheme.colorScheme.error,
                         )
                     },

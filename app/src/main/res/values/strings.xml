@@ -52,16 +52,25 @@
     <string name="settings_title">Settings</string>
 
     <string name="mastodon_notification_item_followed_you">followed you</string>
-    <string name="mastodon_notification_item_favourited_your_status">favourited your status</string>
-    <string name="mastodon_notification_item_reblogged_your_status">reblogged your status</string>
+    <string name="mastodon_notification_item_favourited_your_status">favourited your toot</string>
+    <string name="mastodon_notification_item_reblogged_your_status">reblogged your toot</string>
     <string name="mastodon_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="mastodon_notification_item_mentioned_you">mentioned you</string>
     <string name="mastodon_notification_item_requested_follow">request to follow you</string>
     <string name="mastodon_notification_item_posted_status">just posted a status</string>
-    <string name="mastodon_notification_item_updated_status">updated a status</string>
-    <string name="mastodon_item_reblogged_status">boosted a status</string>
+    <string name="mastodon_notification_item_updated_status">updated a toot</string>
+    <string name="mastodon_item_reblogged_status">boosted a toot</string>
     <string name="mastodon_item_show_more">Show more</string>
     <string name="mastodon_item_show_less">Show less</string>
+
+    <string name="bluesky_notification_item_followed_you">followed you</string>
+    <string name="bluesky_notification_item_favourited_your_status">favourited your status</string>
+    <string name="bluesky_notification_item_reblogged_your_status">reblogged your status</string>
+    <string name="bluesky_notification_item_poll_ended">A poll you were participating in has ended</string>
+    <string name="bluesky_notification_item_mentioned_you">mentioned you</string>
+    <string name="bluesky_item_reblogged_status">boosted a status</string>
+    <string name="bluesky_notification_item_replied_to_you">replied to you</string>
+    <string name="bluesky_notification_item_quoted_your_status">quoted your status</string>
 
     <string name="misskey_notification_item_mentioned_you">mentioned you</string>
     <string name="misskey_notification_item_replied_to_you">replied to you</string>
@@ -72,6 +81,11 @@
     <string name="misskey_notification_item_follow_request_accepted">accepted your follow request</string>
     <string name="misskey_notification_item_achievement_earned">You\'ve earned an achievement</string>
     <string name="misskey_notification_item_app">App</string>
+    <string name="misskey_notification_item_followed_you">followed you</string>
+    <string name="misskey_notification_item_requested_follow">requested to follow you</string>
+    <string name="misskey_item_reblogged_status">reposted a status</string>
+
+    <string name="xqt_item_reblogged_status">retweeted</string>
 
     <string name="mastodon_visibility_public">Public</string>
     <string name="mastodon_visibility_unlisted">Unlisted</string>
@@ -123,7 +137,7 @@
     <string name="notification_channel_compose_name">Compose</string>
     <string name="notification_channel_compose_description">Notifications about toots being sent</string>
 
-    <string name="status_title">Toot detail</string>
+    <string name="status_title">Detail</string>
 
     <string name="misskey_compose_local_only">Local only</string>
     <string name="misskey_compose_local_only_description">Only users on this instance can see this toot</string>
@@ -183,6 +197,11 @@
 
     <string name="misskey_item_action_delete">Delete</string>
     <string name="misskey_item_action_report">Report</string>
+
+    <string name="xqt_item_unbookmark">Unbookmark</string>
+    <string name="xqt_item_bookmark">Bookmark</string>
+    <string name="xqt_item_delete">Delete</string>
+    <string name="xqt_item_report">Report</string>
 
     <string name="user_report">Report %1$s</string>
     <string name="user_block">Block %1$s</string>
@@ -244,8 +263,8 @@
     <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
     <string name="settings_appearance_show_link_previews">Show link previews</string>
     <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
-    <string name="settings_appearance_compat_link_previews">Compat link previews</string>
-    <string name="settings_appearance_compat_link_previews_description">Show link previews in compat mode in the status</string>
+    <string name="settings_appearance_compat_link_previews">Simplify link previews</string>
+    <string name="settings_appearance_compat_link_previews_description">Show link previews in simplify mode in the status</string>
     <string name="settings_appearance_theme_color">Theme color</string>
     <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
 

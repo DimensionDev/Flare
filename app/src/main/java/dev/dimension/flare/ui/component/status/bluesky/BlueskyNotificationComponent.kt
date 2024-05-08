@@ -46,7 +46,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.Favorite,
-                text = stringResource(id = R.string.mastodon_notification_item_favourited_your_status),
+                text = stringResource(id = R.string.bluesky_notification_item_favourited_your_status),
             )
         }
 
@@ -56,7 +56,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = FontAwesomeIcons.Solid.Retweet,
-                text = stringResource(id = R.string.mastodon_notification_item_reblogged_your_status),
+                text = stringResource(id = R.string.bluesky_notification_item_reblogged_your_status),
             )
         }
 
@@ -66,7 +66,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.PersonAdd,
-                text = stringResource(id = R.string.mastodon_notification_item_followed_you),
+                text = stringResource(id = R.string.bluesky_notification_item_followed_you),
             )
         }
 
@@ -76,7 +76,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.AlternateEmail,
-                text = stringResource(id = R.string.misskey_notification_item_mentioned_you),
+                text = stringResource(id = R.string.bluesky_notification_item_mentioned_you),
             )
         }
 
@@ -86,7 +86,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.AutoMirrored.Filled.Reply,
-                text = stringResource(id = R.string.misskey_notification_item_replied_to_you),
+                text = stringResource(id = R.string.bluesky_notification_item_replied_to_you),
             )
         }
 
@@ -96,7 +96,7 @@ internal fun BlueskyNotificationComponent(
                 event = event,
                 modifier = modifier,
                 icon = Icons.Default.PersonAdd,
-                text = stringResource(id = R.string.misskey_notification_item_quoted_your_status),
+                text = stringResource(id = R.string.bluesky_notification_item_quoted_your_status),
             )
         }
     }

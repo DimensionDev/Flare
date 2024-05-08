@@ -651,17 +651,14 @@ private fun StatusContentComponent(
                             .clickable {
                                 expanded = !expanded
                             },
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Lock,
                         contentDescription = stringResource(id = R.string.mastodon_item_content_warning),
-                        modifier =
-                            Modifier
-                                .size(12.dp),
                     )
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }

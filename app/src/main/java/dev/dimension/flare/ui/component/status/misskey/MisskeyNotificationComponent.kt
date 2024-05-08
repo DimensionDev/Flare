@@ -42,7 +42,7 @@ internal fun MisskeyNotificationComponent(
                 StatusRetweetHeaderComponent(
                     icon = Icons.Default.PersonAdd,
                     user = data.user,
-                    text = stringResource(id = R.string.mastodon_notification_item_followed_you),
+                    text = stringResource(id = R.string.misskey_notification_item_followed_you),
                 )
 
             NotificationType.Mention ->
@@ -91,7 +91,7 @@ internal fun MisskeyNotificationComponent(
                 StatusRetweetHeaderComponent(
                     icon = Icons.Default.PersonAdd,
                     user = data.user,
-                    text = stringResource(id = R.string.mastodon_notification_item_requested_follow),
+                    text = stringResource(id = R.string.misskey_notification_item_requested_follow),
                 )
 
             NotificationType.FollowRequestAccepted ->

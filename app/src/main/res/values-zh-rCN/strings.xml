@@ -17,7 +17,7 @@
   <string name="profile_header_button_following">正在关注</string>
   <string name="profile_header_button_requested">已申请</string>
   <string name="profile_header_button_blocked">已屏蔽</string>
-  <string name="compose_title">发嘟文</string>
+  <string name="compose_title">发帖</string>
   <string name="compose_hint">发生什么事了？</string>
   <string name="compose_poll_option_hint">选项 %1$s</string>
   <string name="compose_add_option">添加选项</string>

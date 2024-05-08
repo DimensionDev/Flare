@@ -92,7 +92,7 @@ internal fun BlueskyStatusComponent(
             event.onStatusClick(it as UiStatus.Bluesky, uriHandler)
         },
         headerIcon = data.repostBy?.let { FontAwesomeIcons.Solid.Retweet },
-        headerTextId = data.repostBy?.let { R.string.mastodon_item_reblogged_status },
+        headerTextId = data.repostBy?.let { R.string.bluesky_item_reblogged_status },
         headerUser = data.repostBy,
         statusActions = {
             StatusFooterComponent(

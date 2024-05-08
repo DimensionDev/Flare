@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS DbSearchHistory (
+    search TEXT NOT NULL PRIMARY KEY,
+    created_at INTEGER NOT NULL
+);
+
+insert:
+INSERT OR REPLACE INTO DbSearchHistory (search, created_at) VALUES (?, ?);
+
+select:
+SELECT * FROM DbSearchHistory ORDER BY created_at DESC;
+
+delete:
+DELETE FROM DbSearchHistory WHERE search = ?;
+
+deleteAll:
+DELETE FROM DbSearchHistory;

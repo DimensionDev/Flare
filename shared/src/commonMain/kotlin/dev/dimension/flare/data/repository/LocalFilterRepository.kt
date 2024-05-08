@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
-class LocalFilterRepository(
+internal class LocalFilterRepository(
     private val database: AppDatabase,
 ) {
     fun getAllFlow() =

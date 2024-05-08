@@ -6,6 +6,7 @@ import dev.dimension.flare.data.database.provideVersionDatabase
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,4 +24,5 @@ val commonModule =
         singleOf(::LocalFilterRepository)
         single { CoroutineScope(Dispatchers.IO) }
         singleOf(::ComposeUseCase)
+        singleOf(::SearchHistoryRepository)
     }

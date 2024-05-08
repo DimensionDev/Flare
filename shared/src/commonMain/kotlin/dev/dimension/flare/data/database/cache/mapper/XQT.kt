@@ -31,6 +31,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Instant
 
@@ -353,67 +354,106 @@ internal fun TopLevel.notifications(accountKey: MicroBlogKey): List<UiStatus.XQT
             it.addEntries?.entries.orEmpty()
         }
         ?.mapNotNull { entry ->
-            entry.content?.item?.content?.notification
+            entry.content?.item?.content
         }
-        ?.map { notification ->
-            val url = notification.url?.url
-            val data = globalObjects?.notifications?.get(notification.id)
-            val message = data?.message?.text
-            val users =
-                data?.template?.aggregateUserActionsV1?.fromUsers?.mapNotNull { ref ->
-                    globalObjects?.users?.get(ref.user?.id)?.let { userLegacy ->
-                        User(
-                            legacy = userLegacy,
-                            isBlueVerified = userLegacy.verified,
-                            restId = ref.user?.id.orEmpty(),
-                        )
-                    }?.toUi(accountKey)
-                }
-            val tweet =
-                data?.template?.aggregateUserActionsV1?.targetObjects?.mapNotNull {
-                    globalObjects?.tweets?.get(it.tweet?.id)
-                }
-            val createdAt =
-                data?.timestampMS?.toLongOrNull()?.let {
-                    Instant.fromEpochMilliseconds(it)
-                }
+        ?.mapNotNull { content ->
+            val notification = content.notification
+            val mentionTweet = content.tweet
+            if (notification != null) {
+                val url = notification.url?.url
+                val data = globalObjects?.notifications?.get(notification.id)
+                val message = data?.message?.text
+                val users =
+                    data?.template?.aggregateUserActionsV1?.fromUsers?.mapNotNull { ref ->
+                        globalObjects?.users?.get(ref.user?.id)?.let { userLegacy ->
+                            User(
+                                legacy = userLegacy,
+                                isBlueVerified = userLegacy.verified,
+                                restId = ref.user?.id.orEmpty(),
+                            )
+                        }?.toUi(accountKey)
+                    }
+                val notificationTweet =
+                    data?.template?.aggregateUserActionsV1?.targetObjects?.mapNotNull {
+                        globalObjects?.tweets?.get(it.tweet?.id)
+                    }
+                val createdAt =
+                    data?.timestampMS?.toLongOrNull()?.let {
+                        Instant.fromEpochMilliseconds(it)
+                    }
 
-            UiStatus.XQTNotification(
-                statusKey = MicroBlogKey(id = notification.id.orEmpty(), host = xqtHost),
-                url = url.orEmpty(),
-                text = message.orEmpty(),
-                type =
-                    when (data?.icon?.id) {
-                        "person_icon" -> UiStatus.XQTNotification.Type.Follow
-                        "heart_icon" -> UiStatus.XQTNotification.Type.Like
-                        "bird_icon" -> UiStatus.XQTNotification.Type.Logo
-                        else -> UiStatus.XQTNotification.Type.Recommendation
-                    },
-                users = users.orEmpty().toImmutableList(),
-                data =
-                    tweet?.firstOrNull()?.let {
-                        Tweet(
-                            restId = it.idStr,
-                            core =
-                                UserResultCore(
-                                    userResults =
-                                        UserResults(
-                                            result =
-                                                User(
-                                                    legacy =
-                                                        globalObjects?.users?.get(it.userIdStr)
-                                                            ?: return@let null,
-                                                    isBlueVerified = false,
-                                                    restId = it.userIdStr,
-                                                ),
-                                        ),
-                                ),
-                            legacy = it,
-                        ).toUi(accountKey)
-                    },
-                createdAt = createdAt ?: Instant.DISTANT_PAST,
-                accountKey = accountKey,
-            )
+                UiStatus.XQTNotification(
+                    statusKey = MicroBlogKey(id = notification.id.orEmpty(), host = xqtHost),
+                    url = url.orEmpty(),
+                    text = message.orEmpty(),
+                    type =
+                        when (data?.icon?.id) {
+                            "person_icon" -> UiStatus.XQTNotification.Type.Follow
+                            "heart_icon" -> UiStatus.XQTNotification.Type.Like
+                            "bird_icon" -> UiStatus.XQTNotification.Type.Logo
+                            else -> UiStatus.XQTNotification.Type.Recommendation
+                        },
+                    users = users.orEmpty().toImmutableList(),
+                    data =
+                        notificationTweet?.firstOrNull()?.let {
+                            Tweet(
+                                restId = it.idStr,
+                                core =
+                                    UserResultCore(
+                                        userResults =
+                                            UserResults(
+                                                result =
+                                                    User(
+                                                        legacy =
+                                                            globalObjects?.users?.get(it.userIdStr)
+                                                                ?: return@let null,
+                                                        isBlueVerified = false,
+                                                        restId = it.userIdStr,
+                                                    ),
+                                            ),
+                                    ),
+                                legacy = it,
+                            ).toUi(accountKey)
+                        },
+                    createdAt = createdAt ?: Instant.DISTANT_PAST,
+                    accountKey = accountKey,
+                )
+            } else if (mentionTweet != null) {
+                val tweet = globalObjects?.tweets?.get(mentionTweet.id) ?: return@mapNotNull null
+                val user = globalObjects.users?.get(tweet.userIdStr) ?: return@mapNotNull null
+                if (mentionTweet.id == null) {
+                    return@mapNotNull null
+                }
+                val data =
+                    Tweet(
+                        restId = mentionTweet.id,
+                        core =
+                            UserResultCore(
+                                userResults =
+                                    UserResults(
+                                        result =
+                                            User(
+                                                legacy = user,
+                                                isBlueVerified = user.verified,
+                                                restId = tweet.userIdStr,
+                                            ),
+                                    ),
+                            ),
+                        legacy = tweet,
+                    ).toUi(accountKey)
+                UiStatus.XQTNotification(
+                    statusKey = MicroBlogKey(id = mentionTweet.id, host = xqtHost),
+                    url = "",
+                    text = "",
+                    type = UiStatus.XQTNotification.Type.Mention,
+                    users = persistentListOf(),
+                    data = data,
+                    createdAt = data.createdAt,
+                    accountKey = accountKey,
+                )
+            } else {
+                null
+            }
         }
         ?.toList()
         .orEmpty()

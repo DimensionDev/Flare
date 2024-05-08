@@ -454,6 +454,7 @@ sealed class UiStatus {
             Like,
             Recommendation,
             Logo,
+            Mention,
         }
     }
 }

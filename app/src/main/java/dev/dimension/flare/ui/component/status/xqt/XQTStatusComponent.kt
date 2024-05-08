@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Delete
@@ -371,6 +372,7 @@ internal fun XQTNofiticationComponent(
                         UiStatus.XQTNotification.Type.Like -> Icons.Default.Favorite
                         UiStatus.XQTNotification.Type.Recommendation -> Icons.Default.Recommend
                         UiStatus.XQTNotification.Type.Logo -> Icons.Default.Info
+                        UiStatus.XQTNotification.Type.Mention -> Icons.Default.AlternateEmail
                     },
                 contentDescription = null,
                 modifier =
@@ -382,6 +384,7 @@ internal fun XQTNofiticationComponent(
                         UiStatus.XQTNotification.Type.Like -> Color.Red
                         UiStatus.XQTNotification.Type.Recommendation -> MaterialTheme.colorScheme.primary
                         UiStatus.XQTNotification.Type.Logo -> MaterialTheme.colorScheme.secondary
+                        UiStatus.XQTNotification.Type.Mention -> MaterialTheme.colorScheme.primary
                     },
             )
             Column(

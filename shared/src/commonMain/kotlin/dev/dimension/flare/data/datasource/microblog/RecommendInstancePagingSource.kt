@@ -57,10 +57,10 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
                         usersCount = 0,
                     ),
                     UiInstance(
-                        name = PlatformType.xQt.name,
+                        name = "X",
                         description = "The X makes it sound cool",
                         iconUrl = PlatformType.xQt.logoUrl,
-                        domain = "xqt.social",
+                        domain = "x.social",
                         type = PlatformType.xQt,
                         bannerUrl = null,
                         usersCount = 0,

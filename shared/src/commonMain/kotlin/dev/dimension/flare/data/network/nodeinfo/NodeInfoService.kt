@@ -8,6 +8,7 @@ import dev.dimension.flare.data.network.nodeinfo.model.Schema11
 import dev.dimension.flare.data.network.nodeinfo.model.Schema20
 import dev.dimension.flare.data.network.nodeinfo.model.Schema21
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.xqtHost
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.URLBuilder
@@ -37,18 +38,29 @@ internal data object NodeInfoService {
                     ktorClient().get(
                         it.href,
                     ).body<Schema10.Coordinate>().software.name.value
+
                 "http://nodeinfo.diaspora.software/ns/schema/1.1" ->
                     ktorClient().get(
                         it.href,
                     ).body<Schema11.Coordinate>().software.name.value
-                "http://nodeinfo.diaspora.software/ns/schema/2.0" -> ktorClient().get(it.href).body<Schema20.Coordinate>().software.name
-                "http://nodeinfo.diaspora.software/ns/schema/2.1" -> ktorClient().get(it.href).body<Schema21.Coordinate>().software.name
+
+                "http://nodeinfo.diaspora.software/ns/schema/2.0" ->
+                    ktorClient().get(it.href)
+                        .body<Schema20.Coordinate>().software.name
+
+                "http://nodeinfo.diaspora.software/ns/schema/2.1" ->
+                    ktorClient().get(it.href)
+                        .body<Schema21.Coordinate>().software.name
+
                 else -> throw IllegalArgumentException("Unsupported schema: ${it.rel}")
             }
         }.first()
     }
 
     suspend fun detectPlatformType(host: String): PlatformType {
+        if (host.equals(xqtHost, ignoreCase = true) || host.equals("x.social", ignoreCase = true)) {
+            return PlatformType.xQt
+        }
         return try {
             val nodeInfo = fetchNodeInfo(host)
             when {

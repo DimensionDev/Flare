@@ -173,7 +173,7 @@ mlkit-language-id = { group = "com.google.android.gms", name = "play-services-ml
 mlkit-translate = { group = "com.google.mlkit", name = "translate", version = "17.0.2" }
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
-colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.0.7" }
+colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.0.8" }
 
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout", "material-icons-extended"]

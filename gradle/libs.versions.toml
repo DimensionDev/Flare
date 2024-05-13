@@ -149,7 +149,7 @@ compose-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name 
 
 compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", version = "0.33.6" }
 
-compose-placeholder-material3 = { group = "com.eygraber", name = "compose-placeholder-material3", version = "1.0.7" }
+compose-placeholder-material3 = { group = "com.eygraber", name = "compose-placeholder-material3", version = "1.0.8" }
 
 sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 sqldelight-native-driver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }

@@ -8,8 +8,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.skie)
-    alias(libs.plugins.molecule)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
@@ -158,8 +158,4 @@ skie {
         disableUpload.set(true)
         enabled.set(false)
     }
-}
-
-molecule {
-  kotlinCompilerPlugin.set("1.5.11-kt-2.0.0-RC1")
 }

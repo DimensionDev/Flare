@@ -167,3 +167,10 @@ ktlint {
     }
 }
 
+if (project.file("google-services.json").exists()) {    
+    afterEvaluate {
+        val uploadCrashlyticsMappingFileRelease by tasks
+        val processDebugGoogleServices by tasks
+        uploadCrashlyticsMappingFileRelease.dependsOn(processDebugGoogleServices)
+    }
+}

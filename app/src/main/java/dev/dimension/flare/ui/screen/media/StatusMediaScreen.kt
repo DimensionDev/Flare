@@ -194,8 +194,8 @@ private fun StatusMediaScreen(
                                 }
                             },
                         )
-                    LaunchedEffect(pagerState.currentPage) {
-                        state.medias.onSuccess {
+                    state.medias.onSuccess {
+                        LaunchedEffect(pagerState.currentPage) {
                             state.setWithVideoPadding(it[pagerState.currentPage] is UiMedia.Video)
                         }
                         state.setCurrentPage(pagerState.currentPage)

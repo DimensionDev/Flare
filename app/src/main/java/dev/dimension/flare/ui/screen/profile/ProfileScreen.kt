@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.screen.profile
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
@@ -72,6 +74,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -831,6 +834,7 @@ private fun ProfileHeader(
     expandMatrices: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val animatedVisibilityScope = this@AnimatedVisibilityScope
     AnimatedContent(
         targetState = userState,
         modifier = modifier.animateContentSize(),
@@ -839,26 +843,28 @@ private fun ProfileHeader(
             fadeIn() togetherWith fadeOut()
         },
     ) { state ->
-        when (state) {
-            is UiState.Loading -> {
-                ProfileHeaderLoading()
-            }
+        with(animatedVisibilityScope) {
+            when (state) {
+                is UiState.Loading -> {
+                    ProfileHeaderLoading()
+                }
 
-            is UiState.Error -> {
-                ProfileHeaderError()
-            }
+                is UiState.Error -> {
+                    ProfileHeaderError()
+                }
 
-            is UiState.Success -> {
-                ProfileHeaderSuccess(
-                    user = state.data,
-                    relationState = relationState,
-                    onFollowClick = onFollowClick,
-                    isMe = isMe,
-                    menu = menu,
-                    expandMatrices = expandMatrices,
-                    onAvatarClick = onAvatarClick,
-                    onBannerClick = onBannerClick,
-                )
+                is UiState.Success -> {
+                    ProfileHeaderSuccess(
+                        user = state.data,
+                        relationState = relationState,
+                        onFollowClick = onFollowClick,
+                        isMe = isMe,
+                        menu = menu,
+                        expandMatrices = expandMatrices,
+                        onAvatarClick = onAvatarClick,
+                        onBannerClick = onBannerClick,
+                    )
+                }
             }
         }
     }
@@ -950,7 +956,6 @@ internal fun CommonProfileHeader(
     bannerUrl: String?,
     avatarUrl: String?,
     displayName: Element,
-    @Suppress("UNUSED_PARAMETER")
     userKey: MicroBlogKey,
     handle: String,
     modifier: Modifier = Modifier,
@@ -971,10 +976,19 @@ internal fun CommonProfileHeader(
     Box(
         modifier =
             modifier
-//                .sharedBounds(
-//                    rememberSharedContentState(key = "header-$userKey"),
-//                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                )
+                .sharedBounds(
+                    rememberSharedContentState(key = "header-$userKey"),
+                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+                    renderInOverlayDuringTransition = false,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None,
+                    resizeMode =
+                        SharedTransitionScope.ResizeMode.ScaleToBounds(
+                            contentScale = ContentScale.FillWidth,
+                            alignment = Alignment.TopStart,
+                        ),
+                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                )
                 .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
                 .padding(bottom = 8.dp),
     ) {
@@ -984,6 +998,10 @@ internal fun CommonProfileHeader(
                 contentDescription = null,
                 modifier =
                     Modifier
+                        .sharedElement(
+                            rememberSharedContentState(key = "profile-banner-$userKey"),
+                            animatedVisibilityScope = this@AnimatedVisibilityScope,
+                        )
                         .fillMaxWidth()
                         .height(actualBannerHeight)
                         .let {
@@ -1027,6 +1045,12 @@ internal fun CommonProfileHeader(
                     AvatarComponent(
                         data = avatarUrl,
                         size = ProfileHeaderConstants.AVATAR_SIZE.dp,
+                        beforeModifier =
+                            Modifier
+                                .sharedElement(
+                                    rememberSharedContentState(key = "profile-avatar-$userKey"),
+                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                ),
                         modifier =
                             Modifier
                                 .let {
@@ -1049,6 +1073,12 @@ internal fun CommonProfileHeader(
                     HtmlText2(
                         element = displayName,
                         textStyle = MaterialTheme.typography.titleMedium,
+                        modifier =
+                            Modifier
+                                .sharedElement(
+                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
+                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                ),
                     )
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1057,6 +1087,12 @@ internal fun CommonProfileHeader(
                         Text(
                             text = handle,
                             style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier
+                                    .sharedElement(
+                                        rememberSharedContentState(key = "profile-handle-$userKey"),
+                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                    ),
                         )
                         handleTrailing.invoke(this)
                     }

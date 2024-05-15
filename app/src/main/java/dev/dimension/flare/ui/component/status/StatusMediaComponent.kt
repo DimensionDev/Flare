@@ -87,17 +87,17 @@ internal fun StatusMediaComponent(
                         modifier =
                             Modifier
                                 .clipToBounds()
-                                .sharedElement(
-                                    rememberSharedContentState(
-                                        when (media) {
-                                            is UiMedia.Image -> media.previewUrl
-                                            is UiMedia.Video -> media.thumbnailUrl
-                                            is UiMedia.Audio -> media.previewUrl ?: media.url
-                                            is UiMedia.Gif -> media.previewUrl
-                                        },
-                                    ),
-                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                )
+//                                .sharedElement(
+//                                    rememberSharedContentState(
+//                                        when (media) {
+//                                            is UiMedia.Image -> media.previewUrl
+//                                            is UiMedia.Video -> media.thumbnailUrl
+//                                            is UiMedia.Audio -> media.previewUrl ?: media.url
+//                                            is UiMedia.Gif -> media.previewUrl
+//                                        },
+//                                    ),
+//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                                )
                                 .clickable {
                                     onMediaClick(media)
                                 },
@@ -106,13 +106,15 @@ internal fun StatusMediaComponent(
                 }
             },
             modifier =
-                Modifier.let {
-                    if (hideSensitive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        it.blur(32.dp)
-                    } else {
-                        it
-                    }
-                },
+                Modifier
+                    .clip(MaterialTheme.shapes.medium)
+                    .let {
+                        if (hideSensitive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            it.blur(32.dp)
+                        } else {
+                            it
+                        }
+                    },
             expandedSize = appearanceSettings.expandMediaSize,
         )
         if (showSensitiveButton) {

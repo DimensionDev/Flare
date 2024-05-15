@@ -49,9 +49,10 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
-import coil3.compose.rememberAsyncImagePainter
-import coil3.imageLoader
-import coil3.request.ImageRequest
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberAsyncImagePainter
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -247,6 +248,7 @@ internal fun MediaScreen(
     }
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 private fun mediaPresenter(
     uri: String,

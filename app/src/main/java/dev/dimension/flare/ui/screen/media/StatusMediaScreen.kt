@@ -54,7 +54,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil3.imageLoader
+import coil.annotation.ExperimentalCoilApi
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -70,7 +72,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.VideoPlayer
-import dev.dimension.flare.ui.component.ZoomableCoil3Image
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
@@ -87,6 +88,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import moe.tlaster.swiper.Swiper
@@ -458,9 +460,13 @@ private fun ImageItem(
         } ?: setLockPager(false)
     }
 
-    ZoomableCoil3Image(
-        model = url,
-        placeholderMemoryCacheKey = previewUrl,
+    ZoomableAsyncImage(
+        model =
+            ImageRequest.Builder(LocalContext.current)
+                .data(url)
+                .placeholderMemoryCacheKey(previewUrl)
+                .crossfade(1_000)
+                .build(),
         contentDescription = description,
         state = rememberZoomableImageState(zoomableState),
         modifier = modifier,
@@ -473,6 +479,7 @@ private fun ImageItem(
     )
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 private fun statusMediaPresenter(
     statusKey: MicroBlogKey,

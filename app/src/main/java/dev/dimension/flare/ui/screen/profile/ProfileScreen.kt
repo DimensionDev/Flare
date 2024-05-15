@@ -971,6 +971,10 @@ internal fun CommonProfileHeader(
     Box(
         modifier =
             modifier
+                .sharedBounds(
+                    rememberSharedContentState(key = "header-$userKey"),
+                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+                )
                 .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
                 .padding(bottom = 8.dp),
     ) {
@@ -1152,6 +1156,10 @@ internal fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
                     )
                 }
             }
+            Text(
+                text = "Lorem Ipsum is simply dummy text",
+                modifier = Modifier.placeholder(true),
+            )
         }
     }
 }

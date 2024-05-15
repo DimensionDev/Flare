@@ -22,7 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import coil3.imageLoader
+import coil.annotation.ExperimentalCoilApi
+import coil.imageLoader
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import dev.dimension.flare.R
@@ -114,6 +115,7 @@ private fun StorageScreen(onBack: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 private fun storagePresenter(context: Context) =
     run {

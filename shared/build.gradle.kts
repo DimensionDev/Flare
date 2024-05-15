@@ -159,3 +159,7 @@ skie {
         enabled.set(false)
     }
 }
+
+molecule {
+    kotlinCompilerPlugin.set(libs.compose.compiler.get().toString())
+}

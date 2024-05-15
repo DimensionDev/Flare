@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.network.mastodon.api.model
 
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toInstant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,7 +25,7 @@ internal object DateSerializer : KSerializer<Instant> {
 
     override fun deserialize(decoder: Decoder): Instant {
         val str = decoder.decodeString()
-        return str.toInstant()
+        return Instant.parse(str)
     }
 
     override fun serialize(

@@ -15,7 +15,7 @@ import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import kotlinx.datetime.toInstant
+import kotlinx.datetime.Instant
 
 internal object Misskey {
     fun save(
@@ -23,7 +23,7 @@ internal object Misskey {
         pagingKey: String,
         database: CacheDatabase,
         data: List<Note>,
-        sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() },
+        sortIdProvider: (Note) -> Long = { Instant.parse(it.createdAt).toEpochMilliseconds() },
     ) {
         val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
         val status =
@@ -124,7 +124,7 @@ private fun Notification.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
 ): DbPagingTimeline {
-    val sortId = this.createdAt.toInstant().toEpochMilliseconds()
+    val sortId = Instant.parse(this.createdAt).toEpochMilliseconds()
     val status = this.toDbStatus(accountKey)
     return DbPagingTimeline(
         id = 0,
@@ -154,7 +154,7 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
 private fun Note.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Note) -> Long = { it.createdAt.toInstant().toEpochMilliseconds() },
+    sortIdProvider: (Note) -> Long = { Instant.parse(it.createdAt).toEpochMilliseconds() },
 ): DbPagingTimeline {
     val sortId = sortIdProvider(this)
     val status = this.toDbStatus(accountKey)

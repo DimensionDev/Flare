@@ -19,7 +19,6 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toInstant
 
 internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus.MisskeyNotification {
     val user = user?.toUi(accountKey)
@@ -30,7 +29,7 @@ internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus.MisskeyNotifi
                 host = accountKey.host,
             ),
         user = user,
-        createdAt = createdAt.toInstant(),
+        createdAt = Instant.parse(createdAt),
         note = note?.toUi(accountKey),
         type = type,
         accountKey = accountKey,
@@ -70,7 +69,7 @@ internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
             },
         // TODO: parse card content lazily
         card = null,
-        createdAt = createdAt.toInstant(),
+        createdAt = Instant.parse(createdAt),
         content = text.orEmpty(),
         contentWarningText = cw?.takeIf { it.isNotEmpty() },
         user = user,

@@ -971,10 +971,10 @@ internal fun CommonProfileHeader(
     Box(
         modifier =
             modifier
-                .sharedBounds(
-                    rememberSharedContentState(key = "header-$userKey"),
-                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                )
+//                .sharedBounds(
+//                    rememberSharedContentState(key = "header-$userKey"),
+//                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                )
                 .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
                 .padding(bottom = 8.dp),
     ) {

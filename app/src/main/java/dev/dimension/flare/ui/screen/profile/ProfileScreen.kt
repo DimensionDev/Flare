@@ -11,10 +11,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ContextualFlowRow
+import androidx.compose.foundation.layout.ContextualFlowRowOverflow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -32,7 +34,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
@@ -53,7 +54,6 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.material3.surfaceColorAtElevation
@@ -75,6 +75,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.window.core.layout.WindowWidthSizeClass
@@ -95,7 +96,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
-import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.HtmlText2
@@ -126,7 +126,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.ktml.dom.Element
 import org.koin.compose.koinInject
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.reflect.KFunction1
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -456,7 +455,6 @@ internal fun AnimatedVisibilityScope.ProfileRoute(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3AdaptiveApi::class,
     ExperimentalSharedTransitionApi::class,
 )
 @Composable
@@ -636,7 +634,8 @@ private fun ProfileScreen(
                     Card {
                         ProfileMeidasPreview(
                             mediaState = state.state.mediaState,
-                            orientation = Orientation.Vertical,
+                            maxLines = 2,
+                            itemSize = 128.dp,
                             modifier =
                                 Modifier.clickable {
                                     onProfileMediaClick.invoke()
@@ -689,7 +688,8 @@ private fun ProfileScreen(
                             item {
                                 ProfileMeidasPreview(
                                     mediaState = state.state.mediaState,
-                                    orientation = Orientation.Horizontal,
+                                    maxLines = 1,
+                                    itemSize = 64.dp,
                                     modifier =
                                         Modifier.clickable {
                                             onProfileMediaClick.invoke()
@@ -1164,200 +1164,96 @@ internal fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ProfileMeidasPreview(
     mediaState: UiState<LazyPagingItemsProxy<ProfileMedia>>,
-    orientation: Orientation,
+    maxLines: Int,
+    itemSize: Dp,
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
-    when (orientation) {
-        Orientation.Vertical -> {
-            AdaptiveGrid(
-                modifier = modifier,
-                content = {
-                    mediaState.onSuccess { media ->
-                        if (media.itemCount > 0) {
-                            val count = min(6, media.itemCount)
-                            repeat(count) {
-                                val item = media[it]
-                                if (item == null) {
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .aspectRatio(1f)
-                                                .placeholder(true),
-                                    )
-                                } else {
-                                    Box {
-                                        MediaItem(
-                                            media = item.media,
-                                            modifier =
-                                                Modifier
-                                                    .clipToBounds()
-                                                    .fillMaxSize()
-                                                    .let {
-                                                        if (item.media is UiMedia.Image &&
-                                                            (item.media as UiMedia.Image).sensitive &&
-                                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                                                            !appearanceSettings.showSensitiveContent
-                                                        ) {
-                                                            it.blur(32.dp)
-                                                        } else {
-                                                            it
-                                                        }
-                                                    },
-                                            showCountdown = false,
-                                        )
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .matchParentSize()
-                                                    .let {
-                                                        if (item.media is UiMedia.Image &&
-                                                            (item.media as UiMedia.Image).sensitive &&
-                                                            Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
-                                                            !appearanceSettings.showSensitiveContent
-                                                        ) {
-                                                            it.background(MaterialTheme.colorScheme.surfaceContainer)
-                                                        } else {
-                                                            it
-                                                        }
-                                                    },
-                                        )
-                                        if (it == count - 1) {
-                                            Box(
-                                                modifier =
-                                                    Modifier
-                                                        .matchParentSize()
-                                                        .background(
-                                                            color =
-                                                                MaterialTheme.colorScheme
-                                                                    .surfaceColorAtElevation(
-                                                                        3.dp,
-                                                                    )
-                                                                    .copy(alpha = 0.25f),
-                                                        ),
-                                                contentAlignment = Alignment.Center,
-                                            ) {
-                                                Text(
-                                                    text = stringResource(R.string.mastodon_item_show_more),
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.onSurface,
-                                                    textAlign = TextAlign.Center,
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }.onLoading {
-                        repeat(6) {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .aspectRatio(1f)
-                                        .fillMaxSize()
-                                        .placeholder(true),
-                            )
-                        }
-                    }
-                },
-            )
-        }
-
-        Orientation.Horizontal -> {
-            LazyRow(
-                modifier = modifier,
+    mediaState.onSuccess { media ->
+        if (media.itemCount > 0) {
+            ContextualFlowRow(
+                modifier =
+                    modifier
+                        .padding(horizontal = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-            ) {
-                mediaState.onSuccess { media ->
-                    if (media.itemCount > 0) {
-                        val count = min(6, media.itemCount)
-                        items(count) {
-                            val item = media[it]
-                            if (item == null) {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .aspectRatio(1f)
-                                            .size(64.dp)
-                                            .placeholder(true),
-                                )
-                            } else {
-                                Box {
-                                    MediaItem(
-                                        media = item.media,
-                                        modifier =
-                                            Modifier
-                                                .clipToBounds()
-                                                .size(64.dp)
-                                                .let {
-                                                    if (item.media is UiMedia.Image &&
-                                                        (item.media as UiMedia.Image).sensitive &&
-                                                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                                                        !appearanceSettings.showSensitiveContent
-                                                    ) {
-                                                        it.blur(32.dp)
-                                                    } else {
-                                                        it
-                                                    }
-                                                },
-                                        showCountdown = false,
-                                    )
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .matchParentSize()
-                                                .let {
-                                                    if (item.media is UiMedia.Image &&
-                                                        (item.media as UiMedia.Image).sensitive &&
-                                                        Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
-                                                        !appearanceSettings.showSensitiveContent
-                                                    ) {
-                                                        it.background(MaterialTheme.colorScheme.surfaceContainer)
-                                                    } else {
-                                                        it
-                                                    }
-                                                },
-                                    )
-                                    if (it == count - 1) {
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .matchParentSize()
-                                                    .background(
-                                                        color =
-                                                            MaterialTheme.colorScheme
-                                                                .surfaceColorAtElevation(
-                                                                    3.dp,
-                                                                )
-                                                                .copy(alpha = 0.25f),
-                                                    ),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.mastodon_item_show_more),
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                textAlign = TextAlign.Center,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }.onLoading {
-                    items(6) {
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                overflow =
+                    ContextualFlowRowOverflow.expandIndicator {
                         Box(
                             modifier =
                                 Modifier
-                                    .aspectRatio(1f)
-                                    .size(64.dp)
-                                    .placeholder(true),
+                                    .size(itemSize)
+                                    .background(
+                                        color =
+                                            MaterialTheme.colorScheme
+                                                .surfaceColorAtElevation(
+                                                    3.dp,
+                                                )
+                                                .copy(alpha = 0.25f),
+                                    ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.mastodon_item_show_more),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    },
+                itemCount = media.itemCount,
+                maxLines = maxLines,
+            ) {
+                val item = media[it]
+                if (item == null) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .aspectRatio(1f)
+                                .size(itemSize)
+                                .placeholder(true),
+                    )
+                } else {
+                    Box {
+                        MediaItem(
+                            media = item.media,
+                            modifier =
+                                Modifier
+                                    .clipToBounds()
+                                    .size(itemSize)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .let {
+                                        if (item.media is UiMedia.Image &&
+                                            (item.media as UiMedia.Image).sensitive &&
+                                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                                            !appearanceSettings.showSensitiveContent
+                                        ) {
+                                            it.blur(32.dp)
+                                        } else {
+                                            it
+                                        }
+                                    },
+                            showCountdown = false,
+                        )
+                        Box(
+                            modifier =
+                                Modifier
+                                    .matchParentSize()
+                                    .let {
+                                        if (item.media is UiMedia.Image &&
+                                            (item.media as UiMedia.Image).sensitive &&
+                                            Build.VERSION.SDK_INT < Build.VERSION_CODES.S &&
+                                            !appearanceSettings.showSensitiveContent
+                                        ) {
+                                            it.background(MaterialTheme.colorScheme.surfaceContainer)
+                                        } else {
+                                            it
+                                        }
+                                    },
                         )
                     }
                 }

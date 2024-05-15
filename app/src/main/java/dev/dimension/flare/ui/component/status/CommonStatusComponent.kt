@@ -67,7 +67,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.localizedShortTime
+import dev.dimension.flare.ui.model.localizedFullTime
 import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -720,7 +720,7 @@ private fun StatusPollComponent(
             }
         }
         Text(
-            text = poll.expiresAt.localizedShortTime,
+            text = poll.expiresAt.localizedFullTime,
         )
     }
 }

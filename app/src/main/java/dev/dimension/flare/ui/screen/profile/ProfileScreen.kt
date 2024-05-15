@@ -1002,6 +1002,7 @@ internal fun CommonProfileHeader(
                             rememberSharedContentState(key = "profile-banner-$userKey"),
                             animatedVisibilityScope = this@AnimatedVisibilityScope,
                         )
+                        .clipToBounds()
                         .fillMaxWidth()
                         .height(actualBannerHeight)
                         .let {

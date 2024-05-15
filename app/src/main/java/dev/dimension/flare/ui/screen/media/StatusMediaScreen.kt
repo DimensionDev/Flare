@@ -98,35 +98,36 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
-    style = FullScreenDialogStyle::class,
+//    style = FullScreenDialogStyle::class,
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
     ],
 )
-internal fun StatusMediaRoute(
+internal fun AnimatedVisibilityScope.StatusMediaRoute(
     statusKey: MicroBlogKey,
     index: Int,
     preview: String?,
     navigator: DestinationsNavigator,
     accountType: AccountType,
-) {
-    SetDialogDestinationToEdgeToEdge()
-    AnimatedVisibility(true) {
-        SharedTransitionScope {
-            StatusMediaScreen(
-                statusKey = statusKey,
-                accountType = accountType,
-                index = index,
-                onDismiss = navigator::navigateUp,
-                preview = preview,
-                toStatus = {
-                    navigator.navigate(StatusRouteDestination(statusKey, accountType))
-                },
-            )
-        }
-    }
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
+//    SetDialogDestinationToEdgeToEdge()
+//    AnimatedVisibility(true) {
+//        SharedTransitionScope {
+    StatusMediaScreen(
+        statusKey = statusKey,
+        accountType = accountType,
+        index = index,
+        onDismiss = navigator::navigateUp,
+        preview = preview,
+        toStatus = {
+            navigator.navigate(StatusRouteDestination(statusKey, accountType))
+        },
+    )
+//        }
+//    }
 }
 
 context(AnimatedVisibilityScope, SharedTransitionScope)

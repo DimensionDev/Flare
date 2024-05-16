@@ -773,9 +773,15 @@ private fun ExpandedCard(
                         MediaItem(
                             media = it,
                             keepAspectRatio = appearanceSettings.expandMediaSize,
+                            modifier =
+                                Modifier
+                                    .clipToBounds(),
                         )
                     },
                     expandedSize = appearanceSettings.expandMediaSize,
+                    modifier =
+                        Modifier
+                            .clipToBounds(),
                 )
             }
             Column(

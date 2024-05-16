@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -27,7 +30,6 @@ import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuite
@@ -64,7 +66,6 @@ import kotlin.math.roundToInt
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { 80.dp }
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
 fun NavigationSuiteScaffold2(
@@ -113,7 +114,7 @@ fun NavigationSuiteScaffold2(
         val scope by rememberStateOfItems(navigationSuiteItems)
         val footerScope by rememberStateOfItems(footerItems)
         Row {
-            if (layoutType == NavigationSuiteType.NavigationRail) {
+            AnimatedVisibility(layoutType == NavigationSuiteType.NavigationRail) {
                 NavigationRail(
                     header = railHeader,
                     containerColor = navigationSuiteColors.navigationRailContainerColor,
@@ -151,7 +152,8 @@ fun NavigationSuiteScaffold2(
                         )
                     }
                 }
-            } else if (layoutType == NavigationSuiteType.NavigationDrawer) {
+            }
+            AnimatedVisibility(layoutType == NavigationSuiteType.NavigationDrawer) {
                 val secondaryScope by rememberStateOfItems(secondaryItems)
                 PermanentDrawerSheet(
                     modifier =
@@ -224,14 +226,18 @@ fun NavigationSuiteScaffold2(
                 ) {
                     content.invoke()
                 }
-                if (layoutType == NavigationSuiteType.NavigationBar) {
+                androidx.compose.animation.AnimatedVisibility(
+                    layoutType == NavigationSuiteType.NavigationBar,
+                    enter = slideInVertically { it },
+                    exit = slideOutVertically { it },
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                ) {
                     NavigationBar(
                         containerColor = navigationSuiteColors.navigationBarContainerColor,
                         contentColor = navigationSuiteColors.navigationBarContentColor,
-                        modifier =
-                            Modifier
-                                .align(Alignment.BottomCenter)
-                                .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
                     ) {
                         scope.itemList.forEach {
                             NavigationBarItem(

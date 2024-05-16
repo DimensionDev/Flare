@@ -50,6 +50,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -160,6 +161,7 @@ internal fun HomeScreen(
             NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                 currentWindowAdaptiveInfo(),
             )
+        val actualLayoutType = state.navigationState.type ?: layoutType
         BackHandler(
             enabled = drawerState.isOpen,
             onBack = {
@@ -289,10 +291,10 @@ internal fun HomeScreen(
                         },
                     )
                 },
-                gesturesEnabled = layoutType != NavigationSuiteType.NavigationDrawer,
+                gesturesEnabled = actualLayoutType != NavigationSuiteType.NavigationDrawer,
             ) {
                 NavigationSuiteScaffold2(
-                    layoutType = layoutType,
+                    layoutType = actualLayoutType,
                     modifier = modifier,
                     drawerHeader = {
                         DrawerHeader(accountTypeState, currentTab, navController)
@@ -458,6 +460,7 @@ internal fun HomeScreen(
                                         dependency(tabState)
                                         dependency(drawerState)
                                         dependency(this@SharedTransitionLayout)
+                                        dependency(state.navigationState)
                                     }
                                 }
                             }
@@ -633,6 +636,10 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
             remember {
                 ActiveAccountPresenter()
             }.invoke()
+        val navigationState =
+            remember {
+                NavigationState()
+            }
         val tabs =
             account.user.flatMap(
                 onError = {
@@ -686,6 +693,7 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
             }
         object {
             val tabs = tabs
+            val navigationState = navigationState
         }
     }
 
@@ -724,6 +732,20 @@ internal class TabState {
 
     fun onClick() {
         callbacks.lastOrNull()?.invoke()
+    }
+}
+
+internal class NavigationState {
+    private val state = mutableStateOf<NavigationSuiteType?>(null)
+    val type: NavigationSuiteType?
+        get() = state.value
+
+    fun hide() {
+        state.value = NavigationSuiteType.None
+    }
+
+    fun show() {
+        state.value = null
     }
 }
 

@@ -26,6 +26,7 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
                 is UiStatus.BlueskyNotification -> ""
                 is UiStatus.XQT -> status.contentToken.toMarkdown()
                 is UiStatus.XQTNotification -> ""
+                is UiStatus.VVO -> status.contentToken.toMarkdown()
             },
     )
 }

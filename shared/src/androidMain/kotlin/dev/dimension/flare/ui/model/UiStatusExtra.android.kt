@@ -169,5 +169,12 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
         is UiStatus.XQTNotification -> {
             UiStatusExtra.Empty
         }
+
+        is UiStatus.VVO -> {
+            UiStatusExtra(
+                contentDirection = LayoutDirection.Ltr,
+                createdAt = status.createdAt,
+            )
+        }
     }
 }

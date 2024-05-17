@@ -6,6 +6,7 @@ import dev.dimension.flare.data.database.app.DbAccount
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
@@ -108,6 +109,26 @@ sealed interface UiAccount {
     }
 
     @Immutable
+    data class VVo(
+        override val accountKey: MicroBlogKey,
+        override val credential: Credential,
+    ) : UiAccount {
+        override val platformType: PlatformType
+            get() = PlatformType.VVo
+
+        @Immutable
+        @Serializable
+        @SerialName("VVoCredential")
+        data class Credential(
+            val chocolate: String,
+        ) : UiAccount.Credential
+
+        val dataSource by lazy {
+            VVODataSource(this)
+        }
+    }
+
+    @Immutable
     data object Guest : UiAccount {
         override val accountKey: MicroBlogKey
             get() = GuestMastodonService.GuestKey
@@ -149,6 +170,14 @@ sealed interface UiAccount {
                 PlatformType.xQt -> {
                     val credential = credential_json.decodeJson<XQT.Credential>()
                     XQT(
+                        credential = credential,
+                        accountKey = account_key,
+                    )
+                }
+
+                PlatformType.VVo -> {
+                    val credential = credential_json.decodeJson<VVo.Credential>()
+                    VVo(
                         credential = credential,
                         accountKey = account_key,
                     )

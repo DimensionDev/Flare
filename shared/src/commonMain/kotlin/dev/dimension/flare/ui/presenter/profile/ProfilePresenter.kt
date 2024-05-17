@@ -9,6 +9,7 @@ import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -115,6 +116,14 @@ class ProfilePresenter(
                                     user.userKey,
                                     data,
                                 )
+
+                            is UiRelation.VVO -> {
+                                vvoFollow(
+                                    service as VVODataSource,
+                                    user.userKey,
+                                    data,
+                                )
+                            }
                         }
                     }
                 }
@@ -170,6 +179,17 @@ class ProfilePresenter(
                                     )
                                 }
                             }
+
+                            is UiRelation.VVO -> {
+                                require(service is VVODataSource)
+//                                if (data.blocking) {
+//                                    service.unblock(user.userKey)
+//                                } else {
+//                                    service.block(
+//                                        user.userKey,
+//                                    )
+//                                }
+                            }
                         }
                     }
                 }
@@ -200,6 +220,10 @@ class ProfilePresenter(
                             is UiRelation.XQT -> {
                                 require(service is XQTDataSource)
                                 if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
+                            }
+
+                            is UiRelation.VVO -> {
+                                // NOOP: VVO doesn't have mute
                             }
                         }
                     }
@@ -257,6 +281,17 @@ class ProfilePresenter(
         when {
             data.following -> service.unfollow(userKey)
             data.blocking -> service.unblock(userKey)
+            else -> service.follow(userKey)
+        }
+    }
+
+    private suspend fun vvoFollow(
+        service: VVODataSource,
+        userKey: MicroBlogKey,
+        data: UiRelation.VVO,
+    ) {
+        when {
+            data.following -> service.unfollow(userKey)
             else -> service.follow(userKey)
         }
     }

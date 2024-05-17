@@ -75,6 +75,7 @@ class ComposePresenter(
                                     is UiStatus.MastodonNotification -> PlatformType.Mastodon
                                     is UiStatus.MisskeyNotification -> PlatformType.Misskey
                                     is UiStatus.XQTNotification -> PlatformType.xQt
+                                    is UiStatus.VVO -> PlatformType.VVo
                                 },
                             )
                     } ?: UiState.Success(current to PlatformType.entries.toList())
@@ -127,6 +128,8 @@ class ComposePresenter(
                     is UiAccount.XQT -> UiState.Error(IllegalStateException("XQT not supported"))
                     is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
                     UiAccount.Guest -> UiState.Error(IllegalStateException("Guest not supported"))
+                    // TODO: handle VVo
+                    is UiAccount.VVo -> UiState.Error(IllegalStateException("VVo not supported"))
                 }
             } ?: UiState.Error(IllegalStateException("Visibility not supported"))
 

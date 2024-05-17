@@ -144,6 +144,10 @@ internal fun accountServiceProvider(accountType: AccountType): UiState<Microblog
                     it.dataSource
                 }
 
+                is UiAccount.VVo -> {
+                    it.dataSource
+                }
+
                 UiAccount.Guest -> GuestDataSource
             }
         }

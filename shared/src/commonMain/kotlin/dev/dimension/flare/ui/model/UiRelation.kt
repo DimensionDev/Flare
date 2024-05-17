@@ -42,4 +42,10 @@ sealed interface UiRelation {
         val protected: Boolean,
         val muting: Boolean,
     ) : UiRelation
+
+    @Immutable
+    data class VVO(
+        val following: Boolean,
+        val isFans: Boolean,
+    ) : UiRelation
 }

@@ -232,6 +232,45 @@ sealed class UiUser {
             Company,
         }
     }
+
+    @Immutable
+    data class VVO(
+        override val userKey: MicroBlogKey,
+        override val avatarUrl: String,
+        override val bannerUrl: String?,
+        val rawHandle: String,
+        val rawDescription: String?,
+        val matrices: Matrices,
+        val verified: Boolean,
+        val verifiedReason: String?,
+        val relation: UiRelation.VVO,
+        val accountKey: MicroBlogKey,
+        override val handle: String = "@$rawHandle",
+    ) : UiUser() {
+        override val nameElement: Element by lazy {
+            Element("span").apply {
+                children.add(Text(rawHandle))
+            }
+        }
+        override val descriptionElement: Element? by lazy {
+            rawDescription?.let {
+                Element("span").apply {
+                    children.add(Text(it))
+                }
+            }
+        }
+
+        @Immutable
+        data class Matrices(
+            val fansCount: String,
+            val followsCount: Long,
+            val statusesCount: Long,
+        ) {
+            val fansCountHumanized = fansCount
+            val followsCountHumanized = followsCount.humanize()
+            val statusesCountHumanized = statusesCount.humanize()
+        }
+    }
 }
 
 private fun parseNote(account: Account): Element {

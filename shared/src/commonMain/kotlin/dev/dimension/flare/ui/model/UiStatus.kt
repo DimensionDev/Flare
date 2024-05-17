@@ -158,6 +158,12 @@ sealed class UiStatus {
                 buildString {
                     append("xqt_notification")
                 }
+
+            is VVO ->
+                buildString {
+                    append("vvo")
+                    if (media.isNotEmpty()) append("_media")
+                }
         }
     }
 
@@ -457,6 +463,43 @@ sealed class UiStatus {
             Mention,
         }
     }
+
+    @Immutable
+    data class VVO internal constructor(
+        override val statusKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
+        val rawUser: UiUser.VVO?,
+        val content: String,
+        val rawContent: String,
+        val createdAt: Instant,
+        val media: ImmutableList<UiMedia>,
+        val liked: Boolean,
+        val matrices: Matrices,
+        val regionName: String?,
+        val source: String?,
+        val quote: VVO?,
+    ) : UiStatus() {
+        val contentToken by lazy {
+            Ktml.parse(content)
+        }
+
+        val displayUser by lazy {
+            rawUser?.copy(
+                handle = regionName ?: source ?: rawUser.handle,
+            )
+        }
+
+        @Immutable
+        data class Matrices(
+            val commentCount: Long,
+            val likeCount: Long,
+            val repostCount: Long,
+        ) {
+            val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
+            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.humanize() else null }
+            val humanizedCommentCount by lazy { if (commentCount > 0) commentCount.humanize() else null }
+        }
+    }
 }
 
 internal fun List<Token>.toHtml(accountKey: MicroBlogKey): Element {
@@ -746,6 +789,7 @@ fun createSampleStatus(user: UiUser) =
         is UiUser.Mastodon -> createMastodonStatus(user)
         is UiUser.Misskey -> createMisskeyStatus(user)
         is UiUser.XQT -> createXQTStatus(user)
+        is UiUser.VVO -> createVVOStatus(user)
     }
 
 private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon {
@@ -862,6 +906,28 @@ fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT {
         inReplyToUserId = null,
         sensitive = false,
         raw = Tweet(restId = ""),
+    )
+}
+
+fun createVVOStatus(user: UiUser.VVO): UiStatus.VVO {
+    return UiStatus.VVO(
+        statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
+        accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
+        rawUser = user,
+        content = "VVO post content",
+        rawContent = "VVO post content",
+        createdAt = Clock.System.now(),
+        media = persistentListOf(),
+        liked = false,
+        matrices =
+            UiStatus.VVO.Matrices(
+                commentCount = 15,
+                likeCount = 25,
+                repostCount = 35,
+            ),
+        regionName = null,
+        source = "From Flare",
+        quote = null,
     )
 }
 

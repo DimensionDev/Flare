@@ -5,6 +5,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.DbApplication
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.xqtHost
 
 @Immutable
@@ -33,6 +34,11 @@ sealed interface UiApplication {
         override val host: String = xqtHost
     }
 
+    @Immutable
+    data object VVo : UiApplication {
+        override val host: String = vvoHost
+    }
+
     companion object {
         fun DbApplication.toUi(): UiApplication {
             return when (platform_type) {
@@ -54,6 +60,8 @@ sealed interface UiApplication {
                     )
 
                 PlatformType.xQt -> XQT
+
+                PlatformType.VVo -> VVo
             }
         }
     }

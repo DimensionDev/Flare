@@ -38,10 +38,6 @@ sealed interface StatusContent {
     @SerialName("bluesky")
     data class Bluesky(val data: PostView, val reason: FeedViewPostReasonUnion?) : StatusContent
 
-//    @Serializable
-//    @SerialName("bluesky-reason")
-//    data class BlueskyReason(val reason: FeedViewPostReasonUnion, val data: PostView) : StatusContent
-
     @Serializable
     @SerialName("bluesky-notification")
     data class BlueskyNotification(val data: app.bsky.notification.ListNotificationsNotification) :
@@ -51,6 +47,12 @@ sealed interface StatusContent {
     @SerialName("XQT")
     data class XQT internal constructor(
         internal val data: dev.dimension.flare.data.network.xqt.model.Tweet,
+    ) : StatusContent
+
+    @Serializable
+    @SerialName("vvo")
+    data class VVO internal constructor(
+        internal val data: dev.dimension.flare.data.network.vvo.model.Status,
     ) : StatusContent
 }
 

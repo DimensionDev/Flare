@@ -107,6 +107,8 @@ private fun UiStatus.textToFilter(visited: MutableSet<UiStatus>): List<String> {
                 (retweet?.textToFilter(visited).orEmpty())
 
         is UiStatus.XQTNotification -> emptyList()
+
+        is UiStatus.VVO -> listOfNotNull(content) + (quote?.textToFilter(visited).orEmpty())
     }
 }
 

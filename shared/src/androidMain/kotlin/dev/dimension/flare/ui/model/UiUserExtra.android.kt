@@ -109,5 +109,11 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
                         LayoutDirection.Rtl
                     },
             )
+
+        is UiUser.VVO ->
+            UiUserExtra(
+                nameDirection = LayoutDirection.Ltr,
+                descriptionDirection = LayoutDirection.Ltr,
+            )
     }
 }

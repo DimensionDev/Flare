@@ -235,7 +235,7 @@ class MastodonDataSource(
                 database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Mastodon)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi() }
+                    .map { it.toUi(account.accountKey) }
             },
         )
     }
@@ -257,7 +257,7 @@ class MastodonDataSource(
             cacheSource = {
                 database.dbUserQueries.findByKey(userKey).asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi() }
+                    .map { it.toUi(account.accountKey) }
             },
         )
     }

@@ -84,7 +84,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Mastodon)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi() }
+                    .map { it.toUi(account.accountKey) }
             },
         )
     }
@@ -106,7 +106,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
             cacheSource = {
                 database.dbUserQueries.findByKey(userKey).asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi() }
+                    .map { it.toUi(account.accountKey) }
             },
         )
     }

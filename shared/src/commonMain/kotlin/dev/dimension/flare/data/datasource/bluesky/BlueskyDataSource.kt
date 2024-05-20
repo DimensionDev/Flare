@@ -160,7 +160,7 @@ class BlueskyDataSource(
                 database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Bluesky)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.toUi() }
+                    .mapNotNull { it.toUi(account.accountKey) }
             },
         )
     }
@@ -186,7 +186,7 @@ class BlueskyDataSource(
                 database.dbUserQueries.findByKey(MicroBlogKey(id, account.accountKey.host))
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.toUi() }
+                    .mapNotNull { it.toUi(account.accountKey) }
             },
         )
     }
@@ -199,7 +199,7 @@ class BlueskyDataSource(
                 .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
                 .requireResponse()
                 .toDbUser(account.accountKey.host)
-                .toUi()
+                .toUi(account.accountKey)
                 .let {
                     if (it is UiUser.Bluesky) {
                         it.relation

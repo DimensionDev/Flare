@@ -195,7 +195,7 @@ class MisskeyDataSource(
                 database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Misskey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi() }
+                    .map { it.toUi(account.accountKey) }
             },
         )
     }
@@ -222,7 +222,7 @@ class MisskeyDataSource(
             cacheSource = {
                 database.dbUserQueries.findByKey(userKey).asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi() }
+                    .map { it.toUi(account.accountKey) }
             },
         )
     }
@@ -235,7 +235,7 @@ class MisskeyDataSource(
                 .usersShow(UsersShowRequest(userId = userKey.id))
                 .body()!!
                 .toDbUser(account.accountKey.host)
-                .toUi()
+                .toUi(account.accountKey)
                 .let {
                     if (it is UiUser.Misskey) {
                         it.relation

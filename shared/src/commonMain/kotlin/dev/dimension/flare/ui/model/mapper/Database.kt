@@ -53,33 +53,33 @@ internal fun StatusContent.toUi(accountKey: MicroBlogKey) =
             )
     }
 
-internal fun DbUser.toUi(): UiUser {
+internal fun DbUser.toUi(accountKey: MicroBlogKey): UiUser {
     return when (val user = content) {
-        is UserContent.Mastodon -> user.data.toUi(host = user_key.host)
+        is UserContent.Mastodon -> user.data.toUi(host = accountKey.host)
 
         is UserContent.Misskey ->
             user.data.toUi(
-                accountKey = user_key,
+                accountKey = accountKey,
             )
 
         is UserContent.MisskeyLite ->
             user.data.toUi(
-                accountKey = user_key,
+                accountKey = accountKey,
             )
 
         is UserContent.Bluesky ->
             user.data.toUi(
-                accountKey = user_key,
+                accountKey = accountKey,
             )
 
         is UserContent.BlueskyLite ->
             user.data.toUi(
-                accountKey = user_key,
+                accountKey = accountKey,
             )
 
         is UserContent.XQT ->
             user.data.toUi(
-                accountKey = user_key,
+                accountKey = accountKey,
             )
     }
 }

@@ -221,7 +221,7 @@ class XQTDataSource(
             cacheSource = {
                 database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.xQt).asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi() }
+                    .map { it.toUi(account.accountKey) }
             },
         )
     }
@@ -255,7 +255,7 @@ class XQTDataSource(
             cacheSource = {
                 database.dbUserQueries.findByKey(userKey).asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi() }
+                    .map { it.toUi(account.accountKey) }
             },
         )
     }

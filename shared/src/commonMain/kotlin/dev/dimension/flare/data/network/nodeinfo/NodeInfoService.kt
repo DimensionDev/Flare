@@ -8,6 +8,7 @@ import dev.dimension.flare.data.network.nodeinfo.model.Schema11
 import dev.dimension.flare.data.network.nodeinfo.model.Schema20
 import dev.dimension.flare.data.network.nodeinfo.model.Schema21
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.xqtHost
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -60,6 +61,9 @@ internal data object NodeInfoService {
     suspend fun detectPlatformType(host: String): PlatformType {
         if (host.equals(xqtHost, ignoreCase = true) || host.equals("x.social", ignoreCase = true)) {
             return PlatformType.xQt
+        }
+        if (host.equals(vvoHost, ignoreCase = true) || host.equals("vvo.social", ignoreCase = true)) {
+            return PlatformType.VVo
         }
         return try {
             val nodeInfo = fetchNodeInfo(host)

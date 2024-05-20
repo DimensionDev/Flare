@@ -1,7 +1,9 @@
 package dev.dimension.flare.data.network.vvo
 
 import dev.dimension.flare.data.network.ktorfit
+import dev.dimension.flare.data.network.vvo.api.ConfigApi
 import dev.dimension.flare.data.network.vvo.api.TimelineApi
+import dev.dimension.flare.data.network.vvo.api.UserApi
 import dev.dimension.flare.model.vvoHost
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpClientPlugin
@@ -22,7 +24,9 @@ private fun config(
 
 internal class VVOService(
     private val chocolate: String,
-) : TimelineApi by config(chocolate = chocolate).create() {
+) : TimelineApi by config(chocolate = chocolate).create(),
+    UserApi by config(chocolate = chocolate).create(),
+    ConfigApi by config(chocolate = chocolate).create() {
     companion object {
         fun checkChocolates(chocolate: String): Boolean {
             return chocolate.contains("SUBP=") && chocolate.contains("SUB=")

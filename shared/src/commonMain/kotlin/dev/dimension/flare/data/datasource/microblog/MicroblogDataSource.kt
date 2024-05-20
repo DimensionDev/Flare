@@ -84,6 +84,13 @@ interface MicroblogDataSource {
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
 
     fun supportedComposeEvent(statusKey: MicroBlogKey? = null): List<SupportedComposeEvent>
+
+    fun profileActions(): List<ProfileAction>
+
+    suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    )
 }
 
 data class ComposeProgress(
@@ -108,3 +115,14 @@ enum class SupportedComposeEvent {
 }
 
 fun MicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:${account.accountKey}:$userKey"
+
+sealed interface ProfileAction {
+    suspend operator fun invoke(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    )
+
+    fun interface Block : ProfileAction
+
+    fun interface Mute : ProfileAction
+}

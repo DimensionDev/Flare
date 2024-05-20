@@ -620,6 +620,42 @@ class XQTDataSource(
         }
     }
 
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.XQT)
+        when {
+            relation.following -> unfollow(userKey)
+            relation.blocking -> unblock(userKey)
+            else -> follow(userKey)
+        }
+    }
+
+    override suspend fun block(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.XQT)
+        if (relation.blocking) {
+            unblock(userKey)
+        } else {
+            block(userKey)
+        }
+    }
+
+    override suspend fun mute(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.XQT)
+        if (relation.muting) {
+            unmute(userKey)
+        } else {
+            mute(userKey)
+        }
+    }
+
     suspend fun like(status: UiStatus.XQT) {
         updateStatusUseCase<StatusContent.XQT>(
             statusKey = status.statusKey,

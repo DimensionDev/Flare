@@ -795,4 +795,41 @@ class MastodonDataSource(
             SupportedComposeEvent.Visibility,
         )
     }
+
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Mastodon)
+        when {
+            relation.following -> unfollow(userKey)
+            relation.blocking -> unblock(userKey)
+            relation.requested -> Unit // you can't cancel follow request on mastodon
+            else -> follow(userKey)
+        }
+    }
+
+    override suspend fun block(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Mastodon)
+        if (relation.blocking) {
+            unblock(userKey)
+        } else {
+            block(userKey)
+        }
+    }
+
+    override suspend fun mute(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Mastodon)
+        if (relation.muting) {
+            unmute(userKey)
+        } else {
+            mute(userKey)
+        }
+    }
 }

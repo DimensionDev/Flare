@@ -724,4 +724,41 @@ class MisskeyDataSource(
             SupportedComposeEvent.Visibility,
         )
     }
+
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Misskey)
+        when {
+            relation.following -> unfollow(userKey)
+            relation.blocking -> unblock(userKey)
+            relation.hasPendingFollowRequestFromYou -> Unit // TODO: cancel follow request
+            else -> follow(userKey)
+        }
+    }
+
+    override suspend fun block(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Misskey)
+        if (relation.blocking) {
+            unblock(userKey)
+        } else {
+            block(userKey)
+        }
+    }
+
+    override suspend fun mute(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Misskey)
+        if (relation.muted) {
+            unmute(userKey)
+        } else {
+            mute(userKey)
+        }
+    }
 }

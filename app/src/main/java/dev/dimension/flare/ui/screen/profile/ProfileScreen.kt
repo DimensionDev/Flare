@@ -94,6 +94,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onNotEmptyOrLoading
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -741,6 +742,27 @@ private fun ProfileMenu(
             profileState.isMe.onSuccess { isMe ->
                 if (!isMe) {
                     profileState.relationState.onSuccess { relation ->
+                        profileState.actions.onSuccess { actions ->
+                            for (i in 0..<actions.size) {
+                                val action = actions[i]
+                                DropdownMenuItem(
+                                    text = {
+                                        when (action) {
+                                            is ProfileAction.Block -> TODO()
+                                            is ProfileAction.Mute -> TODO()
+                                        }
+                                    },
+                                    onClick = {
+                                        setShowMoreMenus(false)
+                                        profileState.onProfileActionClick(
+                                            user = user,
+                                            relation = relation,
+                                            action = action,
+                                        )
+                                    },
+                                )
+                            }
+                        }
                         when (relation) {
                             is UiRelation.Bluesky ->
                                 BlueskyUserMenu(

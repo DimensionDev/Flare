@@ -902,6 +902,42 @@ class BlueskyDataSource(
             SupportedComposeEvent.Media,
         )
     }
+
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Bluesky)
+        when {
+            relation.following -> unfollow(userKey)
+            relation.blocking -> unblock(userKey)
+            else -> follow(userKey)
+        }
+    }
+
+    override suspend fun block(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Bluesky)
+        if (relation.blocking) {
+            unblock(userKey)
+        } else {
+            block(userKey)
+        }
+    }
+
+    override suspend fun mute(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Bluesky)
+        if (relation.muting) {
+            unmute(userKey)
+        } else {
+            mute(userKey)
+        }
+    }
 }
 
 fun JsonElement.jsonContent(): JsonContent = JSON.decodeFromJsonElement(this)

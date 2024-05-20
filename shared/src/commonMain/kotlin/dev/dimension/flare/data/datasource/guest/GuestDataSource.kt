@@ -220,4 +220,25 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
     override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
         return emptyList()
     }
+
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun block(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun mute(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        TODO("Not yet implemented")
+    }
 }

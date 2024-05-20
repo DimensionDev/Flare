@@ -277,15 +277,6 @@ sealed class Height {
 }
 
 @Serializable
-data class FocusPoint(
-    val left: Double? = null,
-    val top: Double? = null,
-    val width: Double? = null,
-    val height: Double? = null,
-    val type: Long? = null,
-)
-
-@Serializable
 data class User(
     val id: Long,
     @SerialName("screen_name")
@@ -334,9 +325,18 @@ data class User(
 
 @Serializable
 data class Visible(
+    // type 0: all,
+    // type 10: fans only,
     val type: Long? = null,
     @SerialName("list_id")
     val listID: Long? = null,
+)
+
+@Serializable
+data class Config(
+    val login: Boolean? = null,
+    val st: String? = null,
+    val uid: String? = null,
 )
 
 internal object VVODateSerializer : KSerializer<Instant> {

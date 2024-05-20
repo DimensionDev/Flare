@@ -3,12 +3,14 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
 import dev.dimension.flare.common.CacheData
+import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
+import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LocalFilterRepository
@@ -151,11 +153,83 @@ class VVODataSource(
         TODO("Not yet implemented")
     }
 
-    suspend fun follow(accountKey: MicroBlogKey) {
-        service.follow(accountKey)
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.VVO)
+        if (relation.following) {
+            unfollow(userKey)
+        } else {
+            follow(userKey)
+        }
     }
 
-    suspend fun unfollow(accountKey: MicroBlogKey) {
-        service.unfollow(accountKey)
+    override suspend fun block(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+    }
+
+    override suspend fun mute(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+    }
+
+    suspend fun follow(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Mastodon>(
+            key = key,
+        ) {
+            it.copy(
+                following = true,
+            )
+        }
+        runCatching {
+            val config = service.config()
+            val st = config.data?.st
+            requireNotNull(st) { "st is null" }
+            service.follow(
+                st = st,
+                uid = userKey.id,
+            )
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Mastodon>(
+                key = key,
+            ) {
+                it.copy(
+                    following = false,
+                )
+            }
+        }
+    }
+
+    suspend fun unfollow(userKey: MicroBlogKey) {
+        val key = relationKeyWithUserKey(userKey)
+        MemCacheable.updateWith<UiRelation.Mastodon>(
+            key = key,
+        ) {
+            it.copy(
+                following = false,
+            )
+        }
+        runCatching {
+            val config = service.config()
+            val st = config.data?.st
+            requireNotNull(st) { "st is null" }
+            service.unfollow(
+                st = st,
+                uid = userKey.id,
+            )
+        }.onFailure {
+            MemCacheable.updateWith<UiRelation.Mastodon>(
+                key = key,
+            ) {
+                it.copy(
+                    following = true,
+                )
+            }
+        }
     }
 }

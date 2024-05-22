@@ -122,7 +122,9 @@ sealed interface ProfileAction {
         relation: UiRelation,
     )
 
-    fun interface Block : ProfileAction
+    fun relationState(relation: UiRelation): Boolean
 
-    fun interface Mute : ProfileAction
+    interface Block : ProfileAction
+
+    interface Mute : ProfileAction
 }

@@ -212,6 +212,7 @@ sealed interface TimelineTabItem : TabItem {
                 is UiUser.Misskey -> misskey(user.userKey)
                 is UiUser.Bluesky -> bluesky(user.userKey)
                 is UiUser.XQT -> xqt(user.userKey)
+                is UiUser.VVO -> vvo(user.userKey)
             }
 
         fun defaultSecondary(user: UiUser) =
@@ -220,6 +221,7 @@ sealed interface TimelineTabItem : TabItem {
                 is UiUser.Misskey -> defaultMisskeySecondaryItems(user.userKey)
                 is UiUser.Bluesky -> defaultBlueskySecondaryItems(user.userKey)
                 is UiUser.XQT -> defaultXqtSecondaryItems(user.userKey)
+                is UiUser.VVO -> defaultVVOSecondaryItems(user.userKey)
             }
 
         private fun mastodon(accountKey: MicroBlogKey) =
@@ -466,6 +468,29 @@ sealed interface TimelineTabItem : TabItem {
                         ),
                 ),
             )
+
+        private fun vvo(accountKey: MicroBlogKey) =
+            listOf(
+                HomeTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
+                        ),
+                ),
+                ProfileTabItem(
+                    account = AccountType.Specific(accountKey),
+                    userKey = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                        ),
+                ),
+            )
+
+        private fun defaultVVOSecondaryItems(accountKey: MicroBlogKey) = emptyList<TimelineTabItem>()
     }
 }
 

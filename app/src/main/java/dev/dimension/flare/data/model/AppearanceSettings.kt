@@ -3,6 +3,7 @@ package dev.dimension.flare.data.model
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
@@ -48,6 +49,7 @@ data class AppearanceSettings(
     val misskey: Misskey = Misskey(),
     val bluesky: Bluesky = Bluesky(),
     val xqt: XQT = XQT(),
+    val vvo: VVO = VVO(),
 ) {
     @Serializable
     data class Mastodon(
@@ -113,6 +115,22 @@ data class AppearanceSettings(
             NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
             REPLY(R.string.swipe_action_reply, Icons.AutoMirrored.Filled.Reply),
             REBLOG(R.string.swipe_action_reblog, FontAwesomeIcons.Solid.Retweet),
+            FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
+        }
+    }
+
+    @Serializable
+    data class VVO(
+        val swipeLeft: SwipeActions = SwipeActions.REBLOG,
+        val swipeRight: SwipeActions = SwipeActions.COMMENT,
+    ) {
+        enum class SwipeActions(
+            @StringRes val id: Int,
+            val icon: ImageVector,
+        ) {
+            NONE(R.string.swipe_action_nothing, Icons.Default.HideSource),
+            REBLOG(R.string.swipe_action_reblog, FontAwesomeIcons.Solid.Retweet),
+            COMMENT(R.string.swipe_action_comment, Icons.AutoMirrored.Filled.Comment),
             FAVOURITE(R.string.swipe_action_favourite, Icons.Default.Favorite),
         }
     }

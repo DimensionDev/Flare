@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -19,13 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.HtmlText2
 import dev.dimension.flare.ui.component.MatricesDisplay
-import dev.dimension.flare.ui.component.UserFields
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
@@ -38,8 +38,8 @@ import kotlinx.collections.immutable.persistentMapOf
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-internal fun MastodonProfileHeader(
-    user: UiUser.Mastodon,
+internal fun VVOProfileHeader(
+    user: UiUser.VVO,
     relationState: UiState<UiRelation>,
     onFollowClick: (UiRelation.Mastodon) -> Unit,
     onAvatarClick: () -> Unit,
@@ -56,14 +56,15 @@ internal fun MastodonProfileHeader(
         displayName = user.nameElement,
         handle = user.handle,
         handleTrailing = {
-            if (user.locked) {
+            if (user.verified) {
                 Icon(
-                    imageVector = Icons.Default.Lock,
+                    imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
                     modifier =
                         Modifier
                             .size(12.dp)
                             .alpha(MediumAlpha),
+                    tint = Color.Blue,
                 )
             }
         },
@@ -125,13 +126,12 @@ internal fun MastodonProfileHeader(
                         .padding(horizontal = screenHorizontalPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                HtmlText2(
-                    element = user.descriptionElement,
-                    layoutDirection = user.descriptionDirection,
-                )
-                UserFields(
-                    fields = user.fieldsParsed,
-                )
+                user.descriptionElement?.let {
+                    HtmlText2(
+                        element = it,
+                        layoutDirection = user.descriptionDirection,
+                    )
+                }
                 MatricesDisplay(
                     matrices =
                         remember(user.matrices) {

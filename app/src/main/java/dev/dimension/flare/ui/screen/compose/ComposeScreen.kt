@@ -1126,6 +1126,8 @@ private fun composePresenter(
                                 sensitive = mediaState.isMediaSensitive,
                             )
 
+                        is UiAccount.VVo -> TODO()
+
                         UiAccount.Guest -> throw IllegalStateException("Guest account cannot compose")
                     }
                 state.send(data)

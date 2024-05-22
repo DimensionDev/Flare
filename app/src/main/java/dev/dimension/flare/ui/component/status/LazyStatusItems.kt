@@ -58,6 +58,8 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.component.status.vvo.VVOStatusComponent
+import dev.dimension.flare.ui.component.status.vvo.VVOStatusEvent
 import dev.dimension.flare.ui.component.status.xqt.XQTNofiticationComponent
 import dev.dimension.flare.ui.component.status.xqt.XQTStatusComponent
 import dev.dimension.flare.ui.component.status.xqt.XQTStatusEvent
@@ -349,6 +351,15 @@ internal fun StatusItem(
                 modifier = modifier.padding(horizontal = horizontalPadding),
             )
         }
+
+        is UiStatus.VVO -> {
+            VVOStatusComponent(
+                data = item,
+                event = event,
+                modifier = modifier,
+                isDetail = isDetail,
+            )
+        }
     }
 }
 
@@ -356,7 +367,8 @@ internal sealed interface StatusEvent :
     MastodonStatusEvent,
     MisskeyStatusEvent,
     BlueskyStatusEvent,
-    XQTStatusEvent
+    XQTStatusEvent,
+    VVOStatusEvent
 
 internal class DefaultStatusEvent(
     private val scope: CoroutineScope,
@@ -724,6 +736,45 @@ internal class DefaultStatusEvent(
             ).deeplink(),
         )
     }
+
+    override fun onLikeClick(data: UiStatus.VVO) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onCommentClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDeleteClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onReblogClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onReportClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onStatusClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        TODO("Not yet implemented")
+    }
 }
 
 internal data object EmptyStatusEvent : StatusEvent {
@@ -756,6 +807,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onAddReactionClick(
         data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onCommentClick(
+        data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) = Unit
 
@@ -825,6 +881,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onReblogClick(data: UiStatus.XQT) = Unit
 
+    override fun onReblogClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
     override fun onQuoteClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -834,6 +895,8 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onLikeClick(data: UiStatus.XQT) = Unit
 
+    override fun onLikeClick(data: UiStatus.VVO) = Unit
+
     override fun onReportClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -844,6 +907,11 @@ internal data object EmptyStatusEvent : StatusEvent {
         uriHandler: UriHandler,
     ) = Unit
 
+    override fun onReportClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
     override fun onDeleteClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -851,6 +919,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onDeleteClick(
         data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onDeleteClick(
+        data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) = Unit
 
@@ -861,6 +934,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onStatusClick(
         data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onStatusClick(
+        data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) = Unit
 }

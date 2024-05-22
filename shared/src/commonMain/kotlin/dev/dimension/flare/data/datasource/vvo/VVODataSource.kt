@@ -9,6 +9,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -165,16 +166,8 @@ class VVODataSource(
         }
     }
 
-    override suspend fun block(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-    }
-
-    override suspend fun mute(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
+    override fun profileActions(): List<ProfileAction> {
+        return emptyList()
     }
 
     suspend fun follow(userKey: MicroBlogKey) {

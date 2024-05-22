@@ -17,6 +17,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
@@ -228,17 +229,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         TODO("Not yet implemented")
     }
 
-    override suspend fun block(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun mute(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-        TODO("Not yet implemented")
+    override fun profileActions(): List<ProfileAction> {
+        return emptyList()
     }
 }

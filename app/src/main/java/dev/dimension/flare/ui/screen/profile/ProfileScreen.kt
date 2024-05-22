@@ -747,10 +747,22 @@ private fun ProfileMenu(
                                 val action = actions[i]
                                 DropdownMenuItem(
                                     text = {
-                                        when (action) {
-                                            is ProfileAction.Block -> TODO()
-                                            is ProfileAction.Mute -> TODO()
-                                        }
+                                        val text =
+                                            when (action) {
+                                                is ProfileAction.Block ->
+                                                    if (action.relationState(relation)) {
+                                                        stringResource(id = R.string.user_unblock, user.handle)
+                                                    } else {
+                                                        stringResource(id = R.string.user_block, user.handle)
+                                                    }
+                                                is ProfileAction.Mute ->
+                                                    if (action.relationState(relation)) {
+                                                        stringResource(id = R.string.user_unmute, user.handle)
+                                                    } else {
+                                                        stringResource(id = R.string.user_mute, user.handle)
+                                                    }
+                                            }
+                                        Text(text = text)
                                     },
                                     onClick = {
                                         setShowMoreMenus(false)
@@ -762,63 +774,6 @@ private fun ProfileMenu(
                                     },
                                 )
                             }
-                        }
-                        when (relation) {
-                            is UiRelation.Bluesky ->
-                                BlueskyUserMenu(
-                                    user = user,
-                                    relation = relation,
-                                    onBlockClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.block(user, relation)
-                                    },
-                                    onMuteClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.mute(user, relation)
-                                    },
-                                )
-
-                            is UiRelation.Mastodon ->
-                                MastodonUserMenu(
-                                    user = user,
-                                    relation = relation,
-                                    onBlockClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.block(user, relation)
-                                    },
-                                    onMuteClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.mute(user, relation)
-                                    },
-                                )
-
-                            is UiRelation.Misskey ->
-                                MisskeyUserMenu(
-                                    user = user,
-                                    relation = relation,
-                                    onBlockClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.block(user, relation)
-                                    },
-                                    onMuteClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.mute(user, relation)
-                                    },
-                                )
-
-                            is UiRelation.XQT ->
-                                XQTUserMenu(
-                                    user = user,
-                                    relation = relation,
-                                    onBlockClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.block(user, relation)
-                                    },
-                                    onMuteClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.mute(user, relation)
-                                    },
-                                )
                         }
                     }
                     DropdownMenuItem(
@@ -956,6 +911,20 @@ private fun ProfileHeaderSuccess(
 
         is UiUser.XQT ->
             XQTProfileHeader(
+                user = user,
+                relationState = relationState,
+                modifier = modifier,
+                isMe = isMe,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
+                menu = menu,
+                expandMatrices = expandMatrices,
+                onAvatarClick = onAvatarClick,
+                onBannerClick = onBannerClick,
+            )
+        is UiUser.VVO ->
+            VVOProfileHeader(
                 user = user,
                 relationState = relationState,
                 modifier = modifier,

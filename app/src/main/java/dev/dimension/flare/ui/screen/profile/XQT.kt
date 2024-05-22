@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -176,34 +174,5 @@ internal fun XQTProfileHeader(
         modifier = modifier,
         onAvatarClick = onAvatarClick,
         onBannerClick = onBannerClick,
-    )
-}
-
-@Composable
-internal fun ColumnScope.XQTUserMenu(
-    user: UiUser,
-    relation: UiRelation.XQT,
-    onBlockClick: () -> Unit,
-    onMuteClick: () -> Unit,
-) {
-    DropdownMenuItem(
-        text = {
-            if (relation.muting) {
-                Text(text = stringResource(R.string.user_unmute, user.handle))
-            } else {
-                Text(text = stringResource(R.string.user_mute, user.handle))
-            }
-        },
-        onClick = onMuteClick,
-    )
-    DropdownMenuItem(
-        text = {
-            if (relation.blocking) {
-                Text(text = stringResource(R.string.user_unblock, user.handle))
-            } else {
-                Text(text = stringResource(R.string.user_block, user.handle))
-            }
-        },
-        onClick = onBlockClick,
     )
 }

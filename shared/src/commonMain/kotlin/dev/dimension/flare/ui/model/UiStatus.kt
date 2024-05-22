@@ -483,10 +483,19 @@ sealed class UiStatus {
             Ktml.parse(content)
         }
 
+        val canReblog by lazy {
+            // TODO:
+            true
+        }
+
         val displayUser by lazy {
             rawUser?.copy(
                 handle = regionName ?: source ?: rawUser.handle,
             )
+        }
+
+        val isFromMe by lazy {
+            rawUser?.userKey == accountKey
         }
 
         @Immutable
@@ -938,6 +947,10 @@ val UiStatus.medias: ImmutableList<UiMedia>
             is UiStatus.Misskey -> media
             is UiStatus.Bluesky -> medias
             is UiStatus.XQT -> medias
-            else -> persistentListOf()
+            is UiStatus.VVO -> media
+            is UiStatus.MastodonNotification -> persistentListOf()
+            is UiStatus.MisskeyNotification -> persistentListOf()
+            is UiStatus.BlueskyNotification -> persistentListOf()
+            is UiStatus.XQTNotification -> persistentListOf()
         }
     }

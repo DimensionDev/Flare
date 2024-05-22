@@ -20,6 +20,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -738,27 +739,44 @@ class MisskeyDataSource(
         }
     }
 
-    override suspend fun block(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-        require(relation is UiRelation.Misskey)
-        if (relation.blocking) {
-            unblock(userKey)
-        } else {
-            block(userKey)
-        }
-    }
+    override fun profileActions(): List<ProfileAction> {
+        return listOf(
+            object : ProfileAction.Mute {
+                override suspend fun invoke(
+                    userKey: MicroBlogKey,
+                    relation: UiRelation,
+                ) {
+                    require(relation is UiRelation.Misskey)
+                    if (relation.muted) {
+                        unmute(userKey)
+                    } else {
+                        mute(userKey)
+                    }
+                }
 
-    override suspend fun mute(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-        require(relation is UiRelation.Misskey)
-        if (relation.muted) {
-            unmute(userKey)
-        } else {
-            mute(userKey)
-        }
+                override fun relationState(relation: UiRelation): Boolean {
+                    require(relation is UiRelation.Misskey)
+                    return relation.muted
+                }
+            },
+            object : ProfileAction.Block {
+                override suspend fun invoke(
+                    userKey: MicroBlogKey,
+                    relation: UiRelation,
+                ) {
+                    require(relation is UiRelation.Misskey)
+                    if (relation.blocking) {
+                        unblock(userKey)
+                    } else {
+                        block(userKey)
+                    }
+                }
+
+                override fun relationState(relation: UiRelation): Boolean {
+                    require(relation is UiRelation.Misskey)
+                    return relation.blocking
+                }
+            },
+        )
     }
 }

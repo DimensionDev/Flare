@@ -87,7 +87,7 @@ fun CommonStatusComponent(
     rawContent: String,
     content: Element,
     contentDirection: LayoutDirection,
-    user: UiUser,
+    user: UiUser?,
     medias: ImmutableList<UiMedia>,
     humanizedTime: String,
     expandedTime: String,
@@ -185,7 +185,7 @@ fun CommonStatusDetailComponent(
     rawContent: String,
     content: Element,
     contentDirection: LayoutDirection,
-    user: UiUser,
+    user: UiUser?,
     medias: ImmutableList<UiMedia>,
     expandedTime: String,
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
@@ -315,7 +315,7 @@ fun CommonStatusComponent(
     rawContent: String,
     content: Element,
     contentDirection: LayoutDirection,
-    user: UiUser,
+    user: UiUser?,
     medias: ImmutableList<UiMedia>,
     humanizedTime: String,
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
@@ -422,12 +422,14 @@ fun CommonStatusComponent(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            StatusHeaderComponent(
-                user = user,
-                humanizedTime = humanizedTime,
-                onUserClick = { onUserClick(it) },
-                headerTrailing = headerTrailing,
-            )
+            if (user != null) {
+                StatusHeaderComponent(
+                    user = user,
+                    humanizedTime = humanizedTime,
+                    onUserClick = { onUserClick(it) },
+                    headerTrailing = headerTrailing,
+                )
+            }
 
             if (replyHandle != null) {
                 Spacer(modifier = Modifier.height(4.dp))

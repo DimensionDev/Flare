@@ -283,6 +283,7 @@
     <string name="swipe_action_favourite">Favourite</string>
     <string name="swipe_action_add_reaction">Reaction</string>
     <string name="swipe_action_bookmark">Bookmark</string>
+    <string name="swipe_action_comment">Comment</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>

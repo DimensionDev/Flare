@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
@@ -11,17 +13,18 @@ plugins {
     alias(libs.plugins.skie) apply false
     alias(libs.plugins.molecule) apply false
     alias(libs.plugins.ben.manes.versions)
+    alias(libs.plugins.compose.compiler) apply false
 }
 
 allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "17"
-            allWarningsAsErrors = true
-            freeCompilerArgs = freeCompilerArgs + listOf(
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+            allWarningsAsErrors.set(true)
+            freeCompilerArgs.set(listOf(
                 "-Xcontext-receivers",
                 "-Xexpect-actual-classes"
-            )
+            ))
         }
     }
 }

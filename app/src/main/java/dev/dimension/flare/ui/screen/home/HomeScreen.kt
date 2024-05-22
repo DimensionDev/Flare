@@ -291,7 +291,7 @@ internal fun HomeScreen(
                         },
                     )
                 },
-                gesturesEnabled = actualLayoutType != NavigationSuiteType.NavigationDrawer,
+                gesturesEnabled = state.navigationState.drawerEnabled && actualLayoutType != NavigationSuiteType.NavigationDrawer,
             ) {
                 NavigationSuiteScaffold2(
                     layoutType = actualLayoutType,
@@ -470,7 +470,11 @@ internal fun HomeScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 navGraph = NavGraphs.root,
                                 direction = SettingsRouteDestination,
-                            )
+                            ) {
+                                dependency(rootNavController)
+                                dependency(drawerState)
+                                dependency(state.navigationState)
+                            }
                         }
                         dialogComposable(ComposeRouteDestination) {
                             ComposeRoute(
@@ -737,8 +741,12 @@ internal class TabState {
 
 internal class NavigationState {
     private val state = mutableStateOf<NavigationSuiteType?>(null)
+    private val drawerState = mutableStateOf(true)
     val type: NavigationSuiteType?
         get() = state.value
+
+    val drawerEnabled: Boolean
+        get() = drawerState.value
 
     fun hide() {
         state.value = NavigationSuiteType.None
@@ -746,6 +754,14 @@ internal class NavigationState {
 
     fun show() {
         state.value = null
+    }
+
+    fun enableDrawer() {
+        drawerState.value = true
+    }
+
+    fun disableDrawer() {
+        drawerState.value = false
     }
 }
 

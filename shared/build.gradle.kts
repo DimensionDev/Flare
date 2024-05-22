@@ -1,4 +1,6 @@
+
 import app.cash.sqldelight.core.capitalize
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
@@ -40,10 +42,8 @@ kotlin {
 
     // export as jar for ikvm
     jvm {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "1.8"
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
         }
     }
 
@@ -66,7 +66,7 @@ kotlin {
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
                 api(libs.paging.common)
-                implementation(libs.ktorfit.lib)
+                implementation(libs.bundles.ktorfit)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
                 implementation(libs.uuid)
@@ -77,6 +77,7 @@ kotlin {
                 api(libs.bluesky)
                 implementation(libs.twitter.parser)
                 implementation(libs.molecule.runtime)
+                implementation(libs.skie.annotations)
             }
         }
         val androidMain by getting {
@@ -157,5 +158,9 @@ skie {
     analytics {
         disableUpload.set(true)
         enabled.set(false)
+    }
+    features {
+        coroutinesInterop.set(true)
+        enableSwiftUIObservingPreview.set(true)
     }
 }

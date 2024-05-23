@@ -7,7 +7,9 @@ import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
@@ -18,8 +20,10 @@ import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.vvo.VVOService
+import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
@@ -27,11 +31,13 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.model.toUi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -77,10 +83,36 @@ class VVODataSource(
     }
 
     override val supportedNotificationFilter: List<NotificationFilter>
-        get() = TODO("Not yet implemented")
+        get() = emptyList()
 
     override fun userByAcct(acct: String): CacheData<UiUser> {
-        TODO("Not yet implemented")
+        val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
+        return Cacheable(
+            fetchSource = {
+                val config = service.config()
+                val info = service.checkUserExistence(name)
+                val uid = info.headers["Location"]?.removePrefix("/u/")
+                requireNotNull(uid) { "user not found" }
+                val st = config.data?.st
+                requireNotNull(st) { "st is null" }
+                val profile = service.profileInfo(uid, st)
+                val user = profile.data?.user?.toDbUser()
+                requireNotNull(user) { "user not found" }
+                database.dbUserQueries.insert(
+                    user_key = user.user_key,
+                    platform_type = user.platform_type,
+                    name = user.name,
+                    handle = user.handle,
+                    host = user.host,
+                    content = user.content,
+                )
+            },
+            cacheSource = {
+                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.VVo).asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .map { it.toUi(account.accountKey) }
+            },
+        )
     }
 
     override fun userById(id: String): CacheData<UiUser> {
@@ -111,7 +143,18 @@ class VVODataSource(
     }
 
     override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        TODO("Not yet implemented")
+        return MemCacheable<UiRelation>(
+            relationKeyWithUserKey(userKey),
+        ) {
+            val config = service.config()
+            val st = config.data?.st
+            requireNotNull(st) { "st is null" }
+            val profile = service.profileInfo(userKey.id, st)
+            val user = profile.data?.user?.toDbUser()?.toUi(account.accountKey)
+            requireNotNull(user) { "user not found" }
+            require(user is UiUser.VVO)
+            user.relation
+        }.toUi()
     }
 
     override fun userTimeline(
@@ -134,7 +177,40 @@ class VVODataSource(
     }
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
-        TODO("Not yet implemented")
+        val pagingKey = "status_only_$statusKey"
+        val regex =
+            "\\\$render_data\\s*=\\s*(\\[\\{.*?\\}\\])\\[0\\]\\s*\\|\\|\\s*\\{\\};"
+                .toRegex()
+        return Cacheable(
+            fetchSource = {
+                val response =
+                    service.getStatusDetail(statusKey.id)
+                        .split("\n")
+                        .joinToString("")
+                val json =
+                    regex.find(response)?.groupValues?.get(1)
+                        ?.decodeJson<List<StatusDetailItem>>()
+                        ?: throw Exception("status not found")
+                val item = json.firstOrNull()?.status
+
+                if (item != null) {
+                    VVO.save(
+                        accountKey = account.accountKey,
+                        pagingKey = pagingKey,
+                        database = database,
+                        statuses = listOf(item),
+                    )
+                } else {
+                    throw Exception("status not found")
+                }
+            },
+            cacheSource = {
+                database.dbStatusQueries.get(statusKey, account.accountKey)
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .mapNotNull { it.content.toUi(account.accountKey) }
+            },
+        )
     }
 
     override suspend fun compose(
@@ -182,7 +258,7 @@ class VVODataSource(
     }
 
     override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
-        TODO("Not yet implemented")
+        return listOf(SupportedComposeEvent.Media)
     }
 
     override suspend fun follow(

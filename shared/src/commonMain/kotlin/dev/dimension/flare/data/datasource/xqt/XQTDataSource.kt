@@ -370,6 +370,8 @@ class XQTDataSource(
                         database = database,
                         tweet = listOf(item),
                     )
+                } else {
+                    throw Exception("Status not found")
                 }
             },
             cacheSource = {

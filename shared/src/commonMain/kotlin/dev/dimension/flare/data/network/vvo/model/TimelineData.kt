@@ -403,3 +403,20 @@ internal object VVODateSerializer : KSerializer<Instant> {
         encoder.encodeString(value.toString())
     }
 }
+
+@Serializable
+internal data class StatusExtend(
+    val ok: Long? = null,
+    val longTextContent: String? = null,
+    @SerialName("reposts_count")
+    val repostsCount: Long? = null,
+    @SerialName("comments_count")
+    val commentsCount: Long? = null,
+    @SerialName("attitudes_count")
+    val attitudesCount: Long? = null,
+)
+
+@Serializable
+internal data class StatusDetailItem(
+    val status: Status? = null,
+)

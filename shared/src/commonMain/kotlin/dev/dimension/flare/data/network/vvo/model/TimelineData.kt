@@ -16,9 +16,11 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.floatOrNull
 
 @Serializable
-data class VVOResponse<T>(
+internal data class VVOResponse<T>(
     val data: T? = null,
     val ok: Long? = null,
     @SerialName("http_code")
@@ -26,7 +28,7 @@ data class VVOResponse<T>(
 )
 
 @Serializable
-data class TimelineData(
+internal data class TimelineData(
     val statuses: List<Status>? = null,
     val advertises: JsonArray? = null,
     val ad: JsonArray? = null,
@@ -59,7 +61,7 @@ data class TimelineData(
 )
 
 @Serializable
-data class Status(
+internal data class Status(
     val visible: Visible? = null,
     @SerialName("created_at")
     @Serializable(with = VVODateSerializer::class)
@@ -151,7 +153,7 @@ data class Status(
 )
 
 @Serializable
-data class AttitudeDynamicMembersMessage(
+internal data class AttitudeDynamicMembersMessage(
     @SerialName("user_grace_setting")
     val userGraceSetting: UserGraceSetting? = null,
     val bgimg: String? = null,
@@ -171,7 +173,7 @@ data class AttitudeDynamicMembersMessage(
 )
 
 @Serializable
-data class UserGraceSetting(
+internal data class UserGraceSetting(
     @SerialName("zh_CN")
     val zhCN: String? = null,
     @SerialName("zh_TW")
@@ -181,7 +183,7 @@ data class UserGraceSetting(
 )
 
 @Serializable
-data class CommentManageInfo(
+internal data class CommentManageInfo(
     @SerialName("comment_permission_type")
     val commentPermissionType: Long? = null,
     @SerialName("approval_comment_type")
@@ -193,14 +195,14 @@ data class CommentManageInfo(
 )
 
 @Serializable
-data class HotPage(
+internal data class HotPage(
     val fid: String? = null,
     @SerialName("feed_detail_type")
     val feedDetailType: Long? = null,
 )
 
 @Serializable
-data class NumberDisplayStrategy(
+internal data class NumberDisplayStrategy(
     @SerialName("apply_scenario_flag")
     val applyScenarioFlag: Long? = null,
     @SerialName("display_text_min_number")
@@ -210,12 +212,12 @@ data class NumberDisplayStrategy(
 )
 
 @Serializable
-data class StatusPageInfo(
+internal data class StatusPageInfo(
     val type: String? = null,
     @SerialName("object_type")
     val objectType: Long? = null,
     @SerialName("page_pic")
-    val pagePic: PurplePagePic? = null,
+    val pagePic: PagePic? = null,
     @SerialName("page_url")
     val pageURL: String? = null,
     @SerialName("page_title")
@@ -223,15 +225,53 @@ data class StatusPageInfo(
     val content1: String? = null,
     @SerialName("url_ori")
     val urlOri: String? = null,
+    @SerialName("object_id")
+    val objectID: String? = null,
+    val title: String? = null,
+    val content2: String? = null,
+    @SerialName("video_orientation")
+    val videoOrientation: String? = null,
+    @SerialName("play_count")
+    val playCount: String? = null,
+    @SerialName("media_info")
+    val mediaInfo: MediaInfo? = null,
+    val urls: Urls? = null,
 )
 
 @Serializable
-data class PurplePagePic(
+internal data class Urls(
+    @SerialName("mp4_720p_mp4")
+    val mp4720PMp4: String? = null,
+    @SerialName("mp4_hd_mp4")
+    val mp4HDMp4: String? = null,
+    @SerialName("mp4_ld_mp4")
+    val mp4LdMp4: String? = null,
+)
+
+@Serializable
+internal data class MediaInfo(
+    @SerialName("stream_url")
+    val streamURL: String? = null,
+    @SerialName("stream_url_hd")
+    val streamURLHD: String? = null,
+    val duration: Double? = null,
+)
+
+@Serializable
+internal data class PagePic(
+    val width: String? = null,
+    val pid: String? = null,
+    val source: String? = null,
+    @SerialName("is_self_cover")
+    val isSelfCover: String? = null,
+    val type: String? = null,
     val url: String? = null,
+    val height: String? = null,
+    val scheme: String? = null,
 )
 
 @Serializable
-data class StatusPic(
+internal data class StatusPic(
     val pid: String? = null,
     val url: String? = null,
     val size: String? = null,
@@ -240,44 +280,27 @@ data class StatusPic(
 )
 
 @Serializable
-data class Large(
+internal data class Large(
     val size: String? = null,
     val url: String? = null,
     val geo: StatusPicGeo? = null,
 )
 
 @Serializable
-data class StatusPicGeo(
-    val width: Height? = null,
-    val height: Height? = null,
+internal data class StatusPicGeo(
+    val width: JsonPrimitive? = null,
+    val height: JsonPrimitive? = null,
     val croped: Boolean? = null,
 ) {
     val widthValue: Float
-        get() =
-            when (width) {
-                is Height.IntegerValue -> width.value
-                is Height.StringValue -> width.value.toFloatOrNull() ?: 0f
-                null -> 0f
-            }
+        get() = width?.floatOrNull ?: 0f
 
     val heightValue: Float
-        get() =
-            when (height) {
-                is Height.IntegerValue -> height.value
-                is Height.StringValue -> height.value.toFloatOrNull() ?: 0f
-                null -> 0f
-            }
+        get() = height?.floatOrNull ?: 0f
 }
 
 @Serializable
-sealed class Height {
-    class IntegerValue(val value: Float) : Height()
-
-    class StringValue(val value: String) : Height()
-}
-
-@Serializable
-data class User(
+internal data class User(
     val id: Long,
     @SerialName("screen_name")
     val screenName: String,
@@ -324,7 +347,7 @@ data class User(
 )
 
 @Serializable
-data class Visible(
+internal data class Visible(
     // type 0: all,
     // type 10: fans only,
     val type: Long? = null,
@@ -333,7 +356,7 @@ data class Visible(
 )
 
 @Serializable
-data class Config(
+internal data class Config(
     val login: Boolean? = null,
     val st: String? = null,
     val uid: String? = null,
@@ -345,28 +368,32 @@ internal object VVODateSerializer : KSerializer<Instant> {
 
     override fun deserialize(decoder: Decoder): Instant {
         val str = decoder.decodeString()
-        return Instant.parse(
-            str,
-            format =
-                Format {
-                    // EEE MMM dd HH:mm:ss Z yyyy
-                    dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
-                    char(' ')
-                    monthName(MonthNames.ENGLISH_ABBREVIATED)
-                    char(' ')
-                    dayOfMonth(Padding.NONE)
-                    char(' ')
-                    hour()
-                    char(':')
-                    minute()
-                    char(':')
-                    second()
-                    char(' ')
-                    offset(UtcOffset.Formats.FOUR_DIGITS)
-                    char(' ')
-                    year()
-                },
-        )
+        return runCatching {
+            Instant.parse(
+                str,
+                format =
+                    Format {
+                        // EEE MMM dd HH:mm:ss Z yyyy
+                        dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
+                        char(' ')
+                        monthName(MonthNames.ENGLISH_ABBREVIATED)
+                        char(' ')
+                        dayOfMonth(Padding.NONE)
+                        char(' ')
+                        hour()
+                        char(':')
+                        minute()
+                        char(':')
+                        second()
+                        char(' ')
+                        offset(UtcOffset.Formats.FOUR_DIGITS)
+                        char(' ')
+                        year()
+                    },
+            )
+        }.getOrElse {
+            Instant.parse(str)
+        }
     }
 
     override fun serialize(

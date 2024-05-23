@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
 import android.webkit.CookieManager
-import android.webkit.WebSettings
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -22,8 +21,8 @@ import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.VVOLoginPresenter
 import dev.dimension.flare.ui.screen.home.NavigationState
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 @Destination<RootGraph>(
@@ -82,10 +81,10 @@ private fun VVOLoginScreen(toHome: () -> Unit) {
                 CookieManager.getInstance().removeAllCookies(null)
                 with(it.settings) {
                     javaScriptEnabled = true
-                    domStorageEnabled = true
-                    databaseEnabled = true
-                    javaScriptCanOpenWindowsAutomatically = false
-                    cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+//                    domStorageEnabled = true
+//                    databaseEnabled = true
+//                    javaScriptCanOpenWindowsAutomatically = false
+//                    cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
                 }
             },
         )

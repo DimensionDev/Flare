@@ -356,8 +356,8 @@ internal fun StatusItem(
             VVOStatusComponent(
                 data = item,
                 event = event,
-                modifier = modifier,
                 isDetail = isDetail,
+                modifier = modifier.padding(horizontal = horizontalPadding),
             )
         }
     }

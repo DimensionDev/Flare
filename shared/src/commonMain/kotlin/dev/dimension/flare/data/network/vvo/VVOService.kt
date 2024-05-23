@@ -7,7 +7,8 @@ import dev.dimension.flare.data.network.vvo.api.UserApi
 import dev.dimension.flare.model.vvoHost
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpClientPlugin
-import io.ktor.http.headers
+import io.ktor.client.request.HttpRequestPipeline
+import io.ktor.client.request.header
 import io.ktor.util.AttributeKey
 import io.ktor.util.KtorDsl
 
@@ -29,7 +30,12 @@ internal class VVOService(
     ConfigApi by config(chocolate = chocolate).create() {
     companion object {
         fun checkChocolates(chocolate: String): Boolean {
-            return chocolate.contains("SUBP=") && chocolate.contains("SUB=")
+            return chocolate.split(';').map {
+                val res = it.split('=')
+                res[0].trim() to res[1].trim()
+            }.toMap().let {
+                it.containsKey("MLOGIN") && it["MLOGIN"] == "1"
+            }
         }
     }
 }
@@ -61,10 +67,9 @@ private class VVOHeaderPlugin(
     }
 
     private fun setHeader(client: HttpClient) {
-        client.config {
-            headers {
-                append("Cookie", chocolate)
-            }
+        client.requestPipeline.intercept(HttpRequestPipeline.State) {
+            context.header("Cookie", chocolate)
+            context.header("Referer", "https://$vvoHost/")
         }
     }
 }

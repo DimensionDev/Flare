@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ProfileData(
+internal data class ProfileData(
     val user: User? = null,
     val statuses: List<Status>? = null,
     val more: String? = null,
@@ -14,7 +14,7 @@ data class ProfileData(
 )
 
 @Serializable
-data class Button(
+internal data class Button(
     val type: String? = null,
     val name: String? = null,
     @SerialName("sub_type")
@@ -23,6 +23,6 @@ data class Button(
 )
 
 @Serializable
-data class Params(
+internal data class Params(
     val uid: String? = null,
 )

@@ -2,9 +2,13 @@ package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingData
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
+import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
@@ -22,8 +26,12 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.mapper.toUi
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -76,7 +84,30 @@ class VVODataSource(
     }
 
     override fun userById(id: String): CacheData<UiUser> {
-        TODO("Not yet implemented")
+        val userKey = MicroBlogKey(id, account.accountKey.host)
+        return Cacheable(
+            fetchSource = {
+                val config = service.config()
+                val st = config.data?.st
+                requireNotNull(st) { "st is null" }
+                val profile = service.profileInfo(id, st)
+                val user = profile.data?.user?.toDbUser()
+                requireNotNull(user) { "user not found" }
+                database.dbUserQueries.insert(
+                    user_key = user.user_key,
+                    platform_type = user.platform_type,
+                    name = user.name,
+                    handle = user.handle,
+                    host = user.host,
+                    content = user.content,
+                )
+            },
+            cacheSource = {
+                database.dbUserQueries.findByKey(userKey).asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .map { it.toUi(account.accountKey) }
+            },
+        )
     }
 
     override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {

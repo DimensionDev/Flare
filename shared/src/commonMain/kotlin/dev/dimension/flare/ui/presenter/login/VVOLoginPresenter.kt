@@ -61,7 +61,9 @@ class VVOLoginPresenter(
         val config = service.config()
         val uid = config.data?.uid
         requireNotNull(uid) { "uid is null" }
-        val profile = service.profileInfo(uid)
+        val st = config.data.st
+        requireNotNull(st) { "st is null" }
+        val profile = service.profileInfo(uid, st)
         requireNotNull(profile.data) { "profile is null" }
         accountRepository.addAccount(
             UiAccount.VVo(

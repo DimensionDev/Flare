@@ -17,6 +17,7 @@ internal object VVO {
         val status =
             statuses.flatMap {
                 listOfNotNull(
+                    it.toDbStatus(accountKey),
                     it.retweetedStatus?.toDbStatus(accountKey),
                 )
             }
@@ -84,7 +85,7 @@ private fun Status.toDbStatus(accountKey: MicroBlogKey): dev.dimension.flare.dat
     )
 }
 
-private fun User.toDbUser(): dev.dimension.flare.data.cache.DbUser {
+internal fun User.toDbUser(): dev.dimension.flare.data.cache.DbUser {
     return dev.dimension.flare.data.cache.DbUser(
         handle = screenName,
         host = vvoHost,

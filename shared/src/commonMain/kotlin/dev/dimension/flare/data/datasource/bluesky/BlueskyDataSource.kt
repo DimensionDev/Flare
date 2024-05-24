@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
@@ -871,7 +872,7 @@ class BlueskyDataSource(
                 account.accountKey,
                 query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
     }
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {

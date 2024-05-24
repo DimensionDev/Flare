@@ -47,6 +47,7 @@ internal fun VVOStatusComponent(
     event: VVOStatusEvent,
     modifier: Modifier = Modifier,
     isDetail: Boolean = false,
+    showQuote: Boolean = true,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
     val uriHandler = LocalUriHandler.current
@@ -94,7 +95,7 @@ internal fun VVOStatusComponent(
         headerTextId = null,
         headerUser = null,
         replyHandle = null,
-        quotedStatus = data.quote,
+        quotedStatus = if (showQuote) data.quote else null,
         onQuotedStatusClick = {
             event.onStatusClick(it as UiStatus.VVO, uriHandler)
         },

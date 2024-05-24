@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.vvo
 
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.vvo.api.ConfigApi
 import dev.dimension.flare.data.network.vvo.api.StatusApi
@@ -9,6 +10,7 @@ import dev.dimension.flare.model.vvoHost
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.request.HttpRequestPipeline
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.util.AttributeKey
 import io.ktor.util.KtorDsl
@@ -38,6 +40,16 @@ internal class VVOService(
             }.toMap().let {
                 it.containsKey("MLOGIN") && it["MLOGIN"] == "1"
             }
+        }
+    }
+
+    suspend fun getUid(screenName: String): String? {
+        val response =
+            ktorClient {
+                followRedirects = false
+            }.get("https://$vvoHost/n/$screenName")
+        return response.headers["Location"]?.let {
+            return it.split('/').last()
         }
     }
 }

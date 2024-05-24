@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
@@ -162,6 +163,8 @@ class MisskeyDataSource(
                             database,
                             pagingKey,
                         )
+
+                    else -> throw IllegalStateException("Unsupported notification type")
                 },
         )
     }
@@ -670,7 +673,7 @@ class MisskeyDataSource(
                 account.accountKey,
                 query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
     }
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {

@@ -87,7 +87,7 @@ internal data class Status(
     @SerialName("retweeted_status")
     val retweetedStatus: Status? = null,
     @SerialName("reposts_count")
-    val repostsCount: Long? = null,
+    val repostsCount: JsonPrimitive? = null,
     @SerialName("comments_count")
     val commentsCount: Long? = null,
     @SerialName("reprint_cmt_count")
@@ -419,4 +419,74 @@ internal data class StatusExtend(
 @Serializable
 internal data class StatusDetailItem(
     val status: Status? = null,
+)
+
+@Serializable
+internal data class Comment(
+    @SerialName("disable_reply")
+    val disableReply: Long? = null,
+    @SerialName("created_at")
+    @Serializable(with = VVODateSerializer::class)
+    val createdAt: Instant? = null,
+    val id: String,
+    val rootid: String? = null,
+    val rootidstr: String? = null,
+    @SerialName("floor_number")
+    val floorNumber: Long? = null,
+    val text: String? = null,
+    val restrictOperate: Long? = null,
+    val source: String? = null,
+    val user: User? = null,
+    val mid: String? = null,
+    val status: Status? = null,
+    val clevel: Long? = null,
+    @SerialName("like_count")
+    val likeCount: Long? = null,
+    @SerialName("reply_count")
+    val replyCount: Long? = null,
+    val liked: Boolean? = null,
+    val gid: Long? = null,
+    @SerialName("match_ai_play_picture")
+    val matchAIPlayPicture: Boolean? = null,
+    val rid: String? = null,
+    @SerialName("allow_follow")
+    val allowFollow: Boolean? = null,
+    @SerialName("feature_type")
+    val featureType: Long? = null,
+    @SerialName("cut_tail")
+    val cutTail: Boolean? = null,
+    @SerialName("feedback_menu_type")
+    val feedbackMenuType: Long? = null,
+    val bid: String? = null,
+    val comments: List<Comment>? = null,
+    val pic: StatusPic? = null,
+)
+
+@Serializable
+internal data class Attitude(
+    val id: Long,
+    val idStr: String,
+    @SerialName("created_at")
+    @Serializable(with = VVODateSerializer::class)
+    val createdAt: Instant? = null,
+    val attitude: String? = null,
+    @SerialName("attitude_mask")
+    val attitudeMask: Long? = null,
+    @SerialName("attitude_type")
+    val attitudeType: Long? = null,
+    @SerialName("last_attitude")
+    val lastAttitude: String? = null,
+    @SerialName("source_allowclick")
+    val sourceAllowclick: Long? = null,
+    @SerialName("source_type")
+    val sourceType: Long? = null,
+    val source: String? = null,
+    val user: User? = null,
+    val status: Status? = null,
+    @SerialName("feedback_menu_type")
+    val feedbackMenuType: Long? = null,
+    @SerialName("feature_type")
+    val featureType: Long? = null,
+    @SerialName("cut_tail")
+    val cutTail: Boolean? = null,
 )

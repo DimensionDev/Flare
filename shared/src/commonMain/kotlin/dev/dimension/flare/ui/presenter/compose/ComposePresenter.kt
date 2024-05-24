@@ -76,6 +76,7 @@ class ComposePresenter(
                                     is UiStatus.MisskeyNotification -> PlatformType.Misskey
                                     is UiStatus.XQTNotification -> PlatformType.xQt
                                     is UiStatus.VVO -> PlatformType.VVo
+                                    is UiStatus.VVONotification -> PlatformType.VVo
                                 },
                             )
                     } ?: UiState.Success(current to PlatformType.entries.toList())

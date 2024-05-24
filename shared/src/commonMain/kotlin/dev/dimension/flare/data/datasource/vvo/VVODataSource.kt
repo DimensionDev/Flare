@@ -1,7 +1,10 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
@@ -79,19 +82,61 @@ class VVODataSource(
         pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiStatus>> {
-        TODO("Not yet implemented")
+        return when (type) {
+            NotificationFilter.All -> TODO()
+            NotificationFilter.Mention ->
+                timelinePager(
+                    pageSize = pageSize,
+                    pagingKey = pagingKey,
+                    accountKey = account.accountKey,
+                    database = database,
+                    filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                    scope = scope,
+                    mediator =
+                        MentionRemoteMediator(
+                            service,
+                            database,
+                            account.accountKey,
+                            pagingKey,
+                        ),
+                )
+
+            NotificationFilter.Comment ->
+                Pager(
+                    config = PagingConfig(pageSize = pageSize),
+                ) {
+                    CommentPagingSource(
+                        service = service,
+                        accountKey = account.accountKey,
+                    )
+                }.flow.cachedIn(scope)
+
+            NotificationFilter.Like ->
+                Pager(
+                    config = PagingConfig(pageSize = pageSize),
+                ) {
+                    LikePagingSource(
+                        service = service,
+                        accountKey = account.accountKey,
+                    )
+                }.flow.cachedIn(scope)
+        }
     }
 
     override val supportedNotificationFilter: List<NotificationFilter>
-        get() = emptyList()
+        get() =
+            listOf(
+                NotificationFilter.Mention,
+                NotificationFilter.Comment,
+                NotificationFilter.Like,
+            )
 
     override fun userByAcct(acct: String): CacheData<UiUser> {
         val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
         return Cacheable(
             fetchSource = {
                 val config = service.config()
-                val info = service.checkUserExistence(name)
-                val uid = info.headers["Location"]?.removePrefix("/u/")
+                val uid = service.getUid(name)
                 requireNotNull(uid) { "user not found" }
                 val st = config.data?.st
                 requireNotNull(st) { "st is null" }
@@ -164,7 +209,23 @@ class VVODataSource(
         mediaOnly: Boolean,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
-        TODO("Not yet implemented")
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                UserTimelineRemoteMediator(
+                    userKey = userKey,
+                    service = service,
+                    database = database,
+                    accountKey = account.accountKey,
+                    pagingKey = pagingKey,
+                    mediaOnly = mediaOnly,
+                ),
+        )
     }
 
     override fun context(
@@ -331,5 +392,41 @@ class VVODataSource(
                 )
             }
         }
+    }
+
+    fun statusComment(statusKey: MicroBlogKey): Flow<PagingData<UiStatus.VVONotification>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20),
+        ) {
+            StatusCommentPagingSource(
+                service = service,
+                accountKey = account.accountKey,
+                statusKey = statusKey,
+            )
+        }.flow
+    }
+
+    fun statusRepost(statusKey: MicroBlogKey): Flow<PagingData<UiStatus.VVO>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20),
+        ) {
+            StatusRepostPagingSource(
+                service = service,
+                accountKey = account.accountKey,
+                statusKey = statusKey,
+            )
+        }.flow
+    }
+
+    fun statusExtendedText(statusKey: MicroBlogKey): Flow<UiState<String>> {
+        return MemCacheable(
+            "status_extended_text_$statusKey",
+        ) {
+            val config = service.config()
+            val st = config.data?.st
+            requireNotNull(st) { "st is null" }
+            val response = service.getStatusExtend(statusKey.id, st)
+            response.data?.longTextContent.orEmpty()
+        }.toUi()
     }
 }

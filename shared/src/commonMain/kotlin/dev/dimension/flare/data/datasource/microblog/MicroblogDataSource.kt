@@ -104,6 +104,8 @@ data class ComposeProgress(
 enum class NotificationFilter {
     All,
     Mention,
+    Comment,
+    Like,
 }
 
 enum class SupportedComposeEvent {

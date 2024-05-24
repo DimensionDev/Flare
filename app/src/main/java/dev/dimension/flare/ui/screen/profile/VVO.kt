@@ -41,7 +41,7 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 internal fun VVOProfileHeader(
     user: UiUser.VVO,
     relationState: UiState<UiRelation>,
-    onFollowClick: (UiRelation.Mastodon) -> Unit,
+    onFollowClick: (UiRelation.VVO) -> Unit,
     onAvatarClick: () -> Unit,
     onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
@@ -90,7 +90,7 @@ internal fun VVOProfileHeader(
 
                         is UiState.Success -> {
                             when (val data = relationState.data) {
-                                is UiRelation.Mastodon -> {
+                                is UiRelation.VVO -> {
                                     FilledTonalButton(
                                         onClick = {
                                             onFollowClick.invoke(data)
@@ -100,9 +100,7 @@ internal fun VVOProfileHeader(
                                             text =
                                                 stringResource(
                                                     when {
-                                                        data.blocking -> R.string.profile_header_button_blocked
                                                         data.following -> R.string.profile_header_button_following
-                                                        data.requested -> R.string.profile_header_button_requested
                                                         else -> R.string.profile_header_button_follow
                                                     },
                                                 ),

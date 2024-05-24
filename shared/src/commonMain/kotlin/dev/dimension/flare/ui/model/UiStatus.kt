@@ -164,6 +164,11 @@ sealed class UiStatus {
                     append("vvo")
                     if (media.isNotEmpty()) append("_media")
                 }
+
+            is VVONotification ->
+                buildString {
+                    append("vvo_notification")
+                }
         }
     }
 
@@ -195,6 +200,54 @@ sealed class UiStatus {
         val reblogStatus: Mastodon?,
         internal val raw: dev.dimension.flare.data.network.mastodon.api.model.Status,
     ) : UiStatus() {
+        companion object {
+            private fun parseContent(
+                status: Status,
+                text: String,
+                accountKey: MicroBlogKey,
+            ): Element {
+                val emoji = status.emojis.orEmpty()
+                val mentions = status.mentions.orEmpty()
+                var content = text
+                emoji.forEach {
+                    content =
+                        content.replace(
+                            ":${it.shortcode}:",
+                            "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
+                        )
+                }
+                val body = Ktml.parse(content)
+                body.children.forEach {
+                    replaceMentionAndHashtag(mentions, it, accountKey)
+                }
+                return body
+            }
+
+            private fun replaceMentionAndHashtag(
+                mentions: List<Mention>,
+                node: Node,
+                accountKey: MicroBlogKey,
+            ) {
+                if (node is Element) {
+                    val href = node.attributes["href"]
+                    val mention = mentions.firstOrNull { it.url == href }
+                    if (mention != null) {
+                        val id = mention.id
+                        if (id != null) {
+                            node.attributes["href"] =
+                                AppDeepLink.Profile(
+                                    accountKey,
+                                    userKey = MicroBlogKey(id, accountKey.host),
+                                )
+                        }
+                    } else if (node.innerText.startsWith("#")) {
+                        node.attributes["href"] = AppDeepLink.Search(accountKey, node.innerText)
+                    }
+                    node.children.forEach { replaceMentionAndHashtag(mentions, it, accountKey) }
+                }
+            }
+        }
+
         val contentToken by lazy {
             parseContent(raw, content, accountKey)
         }
@@ -478,14 +531,42 @@ sealed class UiStatus {
         val regionName: String?,
         val source: String?,
         val quote: VVO?,
+        val canReblog: Boolean,
     ) : UiStatus() {
-        val contentToken by lazy {
-            Ktml.parse(content)
+        companion object {
+            fun replaceMentionAndHashtag(
+                element: Element,
+                node: Node,
+                accountKey: MicroBlogKey,
+            ) {
+                if (node is Element) {
+                    val href = node.attributes["href"]
+                    if (href != null) {
+                        if (href.startsWith("/n/")) {
+                            val id = href.removePrefix("/n/")
+                            if (id.isNotEmpty()) {
+                                node.attributes["href"] =
+                                    AppDeepLink.ProfileWithNameAndHost(
+                                        accountKey = accountKey,
+                                        userName = id,
+                                        host = accountKey.host,
+                                    )
+                            }
+                        } else if (href.startsWith("https://m.weibo.cn/search")) {
+                            node.attributes["href"] = AppDeepLink.Search(accountKey, node.innerText)
+                        }
+                    }
+                    node.children.forEach { replaceMentionAndHashtag(element, it, accountKey) }
+                }
+            }
         }
 
-        val canReblog by lazy {
-            // TODO:
-            true
+        val contentToken by lazy {
+            val element = Ktml.parse(content)
+            element.children.forEach {
+                replaceMentionAndHashtag(element, it, accountKey)
+            }
+            element
         }
 
         val displayUser by lazy {
@@ -502,11 +583,44 @@ sealed class UiStatus {
         data class Matrices(
             val commentCount: Long,
             val likeCount: Long,
-            val repostCount: Long,
+            val repostCount: String,
         ) {
             val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
-            val humanizedRepostCount by lazy { if (repostCount > 0) repostCount.humanize() else null }
+            val humanizedRepostCount by lazy {
+                repostCount.toLongOrNull()?.let { if (it > 0) it.humanize() else null }
+                    ?: repostCount
+            }
             val humanizedCommentCount by lazy { if (commentCount > 0) commentCount.humanize() else null }
+        }
+    }
+
+    @Immutable
+    data class VVONotification internal constructor(
+        override val statusKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
+        val rawUser: UiUser.VVO?,
+        val content: Content,
+        val createdAt: Instant,
+        val source: String?,
+        val status: VVO?,
+    ) : UiStatus() {
+        @Immutable
+        sealed interface Content {
+            @Immutable
+            data object Like : Content
+
+            @Immutable
+            data class Comment(val text: String) : Content {
+                val contentToken by lazy {
+                    Ktml.parse(text)
+                }
+            }
+        }
+
+        val displayUser by lazy {
+            rawUser?.copy(
+                handle = source ?: rawUser.handle,
+            )
         }
     }
 }
@@ -543,51 +657,10 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node {
 
         is UserNameToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host)
+                attributes["href"] =
+                    AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host)
                 children.add(Text(value))
             }
-    }
-}
-
-private fun parseContent(
-    status: Status,
-    text: String,
-    accountKey: MicroBlogKey,
-): Element {
-    val emoji = status.emojis.orEmpty()
-    val mentions = status.mentions.orEmpty()
-    var content = text
-    emoji.forEach {
-        content =
-            content.replace(
-                ":${it.shortcode}:",
-                "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
-            )
-    }
-    val body = Ktml.parse(content)
-    body.children.forEach {
-        replaceMentionAndHashtag(mentions, it, accountKey)
-    }
-    return body
-}
-
-private fun replaceMentionAndHashtag(
-    mentions: List<Mention>,
-    node: Node,
-    accountKey: MicroBlogKey,
-) {
-    if (node is Element) {
-        val href = node.attributes["href"]
-        val mention = mentions.firstOrNull { it.url == href }
-        if (mention != null) {
-            val id = mention.id
-            if (id != null) {
-                node.attributes["href"] = AppDeepLink.Profile(accountKey, userKey = MicroBlogKey(id, accountKey.host))
-            }
-        } else if (node.innerText.startsWith("#")) {
-            node.attributes["href"] = AppDeepLink.Search(accountKey, node.innerText)
-        }
-        node.children.forEach { replaceMentionAndHashtag(mentions, it, accountKey) }
     }
 }
 
@@ -932,11 +1005,12 @@ fun createVVOStatus(user: UiUser.VVO): UiStatus.VVO {
             UiStatus.VVO.Matrices(
                 commentCount = 15,
                 likeCount = 25,
-                repostCount = 35,
+                repostCount = "35",
             ),
         regionName = null,
         source = "From Flare",
         quote = null,
+        canReblog = true,
     )
 }
 
@@ -952,5 +1026,6 @@ val UiStatus.medias: ImmutableList<UiMedia>
             is UiStatus.MisskeyNotification -> persistentListOf()
             is UiStatus.BlueskyNotification -> persistentListOf()
             is UiStatus.XQTNotification -> persistentListOf()
+            is UiStatus.VVONotification -> persistentListOf()
         }
     }

@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.benasher44.uuid.uuid4
@@ -206,6 +207,8 @@ class MastodonDataSource(
                             account.accountKey,
                             pagingKey,
                         )
+
+                    else -> throw IllegalStateException("Unsupported notification type")
                 },
         )
 
@@ -784,7 +787,7 @@ class MastodonDataSource(
                 account.accountKey.host,
                 query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
     }
 
     override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {

@@ -118,8 +118,10 @@ internal fun AnimatedVisibilityScope.StatusMediaRoute(
 //        SharedTransitionScope {
     DisposableEffect(Unit) {
         navigationState.hide()
+        navigationState.disableDrawer()
         onDispose {
             navigationState.show()
+            navigationState.enableDrawer()
         }
     }
     StatusMediaScreen(

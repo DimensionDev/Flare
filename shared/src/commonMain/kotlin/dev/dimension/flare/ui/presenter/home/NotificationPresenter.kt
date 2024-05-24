@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,6 +15,7 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -26,20 +28,32 @@ class NotificationPresenter(
     @Composable
     override fun body(): NotificationState {
         val scope = rememberCoroutineScope()
-        var type by remember { mutableStateOf(NotificationFilter.All) }
+        var type by remember { mutableStateOf<NotificationFilter?>(null) }
         val serviceState = accountServiceProvider(accountType = accountType)
         val allTypes =
             serviceState.map { service ->
                 service.supportedNotificationFilter.toImmutableList()
             }
+        serviceState.onSuccess {
+            LaunchedEffect(it) {
+                type = it.supportedNotificationFilter.firstOrNull()
+            }
+        }
         val listState =
-            serviceState.map { service ->
-                remember(service, type) {
-                    service.notification(
-                        type = type,
-                        scope = scope,
+            serviceState.flatMap { service ->
+                val currentType = type
+                if (service.supportedNotificationFilter.isEmpty() || currentType == null) {
+                    UiState.Error(IllegalStateException("No supported notification filter"))
+                } else {
+                    UiState.Success(
+                        remember(service, currentType) {
+                            service.notification(
+                                type = currentType,
+                                scope = scope,
+                            )
+                        }.collectPagingProxy(),
                     )
-                }.collectPagingProxy()
+                }
             }
 //        val refreshing =
 //            listState is UiState.Loading ||
@@ -66,7 +80,7 @@ class NotificationPresenter(
 @Immutable
 abstract class NotificationState(
     val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
-    val notificationType: NotificationFilter,
+    val notificationType: NotificationFilter?,
     val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {
     abstract suspend fun refresh()

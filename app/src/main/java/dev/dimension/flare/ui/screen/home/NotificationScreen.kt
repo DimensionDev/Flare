@@ -163,7 +163,6 @@ private fun NotificationScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NotificationFilterSelector(
     filters: ImmutableList<NotificationFilter>,
@@ -196,6 +195,8 @@ private val NotificationFilter.title: Int
         when (this) {
             NotificationFilter.All -> R.string.notification_tab_all_title
             NotificationFilter.Mention -> R.string.notification_tab_mentions_title
+            NotificationFilter.Comment -> R.string.notification_tab_comments_title
+            NotificationFilter.Like -> R.string.notification_tab_likes_title
         }
 
 @Composable

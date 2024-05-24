@@ -123,6 +123,7 @@ internal fun UiStatusQuoted(
                 showMedia = showMedia,
                 colors = colors,
             )
+        is UiStatus.VVONotification -> Unit
     }
 }
 

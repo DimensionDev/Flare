@@ -582,12 +582,12 @@ private fun StatusReplyComponent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun StatusHeaderComponent(
+internal fun StatusHeaderComponent(
     user: UiUser,
     humanizedTime: String,
     onUserClick: (MicroBlogKey) -> Unit,
-    headerTrailing: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
+    headerTrailing: @Composable RowScope.() -> Unit = {},
 ) {
     CommonStatusHeaderComponent(
         data = user,

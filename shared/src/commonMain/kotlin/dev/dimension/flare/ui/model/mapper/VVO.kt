@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.data.network.vvo.model.Attitude
+import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.User
 import dev.dimension.flare.model.MicroBlogKey
@@ -10,6 +12,7 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Instant
+import moe.tlaster.ktml.Ktml
 
 internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
     val media =
@@ -67,7 +70,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
         matrices =
             UiStatus.VVO.Matrices(
                 commentCount = commentsCount ?: 0,
-                repostCount = repostsCount ?: 0,
+                repostCount = repostsCount?.content ?: "0",
                 likeCount = attitudesCount ?: 0,
             ),
         liked = favorited ?: false,
@@ -77,6 +80,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
         source = source,
         media = media.toImmutableList(),
         quote = retweetedStatus?.toUi(accountKey),
+        canReblog = visible?.type == null || visible.type == 0L,
     )
 }
 
@@ -87,8 +91,8 @@ internal fun User.toUi(accountKey: MicroBlogKey): UiUser.VVO {
                 id = id.toString(),
                 host = vvoHost,
             ),
-        avatarUrl = avatarHD.orEmpty(),
-        bannerUrl = profileImageURL,
+        avatarUrl = avatarHD ?: profileImageURL ?: "",
+        bannerUrl = coverImagePhone,
         rawHandle = screenName,
         rawDescription = description,
         verified = verified ?: false,
@@ -105,5 +109,32 @@ internal fun User.toUi(accountKey: MicroBlogKey): UiUser.VVO {
                 following = following ?: false,
                 isFans = followMe ?: false,
             ),
+    )
+}
+
+internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification {
+    return UiStatus.VVONotification(
+        statusKey = MicroBlogKey(id = id, host = vvoHost),
+        accountKey = accountKey,
+        createdAt = createdAt ?: Instant.DISTANT_PAST,
+        source = source,
+        rawUser = user?.toUi(accountKey),
+        content =
+            UiStatus.VVONotification.Content.Comment(
+                text = text.orEmpty(),
+            ),
+        status = status?.toUi(accountKey),
+    )
+}
+
+internal fun Attitude.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification {
+    return UiStatus.VVONotification(
+        statusKey = MicroBlogKey(id = idStr, host = vvoHost),
+        accountKey = accountKey,
+        createdAt = createdAt ?: Instant.DISTANT_PAST,
+        source = source?.let { Ktml.parse(it).innerText },
+        rawUser = user?.toUi(accountKey),
+        content = UiStatus.VVONotification.Content.Like,
+        status = status?.toUi(accountKey),
     )
 }

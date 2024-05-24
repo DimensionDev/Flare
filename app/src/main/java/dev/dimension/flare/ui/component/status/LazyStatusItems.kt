@@ -42,6 +42,7 @@ import com.ramcosta.composedestinations.generated.destinations.QuoteDestination
 import com.ramcosta.composedestinations.generated.destinations.ReplyRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.VVOStatusRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.deeplink
@@ -58,6 +59,7 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.component.status.vvo.VVONotificationComponent
 import dev.dimension.flare.ui.component.status.vvo.VVOStatusComponent
 import dev.dimension.flare.ui.component.status.vvo.VVOStatusEvent
 import dev.dimension.flare.ui.component.status.xqt.XQTNofiticationComponent
@@ -220,6 +222,28 @@ internal fun status(detailStatusKey: MicroBlogKey? = null) {
         }
     }
     onError {
+        item(
+            span = StaggeredGridItemSpan.FullLine,
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .clickable {
+                        },
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MoodBad,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(
+                    text = stringResource(id = R.string.status_loadmore_error_retry),
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+        }
     }
 }
 
@@ -357,6 +381,14 @@ internal fun StatusItem(
                 data = item,
                 event = event,
                 isDetail = isDetail,
+                modifier = modifier.padding(horizontal = horizontalPadding),
+            )
+        }
+
+        is UiStatus.VVONotification -> {
+            VVONotificationComponent(
+                data = item,
+                event = event,
                 modifier = modifier.padding(horizontal = horizontalPadding),
             )
         }
@@ -773,7 +805,12 @@ internal class DefaultStatusEvent(
         data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) {
-        TODO("Not yet implemented")
+        uriHandler.openUri(
+            VVOStatusRouteDestination(
+                statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
+            ).deeplink(),
+        )
     }
 }
 

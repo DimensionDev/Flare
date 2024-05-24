@@ -7,7 +7,9 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.HEAD
 import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
+import dev.dimension.flare.data.network.vvo.model.ContainerInfo
 import dev.dimension.flare.data.network.vvo.model.ProfileData
 import dev.dimension.flare.data.network.vvo.model.User
 import dev.dimension.flare.data.network.vvo.model.VVOResponse
@@ -35,6 +37,14 @@ internal interface UserApi {
 
     @HEAD("n/{screenName}")
     suspend fun checkUserExistence(
-        @Query("screen_name") screenName: String,
+        @Path("screenName") screenName: String,
     ): Response<Unit>
+
+    @GET("api/container/getIndex")
+    suspend fun getContainerIndex(
+        @Query("type") type: String,
+        @Query("value") value: String,
+        @Query("containerid") containerId: String? = null,
+        @Query("since_id") sinceId: String? = null,
+    ): VVOResponse<ContainerInfo>
 }

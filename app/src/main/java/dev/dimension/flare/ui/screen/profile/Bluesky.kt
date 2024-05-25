@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.MatricesDisplay
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -106,7 +106,7 @@ internal fun BlueskyProfileHeader(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 user.descriptionElement?.let {
-                    HtmlText2(
+                    HtmlText(
                         element = it,
                         layoutDirection = user.descriptionDirection,
                     )

@@ -27,7 +27,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.status.StatusRetweetHeaderComponent
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.nameDirection
@@ -137,7 +137,7 @@ private fun NotificationComponent(
                     Modifier
                         .weight(1f),
             ) {
-                HtmlText2(
+                HtmlText(
                     element = data.user.nameElement,
                     layoutDirection = data.user.nameDirection,
                     modifier =

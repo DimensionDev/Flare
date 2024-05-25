@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.status.StatusHeaderComponent
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.model.UiMedia
@@ -49,7 +49,7 @@ internal fun VVONotificationComponent(
         Spacer(modifier = Modifier.height(4.dp))
         when (val content = data.content) {
             is UiStatus.VVONotification.Content.Comment ->
-                HtmlText2(element = content.contentToken)
+                HtmlText(element = content.contentToken)
 
             UiStatus.VVONotification.Content.Like ->
                 Text(

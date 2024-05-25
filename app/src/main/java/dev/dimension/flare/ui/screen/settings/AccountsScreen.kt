@@ -39,7 +39,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUser
@@ -176,7 +176,7 @@ fun AccountItem(
     modifier: Modifier = Modifier,
     trailingContent: @Composable (UiUser) -> Unit = { },
     headlineContent: @Composable (UiUser) -> Unit = {
-        HtmlText2(element = it.nameElement, maxLines = 1)
+        HtmlText(element = it.nameElement, maxLines = 1)
     },
     supportingContent: @Composable (UiUser) -> Unit = {
         Text(text = it.handle, maxLines = 1)

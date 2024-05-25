@@ -102,7 +102,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -545,7 +545,7 @@ private fun ProfileScreen(
                     TopAppBar(
                         title = {
                             state.state.userState.onSuccess {
-                                HtmlText2(
+                                HtmlText(
                                     element = it.nameElement,
                                     modifier =
                                         Modifier.graphicsLayer {
@@ -1062,7 +1062,7 @@ internal fun CommonProfileHeader(
                             .weight(1f)
                             .padding(top = actualBannerHeight),
                 ) {
-                    HtmlText2(
+                    HtmlText(
                         element = displayName,
                         textStyle = MaterialTheme.typography.titleMedium,
                         modifier =

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
@@ -172,7 +172,7 @@ private fun QuotedStatus(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                HtmlText2(
+                                HtmlText(
                                     element = nameElement,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -198,7 +198,7 @@ private fun QuotedStatus(
                         }
                     }
                 }
-                HtmlText2(element = contentElement, layoutDirection = contentLayoutDirection)
+                HtmlText(element = contentElement, layoutDirection = contentLayoutDirection)
             }
             if (!medias.isNullOrEmpty() && LocalAppearanceSettings.current.showMedia && showMedia) {
                 StatusMediaComponent(

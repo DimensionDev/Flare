@@ -61,7 +61,7 @@ import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AdaptiveGrid
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
@@ -668,7 +668,7 @@ private fun StatusContentComponent(
         AnimatedVisibility(visible = expanded || contentWarning.isNullOrEmpty()) {
             Column {
                 if (rawContent.isNotEmpty() && rawContent.isNotBlank()) {
-                    HtmlText2(
+                    HtmlText(
                         element = content,
                         layoutDirection = contentDirection,
                         modifier = Modifier.fillMaxWidth(),

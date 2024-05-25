@@ -616,7 +616,10 @@ sealed class UiStatus {
             data object Like : Content
 
             @Immutable
-            data class Comment(val text: String) : Content {
+            data class Comment(
+                val text: String,
+                val media: ImmutableList<UiMedia>,
+            ) : Content {
                 val contentToken by lazy {
                     Ktml.parse(text)
                 }

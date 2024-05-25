@@ -130,11 +130,13 @@ fun SetDialogDestinationToEdgeToEdge() {
 fun MediaRoute(
     uri: String,
     navigator: DestinationsNavigator,
+    previewUrl: String? = null,
 ) {
     SetDialogDestinationToEdgeToEdge()
     MediaScreen(
         uri = uri,
         onDismiss = navigator::navigateUp,
+        previewUrl = previewUrl,
     )
 }
 
@@ -146,6 +148,7 @@ fun MediaRoute(
 @Composable
 internal fun MediaScreen(
     uri: String,
+    previewUrl: String?,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -180,6 +183,8 @@ internal fun MediaScreen(
                         model =
                             ImageRequest.Builder(LocalContext.current)
                                 .data(uri)
+                                .placeholderMemoryCacheKey(previewUrl)
+                                .crossfade(1_000)
                                 .build(),
                     )
                 LaunchedEffect(painter.intrinsicSize) {

@@ -122,6 +122,25 @@ internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification {
         content =
             UiStatus.VVONotification.Content.Comment(
                 text = text.orEmpty(),
+                media =
+                    listOfNotNull(
+                        pic?.let {
+                            val url = it.large?.url ?: it.url
+                            val previewUrl = it.url ?: url
+                            if (!url.isNullOrEmpty() && !previewUrl.isNullOrEmpty()) {
+                                UiMedia.Image(
+                                    url = url,
+                                    width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
+                                    height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
+                                    previewUrl = previewUrl,
+                                    description = null,
+                                    sensitive = false,
+                                )
+                            } else {
+                                null
+                            }
+                        },
+                    ).toImmutableList(),
             ),
         status = status?.toUi(accountKey),
     )

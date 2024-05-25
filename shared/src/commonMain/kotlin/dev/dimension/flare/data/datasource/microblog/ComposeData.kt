@@ -67,3 +67,12 @@ data class XQTComposeData(
         val multiple: Boolean,
     )
 }
+
+data class VVOComposeData(
+    val account: UiAccount.VVo,
+    val content: String,
+    val repostId: String? = null,
+    val commentId: String? = null,
+    val replyId: String? = null,
+    val medias: List<FileItem> = emptyList(),
+) : ComposeData

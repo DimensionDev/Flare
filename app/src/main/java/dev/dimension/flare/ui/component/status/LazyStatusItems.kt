@@ -35,6 +35,7 @@ import androidx.paging.LoadState
 import com.ramcosta.composedestinations.generated.destinations.BlueskyReportStatusRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DeleteStatusConfirmRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MastodonReportRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.MediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MisskeyReactionRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MisskeyReportRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
@@ -770,6 +771,14 @@ internal class DefaultStatusEvent(
         )
     }
 
+    override fun onRawMediaClick(
+        url: String,
+        preview: String?,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(MediaRouteDestination(url, preview).deeplink())
+    }
+
     override fun onLikeClick(data: UiStatus.VVO) {
         TODO("Not yet implemented")
     }
@@ -977,6 +986,12 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onStatusClick(
         data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onRawMediaClick(
+        url: String,
+        preview: String?,
         uriHandler: UriHandler,
     ) = Unit
 }

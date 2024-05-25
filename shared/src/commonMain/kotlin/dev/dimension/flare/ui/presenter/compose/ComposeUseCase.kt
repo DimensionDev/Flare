@@ -4,6 +4,7 @@ import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
+import dev.dimension.flare.data.datasource.microblog.VVOComposeData
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -25,7 +26,6 @@ class ComposeUseCase(
                                 progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
                             },
                         )
-
                     is MisskeyComposeData ->
                         data.account.dataSource.compose(
                             data = data,
@@ -42,6 +42,13 @@ class ComposeUseCase(
                             },
                         )
                     is XQTComposeData ->
+                        data.account.dataSource.compose(
+                            data = data,
+                            progress = {
+                                progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
+                            },
+                        )
+                    is VVOComposeData ->
                         data.account.dataSource.compose(
                             data = data,
                             progress = {

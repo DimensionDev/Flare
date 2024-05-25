@@ -490,3 +490,15 @@ internal data class Attitude(
     @SerialName("cut_tail")
     val cutTail: Boolean? = null,
 )
+
+@Serializable
+data class UploadResponse(
+    @SerialName("pic_id")
+    val picID: String? = null,
+    @SerialName("thumbnail_pic")
+    val thumbnailPic: String? = null,
+    @SerialName("bmiddle_pic")
+    val bmiddlePic: String? = null,
+    @SerialName("original_pic")
+    val originalPic: String? = null,
+)

@@ -9,6 +9,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -20,6 +21,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
+import dev.dimension.flare.data.datasource.microblog.VVOComposeData
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -35,6 +37,9 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -274,11 +279,72 @@ class VVODataSource(
         )
     }
 
+    private suspend fun uploadMedia(
+        fileItem: FileItem,
+        st: String,
+    ): String {
+        val bytes = fileItem.readBytes()
+        val response =
+            service.uploadPic(
+                st = st,
+                file =
+                    formData {
+                        append(
+                            "pic",
+                            bytes,
+                            Headers.build {
+                                append(HttpHeaders.ContentDisposition, "filename=${fileItem.name}")
+                            },
+                        )
+                    },
+            )
+        return response.picID ?: throw Exception("upload failed")
+    }
+
     override suspend fun compose(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     ) {
-        TODO("Not yet implemented")
+        require(data is VVOComposeData)
+        val maxProgress = data.medias.size + 1
+        val config = service.config()
+        val st = config.data?.st
+        requireNotNull(st) { "st is null" }
+        val mediaIds =
+            data.medias.mapIndexed { index, it ->
+                uploadMedia(it, st)
+                progress(ComposeProgress(index + 1, maxProgress))
+            }
+        val mediaId = mediaIds.joinToString(",")
+        if (data.replyId != null && data.commentId != null) {
+            service.replyComment(
+                id = data.commentId,
+                cid = data.replyId,
+                content = data.content,
+                st = st,
+                picId = mediaId,
+            )
+        } else if (data.commentId != null) {
+            service.commentStatus(
+                id = data.commentId,
+                content = data.content,
+                st = st,
+                picId = mediaId,
+            )
+        } else if (data.repostId != null) {
+            service.repostStatus(
+                id = data.repostId,
+                content = data.content,
+                st = st,
+                picId = mediaId,
+            )
+        } else {
+            service.updateStatus(
+                content = data.content,
+                st = st,
+                picId = mediaId,
+            )
+        }
     }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {

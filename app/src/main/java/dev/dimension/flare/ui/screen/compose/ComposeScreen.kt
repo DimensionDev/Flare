@@ -94,6 +94,7 @@ import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
 import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
+import dev.dimension.flare.data.datasource.microblog.VVOComposeData
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -1126,7 +1127,15 @@ private fun composePresenter(
                                 sensitive = mediaState.isMediaSensitive,
                             )
 
-                        is UiAccount.VVo -> TODO()
+                        is UiAccount.VVo ->
+                            VVOComposeData(
+                                account = it,
+                                medias =
+                                    mediaState.medias.map {
+                                        FileItem(context, it)
+                                    },
+                                content = textFieldState.text.toString(),
+                            )
 
                         UiAccount.Guest -> throw IllegalStateException("Guest account cannot compose")
                     }

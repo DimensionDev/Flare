@@ -246,6 +246,12 @@ private fun RowScope.StatusFooterComponent(
 }
 
 internal interface VVOStatusEvent {
+    fun onRawMediaClick(
+        url: String,
+        preview: String?,
+        uriHandler: UriHandler,
+    )
+
     fun onMediaClick(
         accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,

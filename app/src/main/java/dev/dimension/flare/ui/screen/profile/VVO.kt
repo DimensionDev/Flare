@@ -54,7 +54,7 @@ internal fun VVOProfileHeader(
         bannerUrl = user.bannerUrl,
         avatarUrl = user.avatarUrl,
         displayName = user.nameElement,
-        handle = user.handle,
+        handle = user.verifiedReason ?: user.handle,
         handleTrailing = {
             if (user.verified) {
                 Icon(

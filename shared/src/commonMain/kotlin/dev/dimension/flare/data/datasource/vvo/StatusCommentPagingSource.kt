@@ -21,7 +21,7 @@ internal class StatusCommentPagingSource(
                     maxId = params.key,
                 )
 
-            val nextPage = response.data?.maxID
+            val nextPage = response.data?.maxID?.takeIf { it != 0L }
             val data =
                 response.data?.data.orEmpty().map {
                     it.toUi(accountKey)
@@ -30,7 +30,7 @@ internal class StatusCommentPagingSource(
             LoadResult.Page(
                 data = data,
                 prevKey = null,
-                nextKey = nextPage,
+                nextKey = nextPage.takeIf { it != params.key },
             )
         } catch (e: Throwable) {
             LoadResult.Error(e)

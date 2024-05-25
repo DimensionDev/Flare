@@ -22,7 +22,7 @@ internal interface UserApi {
         @Field("uid") uid: String,
     ): VVOResponse<User>
 
-    @POST("api/friendships/destroy")
+    @POST("api/friendships/destory")
     @FormUrlEncoded
     suspend fun unfollow(
         @Field("st") st: String,

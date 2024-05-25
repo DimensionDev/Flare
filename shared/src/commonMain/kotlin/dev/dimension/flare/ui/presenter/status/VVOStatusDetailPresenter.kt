@@ -30,6 +30,8 @@ class VVOStatusDetailPresenter(
                 remember(statusKey, accountType) {
                     it.status(statusKey)
                 }.collectAsState().toUi()
+            }.map {
+                it as UiStatus.VVO
             }
 
         val extendedText =
@@ -46,7 +48,6 @@ class VVOStatusDetailPresenter(
                     is UiState.Error -> item
                     is UiState.Loading -> item
                     is UiState.Success -> {
-                        require(item is UiStatus.VVO)
                         item.copy(content = extendedText.data)
                     }
                 }
@@ -78,7 +79,7 @@ class VVOStatusDetailPresenter(
 
 @Immutable
 interface VVOStatusDetailState {
-    val status: UiState<UiStatus>
+    val status: UiState<UiStatus.VVO>
     val comment: UiState<LazyPagingItemsProxy<UiStatus.VVONotification>>
     val repost: UiState<LazyPagingItemsProxy<UiStatus.VVO>>
 }

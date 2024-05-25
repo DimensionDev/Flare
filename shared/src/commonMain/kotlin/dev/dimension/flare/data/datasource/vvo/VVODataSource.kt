@@ -340,7 +340,7 @@ class VVODataSource(
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation.VVO>(
             key = key,
         ) {
             it.copy(
@@ -356,7 +356,7 @@ class VVODataSource(
                 uid = userKey.id,
             )
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation.VVO>(
                 key = key,
             ) {
                 it.copy(
@@ -368,7 +368,7 @@ class VVODataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation.VVO>(
             key = key,
         ) {
             it.copy(
@@ -384,7 +384,7 @@ class VVODataSource(
                 uid = userKey.id,
             )
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation.VVO>(
                 key = key,
             ) {
                 it.copy(

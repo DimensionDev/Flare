@@ -342,4 +342,7 @@
     <string name="date_format_full">dd MMM yy HH:mm</string>
 
     <string name="vvo_notification_like">Liked your status</string>
+
+    <string name="status_detail_comment">Comment</string>
+    <string name="status_detail_repost">Repost</string>
 </resources>

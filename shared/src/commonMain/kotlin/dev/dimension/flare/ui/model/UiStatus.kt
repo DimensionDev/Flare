@@ -587,8 +587,14 @@ sealed class UiStatus {
         ) {
             val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
             val humanizedRepostCount by lazy {
-                repostCount.toLongOrNull()?.let { if (it > 0) it.humanize() else null }
-                    ?: repostCount
+                val value = repostCount.toLongOrNull()
+                if (value == null) {
+                    repostCount
+                } else if (value > 0) {
+                    value.humanize()
+                } else {
+                    null
+                }
             }
             val humanizedCommentCount by lazy { if (commentCount > 0) commentCount.humanize() else null }
         }

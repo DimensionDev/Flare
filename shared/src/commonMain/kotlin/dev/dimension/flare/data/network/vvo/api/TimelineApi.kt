@@ -39,7 +39,7 @@ internal interface TimelineApi {
         @Query("max_id_type") maxIdType: Int = 0,
     ): VVOResponse<HotflowData>
 
-    @GET("statuses/repostTimeline")
+    @GET("api/statuses/repostTimeline")
     suspend fun getRepostTimeline(
         @Query("id") id: String,
         @Query("page") page: Int,

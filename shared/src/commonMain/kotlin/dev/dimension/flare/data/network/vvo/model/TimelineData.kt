@@ -458,7 +458,7 @@ internal data class Comment(
     @SerialName("feedback_menu_type")
     val feedbackMenuType: Long? = null,
     val bid: String? = null,
-    val comments: List<Comment>? = null,
+//    val comments: List<Comment>? = null,
     val pic: StatusPic? = null,
 )
 

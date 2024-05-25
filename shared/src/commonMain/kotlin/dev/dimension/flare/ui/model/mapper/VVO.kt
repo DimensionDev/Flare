@@ -70,7 +70,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
         matrices =
             UiStatus.VVO.Matrices(
                 commentCount = commentsCount ?: 0,
-                repostCount = repostsCount?.content ?: "0",
+                repostCount = repostsCount?.content.orEmpty(),
                 likeCount = attitudesCount ?: 0,
             ),
         liked = favorited ?: false,

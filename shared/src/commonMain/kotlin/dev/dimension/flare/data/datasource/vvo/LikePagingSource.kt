@@ -27,7 +27,7 @@ internal class LikePagingSource(
             LoadResult.Page(
                 data = data,
                 prevKey = null,
-                nextKey = nextPage,
+                nextKey = nextPage.takeIf { it != params.key && data.any() },
             )
         } catch (e: Throwable) {
             LoadResult.Error(e)

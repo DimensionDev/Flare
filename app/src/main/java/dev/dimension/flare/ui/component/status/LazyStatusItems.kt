@@ -76,13 +76,61 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
+context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<T>>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
-internal fun status(detailStatusKey: MicroBlogKey? = null) {
+internal fun <T : UiStatus> status(
+    detailStatusKey: MicroBlogKey? = null,
+    showVVOStatus: Boolean = true,
+) {
     onSuccess { lazyPagingItems ->
         if (lazyPagingItems.itemCount > 0) {
             with(lazyPagingItems) {
-                statusItems(detailStatusKey = detailStatusKey)
+                items(
+                    itemCount,
+                    key =
+                        itemKey {
+                            it.itemKey
+                        },
+                    contentType =
+                        itemContentType {
+                            it.itemType
+                        },
+                ) {
+                    Column {
+                        val item = get(it)
+                        StatusItem(
+                            item,
+                            this@StatusEvent,
+                            isDetail = item?.statusKey == detailStatusKey,
+                            showVVOStatus = showVVOStatus,
+                            modifier =
+                                Modifier
+                                    .let {
+                                        if (item != null) {
+                                            it.sharedBounds(
+                                                rememberSharedContentState(key = item.itemKey),
+                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                                // ANY transition will lead to the entire screen being animated to
+                                                // exit state after list -> detail -> go back -> scroll a little bit,
+                                                // I have no idea why, so just use None here
+                                                enter = EnterTransition.None,
+                                                exit = ExitTransition.None,
+                                                renderInOverlayDuringTransition = false,
+                                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                                            )
+                                        } else {
+                                            it
+                                        }
+                                    }
+                                    .background(MaterialTheme.colorScheme.background),
+                        )
+                        if (it != itemCount - 1) {
+                            HorizontalDivider(
+                                modifier = Modifier.alpha(DisabledAlpha),
+                            )
+                        }
+                    }
+                }
             }
             when (lazyPagingItems.loadState.append) {
                 is LoadState.Error ->
@@ -247,56 +295,6 @@ internal fun status(detailStatusKey: MicroBlogKey? = null) {
     }
 }
 
-context(LazyStaggeredGridScope, LazyPagingItemsProxy<UiStatus>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
-private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
-    items(
-        itemCount,
-        key =
-            itemKey {
-                it.itemKey
-            },
-        contentType =
-            itemContentType {
-                it.itemType
-            },
-    ) {
-        Column {
-            val item = get(it)
-            StatusItem(
-                item,
-                this@StatusEvent,
-                isDetail = item?.statusKey == detailStatusKey,
-                modifier =
-                    Modifier
-                        .let {
-                            if (item != null) {
-                                it.sharedBounds(
-                                    rememberSharedContentState(key = item.itemKey),
-                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                    // ANY transition will lead to the entire screen being animated to
-                                    // exit state after list -> detail -> go back -> scroll a little bit,
-                                    // I have no idea why, so just use None here
-                                    enter = EnterTransition.None,
-                                    exit = ExitTransition.None,
-                                    renderInOverlayDuringTransition = false,
-                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                                )
-                            } else {
-                                it
-                            }
-                        }
-                        .background(MaterialTheme.colorScheme.background),
-            )
-            if (it != itemCount - 1) {
-                HorizontalDivider(
-                    modifier = Modifier.alpha(DisabledAlpha),
-                )
-            }
-        }
-    }
-}
-
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -306,6 +304,7 @@ internal fun StatusItem(
     modifier: Modifier = Modifier,
     horizontalPadding: Dp = screenHorizontalPadding,
     isDetail: Boolean = false,
+    showVVOStatus: Boolean = true,
 ) {
     when (item) {
         is UiStatus.Mastodon ->
@@ -382,6 +381,7 @@ internal fun StatusItem(
                 event = event,
                 isDetail = isDetail,
                 modifier = modifier.padding(horizontal = horizontalPadding),
+                showQuote = showVVOStatus,
             )
         }
 
@@ -390,6 +390,7 @@ internal fun StatusItem(
                 data = item,
                 event = event,
                 modifier = modifier.padding(horizontal = horizontalPadding),
+                showStatus = showVVOStatus,
             )
         }
     }

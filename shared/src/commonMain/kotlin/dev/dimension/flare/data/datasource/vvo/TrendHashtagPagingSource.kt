@@ -1,39 +1,35 @@
-package dev.dimension.flare.data.datasource.xqt
+package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.ui.model.UiHashtag
 
 internal class TrendHashtagPagingSource(
-    private val service: XQTService,
+    private val service: VVOService,
 ) : PagingSource<Int, UiHashtag>() {
+    private val containerId = "106003type=25&filter_type=realtimehot"
+
     override fun getRefreshKey(state: PagingState<Int, UiHashtag>): Int? {
         return null
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiHashtag> {
         try {
-            service.getGuide(count = params.loadSize)
-                .timeline
-                ?.instructions
-                ?.asSequence()
-                ?.mapNotNull {
-                    it.addEntries?.entries
+            service.getContainerIndex(containerId = containerId)
+                .data
+                ?.cards
+                ?.flatMap {
+                    it.cardGroup.orEmpty()
                 }
-                ?.flatten()
                 ?.mapNotNull {
-                    it.content?.timelineModule?.items
-                }
-                ?.flatten()
-                ?.mapNotNull {
-                    it.item?.content?.trend
+                    it.desc
                 }
                 ?.map {
                     UiHashtag(
-                        hashtag = it.name ?: "",
+                        hashtag = it,
                         description = null,
-                        searchContent = "#${it.name}",
+                        searchContent = "#$it#",
                     )
                 }
                 ?.toList()

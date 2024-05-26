@@ -783,7 +783,7 @@ internal class DefaultStatusEvent(
         scope.launch {
             val account =
                 accountRepository.get(data.accountKey) as? UiAccount.VVo ?: return@launch
-//            account.dataSource.like(data)
+            account.dataSource.like(data)
         }
     }
 

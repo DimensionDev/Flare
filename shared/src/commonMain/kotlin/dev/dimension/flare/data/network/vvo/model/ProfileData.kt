@@ -67,6 +67,14 @@ internal data class Card(
     val itemid: String? = null,
     val scheme: String? = null,
     val mblog: Status? = null,
+    @SerialName("card_group")
+    val cardGroup: List<CardGroup>? = null,
+)
+
+@Serializable
+internal data class CardGroup(
+    val desc: String? = null,
+    val user: User? = null,
 )
 
 @Serializable

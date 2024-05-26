@@ -15,6 +15,8 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
@@ -353,7 +355,22 @@ class VVODataSource(
         pageSize: Int,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
-        TODO("Not yet implemented")
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
+            scope = scope,
+            mediator =
+                SearchStatusRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                    query,
+                ),
+        )
     }
 
     override fun searchUser(
@@ -361,7 +378,15 @@ class VVODataSource(
         scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUser>> {
-        TODO("Not yet implemented")
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            SearchUserPagingSource(
+                service = service,
+                accountKey = account.accountKey,
+                query = query,
+            )
+        }.flow
     }
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
@@ -373,11 +398,31 @@ class VVODataSource(
         scope: CoroutineScope,
         pagingKey: String,
     ): Flow<PagingData<UiStatus>> {
-        TODO("Not yet implemented")
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                DiscoverStatusRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
     }
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
-        TODO("Not yet implemented")
+        return Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            TrendHashtagPagingSource(
+                service,
+            )
+        }.flow
     }
 
     override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
@@ -490,5 +535,58 @@ class VVODataSource(
             val response = service.getStatusExtend(statusKey.id, st)
             response.data?.longTextContent.orEmpty()
         }.toUi()
+    }
+
+    suspend fun like(status: UiStatus.VVO) {
+        updateStatusUseCase<StatusContent.VVO>(
+            statusKey = status.statusKey,
+            accountKey = status.accountKey,
+            cacheDatabase = database,
+            update = {
+                it.copy(
+                    data =
+                        it.data.copy(
+                            favorited = !status.liked,
+                            attitudesCount =
+                                if (status.liked) {
+                                    it.data.attitudesCount?.minus(1)
+                                } else {
+                                    it.data.attitudesCount?.plus(1)
+                                },
+                        ),
+                )
+            },
+        )
+
+        runCatching {
+            val st = service.config().data?.st
+            requireNotNull(st) { "st is null" }
+            if (status.liked) {
+                service.unlikeStatus(id = status.statusKey.id, st = st)
+            } else {
+                service.likeStatus(id = status.statusKey.id, st = st)
+            }
+        }.onFailure {
+            updateStatusUseCase<StatusContent.VVO>(
+                statusKey = status.statusKey,
+                accountKey = status.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                favorited = status.liked,
+                                attitudesCount =
+                                    if (status.liked) {
+                                        it.data.attitudesCount?.plus(1)
+                                    } else {
+                                        it.data.attitudesCount?.minus(1)
+                                    },
+                            ),
+                    )
+                },
+            )
+        }.onSuccess {
+        }
     }
 }

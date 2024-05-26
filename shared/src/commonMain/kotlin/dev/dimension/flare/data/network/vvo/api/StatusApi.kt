@@ -76,4 +76,22 @@ internal interface StatusApi {
         @Field("st") st: String,
         @Header("X-Xsrf-Token") xsrfToken: String = st,
     ): VVOResponse<String>
+
+    @POST("api/attitudes/create")
+    @FormUrlEncoded
+    suspend fun likeStatus(
+        @Field("id") id: String,
+        @Field("st") st: String,
+        @Field("attitude") attitude: String = "heart",
+        @Header("X-Xsrf-Token") xsrfToken: String = st,
+    ): VVOResponse<String>
+
+    @POST("api/attitudes/destroy")
+    @FormUrlEncoded
+    suspend fun unlikeStatus(
+        @Field("id") id: String,
+        @Field("st") st: String,
+        @Field("attitude") attitude: String = "heart",
+        @Header("X-Xsrf-Token") xsrfToken: String = st,
+    ): VVOResponse<String>
 }

@@ -42,9 +42,11 @@ internal interface UserApi {
 
     @GET("api/container/getIndex")
     suspend fun getContainerIndex(
-        @Query("type") type: String,
-        @Query("value") value: String,
+        @Query("type") type: String? = null,
+        @Query("value") value: String? = null,
         @Query("containerid") containerId: String? = null,
         @Query("since_id") sinceId: String? = null,
+        @Query("page") page: Int? = null,
+        @Query("page_type") pageType: String? = null,
     ): VVOResponse<ContainerInfo>
 }

@@ -63,6 +63,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.CoroutineScope
@@ -124,6 +125,9 @@ fun SetDialogDestinationToEdgeToEdge() {
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+        DeepLink(
+            uriPattern = AppDeepLink.RawImage.ROUTE,
         ),
     ],
 )

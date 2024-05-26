@@ -37,9 +37,6 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
-import io.ktor.client.request.forms.formData
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -287,16 +284,8 @@ class VVODataSource(
         val response =
             service.uploadPic(
                 st = st,
-                file =
-                    formData {
-                        append(
-                            "pic",
-                            bytes,
-                            Headers.build {
-                                append(HttpHeaders.ContentDisposition, "filename=${fileItem.name}")
-                            },
-                        )
-                    },
+                bytes = bytes,
+                filename = fileItem.name ?: "file",
             )
         return response.picID ?: throw Exception("upload failed")
     }
@@ -312,8 +301,9 @@ class VVODataSource(
         requireNotNull(st) { "st is null" }
         val mediaIds =
             data.medias.mapIndexed { index, it ->
-                uploadMedia(it, st)
-                progress(ComposeProgress(index + 1, maxProgress))
+                uploadMedia(it, st).also {
+                    progress(ComposeProgress(index + 1, maxProgress))
+                }
             }
         val mediaId = mediaIds.joinToString(",")
         if (data.replyId != null && data.commentId != null) {
@@ -348,7 +338,13 @@ class VVODataSource(
     }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        TODO("Not yet implemented")
+        val config = service.config()
+        val st = config.data?.st
+        requireNotNull(st) { "st is null" }
+        service.deleteStatus(
+            mid = statusKey.id,
+            st = st,
+        )
     }
 
     override fun searchStatus(

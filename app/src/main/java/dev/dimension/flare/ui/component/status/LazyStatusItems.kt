@@ -703,12 +703,12 @@ internal class DefaultStatusEvent(
         data: UiStatus.XQT,
         uriHandler: UriHandler,
     ) {
-        uriHandler.openUri(
-            BlueskyReportStatusRouteDestination(
-                statusKey = data.statusKey,
-                accountType = AccountType.Specific(data.accountKey),
-            ).deeplink(),
-        )
+//        uriHandler.openUri(
+//            BlueskyReportStatusRouteDestination(
+//                statusKey = data.statusKey,
+//                accountType = AccountType.Specific(data.accountKey),
+//            ).deeplink(),
+//        )
     }
 
     override fun onDeleteClick(
@@ -780,35 +780,54 @@ internal class DefaultStatusEvent(
     }
 
     override fun onLikeClick(data: UiStatus.VVO) {
-        TODO("Not yet implemented")
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.VVo ?: return@launch
+//            account.dataSource.like(data)
+        }
     }
 
     override fun onCommentClick(
         data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) {
-        TODO("Not yet implemented")
+        uriHandler.openUri(
+            ReplyRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                replyTo = data.statusKey,
+            ).deeplink(),
+        )
     }
 
     override fun onDeleteClick(
         data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) {
-        TODO("Not yet implemented")
+        uriHandler.openUri(
+            DeleteStatusConfirmRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                statusKey = data.statusKey,
+            ).deeplink(),
+        )
     }
 
     override fun onReblogClick(
         data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) {
-        TODO("Not yet implemented")
+        uriHandler.openUri(
+            QuoteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                quoted = data.statusKey,
+            ).deeplink(),
+        )
     }
 
     override fun onReportClick(
         data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) {
-        TODO("Not yet implemented")
+//        TODO("Not yet implemented")
     }
 
     override fun onStatusClick(

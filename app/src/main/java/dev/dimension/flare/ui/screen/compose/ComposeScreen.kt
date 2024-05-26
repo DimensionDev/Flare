@@ -78,6 +78,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
@@ -958,6 +959,15 @@ private fun composePresenter(
 //                        }
                     }
 
+                    is UiStatus.VVO -> {
+                        if (item.quote != null && status is ComposeStatus.Quote) {
+                            textFieldState.edit {
+                                append("//@${item.rawUser?.rawHandle}:${item.rawContent}")
+                                selection = TextRange.Zero
+                            }
+                        }
+                    }
+
                     else -> Unit
                 }
             }
@@ -1135,6 +1145,8 @@ private fun composePresenter(
                                         FileItem(context, it)
                                     },
                                 content = textFieldState.text.toString(),
+                                repostId = (status as? ComposeStatus.Quote)?.statusKey?.id,
+                                commentId = (status as? ComposeStatus.Reply)?.statusKey?.id,
                             )
 
                         UiAccount.Guest -> throw IllegalStateException("Guest account cannot compose")

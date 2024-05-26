@@ -9,7 +9,9 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.misskey.api.model.NotificationType
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.humanizer.humanize
+import io.ktor.http.decodeURLPart
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
@@ -552,8 +554,13 @@ sealed class UiStatus {
                                         host = accountKey.host,
                                     )
                             }
-                        } else if (href.startsWith("https://m.weibo.cn/search")) {
+                        } else if (href.startsWith("https://$vvoHost/search")) {
                             node.attributes["href"] = AppDeepLink.Search(accountKey, node.innerText)
+                        } else if (href.startsWith("https://weibo.cn/sinaurl?u=")) {
+                            val url = href.removePrefix("https://weibo.cn/sinaurl?u=").decodeURLPart()
+                            if (url.contains("sinaimg.cn/")) {
+                                node.attributes["href"] = AppDeepLink.RawImage(url)
+                            }
                         }
                     }
                     node.children.forEach { replaceMentionAndHashtag(element, it, accountKey) }

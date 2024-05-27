@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">有新嘟文</string>
   <string name="notification_tab_all_title">全部</string>
   <string name="notification_tab_mentions_title">提及</string>
+  <string name="notification_tab_comments_title">评论</string>
+  <string name="notification_tab_likes_title">点赞</string>
   <string name="profile_header_following_count">%1$s 关注</string>
   <string name="profile_header_fans_count">%1$s 粉丝</string>
   <string name="profile_header_toots_count">%1$s 嘟文</string>
@@ -235,6 +237,7 @@
   <string name="swipe_action_favourite">收藏</string>
   <string name="swipe_action_add_reaction">添加反应</string>
   <string name="swipe_action_bookmark">书签</string>
+  <string name="swipe_action_comment">评论</string>
   <string name="settings_storage_clear_image_cache">清除图片缓存</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB的图片将被删除</string>
   <string name="settings_storage_clear_database">清除缓存数据库</string>
@@ -274,4 +277,7 @@
   <string name="date_format_year_month_day">yyyy年MMMdd日</string>
   <string name="date_format_month_day">MMMdd日</string>
   <string name="date_format_full">yyyy年MMMdd日 HH:mm</string>
+  <string name="vvo_notification_like">喜欢了您的帖子</string>
+  <string name="status_detail_comment">评论</string>
+  <string name="status_detail_repost">转发</string>
 </resources>

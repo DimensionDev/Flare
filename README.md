@@ -7,6 +7,7 @@
 ![badge-Misskey](https://img.shields.io/badge/Misskey-acea31)
 ![badge-Bluesky](https://img.shields.io/badge/Bluesky-blue)
 ![badge-xQt](https://img.shields.io/badge/xQt-black)
+![badge-VVo](https://img.shields.io/badge/VVo-red)
 
 ![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-17.0-black)
@@ -29,7 +30,7 @@ The ultimate next generation* open-sourced AI powered** decentralized social net
 Here're some features we're planning to implement in the future, you can check the project board [here](https://github.com/orgs/DimensionDev/projects/3) for progress.
  - [ ] Mixed timeline
  - [ ] AI powered features
- - [ ] Support for vvo platform
+ - [x] Support for vvo platform
  - [x] Anonymous mode, no need to login
  - [x] Customizable tabs
  - [x] Local filtering

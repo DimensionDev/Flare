@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Νέα φωνές</string>
   <string name="notification_tab_all_title">Όλα</string>
   <string name="notification_tab_mentions_title">Αναφορές</string>
+  <string name="notification_tab_comments_title">Σχόλια</string>
+  <string name="notification_tab_likes_title">Αρέσει</string>
   <string name="profile_header_button_follow">Ακολουθήστε</string>
   <string name="profile_header_button_following">Ακολουθεί</string>
   <string name="profile_header_button_requested">Ζητήθηκε</string>
@@ -231,6 +233,7 @@
   <string name="swipe_action_favourite">Αγαπημένο</string>
   <string name="swipe_action_add_reaction">Αντίδραση</string>
   <string name="swipe_action_bookmark">Σελιδοδείκτης</string>
+  <string name="swipe_action_comment">Σχόλιο</string>
   <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
   <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
@@ -269,4 +272,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy HH:mm</string>
+  <string name="vvo_notification_like">Μου άρεσε η κατάστασή σας</string>
+  <string name="status_detail_comment">Σχόλιο</string>
+  <string name="status_detail_repost">Επαναδημοσίευση</string>
 </resources>

@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Nieuwe toots</string>
   <string name="notification_tab_all_title">Allemaal</string>
   <string name="notification_tab_mentions_title">Vermeldingen</string>
+  <string name="notification_tab_comments_title">Opmerkingen</string>
+  <string name="notification_tab_likes_title">Vind-ik-leuk</string>
   <string name="profile_header_following_count">%1$s volgers</string>
   <string name="profile_header_fans_count">%1$s volgers</string>
   <string name="profile_header_toots_count">%1$s Toots</string>
@@ -235,6 +237,7 @@
   <string name="swipe_action_favourite">Favoriete</string>
   <string name="swipe_action_add_reaction">Reactie</string>
   <string name="swipe_action_bookmark">Bladwijzer</string>
+  <string name="swipe_action_comment">Opmerking</string>
   <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
   <string name="settings_storage_clear_database">Cache database wissen</string>
@@ -274,4 +277,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy HH:mm</string>
+  <string name="vvo_notification_like">Vind je status leuk</string>
+  <string name="status_detail_comment">Opmerking</string>
+  <string name="status_detail_repost">Herpost</string>
 </resources>

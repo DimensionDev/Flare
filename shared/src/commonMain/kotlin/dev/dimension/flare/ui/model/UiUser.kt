@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.humanizer.humanize
 import kotlinx.collections.immutable.ImmutableMap
@@ -245,7 +246,7 @@ sealed class UiUser {
         val verifiedReason: String?,
         val relation: UiRelation.VVO,
         val accountKey: MicroBlogKey,
-        override val handle: String = "@$rawHandle",
+        override val handle: String = "@$rawHandle@${vvoHost.removePrefix("m.")}",
     ) : UiUser() {
         override val nameElement: Element by lazy {
             Element("span").apply {

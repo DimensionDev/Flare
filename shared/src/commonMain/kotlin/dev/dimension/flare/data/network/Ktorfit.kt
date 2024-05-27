@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network
 
 import de.jensklingenberg.ktorfit.converter.CallConverterFactory
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
+import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.authorization.Authorization
 import dev.dimension.flare.data.network.authorization.AuthorizationPlugin
@@ -31,6 +32,7 @@ internal fun ktorfit(
     converterFactories(
         FlowConverterFactory(),
         CallConverterFactory(),
+        ResponseConverterFactory(),
     )
 }
 

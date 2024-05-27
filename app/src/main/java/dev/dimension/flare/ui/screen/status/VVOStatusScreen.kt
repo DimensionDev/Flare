@@ -32,6 +32,7 @@ import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -186,23 +187,25 @@ private fun StatusContent(
     modifier: Modifier = Modifier,
 ) {
     statusState.onSuccess { status ->
-        StatusItem(
-            item = status,
-            event = event,
-            modifier =
-                modifier.sharedBounds(
-                    rememberSharedContentState(key = status.itemKey),
-                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                    // ANY transition will lead to the entire screen being animated to
-                    // exit state after list -> detail -> go back -> scroll a little bit,
-                    // I have no idea why, so just use None here
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    renderInOverlayDuringTransition = false,
-                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                ),
-            isDetail = true,
-        )
+        key(status.statusKey, status.content) {
+            StatusItem(
+                item = status,
+                event = event,
+                modifier =
+                    modifier.sharedBounds(
+                        rememberSharedContentState(key = status.itemKey),
+                        animatedVisibilityScope = this@AnimatedVisibilityScope,
+                        // ANY transition will lead to the entire screen being animated to
+                        // exit state after list -> detail -> go back -> scroll a little bit,
+                        // I have no idea why, so just use None here
+                        enter = EnterTransition.None,
+                        exit = ExitTransition.None,
+                        renderInOverlayDuringTransition = false,
+                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                    ),
+                isDetail = true,
+            )
+        }
     }.onLoading {
         StatusItem(item = null, event = event, modifier = modifier, isDetail = true)
     }.onError {

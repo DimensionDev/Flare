@@ -42,7 +42,10 @@ class NotificationPresenter(
         val listState =
             serviceState.flatMap { service ->
                 val currentType = type
-                if (service.supportedNotificationFilter.isEmpty() || currentType == null) {
+                if (service.supportedNotificationFilter.isEmpty() ||
+                    currentType == null ||
+                    currentType !in service.supportedNotificationFilter
+                ) {
                     UiState.Error(IllegalStateException("No supported notification filter"))
                 } else {
                     UiState.Success(

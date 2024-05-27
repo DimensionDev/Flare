@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Nye toots</string>
   <string name="notification_tab_all_title">Alle</string>
   <string name="notification_tab_mentions_title">Omtalelser</string>
+  <string name="notification_tab_comments_title">Kommentarer</string>
+  <string name="notification_tab_likes_title">Liker</string>
   <string name="profile_header_following_count">%1$s Følger</string>
   <string name="profile_header_fans_count">%1$s følgere</string>
   <string name="profile_header_toots_count">%1$s toots</string>
@@ -234,6 +236,7 @@
   <string name="swipe_action_favourite">Favoritt</string>
   <string name="swipe_action_add_reaction">Reaksjon</string>
   <string name="swipe_action_bookmark">Bokmerke</string>
+  <string name="swipe_action_comment">Kommentar</string>
   <string name="settings_storage_clear_image_cache">Tøm bildebuffer</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
   <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>
@@ -273,4 +276,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy H:mm</string>
+  <string name="vvo_notification_like">Likte statusen din</string>
+  <string name="status_detail_comment">Kommentar</string>
+  <string name="status_detail_repost">Gjenkjenn</string>
 </resources>

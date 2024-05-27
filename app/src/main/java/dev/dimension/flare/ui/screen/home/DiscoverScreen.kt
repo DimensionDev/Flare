@@ -6,13 +6,14 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -21,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,7 +30,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -94,7 +98,7 @@ internal fun AnimatedVisibilityScope.DiscoverRoute(
 }
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalLayoutApi::class)
 @Composable
 private fun DiscoverScreen(
     accountType: AccountType,
@@ -102,6 +106,7 @@ private fun DiscoverScreen(
     onUserClick: (MicroBlogKey) -> Unit,
     onAccountClick: () -> Unit,
 ) {
+    val windowInfo = currentWindowAdaptiveInfo()
     val state by producePresenter("discover_$accountType") { discoverPresenter(accountType) }
     val lazyListState = rememberLazyStaggeredGridState()
     RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
@@ -222,19 +227,27 @@ private fun DiscoverScreen(
                                 item(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
-                                    LazyRow(
+                                    val maxItemsInEachRow =
+                                        if (windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {
+                                            2
+                                        } else if (windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.MEDIUM) {
+                                            4
+                                        } else {
+                                            8
+                                        }
+                                    FlowRow(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                                        maxItemsInEachRow = maxItemsInEachRow,
                                     ) {
                                         hashtags.onSuccess {
-                                            items(
+                                            repeat(
                                                 hashtags.itemCount,
                                             ) {
                                                 val hashtag = hashtags[it]
                                                 Card(
-                                                    modifier =
-                                                        Modifier
-                                                            .width(192.dp),
+                                                    modifier = Modifier.weight(1f),
                                                     onClick = {
                                                         hashtag?.searchContent?.let { it1 ->
                                                             state.commitSearch(
@@ -246,24 +259,29 @@ private fun DiscoverScreen(
                                                     Box(
                                                         modifier =
                                                             Modifier
-                                                                .padding(8.dp)
-                                                                .height(48.dp),
+                                                                .padding(8.dp),
                                                     ) {
                                                         if (hashtag != null) {
-                                                            Text(text = hashtag.hashtag)
+                                                            Text(
+                                                                text = hashtag.hashtag,
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis,
+                                                            )
                                                         } else {
                                                             Text(
                                                                 text = "Lorem Ipsum is simply dummy text",
                                                                 modifier = Modifier.placeholder(true),
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis,
                                                             )
                                                         }
                                                     }
                                                 }
                                             }
                                         }.onLoading {
-                                            items(10) {
+                                            repeat(10) {
                                                 Card(
-                                                    modifier = Modifier.width(192.dp),
+                                                    modifier = Modifier.weight(1f),
                                                 ) {
                                                     Box(
                                                         modifier = Modifier.padding(8.dp),
@@ -271,6 +289,8 @@ private fun DiscoverScreen(
                                                         Text(
                                                             text = "Lorem Ipsum is simply dummy text",
                                                             modifier = Modifier.placeholder(true),
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis,
                                                         )
                                                     }
                                                 }

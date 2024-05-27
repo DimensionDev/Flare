@@ -33,6 +33,7 @@ internal class TrendHashtagPagingSource(
                     )
                 }
                 ?.toList()
+                ?.take(10)
                 .orEmpty()
                 .let {
                     return LoadResult.Page(

@@ -31,9 +31,9 @@ internal class TrendHashtagPagingSource(
                 }
                 ?.map {
                     UiHashtag(
-                        hashtag = it.name ?: "",
+                        hashtag = it.name.orEmpty(),
                         description = null,
-                        searchContent = "#${it.name}",
+                        searchContent = it.name.orEmpty(),
                     )
                 }
                 ?.toList()

@@ -479,6 +479,26 @@ sealed interface TimelineTabItem : TabItem {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
+                NotificationTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+                            icon =
+                                IconType.Mixed(
+                                    IconType.Material.MaterialIcon.Notification,
+                                    accountKey,
+                                ),
+                        ),
+                ),
+                DiscoverTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
+                        ),
+                ),
                 ProfileTabItem(
                     account = AccountType.Specific(accountKey),
                     userKey = AccountType.Specific(accountKey),

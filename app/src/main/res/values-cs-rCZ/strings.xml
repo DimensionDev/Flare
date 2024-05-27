@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Nové tooty</string>
   <string name="notification_tab_all_title">Vše</string>
   <string name="notification_tab_mentions_title">Zmiňuje</string>
+  <string name="notification_tab_comments_title">Komentáře</string>
+  <string name="notification_tab_likes_title">Líbí se mi</string>
   <string name="profile_header_following_count">%1$s následuje</string>
   <string name="profile_header_fans_count">%1$s následovníci</string>
   <string name="profile_header_toots_count">%1$s Tooty</string>
@@ -235,6 +237,7 @@
   <string name="swipe_action_favourite">Oblíbená</string>
   <string name="swipe_action_add_reaction">Reakce</string>
   <string name="swipe_action_bookmark">Záložka</string>
+  <string name="swipe_action_comment">Komentář</string>
   <string name="settings_storage_clear_image_cache">Vymazat cache obrázků</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB obrázků bude odstraněno</string>
   <string name="settings_storage_clear_database">Vymazat databázi mezipaměti</string>
@@ -274,4 +277,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy HH:mm</string>
+  <string name="vvo_notification_like">Líbí se vám váš status</string>
+  <string name="status_detail_comment">Komentář</string>
+  <string name="status_detail_repost">Znovu odeslat</string>
 </resources>

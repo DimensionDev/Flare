@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">تبويقات جديدة</string>
   <string name="notification_tab_all_title">الكل</string>
   <string name="notification_tab_mentions_title">الإشارات</string>
+  <string name="notification_tab_comments_title">تعليقات</string>
+  <string name="notification_tab_likes_title">إعجاب</string>
   <string name="profile_header_following_count">%1$s متابعة</string>
   <string name="profile_header_toots_count">تبويبات %1$s</string>
   <string name="profile_misskey_header_status_count">حالة %1$s</string>
@@ -233,6 +235,7 @@
   <string name="swipe_action_favourite">المفضلة</string>
   <string name="swipe_action_add_reaction">رد</string>
   <string name="swipe_action_bookmark">إشارة</string>
+  <string name="swipe_action_comment">تعليق</string>
   <string name="settings_storage_clear_image_cache">مسح ذاكرة التخزين المؤقت للصورة</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
   <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>
@@ -272,4 +275,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy HH:mm</string>
+  <string name="vvo_notification_like">أعجبك حالتك</string>
+  <string name="status_detail_comment">تعليق</string>
+  <string name="status_detail_repost">إعادة</string>
 </resources>

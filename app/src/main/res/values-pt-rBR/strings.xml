@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Novos toots</string>
   <string name="notification_tab_all_title">TODOS</string>
   <string name="notification_tab_mentions_title">Menciona</string>
+  <string name="notification_tab_comments_title">comentários</string>
+  <string name="notification_tab_likes_title">Gostos</string>
   <string name="profile_header_following_count">%1$s Seguindo</string>
   <string name="profile_header_fans_count">%1$s Seguidores</string>
   <string name="profile_header_toots_count">%1$s Toots</string>
@@ -235,6 +237,7 @@
   <string name="swipe_action_favourite">Favorito</string>
   <string name="swipe_action_add_reaction">Reação</string>
   <string name="swipe_action_bookmark">Favorito</string>
+  <string name="swipe_action_comment">Comentar</string>
   <string name="settings_storage_clear_image_cache">Limpar cache de imagens</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB de imagens serão removidas</string>
   <string name="settings_storage_clear_database">Limpar banco de dados de cache</string>
@@ -274,4 +277,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy HH:mm</string>
+  <string name="vvo_notification_like">Curtiu seu status</string>
+  <string name="status_detail_comment">Comentar</string>
+  <string name="status_detail_repost">Republicar</string>
 </resources>

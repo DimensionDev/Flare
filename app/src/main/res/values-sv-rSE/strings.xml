@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Nya toots</string>
   <string name="notification_tab_all_title">Alla</string>
   <string name="notification_tab_mentions_title">Omnämningar</string>
+  <string name="notification_tab_comments_title">Kommentarer</string>
+  <string name="notification_tab_likes_title">Gillar</string>
   <string name="profile_header_following_count">%1$s Följer</string>
   <string name="profile_header_fans_count">%1$s Följare</string>
   <string name="profile_header_toots_count">%1$s Toots</string>
@@ -235,6 +237,7 @@
   <string name="swipe_action_favourite">Favorit</string>
   <string name="swipe_action_add_reaction">Reaktion</string>
   <string name="swipe_action_bookmark">Bokmärke</string>
+  <string name="swipe_action_comment">Kommentar</string>
   <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
   <string name="settings_storage_clear_database">Rensa cache-databas</string>
@@ -274,4 +277,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM åå HH:mm</string>
+  <string name="vvo_notification_like">Gillade din status</string>
+  <string name="status_detail_comment">Kommentar</string>
+  <string name="status_detail_repost">Omvänd</string>
 </resources>

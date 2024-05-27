@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Nowe wpisy</string>
   <string name="notification_tab_all_title">Wszystkie</string>
   <string name="notification_tab_mentions_title">Wzmianki</string>
+  <string name="notification_tab_comments_title">Komentarze</string>
+  <string name="notification_tab_likes_title">Polubienia</string>
   <string name="profile_header_fans_count">%1$s Obserwujących</string>
   <string name="profile_header_toots_count">%1$s Wpisy</string>
   <string name="profile_misskey_header_status_count">Status %1$s</string>
@@ -234,6 +236,7 @@
   <string name="swipe_action_favourite">Ulubione</string>
   <string name="swipe_action_add_reaction">Reakcja</string>
   <string name="swipe_action_bookmark">Zakładka</string>
+  <string name="swipe_action_comment">Komentarz</string>
   <string name="settings_storage_clear_image_cache">Usuń pamięć podręczną obrazów</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
   <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>
@@ -273,4 +276,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy GG:mm</string>
+  <string name="vvo_notification_like">Polubiono Twój status</string>
+  <string name="status_detail_comment">Komentarz</string>
+  <string name="status_detail_repost">Udostępnij ponownie</string>
 </resources>

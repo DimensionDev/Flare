@@ -20,6 +20,7 @@ internal class UserTimelineRemoteMediator(
     private val mediaOnly: Boolean,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
     private var containerid: String? = null
+    var page = 0
 
     override suspend fun load(
         loadType: LoadType,
@@ -46,6 +47,7 @@ internal class UserTimelineRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
+                        page = 0
                         service.getContainerIndex(
                             type = "uid",
                             value = userKey.id,
@@ -64,6 +66,7 @@ internal class UserTimelineRemoteMediator(
                     }
 
                     LoadType.APPEND -> {
+                        page++
                         val lastItem =
                             state.lastItemOrNull()
                                 ?: return MediatorResult.Success(
@@ -84,6 +87,10 @@ internal class UserTimelineRemoteMediator(
                 pagingKey = pagingKey,
                 database = database,
                 statuses = status,
+                sortIdProvider = {
+                    val index = status.indexOf(it)
+                    -(index + page * state.config.pageSize).toLong()
+                },
             )
             MediatorResult.Success(
                 endOfPaginationReached = response.data?.cardlistInfo?.sinceID == null,

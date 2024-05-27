@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Uudet tootit</string>
   <string name="notification_tab_all_title">Kaikki</string>
   <string name="notification_tab_mentions_title">Maininnat</string>
+  <string name="notification_tab_comments_title">Kommentit</string>
+  <string name="notification_tab_likes_title">Tykkäykset</string>
   <string name="profile_header_following_count">%1$s Seurattu</string>
   <string name="profile_header_fans_count">%1$s Seuraajaa</string>
   <string name="profile_header_toots_count">%1$s Juuret</string>
@@ -235,6 +237,7 @@
   <string name="swipe_action_favourite">Suosikki</string>
   <string name="swipe_action_add_reaction">Reaktio</string>
   <string name="swipe_action_bookmark">Kirjanmerkki</string>
+  <string name="swipe_action_comment">Kommentti</string>
   <string name="settings_storage_clear_image_cache">Tyhjennä kuvien välimuisti</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
   <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>
@@ -274,4 +277,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">pp MMM yy HH:mm</string>
+  <string name="vvo_notification_like">Tykkään tilastasi</string>
+  <string name="status_detail_comment">Kommentti</string>
+  <string name="status_detail_repost">Uudelleenlähetys</string>
 </resources>

@@ -35,6 +35,7 @@ import androidx.paging.LoadState
 import com.ramcosta.composedestinations.generated.destinations.BlueskyReportStatusRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DeleteStatusConfirmRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MastodonReportRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.MediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MisskeyReactionRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MisskeyReportRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
@@ -42,6 +43,7 @@ import com.ramcosta.composedestinations.generated.destinations.QuoteDestination
 import com.ramcosta.composedestinations.generated.destinations.ReplyRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.VVOStatusRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.deeplink
@@ -58,6 +60,9 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.component.status.vvo.VVONotificationComponent
+import dev.dimension.flare.ui.component.status.vvo.VVOStatusComponent
+import dev.dimension.flare.ui.component.status.vvo.VVOStatusEvent
 import dev.dimension.flare.ui.component.status.xqt.XQTNofiticationComponent
 import dev.dimension.flare.ui.component.status.xqt.XQTStatusComponent
 import dev.dimension.flare.ui.component.status.xqt.XQTStatusEvent
@@ -72,13 +77,61 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<UiStatus>>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
+context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<T>>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
-internal fun status(detailStatusKey: MicroBlogKey? = null) {
+internal fun <T : UiStatus> status(
+    detailStatusKey: MicroBlogKey? = null,
+    showVVOStatus: Boolean = true,
+) {
     onSuccess { lazyPagingItems ->
         if (lazyPagingItems.itemCount > 0) {
             with(lazyPagingItems) {
-                statusItems(detailStatusKey = detailStatusKey)
+                items(
+                    itemCount,
+                    key =
+                        itemKey {
+                            it.itemKey
+                        },
+                    contentType =
+                        itemContentType {
+                            it.itemType
+                        },
+                ) {
+                    Column {
+                        val item = get(it)
+                        StatusItem(
+                            item,
+                            this@StatusEvent,
+                            isDetail = item?.statusKey == detailStatusKey,
+                            showVVOStatus = showVVOStatus,
+                            modifier =
+                                Modifier
+                                    .let {
+                                        if (item != null) {
+                                            it.sharedBounds(
+                                                rememberSharedContentState(key = item.itemKey),
+                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                                // ANY transition will lead to the entire screen being animated to
+                                                // exit state after list -> detail -> go back -> scroll a little bit,
+                                                // I have no idea why, so just use None here
+                                                enter = EnterTransition.None,
+                                                exit = ExitTransition.None,
+                                                renderInOverlayDuringTransition = false,
+                                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                                            )
+                                        } else {
+                                            it
+                                        }
+                                    }
+                                    .background(MaterialTheme.colorScheme.background),
+                        )
+                        if (it != itemCount - 1) {
+                            HorizontalDivider(
+                                modifier = Modifier.alpha(DisabledAlpha),
+                            )
+                        }
+                    }
+                }
             }
             when (lazyPagingItems.loadState.append) {
                 is LoadState.Error ->
@@ -218,53 +271,25 @@ internal fun status(detailStatusKey: MicroBlogKey? = null) {
         }
     }
     onError {
-    }
-}
-
-context(LazyStaggeredGridScope, LazyPagingItemsProxy<UiStatus>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
-private fun statusItems(detailStatusKey: MicroBlogKey? = null) {
-    items(
-        itemCount,
-        key =
-            itemKey {
-                it.itemKey
-            },
-        contentType =
-            itemContentType {
-                it.itemType
-            },
-    ) {
-        Column {
-            val item = get(it)
-            StatusItem(
-                item,
-                this@StatusEvent,
-                isDetail = item?.statusKey == detailStatusKey,
+        item(
+            span = StaggeredGridItemSpan.FullLine,
+        ) {
+            Column(
                 modifier =
                     Modifier
-                        .let {
-                            if (item != null) {
-                                it.sharedBounds(
-                                    rememberSharedContentState(key = item.itemKey),
-                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                    // ANY transition will lead to the entire screen being animated to
-                                    // exit state after list -> detail -> go back -> scroll a little bit,
-                                    // I have no idea why, so just use None here
-                                    enter = EnterTransition.None,
-                                    exit = ExitTransition.None,
-                                    renderInOverlayDuringTransition = false,
-                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                                )
-                            } else {
-                                it
-                            }
-                        }
-                        .background(MaterialTheme.colorScheme.background),
-            )
-            if (it != itemCount - 1) {
-                HorizontalDivider(
-                    modifier = Modifier.alpha(DisabledAlpha),
+                        .clickable {
+                        },
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MoodBad,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(
+                    text = stringResource(id = R.string.status_loadmore_error_retry),
+                    modifier = Modifier.padding(16.dp),
                 )
             }
         }
@@ -280,6 +305,7 @@ internal fun StatusItem(
     modifier: Modifier = Modifier,
     horizontalPadding: Dp = screenHorizontalPadding,
     isDetail: Boolean = false,
+    showVVOStatus: Boolean = true,
 ) {
     when (item) {
         is UiStatus.Mastodon ->
@@ -349,6 +375,25 @@ internal fun StatusItem(
                 modifier = modifier.padding(horizontal = horizontalPadding),
             )
         }
+
+        is UiStatus.VVO -> {
+            VVOStatusComponent(
+                data = item,
+                event = event,
+                isDetail = isDetail,
+                modifier = modifier.padding(horizontal = horizontalPadding),
+                showQuote = showVVOStatus,
+            )
+        }
+
+        is UiStatus.VVONotification -> {
+            VVONotificationComponent(
+                data = item,
+                event = event,
+                modifier = modifier.padding(horizontal = horizontalPadding),
+                showStatus = showVVOStatus,
+            )
+        }
     }
 }
 
@@ -356,7 +401,8 @@ internal sealed interface StatusEvent :
     MastodonStatusEvent,
     MisskeyStatusEvent,
     BlueskyStatusEvent,
-    XQTStatusEvent
+    XQTStatusEvent,
+    VVOStatusEvent
 
 internal class DefaultStatusEvent(
     private val scope: CoroutineScope,
@@ -657,12 +703,12 @@ internal class DefaultStatusEvent(
         data: UiStatus.XQT,
         uriHandler: UriHandler,
     ) {
-        uriHandler.openUri(
-            BlueskyReportStatusRouteDestination(
-                statusKey = data.statusKey,
-                accountType = AccountType.Specific(data.accountKey),
-            ).deeplink(),
-        )
+//        uriHandler.openUri(
+//            BlueskyReportStatusRouteDestination(
+//                statusKey = data.statusKey,
+//                accountType = AccountType.Specific(data.accountKey),
+//            ).deeplink(),
+//        )
     }
 
     override fun onDeleteClick(
@@ -724,6 +770,77 @@ internal class DefaultStatusEvent(
             ).deeplink(),
         )
     }
+
+    override fun onRawMediaClick(
+        url: String,
+        preview: String?,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(MediaRouteDestination(url, preview).deeplink())
+    }
+
+    override fun onLikeClick(data: UiStatus.VVO) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.VVo ?: return@launch
+            account.dataSource.like(data)
+        }
+    }
+
+    override fun onCommentClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            ReplyRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                replyTo = data.statusKey,
+            ).deeplink(),
+        )
+    }
+
+    override fun onDeleteClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            DeleteStatusConfirmRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                statusKey = data.statusKey,
+            ).deeplink(),
+        )
+    }
+
+    override fun onReblogClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            QuoteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                quoted = data.statusKey,
+            ).deeplink(),
+        )
+    }
+
+    override fun onReportClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+//        TODO("Not yet implemented")
+    }
+
+    override fun onStatusClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            VVOStatusRouteDestination(
+                statusKey = data.statusKey,
+                accountType = AccountType.Specific(data.accountKey),
+            ).deeplink(),
+        )
+    }
 }
 
 internal data object EmptyStatusEvent : StatusEvent {
@@ -756,6 +873,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onAddReactionClick(
         data: UiStatus.Misskey,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onCommentClick(
+        data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) = Unit
 
@@ -825,6 +947,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onReblogClick(data: UiStatus.XQT) = Unit
 
+    override fun onReblogClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
     override fun onQuoteClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -834,6 +961,8 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onLikeClick(data: UiStatus.XQT) = Unit
 
+    override fun onLikeClick(data: UiStatus.VVO) = Unit
+
     override fun onReportClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -844,6 +973,11 @@ internal data object EmptyStatusEvent : StatusEvent {
         uriHandler: UriHandler,
     ) = Unit
 
+    override fun onReportClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
     override fun onDeleteClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -851,6 +985,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onDeleteClick(
         data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onDeleteClick(
+        data: UiStatus.VVO,
         uriHandler: UriHandler,
     ) = Unit
 
@@ -861,6 +1000,17 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onStatusClick(
         data: UiStatus.XQT,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onStatusClick(
+        data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onRawMediaClick(
+        url: String,
+        preview: String?,
         uriHandler: UriHandler,
     ) = Unit
 }

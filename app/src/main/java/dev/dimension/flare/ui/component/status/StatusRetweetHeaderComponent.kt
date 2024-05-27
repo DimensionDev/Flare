@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.theme.MediumAlpha
 
@@ -41,7 +41,7 @@ internal fun StatusRetweetHeaderComponent(
         )
         if (user != null) {
             Spacer(modifier = Modifier.width(8.dp))
-            HtmlText2(
+            HtmlText(
                 element = user.nameElement,
                 layoutDirection = LocalLayoutDirection.current,
                 textStyle = MaterialTheme.typography.bodySmall,

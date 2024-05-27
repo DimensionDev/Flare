@@ -128,7 +128,7 @@ internal data class GlobalObjects(
 )
 
 @Serializable
-data class Notification(
+internal data class Notification(
     val id: String? = null,
     @SerialName("timestampMs")
     val timestampMS: String? = null,
@@ -138,19 +138,19 @@ data class Notification(
 )
 
 @Serializable
-data class Icon(
+internal data class Icon(
     val id: String? = null,
 )
 
 @Serializable
-data class Message(
+internal data class Message(
     val text: String? = null,
     val entities: List<Entity>? = null,
     val rtl: Boolean? = null,
 )
 
 @Serializable
-data class Entity(
+internal data class Entity(
     val fromIndex: Long? = null,
     val toIndex: Long? = null,
     val ref: Ref? = null,
@@ -158,34 +158,34 @@ data class Entity(
 )
 
 @Serializable
-data class Ref(
+internal data class Ref(
     val user: Icon? = null,
 )
 
 @Serializable
-data class Template(
+internal data class Template(
     val aggregateUserActionsV1: AggregateUserActionsV1? = null,
 )
 
 @Serializable
-data class AggregateUserActionsV1(
+internal data class AggregateUserActionsV1(
     val targetObjects: List<TargetObject>? = null,
     val fromUsers: List<Ref>? = null,
     val additionalContext: AdditionalContext? = null,
 )
 
 @Serializable
-data class AdditionalContext(
+internal data class AdditionalContext(
     val contextText: ContextText? = null,
 )
 
 @Serializable
-data class ContextText(
+internal data class ContextText(
     val text: String? = null,
     val entities: List<Entity>? = null,
 )
 
 @Serializable
-data class TargetObject(
+internal data class TargetObject(
     val tweet: Icon? = null,
 )

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.VVOLoginRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.XQTLoginRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.NavResult
@@ -101,32 +102,17 @@ fun ServiceSelectRoute(
         onXQT = {
             navigator.navigate(XQTLoginRouteDestination)
         },
+        onVVO = {
+            navigator.navigate(VVOLoginRouteDestination)
+        },
     )
 }
 
-// @NavGraph
-// annotation class EntryNavGraph(
-//    val start: Boolean = false,
-// )
-//
-// @Composable
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @EntryNavGraph(start = true)
-// fun EntryServiceSelectRoute(navigator: DestinationsNavigator) {
-//    ServiceSelectScreen(
-//        onBack = null,
-//        onXQT = {
-//            navigator.navigate(EntryXQTLoginRouteDestination)
-//        },
-//    )
-// }
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceSelectScreen(
     onXQT: () -> Unit,
+    onVVO: () -> Unit,
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -337,6 +323,19 @@ fun ServiceSelectScreen(
                                 Button(
                                     onClick = {
                                         onXQT.invoke()
+                                    },
+                                    modifier = Modifier.width(300.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(id = R.string.service_select_next_button),
+                                    )
+                                }
+                            }
+
+                            PlatformType.VVo -> {
+                                Button(
+                                    onClick = {
+                                        onVVO.invoke()
                                     },
                                     modifier = Modifier.width(300.dp),
                                 ) {

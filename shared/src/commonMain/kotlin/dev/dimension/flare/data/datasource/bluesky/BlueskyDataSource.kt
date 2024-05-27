@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
@@ -39,6 +40,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -870,7 +872,7 @@ class BlueskyDataSource(
                 account.accountKey,
                 query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
     }
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
@@ -900,6 +902,59 @@ class BlueskyDataSource(
     override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
         return listOf(
             SupportedComposeEvent.Media,
+        )
+    }
+
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Bluesky)
+        when {
+            relation.following -> unfollow(userKey)
+            relation.blocking -> unblock(userKey)
+            else -> follow(userKey)
+        }
+    }
+
+    override fun profileActions(): List<ProfileAction> {
+        return listOf(
+            object : ProfileAction.Mute {
+                override suspend fun invoke(
+                    userKey: MicroBlogKey,
+                    relation: UiRelation,
+                ) {
+                    require(relation is UiRelation.Bluesky)
+                    if (relation.muting) {
+                        unmute(userKey)
+                    } else {
+                        mute(userKey)
+                    }
+                }
+
+                override fun relationState(relation: UiRelation): Boolean {
+                    require(relation is UiRelation.Bluesky)
+                    return relation.muting
+                }
+            },
+            object : ProfileAction.Block {
+                override suspend fun invoke(
+                    userKey: MicroBlogKey,
+                    relation: UiRelation,
+                ) {
+                    require(relation is UiRelation.Bluesky)
+                    if (relation.blocking) {
+                        unblock(userKey)
+                    } else {
+                        block(userKey)
+                    }
+                }
+
+                override fun relationState(relation: UiRelation): Boolean {
+                    require(relation is UiRelation.Bluesky)
+                    return relation.blocking
+                }
+            },
         )
     }
 }

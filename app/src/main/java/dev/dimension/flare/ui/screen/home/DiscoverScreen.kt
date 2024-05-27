@@ -36,7 +36,7 @@ import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDesti
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.LazyPagingItemsProxy
-import dev.dimension.flare.common.isLoading
+import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onNotEmptyOrLoading
 import dev.dimension.flare.common.onSuccess
@@ -55,6 +55,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.mastodon.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
@@ -235,7 +236,11 @@ private fun DiscoverScreen(
                                                         Modifier
                                                             .width(192.dp),
                                                     onClick = {
-                                                        state.commitSearch("#${hashtag?.hashtag}")
+                                                        hashtag?.searchContent?.let { it1 ->
+                                                            state.commitSearch(
+                                                                it1,
+                                                            )
+                                                        }
                                                     },
                                                 ) {
                                                     Box(
@@ -305,6 +310,7 @@ private fun discoverPresenter(
     accountType: AccountType,
     statusEvent: StatusEvent = koinInject(),
 ) = run {
+    val scope = rememberCoroutineScope()
     val state = remember(accountType) { DiscoverPresenter(accountType = accountType) }.invoke()
     val searchBarState = searchBarPresenter(accountType = accountType)
     val searchState =
@@ -318,18 +324,37 @@ private fun discoverPresenter(
         val isInSearchMode = query.isNotEmpty()
         val refreshing =
             if (!isInSearchMode) {
-                false
+                state.users is UiState.Loading || state.status is UiState.Loading ||
+                    state.hashtags is UiState.Loading ||
+                    state.users is UiState.Success &&
+                    (state.users as UiState.Success<LazyPagingItemsProxy<UiUser>>).data.isRefreshing ||
+                    state.status is UiState.Success &&
+                    (state.status as UiState.Success<LazyPagingItemsProxy<UiStatus>>).data.isRefreshing ||
+                    state.hashtags is UiState.Success &&
+                    (state.hashtags as UiState.Success<LazyPagingItemsProxy<UiHashtag>>).data.isRefreshing
             } else {
                 searchState.users is UiState.Loading || searchState.status is UiState.Loading ||
                     searchState.users is UiState.Success &&
-                    (searchState.users as UiState.Success<LazyPagingItemsProxy<UiUser>>).data.isLoading ||
+                    (searchState.users as UiState.Success<LazyPagingItemsProxy<UiUser>>).data.isRefreshing ||
                     searchState.status is UiState.Success &&
-                    (searchState.status as UiState.Success<LazyPagingItemsProxy<UiStatus>>).data.isLoading
+                    (searchState.status as UiState.Success<LazyPagingItemsProxy<UiStatus>>).data.isRefreshing
             }
 
         fun refresh() {
             if (isInSearchMode) {
                 searchState.search(query)
+            } else {
+                scope.launch {
+                    state.users.onSuccess {
+                        it.refreshSuspend()
+                    }
+                    state.status.onSuccess {
+                        it.refreshSuspend()
+                    }
+                    state.hashtags.onSuccess {
+                        it.refreshSuspend()
+                    }
+                }
             }
         }
 

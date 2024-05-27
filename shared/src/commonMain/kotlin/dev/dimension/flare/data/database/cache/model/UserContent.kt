@@ -43,4 +43,10 @@ sealed interface UserContent {
     data class XQT internal constructor(
         internal val data: User,
     ) : UserContent
+
+    @Serializable
+    @SerialName("VVO")
+    data class VVO internal constructor(
+        internal val data: dev.dimension.flare.data.network.vvo.model.User,
+    ) : UserContent
 }

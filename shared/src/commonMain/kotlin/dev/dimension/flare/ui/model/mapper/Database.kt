@@ -51,6 +51,11 @@ internal fun StatusContent.toUi(accountKey: MicroBlogKey) =
             data.toUi(
                 accountKey = accountKey,
             )
+
+        is StatusContent.VVO ->
+            data.toUi(
+                accountKey = accountKey,
+            )
     }
 
 internal fun DbUser.toUi(accountKey: MicroBlogKey): UiUser {
@@ -80,6 +85,11 @@ internal fun DbUser.toUi(accountKey: MicroBlogKey): UiUser {
         is UserContent.XQT ->
             user.data.toUi(
                 accountKey = accountKey,
+            )
+
+        is UserContent.VVO ->
+            user.data.toUi(
+                accountKey = user_key,
             )
     }
 }

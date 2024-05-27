@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.humanizer.humanize
 import kotlinx.collections.immutable.ImmutableMap
@@ -230,6 +231,45 @@ sealed class UiUser {
         enum class VerifyType {
             Money,
             Company,
+        }
+    }
+
+    @Immutable
+    data class VVO(
+        override val userKey: MicroBlogKey,
+        override val avatarUrl: String,
+        override val bannerUrl: String?,
+        val rawHandle: String,
+        val rawDescription: String?,
+        val matrices: Matrices,
+        val verified: Boolean,
+        val verifiedReason: String?,
+        val relation: UiRelation.VVO,
+        val accountKey: MicroBlogKey,
+        override val handle: String = "@$rawHandle@${vvoHost.removePrefix("m.")}",
+    ) : UiUser() {
+        override val nameElement: Element by lazy {
+            Element("span").apply {
+                children.add(Text(rawHandle))
+            }
+        }
+        override val descriptionElement: Element? by lazy {
+            rawDescription?.let {
+                Element("span").apply {
+                    children.add(Text(it))
+                }
+            }
+        }
+
+        @Immutable
+        data class Matrices(
+            val fansCount: String,
+            val followsCount: Long,
+            val statusesCount: Long,
+        ) {
+            val fansCountHumanized = fansCount
+            val followsCountHumanized = followsCount.humanize()
+            val statusesCountHumanized = statusesCount.humanize()
         }
     }
 }

@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.benasher44.uuid.uuid4
@@ -21,6 +22,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -205,6 +207,8 @@ class MastodonDataSource(
                             account.accountKey,
                             pagingKey,
                         )
+
+                    else -> throw IllegalStateException("Unsupported notification type")
                 },
         )
 
@@ -783,7 +787,7 @@ class MastodonDataSource(
                 account.accountKey.host,
                 query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
     }
 
     override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
@@ -793,6 +797,60 @@ class MastodonDataSource(
             SupportedComposeEvent.Emoji,
             SupportedComposeEvent.ContentWarning,
             SupportedComposeEvent.Visibility,
+        )
+    }
+
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Mastodon)
+        when {
+            relation.following -> unfollow(userKey)
+            relation.blocking -> unblock(userKey)
+            relation.requested -> Unit // you can't cancel follow request on mastodon
+            else -> follow(userKey)
+        }
+    }
+
+    override fun profileActions(): List<ProfileAction> {
+        return listOf(
+            object : ProfileAction.Mute {
+                override suspend fun invoke(
+                    userKey: MicroBlogKey,
+                    relation: UiRelation,
+                ) {
+                    require(relation is UiRelation.Mastodon)
+                    if (relation.muting) {
+                        unmute(userKey)
+                    } else {
+                        mute(userKey)
+                    }
+                }
+
+                override fun relationState(relation: UiRelation): Boolean {
+                    require(relation is UiRelation.Mastodon)
+                    return relation.muting
+                }
+            },
+            object : ProfileAction.Block {
+                override suspend fun invoke(
+                    userKey: MicroBlogKey,
+                    relation: UiRelation,
+                ) {
+                    require(relation is UiRelation.Mastodon)
+                    if (relation.blocking) {
+                        unblock(userKey)
+                    } else {
+                        block(userKey)
+                    }
+                }
+
+                override fun relationState(relation: UiRelation): Boolean {
+                    require(relation is UiRelation.Mastodon)
+                    return relation.blocking
+                }
+            },
         )
     }
 }

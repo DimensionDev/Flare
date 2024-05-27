@@ -4,6 +4,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
@@ -20,6 +21,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -161,6 +163,8 @@ class MisskeyDataSource(
                             database,
                             pagingKey,
                         )
+
+                    else -> throw IllegalStateException("Unsupported notification type")
                 },
         )
     }
@@ -669,7 +673,7 @@ class MisskeyDataSource(
                 account.accountKey,
                 query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
     }
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
@@ -722,6 +726,60 @@ class MisskeyDataSource(
             SupportedComposeEvent.Emoji,
             SupportedComposeEvent.ContentWarning,
             SupportedComposeEvent.Visibility,
+        )
+    }
+
+    override suspend fun follow(
+        userKey: MicroBlogKey,
+        relation: UiRelation,
+    ) {
+        require(relation is UiRelation.Misskey)
+        when {
+            relation.following -> unfollow(userKey)
+            relation.blocking -> unblock(userKey)
+            relation.hasPendingFollowRequestFromYou -> Unit // TODO: cancel follow request
+            else -> follow(userKey)
+        }
+    }
+
+    override fun profileActions(): List<ProfileAction> {
+        return listOf(
+            object : ProfileAction.Mute {
+                override suspend fun invoke(
+                    userKey: MicroBlogKey,
+                    relation: UiRelation,
+                ) {
+                    require(relation is UiRelation.Misskey)
+                    if (relation.muted) {
+                        unmute(userKey)
+                    } else {
+                        mute(userKey)
+                    }
+                }
+
+                override fun relationState(relation: UiRelation): Boolean {
+                    require(relation is UiRelation.Misskey)
+                    return relation.muted
+                }
+            },
+            object : ProfileAction.Block {
+                override suspend fun invoke(
+                    userKey: MicroBlogKey,
+                    relation: UiRelation,
+                ) {
+                    require(relation is UiRelation.Misskey)
+                    if (relation.blocking) {
+                        unblock(userKey)
+                    } else {
+                        block(userKey)
+                    }
+                }
+
+                override fun relationState(relation: UiRelation): Boolean {
+                    require(relation is UiRelation.Misskey)
+                    return relation.blocking
+                }
+            },
         )
     }
 }

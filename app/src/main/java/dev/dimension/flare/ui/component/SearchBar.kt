@@ -227,7 +227,7 @@ internal fun LazyStaggeredGridScope.searchContent(
                                     handle = item.handle,
                                     content = {
                                         item.descriptionElement?.let {
-                                            HtmlText2(
+                                            HtmlText(
                                                 element = it,
                                                 maxLines = 2,
                                                 modifier = Modifier.padding(horizontal = screenHorizontalPadding),

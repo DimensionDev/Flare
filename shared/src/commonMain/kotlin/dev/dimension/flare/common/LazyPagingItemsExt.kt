@@ -48,6 +48,9 @@ inline fun <reified T : Any> LazyPagingItemsProxy<T>.onLoading(block: () -> Unit
 val <T : Any> LazyPagingItemsProxy<T>.isLoading: Boolean
     get() = loadState.refresh is LoadState.Loading && itemCount == 0
 
+val <T : Any> LazyPagingItemsProxy<T>.isRefreshing: Boolean
+    get() = loadState.refresh is LoadState.Loading
+
 inline fun <reified T : Any> LazyPagingItemsProxy<T>.onError(block: (Throwable) -> Unit): LazyPagingItemsProxy<T> {
     if (loadState.refresh is LoadState.Error && itemCount == 0) {
         block((loadState.refresh as LoadState.Error).error)

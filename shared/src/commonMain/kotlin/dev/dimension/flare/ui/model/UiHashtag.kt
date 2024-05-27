@@ -6,4 +6,5 @@ import androidx.compose.runtime.Immutable
 data class UiHashtag(
     val hashtag: String,
     val description: String?,
+    val searchContent: String,
 )

@@ -63,6 +63,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.CoroutineScope
@@ -125,16 +126,21 @@ fun SetDialogDestinationToEdgeToEdge() {
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.RawImage.ROUTE,
+        ),
     ],
 )
 fun MediaRoute(
     uri: String,
     navigator: DestinationsNavigator,
+    previewUrl: String? = null,
 ) {
     SetDialogDestinationToEdgeToEdge()
     MediaScreen(
         uri = uri,
         onDismiss = navigator::navigateUp,
+        previewUrl = previewUrl,
     )
 }
 
@@ -146,6 +152,7 @@ fun MediaRoute(
 @Composable
 internal fun MediaScreen(
     uri: String,
+    previewUrl: String?,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -180,6 +187,8 @@ internal fun MediaScreen(
                         model =
                             ImageRequest.Builder(LocalContext.current)
                                 .data(uri)
+                                .placeholderMemoryCacheKey(previewUrl)
+                                .crossfade(1_000)
                                 .build(),
                     )
                 LaunchedEffect(painter.intrinsicSize) {

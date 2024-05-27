@@ -6,10 +6,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.collectPagingProxy
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -23,6 +20,9 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
+import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 class ProfilePresenter(
@@ -65,12 +65,17 @@ class ProfilePresenter(
             accountServiceState.map {
                 it.account.accountKey == userKey || userKey == null
             }
+        val actions =
+            accountServiceState.map { service ->
+                service.profileActions().toImmutableList().toImmutableListWrapper()
+            }
         return object : ProfileState(
             userState = userState.flatMap { it.toUi() },
             listState = listState,
             mediaState = mediaState,
             relationState = relationState,
             isMe = isMe,
+            actions = actions,
         ) {
             override suspend fun refresh() {
                 userState.onSuccess {
@@ -81,183 +86,51 @@ class ProfilePresenter(
                 }
             }
 
+            override fun onProfileActionClick(
+                user: UiUser,
+                relation: UiRelation,
+                action: ProfileAction,
+            ) {
+                scope.launch {
+                    action.invoke(user.userKey, relation)
+                }
+            }
+
             override fun follow(
                 user: UiUser,
                 data: UiRelation,
             ) {
                 scope.launch {
                     accountServiceState.onSuccess { service ->
-                        when (data) {
-                            is UiRelation.Bluesky ->
-                                blueskyFollow(
-                                    service as BlueskyDataSource,
-                                    user.userKey,
-                                    data,
-                                )
-
-                            is UiRelation.Mastodon ->
-                                mastodonFollow(
-                                    service as MastodonDataSource,
-                                    user.userKey,
-                                    data,
-                                )
-
-                            is UiRelation.Misskey ->
-                                misskeyFollow(
-                                    service as MisskeyDataSource,
-                                    user.userKey,
-                                    data,
-                                )
-
-                            is UiRelation.XQT ->
-                                xqtFollow(
-                                    service as XQTDataSource,
-                                    user.userKey,
-                                    data,
-                                )
-                        }
+                        service.follow(user.userKey, data)
                     }
                 }
             }
-
-            override fun block(
-                user: UiUser,
-                data: UiRelation,
-            ) {
-                scope.launch {
-                    accountServiceState.onSuccess { service ->
-                        when (data) {
-                            is UiRelation.Bluesky -> {
-                                require(service is BlueskyDataSource)
-                                if (data.blocking) {
-                                    service.unblock(user.userKey)
-                                } else {
-                                    service.block(
-                                        user.userKey,
-                                    )
-                                }
-                            }
-
-                            is UiRelation.Mastodon -> {
-                                require(service is MastodonDataSource)
-                                if (data.blocking) {
-                                    service.unblock(user.userKey)
-                                } else {
-                                    service.block(
-                                        user.userKey,
-                                    )
-                                }
-                            }
-
-                            is UiRelation.Misskey -> {
-                                require(service is MisskeyDataSource)
-                                if (data.blocking) {
-                                    service.unblock(user.userKey)
-                                } else {
-                                    service.block(
-                                        user.userKey,
-                                    )
-                                }
-                            }
-
-                            is UiRelation.XQT -> {
-                                require(service is XQTDataSource)
-                                if (data.blocking) {
-                                    service.unblock(user.userKey)
-                                } else {
-                                    service.block(
-                                        user.userKey,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            override fun mute(
-                user: UiUser,
-                data: UiRelation,
-            ) {
-                scope.launch {
-                    accountServiceState.onSuccess { service ->
-                        when (data) {
-                            is UiRelation.Bluesky -> {
-                                require(service is BlueskyDataSource)
-                                if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
-                            }
-
-                            is UiRelation.Mastodon -> {
-                                require(service is MastodonDataSource)
-                                if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
-                            }
-
-                            is UiRelation.Misskey -> {
-                                require(service is MisskeyDataSource)
-                                if (data.muted) service.unmute(user.userKey) else service.mute(user.userKey)
-                            }
-
-                            is UiRelation.XQT -> {
-                                require(service is XQTDataSource)
-                                if (data.muting) service.unmute(user.userKey) else service.mute(user.userKey)
-                            }
-                        }
-                    }
-                }
-            }
+//
+//            override fun block(
+//                user: UiUser,
+//                data: UiRelation,
+//            ) {
+//                scope.launch {
+//                    accountServiceState.onSuccess { service ->
+//                        service.block(user.userKey, data)
+//                    }
+//                }
+//            }
+//
+//            override fun mute(
+//                user: UiUser,
+//                data: UiRelation,
+//            ) {
+//                scope.launch {
+//                    accountServiceState.onSuccess { service ->
+//                        service.mute(user.userKey, data)
+//                    }
+//                }
+//            }
 
             override fun report(user: UiUser) {
             }
-        }
-    }
-
-    private suspend fun misskeyFollow(
-        misskeyDataSource: MisskeyDataSource,
-        userKey: MicroBlogKey,
-        data: UiRelation.Misskey,
-    ) {
-        when {
-            data.following -> misskeyDataSource.unfollow(userKey)
-            data.blocking -> misskeyDataSource.unblock(userKey)
-            data.hasPendingFollowRequestFromYou -> Unit // TODO: cancel follow request
-            else -> misskeyDataSource.follow(userKey)
-        }
-    }
-
-    private suspend fun mastodonFollow(
-        mastodonDataSource: MastodonDataSource,
-        userKey: MicroBlogKey,
-        data: UiRelation.Mastodon,
-    ) {
-        when {
-            data.following -> mastodonDataSource.unfollow(userKey)
-            data.blocking -> mastodonDataSource.unblock(userKey)
-            data.requested -> Unit // you can't cancel follow request on mastodon
-            else -> mastodonDataSource.follow(userKey)
-        }
-    }
-
-    private suspend fun blueskyFollow(
-        service: BlueskyDataSource,
-        userKey: MicroBlogKey,
-        data: UiRelation.Bluesky,
-    ) {
-        when {
-            data.following -> service.unfollow(userKey)
-            data.blocking -> service.unblock(userKey)
-            else -> service.follow(userKey)
-        }
-    }
-
-    private suspend fun xqtFollow(
-        service: XQTDataSource,
-        userKey: MicroBlogKey,
-        data: UiRelation.XQT,
-    ) {
-        when {
-            data.following -> service.unfollow(userKey)
-            data.blocking -> service.unblock(userKey)
-            else -> service.follow(userKey)
         }
     }
 }
@@ -268,6 +141,7 @@ abstract class ProfileState(
     val mediaState: UiState<LazyPagingItemsProxy<ProfileMedia>>,
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,
+    val actions: UiState<ImmutableListWrapper<ProfileAction>>,
 ) {
     abstract suspend fun refresh()
 
@@ -275,15 +149,21 @@ abstract class ProfileState(
         user: UiUser,
         data: UiRelation,
     )
+//
+//    abstract fun block(
+//        user: UiUser,
+//        data: UiRelation,
+//    )
+//
+//    abstract fun mute(
+//        user: UiUser,
+//        data: UiRelation,
+//    )
 
-    abstract fun block(
+    abstract fun onProfileActionClick(
         user: UiUser,
-        data: UiRelation,
-    )
-
-    abstract fun mute(
-        user: UiUser,
-        data: UiRelation,
+        relation: UiRelation,
+        action: ProfileAction,
     )
 
     abstract fun report(user: UiUser)

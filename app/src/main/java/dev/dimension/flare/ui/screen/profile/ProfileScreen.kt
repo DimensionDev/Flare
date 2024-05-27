@@ -94,6 +94,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onNotEmptyOrLoading
+import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -101,7 +102,7 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -544,7 +545,7 @@ private fun ProfileScreen(
                     TopAppBar(
                         title = {
                             state.state.userState.onSuccess {
-                                HtmlText2(
+                                HtmlText(
                                     element = it.nameElement,
                                     modifier =
                                         Modifier.graphicsLayer {
@@ -741,62 +742,38 @@ private fun ProfileMenu(
             profileState.isMe.onSuccess { isMe ->
                 if (!isMe) {
                     profileState.relationState.onSuccess { relation ->
-                        when (relation) {
-                            is UiRelation.Bluesky ->
-                                BlueskyUserMenu(
-                                    user = user,
-                                    relation = relation,
-                                    onBlockClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.block(user, relation)
+                        profileState.actions.onSuccess { actions ->
+                            for (i in 0..<actions.size) {
+                                val action = actions[i]
+                                DropdownMenuItem(
+                                    text = {
+                                        val text =
+                                            when (action) {
+                                                is ProfileAction.Block ->
+                                                    if (action.relationState(relation)) {
+                                                        stringResource(id = R.string.user_unblock, user.handle)
+                                                    } else {
+                                                        stringResource(id = R.string.user_block, user.handle)
+                                                    }
+                                                is ProfileAction.Mute ->
+                                                    if (action.relationState(relation)) {
+                                                        stringResource(id = R.string.user_unmute, user.handle)
+                                                    } else {
+                                                        stringResource(id = R.string.user_mute, user.handle)
+                                                    }
+                                            }
+                                        Text(text = text)
                                     },
-                                    onMuteClick = {
+                                    onClick = {
                                         setShowMoreMenus(false)
-                                        profileState.mute(user, relation)
-                                    },
-                                )
-
-                            is UiRelation.Mastodon ->
-                                MastodonUserMenu(
-                                    user = user,
-                                    relation = relation,
-                                    onBlockClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.block(user, relation)
-                                    },
-                                    onMuteClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.mute(user, relation)
-                                    },
-                                )
-
-                            is UiRelation.Misskey ->
-                                MisskeyUserMenu(
-                                    user = user,
-                                    relation = relation,
-                                    onBlockClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.block(user, relation)
-                                    },
-                                    onMuteClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.mute(user, relation)
+                                        profileState.onProfileActionClick(
+                                            user = user,
+                                            relation = relation,
+                                            action = action,
+                                        )
                                     },
                                 )
-
-                            is UiRelation.XQT ->
-                                XQTUserMenu(
-                                    user = user,
-                                    relation = relation,
-                                    onBlockClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.block(user, relation)
-                                    },
-                                    onMuteClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.mute(user, relation)
-                                    },
-                                )
+                            }
                         }
                     }
                     DropdownMenuItem(
@@ -946,6 +923,20 @@ private fun ProfileHeaderSuccess(
                 onAvatarClick = onAvatarClick,
                 onBannerClick = onBannerClick,
             )
+        is UiUser.VVO ->
+            VVOProfileHeader(
+                user = user,
+                relationState = relationState,
+                modifier = modifier,
+                isMe = isMe,
+                onFollowClick = {
+                    onFollowClick(user, it)
+                },
+                menu = menu,
+                expandMatrices = expandMatrices,
+                onAvatarClick = onAvatarClick,
+                onBannerClick = onBannerClick,
+            )
     }
 }
 
@@ -1071,7 +1062,7 @@ internal fun CommonProfileHeader(
                             .weight(1f)
                             .padding(top = actualBannerHeight),
                 ) {
-                    HtmlText2(
+                    HtmlText(
                         element = displayName,
                         textStyle = MaterialTheme.typography.titleMedium,
                         modifier =

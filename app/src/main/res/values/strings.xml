@@ -13,6 +13,8 @@
 
     <string name="notification_tab_all_title">All</string>
     <string name="notification_tab_mentions_title">Mentions</string>
+    <string name="notification_tab_comments_title">Comments</string>
+    <string name="notification_tab_likes_title">Likes</string>
 
     <string name="profile_header_following_count">%1$s Following</string>
     <string name="profile_header_fans_count">%1$s Followers</string>
@@ -283,6 +285,7 @@
     <string name="swipe_action_favourite">Favourite</string>
     <string name="swipe_action_add_reaction">Reaction</string>
     <string name="swipe_action_bookmark">Bookmark</string>
+    <string name="swipe_action_comment">Comment</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
@@ -337,4 +340,9 @@
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
+
+    <string name="vvo_notification_like">Liked your status</string>
+
+    <string name="status_detail_comment">Comment</string>
+    <string name="status_detail_repost">Repost</string>
 </resources>

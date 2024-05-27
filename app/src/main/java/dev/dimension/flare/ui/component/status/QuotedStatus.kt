@@ -21,11 +21,13 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.contentDirection
 import dev.dimension.flare.ui.model.localizedShortTime
+import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
 import moe.tlaster.ktml.dom.Element
@@ -47,9 +49,7 @@ internal fun UiStatusQuoted(
     when (status) {
         is UiStatus.Mastodon -> {
             QuotedStatus(
-                avatarUrl = status.user.avatarUrl,
-                nameElement = status.user.nameElement,
-                handle = status.user.handle,
+                user = status.user,
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
                 medias = status.media,
@@ -65,9 +65,7 @@ internal fun UiStatusQuoted(
         is UiStatus.MastodonNotification -> Unit
         is UiStatus.Misskey ->
             QuotedStatus(
-                avatarUrl = status.user.avatarUrl,
-                nameElement = status.user.nameElement,
-                handle = status.user.handle,
+                user = status.user,
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
                 medias = status.media,
@@ -83,9 +81,7 @@ internal fun UiStatusQuoted(
         is UiStatus.MisskeyNotification -> Unit
         is UiStatus.Bluesky ->
             QuotedStatus(
-                avatarUrl = status.user.avatarUrl,
-                nameElement = status.user.nameElement,
-                handle = status.user.handle,
+                user = status.user,
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
                 medias = status.medias,
@@ -100,9 +96,7 @@ internal fun UiStatusQuoted(
         is UiStatus.BlueskyNotification -> Unit
         is UiStatus.XQT ->
             QuotedStatus(
-                avatarUrl = status.user.avatarUrl,
-                nameElement = status.user.nameElement,
-                handle = status.user.handle,
+                user = status.user,
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
                 medias = status.medias,
@@ -115,6 +109,21 @@ internal fun UiStatusQuoted(
                 colors = colors,
             )
         is UiStatus.XQTNotification -> Unit
+        is UiStatus.VVO ->
+            QuotedStatus(
+                user = status.displayUser,
+                contentElement = status.contentToken,
+                contentLayoutDirection = status.contentDirection,
+                medias = status.medias,
+                createdAt = status.localizedShortTime,
+                onMediaClick = onMediaClick,
+                modifier = modifier,
+                onClick = onClick,
+                sensitive = false,
+                showMedia = showMedia,
+                colors = colors,
+            )
+        is UiStatus.VVONotification -> Unit
     }
 }
 
@@ -122,9 +131,7 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun QuotedStatus(
-    avatarUrl: String,
-    nameElement: Element,
-    handle: String,
+    user: UiUser?,
     contentElement: Element,
     contentLayoutDirection: LayoutDirection,
     medias: ImmutableList<UiMedia>?,
@@ -148,46 +155,50 @@ private fun QuotedStatus(
                         .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    AvatarComponent(
-                        data = avatarUrl,
-                        size = 20.dp,
-                    )
-                    Row(
-                        modifier =
-                            Modifier
-                                .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        HtmlText2(
-                            element = nameElement,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = handle,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier =
-                                Modifier
-                                    .alpha(MediumAlpha),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                if (user != null) {
+                    with(user) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            AvatarComponent(
+                                data = avatarUrl,
+                                size = 20.dp,
+                            )
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .weight(1f),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                HtmlText(
+                                    element = nameElement,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                                Text(
+                                    text = handle,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier =
+                                        Modifier
+                                            .alpha(MediumAlpha),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            Text(
+                                text = createdAt,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier =
+                                    Modifier
+                                        .alpha(MediumAlpha),
+                                maxLines = 1,
+                            )
+                        }
                     }
-                    Text(
-                        text = createdAt,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier =
-                            Modifier
-                                .alpha(MediumAlpha),
-                        maxLines = 1,
-                    )
                 }
-                HtmlText2(element = contentElement, layoutDirection = contentLayoutDirection)
+                HtmlText(element = contentElement, layoutDirection = contentLayoutDirection)
             }
             if (!medias.isNullOrEmpty() && LocalAppearanceSettings.current.showMedia && showMedia) {
                 StatusMediaComponent(

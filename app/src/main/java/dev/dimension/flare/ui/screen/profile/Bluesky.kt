@@ -5,12 +5,10 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.MatricesDisplay
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -108,7 +106,7 @@ internal fun BlueskyProfileHeader(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 user.descriptionElement?.let {
-                    HtmlText2(
+                    HtmlText(
                         element = it,
                         layoutDirection = user.descriptionDirection,
                     )
@@ -129,34 +127,5 @@ internal fun BlueskyProfileHeader(
         modifier = modifier,
         onAvatarClick = onAvatarClick,
         onBannerClick = onBannerClick,
-    )
-}
-
-@Composable
-internal fun ColumnScope.BlueskyUserMenu(
-    user: UiUser,
-    relation: UiRelation.Bluesky,
-    onBlockClick: () -> Unit,
-    onMuteClick: () -> Unit,
-) {
-    DropdownMenuItem(
-        text = {
-            if (relation.muting) {
-                Text(text = stringResource(R.string.user_unmute, user.handle))
-            } else {
-                Text(text = stringResource(R.string.user_mute, user.handle))
-            }
-        },
-        onClick = onMuteClick,
-    )
-    DropdownMenuItem(
-        text = {
-            if (relation.blocking) {
-                Text(text = stringResource(R.string.user_unblock, user.handle))
-            } else {
-                Text(text = stringResource(R.string.user_block, user.handle))
-            }
-        },
-        onClick = onBlockClick,
     )
 }

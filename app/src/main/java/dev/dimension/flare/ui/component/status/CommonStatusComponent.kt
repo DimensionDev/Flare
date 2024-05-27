@@ -61,7 +61,7 @@ import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AdaptiveGrid
-import dev.dimension.flare.ui.component.HtmlText2
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
@@ -87,7 +87,7 @@ fun CommonStatusComponent(
     rawContent: String,
     content: Element,
     contentDirection: LayoutDirection,
-    user: UiUser,
+    user: UiUser?,
     medias: ImmutableList<UiMedia>,
     humanizedTime: String,
     expandedTime: String,
@@ -185,7 +185,7 @@ fun CommonStatusDetailComponent(
     rawContent: String,
     content: Element,
     contentDirection: LayoutDirection,
-    user: UiUser,
+    user: UiUser?,
     medias: ImmutableList<UiMedia>,
     expandedTime: String,
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
@@ -315,7 +315,7 @@ fun CommonStatusComponent(
     rawContent: String,
     content: Element,
     contentDirection: LayoutDirection,
-    user: UiUser,
+    user: UiUser?,
     medias: ImmutableList<UiMedia>,
     humanizedTime: String,
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
@@ -422,12 +422,14 @@ fun CommonStatusComponent(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            StatusHeaderComponent(
-                user = user,
-                humanizedTime = humanizedTime,
-                onUserClick = { onUserClick(it) },
-                headerTrailing = headerTrailing,
-            )
+            if (user != null) {
+                StatusHeaderComponent(
+                    user = user,
+                    humanizedTime = humanizedTime,
+                    onUserClick = { onUserClick(it) },
+                    headerTrailing = headerTrailing,
+                )
+            }
 
             if (replyHandle != null) {
                 Spacer(modifier = Modifier.height(4.dp))
@@ -580,12 +582,12 @@ private fun StatusReplyComponent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun StatusHeaderComponent(
+internal fun StatusHeaderComponent(
     user: UiUser,
     humanizedTime: String,
     onUserClick: (MicroBlogKey) -> Unit,
-    headerTrailing: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
+    headerTrailing: @Composable RowScope.() -> Unit = {},
 ) {
     CommonStatusHeaderComponent(
         data = user,
@@ -666,7 +668,7 @@ private fun StatusContentComponent(
         AnimatedVisibility(visible = expanded || contentWarning.isNullOrEmpty()) {
             Column {
                 if (rawContent.isNotEmpty() && rawContent.isNotBlank()) {
-                    HtmlText2(
+                    HtmlText(
                         element = content,
                         layoutDirection = contentDirection,
                         modifier = Modifier.fillMaxWidth(),

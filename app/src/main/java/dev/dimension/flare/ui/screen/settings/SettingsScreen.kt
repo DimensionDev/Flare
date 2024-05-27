@@ -54,6 +54,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.screen.home.Router
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -61,7 +62,7 @@ import dev.dimension.flare.ui.screen.home.Router
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun SettingsRoute() {
+internal fun SettingsRoute(navigationState: NavigationState) {
     val settingsPanelState by producePresenter {
         settingsPanelPresenter()
     }
@@ -119,6 +120,7 @@ internal fun SettingsRoute() {
                                 },
                             ),
                         )
+                        dependency(navigationState)
                     }
                 }
             }

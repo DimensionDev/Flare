@@ -37,6 +37,7 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
                     user.fieldsParsed.mapValues { (_, value) ->
                         value.toMarkdown()
                     }
+                is UiUser.VVO -> persistentMapOf()
             }.map { (key, value) ->
                 key to value
             }.toImmutableList().toImmutableListWrapper(),

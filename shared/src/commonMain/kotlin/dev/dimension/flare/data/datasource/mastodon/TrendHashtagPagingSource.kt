@@ -18,6 +18,7 @@ internal class TrendHashtagPagingSource(
                 UiHashtag(
                     hashtag = it.name ?: "",
                     description = null,
+                    searchContent = "#${it.name}",
                 )
             }.let {
                 return LoadResult.Page(

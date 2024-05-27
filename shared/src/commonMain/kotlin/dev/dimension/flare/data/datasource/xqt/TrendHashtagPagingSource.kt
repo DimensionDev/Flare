@@ -33,6 +33,7 @@ internal class TrendHashtagPagingSource(
                     UiHashtag(
                         hashtag = it.name ?: "",
                         description = null,
+                        searchContent = "#${it.name}",
                     )
                 }
                 ?.toList()

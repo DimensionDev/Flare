@@ -1,6 +1,7 @@
 package dev.dimension.flare.common
 
 import dev.dimension.flare.model.MicroBlogKey
+import io.ktor.http.encodeURLPathPart
 import io.ktor.http.encodeURLQueryComponent
 
 const val APPSCHEMA = "flare"
@@ -51,6 +52,12 @@ object AppDeepLink {
         operator fun invoke() = "$APPSCHEMA://Compose"
     }
 
+    object RawImage {
+        const val ROUTE = "$APPSCHEMA://RawImage/{uri}"
+
+        operator fun invoke(url: String) = "$APPSCHEMA://RawImage/${url.encodeURLPathPart()}"
+    }
+
     fun parse(url: String): DeeplinkEvent? {
         val uri = url.removePrefix("$APPSCHEMA://")
         return when {
@@ -80,6 +87,11 @@ object AppDeepLink {
                 DeeplinkEvent.Compose
             }
 
+            uri.startsWith("RawImage/") -> {
+                val rawImage = uri.substringAfter("RawImage/")
+                DeeplinkEvent.RawImage(rawImage)
+            }
+
             else -> null
         }
     }
@@ -104,4 +116,8 @@ sealed interface DeeplinkEvent {
     ) : DeeplinkEvent
 
     data object Compose : DeeplinkEvent
+
+    data class RawImage(
+        val url: String,
+    ) : DeeplinkEvent
 }

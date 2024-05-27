@@ -695,6 +695,9 @@ private fun AppearanceScreen(
 
                                         is UiUser.XQT ->
                                             appearanceSettings.xqt.swipeLeft.icon
+
+                                        is UiUser.VVO ->
+                                            appearanceSettings.vvo.swipeLeft.icon
                                     }
                                 val textId =
                                     when (user) {
@@ -709,6 +712,9 @@ private fun AppearanceScreen(
 
                                         is UiUser.XQT ->
                                             appearanceSettings.xqt.swipeLeft.id
+
+                                        is UiUser.VVO ->
+                                            appearanceSettings.vvo.swipeLeft.id
                                     }
                                 TextButton(onClick = {
                                     showMenu = true
@@ -857,6 +863,39 @@ private fun AppearanceScreen(
                                                     },
                                                 )
                                             }
+
+                                        is UiUser.VVO ->
+                                            AppearanceSettings.VVO.SwipeActions.entries.forEach {
+                                                DropdownMenuItem(
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            imageVector = it.icon,
+                                                            contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
+                                                        )
+                                                    },
+                                                    text = {
+                                                        Text(text = stringResource(id = it.id))
+                                                    },
+                                                    onClick = {
+                                                        state.updateSettings {
+                                                            copy(
+                                                                vvo =
+                                                                    vvo.copy(
+                                                                        swipeLeft = it,
+                                                                    ),
+                                                            )
+                                                        }
+                                                        showMenu = false
+                                                    },
+                                                    trailingIcon = {
+                                                        RadioButton(
+                                                            selected = appearanceSettings.vvo.swipeLeft == it,
+                                                            onClick = null,
+                                                        )
+                                                    },
+                                                )
+                                            }
                                     }
                                 }
                             },
@@ -890,6 +929,9 @@ private fun AppearanceScreen(
 
                                         is UiUser.XQT ->
                                             appearanceSettings.xqt.swipeRight.icon
+
+                                        is UiUser.VVO ->
+                                            appearanceSettings.vvo.swipeRight.icon
                                     }
                                 val textId =
                                     when (user) {
@@ -904,6 +946,9 @@ private fun AppearanceScreen(
 
                                         is UiUser.XQT ->
                                             appearanceSettings.xqt.swipeRight.id
+
+                                        is UiUser.VVO ->
+                                            appearanceSettings.vvo.swipeRight.id
                                     }
                                 TextButton(onClick = {
                                     showMenu = true
@@ -1052,6 +1097,39 @@ private fun AppearanceScreen(
                                                     },
                                                 )
                                             }
+
+                                        is UiUser.VVO ->
+                                            AppearanceSettings.VVO.SwipeActions.entries.forEach {
+                                                DropdownMenuItem(
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            imageVector = it.icon,
+                                                            contentDescription = stringResource(id = it.id),
+                                                            modifier = Modifier.size(24.dp),
+                                                        )
+                                                    },
+                                                    text = {
+                                                        Text(text = stringResource(id = it.id))
+                                                    },
+                                                    onClick = {
+                                                        state.updateSettings {
+                                                            copy(
+                                                                vvo =
+                                                                    vvo.copy(
+                                                                        swipeRight = it,
+                                                                    ),
+                                                            )
+                                                        }
+                                                        showMenu = false
+                                                    },
+                                                    trailingIcon = {
+                                                        RadioButton(
+                                                            selected = appearanceSettings.vvo.swipeRight == it,
+                                                            onClick = null,
+                                                        )
+                                                    },
+                                                )
+                                            }
                                     }
                                 }
                             },
@@ -1075,6 +1153,7 @@ private fun AppearanceScreen(
                                         text = "Misskey",
                                         style = MaterialTheme.typography.titleMedium,
                                     )
+                                is UiUser.VVO -> Unit
                             }
                         },
                     )
@@ -1101,6 +1180,7 @@ private fun AppearanceScreen(
                                     }
                                 },
                             )
+                        is UiUser.VVO -> Unit
                     }
                 }
             }

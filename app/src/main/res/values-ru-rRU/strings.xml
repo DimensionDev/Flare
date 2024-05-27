@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Новые зубы</string>
   <string name="notification_tab_all_title">Все</string>
   <string name="notification_tab_mentions_title">Упоминания</string>
+  <string name="notification_tab_comments_title">Комментарии</string>
+  <string name="notification_tab_likes_title">Лайки</string>
   <string name="profile_header_following_count">Подписка на %1$s</string>
   <string name="profile_header_fans_count">%1$s подписчики</string>
   <string name="profile_header_toots_count">%1$s кастрюли</string>
@@ -233,6 +235,7 @@
   <string name="swipe_action_favourite">Избранное</string>
   <string name="swipe_action_add_reaction">Реакция</string>
   <string name="swipe_action_bookmark">Закладка</string>
+  <string name="swipe_action_comment">Комментарий</string>
   <string name="settings_storage_clear_image_cache">Очистить кэш изображений</string>
   <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
   <string name="settings_storage_clear_database">Очистить базу данных кэша</string>
@@ -272,4 +275,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">dd MMM yy H:mm</string>
+  <string name="vvo_notification_like">Понравился ваш статус</string>
+  <string name="status_detail_comment">Комментарий</string>
+  <string name="status_detail_repost">Репост</string>
 </resources>

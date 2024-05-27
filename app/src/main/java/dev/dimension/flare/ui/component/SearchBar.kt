@@ -7,6 +7,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +16,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -88,6 +90,9 @@ internal fun SearchBar(
         onAccountClick = onAccountClick,
         historyState = state.searchHistories,
         modifier = modifier,
+        onDelete = {
+            state.deleteSearchHistory(it)
+        },
     )
 }
 
@@ -100,6 +105,7 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 private fun SearchContent(
     user: UiState<UiUser>?,
     historyState: UiState<ImmutableListWrapper<UiSearchHistory>>,
+    onDelete: (UiSearchHistory) -> Unit,
     query: String,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
@@ -154,7 +160,9 @@ private fun SearchContent(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
     ) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier.imePadding(),
+        ) {
             historyState.onSuccess { history ->
                 items(history.size) { index ->
                     val item = history[index]
@@ -169,6 +177,16 @@ private fun SearchContent(
                                     onSearch(item.keyword)
                                 },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                        trailingContent = {
+                            IconButton(onClick = {
+                                onDelete.invoke(item)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.delete),
+                                )
+                            }
+                        },
                     )
                 }
             }
@@ -302,6 +320,10 @@ internal fun searchBarPresenter(
             override fun setQuery(value: String) {
                 query = value
             }
+
+            override fun deleteSearchHistory(history: UiSearchHistory) {
+                searchHistoryState.deleteSearchHistory(history.keyword)
+            }
         }
     }
 
@@ -312,4 +334,6 @@ internal interface SearchBarState : UserState, SearchHistoryState {
     fun setExpanded(value: Boolean)
 
     fun setQuery(value: String)
+
+    fun deleteSearchHistory(history: UiSearchHistory)
 }

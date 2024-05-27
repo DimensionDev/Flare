@@ -9,6 +9,8 @@
   <string name="home_timeline_new_toots">Нові дмухи</string>
   <string name="notification_tab_all_title">Всі</string>
   <string name="notification_tab_mentions_title">Згадки</string>
+  <string name="notification_tab_comments_title">Коментарі</string>
+  <string name="notification_tab_likes_title">Сподобалося</string>
   <string name="profile_header_toots_count">%1$s казанок</string>
   <string name="profile_misskey_header_status_count">%1$s статус</string>
   <string name="profile_header_button_follow">Слідкувати</string>
@@ -232,6 +234,7 @@
   <string name="swipe_action_favourite">Вибране</string>
   <string name="swipe_action_add_reaction">Реакція</string>
   <string name="swipe_action_bookmark">Закладка</string>
+  <string name="swipe_action_comment">Коментар</string>
   <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
   <string name="settings_storage_clear_database">Очистити базу даних кешу</string>
@@ -271,4 +274,7 @@
   <string name="date_format_year_month_day">dd MMM yy</string>
   <string name="date_format_month_day">dd MMM</string>
   <string name="date_format_full">дд MMM H:mm</string>
+  <string name="vvo_notification_like">Вподобано ваш статус</string>
+  <string name="status_detail_comment">Коментар</string>
+  <string name="status_detail_repost">Репост</string>
 </resources>

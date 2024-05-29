@@ -83,7 +83,7 @@ interface MicroblogDataSource {
 
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
 
-    fun supportedComposeEvent(statusKey: MicroBlogKey? = null): List<SupportedComposeEvent>
+    fun composeConfig(statusKey: MicroBlogKey? = null): ComposeConfig
 
     fun profileActions(): List<ProfileAction>
 
@@ -108,25 +108,4 @@ enum class NotificationFilter {
     Like,
 }
 
-enum class SupportedComposeEvent {
-    Media,
-    Poll,
-    Emoji,
-    ContentWarning,
-    Visibility,
-}
-
 fun MicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:${account.accountKey}:$userKey"
-
-sealed interface ProfileAction {
-    suspend operator fun invoke(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    )
-
-    fun relationState(relation: UiRelation): Boolean
-
-    interface Block : ProfileAction
-
-    interface Mute : ProfileAction
-}

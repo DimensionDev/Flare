@@ -17,13 +17,13 @@ import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
-import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -790,13 +790,14 @@ class MastodonDataSource(
         }.flow.cachedIn(scope)
     }
 
-    override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
-        return listOf(
-            SupportedComposeEvent.Media,
-            SupportedComposeEvent.Poll,
-            SupportedComposeEvent.Emoji,
-            SupportedComposeEvent.ContentWarning,
-            SupportedComposeEvent.Visibility,
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
+        return ComposeConfig(
+            text = ComposeConfig.Text(500),
+            media = ComposeConfig.Media(4, true),
+            poll = ComposeConfig.Poll(4),
+            emoji = ComposeConfig.Emoji(emoji(), mergeTag = "mastodon@${account.accountKey.host}"),
+            contentWarning = ComposeConfig.ContentWarning,
+            visibility = ComposeConfig.Visibility,
         )
     }
 

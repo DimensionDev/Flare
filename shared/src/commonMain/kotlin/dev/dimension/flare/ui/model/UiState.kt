@@ -41,6 +41,13 @@ inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
         is UiState.Loading -> UiState.Loading()
     }
 
+inline fun <T : Any, R : Any> UiState<T>.mapNotNull(transform: (T) -> R?): UiState<R> =
+    when (this) {
+        is UiState.Success -> transform(data)?.let { UiState.Success(it) } ?: UiState.Error(IllegalStateException())
+        is UiState.Error -> UiState.Error(throwable)
+        is UiState.Loading -> UiState.Loading()
+    }
+
 inline fun <T : Any, R : Any> UiState<T>.flatMap(
     onError: (Throwable) -> UiState<R> = { UiState.Error(it) },
     transform: (T) -> UiState<R>,
@@ -87,6 +94,8 @@ inline fun <T : Any> UiState<T>.onLoading(action: () -> Unit): UiState<T> =
     }
 
 fun <T : Any> UiState<T>.takeSuccess(): T? = (this as? UiState.Success)?.data
+
+fun <T : Any> UiState<T>.takeSuccessOr(value: T): T = (this as? UiState.Success)?.data ?: value
 
 @OptIn(ExperimentalObjCRefinement::class)
 @Composable

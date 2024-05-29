@@ -9,10 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.allAccountsPresenter
@@ -26,6 +24,7 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.merge
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
@@ -134,33 +133,21 @@ class ComposePresenter(
                 }
             } ?: UiState.Error(IllegalStateException("Visibility not supported"))
 
-        val emojiState =
-            services.takeIf {
-                it.size == 1
-            }?.first()?.flatMap {
-                remember(it) {
-                    when (it) {
-                        is MastodonDataSource -> it.emoji()
-                        is MisskeyDataSource -> it.emoji()
-                        else -> null
-                    }
-                }?.collectAsState()?.toUi()?.map {
-                    it.toImmutableListWrapper()
-                } ?: UiState.Error(IllegalStateException("Emoji not supported"))
-            } ?: UiState.Error(IllegalStateException("Emoji not supported"))
-        val supportedComposeEvent =
+        val composeConfig: UiState<ComposeConfig> =
             remember(services) {
                 services.merge().map {
-                    it.flatMap {
-                        it.supportedComposeEvent(statusKey = status?.statusKey)
-                    }.groupBy {
-                        it
-                    }.entries.filter {
-                        it.value.size == services.size
-                    }.map {
-                        it.key
-                    }.toImmutableList().toImmutableListWrapper()
+                    it.map { it.composeConfig(statusKey = status?.statusKey) }
+                        .reduceOrNull { acc, config -> acc.merge(config) } ?: ComposeConfig()
                 }
+            }
+
+        val emojiState =
+            composeConfig.mapNotNull {
+                it.emoji
+            }.flatMap {
+                it.emoji.collectAsState().toUi()
+            }.map {
+                it.toImmutableListWrapper()
             }
 
         return object : ComposeState(
@@ -168,7 +155,7 @@ class ComposePresenter(
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
-            supportedComposeEvent = supportedComposeEvent,
+            composeConfig = composeConfig,
             enableCrossPost = enableCrossPost,
             selectedAccounts = selectedAccounts.toImmutableList(),
             selectedUsers = selectedUsers,
@@ -319,7 +306,7 @@ abstract class ComposeState(
     val visibilityState: UiState<VisibilityState>,
     val replyState: UiState<UiStatus>?,
     val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
-    val supportedComposeEvent: UiState<ImmutableListWrapper<SupportedComposeEvent>>,
+    val composeConfig: UiState<ComposeConfig>,
     val enableCrossPost: UiState<Boolean>,
     val selectedAccounts: ImmutableList<UiAccount>,
     val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiUser>, UiAccount>>>,

@@ -13,12 +13,12 @@ import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendsUserPagingSource
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
-import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -218,8 +218,8 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         }.flow
     }
 
-    override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
-        return emptyList()
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
+        return ComposeConfig()
     }
 
     override suspend fun follow(

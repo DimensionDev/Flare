@@ -17,12 +17,12 @@ import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
-import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -613,15 +613,16 @@ class XQTDataSource(
         }.flow
     }
 
-    override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
-        return if (statusKey == null) {
-            listOf(
-//                SupportedComposeEvent.Poll,
-                SupportedComposeEvent.Media,
-            )
-        } else {
-            listOf()
-        }
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
+        return ComposeConfig(
+            text = ComposeConfig.Text(280),
+            media =
+                if (statusKey != null) {
+                    null
+                } else {
+                    ComposeConfig.Media(4, true)
+                },
+        )
     }
 
     override suspend fun follow(

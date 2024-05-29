@@ -20,10 +20,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -92,9 +92,9 @@ import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
-import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.VVOComposeData
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.model.AccountType
@@ -111,10 +111,12 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
@@ -242,7 +244,9 @@ private fun ComposeScreen(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(4),
             onResult = { uris ->
-                state.mediaState.addMedia(uris)
+                state.mediaState.onSuccess {
+                    it.addMedia(uris)
+                }
             },
         )
     val focusRequester = remember { FocusRequester() }
@@ -432,67 +436,71 @@ private fun ComposeScreen(
                     Text(text = stringResource(id = R.string.compose_hint))
                 },
             )
-            AnimatedVisibility(state.mediaState.medias.isNotEmpty()) {
-                Column {
-                    Row(
-                        modifier =
-                            Modifier
-                                .padding(horizontal = screenHorizontalPadding)
-                                .fillMaxWidth()
-                                .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        state.mediaState.medias.forEach { uri ->
-                            Box {
-                                NetworkImage(
-                                    model = uri,
-                                    contentDescription = null,
-                                    modifier =
-                                        Modifier
-                                            .size(128.dp)
-                                            .clip(RoundedCornerShape(8.dp)),
-                                )
-                                IconButton(
-                                    onClick = {
-                                        state.mediaState.removeMedia(uri)
-                                    },
-                                    modifier =
-                                        Modifier
-                                            .align(Alignment.TopEnd)
-                                            .background(
-                                                color = Color.Black.copy(alpha = 0.3f),
-                                                shape = CircleShape,
-                                            ),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
+            state.mediaState.onSuccess { mediaState ->
+                AnimatedVisibility(mediaState.medias.isNotEmpty()) {
+                    Column {
+                        Row(
+                            modifier =
+                                Modifier
+                                    .padding(horizontal = screenHorizontalPadding)
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            mediaState.medias.forEach { uri ->
+                                Box {
+                                    NetworkImage(
+                                        model = uri,
                                         contentDescription = null,
+                                        modifier =
+                                            Modifier
+                                                .size(128.dp)
+                                                .clip(RoundedCornerShape(8.dp)),
                                     )
+                                    IconButton(
+                                        onClick = {
+                                            mediaState.removeMedia(uri)
+                                        },
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopEnd)
+                                                .background(
+                                                    color = Color.Black.copy(alpha = 0.3f),
+                                                    shape = CircleShape,
+                                                ),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = null,
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
-                    val sensitiveInteractionSource = remember { MutableInteractionSource() }
-                    Row(
-                        modifier =
-                            Modifier
-                                .padding(horizontal = screenHorizontalPadding)
-                                .fillMaxWidth()
-                                .clickable(
+                        if (mediaState.canSensitive) {
+                            val sensitiveInteractionSource = remember { MutableInteractionSource() }
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .fillMaxWidth()
+                                        .clickable(
+                                            interactionSource = sensitiveInteractionSource,
+                                            indication = null,
+                                        ) {
+                                            mediaState.setMediaSensitive(!mediaState.isMediaSensitive)
+                                        },
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(
+                                    checked = mediaState.isMediaSensitive,
+                                    onCheckedChange = { mediaState.setMediaSensitive(it) },
                                     interactionSource = sensitiveInteractionSource,
-                                    indication = null,
-                                ) {
-                                    state.mediaState.setMediaSensitive(!state.mediaState.isMediaSensitive)
-                                },
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(
-                            checked = state.mediaState.isMediaSensitive,
-                            onCheckedChange = { state.mediaState.setMediaSensitive(it) },
-                            interactionSource = sensitiveInteractionSource,
-                        )
-                        Text(text = stringResource(id = R.string.compose_media_sensitive))
+                                )
+                                Text(text = stringResource(id = R.string.compose_media_sensitive))
+                            }
+                        }
                     }
                 }
             }
@@ -629,13 +637,13 @@ private fun ComposeScreen(
                     .fillMaxWidth(),
             tonalElevation = 8.dp,
         ) {
-            Column(
-                modifier =
-                    Modifier
-                        .navigationBarsPadding(),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(
-                    modifier = Modifier,
+                    modifier =
+                        Modifier
+                            .weight(1f),
                 ) {
                     IconButton(
                         onClick = {
@@ -751,6 +759,15 @@ private fun ComposeScreen(
                             }
                         }
                     }
+                }
+
+                state.remainingLength.onSuccess {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.width(screenHorizontalPadding))
                 }
             }
         }
@@ -926,23 +943,35 @@ private fun composePresenter(
     val textFieldState by remember {
         mutableStateOf(TextFieldState(initialText))
     }
+
+    val remainingLength =
+        state.composeConfig.mapNotNull {
+            it.text
+        }.map {
+            it.maxLength - textFieldState.text.length
+        }
+
     val pollState =
-        state.supportedComposeEvent.flatMap {
-            if (it.contains(SupportedComposeEvent.Poll)) {
-                UiState.Success(pollPresenter())
-            } else {
-                UiState.Error(IllegalStateException("Poll not supported"))
-            }
+        state.composeConfig.mapNotNull {
+            it.poll
+        }.map {
+            pollPresenter(it)
         }
-    val mediaState = mediaPresenter(initialMedias)
+
+    val mediaState =
+        state.composeConfig.mapNotNull {
+            it.media
+        }.map {
+            mediaPresenter(it, initialMedias)
+        }
+
     val contentWarningState =
-        state.supportedComposeEvent.flatMap {
-            if (it.contains(SupportedComposeEvent.ContentWarning)) {
-                UiState.Success(contentWarningPresenter())
-            } else {
-                UiState.Error(IllegalStateException("Content warning not supported"))
-            }
+        state.composeConfig.mapNotNull {
+            it.contentWarning
+        }.map {
+            contentWarningPresenter()
         }
+
     state.replyState?.onSuccess {
         LaunchedEffect(it) {
             if (textFieldState.text.isEmpty()) {
@@ -978,19 +1007,25 @@ private fun composePresenter(
         remember(textFieldState.text, state.account) {
             textFieldState.text.isNotBlank() &&
                 textFieldState.text.isNotEmpty() &&
-                state.account is UiState.Success
+                state.account is UiState.Success &&
+                remainingLength.takeSuccessOr(0) >= 0
         }
     val canPoll =
         remember(mediaState) {
-            mediaState.medias.isEmpty()
+            mediaState !is UiState.Success || mediaState.data.medias.isEmpty()
         }
     val canMedia =
         remember(mediaState, pollState) {
-            mediaState.medias.size < 4 && !(pollState is UiState.Success && pollState.data.enabled)
+            (mediaState is UiState.Success && mediaState.data.canAddMedia) &&
+                !(pollState is UiState.Success && pollState.data.enabled)
         }
     var showEmojiMenu by remember { mutableStateOf(false) }
     var showAccountSelectMenu by remember { mutableStateOf(false) }
     object {
+        val remainingLength =
+            remainingLength.map {
+                it.toString()
+            }
         val textFieldState = textFieldState
         val canSend = canSend
         val canPoll = canPoll
@@ -1026,9 +1061,9 @@ private fun composePresenter(
                             MastodonComposeData(
                                 content = textFieldState.text.toString(),
                                 medias =
-                                    mediaState.medias.map {
+                                    mediaState.takeSuccess()?.medias?.map {
                                         FileItem(context, it)
-                                    },
+                                    }.orEmpty(),
                                 poll =
                                     pollState.takeSuccess()?.takeIf { it.enabled }?.let {
                                         MastodonComposeData.Poll(
@@ -1040,7 +1075,7 @@ private fun composePresenter(
                                                 },
                                         )
                                     },
-                                sensitive = mediaState.isMediaSensitive,
+                                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
                                 spoilerText = contentWarningState.takeSuccess()?.textFieldState?.text?.toString(),
                                 visibility =
                                     state.visibilityState
@@ -1056,9 +1091,9 @@ private fun composePresenter(
                             MisskeyComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.medias.map {
+                                    mediaState.takeSuccess()?.medias?.map {
                                         FileItem(context, it)
-                                    },
+                                    }.orEmpty(),
                                 poll =
                                     pollState.takeSuccess()?.takeIf { it.enabled }?.let {
                                         MisskeyComposeData.Poll(
@@ -1070,7 +1105,7 @@ private fun composePresenter(
                                                 },
                                         )
                                     },
-                                sensitive = mediaState.isMediaSensitive,
+                                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
                                 spoilerText = contentWarningState.takeSuccess()?.textFieldState?.text?.toString(),
                                 visibility =
                                     state.visibilityState
@@ -1093,9 +1128,9 @@ private fun composePresenter(
                             BlueskyComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.medias.map {
+                                    mediaState.takeSuccess()?.medias?.map {
                                         FileItem(context, it)
-                                    },
+                                    }.orEmpty(),
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 content = textFieldState.text.toString(),
@@ -1105,9 +1140,9 @@ private fun composePresenter(
                             XQTComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.medias.map {
+                                    mediaState.takeSuccess()?.medias?.map {
                                         FileItem(context, it)
-                                    },
+                                    }.orEmpty(),
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 quoteUsername =
@@ -1134,16 +1169,16 @@ private fun composePresenter(
                                                     },
                                             )
                                         },
-                                sensitive = mediaState.isMediaSensitive,
+                                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
                             )
 
                         is UiAccount.VVo ->
                             VVOComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.medias.map {
+                                    mediaState.takeSuccess()?.medias?.map {
                                         FileItem(context, it)
-                                    },
+                                    }.orEmpty(),
                                 content = textFieldState.text.toString(),
                                 repostId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 commentId = (status as? ComposeStatus.Reply)?.statusKey?.id,
@@ -1177,38 +1212,42 @@ private fun contentWarningPresenter() =
     }
 
 @Composable
-private fun mediaPresenter(initialMedias: ImmutableList<Uri> = persistentListOf()) =
-    run {
-        var medias by remember {
-            mutableStateOf(initialMedias.toList())
-        }
-        var isMediaSensitive by remember {
-            mutableStateOf(false)
-        }
-
-        object {
-            val medias = medias.toImmutableList()
-            val isMediaSensitive = isMediaSensitive
-
-            fun addMedia(uris: List<Uri>) {
-                medias = (medias + uris).distinct().takeLast(4)
-            }
-
-            fun removeMedia(uri: Uri) {
-                medias = medias.filterNot { it == uri }
-                if (medias.isEmpty()) {
-                    isMediaSensitive = false
-                }
-            }
-
-            fun setMediaSensitive(value: Boolean) {
-                isMediaSensitive = value
-            }
-        }
+private fun mediaPresenter(
+    config: ComposeConfig.Media,
+    initialMedias: ImmutableList<Uri> = persistentListOf(),
+) = run {
+    var medias by remember {
+        mutableStateOf(initialMedias.toList())
+    }
+    var isMediaSensitive by remember {
+        mutableStateOf(false)
     }
 
+    object {
+        val medias = medias.toImmutableList()
+        val isMediaSensitive = isMediaSensitive
+        val canAddMedia = medias.size < config.maxCount
+        val canSensitive = config.canSensitive
+
+        fun addMedia(uris: List<Uri>) {
+            medias = (medias + uris).distinct().takeLast(config.maxCount)
+        }
+
+        fun removeMedia(uri: Uri) {
+            medias = medias.filterNot { it == uri }
+            if (medias.isEmpty()) {
+                isMediaSensitive = false
+            }
+        }
+
+        fun setMediaSensitive(value: Boolean) {
+            isMediaSensitive = value
+        }
+    }
+}
+
 @Composable
-private fun pollPresenter() =
+private fun pollPresenter(config: ComposeConfig.Poll) =
     run {
         var enabled by remember {
             mutableStateOf(false)
@@ -1227,7 +1266,7 @@ private fun pollPresenter() =
         }
         val canAddPollOption =
             remember(options) {
-                options.size < 4
+                options.size < config.maxOptions
             }
 
         object {

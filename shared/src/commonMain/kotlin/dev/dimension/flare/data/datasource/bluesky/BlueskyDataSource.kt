@@ -36,12 +36,12 @@ import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
-import dev.dimension.flare.data.datasource.microblog.SupportedComposeEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.getService
@@ -899,9 +899,10 @@ class BlueskyDataSource(
         throw UnsupportedOperationException("Bluesky does not support discover statuses")
     }
 
-    override fun supportedComposeEvent(statusKey: MicroBlogKey?): List<SupportedComposeEvent> {
-        return listOf(
-            SupportedComposeEvent.Media,
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
+        return ComposeConfig(
+            text = ComposeConfig.Text(300),
+            media = ComposeConfig.Media(4, true),
         )
     }
 

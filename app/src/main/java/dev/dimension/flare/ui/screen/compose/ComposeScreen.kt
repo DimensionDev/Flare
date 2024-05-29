@@ -20,10 +20,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -415,27 +415,45 @@ private fun ComposeScreen(
                     }
                 }
             }
-            TextField2(
-                state = state.textFieldState,
+            Box(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .focusRequester(
-                            focusRequester = focusRequester,
+                        .fillMaxWidth(),
+            ) {
+                TextField2(
+                    state = state.textFieldState,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .focusRequester(
+                                focusRequester = focusRequester,
+                            ),
+                    colors =
+                        TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                         ),
-                colors =
-                    TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        errorIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                    ),
-                placeholder = {
-                    Text(text = stringResource(id = R.string.compose_hint))
-                },
-            )
+                    placeholder = {
+                        Text(text = stringResource(id = R.string.compose_hint))
+                    },
+                )
+
+                state.remainingLength.onSuccess {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(horizontal = screenHorizontalPadding),
+                    )
+                }
+            }
             state.mediaState.onSuccess { mediaState ->
                 AnimatedVisibility(mediaState.medias.isNotEmpty()) {
                     Column {
@@ -634,124 +652,121 @@ private fun ComposeScreen(
         Surface(
             modifier =
                 Modifier
+                    .heightIn(min = 16.dp)
                     .fillMaxWidth(),
             tonalElevation = 8.dp,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(
-                    modifier =
-                        Modifier
-                            .weight(1f),
-                ) {
+            Row {
+                state.mediaState.onSuccess {
+                    if (it.enabled) {
+                        IconButton(
+                            onClick = {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageAndVideo,
+                                    ),
+                                )
+                            },
+                            enabled = state.canMedia,
+                        ) {
+                            Icon(imageVector = Icons.Default.Image, contentDescription = null)
+                        }
+                    }
+                }
+                state.pollState.onSuccess {
                     IconButton(
                         onClick = {
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageAndVideo,
-                                ),
-                            )
+                            it.togglePoll()
                         },
-                        enabled = state.canMedia,
+                        enabled = state.canPoll,
                     ) {
-                        Icon(imageVector = Icons.Default.Image, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.Default.Poll,
+                            contentDescription = null,
+                        )
                     }
-                    state.pollState.onSuccess {
-                        IconButton(
-                            onClick = {
-                                it.togglePoll()
-                            },
-                            enabled = state.canPoll,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Poll,
-                                contentDescription = null,
+                }
+                state.state.visibilityState.onSuccess { visibilityState ->
+                    when (visibilityState) {
+                        is MastodonVisibilityState ->
+                            MastodonVisibilityContent(
+                                visibilityState,
                             )
-                        }
-                    }
-                    state.state.visibilityState.onSuccess { visibilityState ->
-                        when (visibilityState) {
-                            is MastodonVisibilityState ->
-                                MastodonVisibilityContent(
-                                    visibilityState,
-                                )
 
-                            is MisskeyVisibilityState ->
-                                MisskeyVisibilityContent(
-                                    visibilityState,
-                                )
-                        }
+                        is MisskeyVisibilityState ->
+                            MisskeyVisibilityContent(
+                                visibilityState,
+                            )
                     }
-                    state.contentWarningState.onSuccess {
+                }
+                state.contentWarningState.onSuccess {
+                    IconButton(
+                        onClick = {
+                            it.toggle()
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                        )
+                    }
+                }
+                state.state.emojiState.onSuccess { emojis ->
+                    AnimatedVisibility(emojis.size > 0) {
                         IconButton(
                             onClick = {
-                                it.toggle()
+                                state.setShowEmojiMenu(!state.showEmojiMenu)
                             },
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Warning,
+                                imageVector = Icons.Default.EmojiEmotions,
                                 contentDescription = null,
                             )
-                        }
-                    }
-                    state.state.emojiState.onSuccess { emojis ->
-                        AnimatedVisibility(emojis.size > 0) {
-                            IconButton(
-                                onClick = {
-                                    state.setShowEmojiMenu(!state.showEmojiMenu)
-                                },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.EmojiEmotions,
-                                    contentDescription = null,
-                                )
-                                if (state.showEmojiMenu) {
-                                    Popup(
-                                        onDismissRequest = {
-                                            state.setShowEmojiMenu(false)
-                                        },
-                                        offset =
-                                            IntOffset(
-                                                x = 0,
-                                                y =
-                                                    with(LocalDensity.current) {
-                                                        48.dp.roundToPx()
-                                                    },
+                            if (state.showEmojiMenu) {
+                                Popup(
+                                    onDismissRequest = {
+                                        state.setShowEmojiMenu(false)
+                                    },
+                                    offset =
+                                        IntOffset(
+                                            x = 0,
+                                            y =
+                                                with(LocalDensity.current) {
+                                                    48.dp.roundToPx()
+                                                },
+                                        ),
+                                    properties = PopupProperties(usePlatformDefaultWidth = true),
+                                ) {
+                                    Card(
+                                        modifier =
+                                            Modifier.sizeIn(
+                                                maxHeight = 256.dp,
+                                                maxWidth = 384.dp,
                                             ),
-                                        properties = PopupProperties(usePlatformDefaultWidth = true),
+                                        elevation =
+                                            CardDefaults.elevatedCardElevation(
+                                                defaultElevation = 3.dp,
+                                            ),
                                     ) {
-                                        Card(
-                                            modifier =
-                                                Modifier.sizeIn(
-                                                    maxHeight = 256.dp,
-                                                    maxWidth = 384.dp,
-                                                ),
-                                            elevation =
-                                                CardDefaults.elevatedCardElevation(
-                                                    defaultElevation = 3.dp,
-                                                ),
+                                        LazyVerticalGrid(
+                                            columns = GridCells.Adaptive(36.dp),
+                                            contentPadding = PaddingValues(8.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
                                         ) {
-                                            LazyVerticalGrid(
-                                                columns = GridCells.Adaptive(36.dp),
-                                                contentPadding = PaddingValues(8.dp),
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                            ) {
-                                                items(emojis.size) { index ->
-                                                    val emoji = emojis[index]
-                                                    NetworkImage(
-                                                        model = emoji.url,
-                                                        contentDescription = emoji.shortcode,
-                                                        contentScale = ContentScale.Fit,
-                                                        modifier =
-                                                            Modifier
-                                                                .size(36.dp)
-                                                                .clickable {
-                                                                    state.selectEmoji(emoji)
-                                                                },
-                                                    )
-                                                }
+                                            items(emojis.size) { index ->
+                                                val emoji = emojis[index]
+                                                NetworkImage(
+                                                    model = emoji.url,
+                                                    contentDescription = emoji.shortcode,
+                                                    contentScale = ContentScale.Fit,
+                                                    modifier =
+                                                        Modifier
+                                                            .size(36.dp)
+                                                            .clickable {
+                                                                state.selectEmoji(emoji)
+                                                            },
+                                                )
                                             }
                                         }
                                     }
@@ -759,15 +774,6 @@ private fun ComposeScreen(
                             }
                         }
                     }
-                }
-
-                state.remainingLength.onSuccess {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(modifier = Modifier.width(screenHorizontalPadding))
                 }
             }
         }
@@ -1228,6 +1234,7 @@ private fun mediaPresenter(
         val isMediaSensitive = isMediaSensitive
         val canAddMedia = medias.size < config.maxCount
         val canSensitive = config.canSensitive
+        val enabled = config.maxCount > 0
 
         fun addMedia(uris: List<Uri>) {
             medias = (medias + uris).distinct().takeLast(config.maxCount)

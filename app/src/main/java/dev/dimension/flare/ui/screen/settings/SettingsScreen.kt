@@ -20,7 +20,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
@@ -84,46 +83,47 @@ internal fun SettingsRoute(navigationState: NavigationState) {
         directive = scaffoldNavigator.scaffoldDirective,
         value = scaffoldNavigator.scaffoldValue,
         listPane = {
-            AnimatedPane {
-                SettingsScreen(
-                    toAccounts = {
-                        settingsPanelState.setSelectedItem(AccountsRouteDestination)
-                    },
-                    toAppearance = {
-                        settingsPanelState.setSelectedItem(AppearanceRouteDestination)
-                    },
-                    toStorage = {
-                        settingsPanelState.setSelectedItem(StorageRouteDestination)
-                    },
-                    toAbout = {
-                        settingsPanelState.setSelectedItem(AboutRouteDestination)
-                    },
-                    toTabCustomization = {
-                        settingsPanelState.setSelectedItem(TabCustomizeRouteDestination)
-                    },
-                    toLocalFilter = {
-                        settingsPanelState.setSelectedItem(LocalFilterRouteDestination)
-                    },
-                )
-            }
+            // TODO: AnimatedPane will lead to a crash for compose 1.7.0-beta02
+//            AnimatedPane {
+            SettingsScreen(
+                toAccounts = {
+                    settingsPanelState.setSelectedItem(AccountsRouteDestination)
+                },
+                toAppearance = {
+                    settingsPanelState.setSelectedItem(AppearanceRouteDestination)
+                },
+                toStorage = {
+                    settingsPanelState.setSelectedItem(StorageRouteDestination)
+                },
+                toAbout = {
+                    settingsPanelState.setSelectedItem(AboutRouteDestination)
+                },
+                toTabCustomization = {
+                    settingsPanelState.setSelectedItem(TabCustomizeRouteDestination)
+                },
+                toLocalFilter = {
+                    settingsPanelState.setSelectedItem(LocalFilterRouteDestination)
+                },
+            )
+//            }
         },
         detailPane = {
-            AnimatedPane {
-                settingsPanelState.selectedItem?.let { item ->
-                    Router(navGraph = NavGraphs.root, item) {
-                        dependency(
-                            ProxyDestinationsNavigator(
-                                scaffoldNavigator,
-                                destinationsNavigator,
-                                navigateBack = {
-                                    settingsPanelState.setSelectedItem(null)
-                                },
-                            ),
-                        )
-                        dependency(navigationState)
-                    }
+//            AnimatedPane {
+            settingsPanelState.selectedItem?.let { item ->
+                Router(navGraph = NavGraphs.root, item) {
+                    dependency(
+                        ProxyDestinationsNavigator(
+                            scaffoldNavigator,
+                            destinationsNavigator,
+                            navigateBack = {
+                                settingsPanelState.setSelectedItem(null)
+                            },
+                        ),
+                    )
+                    dependency(navigationState)
                 }
             }
+//            }
         },
     )
 }

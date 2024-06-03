@@ -78,6 +78,8 @@ class AccountRepository(
 
 data object NoActiveAccountException : Exception("No active account.")
 
+data object LoginExpiredException : Exception("Login expired.")
+
 @Composable
 internal fun activeAccountPresenter(repository: AccountRepository = koinInject()): State<UiState<UiAccount>> {
     return remember(repository) {

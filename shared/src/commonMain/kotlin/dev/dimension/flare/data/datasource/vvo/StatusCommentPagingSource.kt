@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import dev.dimension.flare.data.network.vvo.VVOService
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.mapper.toUi
@@ -14,6 +15,12 @@ internal class StatusCommentPagingSource(
 ) : PagingSource<Long, UiStatus.VVONotification>() {
     override suspend fun load(params: LoadParams<Long>): LoadResult<Long, UiStatus.VVONotification> {
         return try {
+            val config = service.config()
+            if (config.data?.login != true) {
+                return LoadResult.Error(
+                    LoginExpiredException,
+                )
+            }
             val response =
                 service.getHotComments(
                     id = statusKey.id,

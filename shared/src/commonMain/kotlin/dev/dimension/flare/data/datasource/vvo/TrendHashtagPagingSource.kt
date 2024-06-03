@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import dev.dimension.flare.data.network.vvo.VVOService
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.ui.model.UiHashtag
 
 internal class TrendHashtagPagingSource(
@@ -16,6 +17,12 @@ internal class TrendHashtagPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiHashtag> {
         try {
+            val config = service.config()
+            if (config.data?.login != true) {
+                return LoadResult.Error(
+                    LoginExpiredException,
+                )
+            }
             service.getContainerIndex(containerId = containerId)
                 .data
                 ?.cards
@@ -43,7 +50,6 @@ internal class TrendHashtagPagingSource(
                     )
                 }
         } catch (e: Throwable) {
-            e.printStackTrace()
             return LoadResult.Error(e)
         }
     }

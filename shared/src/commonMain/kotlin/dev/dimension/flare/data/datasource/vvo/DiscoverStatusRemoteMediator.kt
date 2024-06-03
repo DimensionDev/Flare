@@ -8,6 +8,7 @@ import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.network.vvo.VVOService
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -25,6 +26,12 @@ internal class DiscoverStatusRemoteMediator(
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
     ): MediatorResult {
         return try {
+            val config = service.config()
+            if (config.data?.login != true) {
+                return MediatorResult.Error(
+                    LoginExpiredException,
+                )
+            }
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {

@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.annotation.parameters.DeepLink
+import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.generated.destinations.VVOLoginRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.XQTLoginRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -82,6 +84,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @Composable
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
 )
 fun ServiceSelectRoute(
     navigator: DestinationsNavigator,

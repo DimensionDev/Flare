@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.misskey
 import com.benasher44.uuid.uuid4
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.misskey.api.AuthResources
+import dev.dimension.flare.data.network.misskey.api.createAuthResources
 import dev.dimension.flare.data.network.misskey.api.model.response.MiAuthCheckResponse
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
@@ -44,7 +45,7 @@ internal class MisskeyOauthService(
     private val callback: String? = null,
     private val permission: List<String> = defaultPermission,
     private val session: String = uuid4().toString(),
-) : AuthResources by ktorfit("https://$host/").create() {
+) : AuthResources by ktorfit("https://$host/").createAuthResources() {
     fun getAuthorizeUrl(): String {
         val url =
             URLBuilder().apply {

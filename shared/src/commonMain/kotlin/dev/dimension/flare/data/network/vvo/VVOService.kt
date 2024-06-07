@@ -7,6 +7,10 @@ import dev.dimension.flare.data.network.vvo.api.ConfigApi
 import dev.dimension.flare.data.network.vvo.api.StatusApi
 import dev.dimension.flare.data.network.vvo.api.TimelineApi
 import dev.dimension.flare.data.network.vvo.api.UserApi
+import dev.dimension.flare.data.network.vvo.api.createConfigApi
+import dev.dimension.flare.data.network.vvo.api.createStatusApi
+import dev.dimension.flare.data.network.vvo.api.createTimelineApi
+import dev.dimension.flare.data.network.vvo.api.createUserApi
 import dev.dimension.flare.data.network.vvo.model.UploadResponse
 import dev.dimension.flare.model.vvoHost
 import io.ktor.client.HttpClient
@@ -38,10 +42,10 @@ private fun config(
 
 internal class VVOService(
     private val chocolate: String,
-) : TimelineApi by config(chocolate = chocolate).create(),
-    UserApi by config(chocolate = chocolate).create(),
-    ConfigApi by config(chocolate = chocolate).create(),
-    StatusApi by config(chocolate = chocolate).create() {
+) : TimelineApi by config(chocolate = chocolate).createTimelineApi(),
+    UserApi by config(chocolate = chocolate).createUserApi(),
+    ConfigApi by config(chocolate = chocolate).createConfigApi(),
+    StatusApi by config(chocolate = chocolate).createStatusApi() {
     companion object {
         fun checkChocolates(chocolate: String): Boolean {
             return chocolate.split(';').map {

@@ -6,6 +6,10 @@ import dev.dimension.flare.data.network.mastodon.api.LookupResources
 import dev.dimension.flare.data.network.mastodon.api.SearchResources
 import dev.dimension.flare.data.network.mastodon.api.TimelineResources
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
+import dev.dimension.flare.data.network.mastodon.api.createLookupResources
+import dev.dimension.flare.data.network.mastodon.api.createSearchResources
+import dev.dimension.flare.data.network.mastodon.api.createTimelineResources
+import dev.dimension.flare.data.network.mastodon.api.createTrendsResources
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.ResponseException
@@ -29,10 +33,10 @@ private fun config(baseUrl: String) =
 private val baseUrl = "https://mastodon.social/"
 
 internal object GuestMastodonService :
-    TrendsResources by config(baseUrl).create(),
-    LookupResources by config(baseUrl).create(),
-    TimelineResources by config(baseUrl).create(),
-    SearchResources by config(baseUrl).create() {
+    TrendsResources by config(baseUrl).createTrendsResources(),
+    LookupResources by config(baseUrl).createLookupResources(),
+    TimelineResources by config(baseUrl).createTimelineResources(),
+    SearchResources by config(baseUrl).createSearchResources() {
     val instance = baseUrl
     val host = "mastodon.social"
 

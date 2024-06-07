@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.mastodon
 
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.MastodonOAuthResources
+import dev.dimension.flare.data.network.mastodon.api.createMastodonOAuthResources
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonAuthScope
 import io.ktor.http.encodeURLParameter
@@ -18,7 +19,7 @@ internal class MastodonOAuthService(
             MastodonAuthScope.Follow,
             MastodonAuthScope.Push,
         ),
-) : MastodonOAuthResources by ktorfit(baseUrl).create() {
+) : MastodonOAuthResources by ktorfit(baseUrl).createMastodonOAuthResources() {
     suspend fun createApplication() =
         createApplication(
             client_name = client_name,

@@ -50,7 +50,7 @@ firebase-bom = "33.1.0"
 google-services = "4.4.2"
 firebase-crashlytics = "3.0.1"
 napier = "2.7.1"
-materialKolor = "1.6.1"
+materialKolor = "1.6.2"
 
 [libraries]
 bluesky = { module = "sh.christian.ozone:bluesky", version.ref = "bluesky" }

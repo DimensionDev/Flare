@@ -164,13 +164,14 @@ skie {
         enabled.set(false)
     }
     features {
-        coroutinesInterop.set(true)
-        enableFlowCombineConvertorPreview.set(true)
+        enableSwiftUIObservingPreview = true
     }
 }
 
 afterEvaluate {
 //    val kspCommonMainKotlinMetadata by tasks
     val runKtlintFormatOverCommonMainSourceSet by tasks
+    val runKtlintCheckOverCommonMainSourceSet by tasks
     runKtlintFormatOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
+    runKtlintCheckOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
 }

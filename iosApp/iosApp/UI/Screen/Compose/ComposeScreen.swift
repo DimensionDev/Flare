@@ -170,8 +170,8 @@ struct ComposeScreen: View {
                                 }
                             }
                             if viewModel.mediaViewModel.selectedItems.count == 0,
-                            case .success(let data) = onEnum(of: viewModel.model.supportedComposeEvent),
-                               data.data.contains(element: SupportedComposeEvent.poll.toKotlinEnum()) {
+                            case .success(let data) = onEnum(of: viewModel.model.composeConfig),
+                               let poll = data.data.poll {
                                 Button(action: {
                                     withAnimation {
                                         viewModel.togglePoll()
@@ -213,8 +213,9 @@ struct ComposeScreen: View {
                                     }
                                 }
                             }
-                            if case .success(let data) = onEnum(of: viewModel.model.supportedComposeEvent),
-                               data.data.contains(element: SupportedComposeEvent.contentWarning.toKotlinEnum()) {
+                            
+                            if case .success(let data) = onEnum(of: viewModel.model.composeConfig),
+                                data.data.contentWarning != nil {
                                 Button(action: {
                                     withAnimation {
                                         viewModel.toggleCW()

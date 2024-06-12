@@ -138,6 +138,17 @@ struct ServiceSelectScreen: View {
                         .listRowSeparator(.hidden)
                         .frame(maxWidth: .infinity, alignment: Alignment.center)
                         .disabled(viewModel.model.loading)
+                    case .vvo:
+                        Button {
+                            // TODO: vvo
+                        } label: {
+                            Text("next")
+                                .frame(width: 200)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .listRowSeparator(.hidden)
+                        .frame(maxWidth: .infinity, alignment: Alignment.center)
+                        .disabled(viewModel.model.loading)
                     }
                 } else if viewModel.model.instances.isSuccess {
                     ForEach(1...viewModel.model.instances.itemCount, id: \.self) { index in

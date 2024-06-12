@@ -113,32 +113,41 @@ struct ProfileScreen: View {
             Menu {
                 if case .success(let user) = onEnum(of: viewModel.model.userState) {
                     if case .success(let isMe) = onEnum(of: viewModel.model.isMe), !isMe.data.boolValue {
-                        if case .success(let relation) = onEnum(of: viewModel.model.relationState) {
-                            switch onEnum(of: relation.data) {
-                            case .bluesky(let blueskyRelation):
-                                BlueskyMenu(
-                                    relation: blueskyRelation,
-                                    onMuteClick: { viewModel.model.mute(user: user.data, data: relation.data) },
-                                    onBlockClick: { viewModel.model.block(user: user.data, data: relation.data) }
-                                )
-                            case .mastodon(let mastodonRelation):
-                                MastodonMenu(
-                                    relation: mastodonRelation,
-                                    onMuteClick: { viewModel.model.mute(user: user.data, data: relation.data) },
-                                    onBlockClick: { viewModel.model.block(user: user.data, data: relation.data) }
-                                )
-                            case .misskey(let misskeyRelation):
-                                MisskeyMenu(
-                                    relation: misskeyRelation,
-                                    onMuteClick: { viewModel.model.mute(user: user.data, data: relation.data) },
-                                    onBlockClick: { viewModel.model.block(user: user.data, data: relation.data) }
-                                )
-                            case .xQT(let xqtRelation):
-                                XQTMenu(
-                                    relation: xqtRelation,
-                                    onMuteClick: { viewModel.model.mute(user: user.data, data: relation.data) },
-                                    onBlockClick: { viewModel.model.block(user: user.data, data: relation.data) }
-                                )
+                        if case .success(let relation) = onEnum(of: viewModel.model.relationState),
+                           case .success(let actions) = onEnum(of: viewModel.model.actions) {
+                            ForEach(0...actions.data.size, id: \.self) { index in
+                                let item = actions.data.get(index: index)
+                                Button(action: {
+                                    Task {
+                                        try? await item.invoke(userKey: user.data.userKey, relation: relation.data)
+                                    }
+                                }, label: {
+                                    let text = switch onEnum(of: item) {
+                                    case .block(let block): if block.relationState(relation: relation.data) {
+                                        String(localized: "unblock")
+                                    } else {
+                                        String(localized: "block")
+                                    }
+                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                        String(localized: "unmute")
+                                    } else {
+                                        String(localized: "mute")
+                                    }
+                                    }
+                                    let icon = switch onEnum(of: item) {
+                                    case .block(let block): if block.relationState(relation: relation.data) {
+                                        "xmark.circle"
+                                    } else {
+                                        "checkmark.circle"
+                                    }
+                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                        "speaker"
+                                    } else {
+                                        "speaker.slash"
+                                    }
+                                    }
+                                        Label(text, systemImage: icon)
+                                    })
                             }
                         }
                         Button(action: { viewModel.model.report(user: user.data) }, label: {
@@ -276,6 +285,7 @@ struct ProfileHeaderSuccess: View {
             BlueskyProfileHeader(user: bluesky, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
         case .xQT(let xqt):
             XQTProfileHeader(user: xqt, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
+        case .vVO(let vvo): EmptyView() // TODO: vvo
         }
     }
 }

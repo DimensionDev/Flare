@@ -179,6 +179,7 @@ struct TabItem<Content: View>: View {
                     router.navigate(to: .statusDetail(accountType: accountType, statusKey: data.statusKey.description()))
                 case .compose:
                     showCompose = true
+                case .rawImage(let data): break
                 }
                 return .handled
             } else {
@@ -297,8 +298,9 @@ class StatusEvent: MastodonStatusEvent, MisskeyStatusEvent, BlueskyStatusEvent, 
                     try? await misskey.dataSource.deleteStatus(statusKey: statusKey)
                 case .xQT(let xqt):
                     try? await xqt.dataSource.deleteStatus(statusKey: statusKey)
-                case .guest(_):
-                    ()
+                case .vVo(let vvo):
+                    try? await vvo.dataSource.deleteStatus(statusKey: statusKey)
+                case .guest: break
                 }
             }
         }

@@ -29,27 +29,6 @@ struct XQTFollowButton: View {
     }
 }
 
-struct XQTMenu: View {
-    let relation: UiRelationXQT
-    let onMuteClick: () -> Void
-    let onBlockClick: () -> Void
-    var body: some View {
-        Button(action: onBlockClick, label: {
-            let text = if relation.blocking {
-                String(localized: "unblock")
-            } else {
-                String(localized: "block")
-            }
-            let icon = if relation.blocking {
-                "xmark.circle"
-            } else {
-                "checkmark.circle"
-            }
-            Label(text, systemImage: icon)
-        })
-    }
-}
-
 struct XQTProfileHeader: View {
     let user: UiUser.XQT
     let relation: UiState<UiRelation>

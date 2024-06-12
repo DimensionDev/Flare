@@ -86,6 +86,15 @@ class ComposeViewModel: MoleculeViewModelProto {
                         sensitive: mediaViewModel.sensitive,
                         poll: getXQTPoll()
                     ) as ComposeData_
+                case .vVo(let vvo):
+                    VVOComposeData(
+                        account: vvo,
+                        content: text,
+                        repostId: getQuoteId(),
+                        commentId: nil,
+                        replyId: getReplyId(),
+                        medias: getMedia()
+                    ) as ComposeData_
                 case .guest(_): nil
                 }
                 if let data = data {

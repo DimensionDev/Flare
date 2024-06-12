@@ -50,37 +50,3 @@ struct BlueskyFollowButton: View {
         }
     }
 }
-
-struct BlueskyMenu: View {
-    let relation: UiRelationBluesky
-    let onMuteClick: () -> Void
-    let onBlockClick: () -> Void
-    var body: some View {
-        Button(action: onMuteClick, label: {
-            let text = if relation.muting {
-                String(localized: "unmute")
-            } else {
-                String(localized: "mute")
-            }
-            let icon = if relation.muting {
-                "speaker"
-            } else {
-                "speaker.slash"
-            }
-            Label(text, systemImage: icon)
-        })
-        Button(action: onBlockClick, label: {
-            let text = if relation.blocking {
-                String(localized: "unblock")
-            } else {
-                String(localized: "block")
-            }
-            let icon = if relation.blocking {
-                "xmark.circle"
-            } else {
-                "checkmark.circle"
-            }
-            Label(text, systemImage: icon)
-        })
-    }
-}

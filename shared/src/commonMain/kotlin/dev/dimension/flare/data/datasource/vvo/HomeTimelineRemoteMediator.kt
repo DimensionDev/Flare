@@ -18,9 +18,7 @@ internal class HomeTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
-    override suspend fun initialize(): InitializeAction {
-        return InitializeAction.SKIP_INITIAL_REFRESH
-    }
+    override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
     override suspend fun load(
         loadType: LoadType,

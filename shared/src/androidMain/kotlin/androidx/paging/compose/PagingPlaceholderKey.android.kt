@@ -7,7 +7,9 @@ import android.os.Parcelable
 internal actual fun getPagingPlaceholderKey(index: Int): Any = PagingPlaceholderKey(index)
 
 @SuppressLint("BanParcelableUsage")
-private data class PagingPlaceholderKey(private val index: Int) : Parcelable {
+private data class PagingPlaceholderKey(
+    private val index: Int,
+) : Parcelable {
     override fun writeToParcel(
         parcel: Parcel,
         flags: Int,
@@ -15,9 +17,7 @@ private data class PagingPlaceholderKey(private val index: Int) : Parcelable {
         parcel.writeInt(index)
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
     companion object {
         @Suppress("unused")

@@ -12,7 +12,10 @@ internal class AuthorizationPlugin private constructor(
     private val header: String,
 ) {
     @KtorDsl
-    class Config(internal var authorization: Authorization = EmptyAuthorization, internal var header: String? = null)
+    class Config(
+        internal var authorization: Authorization = EmptyAuthorization,
+        internal var header: String? = null,
+    )
 
     @KtorDsl
     companion object Plugin : HttpClientPlugin<Config, AuthorizationPlugin> {

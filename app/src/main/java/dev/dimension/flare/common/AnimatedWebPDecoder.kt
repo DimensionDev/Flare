@@ -9,25 +9,25 @@ import coil.request.Options
 import com.github.penfeizhou.animation.webp.WebPDrawable
 import com.github.penfeizhou.animation.webp.decode.WebPParser
 
-internal class AnimatedWebPDecoder(private val source: ImageSource) : Decoder {
-    override suspend fun decode(): DecodeResult {
-        return DecodeResult(
+internal class AnimatedWebPDecoder(
+    private val source: ImageSource,
+) : Decoder {
+    override suspend fun decode(): DecodeResult =
+        DecodeResult(
             drawable = WebPDrawable.fromFile(source.file().toString()),
             isSampled = false,
         )
-    }
 
     class Factory : Decoder.Factory {
         override fun create(
             result: SourceResult,
             options: Options,
             imageLoader: ImageLoader,
-        ): Decoder? {
-            return if (WebPParser.isAWebP(result.source.file().toString())) {
+        ): Decoder? =
+            if (WebPParser.isAWebP(result.source.file().toString())) {
                 AnimatedWebPDecoder(result.source)
             } else {
                 null
             }
-        }
     }
 }

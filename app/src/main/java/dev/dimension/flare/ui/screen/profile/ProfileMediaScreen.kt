@@ -109,41 +109,42 @@ private fun ProfileMediaScreen(
             verticalItemSpacing = 8.dp,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            state.mediaState.onSuccess { items ->
-                items(items.itemCount) { index ->
-                    val item = items[index]
-                    if (item != null) {
-                        val media = item.media
-                        MediaItem(
-                            media = media,
-                            showCountdown = false,
-                            modifier =
-                                Modifier
-                                    .clipToBounds()
-                                    .clickable {
-                                        onItemClicked(
-                                            item.status.statusKey,
-                                            item.index,
-                                            when (media) {
-                                                is UiMedia.Image -> media.previewUrl
-                                                is UiMedia.Video -> media.thumbnailUrl
-                                                is UiMedia.Gif -> media.previewUrl
-                                                else -> null
-                                            },
-                                        )
-                                    },
-                        )
-                    } else {
-                        Card {
-                            Box(modifier = Modifier.size(120.dp).placeholder(true))
+            state.mediaState
+                .onSuccess { items ->
+                    items(items.itemCount) { index ->
+                        val item = items[index]
+                        if (item != null) {
+                            val media = item.media
+                            MediaItem(
+                                media = media,
+                                showCountdown = false,
+                                modifier =
+                                    Modifier
+                                        .clipToBounds()
+                                        .clickable {
+                                            onItemClicked(
+                                                item.status.statusKey,
+                                                item.index,
+                                                when (media) {
+                                                    is UiMedia.Image -> media.previewUrl
+                                                    is UiMedia.Video -> media.thumbnailUrl
+                                                    is UiMedia.Gif -> media.previewUrl
+                                                    else -> null
+                                                },
+                                            )
+                                        },
+                            )
+                        } else {
+                            Card {
+                                Box(modifier = Modifier.size(120.dp).placeholder(true))
+                            }
                         }
                     }
+                }.onLoading {
+                    items(10) {
+                        Box(modifier = Modifier.size(120.dp).placeholder(true))
+                    }
                 }
-            }.onLoading {
-                items(10) {
-                    Box(modifier = Modifier.size(120.dp).placeholder(true))
-                }
-            }
         }
     }
 }

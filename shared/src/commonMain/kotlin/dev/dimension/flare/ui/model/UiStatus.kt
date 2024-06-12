@@ -456,10 +456,18 @@ sealed class UiStatus {
                 .map { token ->
                     if (token is UrlToken) {
                         val actual =
-                            raw.legacy?.entities?.urls
-                                ?.firstOrNull { it.url == token.value.trim() }?.expandedUrl
-                                ?: raw.noteTweet?.noteTweetResults?.result?.entitySet?.urls
-                                    ?.firstOrNull { it.url == token.value.trim() }?.expandedUrl
+                            raw.legacy
+                                ?.entities
+                                ?.urls
+                                ?.firstOrNull { it.url == token.value.trim() }
+                                ?.expandedUrl
+                                ?: raw.noteTweet
+                                    ?.noteTweetResults
+                                    ?.result
+                                    ?.entitySet
+                                    ?.urls
+                                    ?.firstOrNull { it.url == token.value.trim() }
+                                    ?.expandedUrl
                         if (actual != null) {
                             UrlToken(actual)
                         } else {
@@ -468,8 +476,7 @@ sealed class UiStatus {
                     } else {
                         token
                     }
-                }
-                .toHtml(accountKey)
+                }.toHtml(accountKey)
         }
 
         val canRetweet by lazy {
@@ -649,8 +656,8 @@ internal fun List<Token>.toHtml(accountKey: MicroBlogKey): Element {
     return body
 }
 
-private fun Token.toHtml(accountKey: MicroBlogKey): Node {
-    return when (this) {
+private fun Token.toHtml(accountKey: MicroBlogKey): Node =
+    when (this) {
         is CashTagToken ->
             Element("a").apply {
                 attributes["href"] = AppDeepLink.Search(accountKey, value)
@@ -678,10 +685,9 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node {
                 children.add(Text(value))
             }
     }
-}
 
-internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): Element {
-    return when (this) {
+internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): Element =
+    when (this) {
         is CenterNode -> {
             Element("center").apply {
                 content.forEach {
@@ -851,10 +857,9 @@ internal fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): 
             }
         }
     }
-}
 
-private fun String.trimUrl(): String {
-    return this
+private fun String.trimUrl(): String =
+    this
         .removePrefix("http://")
         .removePrefix("https://")
         .removePrefix("www.")
@@ -866,20 +871,18 @@ private fun String.trimUrl(): String {
                 it
             }
         }
-}
 
 private fun resolveMisskeyEmoji(
     name: String,
     accountHost: String,
-): String {
-    return name.trim(':').let {
+): String =
+    name.trim(':').let {
         if (it.endsWith("@.")) {
             "https://$accountHost/emoji/${it.dropLast(2)}.webp"
         } else {
             "https://$accountHost/emoji/$it.webp"
         }
     }
-}
 
 fun createSampleStatus(user: UiUser) =
     when (user) {
@@ -890,8 +893,8 @@ fun createSampleStatus(user: UiUser) =
         is UiUser.VVO -> createVVOStatus(user)
     }
 
-private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon {
-    return UiStatus.Mastodon(
+private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon =
+    UiStatus.Mastodon(
         statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
         accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
         user = user,
@@ -918,10 +921,9 @@ private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon {
         reblogStatus = null,
         raw = Status(),
     )
-}
 
-private fun createBlueskyStatus(user: UiUser.Bluesky): UiStatus.Bluesky {
-    return UiStatus.Bluesky(
+private fun createBlueskyStatus(user: UiUser.Bluesky): UiStatus.Bluesky =
+    UiStatus.Bluesky(
         accountKey = MicroBlogKey(id = "123", host = user.userKey.host),
         statusKey = MicroBlogKey(id = "456", host = user.userKey.host),
         user = user,
@@ -945,10 +947,9 @@ private fun createBlueskyStatus(user: UiUser.Bluesky): UiStatus.Bluesky {
         cid = "cid_sample",
         uri = "https://bluesky.post/uri",
     )
-}
 
-private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey {
-    return UiStatus.Misskey(
+private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey =
+    UiStatus.Misskey(
         statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
         accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
         user = user,
@@ -973,10 +974,9 @@ private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey {
         quote = null,
         renote = null,
     )
-}
 
-fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT {
-    return UiStatus.XQT(
+fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT =
+    UiStatus.XQT(
         statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
         accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
         user = user,
@@ -1005,10 +1005,9 @@ fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT {
         sensitive = false,
         raw = Tweet(restId = ""),
     )
-}
 
-fun createVVOStatus(user: UiUser.VVO): UiStatus.VVO {
-    return UiStatus.VVO(
+fun createVVOStatus(user: UiUser.VVO): UiStatus.VVO =
+    UiStatus.VVO(
         statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
         accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
         rawUser = user,
@@ -1028,7 +1027,6 @@ fun createVVOStatus(user: UiUser.VVO): UiStatus.VVO {
         quote = null,
         canReblog = true,
     )
-}
 
 val UiStatus.medias: ImmutableList<UiMedia>
     get() {

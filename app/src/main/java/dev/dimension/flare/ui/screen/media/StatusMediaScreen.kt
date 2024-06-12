@@ -216,116 +216,117 @@ private fun StatusMediaScreen(
                         } ?: it
                     },
                 ) { index ->
-                    state.medias.onSuccess { medias ->
-                        when (val media = medias[index]) {
-                            is UiMedia.Audio ->
-                                VideoPlayer(
-                                    uri = media.url,
-                                    previewUri = null,
-                                    contentDescription = media.description,
-                                    modifier =
-                                        Modifier
-                                            .fillMaxSize(),
-                                    onClick = {
-                                        state.setShowUi(!state.showUi)
-                                    },
-                                    onLongClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        state.setShowMenu(true)
-                                    },
-                                )
+                    state.medias
+                        .onSuccess { medias ->
+                            when (val media = medias[index]) {
+                                is UiMedia.Audio ->
+                                    VideoPlayer(
+                                        uri = media.url,
+                                        previewUri = null,
+                                        contentDescription = media.description,
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize(),
+                                        onClick = {
+                                            state.setShowUi(!state.showUi)
+                                        },
+                                        onLongClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            state.setShowMenu(true)
+                                        },
+                                    )
 
-                            is UiMedia.Gif ->
-                                VideoPlayer(
-                                    uri = media.url,
-                                    previewUri = media.previewUrl,
-                                    contentDescription = media.description,
-                                    modifier =
-                                        Modifier
+                                is UiMedia.Gif ->
+                                    VideoPlayer(
+                                        uri = media.url,
+                                        previewUri = media.previewUrl,
+                                        contentDescription = media.description,
+                                        modifier =
+                                            Modifier
 //                                                .sharedElement(
 //                                                    rememberSharedContentState(media.previewUrl),
 //                                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                                )
-                                            .fillMaxSize(),
-                                    onClick = {
-                                        state.setShowUi(!state.showUi)
-                                    },
+                                                .fillMaxSize(),
+                                        onClick = {
+                                            state.setShowUi(!state.showUi)
+                                        },
 //                                                aspectRatio = media.aspectRatio,
-                                    onLongClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        state.setShowMenu(true)
-                                    },
-                                    contentScale = ContentScale.Fit,
-                                )
+                                        onLongClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            state.setShowMenu(true)
+                                        },
+                                        contentScale = ContentScale.Fit,
+                                    )
 
-                            is UiMedia.Image -> {
-                                ImageItem(
-                                    modifier =
-                                        Modifier
+                                is UiMedia.Image -> {
+                                    ImageItem(
+                                        modifier =
+                                            Modifier
 //                                            .sharedElement(
 //                                                rememberSharedContentState(media.previewUrl),
 //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                            )
-                                            .fillMaxSize(),
-                                    url = media.url,
-                                    previewUrl = media.previewUrl,
-                                    description = media.description,
-                                    onClick = {
-                                        state.setShowUi(!state.showUi)
-                                    },
-                                    onLongClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        state.setShowMenu(true)
-                                    },
-                                    setLockPager = state::setLockPager,
-                                )
-                            }
+                                                .fillMaxSize(),
+                                        url = media.url,
+                                        previewUrl = media.previewUrl,
+                                        description = media.description,
+                                        onClick = {
+                                            state.setShowUi(!state.showUi)
+                                        },
+                                        onLongClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            state.setShowMenu(true)
+                                        },
+                                        setLockPager = state::setLockPager,
+                                    )
+                                }
 
-                            is UiMedia.Video ->
-                                VideoPlayer(
-                                    uri = media.url,
-                                    previewUri = media.thumbnailUrl,
-                                    contentDescription = media.description,
+                                is UiMedia.Video ->
+                                    VideoPlayer(
+                                        uri = media.url,
+                                        previewUri = media.thumbnailUrl,
+                                        contentDescription = media.description,
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize(),
+                                        onClick = {
+                                            state.setShowUi(!state.showUi)
+                                        },
+//                                                aspectRatio = media.aspectRatio,
+                                        showControls = true,
+                                        keepScreenOn = true,
+                                        muted = false,
+                                        onLongClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            state.setShowMenu(true)
+                                        },
+                                        contentScale = ContentScale.Fit,
+                                    )
+                            }
+                        }.onLoading {
+                            if (preview != null) {
+                                ImageItem(
+                                    url = preview,
+                                    previewUrl = preview,
+                                    description = null,
+                                    onClick = { /*TODO*/ },
+                                    onLongClick = { /*TODO*/ },
+                                    setLockPager = state::setLockPager,
                                     modifier =
                                         Modifier
                                             .fillMaxSize(),
-                                    onClick = {
-                                        state.setShowUi(!state.showUi)
-                                    },
-//                                                aspectRatio = media.aspectRatio,
-                                    showControls = true,
-                                    keepScreenOn = true,
-                                    muted = false,
-                                    onLongClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        state.setShowMenu(true)
-                                    },
-                                    contentScale = ContentScale.Fit,
                                 )
+                            } else {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .aspectRatio(1f)
+                                            .fillMaxSize()
+                                            .placeholder(true),
+                                )
+                            }
                         }
-                    }.onLoading {
-                        if (preview != null) {
-                            ImageItem(
-                                url = preview,
-                                previewUrl = preview,
-                                description = null,
-                                onClick = { /*TODO*/ },
-                                onLongClick = { /*TODO*/ },
-                                setLockPager = state::setLockPager,
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize(),
-                            )
-                        } else {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .aspectRatio(1f)
-                                        .fillMaxSize()
-                                        .placeholder(true),
-                            )
-                        }
-                    }
                 }
                 if (pagerState.pageCount > 1) {
                     AnimatedVisibility(
@@ -383,8 +384,7 @@ private fun StatusMediaScreen(
                             Modifier
                                 .padding(
                                     bottom = if (state.withVideoPadding) 72.dp else 0.dp,
-                                )
-                                .systemBarsPadding(),
+                                ).systemBarsPadding(),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -467,7 +467,8 @@ private fun ImageItem(
 
     ZoomableAsyncImage(
         model =
-            ImageRequest.Builder(LocalContext.current)
+            ImageRequest
+                .Builder(LocalContext.current)
                 .data(url)
                 .placeholderMemoryCacheKey(previewUrl)
                 .crossfade(1_000)
@@ -557,11 +558,12 @@ private fun statusMediaPresenter(
                     saveByteArrayToDownloads(context, byteArray, fileName)
                 }
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.media_save_success),
-                        Toast.LENGTH_SHORT,
-                    ).show()
+                    Toast
+                        .makeText(
+                            context,
+                            context.getString(R.string.media_save_success),
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
             }
         }

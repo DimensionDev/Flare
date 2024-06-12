@@ -13,12 +13,10 @@ internal class NotificationPagingSource(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
 ) : PagingSource<String, UiStatus>() {
-    override fun getRefreshKey(state: PagingState<String, UiStatus>): String? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<String, UiStatus>): String? = null
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiStatus> {
-        return try {
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiStatus> =
+        try {
             val response =
                 service.getNotificationsAll(
                     xTwitterClientLanguage = locale,
@@ -36,5 +34,4 @@ internal class NotificationPagingSource(
         } catch (e: Throwable) {
             LoadResult.Error(e)
         }
-    }
 }

@@ -29,7 +29,8 @@ internal class ComposeNotifyUseCase(
     operator fun invoke(data: ComposeData) {
         val notificationId = UUID.randomUUID().hashCode()
         var builder =
-            NotificationCompat.Builder(context, CHANNEL_ID)
+            NotificationCompat
+                .Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(context.getString(R.string.compose_notification_title))
                 .setContentText(context.getString(R.string.compose_notification_text))

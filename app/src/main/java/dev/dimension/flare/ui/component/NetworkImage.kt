@@ -45,7 +45,8 @@ fun NetworkImage(
 ) {
     SubcomposeAsyncImage(
         model =
-            ImageRequest.Builder(LocalContext.current)
+            ImageRequest
+                .Builder(LocalContext.current)
                 .data(model)
                 .let {
                     if (model is String) {
@@ -53,8 +54,7 @@ fun NetworkImage(
                     } else {
                         it
                     }
-                }
-                .build(),
+                }.build(),
         contentDescription = contentDescription,
         alignment = alignment,
         contentScale = contentScale,
@@ -78,7 +78,8 @@ fun EmojiImage(
         rememberAsyncImagePainter(
             model =
                 remember(uri, context) {
-                    ImageRequest.Builder(context)
+                    ImageRequest
+                        .Builder(context)
                         .data(uri)
                         .size(Size.ORIGINAL)
                         .build()

@@ -44,8 +44,8 @@ internal class KeyedQueryPagingSource<Key : Any, RowType : Any>(
         return boundaries.getOrNull(keyIndex)
     }
 
-    override suspend fun load(params: PagingSource.LoadParams<Key>): PagingSource.LoadResult<Key, RowType> {
-        return withContext(context) {
+    override suspend fun load(params: PagingSource.LoadParams<Key>): PagingSource.LoadResult<Key, RowType> =
+        withContext(context) {
             try {
                 val getPagingSourceLoadResult: TransactionCallbacks.() -> PagingSource.LoadResult<Key, RowType> = {
                     val boundaries =
@@ -81,5 +81,4 @@ internal class KeyedQueryPagingSource<Key : Any, RowType : Any>(
                 PagingSource.LoadResult.Error<Key, RowType>(e)
             }
         }
-    }
 }

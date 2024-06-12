@@ -147,8 +147,8 @@ internal class ProxyDestinationsNavigator(
     private val navigator: DestinationsNavigator,
     private val navigateBack: () -> Unit,
 ) : DestinationsNavigator by navigator {
-    override fun navigateUp(): Boolean {
-        return if (navigator.navigateUp()) {
+    override fun navigateUp(): Boolean =
+        if (navigator.navigateUp()) {
             true
         } else if (scaffoldNavigator.canNavigateBack()) {
             navigateBack()
@@ -156,10 +156,9 @@ internal class ProxyDestinationsNavigator(
         } else {
             false
         }
-    }
 
-    override fun popBackStack(): Boolean {
-        return if (navigator.popBackStack()) {
+    override fun popBackStack(): Boolean =
+        if (navigator.popBackStack()) {
             true
         } else if (scaffoldNavigator.canNavigateBack()) {
             navigateBack()
@@ -167,7 +166,6 @@ internal class ProxyDestinationsNavigator(
         } else {
             false
         }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -196,37 +194,38 @@ internal fun SettingsScreen(
                     .padding(it)
                     .verticalScroll(rememberScrollState()),
         ) {
-            state.user.onSuccess {
-                AccountItem(
-                    userState = state.user,
-                    onClick = {
-                        toAccounts.invoke()
-                    },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_accounts_title))
-                    },
-                )
-            }.onError {
-                ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(id = R.string.settings_accounts_title))
-                    },
-                    modifier =
-                        Modifier
-                            .clickable {
-                                toAccounts.invoke()
-                            },
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = null,
-                        )
-                    },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_accounts_title))
-                    },
-                )
-            }
+            state.user
+                .onSuccess {
+                    AccountItem(
+                        userState = state.user,
+                        onClick = {
+                            toAccounts.invoke()
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_accounts_title))
+                        },
+                    )
+                }.onError {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_accounts_title))
+                        },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    toAccounts.invoke()
+                                },
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = null,
+                            )
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_accounts_title))
+                        },
+                    )
+                }
             HorizontalDivider()
             ListItem(
                 headlineContent = {

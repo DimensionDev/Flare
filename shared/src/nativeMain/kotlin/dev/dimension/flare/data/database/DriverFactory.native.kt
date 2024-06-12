@@ -10,9 +10,7 @@ internal actual class DriverFactory {
     actual fun createDriver(
         schema: SqlSchema<QueryResult.Value<Unit>>,
         name: String,
-    ): SqlDriver {
-        return NativeSqliteDriver(schema, name)
-    }
+    ): SqlDriver = NativeSqliteDriver(schema, name)
 
     actual fun deleteDatabase(name: String) {
         DatabaseFileContext.deleteDatabase(name, null)

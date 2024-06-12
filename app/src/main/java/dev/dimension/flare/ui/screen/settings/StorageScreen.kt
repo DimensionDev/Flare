@@ -121,7 +121,11 @@ private fun storagePresenter(context: Context) =
     run {
         val state = remember { StoragePresenter() }.invoke()
         var imageCacheSize by remember {
-            mutableLongStateOf(context.imageLoader.diskCache?.size?.div(1024L * 1024L) ?: 0L)
+            mutableLongStateOf(
+                context.imageLoader.diskCache
+                    ?.size
+                    ?.div(1024L * 1024L) ?: 0L,
+            )
         }
 
         object : StorageState by state {

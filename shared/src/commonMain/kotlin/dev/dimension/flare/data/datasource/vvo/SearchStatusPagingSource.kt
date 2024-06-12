@@ -41,14 +41,15 @@ internal class SearchStatusRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         page = 1
-                        service.getContainerIndex(
-                            containerId = containerId,
-                            pageType = "searchall",
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getContainerIndex(
+                                containerId = containerId,
+                                pageType = "searchall",
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(
@@ -65,7 +66,11 @@ internal class SearchStatusRemoteMediator(
                         )
                     }
                 }
-            val status = response.data?.cards?.mapNotNull { it.mblog }.orEmpty()
+            val status =
+                response.data
+                    ?.cards
+                    ?.mapNotNull { it.mblog }
+                    .orEmpty()
 
             VVO.save(
                 accountKey = accountKey,

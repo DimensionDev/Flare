@@ -83,7 +83,8 @@ private const val MAX_ASYNC_UPLOAD_SIZE = 10
 @OptIn(ExperimentalPagingApi::class)
 class XQTDataSource(
     override val account: UiAccount.XQT,
-) : MicroblogDataSource, KoinComponent {
+) : MicroblogDataSource,
+    KoinComponent {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
@@ -94,8 +95,8 @@ class XQTDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -110,14 +111,13 @@ class XQTDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     fun featuredTimeline(
         pageSize: Int = 20,
         pagingKey: String = "featured_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -132,14 +132,13 @@ class XQTDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     fun bookmarkTimeline(
         pageSize: Int = 20,
         pagingKey: String = "bookmark_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -154,7 +153,6 @@ class XQTDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     override fun notification(
         type: NotificationFilter,
@@ -199,7 +197,8 @@ class XQTDataSource(
         return Cacheable(
             fetchSource = {
                 val user =
-                    service.userByScreenName(name)
+                    service
+                        .userByScreenName(name)
                         .body()
                         ?.data
                         ?.user
@@ -209,8 +208,7 @@ class XQTDataSource(
                                 is User -> it
                                 is UserUnavailable -> null
                             }
-                        }
-                        ?.toDbUser() ?: throw Exception("User not found")
+                        }?.toDbUser() ?: throw Exception("User not found")
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,
@@ -221,7 +219,9 @@ class XQTDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.xQt).asFlow()
+                database.dbUserQueries
+                    .findByHandleAndHost(name, host, PlatformType.xQt)
+                    .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi(account.accountKey) }
             },
@@ -233,7 +233,8 @@ class XQTDataSource(
         return Cacheable(
             fetchSource = {
                 val user =
-                    service.userById(id)
+                    service
+                        .userById(id)
                         .body()
                         ?.data
                         ?.user
@@ -243,8 +244,7 @@ class XQTDataSource(
                                 is User -> it
                                 is UserUnavailable -> null
                             }
-                        }
-                        ?.toDbUser() ?: throw Exception("User not found")
+                        }?.toDbUser() ?: throw Exception("User not found")
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,
@@ -255,19 +255,22 @@ class XQTDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByKey(userKey).asFlow()
+                database.dbUserQueries
+                    .findByKey(userKey)
+                    .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi(account.accountKey) }
             },
         )
     }
 
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        return MemCacheable<UiRelation>(
+    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
+        MemCacheable<UiRelation>(
             relationKeyWithUserKey(userKey),
         ) {
             val userResponse =
-                service.userById(userKey.id)
+                service
+                    .userById(userKey.id)
                     .body()
                     ?.data
                     ?.user
@@ -280,11 +283,11 @@ class XQTDataSource(
                     } ?: throw Exception("User not found")
             val user = userResponse.toDbUser()
 
-            service.profileSpotlights(user.handle)
+            service
+                .profileSpotlights(user.handle)
                 .body()
                 ?.toUi(muting = userResponse.legacy.muting) ?: throw Exception("User not found")
         }.toUi()
-    }
 
     override fun userTimeline(
         userKey: MicroBlogKey,
@@ -292,8 +295,8 @@ class XQTDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -319,7 +322,6 @@ class XQTDataSource(
                     )
                 },
         )
-    }
 
     override fun context(
         statusKey: MicroBlogKey,
@@ -350,14 +352,14 @@ class XQTDataSource(
         return Cacheable(
             fetchSource = {
                 val response =
-                    service.getTweetDetail(
-                        variables =
-                            TweetDetailRequest(
-                                focalTweetID = statusKey.id,
-                                cursor = null,
-                            ).encodeJson(),
-                    )
-                        .body()
+                    service
+                        .getTweetDetail(
+                            variables =
+                                TweetDetailRequest(
+                                    focalTweetID = statusKey.id,
+                                    cursor = null,
+                                ).encodeJson(),
+                        ).body()
                         ?.data
                         ?.threadedConversationWithInjectionsV2
                         ?.instructions
@@ -376,7 +378,8 @@ class XQTDataSource(
                 }
             },
             cacheSource = {
-                database.dbStatusQueries.get(statusKey, account.accountKey)
+                database.dbStatusQueries
+                    .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .mapNotNull { it.content.toUi(account.accountKey) }
@@ -445,8 +448,8 @@ class XQTDataSource(
         )
     }
 
-    private fun getMeidaTypeFromName(name: String?): String {
-        return when {
+    private fun getMeidaTypeFromName(name: String?): String =
+        when {
             name == null -> "image/jpeg"
             name.endsWith(".jpg") -> "image/jpeg"
             name.endsWith(".jpeg") -> "image/jpeg"
@@ -456,7 +459,6 @@ class XQTDataSource(
             name.endsWith(".mov") -> "video/quicktime"
             else -> "image/jpeg"
         }
-    }
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun uploadMedia(
@@ -466,11 +468,12 @@ class XQTDataSource(
         coroutineScope {
             val totalBytes = mediaData.size.toLong()
             val mediaId =
-                service.initUpload(
-                    mediaType = mediaType,
-                    totalBytes = totalBytes.toString(),
-                    category = if (mediaType.contains("video")) "tweet_video" else "tweet_image",
-                ).mediaIDString ?: throw Error("init upload failed")
+                service
+                    .initUpload(
+                        mediaType = mediaType,
+                        totalBytes = totalBytes.toString(),
+                        category = if (mediaType.contains("video")) "tweet_video" else "tweet_image",
+                    ).mediaIDString ?: throw Error("init upload failed")
 
             var streamReadLength = 0
             val uploadChunks = mutableListOf<ByteArray>()
@@ -478,16 +481,17 @@ class XQTDataSource(
             var uploadBytes = 0L
 
             suspend fun uploadAll() {
-                uploadChunks.mapIndexed { index, array ->
-                    async {
-                        service.appendUpload(
-                            mediaId = mediaId,
-                            segmentIndex = (uploadTimes * MAX_ASYNC_UPLOAD_SIZE + index.toLong()).toString(),
-                            mediaData = Base64.encode(array),
-                        )
-                        uploadBytes += array.size
-                    }
-                }.awaitAll()
+                uploadChunks
+                    .mapIndexed { index, array ->
+                        async {
+                            service.appendUpload(
+                                mediaId = mediaId,
+                                segmentIndex = (uploadTimes * MAX_ASYNC_UPLOAD_SIZE + index.toLong()).toString(),
+                                mediaData = Base64.encode(array),
+                            )
+                            uploadBytes += array.size
+                        }
+                    }.awaitAll()
                 uploadTimes++
                 uploadChunks.clear()
             }
@@ -548,8 +552,8 @@ class XQTDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -565,14 +569,13 @@ class XQTDataSource(
                     query,
                 ),
         )
-    }
 
     override fun searchUser(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> {
-        return Pager(
+    ): Flow<PagingData<UiUser>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
@@ -581,10 +584,9 @@ class XQTDataSource(
                 query = query,
             )
         }.flow
-    }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
-        return Pager(
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
@@ -592,7 +594,6 @@ class XQTDataSource(
                 account.accountKey,
             )
         }.flow
-    }
 
     override fun discoverStatuses(
         pageSize: Int,
@@ -603,18 +604,17 @@ class XQTDataSource(
         throw UnsupportedOperationException("Bluesky does not support discover statuses")
     }
 
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
-        return Pager(
+    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendHashtagPagingSource(
                 service,
             )
         }.flow
-    }
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
-        return ComposeConfig(
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+        ComposeConfig(
             text = ComposeConfig.Text(280),
             media =
                 if (statusKey != null) {
@@ -623,7 +623,6 @@ class XQTDataSource(
                     ComposeConfig.Media(4, true)
                 },
         )
-    }
 
     override suspend fun follow(
         userKey: MicroBlogKey,
@@ -692,9 +691,11 @@ class XQTDataSource(
                                     favorited = !status.reaction.liked,
                                     favoriteCount =
                                         if (status.reaction.liked) {
-                                            it.data.legacy.favoriteCount.minus(1)
+                                            it.data.legacy.favoriteCount
+                                                .minus(1)
                                         } else {
-                                            it.data.legacy.favoriteCount.plus(1)
+                                            it.data.legacy.favoriteCount
+                                                .plus(1)
                                         },
                                     retweetedStatusResult =
                                         it.data.legacy.retweetedStatusResult?.copy(
@@ -708,10 +709,12 @@ class XQTDataSource(
                                                                     favoriteCount =
                                                                         if (status.reaction.liked) {
                                                                             it.data.legacy.retweetedStatusResult.result
-                                                                                .legacy.favoriteCount.minus(1)
+                                                                                .legacy.favoriteCount
+                                                                                .minus(1)
                                                                         } else {
                                                                             it.data.legacy.retweetedStatusResult.result
-                                                                                .legacy.favoriteCount.plus(1)
+                                                                                .legacy.favoriteCount
+                                                                                .plus(1)
                                                                         },
                                                                 ),
                                                         )
@@ -723,15 +726,18 @@ class XQTDataSource(
                                                                 it.data.legacy.retweetedStatusResult.result.tweet.copy(
                                                                     legacy =
                                                                         it.data.legacy.retweetedStatusResult.result
-                                                                            .tweet.legacy?.copy(
+                                                                            .tweet.legacy
+                                                                            ?.copy(
                                                                                 favorited = !status.reaction.liked,
                                                                                 favoriteCount =
                                                                                     if (status.reaction.liked) {
                                                                                         it.data.legacy.retweetedStatusResult
-                                                                                            .result.tweet.legacy.favoriteCount.minus(1)
+                                                                                            .result.tweet.legacy.favoriteCount
+                                                                                            .minus(1)
                                                                                     } else {
                                                                                         it.data.legacy.retweetedStatusResult
-                                                                                            .result.tweet.legacy.favoriteCount.plus(1)
+                                                                                            .result.tweet.legacy.favoriteCount
+                                                                                            .plus(1)
                                                                                     },
                                                                             ),
                                                                 ),
@@ -804,9 +810,11 @@ class XQTDataSource(
                                     retweeted = !status.reaction.retweeted,
                                     retweetCount =
                                         if (status.reaction.retweeted) {
-                                            it.data.legacy.retweetCount.minus(1)
+                                            it.data.legacy.retweetCount
+                                                .minus(1)
                                         } else {
-                                            it.data.legacy.retweetCount.plus(1)
+                                            it.data.legacy.retweetCount
+                                                .plus(1)
                                         },
                                     retweetedStatusResult =
                                         it.data.legacy.retweetedStatusResult?.copy(
@@ -820,10 +828,12 @@ class XQTDataSource(
                                                                     retweetCount =
                                                                         if (status.reaction.retweeted) {
                                                                             it.data.legacy.retweetedStatusResult
-                                                                                .result.legacy.retweetCount.minus(1)
+                                                                                .result.legacy.retweetCount
+                                                                                .minus(1)
                                                                         } else {
                                                                             it.data.legacy.retweetedStatusResult
-                                                                                .result.legacy.retweetCount.plus(1)
+                                                                                .result.legacy.retweetCount
+                                                                                .plus(1)
                                                                         },
                                                                 ),
                                                         )
@@ -839,10 +849,12 @@ class XQTDataSource(
                                                                             retweetCount =
                                                                                 if (status.reaction.retweeted) {
                                                                                     it.data.legacy.retweetedStatusResult
-                                                                                        .result.tweet.legacy.retweetCount.minus(1)
+                                                                                        .result.tweet.legacy.retweetCount
+                                                                                        .minus(1)
                                                                                 } else {
                                                                                     it.data.legacy.retweetedStatusResult
-                                                                                        .result.tweet.legacy.retweetCount.plus(1)
+                                                                                        .result.tweet.legacy.retweetCount
+                                                                                        .plus(1)
                                                                                 },
                                                                         ),
                                                                 ),

@@ -32,14 +32,15 @@ internal class SearchStatusRemoteMediator(
                         )
                     }
                     LoadType.REFRESH -> {
-                        service.notesSearch(
-                            NotesSearchRequest(
-                                query = query,
-                                limit = state.config.pageSize,
-                            ),
-                        ).also {
-                            database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                        }
+                        service
+                            .notesSearch(
+                                NotesSearchRequest(
+                                    query = query,
+                                    limit = state.config.pageSize,
+                                ),
+                            ).also {
+                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                            }
                     }
 
                     LoadType.APPEND -> {

@@ -26,14 +26,15 @@ internal class PublicTimelineRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        service.publicTimeline(
-                            limit = state.config.pageSize,
-                            local = local,
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .publicTimeline(
+                                limit = state.config.pageSize,
+                                local = local,
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(

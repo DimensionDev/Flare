@@ -20,10 +20,14 @@ import kotlin.native.HiddenFromObjC
 @Immutable
 sealed class UiState<T : Any> {
     @Immutable
-    data class Success<T : Any>(val data: T) : UiState<T>()
+    data class Success<T : Any>(
+        val data: T,
+    ) : UiState<T>()
 
     @Immutable
-    data class Error<T : Any>(val throwable: Throwable) : UiState<T>()
+    data class Error<T : Any>(
+        val throwable: Throwable,
+    ) : UiState<T>()
 
     @Immutable
     class Loading<T : Any> : UiState<T>()
@@ -103,8 +107,8 @@ fun <T : Any> UiState<T>.takeSuccessOr(value: T): T = (this as? UiState.Success)
 fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
     remember(this) { toUiState() }.collectAsState(initial)
 
-fun <T : Any> CacheableState<T>.toUi(): UiState<T> {
-    return data?.let {
+fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
+    data?.let {
         UiState.Success(it)
     } ?: run {
         when (val state = refreshState) {
@@ -113,10 +117,9 @@ fun <T : Any> CacheableState<T>.toUi(): UiState<T> {
             LoadState.Success -> UiState.Error(IllegalStateException("Data is null"))
         }
     }
-}
 
-internal fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> {
-    return combine(data, refreshState) { data, refresh ->
+internal fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> =
+    combine(data, refreshState) { data, refresh ->
         if (data is CacheState.Success) {
             UiState.Success(data.data)
         } else {
@@ -127,4 +130,3 @@ internal fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> {
             }
         }
     }
-}

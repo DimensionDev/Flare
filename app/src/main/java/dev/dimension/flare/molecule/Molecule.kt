@@ -29,9 +29,7 @@ private class PresenterHolder<T>(
 fun <T> producePresenter(
     key: String? = null,
     body: @Composable () -> T,
-): State<T> {
-    return createPresenter(body, key)
-}
+): State<T> = createPresenter(body, key)
 
 @Composable
 private fun <T> createPresenter(
@@ -41,6 +39,4 @@ private fun <T> createPresenter(
         viewModel(key = key + currentCompositeKeyHash.toString()) {
             PresenterHolder<T>(body)
         },
-): State<T> {
-    return holder.state.collectAsStateWithLifecycle()
-}
+): State<T> = holder.state.collectAsStateWithLifecycle()

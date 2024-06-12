@@ -12,21 +12,22 @@ internal class TrendsUserPagingSource(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
 ) : PagingSource<Int, UiUser>() {
-    override fun getRefreshKey(state: PagingState<Int, UiUser>): Int? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Int, UiUser>): Int? = null
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiUser> {
         try {
-            service.pinnedUsers(PinnedUsersRequest(limit = params.loadSize)).body()?.map {
-                it.toUi(accountKey)
-            }.let {
-                return LoadResult.Page(
-                    data = it ?: emptyList(),
-                    prevKey = null,
-                    nextKey = null,
-                )
-            }
+            service
+                .pinnedUsers(PinnedUsersRequest(limit = params.loadSize))
+                .body()
+                ?.map {
+                    it.toUi(accountKey)
+                }.let {
+                    return LoadResult.Page(
+                        data = it ?: emptyList(),
+                        prevKey = null,
+                        nextKey = null,
+                    )
+                }
         } catch (e: Throwable) {
             e.printStackTrace()
             return LoadResult.Error(e)

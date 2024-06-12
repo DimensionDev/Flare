@@ -26,13 +26,14 @@ class VVOStatusDetailPresenter(
     override fun body(): VVOStatusDetailState {
         val service = accountServiceProvider(accountType)
         val status =
-            service.flatMap {
-                remember(statusKey, accountType) {
-                    it.status(statusKey)
-                }.collectAsState().toUi()
-            }.map {
-                it as UiStatus.VVO
-            }
+            service
+                .flatMap {
+                    remember(statusKey, accountType) {
+                        it.status(statusKey)
+                    }.collectAsState().toUi()
+                }.map {
+                    it as UiStatus.VVO
+                }
 
         val extendedText =
             service.flatMap {

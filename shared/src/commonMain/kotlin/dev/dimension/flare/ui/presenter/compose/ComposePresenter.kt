@@ -61,51 +61,60 @@ class ComposePresenter(
             }
         val allUsers =
             accounts.flatMap { data ->
-                accountState.flatMap { current ->
-                    replyState?.map {
-                        current to
-                            listOf(
-                                when (it) {
-                                    is UiStatus.Mastodon -> PlatformType.Mastodon
-                                    is UiStatus.Misskey -> PlatformType.Misskey
-                                    is UiStatus.XQT -> PlatformType.xQt
-                                    is UiStatus.Bluesky -> PlatformType.Bluesky
-                                    is UiStatus.BlueskyNotification -> PlatformType.Bluesky
-                                    is UiStatus.MastodonNotification -> PlatformType.Mastodon
-                                    is UiStatus.MisskeyNotification -> PlatformType.Misskey
-                                    is UiStatus.XQTNotification -> PlatformType.xQt
-                                    is UiStatus.VVO -> PlatformType.VVo
-                                    is UiStatus.VVONotification -> PlatformType.VVo
-                                },
-                            )
-                    } ?: UiState.Success(current to PlatformType.entries.toList())
-                }.map { (current, platforms) ->
-                    data.sortedBy {
-                        it.accountKey != current.accountKey
-                    }.filter {
-                        it.platformType in platforms
-                    }.map { account ->
-                        accountServiceProvider(accountType = AccountType.Specific(accountKey = account.accountKey))
-                            .flatMap { service ->
-                                remember(account.accountKey) {
-                                    service.userById(account.accountKey.id)
-                                }.collectAsState().toUi()
-                            } to account
-                    }.toImmutableList().toImmutableListWrapper()
-                }
+                accountState
+                    .flatMap { current ->
+                        replyState?.map {
+                            current to
+                                listOf(
+                                    when (it) {
+                                        is UiStatus.Mastodon -> PlatformType.Mastodon
+                                        is UiStatus.Misskey -> PlatformType.Misskey
+                                        is UiStatus.XQT -> PlatformType.xQt
+                                        is UiStatus.Bluesky -> PlatformType.Bluesky
+                                        is UiStatus.BlueskyNotification -> PlatformType.Bluesky
+                                        is UiStatus.MastodonNotification -> PlatformType.Mastodon
+                                        is UiStatus.MisskeyNotification -> PlatformType.Misskey
+                                        is UiStatus.XQTNotification -> PlatformType.xQt
+                                        is UiStatus.VVO -> PlatformType.VVo
+                                        is UiStatus.VVONotification -> PlatformType.VVo
+                                    },
+                                )
+                        } ?: UiState.Success(current to PlatformType.entries.toList())
+                    }.map { (current, platforms) ->
+                        data
+                            .sortedBy {
+                                it.accountKey != current.accountKey
+                            }.filter {
+                                it.platformType in platforms
+                            }.map { account ->
+                                accountServiceProvider(accountType = AccountType.Specific(accountKey = account.accountKey))
+                                    .flatMap { service ->
+                                        remember(account.accountKey) {
+                                            service.userById(account.accountKey.id)
+                                        }.collectAsState().toUi()
+                                    } to account
+                            }.toImmutableList()
+                            .toImmutableListWrapper()
+                    }
             }
 
         val selectedUsers =
             allUsers.map {
-                it.toImmutableList().filter {
-                    selectedAccounts.contains(it.second)
-                }.toImmutableList().toImmutableListWrapper()
+                it
+                    .toImmutableList()
+                    .filter {
+                        selectedAccounts.contains(it.second)
+                    }.toImmutableList()
+                    .toImmutableListWrapper()
             }
         val remainingAccounts =
             allUsers.map {
-                it.toImmutableList().filter {
-                    !selectedAccounts.contains(it.second)
-                }.toImmutableList().toImmutableListWrapper()
+                it
+                    .toImmutableList()
+                    .filter {
+                        !selectedAccounts.contains(it.second)
+                    }.toImmutableList()
+                    .toImmutableListWrapper()
             }
         val enableCrossPost =
             allUsers.map {
@@ -119,36 +128,40 @@ class ComposePresenter(
             }
         val composeUseCase: ComposeUseCase = koinInject()
         val visibilityState: UiState<VisibilityState> =
-            selectedAccounts.takeIf {
-                it.size == 1
-            }?.first()?.let {
-                when (it) {
-                    is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
-                    is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
-                    is UiAccount.XQT -> UiState.Error(IllegalStateException("XQT not supported"))
-                    is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
-                    UiAccount.Guest -> UiState.Error(IllegalStateException("Guest not supported"))
-                    // TODO: handle VVo
-                    is UiAccount.VVo -> UiState.Error(IllegalStateException("VVo not supported"))
-                }
-            } ?: UiState.Error(IllegalStateException("Visibility not supported"))
+            selectedAccounts
+                .takeIf {
+                    it.size == 1
+                }?.first()
+                ?.let {
+                    when (it) {
+                        is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
+                        is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
+                        is UiAccount.XQT -> UiState.Error(IllegalStateException("XQT not supported"))
+                        is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
+                        UiAccount.Guest -> UiState.Error(IllegalStateException("Guest not supported"))
+                        // TODO: handle VVo
+                        is UiAccount.VVo -> UiState.Error(IllegalStateException("VVo not supported"))
+                    }
+                } ?: UiState.Error(IllegalStateException("Visibility not supported"))
 
         val composeConfig: UiState<ComposeConfig> =
             remember(services) {
                 services.merge().map {
-                    it.map { it.composeConfig(statusKey = status?.statusKey) }
+                    it
+                        .map { it.composeConfig(statusKey = status?.statusKey) }
                         .reduceOrNull { acc, config -> acc.merge(config) } ?: ComposeConfig()
                 }
             }
 
         val emojiState =
-            composeConfig.mapNotNull {
-                it.emoji
-            }.flatMap {
-                it.emoji.collectAsState().toUi()
-            }.map {
-                it.toImmutableListWrapper()
-            }
+            composeConfig
+                .mapNotNull {
+                    it.emoji
+                }.flatMap {
+                    it.emoji.collectAsState().toUi()
+                }.map {
+                    it.toImmutableListWrapper()
+                }
 
         return object : ComposeState(
             account = accountState,
@@ -208,7 +221,9 @@ class ComposePresenter(
         return object : MisskeyVisibilityState(
             visibility = visibility,
             showVisibilityMenu = showVisibilityMenu,
-            allVisibilities = UiStatus.Misskey.Visibility.entries.toImmutableList(),
+            allVisibilities =
+                UiStatus.Misskey.Visibility.entries
+                    .toImmutableList(),
             localOnly = localOnly,
         ) {
             override fun setLocalOnly(value: Boolean) {
@@ -240,7 +255,9 @@ class ComposePresenter(
         return object : MastodonVisibilityState(
             visibility = visibility,
             showVisibilityMenu = showVisibilityMenu,
-            allVisibilities = UiStatus.Mastodon.Visibility.entries.toImmutableList(),
+            allVisibilities =
+                UiStatus.Mastodon.Visibility.entries
+                    .toImmutableList(),
         ) {
             override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
                 visibility = value

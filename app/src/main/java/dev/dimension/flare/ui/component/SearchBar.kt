@@ -221,49 +221,50 @@ internal fun LazyStaggeredGridScope.searchContent(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
             ) {
-                users.onLoading {
-                    items(10) {
-                        ProfileHeaderLoading(
-                            modifier = Modifier.width(256.dp),
-                        )
-                    }
-                }.onSuccess {
-                    items(users.itemCount) {
-                        val item = users[it]
-                        Card {
-                            if (item == null) {
-                                ProfileHeaderLoading(
-                                    modifier =
-                                        Modifier
-                                            .width(256.dp),
-                                )
-                            } else {
-                                CommonProfileHeader(
-                                    bannerUrl = item.bannerUrl,
-                                    avatarUrl = item.avatarUrl,
-                                    displayName = item.nameElement,
-                                    handle = item.handle,
-                                    content = {
-                                        item.descriptionElement?.let {
-                                            HtmlText(
-                                                element = it,
-                                                maxLines = 2,
-                                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                                            )
-                                        }
-                                    },
-                                    userKey = item.userKey,
-                                    modifier =
-                                        Modifier
-                                            .width(256.dp)
-                                            .clickable {
-                                                toUser(item.userKey)
-                                            },
-                                )
+                users
+                    .onLoading {
+                        items(10) {
+                            ProfileHeaderLoading(
+                                modifier = Modifier.width(256.dp),
+                            )
+                        }
+                    }.onSuccess {
+                        items(users.itemCount) {
+                            val item = users[it]
+                            Card {
+                                if (item == null) {
+                                    ProfileHeaderLoading(
+                                        modifier =
+                                            Modifier
+                                                .width(256.dp),
+                                    )
+                                } else {
+                                    CommonProfileHeader(
+                                        bannerUrl = item.bannerUrl,
+                                        avatarUrl = item.avatarUrl,
+                                        displayName = item.nameElement,
+                                        handle = item.handle,
+                                        content = {
+                                            item.descriptionElement?.let {
+                                                HtmlText(
+                                                    element = it,
+                                                    maxLines = 2,
+                                                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                                                )
+                                            }
+                                        },
+                                        userKey = item.userKey,
+                                        modifier =
+                                            Modifier
+                                                .width(256.dp)
+                                                .clickable {
+                                                    toUser(item.userKey)
+                                                },
+                                    )
+                                }
                             }
                         }
                     }
-                }
             }
         }
     }
@@ -327,7 +328,9 @@ internal fun searchBarPresenter(
         }
     }
 
-internal interface SearchBarState : UserState, SearchHistoryState {
+internal interface SearchBarState :
+    UserState,
+    SearchHistoryState {
     val expanded: Boolean
     val query: String
 

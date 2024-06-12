@@ -84,7 +84,8 @@ import sh.christian.ozone.api.model.JsonContent
 @OptIn(ExperimentalPagingApi::class)
 class BlueskyDataSource(
     override val account: UiAccount.Bluesky,
-) : MicroblogDataSource, KoinComponent {
+) : MicroblogDataSource,
+    KoinComponent {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
@@ -145,7 +146,8 @@ class BlueskyDataSource(
         return Cacheable(
             fetchSource = {
                 val user =
-                    account.getService(appDatabase)
+                    account
+                        .getService(appDatabase)
                         .getProfile(GetProfileQueryParams(actor = Handle(handle = name)))
                         .requireResponse()
                         .toDbUser(account.accountKey.host)
@@ -159,7 +161,8 @@ class BlueskyDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Bluesky)
+                database.dbUserQueries
+                    .findByHandleAndHost(name, host, PlatformType.Bluesky)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .mapNotNull { it.toUi(account.accountKey) }
@@ -167,11 +170,12 @@ class BlueskyDataSource(
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> {
-        return Cacheable(
+    override fun userById(id: String): CacheData<UiUser> =
+        Cacheable(
             fetchSource = {
                 val user =
-                    account.getService(appDatabase)
+                    account
+                        .getService(appDatabase)
                         .getProfile(GetProfileQueryParams(actor = Did(did = id)))
                         .requireResponse()
                         .toDbUser(account.accountKey.host)
@@ -185,19 +189,20 @@ class BlueskyDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByKey(MicroBlogKey(id, account.accountKey.host))
+                database.dbUserQueries
+                    .findByKey(MicroBlogKey(id, account.accountKey.host))
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .mapNotNull { it.toUi(account.accountKey) }
             },
         )
-    }
 
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        return MemCacheable<UiRelation>(
+    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
+        MemCacheable<UiRelation>(
             relationKeyWithUserKey(userKey),
         ) {
-            account.getService(appDatabase)
+            account
+                .getService(appDatabase)
                 .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
                 .requireResponse()
                 .toDbUser(account.accountKey.host)
@@ -210,7 +215,6 @@ class BlueskyDataSource(
                     }
                 }
         }.toUi()
-    }
 
     override fun userTimeline(
         userKey: MicroBlogKey,
@@ -267,13 +271,17 @@ class BlueskyDataSource(
         return Cacheable(
             fetchSource = {
                 val result =
-                    service.getPosts(
-                        GetPostsQueryParams(
-                            persistentListOf(AtUri(statusKey.id)),
-                        ),
-                    ).requireResponse().posts.firstOrNull().let {
-                        listOfNotNull(it)
-                    }
+                    service
+                        .getPosts(
+                            GetPostsQueryParams(
+                                persistentListOf(AtUri(statusKey.id)),
+                            ),
+                        ).requireResponse()
+                        .posts
+                        .firstOrNull()
+                        .let {
+                            listOfNotNull(it)
+                        }
                 Bluesky.savePost(
                     account.accountKey,
                     pagingKey,
@@ -282,7 +290,8 @@ class BlueskyDataSource(
                 )
             },
             cacheSource = {
-                database.dbStatusQueries.get(statusKey, account.accountKey)
+                database.dbStatusQueries
+                    .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .mapNotNull { it.content.toUi(account.accountKey) }
@@ -298,68 +307,82 @@ class BlueskyDataSource(
         val maxProgress = data.medias.size + 1
         val service = data.account.getService(appDatabase)
         val mediaBlob =
-            data.medias.mapIndexedNotNull { index, item ->
-                service.uploadBlob(item.readBytes()).also {
-                    progress(ComposeProgress(index + 1, maxProgress))
-                }.maybeResponse()
-            }.map {
-                it.blob
-            }
+            data.medias
+                .mapIndexedNotNull { index, item ->
+                    service
+                        .uploadBlob(item.readBytes())
+                        .also {
+                            progress(ComposeProgress(index + 1, maxProgress))
+                        }.maybeResponse()
+                }.map {
+                    it.blob
+                }
         val post =
             Post(
                 text = data.content,
                 createdAt = Clock.System.now(),
                 embed =
-                    data.quoteId?.let { quoteId ->
-                        service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(quoteId))))
-                            .maybeResponse()
-                            ?.posts
-                            ?.firstOrNull()
-                    }?.let { item ->
-                        PostEmbedUnion.Record(
-                            Record(
-                                StrongRef(
-                                    uri = item.uri,
-                                    cid = item.cid,
+                    data.quoteId
+                        ?.let { quoteId ->
+                            service
+                                .getPosts(GetPostsQueryParams(persistentListOf(AtUri(quoteId))))
+                                .maybeResponse()
+                                ?.posts
+                                ?.firstOrNull()
+                        }?.let { item ->
+                            PostEmbedUnion.Record(
+                                Record(
+                                    StrongRef(
+                                        uri = item.uri,
+                                        cid = item.cid,
+                                    ),
                                 ),
-                            ),
-                        )
-                    } ?: mediaBlob.takeIf { it.any() }?.let { blobs ->
+                            )
+                        } ?: mediaBlob.takeIf { it.any() }?.let { blobs ->
                         PostEmbedUnion.Images(
                             Images(
-                                blobs.map { blob ->
-                                    ImagesImage(image = blob, alt = "")
-                                }.toImmutableList(),
+                                blobs
+                                    .map { blob ->
+                                        ImagesImage(image = blob, alt = "")
+                                    }.toImmutableList(),
                             ),
                         )
                     },
                 reply =
-                    data.inReplyToID?.let { inReplyToID ->
-                        service.getPosts(GetPostsQueryParams(persistentListOf(AtUri(inReplyToID))))
-                            .maybeResponse()
-                            ?.posts
-                            ?.firstOrNull()
-                    }?.let { item ->
-                        val root =
-                            item.record.jsonElement().jsonObjectOrNull?.get("reply")?.jsonObjectOrNull?.get("root")
-                                ?.jsonObjectOrNull?.let { root ->
-                                    StrongRef(
-                                        uri = AtUri(root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri),
-                                        cid = Cid(root["cid"]?.jsonPrimitive?.content ?: item.cid.cid),
-                                    )
-                                } ?: StrongRef(
-                                uri = item.uri,
-                                cid = item.cid,
-                            )
-                        PostReplyRef(
-                            parent =
-                                StrongRef(
+                    data.inReplyToID
+                        ?.let { inReplyToID ->
+                            service
+                                .getPosts(GetPostsQueryParams(persistentListOf(AtUri(inReplyToID))))
+                                .maybeResponse()
+                                ?.posts
+                                ?.firstOrNull()
+                        }?.let { item ->
+                            val root =
+                                item.record
+                                    .jsonElement()
+                                    .jsonObjectOrNull
+                                    ?.get("reply")
+                                    ?.jsonObjectOrNull
+                                    ?.get("root")
+                                    ?.jsonObjectOrNull
+                                    ?.let { root ->
+                                        StrongRef(
+                                            uri = AtUri(root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri),
+                                            cid = Cid(root["cid"]?.jsonPrimitive?.content ?: item.cid.cid),
+                                        )
+                                    } ?: StrongRef(
                                     uri = item.uri,
                                     cid = item.cid,
-                                ),
-                            root = root,
-                        )
-                    },
+                                )
+                            PostReplyRef(
+                                parent =
+                                    StrongRef(
+                                        uri = item.uri,
+                                        cid = item.cid,
+                                    ),
+                                root = root,
+                            )
+                        },
             )
         val json =
             Json {
@@ -448,24 +471,25 @@ class BlueskyDataSource(
                 )
             } else {
                 val result =
-                    service.createRecord(
-                        CreateRecordRequest(
-                            repo = Did(did = account.accountKey.id),
-                            collection = Nsid("app.bsky.feed.repost"),
-                            record =
-                                buildJsonObject {
-                                    put("\$type", "app.bsky.feed.repost")
-                                    put("createdAt", Clock.System.now().toString())
-                                    put(
-                                        "subject",
-                                        buildJsonObject {
-                                            put("cid", data.cid)
-                                            put("uri", data.uri)
-                                        },
-                                    )
-                                }.jsonContent(),
-                        ),
-                    ).requireResponse()
+                    service
+                        .createRecord(
+                            CreateRecordRequest(
+                                repo = Did(did = account.accountKey.id),
+                                collection = Nsid("app.bsky.feed.repost"),
+                                record =
+                                    buildJsonObject {
+                                        put("\$type", "app.bsky.feed.repost")
+                                        put("createdAt", Clock.System.now().toString())
+                                        put(
+                                            "subject",
+                                            buildJsonObject {
+                                                put("cid", data.cid)
+                                                put("uri", data.uri)
+                                            },
+                                        )
+                                    }.jsonContent(),
+                            ),
+                        ).requireResponse()
                 updateStatusUseCase<StatusContent.Bluesky>(
                     statusKey = data.statusKey,
                     accountKey = account.accountKey,
@@ -561,24 +585,25 @@ class BlueskyDataSource(
                 )
             } else {
                 val result =
-                    service.createRecord(
-                        CreateRecordRequest(
-                            repo = Did(did = account.accountKey.id),
-                            collection = Nsid("app.bsky.feed.like"),
-                            record =
-                                buildJsonObject {
-                                    put("\$type", "app.bsky.feed.like")
-                                    put("createdAt", Clock.System.now().toString())
-                                    put(
-                                        "subject",
-                                        buildJsonObject {
-                                            put("cid", data.cid)
-                                            put("uri", data.uri)
-                                        },
-                                    )
-                                }.jsonContent(),
-                        ),
-                    ).requireResponse()
+                    service
+                        .createRecord(
+                            CreateRecordRequest(
+                                repo = Did(did = account.accountKey.id),
+                                collection = Nsid("app.bsky.feed.like"),
+                                record =
+                                    buildJsonObject {
+                                        put("\$type", "app.bsky.feed.like")
+                                        put("createdAt", Clock.System.now().toString())
+                                        put(
+                                            "subject",
+                                            buildJsonObject {
+                                                put("cid", data.cid)
+                                                put("uri", data.uri)
+                                            },
+                                        )
+                                    }.jsonContent(),
+                            ),
+                        ).requireResponse()
                 updateStatusUseCase<StatusContent.Bluesky>(
                     statusKey = data.statusKey,
                     accountKey = account.accountKey,
@@ -659,7 +684,8 @@ class BlueskyDataSource(
         runCatching {
             val service = account.getService(appDatabase)
             val user =
-                service.getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
+                service
+                    .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
                     .requireResponse()
 
             val followRepo = user.viewer?.following?.atUri
@@ -763,7 +789,8 @@ class BlueskyDataSource(
         runCatching {
             val service = account.getService(appDatabase)
             val user =
-                service.getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
+                service
+                    .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
                     .requireResponse()
 
             val blockRepo = user.viewer?.blocking?.atUri
@@ -887,24 +914,20 @@ class BlueskyDataSource(
         }.flow
     }
 
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
+    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         throw UnsupportedOperationException("Bluesky does not support discover hashtags")
-    }
 
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        throw UnsupportedOperationException("Bluesky does not support discover statuses")
-    }
+    ): Flow<PagingData<UiStatus>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
-        return ComposeConfig(
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+        ComposeConfig(
             text = ComposeConfig.Text(300),
             media = ComposeConfig.Media(4, true),
         )
-    }
 
     override suspend fun follow(
         userKey: MicroBlogKey,

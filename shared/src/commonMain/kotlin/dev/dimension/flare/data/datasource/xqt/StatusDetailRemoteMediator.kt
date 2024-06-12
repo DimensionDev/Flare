@@ -34,8 +34,8 @@ internal class StatusDetailRemoteMediator(
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
-    ): MediatorResult {
-        return try {
+    ): MediatorResult =
+        try {
             if (loadType == LoadType.REFRESH) {
                 if (!database.dbPagingTimelineQueries.existsPaging(accountKey, pagingKey).executeAsOne()) {
                     database.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()?.let {
@@ -52,14 +52,14 @@ internal class StatusDetailRemoteMediator(
 
             if (statusOnly) {
                 val response =
-                    service.getTweetDetail(
-                        variables =
-                            TweetDetailRequest(
-                                focalTweetID = statusKey.id,
-                                cursor = null,
-                            ).encodeJson(),
-                    )
-                        .body()
+                    service
+                        .getTweetDetail(
+                            variables =
+                                TweetDetailRequest(
+                                    focalTweetID = statusKey.id,
+                                    cursor = null,
+                                ).encodeJson(),
+                        ).body()
                         ?.data
                         ?.threadedConversationWithInjectionsV2
                         ?.instructions
@@ -81,8 +81,11 @@ internal class StatusDetailRemoteMediator(
                 val id =
                     actualId ?: run {
                         val result =
-                            database.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()
-                                ?.content?.let { it as? StatusContent.XQT }
+                            database.dbStatusQueries
+                                .get(statusKey, accountKey)
+                                .executeAsOneOrNull()
+                                ?.content
+                                ?.let { it as? StatusContent.XQT }
                                 ?.data
                                 ?.toUi(accountKey)
                                 ?.let {
@@ -92,14 +95,14 @@ internal class StatusDetailRemoteMediator(
                                         ?.id ?: it.statusKey.id
                                 } ?: run {
                                 val response =
-                                    service.getTweetDetail(
-                                        variables =
-                                            TweetDetailRequest(
-                                                focalTweetID = statusKey.id,
-                                                cursor = null,
-                                            ).encodeJson(),
-                                    )
-                                        .body()
+                                    service
+                                        .getTweetDetail(
+                                            variables =
+                                                TweetDetailRequest(
+                                                    focalTweetID = statusKey.id,
+                                                    cursor = null,
+                                                ).encodeJson(),
+                                        ).body()
                                         ?.data
                                         ?.threadedConversationWithInjectionsV2
                                         ?.instructions
@@ -108,8 +111,7 @@ internal class StatusDetailRemoteMediator(
                                 tweet
                                     .firstOrNull {
                                         it.id == statusKey.id
-                                    }
-                                    ?.tweets
+                                    }?.tweets
                                     ?.tweetResults
                                     ?.result
                                     ?.let { it as? Tweet }
@@ -126,31 +128,35 @@ internal class StatusDetailRemoteMediator(
                     }
                 val currentItem =
                     if (cursor == null) {
-                        service.getTweetResultByRestId(
-                            variables =
-                                TweetDetailWithRestIdRequest(
-                                    tweetID = statusKey.id,
-                                ).encodeJson(),
-                        ).body()?.data?.tweetResult
+                        service
+                            .getTweetResultByRestId(
+                                variables =
+                                    TweetDetailWithRestIdRequest(
+                                        tweetID = statusKey.id,
+                                    ).encodeJson(),
+                            ).body()
+                            ?.data
+                            ?.tweetResult
                     } else {
                         null
                     }
                 val actualResponse =
-                    service.getTweetDetail(
-                        variables =
-                            TweetDetailRequest(
-                                focalTweetID = id,
-                                cursor = null,
-                            ).encodeJson(),
-                    )
-                        .body()
+                    service
+                        .getTweetDetail(
+                            variables =
+                                TweetDetailRequest(
+                                    focalTweetID = id,
+                                    cursor = null,
+                                ).encodeJson(),
+                        ).body()
                         ?.data
                         ?.threadedConversationWithInjectionsV2
                         ?.instructions
                         .orEmpty()
 
                 val actualTweet =
-                    actualResponse.tweets()
+                    actualResponse
+                        .tweets()
                         .map {
                             if (id != statusKey.id) {
                                 val itId =
@@ -195,7 +201,6 @@ internal class StatusDetailRemoteMediator(
         } catch (e: Throwable) {
             MediatorResult.Error(e)
         }
-    }
 }
 
 @Serializable

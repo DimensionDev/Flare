@@ -136,8 +136,7 @@ internal fun MastodonStatusComponent(
                             event.onStatusClick(data, uriHandler)
                         }
                     }
-                }
-                .then(modifier),
+                }.then(modifier),
         statusKey = actualData.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(

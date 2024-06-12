@@ -64,34 +64,35 @@ private fun Status.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0L },
-): dev.dimension.flare.data.cache.DbPagingTimeline {
-    return dev.dimension.flare.data.cache.DbPagingTimeline(
+): dev.dimension.flare.data.cache.DbPagingTimeline =
+    dev.dimension.flare.data.cache.DbPagingTimeline(
         id = 0,
         account_key = accountKey,
         status_key = MicroBlogKey(id = id, host = vvoHost),
         paging_key = pagingKey,
         sort_id = sortIdProvider(this),
     )
-}
 
-private fun Status.toDbStatus(accountKey: MicroBlogKey): dev.dimension.flare.data.cache.DbStatus {
-    return dev.dimension.flare.data.cache.DbStatus(
+private fun Status.toDbStatus(accountKey: MicroBlogKey): dev.dimension.flare.data.cache.DbStatus =
+    dev.dimension.flare.data.cache.DbStatus(
         id = 0,
         status_key = MicroBlogKey(id = id, host = vvoHost),
         account_key = accountKey,
         user_key = user?.id?.let { MicroBlogKey(id = it.toString(), host = vvoHost) },
         platform_type = dev.dimension.flare.model.PlatformType.VVo,
-        content = dev.dimension.flare.data.database.cache.model.StatusContent.VVO(data = this),
+        content =
+            dev.dimension.flare.data.database.cache.model.StatusContent
+                .VVO(data = this),
     )
-}
 
-internal fun User.toDbUser(): dev.dimension.flare.data.cache.DbUser {
-    return dev.dimension.flare.data.cache.DbUser(
+internal fun User.toDbUser(): dev.dimension.flare.data.cache.DbUser =
+    dev.dimension.flare.data.cache.DbUser(
         handle = screenName,
         host = vvoHost,
         name = screenName,
         user_key = MicroBlogKey(id = id.toString(), host = vvoHost),
         platform_type = dev.dimension.flare.model.PlatformType.VVo,
-        content = dev.dimension.flare.data.database.cache.model.UserContent.VVO(data = this),
+        content =
+            dev.dimension.flare.data.database.cache.model.UserContent
+                .VVO(data = this),
     )
-}

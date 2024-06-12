@@ -298,8 +298,7 @@ private fun AppearanceScreen(
                                         .background(
                                             color = MaterialTheme.colorScheme.primary,
                                             shape = CircleShape,
-                                        )
-                                        .size(36.dp),
+                                        ).size(36.dp),
                             )
                         },
                         modifier =

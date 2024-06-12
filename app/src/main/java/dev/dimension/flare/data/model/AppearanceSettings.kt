@@ -155,9 +155,7 @@ enum class VideoAutoplay {
 
 @OptIn(ExperimentalSerializationApi::class)
 private object AccountPreferencesSerializer : Serializer<AppearanceSettings> {
-    override suspend fun readFrom(input: InputStream): AppearanceSettings {
-        return ProtoBuf.decodeFromByteArray(input.readBytes())
-    }
+    override suspend fun readFrom(input: InputStream): AppearanceSettings = ProtoBuf.decodeFromByteArray(input.readBytes())
 
     override suspend fun writeTo(
         t: AppearanceSettings,

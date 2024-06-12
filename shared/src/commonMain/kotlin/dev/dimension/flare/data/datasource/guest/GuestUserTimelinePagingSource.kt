@@ -10,12 +10,10 @@ internal class GuestUserTimelinePagingSource(
     private val userId: String,
     private val onlyMedia: Boolean = false,
 ) : PagingSource<String, UiStatus>() {
-    override fun getRefreshKey(state: PagingState<String, UiStatus>): String? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<String, UiStatus>): String? = null
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiStatus> {
-        return try {
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiStatus> =
+        try {
             val maxId = params.key
             val limit = params.loadSize
             val statuses =
@@ -36,5 +34,4 @@ internal class GuestUserTimelinePagingSource(
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
-    }
 }

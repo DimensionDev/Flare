@@ -17,7 +17,9 @@ internal class MisskeyAuthorizationPlugin(
     private val token: String,
 ) {
     @KtorDsl
-    class Config(internal var token: String? = null)
+    class Config(
+        internal var token: String? = null,
+    )
 
     @KtorDsl
     companion object Plugin : HttpClientPlugin<Config, MisskeyAuthorizationPlugin> {

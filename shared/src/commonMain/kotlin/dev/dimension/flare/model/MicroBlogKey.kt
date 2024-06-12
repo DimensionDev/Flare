@@ -9,9 +9,7 @@ data class MicroBlogKey(
     val id: String,
     val host: String,
 ) {
-    override fun hashCode(): Int {
-        return this.id.hashCode() * 31 + host.hashCode()
-    }
+    override fun hashCode(): Int = this.id.hashCode() * 31 + host.hashCode()
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
@@ -19,9 +17,7 @@ data class MicroBlogKey(
         return other.id == id && other.host == host
     }
 
-    override fun toString(): String {
-        return if (host.isNotEmpty()) escapeText(id) + "@" + escapeText(host) else id
-    }
+    override fun toString(): String = if (host.isNotEmpty()) escapeText(id) + "@" + escapeText(host) else id
 
     private fun escapeText(host: String): String {
         val sb = StringBuilder()
@@ -38,9 +34,7 @@ data class MicroBlogKey(
         return sb.toString()
     }
 
-    private fun isSpecialChar(ch: Char): Boolean {
-        return ch == '\\' || ch == '@' || ch == ','
-    }
+    private fun isSpecialChar(ch: Char): Boolean = ch == '\\' || ch == '@' || ch == ','
 
     companion object {
         fun valueOf(str: String): MicroBlogKey {

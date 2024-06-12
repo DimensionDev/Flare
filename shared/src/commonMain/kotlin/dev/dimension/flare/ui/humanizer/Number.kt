@@ -9,8 +9,8 @@ fun Float.humanizePercentage(): String {
     return "$roundedNumber%"
 }
 
-fun Long.humanize(digitPosition: Int = 1): String {
-    return when {
+fun Long.humanize(digitPosition: Int = 1): String =
+    when {
         this < 0 -> "-" + (-this).humanize(digitPosition)
         this == 0L -> "0"
         this in 1..9999 -> this.toString()
@@ -42,4 +42,3 @@ fun Long.humanize(digitPosition: Int = 1): String {
             }
         }
     }
-}

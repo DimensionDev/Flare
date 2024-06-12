@@ -80,7 +80,9 @@ internal object Misskey {
                 )
             }
             val exsitingUsers =
-                database.dbUserQueries.findByKeys(user.map { it.user_key }).executeAsList()
+                database.dbUserQueries
+                    .findByKeys(user.map { it.user_key })
+                    .executeAsList()
                     .filter {
                         it.content is UserContent.Misskey
                     }.map {
@@ -221,9 +223,8 @@ internal fun User.toDbUser(accountHost: String) =
             },
     )
 
-internal fun List<EmojiSimple>.toDb(host: String): DbEmoji {
-    return DbEmoji(
+internal fun List<EmojiSimple>.toDb(host: String): DbEmoji =
+    DbEmoji(
         host = host,
         content = EmojiContent.Misskey(this),
     )
-}

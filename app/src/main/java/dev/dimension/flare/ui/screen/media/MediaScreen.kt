@@ -185,7 +185,8 @@ internal fun MediaScreen(
                 val painter =
                     rememberAsyncImagePainter(
                         model =
-                            ImageRequest.Builder(LocalContext.current)
+                            ImageRequest
+                                .Builder(LocalContext.current)
                                 .data(uri)
                                 .placeholderMemoryCacheKey(previewUrl)
                                 .crossfade(1_000)
@@ -281,11 +282,12 @@ private fun mediaPresenter(
                     saveByteArrayToDownloads(context, byteArray, fileName)
                 }
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.media_save_success),
-                        Toast.LENGTH_SHORT,
-                    ).show()
+                    Toast
+                        .makeText(
+                            context,
+                            context.getString(R.string.media_save_success),
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
             }
         }

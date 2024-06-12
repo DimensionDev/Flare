@@ -16,6 +16,4 @@ actual abstract class PresenterBase<Model : Any> {
 }
 
 @Composable
-operator fun <Model : Any> PresenterBase<Model>.invoke(): Model {
-    return body()
-}
+operator fun <Model : Any> PresenterBase<Model>.invoke(): Model = body()

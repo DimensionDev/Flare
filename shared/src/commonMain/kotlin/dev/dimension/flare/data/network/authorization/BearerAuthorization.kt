@@ -8,7 +8,5 @@ internal class BearerAuthorization(
     override val hasAuthorization: Boolean
         get() = true
 
-    override fun getAuthorizationHeader(context: HttpRequestBuilder): String {
-        return "Bearer $accessToken"
-    }
+    override fun getAuthorizationHeader(context: HttpRequestBuilder): String = "Bearer $accessToken"
 }

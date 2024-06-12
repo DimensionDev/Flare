@@ -42,28 +42,29 @@ internal class UserTimelineRemoteMediator(
             }
             if (containerid == null) {
                 containerid =
-                    service.getContainerIndex(type = "uid", value = userKey.id)
+                    service
+                        .getContainerIndex(type = "uid", value = userKey.id)
                         .data
                         ?.tabsInfo
                         ?.tabs
                         ?.firstOrNull {
                             it.tabType == "weibo"
-                        }
-                        ?.containerid
+                        }?.containerid
             }
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
                         page = 0
-                        service.getContainerIndex(
-                            type = "uid",
-                            value = userKey.id,
-                            containerId = containerid,
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getContainerIndex(
+                                type = "uid",
+                                value = userKey.id,
+                                containerId = containerid,
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
 
                     LoadType.PREPEND -> {
@@ -87,7 +88,11 @@ internal class UserTimelineRemoteMediator(
                         )
                     }
                 }
-            val status = response.data?.cards?.mapNotNull { it.mblog }.orEmpty()
+            val status =
+                response.data
+                    ?.cards
+                    ?.mapNotNull { it.mblog }
+                    .orEmpty()
 
             VVO.save(
                 accountKey = accountKey,

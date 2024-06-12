@@ -18,9 +18,7 @@ internal actual class DriverFactory {
     actual fun createDriver(
         schema: SqlSchema<QueryResult.Value<Unit>>,
         name: String,
-    ): SqlDriver {
-        return JdbcSqliteDriver("jdbc:sqlite:${System.getProperty("user.home")}/flare/$name", schema = schema)
-    }
+    ): SqlDriver = JdbcSqliteDriver("jdbc:sqlite:${System.getProperty("user.home")}/flare/$name", schema = schema)
 
     actual fun deleteDatabase(name: String) {
         File(name).delete()

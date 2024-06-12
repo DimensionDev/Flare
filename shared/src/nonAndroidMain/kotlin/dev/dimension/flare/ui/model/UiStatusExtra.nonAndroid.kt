@@ -14,8 +14,8 @@ actual class UiStatusExtra(
     }
 }
 
-internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
-    return UiStatusExtra(
+internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra =
+    UiStatusExtra(
         contentMarkdown =
             when (status) {
                 is UiStatus.Mastodon -> status.contentToken.toMarkdown()
@@ -30,4 +30,3 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
                 is UiStatus.VVONotification -> ""
             },
     )
-}

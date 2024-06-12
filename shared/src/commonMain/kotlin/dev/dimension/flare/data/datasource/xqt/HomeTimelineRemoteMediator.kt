@@ -24,9 +24,7 @@ internal class HomeTimelineRemoteMediator(
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
     private var cursor: String? = null
 
-    override suspend fun initialize(): InitializeAction {
-        return InitializeAction.SKIP_INITIAL_REFRESH
-    }
+    override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
     override suspend fun load(
         loadType: LoadType,
@@ -37,16 +35,17 @@ internal class HomeTimelineRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         cursor = null
-                        service.getHomeLatestTimeline(
-                            variables =
-                                HomeTimelineRequest(
-                                    count = state.config.pageSize.toLong(),
-                                ).encodeJson(),
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getHomeLatestTimeline(
+                                variables =
+                                    HomeTimelineRequest(
+                                        count = state.config.pageSize.toLong(),
+                                    ).encodeJson(),
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
 
                     LoadType.PREPEND -> {
@@ -65,7 +64,13 @@ internal class HomeTimelineRemoteMediator(
                         )
                     }
                 }.body()
-            val instructions = response?.data?.home?.homeTimelineUrt?.instructions.orEmpty()
+            val instructions =
+                response
+                    ?.data
+                    ?.home
+                    ?.homeTimelineUrt
+                    ?.instructions
+                    .orEmpty()
             cursor = instructions.cursor()
             val tweet = instructions.tweets()
             XQT.save(
@@ -101,16 +106,17 @@ internal class FeaturedTimelineRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         cursor = null
-                        service.getHomeTimeline(
-                            variables =
-                                HomeTimelineRequest(
-                                    count = state.config.pageSize.toLong(),
-                                ).encodeJson(),
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getHomeTimeline(
+                                variables =
+                                    HomeTimelineRequest(
+                                        count = state.config.pageSize.toLong(),
+                                    ).encodeJson(),
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
 
                     LoadType.PREPEND -> {
@@ -129,7 +135,13 @@ internal class FeaturedTimelineRemoteMediator(
                         )
                     }
                 }.body()
-            val instructions = response?.data?.home?.homeTimelineUrt?.instructions.orEmpty()
+            val instructions =
+                response
+                    ?.data
+                    ?.home
+                    ?.homeTimelineUrt
+                    ?.instructions
+                    .orEmpty()
             cursor = instructions.cursor()
             val tweet = instructions.tweets()
             XQT.save(
@@ -165,16 +177,17 @@ internal class BookmarkTimelineRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         cursor = null
-                        service.getBookmarks(
-                            variables =
-                                HomeTimelineRequest(
-                                    count = state.config.pageSize.toLong(),
-                                ).encodeJson(),
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getBookmarks(
+                                variables =
+                                    HomeTimelineRequest(
+                                        count = state.config.pageSize.toLong(),
+                                    ).encodeJson(),
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
 
                     LoadType.PREPEND -> {
@@ -193,7 +206,13 @@ internal class BookmarkTimelineRemoteMediator(
                         )
                     }
                 }.body()
-            val instructions = response?.data?.bookmarkTimelineV2?.timeline?.instructions.orEmpty()
+            val instructions =
+                response
+                    ?.data
+                    ?.bookmarkTimelineV2
+                    ?.timeline
+                    ?.instructions
+                    .orEmpty()
             cursor = instructions.cursor()
             val tweet = instructions.tweets()
             XQT.save(

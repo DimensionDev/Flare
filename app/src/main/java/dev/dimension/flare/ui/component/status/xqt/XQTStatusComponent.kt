@@ -79,8 +79,7 @@ internal fun XQTStatusComponent(
                             event.onStatusClick(data, uriHandler)
                         }
                     }
-                }
-                .then(modifier),
+                }.then(modifier),
         statusKey = actualData.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(
@@ -359,8 +358,7 @@ internal fun XQTNofiticationComponent(
                         } else {
                             it
                         }
-                    }
-                    .padding(bottom = 8.dp)
+                    }.padding(bottom = 8.dp)
                     .fillMaxWidth()
                     .then(modifier),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

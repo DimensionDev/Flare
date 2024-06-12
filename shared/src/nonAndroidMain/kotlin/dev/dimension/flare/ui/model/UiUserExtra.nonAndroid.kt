@@ -18,8 +18,8 @@ actual class UiUserExtra(
     val fieldsMarkdown: ImmutableListWrapper<Pair<String, String>>,
 )
 
-internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
-    return UiUserExtra(
+internal actual fun createUiUserExtra(user: UiUser): UiUserExtra =
+    UiUserExtra(
         nameMarkdown = user.nameElement.toMarkdown(),
         descriptionMarkdown = user.descriptionElement?.toMarkdown(),
         fieldsMarkdown =
@@ -40,21 +40,20 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
                 is UiUser.VVO -> persistentMapOf()
             }.map { (key, value) ->
                 key to value
-            }.toImmutableList().toImmutableListWrapper(),
+            }.toImmutableList()
+                .toImmutableListWrapper(),
     )
-}
 
-internal fun Node.toMarkdown(): String {
-    return when (this) {
+internal fun Node.toMarkdown(): String =
+    when (this) {
         is Comment -> ""
         is Doctype -> ""
         is Element -> toMarkdown()
         is Text -> text
     }
-}
 
-internal fun Element.toMarkdown(): String {
-    return when (name) {
+internal fun Element.toMarkdown(): String =
+    when (name) {
         "p" -> {
             val content = children.joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
@@ -127,4 +126,3 @@ internal fun Element.toMarkdown(): String {
             children.joinToString("") { it.toMarkdown() }
         }
     }
-}

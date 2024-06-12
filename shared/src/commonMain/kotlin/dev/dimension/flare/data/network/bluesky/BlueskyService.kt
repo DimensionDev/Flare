@@ -81,7 +81,9 @@ internal class XrpcAuthPlugin(
             scope.plugin(HttpSend).intercept { context ->
                 if (!context.headers.contains(Authorization) && plugin.accountKey != null && plugin.accountQueries != null) {
                     val account =
-                        plugin.accountQueries.get(plugin.accountKey).executeAsOneOrNull()
+                        plugin.accountQueries
+                            .get(plugin.accountKey)
+                            .executeAsOneOrNull()
                             ?.toUi() as? UiAccount.Bluesky
                     if (account != null) {
                         context.bearerAuth(account.credential.accessToken)
@@ -103,24 +105,28 @@ internal class XrpcAuthPlugin(
 
                 if (response.getOrNull()?.error == "ExpiredToken" && plugin.accountKey != null && plugin.accountQueries != null) {
                     val account =
-                        plugin.accountQueries.get(plugin.accountKey).executeAsOneOrNull()
+                        plugin.accountQueries
+                            .get(plugin.accountKey)
+                            .executeAsOneOrNull()
                             ?.toUi() as? UiAccount.Bluesky
                     if (account != null) {
                         val refreshResponse =
                             scope.post("/xrpc/com.atproto.server.refreshSession") {
                                 bearerAuth(account.credential.refreshToken)
                             }
-                        runCatching { refreshResponse.body<RefreshSessionResponse>() }.getOrNull()
+                        runCatching { refreshResponse.body<RefreshSessionResponse>() }
+                            .getOrNull()
                             ?.let { refreshed ->
                                 val newAccessToken = refreshed.accessJwt
                                 val newRefreshToken = refreshed.refreshJwt
                                 plugin.accountQueries.setCredential(
                                     credentialJson =
-                                        UiAccount.Bluesky.Credential(
-                                            baseUrl = account.credential.baseUrl,
-                                            accessToken = newAccessToken,
-                                            refreshToken = newRefreshToken,
-                                        ).encodeJson(),
+                                        UiAccount.Bluesky
+                                            .Credential(
+                                                baseUrl = account.credential.baseUrl,
+                                                accessToken = newAccessToken,
+                                                refreshToken = newRefreshToken,
+                                            ).encodeJson(),
                                     accountKey = plugin.accountKey,
                                 )
                                 context.headers.remove(Authorization)

@@ -29,16 +29,18 @@ class QuickMenuPresenter : PresenterBase<QuickMenuState>() {
         val allUsers =
             accounts.flatMap { data ->
                 user.user.map { current ->
-                    data.filter {
-                        it.accountKey != current.userKey
-                    }.map { account ->
-                        accountServiceProvider(accountType = AccountType.Specific(accountKey = account.accountKey))
-                            .flatMap { service ->
-                                remember(account.accountKey) {
-                                    service.userById(account.accountKey.id)
-                                }.collectAsState().toUi()
-                            }
-                    }.toImmutableList().toImmutableListWrapper()
+                    data
+                        .filter {
+                            it.accountKey != current.userKey
+                        }.map { account ->
+                            accountServiceProvider(accountType = AccountType.Specific(accountKey = account.accountKey))
+                                .flatMap { service ->
+                                    remember(account.accountKey) {
+                                        service.userById(account.accountKey.id)
+                                    }.collectAsState().toUi()
+                                }
+                        }.toImmutableList()
+                        .toImmutableListWrapper()
                 }
             }
 

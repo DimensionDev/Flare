@@ -28,21 +28,22 @@ class ProfileMediaPresenter(
         val mediaState =
             accountServiceState.map { service ->
                 remember(service, userKey) {
-                    service.userTimeline(
-                        userKey ?: service.account.accountKey,
-                        scope = scope,
-                        mediaOnly = true,
-                    ).map { data ->
-                        data.flatMap { status ->
-                            status.medias.map {
-                                ProfileMedia(
-                                    it,
-                                    status,
-                                    status.medias.indexOf(it),
-                                )
+                    service
+                        .userTimeline(
+                            userKey ?: service.account.accountKey,
+                            scope = scope,
+                            mediaOnly = true,
+                        ).map { data ->
+                            data.flatMap { status ->
+                                status.medias.map {
+                                    ProfileMedia(
+                                        it,
+                                        status,
+                                        status.medias.indexOf(it),
+                                    )
+                                }
                             }
                         }
-                    }
                 }.collectPagingProxy()
             }
         return object : ProfileMediaState {

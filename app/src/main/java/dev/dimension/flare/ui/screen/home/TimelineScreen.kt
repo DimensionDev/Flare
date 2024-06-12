@@ -252,8 +252,7 @@ private fun timelinePresenter(
                 } else {
                     null
                 }
-            }
-                .mapNotNull { it }
+            }.mapNotNull { it }
                 .distinctUntilChanged()
                 .drop(1)
                 .collect {

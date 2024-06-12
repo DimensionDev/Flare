@@ -47,14 +47,16 @@ internal class VVOService(
     ConfigApi by config(chocolate = chocolate).createConfigApi(),
     StatusApi by config(chocolate = chocolate).createStatusApi() {
     companion object {
-        fun checkChocolates(chocolate: String): Boolean {
-            return chocolate.split(';').map {
-                val res = it.split('=')
-                res[0].trim() to res[1].trim()
-            }.toMap().let {
-                it.containsKey("MLOGIN") && it["MLOGIN"] == "1"
-            }
-        }
+        fun checkChocolates(chocolate: String): Boolean =
+            chocolate
+                .split(';')
+                .map {
+                    val res = it.split('=')
+                    res[0].trim() to res[1].trim()
+                }.toMap()
+                .let {
+                    it.containsKey("MLOGIN") && it["MLOGIN"] == "1"
+                }
     }
 
     suspend fun getUid(screenName: String): String? {
@@ -73,8 +75,8 @@ internal class VVOService(
         bytes: ByteArray,
         xsrfToken: String = st,
         type: String = "json",
-    ): UploadResponse {
-        return ktorClient {
+    ): UploadResponse =
+        ktorClient {
             install(HttpTimeout) {
                 connectTimeoutMillis = 2.minutes.inWholeMilliseconds
                 requestTimeoutMillis = 2.minutes.inWholeMilliseconds
@@ -103,8 +105,8 @@ internal class VVOService(
             block = {
                 header("X-Xsrf-Token", xsrfToken)
             },
-        ).bodyAsText().decodeJson<UploadResponse>()
-    }
+        ).bodyAsText()
+            .decodeJson<UploadResponse>()
 }
 
 private class VVOHeaderPlugin(

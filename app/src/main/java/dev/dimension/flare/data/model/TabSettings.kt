@@ -57,10 +57,14 @@ data class TabMetaData(
 @Serializable
 sealed interface TitleType {
     @Serializable
-    data class Text(val content: String) : TitleType
+    data class Text(
+        val content: String,
+    ) : TitleType
 
     @Serializable
-    data class Localized(val key: LocalizedKey) : TitleType {
+    data class Localized(
+        val key: LocalizedKey,
+    ) : TitleType {
         val resId: Int
             get() = key.toId()
 
@@ -77,8 +81,8 @@ sealed interface TitleType {
             Bookmark,
             Favourite, ;
 
-            fun toId(): Int {
-                return when (this) {
+            fun toId(): Int =
+                when (this) {
                     Home -> R.string.home_tab_home_title
                     Notifications -> R.string.home_tab_notifications_title
                     Discover -> R.string.home_tab_discover_title
@@ -90,7 +94,6 @@ sealed interface TitleType {
                     Bookmark -> R.string.home_tab_bookmarks_title
                     Favourite -> R.string.home_tab_favorite_title
                 }
-            }
         }
     }
 }
@@ -98,10 +101,14 @@ sealed interface TitleType {
 @Serializable
 sealed interface IconType {
     @Serializable
-    data class Avatar(val userKey: MicroBlogKey) : IconType
+    data class Avatar(
+        val userKey: MicroBlogKey,
+    ) : IconType
 
     @Serializable
-    data class Material(val icon: MaterialIcon) : IconType {
+    data class Material(
+        val icon: MaterialIcon,
+    ) : IconType {
         @Serializable
         enum class MaterialIcon {
             Home,
@@ -115,8 +122,8 @@ sealed interface IconType {
             Bookmark,
             Heart, ;
 
-            fun toIcon(): ImageVector {
-                return when (this) {
+            fun toIcon(): ImageVector =
+                when (this) {
                     Home -> Icons.Default.Home
                     Notification -> Icons.Default.Notifications
                     Search -> Icons.Default.Search
@@ -128,12 +135,14 @@ sealed interface IconType {
                     Bookmark -> Icons.Default.Bookmarks
                     Heart -> Icons.Default.Favorite
                 }
-            }
         }
     }
 
     @Serializable
-    data class Mixed(val icon: Material.MaterialIcon, val userKey: MicroBlogKey) : IconType
+    data class Mixed(
+        val icon: Material.MaterialIcon,
+        val userKey: MicroBlogKey,
+    ) : IconType
 }
 
 @Serializable
@@ -521,9 +530,7 @@ data class HomeTimelineTabItem(
 ) : TimelineTabItem {
     override val key: String = "home_$account"
 
-    override fun createPresenter(): TimelinePresenter {
-        return HomeTimelinePresenter(account)
-    }
+    override fun createPresenter(): TimelinePresenter = HomeTimelinePresenter(account)
 }
 
 object Mastodon {
@@ -534,9 +541,9 @@ object Mastodon {
     ) : TimelineTabItem {
         override val key: String = "local_$account"
 
-        override fun createPresenter(): TimelinePresenter {
-            return dev.dimension.flare.ui.presenter.home.mastodon.LocalTimelinePresenter(account)
-        }
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.mastodon
+                .LocalTimelinePresenter(account)
     }
 
     @Serializable
@@ -546,9 +553,9 @@ object Mastodon {
     ) : TimelineTabItem {
         override val key: String = "public_$account"
 
-        override fun createPresenter(): TimelinePresenter {
-            return dev.dimension.flare.ui.presenter.home.mastodon.PublicTimelinePresenter(account)
-        }
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.mastodon
+                .PublicTimelinePresenter(account)
     }
 
     @Serializable
@@ -558,9 +565,9 @@ object Mastodon {
     ) : TimelineTabItem {
         override val key: String = "bookmark_$account"
 
-        override fun createPresenter(): TimelinePresenter {
-            return dev.dimension.flare.ui.presenter.home.mastodon.BookmarkTimelinePresenter(account)
-        }
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.mastodon
+                .BookmarkTimelinePresenter(account)
     }
 
     @Serializable
@@ -570,9 +577,9 @@ object Mastodon {
     ) : TimelineTabItem {
         override val key: String = "favourite_$account"
 
-        override fun createPresenter(): TimelinePresenter {
-            return dev.dimension.flare.ui.presenter.home.mastodon.FavouriteTimelinePresenter(account)
-        }
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.mastodon
+                .FavouriteTimelinePresenter(account)
     }
 }
 
@@ -584,9 +591,9 @@ object Misskey {
     ) : TimelineTabItem {
         override val key: String = "local_$account"
 
-        override fun createPresenter(): TimelinePresenter {
-            return dev.dimension.flare.ui.presenter.home.misskey.LocalTimelinePresenter(account)
-        }
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.misskey
+                .LocalTimelinePresenter(account)
     }
 
     @Serializable
@@ -596,9 +603,9 @@ object Misskey {
     ) : TimelineTabItem {
         override val key: String = "global_$account"
 
-        override fun createPresenter(): TimelinePresenter {
-            return dev.dimension.flare.ui.presenter.home.misskey.PublicTimelinePresenter(account)
-        }
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.misskey
+                .PublicTimelinePresenter(account)
     }
 }
 
@@ -610,9 +617,9 @@ object XQT {
     ) : TimelineTabItem {
         override val key: String = "featured_$account"
 
-        override fun createPresenter(): TimelinePresenter {
-            return dev.dimension.flare.ui.presenter.home.xqt.FeaturedTimelinePresenter(account)
-        }
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.xqt
+                .FeaturedTimelinePresenter(account)
     }
 
     @Serializable
@@ -622,9 +629,9 @@ object XQT {
     ) : TimelineTabItem {
         override val key: String = "bookmark_$account"
 
-        override fun createPresenter(): TimelinePresenter {
-            return dev.dimension.flare.ui.presenter.home.xqt.BookmarkTimelinePresenter(account)
-        }
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.xqt
+                .BookmarkTimelinePresenter(account)
     }
 }
 
@@ -661,13 +668,12 @@ data object SettingsTabItem : TabItem {
 
 @OptIn(ExperimentalSerializationApi::class)
 private object TabSettingsSerializer : Serializer<TabSettings> {
-    override suspend fun readFrom(input: InputStream): TabSettings {
-        return try {
+    override suspend fun readFrom(input: InputStream): TabSettings =
+        try {
             ProtoBuf.decodeFromByteArray(input.readBytes())
         } catch (e: SerializationException) {
             throw androidx.datastore.core.CorruptionException("Cannot read proto.", e)
         }
-    }
 
     override suspend fun writeTo(
         t: TabSettings,

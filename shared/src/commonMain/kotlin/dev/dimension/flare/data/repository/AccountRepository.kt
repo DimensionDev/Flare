@@ -65,15 +65,16 @@ class AccountRepository(
         appDatabase.dbAccountQueries.delete(accountKey)
     }
 
-    fun get(accountKey: MicroBlogKey): UiAccount? {
-        return appDatabase.dbAccountQueries.get(accountKey).executeAsOneOrNull()?.toUi()
-    }
+    fun get(accountKey: MicroBlogKey): UiAccount? =
+        appDatabase.dbAccountQueries
+            .get(accountKey)
+            .executeAsOneOrNull()
+            ?.toUi()
 
-    fun getFlow(accountKey: MicroBlogKey): Flow<UiAccount?> {
-        return appDatabase.dbAccountQueries.get(accountKey).asFlow().mapToOneOrNull(Dispatchers.IO).map {
+    fun getFlow(accountKey: MicroBlogKey): Flow<UiAccount?> =
+        appDatabase.dbAccountQueries.get(accountKey).asFlow().mapToOneOrNull(Dispatchers.IO).map {
             it?.toUi()
         }
-    }
 }
 
 data object NoActiveAccountException : Exception("No active account.")
@@ -81,8 +82,8 @@ data object NoActiveAccountException : Exception("No active account.")
 data object LoginExpiredException : Exception("Login expired.")
 
 @Composable
-internal fun activeAccountPresenter(repository: AccountRepository = koinInject()): State<UiState<UiAccount>> {
-    return remember(repository) {
+internal fun activeAccountPresenter(repository: AccountRepository = koinInject()): State<UiState<UiAccount>> =
+    remember(repository) {
         repository.activeAccount
             .map<UiAccount?, UiState<UiAccount>> {
                 if (it == null) {
@@ -92,14 +93,13 @@ internal fun activeAccountPresenter(repository: AccountRepository = koinInject()
                 }
             }
     }.collectAsState(initial = UiState.Loading())
-}
 
 @Composable
 internal fun accountProvider(
     accountType: AccountType,
     repository: AccountRepository = koinInject(),
-): State<UiState<UiAccount>> {
-    return produceState<UiState<UiAccount>>(
+): State<UiState<UiAccount>> =
+    produceState<UiState<UiAccount>>(
         initialValue = UiState.Loading(),
         key1 = accountType,
     ) {
@@ -112,17 +112,17 @@ internal fun accountProvider(
                     repository.getFlow(accountKey = accountType.accountKey)
                 }
             AccountType.Guest -> flowOf(UiAccount.Guest)
-        }.distinctUntilChanged().map {
-            if (it == null) {
-                UiState.Error(NoActiveAccountException)
-            } else {
-                UiState.Success(it)
+        }.distinctUntilChanged()
+            .map {
+                if (it == null) {
+                    UiState.Error(NoActiveAccountException)
+                } else {
+                    UiState.Success(it)
+                }
+            }.collect {
+                value = it
             }
-        }.collect {
-            value = it
-        }
     }
-}
 
 @Composable
 internal fun accountServiceProvider(accountType: AccountType): UiState<MicroblogDataSource> {
@@ -157,11 +157,10 @@ internal fun accountServiceProvider(accountType: AccountType): UiState<Microblog
 }
 
 @Composable
-internal fun allAccountsPresenter(repository: AccountRepository = koinInject()): State<UiState<ImmutableList<UiAccount>>> {
-    return remember(repository) {
+internal fun allAccountsPresenter(repository: AccountRepository = koinInject()): State<UiState<ImmutableList<UiAccount>>> =
+    remember(repository) {
         repository.allAccounts
             .map {
                 UiState.Success(it.toImmutableList())
             }
     }.collectAsState(initial = UiState.Loading())
-}

@@ -35,11 +35,13 @@ class ShortcutComposeActivity : ComponentActivity() {
                 }
                 intent?.action == Intent.ACTION_SEND_MULTIPLE &&
                     intent.type?.startsWith("image/") == true -> {
-                    IntentCompat.getParcelableArrayListExtra(
-                        intent,
-                        Intent.EXTRA_STREAM,
-                        Uri::class.java,
-                    ).orEmpty().toPersistentList()
+                    IntentCompat
+                        .getParcelableArrayListExtra(
+                            intent,
+                            Intent.EXTRA_STREAM,
+                            Uri::class.java,
+                        ).orEmpty()
+                        .toPersistentList()
                 }
                 else -> persistentListOf()
             }

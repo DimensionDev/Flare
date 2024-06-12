@@ -55,7 +55,8 @@ import org.koin.core.component.inject
 @OptIn(ExperimentalPagingApi::class)
 class MastodonDataSource(
     override val account: UiAccount.Mastodon,
-) : MicroblogDataSource, KoinComponent {
+) : MicroblogDataSource,
+    KoinComponent {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
@@ -69,8 +70,8 @@ class MastodonDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -85,14 +86,13 @@ class MastodonDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     fun localTimeline(
         pageSize: Int = 20,
         pagingKey: String = "local_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -108,14 +108,13 @@ class MastodonDataSource(
                     local = true,
                 ),
         )
-    }
 
     fun bookmarkTimeline(
         pageSize: Int = 20,
         pagingKey: String = "bookmarked_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -130,14 +129,13 @@ class MastodonDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     fun favouriteTimeline(
         pageSize: Int = 20,
         pagingKey: String = "favourite_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -152,14 +150,13 @@ class MastodonDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     fun publicTimeline(
         pageSize: Int = 20,
         pagingKey: String = "public_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -175,7 +172,6 @@ class MastodonDataSource(
                     local = false,
                 ),
         )
-    }
 
     override fun notification(
         type: NotificationFilter,
@@ -224,7 +220,8 @@ class MastodonDataSource(
         return Cacheable(
             fetchSource = {
                 val user =
-                    service.lookupUserByAcct("$name@$host")
+                    service
+                        .lookupUserByAcct("$name@$host")
                         ?.toDbUser(account.accountKey.host) ?: throw Exception("User not found")
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
@@ -236,7 +233,8 @@ class MastodonDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Mastodon)
+                database.dbUserQueries
+                    .findByHandleAndHost(name, host, PlatformType.Mastodon)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi(account.accountKey) }
@@ -259,20 +257,21 @@ class MastodonDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByKey(userKey).asFlow()
+                database.dbUserQueries
+                    .findByKey(userKey)
+                    .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi(account.accountKey) }
             },
         )
     }
 
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        return MemCacheable<UiRelation>(
+    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
+        MemCacheable<UiRelation>(
             relationKeyWithUserKey(userKey),
         ) {
             service.showFriendships(listOf(userKey.id)).first().toUi()
         }.toUi()
-    }
 
     override fun userTimeline(
         userKey: MicroBlogKey,
@@ -339,7 +338,8 @@ class MastodonDataSource(
                 )
             },
             cacheSource = {
-                database.dbStatusQueries.get(statusKey, account.accountKey)
+                database.dbStatusQueries
+                    .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .mapNotNull { it.content.toUi(account.accountKey) }
@@ -357,7 +357,9 @@ class MastodonDataSource(
                 )
             },
             cacheSource = {
-                database.dbEmojiQueries.get(account.accountKey.host).asFlow()
+                database.dbEmojiQueries
+                    .get(account.accountKey.host)
+                    .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi().toImmutableList() }
             },
@@ -370,16 +372,18 @@ class MastodonDataSource(
         require(data is MastodonComposeData)
         val maxProgress = data.medias.size + 1
         val mediaIds =
-            data.medias.mapIndexed { index, item ->
-                service.upload(
-                    item.readBytes(),
-                    name = item.name ?: "unknown",
-                ).also {
-                    progress(ComposeProgress(index + 1, maxProgress))
+            data.medias
+                .mapIndexed { index, item ->
+                    service
+                        .upload(
+                            item.readBytes(),
+                            name = item.name ?: "unknown",
+                        ).also {
+                            progress(ComposeProgress(index + 1, maxProgress))
+                        }
+                }.mapNotNull {
+                    it.id
                 }
-            }.mapNotNull {
-                it.id
-            }
         service.post(
             uuid4().toString(),
             PostStatus(
@@ -707,8 +711,8 @@ class MastodonDataSource(
         }
     }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
-        return Pager(
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
@@ -716,14 +720,13 @@ class MastodonDataSource(
                 account.accountKey.host,
             )
         }.flow
-    }
 
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -738,25 +741,23 @@ class MastodonDataSource(
                     pagingKey,
                 ),
         )
-    }
 
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
-        return Pager(
+    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendHashtagPagingSource(
                 service,
             )
         }.flow
-    }
 
     override fun searchStatus(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -772,14 +773,13 @@ class MastodonDataSource(
                     query,
                 ),
         )
-    }
 
     override fun searchUser(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> {
-        return Pager(
+    ): Flow<PagingData<UiUser>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
@@ -788,10 +788,9 @@ class MastodonDataSource(
                 query,
             )
         }.flow.cachedIn(scope)
-    }
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
-        return ComposeConfig(
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+        ComposeConfig(
             text = ComposeConfig.Text(500),
             media = ComposeConfig.Media(4, true),
             poll = ComposeConfig.Poll(4),
@@ -799,7 +798,6 @@ class MastodonDataSource(
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
         )
-    }
 
     override suspend fun follow(
         userKey: MicroBlogKey,

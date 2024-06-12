@@ -61,8 +61,7 @@ internal fun StatusActionButton(
                                 bounded = false,
                                 radius = 20.dp,
                             ),
-                    )
-                    .size(with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() + 4.dp }),
+                    ).size(with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() + 4.dp }),
             tint = color,
         )
         if (!text.isNullOrEmpty() && appearanceSettings.showNumbers) {

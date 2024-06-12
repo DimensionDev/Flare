@@ -98,9 +98,7 @@ public class LazyPagingItems<T : Any> internal constructor(
      * @param index Index of the presented item to return, including placeholders.
      * @return The presented item at position [index], `null` if it is a placeholder
      */
-    fun peek(index: Int): T? {
-        return itemSnapshotList[index]
-    }
+    fun peek(index: Int): T? = itemSnapshotList[index]
 
     /**
      * Retry any failed load requests that would result in a [LoadState.Error] update to this

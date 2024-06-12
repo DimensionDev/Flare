@@ -14,7 +14,9 @@ import dev.dimension.flare.di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
-class App : Application(), ImageLoaderFactory {
+class App :
+    Application(),
+    ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -23,8 +25,9 @@ class App : Application(), ImageLoaderFactory {
         }
     }
 
-    override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(this)
+    override fun newImageLoader(): ImageLoader =
+        ImageLoader
+            .Builder(this)
             .components {
                 if (Build.VERSION.SDK_INT >= 28) {
                     add(ImageDecoderDecoder.Factory())
@@ -34,8 +37,6 @@ class App : Application(), ImageLoaderFactory {
                 add(AnimatedPngDecoder.Factory())
                 add(SvgDecoder.Factory())
                 add(AnimatedWebPDecoder.Factory())
-            }
-            .crossfade(true)
+            }.crossfade(true)
             .build()
-    }
 }

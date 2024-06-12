@@ -38,8 +38,11 @@ private fun config(
     HttpResponseValidator {
         handleResponseExceptionWithRequest { exception, _ ->
             if (exception is ResponseException) {
-                exception.response.bodyAsText().decodeJson<MastodonException>()
-                    .takeIf { it.error != null }?.let {
+                exception.response
+                    .bodyAsText()
+                    .decodeJson<MastodonException>()
+                    .takeIf { it.error != null }
+                    ?.let {
                         throw it
                     }
             }

@@ -118,8 +118,8 @@ internal fun MisskeyCallbackScreen(
 private fun misskeyCallbackPresenter(
     session: String?,
     toHome: () -> Unit,
-): UiState<Nothing> {
-    return remember(
+): UiState<Nothing> =
+    remember(
         session,
         toHome,
     ) {
@@ -128,4 +128,3 @@ private fun misskeyCallbackPresenter(
             toHome = toHome,
         )
     }.invoke()
-}

@@ -33,7 +33,8 @@ fun statusTranslatePresenter(
 private fun translateText(text: String) =
     run {
         val language by produceState<UiState<String>>(initialValue = UiState.Loading(), key1 = text) {
-            LanguageIdentification.getClient()
+            LanguageIdentification
+                .getClient()
                 .identifyLanguage(text)
                 .addOnSuccessListener {
                     value =
@@ -42,8 +43,7 @@ private fun translateText(text: String) =
                         } else {
                             UiState.Success(it)
                         }
-                }
-                .addOnFailureListener {
+                }.addOnFailureListener {
                     value = UiState.Error(it)
                 }
         }
@@ -63,7 +63,8 @@ private fun translateText(text: String) =
                 val client =
                     remember(source, target) {
                         val options =
-                            TranslatorOptions.Builder()
+                            TranslatorOptions
+                                .Builder()
                                 .setSourceLanguage(source)
                                 .setTargetLanguage(target)
                                 .build()
@@ -75,17 +76,17 @@ private fun translateText(text: String) =
                     key2 = source,
                     key3 = target,
                 ) {
-                    client.downloadModelIfNeeded()
+                    client
+                        .downloadModelIfNeeded()
                         .addOnSuccessListener {
-                            client.translate(text)
+                            client
+                                .translate(text)
                                 .addOnSuccessListener {
                                     value = UiState.Success(it)
-                                }
-                                .addOnFailureListener {
+                                }.addOnFailureListener {
                                     value = UiState.Error(it)
                                 }
-                        }
-                        .addOnFailureListener {
+                        }.addOnFailureListener {
                             value = UiState.Error(it)
                         }
                 }

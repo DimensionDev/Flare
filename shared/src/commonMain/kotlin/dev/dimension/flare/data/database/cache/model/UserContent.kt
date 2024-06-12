@@ -11,8 +11,9 @@ import kotlinx.serialization.Serializable
 sealed interface UserContent {
     @Serializable
     @SerialName("Mastodon")
-    data class Mastodon internal constructor(internal val data: dev.dimension.flare.data.network.mastodon.api.model.Account) :
-        UserContent
+    data class Mastodon internal constructor(
+        internal val data: dev.dimension.flare.data.network.mastodon.api.model.Account,
+    ) : UserContent
 
     @Serializable
     @SerialName("Misskey")

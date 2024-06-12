@@ -57,21 +57,24 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
                 UiPoll(
                     id = poll.id ?: "",
                     options =
-                        poll.options?.map { option ->
-                            UiPoll.Option(
-                                title = option.title.orEmpty(),
-                                votesCount = option.votesCount ?: 0,
-                                percentage =
-                                    option.votesCount?.toFloat()?.div(
-                                        if (poll.multiple == true) {
-                                            poll.votersCount ?: 1
-                                        } else {
-                                            poll.votesCount
-                                                ?: 1
-                                        },
-                                    )?.takeUnless { it.isNaN() } ?: 0f,
-                            )
-                        }?.toPersistentList() ?: persistentListOf(),
+                        poll.options
+                            ?.map { option ->
+                                UiPoll.Option(
+                                    title = option.title.orEmpty(),
+                                    votesCount = option.votesCount ?: 0,
+                                    percentage =
+                                        option.votesCount
+                                            ?.toFloat()
+                                            ?.div(
+                                                if (poll.multiple == true) {
+                                                    poll.votersCount ?: 1
+                                                } else {
+                                                    poll.votesCount
+                                                        ?: 1
+                                                },
+                                            )?.takeUnless { it.isNaN() } ?: 0f,
+                                )
+                            }?.toPersistentList() ?: persistentListOf(),
                     expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
                     multiple = poll.multiple ?: false,
                     ownVotes = poll.ownVotes?.toPersistentList() ?: persistentListOf(),
@@ -119,9 +122,10 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
                 }
             } ?: UiStatus.Mastodon.Visibility.Public,
         media =
-            mediaAttachments?.mapNotNull { attachment ->
-                attachment.toUi(sensitive = sensitive ?: false)
-            }?.toPersistentList() ?: persistentListOf(),
+            mediaAttachments
+                ?.mapNotNull { attachment ->
+                    attachment.toUi(sensitive = sensitive ?: false)
+                }?.toPersistentList() ?: persistentListOf(),
         reaction =
             UiStatus.Mastodon.Reaction(
                 liked = favourited ?: false,
@@ -133,8 +137,8 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
     )
 }
 
-private fun Attachment.toUi(sensitive: Boolean): UiMedia? {
-    return when (type) {
+private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
+    when (type) {
         MediaType.Image ->
             UiMedia.Image(
                 url = url.orEmpty(),
@@ -172,7 +176,6 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? {
 
         else -> null
     }
-}
 
 internal fun Account.toUi(host: String): UiUser.Mastodon {
     val remoteHost =
@@ -201,15 +204,18 @@ internal fun Account.toUi(host: String): UiUser.Mastodon {
         handleInternal = username.orEmpty(),
         remoteHost = remoteHost,
         fields =
-            fields?.map {
-                it.name.orEmpty() to it.value.orEmpty()
-            }?.filter { it.first.isNotEmpty() }?.toMap()?.toPersistentMap() ?: persistentMapOf(),
+            fields
+                ?.map {
+                    it.name.orEmpty() to it.value.orEmpty()
+                }?.filter { it.first.isNotEmpty() }
+                ?.toMap()
+                ?.toPersistentMap() ?: persistentMapOf(),
         raw = this,
     )
 }
 
-internal fun RelationshipResponse.toUi(): UiRelation.Mastodon {
-    return UiRelation.Mastodon(
+internal fun RelationshipResponse.toUi(): UiRelation.Mastodon =
+    UiRelation.Mastodon(
         following = following ?: false,
         isFans = followedBy ?: false,
         blocking = blocking ?: false,
@@ -217,10 +223,9 @@ internal fun RelationshipResponse.toUi(): UiRelation.Mastodon {
         requested = requested ?: false,
         domainBlocking = domainBlocking ?: false,
     )
-}
 
-internal fun DbEmoji.toUi(): List<UiEmoji> {
-    return when (content) {
+internal fun DbEmoji.toUi(): List<UiEmoji> =
+    when (content) {
         is EmojiContent.Mastodon -> {
             content.data.filter { it.visibleInPicker == true }.map {
                 UiEmoji(
@@ -239,4 +244,3 @@ internal fun DbEmoji.toUi(): List<UiEmoji> {
             }
         }
     }
-}

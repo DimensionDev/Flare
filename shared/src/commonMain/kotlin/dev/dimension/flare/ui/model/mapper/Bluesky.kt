@@ -25,14 +25,13 @@ import kotlinx.serialization.json.jsonPrimitive
 internal fun FeedViewPostReasonUnion.toUi(
     accountKey: MicroBlogKey,
     data: PostView,
-): UiStatus.Bluesky {
-    return data.toUi(accountKey).copy(
+): UiStatus.Bluesky =
+    data.toUi(accountKey).copy(
         repostBy = (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
     )
-}
 
-internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
-    return with(post) {
+internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky =
+    with(post) {
         UiStatus.Bluesky(
             user = author.toUi(accountKey),
             statusKey =
@@ -41,7 +40,14 @@ internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
                     host = accountKey.host,
                 ),
             accountKey = accountKey,
-            content = record.jsonElement().jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
+            content =
+                record
+                    .jsonElement()
+                    .jsonObjectOrNull
+                    ?.get("text")
+                    ?.jsonPrimitive
+                    ?.content
+                    .orEmpty(),
             indexedAt = indexedAt,
             repostBy = (reason as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
             quote = findQuote(accountKey, this),
@@ -62,10 +68,9 @@ internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
             uri = uri.atUri,
         )
     }
-}
 
-internal fun ListNotificationsNotification.toUi(accountKey: MicroBlogKey): UiStatus.BlueskyNotification {
-    return UiStatus.BlueskyNotification(
+internal fun ListNotificationsNotification.toUi(accountKey: MicroBlogKey): UiStatus.BlueskyNotification =
+    UiStatus.BlueskyNotification(
         user = author.toUi(accountKey),
         statusKey =
             MicroBlogKey(
@@ -76,10 +81,9 @@ internal fun ListNotificationsNotification.toUi(accountKey: MicroBlogKey): UiSta
         reason = reason,
         indexedAt = indexedAt,
     )
-}
 
-internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
-    return UiStatus.Bluesky(
+internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky =
+    UiStatus.Bluesky(
         user = author.toUi(accountKey),
         statusKey =
             MicroBlogKey(
@@ -87,7 +91,14 @@ internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
                 host = accountKey.host,
             ),
         accountKey = accountKey,
-        content = record.jsonElement().jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
+        content =
+            record
+                .jsonElement()
+                .jsonObjectOrNull
+                ?.get("text")
+                ?.jsonPrimitive
+                ?.content
+                .orEmpty(),
         indexedAt = indexedAt,
         repostBy = null,
         quote = findQuote(accountKey, this),
@@ -107,10 +118,9 @@ internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky {
         cid = cid.cid,
         uri = uri.atUri,
     )
-}
 
-private fun findCard(postView: PostView): UiCard? {
-    return if (postView.embed is PostViewEmbedUnion.ExternalView) {
+private fun findCard(postView: PostView): UiCard? =
+    if (postView.embed is PostViewEmbedUnion.ExternalView) {
         val embed = postView.embed as PostViewEmbedUnion.ExternalView
         UiCard(
             url = embed.value.external.uri.uri,
@@ -131,10 +141,9 @@ private fun findCard(postView: PostView): UiCard? {
     } else {
         null
     }
-}
 
-private fun findMedias(postView: PostView): ImmutableList<UiMedia> {
-    return if (postView.embed is PostViewEmbedUnion.ImagesView) {
+private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
+    if (postView.embed is PostViewEmbedUnion.ImagesView) {
         val embed = postView.embed as PostViewEmbedUnion.ImagesView
         embed.value.images.map {
             UiMedia.Image(
@@ -149,13 +158,12 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> {
     } else {
         emptyList()
     }.toImmutableList()
-}
 
 private fun findQuote(
     accountKey: MicroBlogKey,
     postView: PostView,
-): UiStatus.Bluesky? {
-    return when (val embed = postView.embed) {
+): UiStatus.Bluesky? =
+    when (val embed = postView.embed) {
         is PostViewEmbedUnion.RecordView -> toUi(accountKey, embed.value.record)
         is PostViewEmbedUnion.RecordWithMediaView ->
             toUi(
@@ -165,13 +173,12 @@ private fun findQuote(
 
         else -> null
     }
-}
 
 private fun toUi(
     accountKey: MicroBlogKey,
     record: RecordViewRecordUnion,
-): UiStatus.Bluesky? {
-    return when (record) {
+): UiStatus.Bluesky? =
+    when (record) {
         is RecordViewRecordUnion.ViewRecord ->
             UiStatus.Bluesky(
                 accountKey = accountKey,
@@ -180,52 +187,62 @@ private fun toUi(
                         id = record.value.uri.atUri,
                         host = accountKey.host,
                     ),
-                content = record.value.value.jsonElement().jsonObjectOrNull?.get("text")?.jsonPrimitive?.content.orEmpty(),
+                content =
+                    record.value.value
+                        .jsonElement()
+                        .jsonObjectOrNull
+                        ?.get("text")
+                        ?.jsonPrimitive
+                        ?.content
+                        .orEmpty(),
                 indexedAt = record.value.indexedAt,
                 repostBy = null,
                 quote = null,
                 medias =
-                    record.value.embeds.mapNotNull {
-                        when (it) {
-                            is RecordViewRecordEmbedUnion.ImagesView ->
-                                it.value.images.map {
-                                    UiMedia.Image(
-                                        url = it.fullsize.uri,
-                                        previewUrl = it.thumb.uri,
-                                        description = it.alt,
-                                        width = it.aspectRatio?.width?.toFloat() ?: 0f,
-                                        height = it.aspectRatio?.height?.toFloat() ?: 0f,
-                                        sensitive = false,
-                                    )
-                                }
+                    record.value.embeds
+                        .mapNotNull {
+                            when (it) {
+                                is RecordViewRecordEmbedUnion.ImagesView ->
+                                    it.value.images.map {
+                                        UiMedia.Image(
+                                            url = it.fullsize.uri,
+                                            previewUrl = it.thumb.uri,
+                                            description = it.alt,
+                                            width = it.aspectRatio?.width?.toFloat() ?: 0f,
+                                            height = it.aspectRatio?.height?.toFloat() ?: 0f,
+                                            sensitive = false,
+                                        )
+                                    }
 
-                            else -> null
-                        }
-                    }.flatten().toImmutableList(),
+                                else -> null
+                            }
+                        }.flatten()
+                        .toImmutableList(),
                 card =
-                    record.value.embeds.mapNotNull {
-                        when (it) {
-                            is RecordViewRecordEmbedUnion.ExternalView ->
-                                UiCard(
-                                    url = it.value.external.uri.uri,
-                                    title = it.value.external.title,
-                                    description = it.value.external.description,
-                                    media =
-                                        it.value.external.thumb?.let {
-                                            UiMedia.Image(
-                                                url = it.uri,
-                                                previewUrl = it.uri,
-                                                description = null,
-                                                width = 0f,
-                                                height = 0f,
-                                                sensitive = false,
-                                            )
-                                        },
-                                )
+                    record.value.embeds
+                        .mapNotNull {
+                            when (it) {
+                                is RecordViewRecordEmbedUnion.ExternalView ->
+                                    UiCard(
+                                        url = it.value.external.uri.uri,
+                                        title = it.value.external.title,
+                                        description = it.value.external.description,
+                                        media =
+                                            it.value.external.thumb?.let {
+                                                UiMedia.Image(
+                                                    url = it.uri,
+                                                    previewUrl = it.uri,
+                                                    description = null,
+                                                    width = 0f,
+                                                    height = 0f,
+                                                    sensitive = false,
+                                                )
+                                            },
+                                    )
 
-                            else -> null
-                        }
-                    }.firstOrNull(),
+                                else -> null
+                            }
+                        }.firstOrNull(),
                 user = record.value.author.toUi(accountKey),
                 // TODO: add reaction
                 reaction =
@@ -245,7 +262,6 @@ private fun toUi(
 
         else -> null
     }
-}
 
 internal fun ProfileViewDetailed.toUi(accountKey: MicroBlogKey): UiUser =
     UiUser.Bluesky(
@@ -275,8 +291,8 @@ internal fun ProfileViewDetailed.toUi(accountKey: MicroBlogKey): UiUser =
         accountKey = accountKey,
     )
 
-internal fun ProfileViewBasic.toUi(accountKey: MicroBlogKey): UiUser.Bluesky {
-    return UiUser.Bluesky(
+internal fun ProfileViewBasic.toUi(accountKey: MicroBlogKey): UiUser.Bluesky =
+    UiUser.Bluesky(
         userKey =
             MicroBlogKey(
                 id = did.did,
@@ -302,10 +318,9 @@ internal fun ProfileViewBasic.toUi(accountKey: MicroBlogKey): UiUser.Bluesky {
             ),
         accountKey = accountKey,
     )
-}
 
-internal fun ProfileView.toUi(accountKey: MicroBlogKey): UiUser.Bluesky {
-    return UiUser.Bluesky(
+internal fun ProfileView.toUi(accountKey: MicroBlogKey): UiUser.Bluesky =
+    UiUser.Bluesky(
         userKey =
             MicroBlogKey(
                 id = did.did,
@@ -331,4 +346,3 @@ internal fun ProfileView.toUi(accountKey: MicroBlogKey): UiUser.Bluesky {
             ),
         accountKey = accountKey,
     )
-}

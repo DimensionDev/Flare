@@ -4,12 +4,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.LayoutDirection
 
-operator fun PaddingValues.plus(contentPadding: PaddingValues): PaddingValues {
-    return AdditionalPaddingValues(
+operator fun PaddingValues.plus(contentPadding: PaddingValues): PaddingValues =
+    AdditionalPaddingValues(
         this,
         contentPadding,
     )
-}
 
 @Stable
 private class AdditionalPaddingValues(
@@ -32,7 +31,8 @@ private class AdditionalPaddingValues(
 
     override fun equals(other: Any?): Boolean =
         this === other ||
-            other is AdditionalPaddingValues && base == other.base &&
+            other is AdditionalPaddingValues &&
+            base == other.base &&
             additional == other.additional
 
     override fun hashCode(): Int {

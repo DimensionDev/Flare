@@ -90,8 +90,8 @@ suspend fun mastodonLoginUseCase(
     domain: String,
     applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,
-): Result<Unit> {
-    return runCatching {
+): Result<Unit> =
+    runCatching {
         val baseUrl =
             if (domain.startsWith("http://", ignoreCase = true) ||
                 domain.startsWith(
@@ -131,4 +131,3 @@ suspend fun mastodonLoginUseCase(
         val target = service.getWebOAuthUrl(application)
         launchOAuth(target)
     }
-}

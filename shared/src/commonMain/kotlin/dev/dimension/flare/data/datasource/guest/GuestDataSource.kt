@@ -47,11 +47,10 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return Pager(PagingConfig(pageSize = pageSize)) {
+    ): Flow<PagingData<UiStatus>> =
+        Pager(PagingConfig(pageSize = pageSize)) {
             GuestTimelinePagingSource()
         }.flow
-    }
 
     override fun notification(
         type: NotificationFilter,
@@ -70,7 +69,8 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         return Cacheable(
             fetchSource = {
                 val user =
-                    GuestMastodonService.lookupUserByAcct("$name@$host")
+                    GuestMastodonService
+                        .lookupUserByAcct("$name@$host")
                         ?.toDbUser(GuestMastodonService.host) ?: throw Exception("User not found")
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
@@ -82,7 +82,8 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Mastodon)
+                database.dbUserQueries
+                    .findByHandleAndHost(name, host, PlatformType.Mastodon)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi(account.accountKey) }
@@ -105,16 +106,16 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByKey(userKey).asFlow()
+                database.dbUserQueries
+                    .findByKey(userKey)
+                    .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi(account.accountKey) }
             },
         )
     }
 
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        return flowOf(UiState.Error(Exception("Not implemented")))
-    }
+    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> = flowOf(UiState.Error(Exception("Not implemented")))
 
     override fun userTimeline(
         userKey: MicroBlogKey,
@@ -122,31 +123,30 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return Pager(PagingConfig(pageSize = pageSize)) {
+    ): Flow<PagingData<UiStatus>> =
+        Pager(PagingConfig(pageSize = pageSize)) {
             GuestUserTimelinePagingSource(userKey.id, onlyMedia = mediaOnly)
         }.flow
-    }
 
     override fun context(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return Pager(PagingConfig(pageSize = pageSize)) {
+    ): Flow<PagingData<UiStatus>> =
+        Pager(PagingConfig(pageSize = pageSize)) {
             GuestStatusDetailPagingSource(statusKey, statusOnly = false)
         }.flow
-    }
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
         val pagingKey = "status_only_$statusKey"
         return MemCacheable(
             key = pagingKey,
             fetchSource = {
-                GuestMastodonService.lookupStatus(
-                    statusKey.id,
-                ).toUi(GuestMastodonService.GuestKey)
+                GuestMastodonService
+                    .lookupStatus(
+                        statusKey.id,
+                    ).toUi(GuestMastodonService.GuestKey)
             },
         )
     }
@@ -165,18 +165,17 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return Pager(PagingConfig(pageSize = pageSize)) {
+    ): Flow<PagingData<UiStatus>> =
+        Pager(PagingConfig(pageSize = pageSize)) {
             GuestSearchStatusPagingSource(query)
         }.flow
-    }
 
     override fun searchUser(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> {
-        return Pager(
+    ): Flow<PagingData<UiUser>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
@@ -185,10 +184,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 query,
             )
         }.flow
-    }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
-        return Pager(
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
@@ -196,31 +194,26 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 GuestMastodonService.host,
             )
         }.flow
-    }
 
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return Pager(PagingConfig(pageSize = pageSize)) {
+    ): Flow<PagingData<UiStatus>> =
+        Pager(PagingConfig(pageSize = pageSize)) {
             GuestDiscoverStatusPagingSource()
         }.flow
-    }
 
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
-        return Pager(
+    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendHashtagPagingSource(
                 GuestMastodonService,
             )
         }.flow
-    }
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
-        return ComposeConfig()
-    }
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig = ComposeConfig()
 
     override suspend fun follow(
         userKey: MicroBlogKey,
@@ -229,7 +222,5 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         TODO("Not yet implemented")
     }
 
-    override fun profileActions(): List<ProfileAction> {
-        return emptyList()
-    }
+    override fun profileActions(): List<ProfileAction> = emptyList()
 }

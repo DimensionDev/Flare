@@ -48,8 +48,12 @@ internal object XQT {
             tweet.flatMap {
                 listOfNotNull(
                     it.tweets.toDbStatus(accountKey),
-                    it.tweets.tweetResults.result?.getRetweet()?.toDbStatus(accountKey),
-                    it.tweets.tweetResults.result?.getQuoted()?.toDbStatus(accountKey),
+                    it.tweets.tweetResults.result
+                        ?.getRetweet()
+                        ?.toDbStatus(accountKey),
+                    it.tweets.tweetResults.result
+                        ?.getQuoted()
+                        ?.toDbStatus(accountKey),
                 )
             }
         val user = tweet.map { it.tweets.toDbUser() }
@@ -85,21 +89,22 @@ internal object XQT {
     }
 }
 
-private fun TweetUnion.getRetweet(): TweetUnion? {
-    return when (this) {
+private fun TweetUnion.getRetweet(): TweetUnion? =
+    when (this) {
         is Tweet -> this.legacy?.retweetedStatusResult?.result
         is TweetTombstone -> null
-        is TweetWithVisibilityResults -> this.tweet.legacy?.retweetedStatusResult?.result
+        is TweetWithVisibilityResults ->
+            this.tweet.legacy
+                ?.retweetedStatusResult
+                ?.result
     }
-}
 
-private fun TweetUnion.getQuoted(): TweetUnion? {
-    return when (this) {
+private fun TweetUnion.getQuoted(): TweetUnion? =
+    when (this) {
         is Tweet -> this.quotedStatusResult?.result
         is TweetTombstone -> null
         is TweetWithVisibilityResults -> this.tweet.quotedStatusResult?.result
     }
-}
 
 private fun XQTTimeline.toDbPagingTimeline(
     accountKey: MicroBlogKey,
@@ -116,13 +121,12 @@ private fun XQTTimeline.toDbPagingTimeline(
     )
 }
 
-private fun TimelineTweet.toDbStatus(accountKey: MicroBlogKey): DbStatus {
-    return tweetResults.result?.toDbStatus(accountKey)
+private fun TimelineTweet.toDbStatus(accountKey: MicroBlogKey): DbStatus =
+    tweetResults.result?.toDbStatus(accountKey)
         ?: throw IllegalStateException("Tweet should not be null")
-}
 
-private fun TweetUnion.toDbStatus(accountKey: MicroBlogKey): DbStatus? {
-    return when (this) {
+private fun TweetUnion.toDbStatus(accountKey: MicroBlogKey): DbStatus? =
+    when (this) {
         is Tweet -> toDbStatus(this, accountKey)
         // You’re unable to view this Post because
         // this account owner limits who can view their Posts. Learn more
@@ -130,7 +134,6 @@ private fun TweetUnion.toDbStatus(accountKey: MicroBlogKey): DbStatus? {
         is TweetTombstone -> null
         is TweetWithVisibilityResults -> toDbStatus(this.tweet, accountKey)
     }
-}
 
 private fun toDbStatus(
     tweet: Tweet,
@@ -142,8 +145,7 @@ private fun toDbStatus(
             ?.result
             ?.let {
                 it as? User
-            }
-            ?.toDbUser() ?: throw IllegalStateException("Tweet.user should not be null")
+            }?.toDbUser() ?: throw IllegalStateException("Tweet.user should not be null")
     return DbStatus(
         id = 0,
         status_key =
@@ -237,9 +239,10 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
             is TimelineTimelineCursor -> emptyList()
             is TimelineTimelineItem -> listOf(entry.content.itemContent to entry.sortIndex.toLong())
             is TimelineTimelineModule ->
-                entry.content.items?.map {
-                    it.item.itemContent to entry.sortIndex.toLong()
-                }.orEmpty()
+                entry.content.items
+                    ?.map {
+                        it.item.itemContent to entry.sortIndex.toLong()
+                    }.orEmpty()
         }
     }.mapNotNull { pair ->
         pair.first.let {
@@ -286,28 +289,30 @@ internal fun List<InstructionUnion>.cursor() =
         }
     }.firstOrNull()
 
-internal fun TopLevel.tweets(): List<XQTTimeline> {
-    return timeline
+internal fun TopLevel.tweets(): List<XQTTimeline> =
+    timeline
         ?.instructions
         ?.asSequence()
         ?.flatMap {
             it.addEntries?.entries.orEmpty()
-        }
-        ?.mapNotNull { entry ->
-            val id = entry.content?.item?.content?.tweet?.id
+        }?.mapNotNull { entry ->
+            val id =
+                entry.content
+                    ?.item
+                    ?.content
+                    ?.tweet
+                    ?.id
             val index = entry.sortIndex?.toLong()
             if (id != null && index != null) {
                 id to index
             } else {
                 null
             }
-        }
-        ?.mapNotNull { (id, index) ->
+        }?.mapNotNull { (id, index) ->
             globalObjects?.tweets?.get(id)?.let {
                 it to index
             }
-        }
-        ?.map { (tweetLegacy, index) ->
+        }?.map { (tweetLegacy, index) ->
             // build tweet
             Tweet(
                 restId = tweetLegacy.idStr,
@@ -328,8 +333,7 @@ internal fun TopLevel.tweets(): List<XQTTimeline> {
                     },
                 legacy = tweetLegacy,
             ) to index
-        }
-        ?.map { (tweet, index) ->
+        }?.map { (tweet, index) ->
             XQTTimeline(
                 tweets =
                     TimelineTweet(
@@ -341,10 +345,8 @@ internal fun TopLevel.tweets(): List<XQTTimeline> {
                 id = tweet.restId,
                 sortedIndex = index,
             )
-        }
-        ?.toList()
+        }?.toList()
         .orEmpty()
-}
 
 internal fun TopLevel.notifications(accountKey: MicroBlogKey): List<UiStatus.XQTNotification> {
     return timeline
@@ -352,11 +354,9 @@ internal fun TopLevel.notifications(accountKey: MicroBlogKey): List<UiStatus.XQT
         ?.asSequence()
         ?.flatMap {
             it.addEntries?.entries.orEmpty()
-        }
-        ?.mapNotNull { entry ->
+        }?.mapNotNull { entry ->
             entry.content?.item?.content
-        }
-        ?.mapNotNull { content ->
+        }?.mapNotNull { content ->
             val notification = content.notification
             val mentionTweet = content.tweet
             if (notification != null) {
@@ -365,13 +365,16 @@ internal fun TopLevel.notifications(accountKey: MicroBlogKey): List<UiStatus.XQT
                 val message = data?.message?.text
                 val users =
                     data?.template?.aggregateUserActionsV1?.fromUsers?.mapNotNull { ref ->
-                        globalObjects?.users?.get(ref.user?.id)?.let { userLegacy ->
-                            User(
-                                legacy = userLegacy,
-                                isBlueVerified = userLegacy.verified,
-                                restId = ref.user?.id.orEmpty(),
-                            )
-                        }?.toUi(accountKey)
+                        globalObjects
+                            ?.users
+                            ?.get(ref.user?.id)
+                            ?.let { userLegacy ->
+                                User(
+                                    legacy = userLegacy,
+                                    isBlueVerified = userLegacy.verified,
+                                    restId = ref.user?.id.orEmpty(),
+                                )
+                            }?.toUi(accountKey)
                     }
                 val notificationTweet =
                     data?.template?.aggregateUserActionsV1?.targetObjects?.mapNotNull {
@@ -454,8 +457,7 @@ internal fun TopLevel.notifications(accountKey: MicroBlogKey): List<UiStatus.XQT
             } else {
                 null
             }
-        }
-        ?.toList()
+        }?.toList()
         .orEmpty()
 }
 
@@ -469,27 +471,26 @@ internal fun List<InstructionUnion>.users(): List<User> =
                             is TimelineTimelineCursor -> emptyList()
                             is TimelineTimelineItem -> listOf(entry.content.itemContent)
                             is TimelineTimelineModule ->
-                                entry.content.items?.map {
-                                    it.item.itemContent
-                                }.orEmpty()
+                                entry.content.items
+                                    ?.map {
+                                        it.item.itemContent
+                                    }.orEmpty()
                         }
                     }
 
             else -> emptyList()
         }
+    }.mapNotNull { content ->
+        when (content) {
+            is TimelineUser -> content.userResults.result
+            else -> null
+        }
+    }.mapNotNull {
+        when (it) {
+            is User -> it
+            is UserUnavailable -> null
+        }
     }
-        .mapNotNull { content ->
-            when (content) {
-                is TimelineUser -> content.userResults.result
-                else -> null
-            }
-        }
-        .mapNotNull {
-            when (it) {
-                is User -> it
-                is UserUnavailable -> null
-            }
-        }
 
 internal fun TopLevel.cursor(): String? =
     timeline
@@ -497,14 +498,10 @@ internal fun TopLevel.cursor(): String? =
         ?.asSequence()
         ?.flatMap {
             it.addEntries?.entries.orEmpty()
-        }
-        ?.mapNotNull {
+        }?.mapNotNull {
             it.content?.operation?.cursor
-        }
-        ?.filter {
+        }?.filter {
             it.cursorType == CursorType.bottom
-        }
-        ?.map {
+        }?.map {
             it.value
-        }
-        ?.firstOrNull()
+        }?.firstOrNull()

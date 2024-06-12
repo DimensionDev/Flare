@@ -128,8 +128,7 @@ internal fun StatusMediaComponent(
                             } else {
                                 it
                             }
-                        }
-                        .let {
+                        }.let {
                             if (hideSensitive) {
                                 it.clickable {
                                     hideSensitive = false
@@ -137,8 +136,7 @@ internal fun StatusMediaComponent(
                             } else {
                                 it
                             }
-                        }
-                        .padding(16.dp),
+                        }.padding(16.dp),
             ) {
                 AnimatedContent(
                     hideSensitive,
@@ -279,8 +277,7 @@ fun MediaItem(
                                             .background(
                                                 Color.Black.copy(alpha = 0.5f),
                                                 shape = MaterialTheme.shapes.small,
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            ).padding(horizontal = 8.dp, vertical = 4.dp)
                                             .align(Alignment.BottomStart),
                                     contentAlignment = Alignment.Center,
                                 ) {
@@ -403,7 +400,8 @@ fun Context.observeWifiStateAsFlow() =
         val connectivityManager =
             getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkRequest =
-            NetworkRequest.Builder()
+            NetworkRequest
+                .Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                 .build()
         val networkCallback =

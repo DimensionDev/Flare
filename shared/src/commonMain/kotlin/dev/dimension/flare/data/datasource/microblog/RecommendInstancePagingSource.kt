@@ -9,12 +9,10 @@ import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.ui.model.UiInstance
 
 internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
-    override fun getRefreshKey(state: PagingState<Int, UiInstance>): Int? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Int, UiInstance>): Int? = null
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiInstance> {
-        return try {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiInstance> =
+        try {
             val instances =
                 runCatching {
                     JoinMastodonService.servers().map {
@@ -83,5 +81,4 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
-    }
 }

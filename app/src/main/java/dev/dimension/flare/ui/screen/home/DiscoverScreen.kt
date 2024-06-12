@@ -172,43 +172,44 @@ private fun DiscoverScreen(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                                     ) {
-                                        users.onSuccess {
-                                            items(
-                                                users.itemCount,
-                                                key = users.itemKey { it.itemKey },
-                                            ) {
-                                                val user = users[it]
-                                                Card(
-                                                    modifier =
-                                                        Modifier
-                                                            .width(256.dp),
+                                        users
+                                            .onSuccess {
+                                                items(
+                                                    users.itemCount,
+                                                    key = users.itemKey { it.itemKey },
                                                 ) {
-                                                    if (user != null) {
-                                                        CommonStatusHeaderComponent(
-                                                            data = user,
-                                                            onUserClick = onUserClick,
-                                                            modifier = Modifier.padding(8.dp),
-                                                        )
-                                                    } else {
+                                                    val user = users[it]
+                                                    Card(
+                                                        modifier =
+                                                            Modifier
+                                                                .width(256.dp),
+                                                    ) {
+                                                        if (user != null) {
+                                                            CommonStatusHeaderComponent(
+                                                                data = user,
+                                                                onUserClick = onUserClick,
+                                                                modifier = Modifier.padding(8.dp),
+                                                            )
+                                                        } else {
+                                                            UserPlaceholder(
+                                                                modifier = Modifier.padding(8.dp),
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }.onLoading {
+                                                items(10) {
+                                                    Card(
+                                                        modifier =
+                                                            Modifier
+                                                                .width(256.dp),
+                                                    ) {
                                                         UserPlaceholder(
                                                             modifier = Modifier.padding(8.dp),
                                                         )
                                                     }
                                                 }
                                             }
-                                        }.onLoading {
-                                            items(10) {
-                                                Card(
-                                                    modifier =
-                                                        Modifier
-                                                            .width(256.dp),
-                                                ) {
-                                                    UserPlaceholder(
-                                                        modifier = Modifier.padding(8.dp),
-                                                    )
-                                                }
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -241,33 +242,52 @@ private fun DiscoverScreen(
                                         modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                                         maxItemsInEachRow = maxItemsInEachRow,
                                     ) {
-                                        hashtags.onSuccess {
-                                            repeat(
-                                                hashtags.itemCount,
-                                            ) {
-                                                val hashtag = hashtags[it]
-                                                Card(
-                                                    modifier = Modifier.weight(1f),
-                                                    onClick = {
-                                                        hashtag?.searchContent?.let { it1 ->
-                                                            state.commitSearch(
-                                                                it1,
-                                                            )
-                                                        }
-                                                    },
+                                        hashtags
+                                            .onSuccess {
+                                                repeat(
+                                                    hashtags.itemCount,
                                                 ) {
-                                                    Box(
-                                                        modifier =
-                                                            Modifier
-                                                                .padding(8.dp),
+                                                    val hashtag = hashtags[it]
+                                                    Card(
+                                                        modifier = Modifier.weight(1f),
+                                                        onClick = {
+                                                            hashtag?.searchContent?.let { it1 ->
+                                                                state.commitSearch(
+                                                                    it1,
+                                                                )
+                                                            }
+                                                        },
                                                     ) {
-                                                        if (hashtag != null) {
-                                                            Text(
-                                                                text = hashtag.hashtag,
-                                                                maxLines = 1,
-                                                                overflow = TextOverflow.Ellipsis,
-                                                            )
-                                                        } else {
+                                                        Box(
+                                                            modifier =
+                                                                Modifier
+                                                                    .padding(8.dp),
+                                                        ) {
+                                                            if (hashtag != null) {
+                                                                Text(
+                                                                    text = hashtag.hashtag,
+                                                                    maxLines = 1,
+                                                                    overflow = TextOverflow.Ellipsis,
+                                                                )
+                                                            } else {
+                                                                Text(
+                                                                    text = "Lorem Ipsum is simply dummy text",
+                                                                    modifier = Modifier.placeholder(true),
+                                                                    maxLines = 1,
+                                                                    overflow = TextOverflow.Ellipsis,
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }.onLoading {
+                                                repeat(10) {
+                                                    Card(
+                                                        modifier = Modifier.weight(1f),
+                                                    ) {
+                                                        Box(
+                                                            modifier = Modifier.padding(8.dp),
+                                                        ) {
                                                             Text(
                                                                 text = "Lorem Ipsum is simply dummy text",
                                                                 modifier = Modifier.placeholder(true),
@@ -278,24 +298,6 @@ private fun DiscoverScreen(
                                                     }
                                                 }
                                             }
-                                        }.onLoading {
-                                            repeat(10) {
-                                                Card(
-                                                    modifier = Modifier.weight(1f),
-                                                ) {
-                                                    Box(
-                                                        modifier = Modifier.padding(8.dp),
-                                                    ) {
-                                                        Text(
-                                                            text = "Lorem Ipsum is simply dummy text",
-                                                            modifier = Modifier.placeholder(true),
-                                                            maxLines = 1,
-                                                            overflow = TextOverflow.Ellipsis,
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -344,7 +346,8 @@ private fun discoverPresenter(
         val isInSearchMode = query.isNotEmpty()
         val refreshing =
             if (!isInSearchMode) {
-                state.users is UiState.Loading || state.status is UiState.Loading ||
+                state.users is UiState.Loading ||
+                    state.status is UiState.Loading ||
                     state.hashtags is UiState.Loading ||
                     state.users is UiState.Success &&
                     (state.users as UiState.Success<LazyPagingItemsProxy<UiUser>>).data.isRefreshing ||
@@ -353,7 +356,8 @@ private fun discoverPresenter(
                     state.hashtags is UiState.Success &&
                     (state.hashtags as UiState.Success<LazyPagingItemsProxy<UiHashtag>>).data.isRefreshing
             } else {
-                searchState.users is UiState.Loading || searchState.status is UiState.Loading ||
+                searchState.users is UiState.Loading ||
+                    searchState.status is UiState.Loading ||
                     searchState.users is UiState.Success &&
                     (searchState.users as UiState.Success<LazyPagingItemsProxy<UiUser>>).data.isRefreshing ||
                     searchState.status is UiState.Success &&

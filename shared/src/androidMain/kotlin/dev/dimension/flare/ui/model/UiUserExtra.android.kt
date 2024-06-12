@@ -13,8 +13,8 @@ actual data class UiUserExtra(
 val UiUser.nameDirection get() = extra.nameDirection
 val UiUser.descriptionDirection get() = extra.descriptionDirection
 
-internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
-    return when (user) {
+internal actual fun createUiUserExtra(user: UiUser): UiUserExtra =
+    when (user) {
         is UiUser.Mastodon ->
             UiUserExtra(
                 nameDirection =
@@ -116,4 +116,3 @@ internal actual fun createUiUserExtra(user: UiUser): UiUserExtra {
                 descriptionDirection = LayoutDirection.Ltr,
             )
     }
-}

@@ -66,7 +66,5 @@ internal class MisskeyOauthService(
         return url.buildString()
     }
 
-    suspend fun check(): MiAuthCheckResponse {
-        return check(session)
-    }
+    suspend fun check(): MiAuthCheckResponse = check(session)
 }

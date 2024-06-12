@@ -30,13 +30,15 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
         val activeAccount by activeAccountPresenter()
         val user =
             accounts.map {
-                it.map { account ->
-                    accountServiceProvider(accountType = AccountType.Specific(account.accountKey)).flatMap { service ->
-                        remember(account.accountKey) {
-                            service.userById(account.accountKey.id)
-                        }.collectAsState().toUi()
-                    }
-                }.toImmutableList().toImmutableListWrapper()
+                it
+                    .map { account ->
+                        accountServiceProvider(accountType = AccountType.Specific(account.accountKey)).flatMap { service ->
+                            remember(account.accountKey) {
+                                service.userById(account.accountKey.id)
+                            }.collectAsState().toUi()
+                        }
+                    }.toImmutableList()
+                    .toImmutableListWrapper()
             }
         return object : AccountsState(
             accounts = user,
@@ -70,23 +72,13 @@ data class ImmutableListWrapper<T : Any>(
     val size: Int
         get() = data.size
 
-    operator fun get(index: Int): T {
-        return data[index]
-    }
+    operator fun get(index: Int): T = data[index]
 
-    fun indexOf(element: T): Int {
-        return data.indexOf(element)
-    }
+    fun indexOf(element: T): Int = data.indexOf(element)
 
-    fun contains(element: T): Boolean {
-        return data.contains(element)
-    }
+    fun contains(element: T): Boolean = data.contains(element)
 
-    fun toImmutableList(): ImmutableList<T> {
-        return data
-    }
+    fun toImmutableList(): ImmutableList<T> = data
 }
 
-fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> {
-    return ImmutableListWrapper(this)
-}
+fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> = ImmutableListWrapper(this)

@@ -2,35 +2,32 @@ import SwiftUI
 import shared
 
 struct StorageScreen: View {
-    @State var viewModel = StorageViewModel()
+    let presenter = StoragePresenter()
     var body: some View {
-        List {
-            Button(role: .destructive) {
-                viewModel.model.clearCache()
-            } label: {
-                HStack(alignment: .center) {
-                    Image(systemName: "trash")
-                        .font(.title)
-                    Spacer()
-                        .frame(width: 16)
-                    VStack(alignment: .leading) {
-                        Text("storage_clear_cache")
-                        Text(
-                            "\(viewModel.model.userCount) users, \(viewModel.model.statusCount) statuses will be deleted"
-                        )
-                        .font(.caption)
+        Observing(presenter.models) { state in
+            List {
+                Button(role: .destructive) {
+                    state.clearCache()
+                } label: {
+                    HStack(alignment: .center) {
+                        Image(systemName: "trash")
+                            .font(.title)
+                        Spacer()
+                            .frame(width: 16)
+                        VStack(alignment: .leading) {
+                            Text("storage_clear_cache")
+                            Text(
+                                "\(state.userCount) users, \(state.statusCount) statuses will be deleted"
+                            )
+                            .font(.caption)
+                        }
                     }
                 }
+                .buttonStyle(.borderless)
             }
-            .buttonStyle(.borderless)
         }
         .navigationTitle("storage_title")
-        .activateViewModel(viewModel: viewModel)
     }
-}
-
-@Observable
-class StorageViewModel: MoleculeViewModelBase<StorageState, StoragePresenter> {
 }
 
 #Preview {

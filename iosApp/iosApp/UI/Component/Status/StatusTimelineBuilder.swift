@@ -85,7 +85,7 @@ struct StatusTimeline: View {
                             xqtEvent: xqtEvent
                         )
                         .onTapGesture {
-                            openURL(URL(string: AppDeepLink.StatusDetail.shared.invoke(statusKey: status.statusKey))!)
+                            openURL(URL(string: AppDeepLink.StatusDetail.shared.invoke(accountKey: status.accountKey, statusKey: status.statusKey))!)
                         }
                     } else {
                         StatusPlaceHolder()

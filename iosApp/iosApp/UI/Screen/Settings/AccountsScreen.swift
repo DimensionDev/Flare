@@ -2,67 +2,69 @@ import SwiftUI
 import shared
 
 struct AccountsScreen: View {
-    @State var viewModel = AccountsViewModel()
+    let presenter = AccountsPresenter()
     @State var showServiceSelectSheet = false
     var body: some View {
-        List {
-            switch onEnum(of: viewModel.model.accounts) {
-            case .success(let data):
-                if data.data.size > 0 {
-                    ForEach(1...data.data.size, id: \.self) { index in
-                        let item = data.data.get(index: index - 1)
-                        switch onEnum(of: item) {
-                        case .success(let user):
-                            Button {
-                                viewModel.model.setActiveAccount(accountKey: user.data.userKey)
-                            } label: {
-                                HStack {
-                                    UserComponent(user: user.data, onUserClicked: { })
-                                    Spacer()
-                                    switch onEnum(of: viewModel.model.activeAccount) {
-                                    case .success(let activeAccount):
-                                        Image(
-                                            systemName: activeAccount.data.accountKey == user.data.userKey ?
-                                            "checkmark.circle.fill" :
-                                                "circle"
-                                        )
-                                        .foregroundStyle(.blue)
-                                    default:
-                                        Image(systemName: "circle")
+        Observing(presenter.models) { state in
+            List {
+                switch onEnum(of: state.accounts) {
+                case .success(let data):
+                    if data.data.size > 0 {
+                        ForEach(1...data.data.size, id: \.self) { index in
+                            let item = data.data.get(index: index - 1)
+                            switch onEnum(of: item) {
+                            case .success(let user):
+                                Button {
+                                    state.setActiveAccount(accountKey: user.data.userKey)
+                                } label: {
+                                    HStack {
+                                        UserComponent(user: user.data, onUserClicked: { })
+                                        Spacer()
+                                        switch onEnum(of: state.activeAccount) {
+                                        case .success(let activeAccount):
+                                            Image(
+                                                systemName: activeAccount.data.accountKey == user.data.userKey ?
+                                                "checkmark.circle.fill" :
+                                                    "circle"
+                                            )
                                             .foregroundStyle(.blue)
+                                        default:
+                                            Image(systemName: "circle")
+                                                .foregroundStyle(.blue)
+                                        }
+                                    }
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            state.removeAccount(accountKey: user.data.userKey)
+                                        } label: {
+                                            Label("delete", systemImage: "trash")
+                                        }
                                     }
                                 }
-                                .swipeActions(edge: .trailing) {
+                                .buttonStyle(.plain)
+                                #if os(macOS)
+                                .contextMenu {
                                     Button(role: .destructive) {
                                         viewModel.model.removeAccount(accountKey: user.data.userKey)
                                     } label: {
                                         Label("delete", systemImage: "trash")
                                     }
                                 }
+                                #endif
+                            case .error:
+                                Text("error")
+                            case .loading:
+                                Text("loading")
                             }
-                            .buttonStyle(.plain)
-                            #if os(macOS)
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    viewModel.model.removeAccount(accountKey: user.data.userKey)
-                                } label: {
-                                    Label("delete", systemImage: "trash")
-                                }
-                            }
-                            #endif
-                        case .error:
-                            Text("error")
-                        case .loading:
-                            Text("loading")
                         }
+                    } else {
+                        Text("no_accounts")
                     }
-                } else {
-                    Text("no_accounts")
+                case .error:
+                    Text("error")
+                case .loading:
+                    Text("loading")
                 }
-            case .error:
-                Text("error")
-            case .loading:
-                Text("loading")
             }
         }
         .navigationTitle("accounts_management_title")
@@ -81,10 +83,5 @@ struct AccountsScreen: View {
             .frame(minWidth: 600, minHeight: 400)
 #endif
         })
-        .activateViewModel(viewModel: viewModel)
     }
-}
-
-@Observable
-class AccountsViewModel: MoleculeViewModelBase<AccountsState, AccountsPresenter> {
 }

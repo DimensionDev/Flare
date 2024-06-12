@@ -4,24 +4,26 @@ import shared
 struct SettingsScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var selectedDetail: SettingsDestination?
-    @State private var viewModel = SettingsViewModel()
+    let presenter = ActiveAccountPresenter()
     var body: some View {
         FlareTheme {
             NavigationSplitView {
                 List(selection: $selectedDetail) {
-                    Section {
-                        AccountItem(
-                            userState: viewModel.model.user,
-                            supportingContent: { _ in
-                                AnyView(
-                                    Text("settings_account_manage")
-                                        .lineLimit(1)
-                                        .font(.subheadline)
-                                        .opacity(0.5)
+                    Observing(presenter.models) { state in
+                            Section {
+                                AccountItem(
+                                    userState: state.user,
+                                    supportingContent: { _ in
+                                        AnyView(
+                                            Text("settings_account_manage")
+                                                .lineLimit(1)
+                                                .font(.subheadline)
+                                                .opacity(0.5)
+                                        )
+                                    }
                                 )
+                                .tag(SettingsDestination.account)
                             }
-                        )
-                        .tag(SettingsDestination.account)
                     }
                     Section {
                         Label("settings_appearance", systemImage: "paintpalette")
@@ -53,7 +55,6 @@ struct SettingsScreen: View {
                 }
             }
         }
-        .activateViewModel(viewModel: viewModel)
     }
 }
 
@@ -77,7 +78,4 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     public var id: String {
         self.rawValue
     }
-}
-
-class SettingsViewModel: MoleculeViewModelBase<UserState, ActiveAccountPresenter> {
 }

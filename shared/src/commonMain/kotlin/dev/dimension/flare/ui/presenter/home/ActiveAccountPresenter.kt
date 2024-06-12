@@ -18,13 +18,14 @@ class ActiveAccountPresenter : PresenterBase<UserState>() {
     override fun body(): UserState {
         val account by activeAccountPresenter()
         val user =
-            account.flatMap {
-                accountServiceProvider(accountType = AccountType.Specific(it.accountKey))
-            }.flatMap {
-                remember(it.account.accountKey) {
-                    it.userById(it.account.accountKey.id)
-                }.collectAsState().toUi()
-            }
+            account
+                .flatMap {
+                    accountServiceProvider(accountType = AccountType.Specific(it.accountKey))
+                }.flatMap {
+                    remember(it.account.accountKey) {
+                        it.userById(it.account.accountKey.id)
+                    }.collectAsState().toUi()
+                }
         return object : UserState {
             override val user = user
         }

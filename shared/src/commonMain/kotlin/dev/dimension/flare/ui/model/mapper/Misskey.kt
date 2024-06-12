@@ -52,16 +52,19 @@ internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
                     // misskey poll doesn't have id
                     id = "",
                     options =
-                        poll.choices.map { option ->
-                            UiPoll.Option(
-                                title = option.text,
-                                votesCount = option.votes.toLong(),
-                                percentage =
-                                    option.votes.toFloat().div(
-                                        poll.choices.sumOf { it.votes }.toFloat(),
-                                    ).takeUnless { it.isNaN() } ?: 0f,
-                            )
-                        }.toPersistentList(),
+                        poll.choices
+                            .map { option ->
+                                UiPoll.Option(
+                                    title = option.text,
+                                    votesCount = option.votes.toLong(),
+                                    percentage =
+                                        option.votes
+                                            .toFloat()
+                                            .div(
+                                                poll.choices.sumOf { it.votes }.toFloat(),
+                                            ).takeUnless { it.isNaN() } ?: 0f,
+                                )
+                            }.toPersistentList(),
                     expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
                     multiple = poll.multiple,
                     ownVotes = List(poll.choices.filter { it.isVoted }.size) { index -> index }.toPersistentList(),
@@ -98,20 +101,22 @@ internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
                 Visibility.Specified -> UiStatus.Misskey.Visibility.Specified
             },
         media =
-            files?.mapNotNull { file ->
-                file.toUi()
-            }?.toPersistentList() ?: persistentListOf(),
+            files
+                ?.mapNotNull { file ->
+                    file.toUi()
+                }?.toPersistentList() ?: persistentListOf(),
         reaction =
             UiStatus.Misskey.Reaction(
                 myReaction = myReaction,
                 emojiReactions =
-                    reactions.map { emoji ->
-                        UiStatus.Misskey.EmojiReaction(
-                            name = emoji.key,
-                            count = emoji.value,
-                            url = resolveMisskeyEmoji(emoji.key, accountKey.host),
-                        )
-                    }.toPersistentList(),
+                    reactions
+                        .map { emoji ->
+                            UiStatus.Misskey.EmojiReaction(
+                                name = emoji.key,
+                                count = emoji.value,
+                                url = resolveMisskeyEmoji(emoji.key, accountKey.host),
+                            )
+                        }.toPersistentList(),
             ),
         accountKey = accountKey,
     )
@@ -221,28 +226,29 @@ internal fun User.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
             ),
         accountKey = accountKey,
         fields =
-            fields.map {
-                it.name to it.value
-            }.filter { it.first.isNotEmpty() }.toMap().toPersistentMap(),
+            fields
+                .map {
+                    it.name to it.value
+                }.filter { it.first.isNotEmpty() }
+                .toMap()
+                .toPersistentMap(),
     )
 }
 
-internal fun EmojiSimple.toUi(): UiEmoji {
-    return UiEmoji(
+internal fun EmojiSimple.toUi(): UiEmoji =
+    UiEmoji(
         shortcode = name,
         url = url,
     )
-}
 
 internal fun resolveMisskeyEmoji(
     name: String,
     accountHost: String,
-): String {
-    return name.trim(':').let {
+): String =
+    name.trim(':').let {
         if (it.endsWith("@.")) {
             "https://$accountHost/emoji/${it.dropLast(2)}.webp"
         } else {
             "https://$accountHost/emoji/$it.webp"
         }
     }
-}

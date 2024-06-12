@@ -11,12 +11,10 @@ internal class GuestStatusDetailPagingSource(
     private val statusKey: MicroBlogKey,
     private val statusOnly: Boolean,
 ) : PagingSource<Int, UiStatus>() {
-    override fun getRefreshKey(state: PagingState<Int, UiStatus>): Int? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Int, UiStatus>): Int? = null
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiStatus> {
-        return try {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiStatus> =
+        try {
             val result =
                 if (statusOnly) {
                     val current =
@@ -44,5 +42,4 @@ internal class GuestStatusDetailPagingSource(
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
-    }
 }

@@ -33,8 +33,7 @@ fun AvatarComponent(
                         AvatarShape.SQUARE ->
                             RoundedCornerShape(4.dp)
                     },
-                )
-                .then(modifier),
+                ).then(modifier),
     )
 }
 

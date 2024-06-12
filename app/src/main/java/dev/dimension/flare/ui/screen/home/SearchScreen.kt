@@ -178,7 +178,8 @@ private fun presenter(
         val statusEvent = statusEvent
 
         val refreshing =
-            searchState.users is UiState.Loading || searchState.status is UiState.Loading ||
+            searchState.users is UiState.Loading ||
+                searchState.status is UiState.Loading ||
                 searchState.users is UiState.Success &&
                 (searchState.users as UiState.Success<LazyPagingItemsProxy<UiUser>>).data.isLoading ||
                 searchState.status is UiState.Success &&

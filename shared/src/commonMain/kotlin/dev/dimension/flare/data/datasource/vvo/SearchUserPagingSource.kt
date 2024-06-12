@@ -17,9 +17,7 @@ internal class SearchUserPagingSource(
         "100103type=3&q=$query&t="
     }
 
-    override fun getRefreshKey(state: PagingState<Int, UiUser>): Int? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Int, UiUser>): Int? = null
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiUser> {
         try {
@@ -36,11 +34,13 @@ internal class SearchUserPagingSource(
                     page = params.key,
                 )
             val users =
-                response.data?.cards?.flatMap {
-                    it.cardGroup.orEmpty()
-                }?.mapNotNull {
-                    it.user
-                }.orEmpty()
+                response.data
+                    ?.cards
+                    ?.flatMap {
+                        it.cardGroup.orEmpty()
+                    }?.mapNotNull {
+                        it.user
+                    }.orEmpty()
             return LoadResult.Page(
                 data = users.map { it.toUi(accountKey = accountKey) },
                 prevKey = null,

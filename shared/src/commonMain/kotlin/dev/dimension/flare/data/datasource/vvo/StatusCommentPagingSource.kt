@@ -44,7 +44,5 @@ internal class StatusCommentPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Long, UiStatus.VVONotification>): Long? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Long, UiStatus.VVONotification>): Long? = null
 }

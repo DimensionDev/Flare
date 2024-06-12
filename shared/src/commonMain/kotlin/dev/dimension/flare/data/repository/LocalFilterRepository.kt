@@ -16,35 +16,44 @@ internal class LocalFilterRepository(
     private val database: AppDatabase,
 ) {
     fun getAllFlow() =
-        database.dbKeywordFilterQueries.selectAll().asFlow().mapToList(Dispatchers.IO)
+        database.dbKeywordFilterQueries
+            .selectAll()
+            .asFlow()
+            .mapToList(Dispatchers.IO)
             .map {
-                it.map {
-                    UiKeywordFilter(
-                        keyword = it.keyword,
-                        forTimeline = it.for_timeline == 1L,
-                        forNotification = it.for_notification == 1L,
-                        forSearch = it.for_search == 1L,
-                        expiredAt =
-                            it.expired_at.takeIf { it > 0L }
-                                ?.let { Instant.fromEpochMilliseconds(it) },
-                    )
-                }.toImmutableList().toImmutableListWrapper()
+                it
+                    .map {
+                        UiKeywordFilter(
+                            keyword = it.keyword,
+                            forTimeline = it.for_timeline == 1L,
+                            forNotification = it.for_notification == 1L,
+                            forSearch = it.for_search == 1L,
+                            expiredAt =
+                                it.expired_at
+                                    .takeIf { it > 0L }
+                                    ?.let { Instant.fromEpochMilliseconds(it) },
+                        )
+                    }.toImmutableList()
+                    .toImmutableListWrapper()
             }
 
     fun getFlow(
         forTimeline: Boolean = false,
         forNotification: Boolean = false,
         forSearch: Boolean = false,
-    ) = database.dbKeywordFilterQueries.selectNotExpiredFor(
-        currentTime = Clock.System.now().toEpochMilliseconds(),
-        forTimeline = if (forTimeline) 1L else 0L,
-        forNotification = if (forNotification) 1L else 0L,
-        forSearch = if (forSearch) 1L else 0L,
-    ).asFlow().mapToList(Dispatchers.IO).map {
-        it.map {
-            it.keyword
+    ) = database.dbKeywordFilterQueries
+        .selectNotExpiredFor(
+            currentTime = Clock.System.now().toEpochMilliseconds(),
+            forTimeline = if (forTimeline) 1L else 0L,
+            forNotification = if (forNotification) 1L else 0L,
+            forSearch = if (forSearch) 1L else 0L,
+        ).asFlow()
+        .mapToList(Dispatchers.IO)
+        .map {
+            it.map {
+                it.keyword
+            }
         }
-    }
 
     fun add(
         keyword: String,

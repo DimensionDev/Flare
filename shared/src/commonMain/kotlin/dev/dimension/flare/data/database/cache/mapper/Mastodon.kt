@@ -174,7 +174,9 @@ private fun Status.toDbStatus(accountKey: MicroBlogKey): DbStatus {
                 host = user.user_key.host,
             ),
         platform_type = PlatformType.Mastodon,
-        content = dev.dimension.flare.data.database.cache.model.StatusContent.Mastodon(this),
+        content =
+            dev.dimension.flare.data.database.cache.model.StatusContent
+                .Mastodon(this),
         user_key = user.user_key,
         account_key = accountKey,
     )
@@ -200,14 +202,15 @@ internal fun Account.toDbUser(host: String): DbUser {
         handle =
             username
                 ?: throw IllegalArgumentException("mastodon Account.username should not be null"),
-        content = dev.dimension.flare.data.database.cache.model.UserContent.Mastodon(this),
+        content =
+            dev.dimension.flare.data.database.cache.model.UserContent
+                .Mastodon(this),
         host = remoteHost,
     )
 }
 
-internal fun List<Emoji>.toDb(host: String): DbEmoji {
-    return DbEmoji(
+internal fun List<Emoji>.toDb(host: String): DbEmoji =
+    DbEmoji(
         host = host,
         content = EmojiContent.Mastodon(this),
     )
-}

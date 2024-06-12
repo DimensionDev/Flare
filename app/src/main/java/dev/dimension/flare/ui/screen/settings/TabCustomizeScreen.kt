@@ -395,11 +395,12 @@ fun TabIcon(
                     )
                 }.invoke()
             }
-            userState.user.onSuccess {
-                AvatarComponent(it.avatarUrl, size = 24.dp, modifier = modifier)
-            }.onLoading {
-                AvatarComponent(null, size = 24.dp, modifier = modifier.placeholder(true))
-            }
+            userState.user
+                .onSuccess {
+                    AvatarComponent(it.avatarUrl, size = 24.dp, modifier = modifier)
+                }.onLoading {
+                    AvatarComponent(null, size = 24.dp, modifier = modifier.placeholder(true))
+                }
         }
 
         is IconType.Material -> {
@@ -437,11 +438,12 @@ fun TabIcon(
                 Box(
                     modifier = modifier,
                 ) {
-                    userState.user.onSuccess {
-                        AvatarComponent(it.avatarUrl, size = 24.dp)
-                    }.onLoading {
-                        AvatarComponent(null, size = 24.dp, modifier = Modifier.placeholder(true))
-                    }
+                    userState.user
+                        .onSuccess {
+                            AvatarComponent(it.avatarUrl, size = 24.dp)
+                        }.onLoading {
+                            AvatarComponent(null, size = 24.dp, modifier = Modifier.placeholder(true))
+                        }
                     Icon(
                         imageVector = icon.icon.toIcon(),
                         contentDescription =
@@ -474,24 +476,25 @@ private fun presenter(
         }
     var showAddTab by remember { mutableStateOf(false) }
 
-    tabSettings.onSuccess {
-        LaunchedEffect(it.items.size) {
-            cacheTabs.clear()
-            cacheTabs.add(PrimaryTabItemState)
-            cacheTabs.addAll(it.items.map { ActualTabItem(it) })
-            cacheTabs.add(SecondaryTabItemState)
-            it.secondaryItems?.let { secondaryItems ->
-                cacheTabs.addAll(secondaryItems.map { ActualTabItem(it) })
+    tabSettings
+        .onSuccess {
+            LaunchedEffect(it.items.size) {
+                cacheTabs.clear()
+                cacheTabs.add(PrimaryTabItemState)
+                cacheTabs.addAll(it.items.map { ActualTabItem(it) })
+                cacheTabs.add(SecondaryTabItemState)
+                it.secondaryItems?.let { secondaryItems ->
+                    cacheTabs.addAll(secondaryItems.map { ActualTabItem(it) })
+                }
+            }
+        }.onError {
+            LaunchedEffect(Unit) {
+                cacheTabs.clear()
+                cacheTabs.add(PrimaryTabItemState)
+                cacheTabs.addAll(TimelineTabItem.default.map { ActualTabItem(it) })
+                cacheTabs.add(SecondaryTabItemState)
             }
         }
-    }.onError {
-        LaunchedEffect(Unit) {
-            cacheTabs.clear()
-            cacheTabs.add(PrimaryTabItemState)
-            cacheTabs.addAll(TimelineTabItem.default.map { ActualTabItem(it) })
-            cacheTabs.add(SecondaryTabItemState)
-        }
-    }
     val allTabs = allTabsPresenter()
 
     object {
@@ -514,13 +517,16 @@ private fun presenter(
                 repository.updateTabSettings {
                     copy(
                         items =
-                            cacheTabs.subList(1, cacheTabs.indexOfFirst { it is SecondaryTabItemState })
-                                .map { (it as ActualTabItem).tabItem }.toImmutableList(),
+                            cacheTabs
+                                .subList(1, cacheTabs.indexOfFirst { it is SecondaryTabItemState })
+                                .map { (it as ActualTabItem).tabItem }
+                                .toImmutableList(),
                         secondaryItems =
-                            cacheTabs.subList(
-                                cacheTabs.indexOfFirst { it is SecondaryTabItemState } + 1,
-                                cacheTabs.size,
-                            ).map { (it as ActualTabItem).tabItem }
+                            cacheTabs
+                                .subList(
+                                    cacheTabs.indexOfFirst { it is SecondaryTabItemState } + 1,
+                                    cacheTabs.size,
+                                ).map { (it as ActualTabItem).tabItem }
                                 .toImmutableList()
                                 .takeIf {
                                     it.isNotEmpty()
@@ -571,11 +577,13 @@ private fun allTabsPresenter() =
         val accountState = remember { AccountsPresenter() }.invoke()
         val accountTabs =
             accountState.accounts.map {
-                it.toImmutableList().associateWith { userState ->
-                    userState.map { user ->
-                        TimelineTabItem.defaultPrimary(user) + TimelineTabItem.defaultSecondary(user)
-                    }
-                }.toImmutableMap()
+                it
+                    .toImmutableList()
+                    .associateWith { userState ->
+                        userState.map { user ->
+                            TimelineTabItem.defaultPrimary(user) + TimelineTabItem.defaultSecondary(user)
+                        }
+                    }.toImmutableMap()
             }
 
         object {

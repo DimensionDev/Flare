@@ -32,9 +32,10 @@ class MemCacheable<T>(
             update(key, value)
         },
         cacheSource = {
-            caches.getOrPut(key) {
-                MutableStateFlow(null)
-            }.filterNotNull() as Flow<T>
+            caches
+                .getOrPut(key) {
+                    MutableStateFlow(null)
+                }.filterNotNull() as Flow<T>
         },
     ) {
     companion object {
@@ -79,15 +80,13 @@ sealed class CacheData<T>(
                         LoadState.Error(e)
                     },
                 )
-            }
-            .catch { emit(LoadState.Error(it)) }
+            }.catch { emit(LoadState.Error(it)) }
 
     val data: Flow<CacheState<T>> =
         cacheFlow
             .map<T, CacheState<T>> {
                 CacheState.Success(it)
-            }
-            .onStart {
+            }.onStart {
                 emit(CacheState.Empty())
             }
 
@@ -99,7 +98,9 @@ sealed class CacheData<T>(
 sealed class CacheState<T> {
     class Empty<T> : CacheState<T>()
 
-    data class Success<T>(val data: T) : CacheState<T>()
+    data class Success<T>(
+        val data: T,
+    ) : CacheState<T>()
 }
 
 sealed interface LoadState {
@@ -107,7 +108,9 @@ sealed interface LoadState {
 
     data object Success : LoadState
 
-    data class Error(val error: Throwable) : LoadState
+    data class Error(
+        val error: Throwable,
+    ) : LoadState
 }
 
 @Composable

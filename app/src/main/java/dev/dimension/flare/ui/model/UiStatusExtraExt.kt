@@ -15,11 +15,13 @@ val UiStatus.localizedShortTime: String
     get() =
         when (val type = extra.localizedShortTimeType) {
             is LocalizedShortTime.MonthDay ->
-                DateTimeFormatter.ofPattern(stringResource(id = R.string.date_format_month_day))
+                DateTimeFormatter
+                    .ofPattern(stringResource(id = R.string.date_format_month_day))
                     .format(type.localDateTime)
             is LocalizedShortTime.String -> type.value
             is LocalizedShortTime.YearMonthDay ->
-                DateTimeFormatter.ofPattern(stringResource(id = R.string.date_format_year_month_day))
+                DateTimeFormatter
+                    .ofPattern(stringResource(id = R.string.date_format_year_month_day))
                     .format(type.localDateTime)
         }
 

@@ -32,31 +32,32 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
             }
         } +
             listOfNotNull(
-                pageInfo?.takeIf {
-                    it.type == "video"
-                }?.let {
-                    val description = it.title ?: it.content2 ?: it.content1
-                    val height = it.pagePic?.height?.toFloatOrNull() ?: 0f
-                    val width = it.pagePic?.width?.toFloatOrNull() ?: 0f
-                    val previewUrl = it.pagePic?.url
-                    val videoUrl =
-                        it.urls?.mp4720PMp4
-                            ?: it.urls?.mp4HDMp4
-                            ?: it.urls?.mp4LdMp4
-                            ?: it.mediaInfo?.streamURLHD
-                            ?: it.mediaInfo?.streamURL
-                    if (videoUrl != null && previewUrl != null) {
-                        UiMedia.Video(
-                            url = videoUrl,
-                            thumbnailUrl = previewUrl,
-                            width = width,
-                            height = height,
-                            description = description,
-                        )
-                    } else {
-                        null
-                    }
-                },
+                pageInfo
+                    ?.takeIf {
+                        it.type == "video"
+                    }?.let {
+                        val description = it.title ?: it.content2 ?: it.content1
+                        val height = it.pagePic?.height?.toFloatOrNull() ?: 0f
+                        val width = it.pagePic?.width?.toFloatOrNull() ?: 0f
+                        val previewUrl = it.pagePic?.url
+                        val videoUrl =
+                            it.urls?.mp4720PMp4
+                                ?: it.urls?.mp4HDMp4
+                                ?: it.urls?.mp4LdMp4
+                                ?: it.mediaInfo?.streamURLHD
+                                ?: it.mediaInfo?.streamURL
+                        if (videoUrl != null && previewUrl != null) {
+                            UiMedia.Video(
+                                url = videoUrl,
+                                thumbnailUrl = previewUrl,
+                                width = width,
+                                height = height,
+                                description = description,
+                            )
+                        } else {
+                            null
+                        }
+                    },
             )
     return UiStatus.VVO(
         statusKey =
@@ -84,8 +85,8 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
     )
 }
 
-internal fun User.toUi(accountKey: MicroBlogKey): UiUser.VVO {
-    return UiUser.VVO(
+internal fun User.toUi(accountKey: MicroBlogKey): UiUser.VVO =
+    UiUser.VVO(
         userKey =
             MicroBlogKey(
                 id = id.toString(),
@@ -110,10 +111,9 @@ internal fun User.toUi(accountKey: MicroBlogKey): UiUser.VVO {
                 isFans = followMe ?: false,
             ),
     )
-}
 
-internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification {
-    return UiStatus.VVONotification(
+internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification =
+    UiStatus.VVONotification(
         statusKey = MicroBlogKey(id = id, host = vvoHost),
         accountKey = accountKey,
         createdAt = createdAt ?: Instant.DISTANT_PAST,
@@ -144,10 +144,9 @@ internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification {
             ),
         status = status?.toUi(accountKey),
     )
-}
 
-internal fun Attitude.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification {
-    return UiStatus.VVONotification(
+internal fun Attitude.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification =
+    UiStatus.VVONotification(
         statusKey = MicroBlogKey(id = idStr, host = vvoHost),
         accountKey = accountKey,
         createdAt = createdAt ?: Instant.DISTANT_PAST,
@@ -156,4 +155,3 @@ internal fun Attitude.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification {
         content = UiStatus.VVONotification.Content.Like,
         status = status?.toUi(accountKey),
     )
-}

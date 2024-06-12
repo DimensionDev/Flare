@@ -15,41 +15,38 @@ data class ComposeConfig(
     data class Text(
         val maxLength: Int,
     ) {
-        fun merge(other: Text): Text {
-            return Text(
+        fun merge(other: Text): Text =
+            Text(
                 maxLength = minOf(maxLength, other.maxLength),
             )
-        }
     }
 
     data class Media(
         val maxCount: Int,
         val canSensitive: Boolean,
     ) {
-        fun merge(other: Media): Media {
-            return Media(
+        fun merge(other: Media): Media =
+            Media(
                 maxCount = minOf(maxCount, other.maxCount),
                 canSensitive = canSensitive && other.canSensitive,
             )
-        }
     }
 
     data class Poll(
         val maxOptions: Int,
     ) {
-        fun merge(other: Poll): Poll {
-            return Poll(
+        fun merge(other: Poll): Poll =
+            Poll(
                 maxOptions = minOf(maxOptions, other.maxOptions),
             )
-        }
     }
 
     data class Emoji(
         val emoji: CacheData<ImmutableList<UiEmoji>>,
         val mergeTag: String,
     ) {
-        fun merge(other: Emoji): Emoji? {
-            return if (mergeTag == other.mergeTag) {
+        fun merge(other: Emoji): Emoji? =
+            if (mergeTag == other.mergeTag) {
                 Emoji(
                     emoji = emoji,
                     mergeTag = mergeTag,
@@ -57,7 +54,6 @@ data class ComposeConfig(
             } else {
                 null
             }
-        }
     }
 
     object ContentWarning

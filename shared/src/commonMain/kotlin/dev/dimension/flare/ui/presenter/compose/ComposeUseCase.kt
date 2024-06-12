@@ -69,7 +69,12 @@ class ComposeUseCase(
 sealed interface ComposeProgressState {
     data object Success : ComposeProgressState
 
-    data class Progress(val current: Int, val max: Int) : ComposeProgressState
+    data class Progress(
+        val current: Int,
+        val max: Int,
+    ) : ComposeProgressState
 
-    data class Error(val throwable: Throwable) : ComposeProgressState
+    data class Error(
+        val throwable: Throwable,
+    ) : ComposeProgressState
 }

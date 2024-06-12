@@ -34,17 +34,18 @@ internal class SearchStatusPagingSource(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         cursor = null
-                        service.getSearchTimeline(
-                            variables =
-                                SearchRequest(
-                                    rawQuery = query,
-                                    count = state.config.pageSize.toLong(),
-                                ).encodeJson(),
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getSearchTimeline(
+                                variables =
+                                    SearchRequest(
+                                        rawQuery = query,
+                                        count = state.config.pageSize.toLong(),
+                                    ).encodeJson(),
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(

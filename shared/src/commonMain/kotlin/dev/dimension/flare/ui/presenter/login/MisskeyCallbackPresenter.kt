@@ -94,8 +94,8 @@ fun misskeyLoginUseCase(
     host: String,
     applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,
-): Result<Unit> {
-    return runCatching {
+): Result<Unit> =
+    runCatching {
         val session = uuid4().toString()
         val service =
             MisskeyOauthService(
@@ -114,4 +114,3 @@ fun misskeyLoginUseCase(
         val target = service.getAuthorizeUrl()
         launchOAuth(target)
     }
-}

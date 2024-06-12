@@ -72,7 +72,9 @@ private fun ColorPickerDialog(onBack: () -> Unit) {
         },
         text = {
             Column(
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
+                verticalArrangement =
+                    androidx.compose.foundation.layout.Arrangement
+                        .spacedBy(16.dp),
             ) {
                 HsvColorPicker(
                     modifier =

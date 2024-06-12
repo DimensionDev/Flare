@@ -37,7 +37,11 @@ internal class OAuthAuthorization(
 
     override fun getAuthorizationHeader(context: HttpRequestBuilder): String {
         val nonce = generateOAuthNonce()
-        val timestamp = Clock.System.now().epochSeconds.toString()
+        val timestamp =
+            Clock.System
+                .now()
+                .epochSeconds
+                .toString()
 
         val builder = URLBuilder()
         builder.parameters.appendAll(context.url.parameters.build())
@@ -58,7 +62,8 @@ internal class OAuthAuthorization(
         }
 
         val sortSigningBody =
-            builder.parameters.build()
+            builder.parameters
+                .build()
                 .entries()
                 .sortedBy { it.key }
                 .joinToString(separator = "&") {
@@ -75,7 +80,12 @@ internal class OAuthAuthorization(
             Buffer().use { base ->
                 base.writeUtf8(context.method.value)
                 base.writeByte('&'.code)
-                base.writeUtf8(context.url.buildString().substringBefore('?').encodeOAuth())
+                base.writeUtf8(
+                    context.url
+                        .buildString()
+                        .substringBefore('?')
+                        .encodeOAuth(),
+                )
                 base.writeByte('&'.code)
                 base.writeUtf8(sortSigningBody.encodeOAuth())
 

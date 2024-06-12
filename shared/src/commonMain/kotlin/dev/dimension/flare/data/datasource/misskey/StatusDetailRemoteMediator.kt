@@ -46,16 +46,18 @@ internal class StatusDetailRemoteMediator(
             val result =
                 if (statusOnly) {
                     val current =
-                        service.notesShow(
-                            IPinRequest(noteId = statusKey.id),
-                        ).body()
+                        service
+                            .notesShow(
+                                IPinRequest(noteId = statusKey.id),
+                            ).body()
                     listOf(current)
                 } else {
                     val current =
                         if (loadType == LoadType.REFRESH) {
-                            service.notesShow(
-                                IPinRequest(noteId = statusKey.id),
-                            ).body()
+                            service
+                                .notesShow(
+                                    IPinRequest(noteId = statusKey.id),
+                                ).body()
                         } else {
                             null
                         }
@@ -65,13 +67,15 @@ internal class StatusDetailRemoteMediator(
                                 endOfPaginationReached = true,
                             )
                     val children =
-                        service.notesChildren(
-                            NotesChildrenRequest(
-                                noteId = statusKey.id,
-                                untilId = lastItem.timeline_status_key.id,
-                                limit = state.config.pageSize,
-                            ),
-                        ).body().orEmpty()
+                        service
+                            .notesChildren(
+                                NotesChildrenRequest(
+                                    noteId = statusKey.id,
+                                    untilId = lastItem.timeline_status_key.id,
+                                    limit = state.config.pageSize,
+                                ),
+                            ).body()
+                            .orEmpty()
                     listOfNotNull(current?.reply, current) + children
 //                context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
                 }.filterNotNull()

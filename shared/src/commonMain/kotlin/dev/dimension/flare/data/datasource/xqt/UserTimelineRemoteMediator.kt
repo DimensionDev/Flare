@@ -35,17 +35,18 @@ internal class UserTimelineRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         cursor = null
-                        service.getUserTweets(
-                            variables =
-                                UserTimelineRequest(
-                                    userID = userKey.id,
-                                    count = state.config.pageSize.toLong(),
-                                ).encodeJson(),
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getUserTweets(
+                                variables =
+                                    UserTimelineRequest(
+                                        userID = userKey.id,
+                                        count = state.config.pageSize.toLong(),
+                                    ).encodeJson(),
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
 
                     LoadType.PREPEND -> {
@@ -65,7 +66,15 @@ internal class UserTimelineRemoteMediator(
                         )
                     }
                 }.body()
-            val instructions = response?.data?.user?.result?.timelineV2?.timeline?.instructions.orEmpty()
+            val instructions =
+                response
+                    ?.data
+                    ?.user
+                    ?.result
+                    ?.timelineV2
+                    ?.timeline
+                    ?.instructions
+                    .orEmpty()
             val tweet =
                 instructions.tweets(
                     includePin = cursor == null,

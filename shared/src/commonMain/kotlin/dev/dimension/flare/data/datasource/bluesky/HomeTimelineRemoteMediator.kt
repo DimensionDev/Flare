@@ -32,22 +32,24 @@ internal class HomeTimelineRemoteMediator(
                     )
 
                     LoadType.REFRESH -> {
-                        service.getTimeline(
-                            GetTimelineQueryParams(
-                                algorithm = "reverse-chronological",
-                                limit = state.config.pageSize.toLong(),
-                            ),
-                        ).maybeResponse()
+                        service
+                            .getTimeline(
+                                GetTimelineQueryParams(
+                                    algorithm = "reverse-chronological",
+                                    limit = state.config.pageSize.toLong(),
+                                ),
+                            ).maybeResponse()
                     }
 
                     LoadType.APPEND -> {
-                        service.getTimeline(
-                            GetTimelineQueryParams(
-                                algorithm = "reverse-chronological",
-                                limit = state.config.pageSize.toLong(),
-                                cursor = cursor,
-                            ),
-                        ).maybeResponse()
+                        service
+                            .getTimeline(
+                                GetTimelineQueryParams(
+                                    algorithm = "reverse-chronological",
+                                    limit = state.config.pageSize.toLong(),
+                                    cursor = cursor,
+                                ),
+                            ).maybeResponse()
                     }
                 } ?: return MediatorResult.Success(
                     endOfPaginationReached = true,

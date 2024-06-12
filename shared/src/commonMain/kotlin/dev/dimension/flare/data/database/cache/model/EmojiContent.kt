@@ -10,9 +10,13 @@ import kotlinx.serialization.Serializable
 sealed interface EmojiContent {
     @Serializable
     @SerialName("Mastodon")
-    data class Mastodon internal constructor(internal val data: List<Emoji>) : EmojiContent
+    data class Mastodon internal constructor(
+        internal val data: List<Emoji>,
+    ) : EmojiContent
 
     @Serializable
     @SerialName("Misskey")
-    data class Misskey internal constructor(internal val data: List<EmojiSimple>) : EmojiContent
+    data class Misskey internal constructor(
+        internal val data: List<EmojiSimple>,
+    ) : EmojiContent
 }

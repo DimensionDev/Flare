@@ -12,14 +12,13 @@ internal class TrendsUserPagingSource(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : PagingSource<String, UiUser>() {
-    override fun getRefreshKey(state: PagingState<String, UiUser>): String? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<String, UiUser>): String? = null
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiUser> {
-        return try {
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiUser> =
+        try {
             val response =
-                service.getSuggestions(GetSuggestionsQueryParams(limit = params.loadSize.toLong(), cursor = params.key))
+                service
+                    .getSuggestions(GetSuggestionsQueryParams(limit = params.loadSize.toLong(), cursor = params.key))
                     .requireResponse()
             LoadResult.Page(
                 data = response.actors.map { it.toUi(accountKey) },
@@ -29,5 +28,4 @@ internal class TrendsUserPagingSource(
         } catch (e: Throwable) {
             LoadResult.Error(e)
         }
-    }
 }

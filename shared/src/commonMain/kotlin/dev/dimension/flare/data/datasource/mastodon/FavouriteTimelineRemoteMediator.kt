@@ -25,13 +25,14 @@ internal class FavouriteTimelineRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        service.favorites(
-                            limit = state.config.pageSize,
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .favorites(
+                                limit = state.config.pageSize,
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(

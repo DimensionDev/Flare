@@ -27,7 +27,8 @@ class PlayerPoll(
         lruCache<String, Player>(
             10,
             create = { uri ->
-                ExoPlayer.Builder(context)
+                ExoPlayer
+                    .Builder(context)
                     .build()
                     .apply {
                         setMediaItem(MediaItem.fromUri(uri))
@@ -38,9 +39,7 @@ class PlayerPoll(
             },
         )
 
-    fun get(uri: String): Player {
-        return players[uri]
-    }
+    fun get(uri: String): Player = players[uri]
 
     fun remove(uri: String) {
         players.remove(uri)

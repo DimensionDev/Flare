@@ -22,12 +22,14 @@ internal class SearchHistoryRepository(
             .asFlow()
             .mapToList(Dispatchers.IO)
             .map {
-                it.map {
-                    UiSearchHistory(
-                        keyword = it.search,
-                        createdAt = Instant.fromEpochMilliseconds(it.created_at),
-                    )
-                }.toImmutableList().toImmutableListWrapper()
+                it
+                    .map {
+                        UiSearchHistory(
+                            keyword = it.search,
+                            createdAt = Instant.fromEpochMilliseconds(it.created_at),
+                        )
+                    }.toImmutableList()
+                    .toImmutableListWrapper()
             }
 
     fun addSearchHistory(keyword: String) {

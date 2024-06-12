@@ -57,7 +57,8 @@ import org.koin.core.component.inject
 @OptIn(ExperimentalPagingApi::class)
 class MisskeyDataSource(
     override val account: UiAccount.Misskey,
-) : MicroblogDataSource, KoinComponent {
+) : MicroblogDataSource,
+    KoinComponent {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
@@ -71,8 +72,8 @@ class MisskeyDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -87,14 +88,13 @@ class MisskeyDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     fun localTimeline(
         pageSize: Int = 20,
         pagingKey: String = "local_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -109,14 +109,13 @@ class MisskeyDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     fun publicTimeline(
         pageSize: Int = 20,
         pagingKey: String = "public_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -131,15 +130,14 @@ class MisskeyDataSource(
                     pagingKey,
                 ),
         )
-    }
 
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -167,7 +165,6 @@ class MisskeyDataSource(
                     else -> throw IllegalStateException("Unsupported notification type")
                 },
         )
-    }
 
     override val supportedNotificationFilter: List<NotificationFilter>
         get() =
@@ -196,7 +193,8 @@ class MisskeyDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByHandleAndHost(name, host, PlatformType.Misskey)
+                database.dbUserQueries
+                    .findByHandleAndHost(name, host, PlatformType.Misskey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi(account.accountKey) }
@@ -224,15 +222,17 @@ class MisskeyDataSource(
                 )
             },
             cacheSource = {
-                database.dbUserQueries.findByKey(userKey).asFlow()
+                database.dbUserQueries
+                    .findByKey(userKey)
+                    .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi(account.accountKey) }
             },
         )
     }
 
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> {
-        return MemCacheable<UiRelation>(
+    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
+        MemCacheable<UiRelation>(
             relationKeyWithUserKey(userKey),
         ) {
             service
@@ -248,7 +248,6 @@ class MisskeyDataSource(
                     }
                 }
         }.toUi()
-    }
 
     override fun userTimeline(
         userKey: MicroBlogKey,
@@ -256,8 +255,8 @@ class MisskeyDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -274,15 +273,14 @@ class MisskeyDataSource(
                     onlyMedia = mediaOnly,
                 ),
         )
-    }
 
     override fun context(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -299,16 +297,16 @@ class MisskeyDataSource(
                     statusOnly = false,
                 ),
         )
-    }
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
         val pagingKey = "status_only_$statusKey"
         return Cacheable(
             fetchSource = {
                 val result =
-                    service.notesShow(
-                        IPinRequest(noteId = statusKey.id),
-                    ).body()
+                    service
+                        .notesShow(
+                            IPinRequest(noteId = statusKey.id),
+                        ).body()
                 Misskey.save(
                     database = database,
                     accountKey = account.accountKey,
@@ -317,7 +315,8 @@ class MisskeyDataSource(
                 )
             },
             cacheSource = {
-                database.dbStatusQueries.get(statusKey, account.accountKey)
+                database.dbStatusQueries
+                    .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .mapNotNull { it.content.toUi(account.accountKey) }
@@ -328,14 +327,22 @@ class MisskeyDataSource(
     fun emoji() =
         Cacheable(
             fetchSource = {
-                val emojis = service.emojis().body()?.emojis.orEmpty().toImmutableList()
+                val emojis =
+                    service
+                        .emojis()
+                        .body()
+                        ?.emojis
+                        .orEmpty()
+                        .toImmutableList()
                 database.dbEmojiQueries.insert(
                     account.accountKey.host,
                     emojis.toDb(account.accountKey.host).content,
                 )
             },
             cacheSource = {
-                database.dbEmojiQueries.get(account.accountKey.host).asFlow()
+                database.dbEmojiQueries
+                    .get(account.accountKey.host)
+                    .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
                     .map { it.toUi().toImmutableList() }
             },
@@ -348,17 +355,19 @@ class MisskeyDataSource(
         require(data is MisskeyComposeData)
         val maxProgress = data.medias.size + 1
         val mediaIds =
-            data.medias.mapIndexed { index, item ->
-                service.upload(
-                    item.readBytes(),
-                    name = item.name ?: "unknown",
-                    sensitive = data.sensitive,
-                ).also {
-                    progress(ComposeProgress(index + 1, maxProgress))
+            data.medias
+                .mapIndexed { index, item ->
+                    service
+                        .upload(
+                            item.readBytes(),
+                            name = item.name ?: "unknown",
+                            sensitive = data.sensitive,
+                        ).also {
+                            progress(ComposeProgress(index + 1, maxProgress))
+                        }
+                }.mapNotNull {
+                    it?.id
                 }
-            }.mapNotNull {
-                it?.id
-            }
         service.notesCreate(
             NotesCreateRequest(
                 text = data.content,
@@ -485,15 +494,18 @@ class MisskeyDataSource(
     ) {
         runCatching {
             val comment =
-                statusKey?.let {
-                    service.notesShow(
-                        IPinRequest(
-                            noteId = it.id,
-                        ),
-                    ).body()?.url
-                }?.let {
-                    "Note: $it"
-                }
+                statusKey
+                    ?.let {
+                        service
+                            .notesShow(
+                                IPinRequest(
+                                    noteId = it.id,
+                                ),
+                            ).body()
+                            ?.url
+                    }?.let {
+                        "Note: $it"
+                    }
             service.usersReportAbuse(
                 dev.dimension.flare.data.network.misskey.api.model.UsersReportAbuseRequest(
                     userId = userKey.id,
@@ -641,8 +653,8 @@ class MisskeyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -658,14 +670,13 @@ class MisskeyDataSource(
                     query,
                 ),
         )
-    }
 
     override fun searchUser(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> {
-        return Pager(
+    ): Flow<PagingData<UiUser>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
@@ -674,10 +685,9 @@ class MisskeyDataSource(
                 query,
             )
         }.flow.cachedIn(scope)
-    }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
-        return Pager(
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
@@ -685,14 +695,13 @@ class MisskeyDataSource(
                 account.accountKey,
             )
         }.flow
-    }
 
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
-        return timelinePager(
+    ): Flow<PagingData<UiStatus>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = account.accountKey,
@@ -707,20 +716,18 @@ class MisskeyDataSource(
                     pagingKey,
                 ),
         )
-    }
 
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> {
-        return Pager(
+    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendHashtagPagingSource(
                 service,
             )
         }.flow
-    }
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig {
-        return ComposeConfig(
+    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+        ComposeConfig(
             text = ComposeConfig.Text(500),
             media = ComposeConfig.Media(4, true),
             poll = ComposeConfig.Poll(4),
@@ -728,7 +735,6 @@ class MisskeyDataSource(
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
         )
-    }
 
     override suspend fun follow(
         userKey: MicroBlogKey,

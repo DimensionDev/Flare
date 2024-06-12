@@ -9,12 +9,10 @@ import dev.dimension.flare.ui.model.mapper.toUi
 internal class GuestSearchStatusPagingSource(
     private val query: String,
 ) : PagingSource<String, UiStatus>() {
-    override fun getRefreshKey(state: PagingState<String, UiStatus>): String? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<String, UiStatus>): String? = null
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiStatus> {
-        return try {
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiStatus> =
+        try {
             val result =
                 if (query.startsWith("#")) {
                     GuestMastodonService.hashtagTimeline(
@@ -23,12 +21,13 @@ internal class GuestSearchStatusPagingSource(
                         max_id = params.key,
                     )
                 } else {
-                    GuestMastodonService.searchV2(
-                        query = query,
-                        limit = params.loadSize,
-                        type = "statuses",
-                        max_id = params.key,
-                    ).statuses
+                    GuestMastodonService
+                        .searchV2(
+                            query = query,
+                            limit = params.loadSize,
+                            type = "statuses",
+                            max_id = params.key,
+                        ).statuses
                 }
 
             LoadResult.Page(
@@ -39,5 +38,4 @@ internal class GuestSearchStatusPagingSource(
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
-    }
 }

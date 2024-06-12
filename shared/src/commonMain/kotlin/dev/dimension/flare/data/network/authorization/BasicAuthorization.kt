@@ -8,7 +8,5 @@ internal class BasicAuthorization(
     override val hasAuthorization: Boolean
         get() = true
 
-    override fun getAuthorizationHeader(context: HttpRequestBuilder): String {
-        return accessToken
-    }
+    override fun getAuthorizationHeader(context: HttpRequestBuilder): String = accessToken
 }

@@ -50,19 +50,23 @@ internal class StatusDetailRemoteMediator(
             val result =
                 if (statusOnly) {
                     val current =
-                        service.getPosts(
-                            GetPostsQueryParams(
-                                persistentListOf(AtUri(statusKey.id)),
-                            ),
-                        ).requireResponse().posts.firstOrNull()
+                        service
+                            .getPosts(
+                                GetPostsQueryParams(
+                                    persistentListOf(AtUri(statusKey.id)),
+                                ),
+                            ).requireResponse()
+                            .posts
+                            .firstOrNull()
                     listOfNotNull(current)
                 } else {
                     val context =
-                        service.getPostThread(
-                            GetPostThreadQueryParams(
-                                AtUri(statusKey.id),
-                            ),
-                        ).requireResponse()
+                        service
+                            .getPostThread(
+                                GetPostThreadQueryParams(
+                                    AtUri(statusKey.id),
+                                ),
+                            ).requireResponse()
                     when (val thread = context.thread) {
                         is GetPostThreadResponseThreadUnion.ThreadViewPost -> {
                             val parent =

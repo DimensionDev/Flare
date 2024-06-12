@@ -54,7 +54,11 @@ internal class DiscoverStatusRemoteMediator(
                     }
                 }
 
-            val status = response.data?.cards?.mapNotNull { it.mblog }.orEmpty()
+            val status =
+                response.data
+                    ?.cards
+                    ?.mapNotNull { it.mblog }
+                    .orEmpty()
 
             VVO.save(
                 database = database,

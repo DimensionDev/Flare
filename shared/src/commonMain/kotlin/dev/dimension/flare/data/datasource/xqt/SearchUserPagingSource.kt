@@ -15,22 +15,27 @@ internal class SearchUserPagingSource(
     private val accountKey: MicroBlogKey,
     private val query: String,
 ) : PagingSource<String, UiUser>() {
-    override fun getRefreshKey(state: PagingState<String, UiUser>): String? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<String, UiUser>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, UiUser> {
         try {
             val response =
-                service.getSearchTimeline(
-                    variables =
-                        SearchRequest(
-                            rawQuery = query,
-                            count = params.loadSize.toLong(),
-                            cursor = params.key,
-                            product = "People",
-                        ).encodeJson(),
-                ).body()?.data?.searchByRawQuery?.searchTimeline?.timeline?.instructions.orEmpty()
+                service
+                    .getSearchTimeline(
+                        variables =
+                            SearchRequest(
+                                rawQuery = query,
+                                count = params.loadSize.toLong(),
+                                cursor = params.key,
+                                product = "People",
+                            ).encodeJson(),
+                    ).body()
+                    ?.data
+                    ?.searchByRawQuery
+                    ?.searchTimeline
+                    ?.timeline
+                    ?.instructions
+                    .orEmpty()
             val cursor = response.cursor()
             val users = response.users()
             return LoadResult.Page(

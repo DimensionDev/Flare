@@ -62,8 +62,7 @@ internal fun VVOStatusComponent(
                             event.onStatusClick(data, uriHandler)
                         }
                     }
-                }
-                .then(modifier),
+                }.then(modifier),
         statusKey = data.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(

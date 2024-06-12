@@ -63,8 +63,7 @@ internal fun BlueskyStatusComponent(
                             event.onStatusClick(data, uriHandler)
                         }
                     }
-                }
-                .then(modifier),
+                }.then(modifier),
         statusKey = data.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(

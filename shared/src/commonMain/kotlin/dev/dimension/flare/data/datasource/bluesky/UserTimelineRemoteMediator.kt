@@ -32,18 +32,19 @@ internal class UserTimelineRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH ->
-                        service.getAuthorFeed(
-                            GetAuthorFeedQueryParams(
-                                limit = state.config.pageSize.toLong(),
-                                actor = Did(did = userKey.id),
-                                filter =
-                                    if (onlyMedia) {
-                                        GetAuthorFeedFilter.POSTS_WITH_MEDIA
-                                    } else {
-                                        null
-                                    },
-                            ),
-                        ).maybeResponse()
+                        service
+                            .getAuthorFeed(
+                                GetAuthorFeedQueryParams(
+                                    limit = state.config.pageSize.toLong(),
+                                    actor = Did(did = userKey.id),
+                                    filter =
+                                        if (onlyMedia) {
+                                            GetAuthorFeedFilter.POSTS_WITH_MEDIA
+                                        } else {
+                                            null
+                                        },
+                                ),
+                            ).maybeResponse()
 
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(
@@ -52,19 +53,20 @@ internal class UserTimelineRemoteMediator(
                     }
 
                     LoadType.APPEND -> {
-                        service.getAuthorFeed(
-                            GetAuthorFeedQueryParams(
-                                limit = state.config.pageSize.toLong(),
-                                cursor = cursor,
-                                actor = Did(did = userKey.id),
-                                filter =
-                                    if (onlyMedia) {
-                                        GetAuthorFeedFilter.POSTS_WITH_MEDIA
-                                    } else {
-                                        null
-                                    },
-                            ),
-                        ).maybeResponse()
+                        service
+                            .getAuthorFeed(
+                                GetAuthorFeedQueryParams(
+                                    limit = state.config.pageSize.toLong(),
+                                    cursor = cursor,
+                                    actor = Did(did = userKey.id),
+                                    filter =
+                                        if (onlyMedia) {
+                                            GetAuthorFeedFilter.POSTS_WITH_MEDIA
+                                        } else {
+                                            null
+                                        },
+                                ),
+                            ).maybeResponse()
                     }
                 } ?: return MediatorResult.Success(
                     endOfPaginationReached = true,

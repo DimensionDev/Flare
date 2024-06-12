@@ -8,7 +8,11 @@ import dev.dimension.flare.ui.model.UiApplication.Companion.toUi
 class ApplicationRepository(
     private val database: AppDatabase,
 ) {
-    fun findByHost(host: String): UiApplication? = database.dbApplicationQueries.get(host).executeAsOneOrNull()?.toUi()
+    fun findByHost(host: String): UiApplication? =
+        database.dbApplicationQueries
+            .get(host)
+            .executeAsOneOrNull()
+            ?.toUi()
 
     fun addApplication(
         host: String,
@@ -25,7 +29,11 @@ class ApplicationRepository(
         database.dbApplicationQueries.updatePending(if (pendingOAuth) 1L else 0L, host)
     }
 
-    fun getPendingOAuth(): UiApplication? = database.dbApplicationQueries.getPending().executeAsOneOrNull()?.toUi()
+    fun getPendingOAuth(): UiApplication? =
+        database.dbApplicationQueries
+            .getPending()
+            .executeAsOneOrNull()
+            ?.toUi()
 
     fun clearPendingOAuth() {
         database.dbApplicationQueries.clearPending()

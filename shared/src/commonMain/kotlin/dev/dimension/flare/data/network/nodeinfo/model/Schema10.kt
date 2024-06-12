@@ -57,7 +57,9 @@ internal class Schema10 {
     )
 
     @Serializable
-    enum class Bound(val value: String) {
+    enum class Bound(
+        val value: String,
+    ) {
         @SerialName("buddycloud")
         Buddycloud("buddycloud"),
 
@@ -106,7 +108,9 @@ internal class Schema10 {
     )
 
     @Serializable
-    enum class Inbound(val value: String) {
+    enum class Inbound(
+        val value: String,
+    ) {
         @SerialName("appnet")
         Appnet("appnet"),
 
@@ -118,7 +122,9 @@ internal class Schema10 {
     }
 
     @Serializable
-    enum class Outbound(val value: String) {
+    enum class Outbound(
+        val value: String,
+    ) {
         @SerialName("appnet")
         Appnet("appnet"),
 
@@ -217,7 +223,9 @@ internal class Schema10 {
      * The canonical name of this server software.
      */
     @Serializable
-    enum class Name(val value: String) {
+    enum class Name(
+        val value: String,
+    ) {
         @SerialName("diaspora")
         Diaspora("diaspora"),
 
@@ -270,7 +278,9 @@ internal class Schema10 {
      * The schema version, must be 1.0.
      */
     @Serializable
-    enum class Version(val value: String) {
+    enum class Version(
+        val value: String,
+    ) {
         @SerialName("1.0")
         The10("1.0"),
     }

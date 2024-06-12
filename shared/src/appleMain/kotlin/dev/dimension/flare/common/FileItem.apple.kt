@@ -4,7 +4,5 @@ actual class FileItem(
     actual val name: String?,
     private val data: ByteArray,
 ) {
-    actual suspend fun readBytes(): ByteArray {
-        return data
-    }
+    actual suspend fun readBytes(): ByteArray = data
 }

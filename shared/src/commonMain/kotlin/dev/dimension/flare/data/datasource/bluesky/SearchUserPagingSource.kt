@@ -13,21 +13,21 @@ internal class SearchUserPagingSource(
     private val accountKey: MicroBlogKey,
     private val query: String,
 ) : PagingSource<String, UiUser>() {
-    override fun getRefreshKey(state: PagingState<String, UiUser>): String? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<String, UiUser>): String? = null
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, UiUser> {
         try {
-            service.searchActors(
-                SearchActorsQueryParams(q = query, limit = params.loadSize.toLong(), cursor = params.key),
-            ).requireResponse().let {
-                return LoadResult.Page(
-                    data = it.actors.map { it.toUi(accountKey) },
-                    prevKey = null,
-                    nextKey = it.cursor,
-                )
-            }
+            service
+                .searchActors(
+                    SearchActorsQueryParams(q = query, limit = params.loadSize.toLong(), cursor = params.key),
+                ).requireResponse()
+                .let {
+                    return LoadResult.Page(
+                        data = it.actors.map { it.toUi(accountKey) },
+                        prevKey = null,
+                        nextKey = it.cursor,
+                    )
+                }
         } catch (e: Throwable) {
             return LoadResult.Error(e)
         }

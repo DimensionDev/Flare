@@ -15,11 +15,10 @@ import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.database.version.VersionDatabase
 import dev.dimension.flare.data.version.DbVersion
 
-internal fun provideVersionDatabase(driverFactory: DriverFactory): VersionDatabase {
-    return VersionDatabase(
+internal fun provideVersionDatabase(driverFactory: DriverFactory): VersionDatabase =
+    VersionDatabase(
         driverFactory.createDriver(VersionDatabase.Schema, "version.db"),
     )
-}
 
 internal fun provideAppDatabase(
     driverFactory: DriverFactory,

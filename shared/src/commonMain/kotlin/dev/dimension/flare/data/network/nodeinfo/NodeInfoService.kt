@@ -26,36 +26,47 @@ internal data object NodeInfoService {
 
     suspend fun fetchNodeInfo(host: String): String {
         val response =
-            ktorClient().get(
-                URLBuilder(
-                    protocol = URLProtocol.HTTPS,
-                    host = host,
-                    pathSegments = listOf(".well-known", "nodeinfo"),
-                ).build(),
-            ).body<NodeInfo>()
-        return response.links.filter { it.rel in supportedSchemas }.map {
-            when (it.rel) {
-                "http://nodeinfo.diaspora.software/ns/schema/1.0" ->
-                    ktorClient().get(
-                        it.href,
-                    ).body<Schema10.Coordinate>().software.name.value
+            ktorClient()
+                .get(
+                    URLBuilder(
+                        protocol = URLProtocol.HTTPS,
+                        host = host,
+                        pathSegments = listOf(".well-known", "nodeinfo"),
+                    ).build(),
+                ).body<NodeInfo>()
+        return response.links
+            .filter { it.rel in supportedSchemas }
+            .map {
+                when (it.rel) {
+                    "http://nodeinfo.diaspora.software/ns/schema/1.0" ->
+                        ktorClient()
+                            .get(
+                                it.href,
+                            ).body<Schema10.Coordinate>()
+                            .software.name.value
 
-                "http://nodeinfo.diaspora.software/ns/schema/1.1" ->
-                    ktorClient().get(
-                        it.href,
-                    ).body<Schema11.Coordinate>().software.name.value
+                    "http://nodeinfo.diaspora.software/ns/schema/1.1" ->
+                        ktorClient()
+                            .get(
+                                it.href,
+                            ).body<Schema11.Coordinate>()
+                            .software.name.value
 
-                "http://nodeinfo.diaspora.software/ns/schema/2.0" ->
-                    ktorClient().get(it.href)
-                        .body<Schema20.Coordinate>().software.name
+                    "http://nodeinfo.diaspora.software/ns/schema/2.0" ->
+                        ktorClient()
+                            .get(it.href)
+                            .body<Schema20.Coordinate>()
+                            .software.name
 
-                "http://nodeinfo.diaspora.software/ns/schema/2.1" ->
-                    ktorClient().get(it.href)
-                        .body<Schema21.Coordinate>().software.name
+                    "http://nodeinfo.diaspora.software/ns/schema/2.1" ->
+                        ktorClient()
+                            .get(it.href)
+                            .body<Schema21.Coordinate>()
+                            .software.name
 
-                else -> throw IllegalArgumentException("Unsupported schema: ${it.rel}")
-            }
-        }.first()
+                    else -> throw IllegalArgumentException("Unsupported schema: ${it.rel}")
+                }
+            }.first()
     }
 
     suspend fun detectPlatformType(host: String): PlatformType {

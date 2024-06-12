@@ -30,9 +30,7 @@ class XQTLoginPresenter(
             override val loading = loading
             override val error = error
 
-            override fun checkChocolate(cookie: String): Boolean {
-                return XQTService.checkChocolate(cookie)
-            }
+            override fun checkChocolate(cookie: String): Boolean = XQTService.checkChocolate(cookie)
 
             override fun login(chocolate: String) {
                 scope.launch {
@@ -62,8 +60,12 @@ class XQTLoginPresenter(
         val accountSettings = xqtService.getAccountSettings()
         requireNotNull(accountSettings.screenName)
         val account =
-            xqtService.userByScreenName(accountSettings.screenName)
-                .body()?.data?.user?.result
+            xqtService
+                .userByScreenName(accountSettings.screenName)
+                .body()
+                ?.data
+                ?.user
+                ?.result
         requireNotNull(account)
         require(account is User)
         accountRepository.addAccount(

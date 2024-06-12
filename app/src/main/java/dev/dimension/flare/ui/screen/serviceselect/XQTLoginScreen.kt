@@ -61,8 +61,7 @@ private fun XQTLoginScreen(toHome: () -> Unit) {
                         .getCookie(url)
                         ?.takeIf {
                             state.checkChocolate(it)
-                        }
-                        ?.let {
+                        }?.let {
                             state.login(it)
                         }
                 }

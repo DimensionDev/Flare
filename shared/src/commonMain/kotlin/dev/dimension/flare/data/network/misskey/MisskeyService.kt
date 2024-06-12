@@ -9,6 +9,14 @@ import dev.dimension.flare.data.network.misskey.api.MetaApi
 import dev.dimension.flare.data.network.misskey.api.NotesApi
 import dev.dimension.flare.data.network.misskey.api.ReactionsApi
 import dev.dimension.flare.data.network.misskey.api.UsersApi
+import dev.dimension.flare.data.network.misskey.api.createAccountApi
+import dev.dimension.flare.data.network.misskey.api.createDriveApi
+import dev.dimension.flare.data.network.misskey.api.createFollowingApi
+import dev.dimension.flare.data.network.misskey.api.createHashtagsApi
+import dev.dimension.flare.data.network.misskey.api.createMetaApi
+import dev.dimension.flare.data.network.misskey.api.createNotesApi
+import dev.dimension.flare.data.network.misskey.api.createReactionsApi
+import dev.dimension.flare.data.network.misskey.api.createUsersApi
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.request.forms.MultiPartFormDataContent
@@ -39,14 +47,14 @@ private fun config(
 internal class MisskeyService(
     private val baseUrl: String,
     private val token: String,
-) : UsersApi by config(baseUrl, token).create(),
-    MetaApi by config(baseUrl, token).create(),
-    NotesApi by config(baseUrl, token).create(),
-    AccountApi by config(baseUrl, token).create(),
-    DriveApi by config(baseUrl, token).create(),
-    ReactionsApi by config(baseUrl, token).create(),
-    FollowingApi by config(baseUrl, token).create(),
-    HashtagsApi by config(baseUrl, token).create() {
+) : UsersApi by config(baseUrl, token).createUsersApi(),
+    MetaApi by config(baseUrl, token).createMetaApi(),
+    NotesApi by config(baseUrl, token).createNotesApi(),
+    AccountApi by config(baseUrl, token).createAccountApi(),
+    DriveApi by config(baseUrl, token).createDriveApi(),
+    ReactionsApi by config(baseUrl, token).createReactionsApi(),
+    FollowingApi by config(baseUrl, token).createFollowingApi(),
+    HashtagsApi by config(baseUrl, token).createHashtagsApi() {
     suspend fun upload(
         data: ByteArray,
         name: String,

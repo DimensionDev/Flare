@@ -8,9 +8,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 
-internal fun DbPagingTimelineWithStatusView.toUi(): UiStatus {
-    return status_content.toUi(timeline_account_key)
-}
+internal fun DbPagingTimelineWithStatusView.toUi(): UiStatus = status_content.toUi(timeline_account_key)
 
 internal fun StatusContent.toUi(accountKey: MicroBlogKey) =
     when (this) {
@@ -58,8 +56,8 @@ internal fun StatusContent.toUi(accountKey: MicroBlogKey) =
             )
     }
 
-internal fun DbUser.toUi(accountKey: MicroBlogKey): UiUser {
-    return when (val user = content) {
+internal fun DbUser.toUi(accountKey: MicroBlogKey): UiUser =
+    when (val user = content) {
         is UserContent.Mastodon -> user.data.toUi(host = accountKey.host)
 
         is UserContent.Misskey ->
@@ -92,4 +90,3 @@ internal fun DbUser.toUi(accountKey: MicroBlogKey): UiUser {
                 accountKey = user_key,
             )
     }
-}

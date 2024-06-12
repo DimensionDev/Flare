@@ -17,10 +17,16 @@ class StoragePresenter : PresenterBase<StorageState>() {
     override fun body(): StorageState {
         val cacheDatabase = koinInject<CacheDatabase>()
         val statusCount by remember {
-            cacheDatabase.dbStatusQueries.count().asFlow().mapToOneNotNull(Dispatchers.IO)
+            cacheDatabase.dbStatusQueries
+                .count()
+                .asFlow()
+                .mapToOneNotNull(Dispatchers.IO)
         }.collectAsState(0L)
         val userCount by remember {
-            cacheDatabase.dbUserQueries.count().asFlow().mapToOneNotNull(Dispatchers.IO)
+            cacheDatabase.dbUserQueries
+                .count()
+                .asFlow()
+                .mapToOneNotNull(Dispatchers.IO)
         }.collectAsState(0L)
         return object : StorageState {
             override val userCount: Long = userCount

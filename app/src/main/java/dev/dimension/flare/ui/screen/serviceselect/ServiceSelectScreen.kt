@@ -195,24 +195,25 @@ fun ServiceSelectScreen(
                     },
                     modifier = Modifier.width(300.dp),
                     leadingIcon = {
-                        state.detectedPlatformType.onSuccess {
-                            NetworkImage(
-                                it.logoUrl,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }.onError {
-                            Icon(
-                                imageVector = Icons.Filled.QuestionMark,
-                                contentDescription = null,
-                            )
-                        }.onLoading {
-                            Icon(
-                                imageVector = Icons.Filled.Web,
-                                contentDescription = null,
-                                modifier = Modifier.placeholder(true),
-                            )
-                        }
+                        state.detectedPlatformType
+                            .onSuccess {
+                                NetworkImage(
+                                    it.logoUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }.onError {
+                                Icon(
+                                    imageVector = Icons.Filled.QuestionMark,
+                                    contentDescription = null,
+                                )
+                            }.onLoading {
+                                Icon(
+                                    imageVector = Icons.Filled.Web,
+                                    contentDescription = null,
+                                    modifier = Modifier.placeholder(true),
+                                )
+                            }
                     },
                     enabled = !state.loading,
                 )
@@ -244,8 +245,10 @@ fun ServiceSelectScreen(
                                     onKeyboardAction = {
                                         state.blueskyLoginState.login(
                                             "https://${state.instanceInputState.text}",
-                                            state.blueskyInputState.username.text.toString(),
-                                            state.blueskyInputState.password.text.toString(),
+                                            state.blueskyInputState.username.text
+                                                .toString(),
+                                            state.blueskyInputState.password.text
+                                                .toString(),
                                         )
                                     },
                                 )
@@ -253,8 +256,10 @@ fun ServiceSelectScreen(
                                     onClick = {
                                         state.blueskyLoginState.login(
                                             "https://${state.instanceInputState.text}",
-                                            state.blueskyInputState.username.text.toString(),
-                                            state.blueskyInputState.password.text.toString(),
+                                            state.blueskyInputState.username.text
+                                                .toString(),
+                                            state.blueskyInputState.password.text
+                                                .toString(),
                                         )
                                     },
                                     modifier = Modifier.width(300.dp),
@@ -268,14 +273,15 @@ fun ServiceSelectScreen(
                                 OnNewIntent {
                                     state.misskeyLoginState.resume(it.dataString.orEmpty())
                                 }
-                                state.misskeyLoginState.resumedState?.onLoading {
-                                    Text(
-                                        text = stringResource(id = R.string.mastodon_login_verify_message),
-                                    )
-                                    CircularProgressIndicator()
-                                }?.onError {
-                                    Text(text = it.message ?: "Unknown error")
-                                } ?: run {
+                                state.misskeyLoginState.resumedState
+                                    ?.onLoading {
+                                        Text(
+                                            text = stringResource(id = R.string.mastodon_login_verify_message),
+                                        )
+                                        CircularProgressIndicator()
+                                    }?.onError {
+                                        Text(text = it.message ?: "Unknown error")
+                                    } ?: run {
                                     Button(
                                         onClick = {
                                             state.misskeyLoginState.login(
@@ -299,14 +305,15 @@ fun ServiceSelectScreen(
                                 OnNewIntent {
                                     state.mastodonLoginState.resume(it.dataString.orEmpty())
                                 }
-                                state.mastodonLoginState.resumedState?.onLoading {
-                                    Text(
-                                        text = stringResource(id = R.string.mastodon_login_verify_message),
-                                    )
-                                    CircularProgressIndicator()
-                                }?.onError {
-                                    Text(text = it.message ?: "Unknown error")
-                                } ?: run {
+                                state.mastodonLoginState.resumedState
+                                    ?.onLoading {
+                                        Text(
+                                            text = stringResource(id = R.string.mastodon_login_verify_message),
+                                        )
+                                        CircularProgressIndicator()
+                                    }?.onError {
+                                        Text(text = it.message ?: "Unknown error")
+                                    } ?: run {
                                     Button(
                                         onClick = {
                                             state.mastodonLoginState.login(
@@ -367,35 +374,36 @@ fun ServiceSelectScreen(
                         ),
                     verticalItemSpacing = 8.dp,
                 ) {
-                    state.instances.onSuccess {
-                        items(
-                            count = state.instances.itemCount,
-                        ) {
-                            val instance = state.instances.peek(it)
-                            ServiceSelectItem(
-                                instance = instance,
-                                modifier =
-                                    Modifier.clickable {
-                                        if (instance != null) {
-                                            state.selectInstance(instance)
-                                        }
-                                    },
-                            )
+                    state.instances
+                        .onSuccess {
+                            items(
+                                count = state.instances.itemCount,
+                            ) {
+                                val instance = state.instances.peek(it)
+                                ServiceSelectItem(
+                                    instance = instance,
+                                    modifier =
+                                        Modifier.clickable {
+                                            if (instance != null) {
+                                                state.selectInstance(instance)
+                                            }
+                                        },
+                                )
+                            }
+                        }.onLoading {
+                            items(10) {
+                                ServiceSelectItem(
+                                    instance = null,
+                                )
+                            }
+                        }.onEmpty {
+                            items(1) {
+                                Text(
+                                    text = stringResource(id = R.string.service_select_empty_message),
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
                         }
-                    }.onLoading {
-                        items(10) {
-                            ServiceSelectItem(
-                                instance = null,
-                            )
-                        }
-                    }.onEmpty {
-                        items(1) {
-                            Text(
-                                text = stringResource(id = R.string.service_select_empty_message),
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -486,8 +494,7 @@ private fun serviceSelectPresenter(
     LaunchedEffect(Unit) {
         snapshotFlow {
             instanceInputState.text
-        }
-            .distinctUntilChanged()
+        }.distinctUntilChanged()
             .debounce(666L)
             .collect {
                 state.setFilter(it.toString())

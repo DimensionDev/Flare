@@ -40,56 +40,70 @@ actual data class UiStatusExtra(
             }
             // xx day(s)
             diff.inWholeDays >= 1 -> {
-                DateUtils.getRelativeTimeSpanString(
-                    createdAt.toEpochMilliseconds(),
-                    System.currentTimeMillis(),
-                    DateUtils.DAY_IN_MILLIS,
-                    DateUtils.FORMAT_ABBREV_RELATIVE,
-                ).toString().let(LocalizedShortTime::String)
+                DateUtils
+                    .getRelativeTimeSpanString(
+                        createdAt.toEpochMilliseconds(),
+                        System.currentTimeMillis(),
+                        DateUtils.DAY_IN_MILLIS,
+                        DateUtils.FORMAT_ABBREV_RELATIVE,
+                    ).toString()
+                    .let(LocalizedShortTime::String)
             }
             // xx hr(s)
             diff.inWholeHours >= 1 -> {
-                DateUtils.getRelativeTimeSpanString(
-                    createdAt.toEpochMilliseconds(),
-                    System.currentTimeMillis(),
-                    DateUtils.HOUR_IN_MILLIS,
-                    DateUtils.FORMAT_ABBREV_RELATIVE,
-                ).toString().let(LocalizedShortTime::String)
+                DateUtils
+                    .getRelativeTimeSpanString(
+                        createdAt.toEpochMilliseconds(),
+                        System.currentTimeMillis(),
+                        DateUtils.HOUR_IN_MILLIS,
+                        DateUtils.FORMAT_ABBREV_RELATIVE,
+                    ).toString()
+                    .let(LocalizedShortTime::String)
             }
             // xx sec(s)
             diff.inWholeMinutes < 1 -> {
-                DateUtils.getRelativeTimeSpanString(
-                    createdAt.toEpochMilliseconds(),
-                    System.currentTimeMillis(),
-                    DateUtils.SECOND_IN_MILLIS,
-                    DateUtils.FORMAT_ABBREV_RELATIVE,
-                ).toString().let(LocalizedShortTime::String)
+                DateUtils
+                    .getRelativeTimeSpanString(
+                        createdAt.toEpochMilliseconds(),
+                        System.currentTimeMillis(),
+                        DateUtils.SECOND_IN_MILLIS,
+                        DateUtils.FORMAT_ABBREV_RELATIVE,
+                    ).toString()
+                    .let(LocalizedShortTime::String)
             }
             // xx min(s)
             else -> {
-                DateUtils.getRelativeTimeSpanString(
-                    createdAt.toEpochMilliseconds(),
-                    System.currentTimeMillis(),
-                    DateUtils.MINUTE_IN_MILLIS,
-                    DateUtils.FORMAT_ABBREV_RELATIVE,
-                ).toString().let(LocalizedShortTime::String)
+                DateUtils
+                    .getRelativeTimeSpanString(
+                        createdAt.toEpochMilliseconds(),
+                        System.currentTimeMillis(),
+                        DateUtils.MINUTE_IN_MILLIS,
+                        DateUtils.FORMAT_ABBREV_RELATIVE,
+                    ).toString()
+                    .let(LocalizedShortTime::String)
             }
         }
     }
 }
 
 sealed interface LocalizedShortTime {
-    data class String(val value: kotlin.String) : LocalizedShortTime
+    data class String(
+        val value: kotlin.String,
+    ) : LocalizedShortTime
 
-    data class YearMonthDay(val localDateTime: LocalDateTime) : LocalizedShortTime
+    data class YearMonthDay(
+        val localDateTime: LocalDateTime,
+    ) : LocalizedShortTime
 
-    data class MonthDay(val localDateTime: LocalDateTime) : LocalizedShortTime
+    data class MonthDay(
+        val localDateTime: LocalDateTime,
+    ) : LocalizedShortTime
 }
 
 val UiStatus.contentDirection get() = extra.contentDirection
 
-internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
-    return when (status) {
+internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra =
+    when (status) {
         is UiStatus.Mastodon -> {
             UiStatusExtra(
                 contentDirection =
@@ -184,4 +198,3 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra {
             )
         }
     }
-}

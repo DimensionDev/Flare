@@ -12,6 +12,15 @@ import dev.dimension.flare.data.network.mastodon.api.SearchResources
 import dev.dimension.flare.data.network.mastodon.api.StatusResources
 import dev.dimension.flare.data.network.mastodon.api.TimelineResources
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
+import dev.dimension.flare.data.network.mastodon.api.createAccountResources
+import dev.dimension.flare.data.network.mastodon.api.createFriendshipResources
+import dev.dimension.flare.data.network.mastodon.api.createListsResources
+import dev.dimension.flare.data.network.mastodon.api.createLookupResources
+import dev.dimension.flare.data.network.mastodon.api.createMastodonResources
+import dev.dimension.flare.data.network.mastodon.api.createSearchResources
+import dev.dimension.flare.data.network.mastodon.api.createStatusResources
+import dev.dimension.flare.data.network.mastodon.api.createTimelineResources
+import dev.dimension.flare.data.network.mastodon.api.createTrendsResources
 import dev.dimension.flare.data.network.mastodon.api.model.UploadResponse
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.ResponseException
@@ -29,8 +38,11 @@ private fun config(
     HttpResponseValidator {
         handleResponseExceptionWithRequest { exception, _ ->
             if (exception is ResponseException) {
-                exception.response.bodyAsText().decodeJson<MastodonException>()
-                    .takeIf { it.error != null }?.let {
+                exception.response
+                    .bodyAsText()
+                    .decodeJson<MastodonException>()
+                    .takeIf { it.error != null }
+                    ?.let {
                         throw it
                     }
             }
@@ -41,15 +53,15 @@ private fun config(
 internal class MastodonService(
     private val baseUrl: String,
     private val accessToken: String,
-) : TimelineResources by config(baseUrl, accessToken).create(),
-    LookupResources by config(baseUrl, accessToken).create(),
-    FriendshipResources by config(baseUrl, accessToken).create(),
-    AccountResources by config(baseUrl, accessToken).create(),
-    SearchResources by config(baseUrl, accessToken).create(),
-    StatusResources by config(baseUrl, accessToken).create(),
-    ListsResources by config(baseUrl, accessToken).create(),
-    TrendsResources by config(baseUrl, accessToken).create(),
-    MastodonResources by config(baseUrl, accessToken).create() {
+) : TimelineResources by config(baseUrl, accessToken).createTimelineResources(),
+    LookupResources by config(baseUrl, accessToken).createLookupResources(),
+    FriendshipResources by config(baseUrl, accessToken).createFriendshipResources(),
+    AccountResources by config(baseUrl, accessToken).createAccountResources(),
+    SearchResources by config(baseUrl, accessToken).createSearchResources(),
+    StatusResources by config(baseUrl, accessToken).createStatusResources(),
+    ListsResources by config(baseUrl, accessToken).createListsResources(),
+    TrendsResources by config(baseUrl, accessToken).createTrendsResources(),
+    MastodonResources by config(baseUrl, accessToken).createMastodonResources() {
     suspend fun upload(
         data: ByteArray,
         name: String,

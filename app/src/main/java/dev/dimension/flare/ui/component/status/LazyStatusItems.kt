@@ -133,8 +133,7 @@ internal fun <T : UiStatus> status(
                                         } else {
                                             it
                                         }
-                                    }
-                                    .background(MaterialTheme.colorScheme.background),
+                                    }.background(MaterialTheme.colorScheme.background),
                         )
                         if (it != itemCount - 1) {
                             HorizontalDivider(
@@ -163,8 +162,7 @@ internal fun <T : UiStatus> status(
                                         Modifier
                                             .clickable {
                                                 lazyPagingItems.retry()
-                                            }
-                                            .fillMaxWidth()
+                                            }.fillMaxWidth()
                                             .padding(16.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -255,8 +253,7 @@ internal fun <T : UiStatus> status(
                                 Modifier
                                     .clickable {
                                         lazyPagingItems.retry()
-                                    }
-                                    .fillMaxWidth()
+                                    }.fillMaxWidth()
                                     .padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -605,8 +602,7 @@ internal class DefaultStatusEvent(
             StatusRouteDestination(
                 statusKey = data.statusKey,
                 accountType = AccountType.Specific(data.accountKey),
-            )
-                .deeplink(),
+            ).deeplink(),
         )
     }
 
@@ -632,8 +628,7 @@ internal class DefaultStatusEvent(
             ReplyRouteDestination(
                 accountType = AccountType.Specific(data.accountKey),
                 replyTo = data.statusKey,
-            )
-                .deeplink(),
+            ).deeplink(),
         )
     }
 

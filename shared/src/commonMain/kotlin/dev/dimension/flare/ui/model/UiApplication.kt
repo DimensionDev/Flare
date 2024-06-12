@@ -40,8 +40,8 @@ sealed interface UiApplication {
     }
 
     companion object {
-        fun DbApplication.toUi(): UiApplication {
-            return when (platform_type) {
+        fun DbApplication.toUi(): UiApplication =
+            when (platform_type) {
                 PlatformType.Mastodon ->
                     Mastodon(
                         host = host,
@@ -63,6 +63,5 @@ sealed interface UiApplication {
 
                 PlatformType.VVo -> VVo
             }
-        }
     }
 }

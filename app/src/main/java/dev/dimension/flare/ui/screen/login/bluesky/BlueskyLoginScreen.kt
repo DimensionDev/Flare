@@ -218,7 +218,9 @@ private fun BlueskyLoginScreen(
     }
 }
 
-private enum class KnownInstance(val url: String) {
+private enum class KnownInstance(
+    val url: String,
+) {
     Main("https://bsky.social"),
     Staging("https://staging.bsky.dev"),
     Local("http://localhost:2583"),

@@ -83,8 +83,7 @@ internal fun MisskeyStatusComponent(
                             event.onStatusClick(data, uriHandler)
                         }
                     }
-                }
-                .then(modifier),
+                }.then(modifier),
         statusKey = actualData.statusKey,
         onMediaClick = { statusKey, index, preview ->
             event.onMediaClick(
@@ -200,8 +199,7 @@ private fun StatusReactionComponent(
                         Modifier
                             .clickable {
                                 event.onReactionClick(data, reaction)
-                            }
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                            }.padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     EmojiImage(
                         uri = reaction.url,

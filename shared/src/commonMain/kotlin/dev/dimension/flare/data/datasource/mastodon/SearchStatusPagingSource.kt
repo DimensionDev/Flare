@@ -38,11 +38,12 @@ internal class SearchStatusPagingSource(
                                 limit = state.config.pageSize,
                             )
                         } else {
-                            service.searchV2(
-                                query = query,
-                                limit = state.config.pageSize,
-                                type = "statuses",
-                            ).statuses
+                            service
+                                .searchV2(
+                                    query = query,
+                                    limit = state.config.pageSize,
+                                    type = "statuses",
+                                ).statuses
                         }.also {
                             database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
                         }
@@ -61,12 +62,13 @@ internal class SearchStatusPagingSource(
                                 max_id = lastItem.timeline_status_key.id,
                             )
                         } else {
-                            service.searchV2(
-                                query = query,
-                                limit = state.config.pageSize,
-                                max_id = lastItem.timeline_status_key.id,
-                                type = "statuses",
-                            ).statuses
+                            service
+                                .searchV2(
+                                    query = query,
+                                    limit = state.config.pageSize,
+                                    max_id = lastItem.timeline_status_key.id,
+                                    type = "statuses",
+                                ).statuses
                         }
                     }
                 } ?: emptyList()

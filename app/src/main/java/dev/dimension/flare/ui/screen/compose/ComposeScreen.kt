@@ -253,15 +253,16 @@ private fun ComposeScreen(
     val contentWarningFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(state.contentWarningState) {
-        state.contentWarningState.onSuccess { contentWarningState ->
-            if (contentWarningState.enabled) {
-                contentWarningFocusRequester.requestFocus()
-            } else {
+        state.contentWarningState
+            .onSuccess { contentWarningState ->
+                if (contentWarningState.enabled) {
+                    contentWarningFocusRequester.requestFocus()
+                } else {
+                    focusRequester.requestFocus()
+                }
+            }.onError {
                 focusRequester.requestFocus()
             }
-        }.onError {
-            focusRequester.requestFocus()
-        }
     }
 
 //    val permissionState =
@@ -280,8 +281,7 @@ private fun ComposeScreen(
                 .background(
                     MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
                     shape = MaterialTheme.shapes.large,
-                )
-                .clip(MaterialTheme.shapes.large),
+                ).clip(MaterialTheme.shapes.large),
     ) {
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
@@ -787,7 +787,8 @@ private fun MisskeyVisibilityContent(visibilityState: MisskeyVisibilityState) {
             visibilityState.showVisibilityMenu()
         },
     ) {
-        dev.dimension.flare.ui.component.status.misskey.VisibilityIcon(visibility = visibilityState.visibility)
+        dev.dimension.flare.ui.component.status.misskey
+            .VisibilityIcon(visibility = visibilityState.visibility)
         DropdownMenu(
             expanded = visibilityState.showVisibilityMenu,
             onDismissRequest = {
@@ -817,7 +818,8 @@ private fun MisskeyVisibilityContent(visibilityState: MisskeyVisibilityState) {
                         }
                     },
                     leadingIcon = {
-                        dev.dimension.flare.ui.component.status.misskey.VisibilityIcon(visibility = visibility)
+                        dev.dimension.flare.ui.component.status.misskey
+                            .VisibilityIcon(visibility = visibility)
                     },
                     contentPadding =
                         PaddingValues(
@@ -951,32 +953,36 @@ private fun composePresenter(
     }
 
     val remainingLength =
-        state.composeConfig.mapNotNull {
-            it.text
-        }.map {
-            it.maxLength - textFieldState.text.length
-        }
+        state.composeConfig
+            .mapNotNull {
+                it.text
+            }.map {
+                it.maxLength - textFieldState.text.length
+            }
 
     val pollState =
-        state.composeConfig.mapNotNull {
-            it.poll
-        }.map {
-            pollPresenter(it)
-        }
+        state.composeConfig
+            .mapNotNull {
+                it.poll
+            }.map {
+                pollPresenter(it)
+            }
 
     val mediaState =
-        state.composeConfig.mapNotNull {
-            it.media
-        }.map {
-            mediaPresenter(it, initialMedias)
-        }
+        state.composeConfig
+            .mapNotNull {
+                it.media
+            }.map {
+                mediaPresenter(it, initialMedias)
+            }
 
     val contentWarningState =
-        state.composeConfig.mapNotNull {
-            it.contentWarning
-        }.map {
-            contentWarningPresenter()
-        }
+        state.composeConfig
+            .mapNotNull {
+                it.contentWarning
+            }.map {
+                contentWarningPresenter()
+            }
 
     state.replyState?.onSuccess {
         LaunchedEffect(it) {
@@ -1067,9 +1073,12 @@ private fun composePresenter(
                             MastodonComposeData(
                                 content = textFieldState.text.toString(),
                                 medias =
-                                    mediaState.takeSuccess()?.medias?.map {
-                                        FileItem(context, it)
-                                    }.orEmpty(),
+                                    mediaState
+                                        .takeSuccess()
+                                        ?.medias
+                                        ?.map {
+                                            FileItem(context, it)
+                                        }.orEmpty(),
                                 poll =
                                     pollState.takeSuccess()?.takeIf { it.enabled }?.let {
                                         MastodonComposeData.Poll(
@@ -1082,7 +1091,12 @@ private fun composePresenter(
                                         )
                                     },
                                 sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                                spoilerText = contentWarningState.takeSuccess()?.textFieldState?.text?.toString(),
+                                spoilerText =
+                                    contentWarningState
+                                        .takeSuccess()
+                                        ?.textFieldState
+                                        ?.text
+                                        ?.toString(),
                                 visibility =
                                     state.visibilityState
                                         .takeSuccess()
@@ -1097,9 +1111,12 @@ private fun composePresenter(
                             MisskeyComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.takeSuccess()?.medias?.map {
-                                        FileItem(context, it)
-                                    }.orEmpty(),
+                                    mediaState
+                                        .takeSuccess()
+                                        ?.medias
+                                        ?.map {
+                                            FileItem(context, it)
+                                        }.orEmpty(),
                                 poll =
                                     pollState.takeSuccess()?.takeIf { it.enabled }?.let {
                                         MisskeyComposeData.Poll(
@@ -1112,7 +1129,12 @@ private fun composePresenter(
                                         )
                                     },
                                 sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                                spoilerText = contentWarningState.takeSuccess()?.textFieldState?.text?.toString(),
+                                spoilerText =
+                                    contentWarningState
+                                        .takeSuccess()
+                                        ?.textFieldState
+                                        ?.text
+                                        ?.toString(),
                                 visibility =
                                     state.visibilityState
                                         .takeSuccess()
@@ -1134,9 +1156,12 @@ private fun composePresenter(
                             BlueskyComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.takeSuccess()?.medias?.map {
-                                        FileItem(context, it)
-                                    }.orEmpty(),
+                                    mediaState
+                                        .takeSuccess()
+                                        ?.medias
+                                        ?.map {
+                                            FileItem(context, it)
+                                        }.orEmpty(),
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 content = textFieldState.text.toString(),
@@ -1146,24 +1171,31 @@ private fun composePresenter(
                             XQTComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.takeSuccess()?.medias?.map {
-                                        FileItem(context, it)
-                                    }.orEmpty(),
+                                    mediaState
+                                        .takeSuccess()
+                                        ?.medias
+                                        ?.map {
+                                            FileItem(context, it)
+                                        }.orEmpty(),
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 quoteUsername =
                                     (status as? ComposeStatus.Quote)?.let {
                                         if (state.replyState is UiState.Success) {
-                                            (state.replyState as UiState.Success).data.let {
-                                                it as? UiStatus.XQT
-                                            }?.user?.rawHandle
+                                            (state.replyState as UiState.Success)
+                                                .data
+                                                .let {
+                                                    it as? UiStatus.XQT
+                                                }?.user
+                                                ?.rawHandle
                                         } else {
                                             null
                                         }
                                     },
                                 content = textFieldState.text.toString(),
                                 poll =
-                                    pollState.takeSuccess()
+                                    pollState
+                                        .takeSuccess()
                                         ?.takeIf { it.enabled }
                                         ?.let { pollState ->
                                             XQTComposeData.Poll(
@@ -1182,9 +1214,12 @@ private fun composePresenter(
                             VVOComposeData(
                                 account = it,
                                 medias =
-                                    mediaState.takeSuccess()?.medias?.map {
-                                        FileItem(context, it)
-                                    }.orEmpty(),
+                                    mediaState
+                                        .takeSuccess()
+                                        ?.medias
+                                        ?.map {
+                                            FileItem(context, it)
+                                        }.orEmpty(),
                                 content = textFieldState.text.toString(),
                                 repostId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 commentId = (status as? ComposeStatus.Reply)?.statusKey?.id,
@@ -1315,7 +1350,10 @@ private fun pollPresenter(config: ComposeConfig.Poll) =
         }
     }
 
-internal enum class PollExpiration(val textId: Int, val duration: Duration) {
+internal enum class PollExpiration(
+    val textId: Int,
+    val duration: Duration,
+) {
     Minutes5(R.string.compose_poll_expiration_5_minutes, 5.minutes),
     Minutes30(R.string.compose_poll_expiration_30_minutes, 30.minutes),
     Hours1(R.string.compose_poll_expiration_1_hour, 1.hours),

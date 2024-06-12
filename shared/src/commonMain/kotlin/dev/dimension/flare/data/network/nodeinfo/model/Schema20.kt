@@ -42,7 +42,9 @@ internal class Schema20 {
     )
 
     @Serializable
-    enum class Protocol(val value: String) {
+    enum class Protocol(
+        val value: String,
+    ) {
         @SerialName("activitypub")
         Activitypub("activitypub"),
 
@@ -91,7 +93,9 @@ internal class Schema20 {
     )
 
     @Serializable
-    enum class Inbound(val value: String) {
+    enum class Inbound(
+        val value: String,
+    ) {
         @SerialName("atom1.0")
         Atom10("atom1.0"),
 
@@ -118,7 +122,9 @@ internal class Schema20 {
     }
 
     @Serializable
-    enum class Outbound(val value: String) {
+    enum class Outbound(
+        val value: String,
+    ) {
         @SerialName("atom1.0")
         Atom10("atom1.0"),
 
@@ -261,7 +267,9 @@ internal class Schema20 {
      * The schema version, must be 2.0.
      */
     @Serializable
-    enum class Version(val value: String) {
+    enum class Version(
+        val value: String,
+    ) {
         @SerialName("2.0")
         The20("2.0"),
     }

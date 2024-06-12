@@ -38,7 +38,8 @@ fun AudioPlayer(
     val context = LocalContext.current
     val player =
         remember {
-            ExoPlayer.Builder(context)
+            ExoPlayer
+                .Builder(context)
                 .build()
                 .apply {
                     setMediaItem(MediaItem.fromUri(uri))

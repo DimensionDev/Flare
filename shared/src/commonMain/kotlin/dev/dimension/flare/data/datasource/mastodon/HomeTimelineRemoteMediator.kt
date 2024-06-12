@@ -17,9 +17,7 @@ internal class HomeTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
-    override suspend fun initialize(): InitializeAction {
-        return InitializeAction.SKIP_INITIAL_REFRESH
-    }
+    override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
     override suspend fun load(
         loadType: LoadType,
@@ -29,13 +27,14 @@ internal class HomeTimelineRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        service.homeTimeline(
-                            limit = state.config.pageSize,
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .homeTimeline(
+                                limit = state.config.pageSize,
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
                     LoadType.PREPEND -> {
                         val firstItem = state.firstItemOrNull()

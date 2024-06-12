@@ -12,15 +12,15 @@ import kotlinx.serialization.Serializable
 sealed interface StatusContent {
     @Serializable
     @SerialName("mastodon")
-    data class Mastodon internal constructor(internal val data: dev.dimension.flare.data.network.mastodon.api.model.Status) :
-        StatusContent
+    data class Mastodon internal constructor(
+        internal val data: dev.dimension.flare.data.network.mastodon.api.model.Status,
+    ) : StatusContent
 
     @Serializable
     @SerialName("mastodon-notification")
     data class MastodonNotification internal constructor(
         internal val data: dev.dimension.flare.data.network.mastodon.api.model.Notification,
-    ) :
-        StatusContent
+    ) : StatusContent
 
     @Serializable
     @SerialName("misskey")
@@ -36,12 +36,16 @@ sealed interface StatusContent {
 
     @Serializable
     @SerialName("bluesky")
-    data class Bluesky(val data: PostView, val reason: FeedViewPostReasonUnion?) : StatusContent
+    data class Bluesky(
+        val data: PostView,
+        val reason: FeedViewPostReasonUnion?,
+    ) : StatusContent
 
     @Serializable
     @SerialName("bluesky-notification")
-    data class BlueskyNotification(val data: app.bsky.notification.ListNotificationsNotification) :
-        StatusContent
+    data class BlueskyNotification(
+        val data: app.bsky.notification.ListNotificationsNotification,
+    ) : StatusContent
 
     @Serializable
     @SerialName("XQT")

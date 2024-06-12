@@ -58,8 +58,7 @@ internal fun timelinePager(
         pagingData
             .map {
                 it.toUi()
-            }
-            .filter {
+            }.filter {
                 !it.contains(filters)
             }
     }.cachedIn(scope)

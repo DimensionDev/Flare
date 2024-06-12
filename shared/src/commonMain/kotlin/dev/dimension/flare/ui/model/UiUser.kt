@@ -56,9 +56,11 @@ sealed class UiUser {
         }
 
         val fieldsParsed by lazy {
-            fields.map { (key, value) ->
-                key to Ktml.parse(value)
-            }.toMap().toPersistentMap()
+            fields
+                .map { (key, value) ->
+                    key to Ktml.parse(value)
+                }.toMap()
+                .toPersistentMap()
         }
 
         override val descriptionElement by lazy {
@@ -98,9 +100,11 @@ sealed class UiUser {
         }
 
         val fieldsParsed by lazy {
-            fields.map { (key, value) ->
-                key to misskeyParser.parse(value).toHtml(accountKey)
-            }.toMap().toPersistentMap()
+            fields
+                .map { (key, value) ->
+                    key to misskeyParser.parse(value).toHtml(accountKey)
+                }.toMap()
+                .toPersistentMap()
         }
 
         override val descriptionElement by lazy {
@@ -175,20 +179,21 @@ sealed class UiUser {
         override val handle: String = "@$rawHandle@$xqtHost"
 
         val fieldsParsed by lazy {
-            hashMapOf<String, Element>().apply {
-                location?.let {
-                    put("location", Element("span").apply { children.add(Text(it)) })
-                }
-                url?.let { url ->
-                    put(
-                        "url",
-                        Element("a").apply {
-                            children.add(Text(url))
-                            attributes["href"] = url
-                        },
-                    )
-                }
-            }.toImmutableMap()
+            hashMapOf<String, Element>()
+                .apply {
+                    location?.let {
+                        put("location", Element("span").apply { children.add(Text(it)) })
+                    }
+                    url?.let { url ->
+                        put(
+                            "url",
+                            Element("a").apply {
+                                children.add(Text(url))
+                                attributes["href"] = url
+                            },
+                        )
+                    }
+                }.toImmutableMap()
         }
 
         @Immutable
@@ -209,12 +214,15 @@ sealed class UiUser {
         }
         override val descriptionElement: Element? by lazy {
             description?.let {
-                twitterParser.parse(it)
+                twitterParser
+                    .parse(it)
                     .map { token ->
                         if (token is UrlToken) {
                             val actual =
-                                raw.legacy.entities.description?.urls
-                                    ?.firstOrNull { it.url == token.value.trim() }?.expandedUrl
+                                raw.legacy.entities.description
+                                    ?.urls
+                                    ?.firstOrNull { it.url == token.value.trim() }
+                                    ?.expandedUrl
                             if (actual != null) {
                                 UrlToken(actual)
                             } else {
@@ -223,8 +231,7 @@ sealed class UiUser {
                         } else {
                             token
                         }
-                    }
-                    .toHtml(accountKey)
+                    }.toHtml(accountKey)
             }
         }
 

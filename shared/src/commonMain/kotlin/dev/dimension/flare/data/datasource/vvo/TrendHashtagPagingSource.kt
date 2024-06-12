@@ -11,9 +11,7 @@ internal class TrendHashtagPagingSource(
 ) : PagingSource<Int, UiHashtag>() {
     private val containerId = "106003type=25&filter_type=realtimehot"
 
-    override fun getRefreshKey(state: PagingState<Int, UiHashtag>): Int? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Int, UiHashtag>): Int? = null
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiHashtag> {
         try {
@@ -23,23 +21,21 @@ internal class TrendHashtagPagingSource(
                     LoginExpiredException,
                 )
             }
-            service.getContainerIndex(containerId = containerId)
+            service
+                .getContainerIndex(containerId = containerId)
                 .data
                 ?.cards
                 ?.flatMap {
                     it.cardGroup.orEmpty()
-                }
-                ?.mapNotNull {
+                }?.mapNotNull {
                     it.desc
-                }
-                ?.map {
+                }?.map {
                     UiHashtag(
                         hashtag = it,
                         description = null,
                         searchContent = "#$it#",
                     )
-                }
-                ?.toList()
+                }?.toList()
                 ?.take(10)
                 .orEmpty()
                 .let {

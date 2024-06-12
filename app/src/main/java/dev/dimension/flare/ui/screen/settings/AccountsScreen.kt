@@ -111,57 +111,58 @@ internal fun AccountsScreen(
                 is UiState.Success -> {
                     items(accountState.data.size) { index ->
                         val data = accountState.data[index]
-                        data.onSuccess { user ->
-                            SwipeToDismissBox(
-                                state =
-                                    rememberSwipeToDismissBoxState(
-                                        confirmValueChange = {
-                                            if (it == SwipeToDismissBoxValue.EndToStart) {
-                                                state.removeAccount(user.userKey)
-                                                true
-                                            } else {
-                                                false
-                                            }
-                                        },
-                                    ),
-                                backgroundContent = {
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(color = MaterialTheme.colorScheme.error)
-                                                .padding(16.dp),
-                                        contentAlignment = Alignment.CenterEnd,
-                                    ) {
-                                        Text(
-                                            text = stringResource(id = R.string.settings_accounts_remove),
-                                            color = MaterialTheme.colorScheme.onError,
-                                        )
-                                    }
-                                },
-                                enableDismissFromStartToEnd = false,
-                            ) {
-                                AccountItem(
-                                    modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
-                                    userState = data,
-                                    onClick = {
-                                        state.setActiveAccount(it)
-                                    },
-                                    trailingContent = { user ->
-                                        state.activeAccount.onSuccess {
-                                            RadioButton(
-                                                selected = it.accountKey == user.userKey,
-                                                onClick = {
-                                                    state.setActiveAccount(user.userKey)
-                                                },
+                        data
+                            .onSuccess { user ->
+                                SwipeToDismissBox(
+                                    state =
+                                        rememberSwipeToDismissBoxState(
+                                            confirmValueChange = {
+                                                if (it == SwipeToDismissBoxValue.EndToStart) {
+                                                    state.removeAccount(user.userKey)
+                                                    true
+                                                } else {
+                                                    false
+                                                }
+                                            },
+                                        ),
+                                    backgroundContent = {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxSize()
+                                                    .background(color = MaterialTheme.colorScheme.error)
+                                                    .padding(16.dp),
+                                            contentAlignment = Alignment.CenterEnd,
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.settings_accounts_remove),
+                                                color = MaterialTheme.colorScheme.onError,
                                             )
                                         }
                                     },
-                                )
+                                    enableDismissFromStartToEnd = false,
+                                ) {
+                                    AccountItem(
+                                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                                        userState = data,
+                                        onClick = {
+                                            state.setActiveAccount(it)
+                                        },
+                                        trailingContent = { user ->
+                                            state.activeAccount.onSuccess {
+                                                RadioButton(
+                                                    selected = it.accountKey == user.userKey,
+                                                    onClick = {
+                                                        state.setActiveAccount(user.userKey)
+                                                    },
+                                                )
+                                            }
+                                        },
+                                    )
+                                }
+                            }.onLoading {
+                                AccountItemLoadingPlaceholder()
                             }
-                        }.onLoading {
-                            AccountItemLoadingPlaceholder()
-                        }
                     }
                 }
             }

@@ -41,7 +41,5 @@ internal class CommentPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, UiStatus>): Int? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Int, UiStatus>): Int? = null
 }

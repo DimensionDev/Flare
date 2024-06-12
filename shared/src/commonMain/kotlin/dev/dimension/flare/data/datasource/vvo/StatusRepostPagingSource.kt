@@ -43,7 +43,5 @@ internal class StatusRepostPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, UiStatus.VVO>): Int? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Int, UiStatus.VVO>): Int? = null
 }

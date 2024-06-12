@@ -8,25 +8,25 @@ import dev.dimension.flare.ui.model.UiHashtag
 internal class TrendHashtagPagingSource(
     private val service: TrendsResources,
 ) : PagingSource<Int, UiHashtag>() {
-    override fun getRefreshKey(state: PagingState<Int, UiHashtag>): Int? {
-        return null
-    }
+    override fun getRefreshKey(state: PagingState<Int, UiHashtag>): Int? = null
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiHashtag> {
         try {
-            service.trendsTags().map {
-                UiHashtag(
-                    hashtag = it.name ?: "",
-                    description = null,
-                    searchContent = "#${it.name}",
-                )
-            }.let {
-                return LoadResult.Page(
-                    data = it,
-                    prevKey = null,
-                    nextKey = null,
-                )
-            }
+            service
+                .trendsTags()
+                .map {
+                    UiHashtag(
+                        hashtag = it.name ?: "",
+                        description = null,
+                        searchContent = "#${it.name}",
+                    )
+                }.let {
+                    return LoadResult.Page(
+                        data = it,
+                        prevKey = null,
+                        nextKey = null,
+                    )
+                }
         } catch (e: Throwable) {
             return LoadResult.Error(e)
         }

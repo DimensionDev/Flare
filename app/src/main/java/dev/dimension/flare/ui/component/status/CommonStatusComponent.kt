@@ -280,26 +280,28 @@ fun CommonStatusDetailComponent(
                     ) {
                         statusTranslatePresenter(contentWarning = contentWarning, content = content)
                     }
-                    state.contentWarning?.onSuccess {
-                        Text(text = it)
-                    }?.onLoading {
-                        Text(
-                            text = "Lores ipsum dolor sit amet",
-                            modifier = Modifier.placeholder(true),
-                        )
-                    }?.onError {
-                        Text(text = it.message ?: "Error")
-                    }
-                    state.text.onSuccess {
-                        Text(text = it)
-                    }.onLoading {
-                        Text(
-                            text = "Lores ipsum dolor sit amet",
-                            modifier = Modifier.placeholder(true),
-                        )
-                    }.onError {
-                        Text(text = it.message ?: "Error")
-                    }
+                    state.contentWarning
+                        ?.onSuccess {
+                            Text(text = it)
+                        }?.onLoading {
+                            Text(
+                                text = "Lores ipsum dolor sit amet",
+                                modifier = Modifier.placeholder(true),
+                            )
+                        }?.onError {
+                            Text(text = it.message ?: "Error")
+                        }
+                    state.text
+                        .onSuccess {
+                            Text(text = it)
+                        }.onLoading {
+                            Text(
+                                text = "Lores ipsum dolor sit amet",
+                                modifier = Modifier.placeholder(true),
+                            )
+                        }.onError {
+                            Text(text = it.message ?: "Error")
+                        }
                 }
             },
         )

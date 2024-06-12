@@ -186,45 +186,46 @@ private fun StatusContent(
     event: StatusEvent,
     modifier: Modifier = Modifier,
 ) {
-    statusState.onSuccess { status ->
-        key(status.statusKey, status.content) {
-            StatusItem(
-                item = status,
-                event = event,
-                modifier =
-                    modifier.sharedBounds(
-                        rememberSharedContentState(key = status.itemKey),
-                        animatedVisibilityScope = this@AnimatedVisibilityScope,
-                        // ANY transition will lead to the entire screen being animated to
-                        // exit state after list -> detail -> go back -> scroll a little bit,
-                        // I have no idea why, so just use None here
-                        enter = EnterTransition.None,
-                        exit = ExitTransition.None,
-                        renderInOverlayDuringTransition = false,
-                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                    ),
-                isDetail = true,
-            )
+    statusState
+        .onSuccess { status ->
+            key(status.statusKey, status.content) {
+                StatusItem(
+                    item = status,
+                    event = event,
+                    modifier =
+                        modifier.sharedBounds(
+                            rememberSharedContentState(key = status.itemKey),
+                            animatedVisibilityScope = this@AnimatedVisibilityScope,
+                            // ANY transition will lead to the entire screen being animated to
+                            // exit state after list -> detail -> go back -> scroll a little bit,
+                            // I have no idea why, so just use None here
+                            enter = EnterTransition.None,
+                            exit = ExitTransition.None,
+                            renderInOverlayDuringTransition = false,
+                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                        ),
+                    isDetail = true,
+                )
+            }
+        }.onLoading {
+            StatusItem(item = null, event = event, modifier = modifier, isDetail = true)
+        }.onError {
+            Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MoodBad,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(
+                    text = stringResource(id = R.string.status_loadmore_error_retry),
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
         }
-    }.onLoading {
-        StatusItem(item = null, event = event, modifier = modifier, isDetail = true)
-    }.onError {
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoodBad,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-            )
-            Text(
-                text = stringResource(id = R.string.status_loadmore_error_retry),
-                modifier = Modifier.padding(16.dp),
-            )
-        }
-    }
 }
 
 context(AnimatedVisibilityScope, SharedTransitionScope)

@@ -14,6 +14,18 @@ import dev.dimension.flare.data.network.xqt.api.UsersApi
 import dev.dimension.flare.data.network.xqt.api.V11GetApi
 import dev.dimension.flare.data.network.xqt.api.V11PostApi
 import dev.dimension.flare.data.network.xqt.api.V20GetApi
+import dev.dimension.flare.data.network.xqt.api.createDefaultApi
+import dev.dimension.flare.data.network.xqt.api.createGuestApi
+import dev.dimension.flare.data.network.xqt.api.createMediaApi
+import dev.dimension.flare.data.network.xqt.api.createOtherApi
+import dev.dimension.flare.data.network.xqt.api.createPostApi
+import dev.dimension.flare.data.network.xqt.api.createTweetApi
+import dev.dimension.flare.data.network.xqt.api.createUserApi
+import dev.dimension.flare.data.network.xqt.api.createUserListApi
+import dev.dimension.flare.data.network.xqt.api.createUsersApi
+import dev.dimension.flare.data.network.xqt.api.createV11GetApi
+import dev.dimension.flare.data.network.xqt.api.createV11PostApi
+import dev.dimension.flare.data.network.xqt.api.createV20GetApi
 import dev.dimension.flare.model.xqtHost
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpClientPlugin
@@ -41,42 +53,42 @@ internal class XQTService(
     private val chocolate: String? = null,
 ) : DefaultApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createDefaultApi(),
     OtherApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createOtherApi(),
     PostApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createPostApi(),
     TweetApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createTweetApi(),
     UserApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createUserApi(),
     UserListApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createUserListApi(),
     UsersApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createUsersApi(),
     V11GetApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createV11GetApi(),
     V11PostApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createV11PostApi(),
     V20GetApi by config(
         chocolate = chocolate,
-    ).create(),
+    ).createV20GetApi(),
     GuestApi by config(
         url = guestApiUrl,
         chocolate = chocolate,
-    ).create(),
+    ).createGuestApi(),
     MediaApi by config(
         url = uploadUrl,
         chocolate = chocolate,
-    ).create() {
+    ).createMediaApi() {
     companion object {
         fun checkChocolate(value: String) = value.contains("gt=") && value.contains("ct0=") && value.contains("auth_token=")
     }

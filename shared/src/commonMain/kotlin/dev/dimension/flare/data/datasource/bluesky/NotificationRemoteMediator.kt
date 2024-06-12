@@ -28,20 +28,22 @@ internal class NotificationRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        service.listNotifications(
-                            ListNotificationsQueryParams(
-                                limit = state.config.pageSize.toLong(),
-                            ),
-                        ).maybeResponse()
+                        service
+                            .listNotifications(
+                                ListNotificationsQueryParams(
+                                    limit = state.config.pageSize.toLong(),
+                                ),
+                            ).maybeResponse()
                     }
 
                     LoadType.APPEND -> {
-                        service.listNotifications(
-                            ListNotificationsQueryParams(
-                                limit = state.config.pageSize.toLong(),
-                                cursor = cursor,
-                            ),
-                        ).maybeResponse()
+                        service
+                            .listNotifications(
+                                ListNotificationsQueryParams(
+                                    limit = state.config.pageSize.toLong(),
+                                    cursor = cursor,
+                                ),
+                            ).maybeResponse()
                     }
 
                     else -> {

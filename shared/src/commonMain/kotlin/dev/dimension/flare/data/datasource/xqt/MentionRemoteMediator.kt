@@ -30,13 +30,14 @@ internal class MentionRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         cursor = null
-                        service.getNotificationsMentions(
-                            count = state.config.pageSize,
-                        ).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getNotificationsMentions(
+                                count = state.config.pageSize,
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(

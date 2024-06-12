@@ -46,7 +46,8 @@ internal fun StatusRetweetHeaderComponent(
                 layoutDirection = LocalLayoutDirection.current,
                 textStyle = MaterialTheme.typography.bodySmall,
                 modifier =
-                    Modifier.alignByBaseline()
+                    Modifier
+                        .alignByBaseline()
                         .weight(1f, fill = false),
                 maxLines = 1,
             )

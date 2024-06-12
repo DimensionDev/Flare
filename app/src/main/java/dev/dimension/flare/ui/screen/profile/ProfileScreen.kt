@@ -160,43 +160,44 @@ internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostDeeplinkRoute(
             accountType = AccountType.Specific(accountKey),
         )
     }
-    state.onSuccess {
-        ProfileScreen(
-            userKey = it.userKey,
-            onBack = {
-                navigator.navigateUp()
-            },
-            onProfileMediaClick = {
-                navigator.navigate(
-                    ProfileMediaRouteDestination(
-                        it.userKey,
-                        accountType = AccountType.Specific(accountKey),
-                    ),
-                )
-            },
-            onMediaClick = {
-                navigator.navigate(
-                    MediaRouteDestination(
-                        it,
-                    ),
-                )
-            },
-            accountType = AccountType.Specific(accountKey),
-            tabState = tabState,
-        )
-    }.onLoading {
-        ProfileLoadingScreen(
-            onBack = {
-                navigator.navigateUp()
-            },
-        )
-    }.onError {
-        ProfileErrorScreen(
-            onBack = {
-                navigator.navigateUp()
-            },
-        )
-    }
+    state
+        .onSuccess {
+            ProfileScreen(
+                userKey = it.userKey,
+                onBack = {
+                    navigator.navigateUp()
+                },
+                onProfileMediaClick = {
+                    navigator.navigate(
+                        ProfileMediaRouteDestination(
+                            it.userKey,
+                            accountType = AccountType.Specific(accountKey),
+                        ),
+                    )
+                },
+                onMediaClick = {
+                    navigator.navigate(
+                        MediaRouteDestination(
+                            it,
+                        ),
+                    )
+                },
+                accountType = AccountType.Specific(accountKey),
+                tabState = tabState,
+            )
+        }.onLoading {
+            ProfileLoadingScreen(
+                onBack = {
+                    navigator.navigateUp()
+                },
+            )
+        }.onError {
+            ProfileErrorScreen(
+                onBack = {
+                    navigator.navigateUp()
+                },
+            )
+        }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -224,43 +225,44 @@ internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostRoute(
             accountType = accountType,
         )
     }
-    state.onSuccess {
-        ProfileScreen(
-            userKey = it.userKey,
-            onBack = {
-                navigator.navigateUp()
-            },
-            onProfileMediaClick = {
-                navigator.navigate(
-                    ProfileMediaRouteDestination(
-                        it.userKey,
-                        accountType = accountType,
-                    ),
-                )
-            },
-            onMediaClick = {
-                navigator.navigate(
-                    MediaRouteDestination(
-                        it,
-                    ),
-                )
-            },
-            accountType = accountType,
-            tabState = tabState,
-        )
-    }.onLoading {
-        ProfileLoadingScreen(
-            onBack = {
-                navigator.navigateUp()
-            },
-        )
-    }.onError {
-        ProfileErrorScreen(
-            onBack = {
-                navigator.navigateUp()
-            },
-        )
-    }
+    state
+        .onSuccess {
+            ProfileScreen(
+                userKey = it.userKey,
+                onBack = {
+                    navigator.navigateUp()
+                },
+                onProfileMediaClick = {
+                    navigator.navigate(
+                        ProfileMediaRouteDestination(
+                            it.userKey,
+                            accountType = accountType,
+                        ),
+                    )
+                },
+                onMediaClick = {
+                    navigator.navigate(
+                        MediaRouteDestination(
+                            it,
+                        ),
+                    )
+                },
+                accountType = accountType,
+                tabState = tabState,
+            )
+        }.onLoading {
+            ProfileLoadingScreen(
+                onBack = {
+                    navigator.navigateUp()
+                },
+            )
+        }.onError {
+            ProfileErrorScreen(
+                onBack = {
+                    navigator.navigateUp()
+                },
+            )
+        }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -489,7 +491,8 @@ private fun ProfileScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets =
             ScaffoldDefaults
-                .contentWindowInsets.exclude(WindowInsets.statusBars),
+                .contentWindowInsets
+                .exclude(WindowInsets.statusBars),
         topBar = {
             if (showTopBar) {
                 val titleAlpha by remember {
@@ -502,7 +505,12 @@ private fun ProfileScreen(
                         } else {
                             max(
                                 0f,
-                                (listState.firstVisibleItemScrollOffset / listState.layoutInfo.visibleItemsInfo[0].size.height.toFloat()),
+                                (
+                                    listState.firstVisibleItemScrollOffset /
+                                        listState.layoutInfo.visibleItemsInfo[0]
+                                            .size.height
+                                            .toFloat()
+                                ),
                             )
                         }
                     }
@@ -979,8 +987,7 @@ internal fun CommonProfileHeader(
                             alignment = Alignment.TopStart,
                         ),
                     placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                )
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+                ).background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
                 .padding(bottom = 8.dp),
     ) {
         bannerUrl?.let {
@@ -992,8 +999,7 @@ internal fun CommonProfileHeader(
                         .sharedElement(
                             rememberSharedContentState(key = "profile-banner-$userKey"),
                             animatedVisibilityScope = this@AnimatedVisibilityScope,
-                        )
-                        .clipToBounds()
+                        ).clipToBounds()
                         .fillMaxWidth()
                         .height(actualBannerHeight)
                         .let {
@@ -1220,8 +1226,7 @@ private fun ProfileMeidasPreview(
                                             MaterialTheme.colorScheme
                                                 .surfaceColorAtElevation(
                                                     3.dp,
-                                                )
-                                                .copy(alpha = 0.25f),
+                                                ).copy(alpha = 0.25f),
                                     ),
                             contentAlignment = Alignment.Center,
                         ) {

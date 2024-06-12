@@ -60,8 +60,7 @@ private fun VVOLoginScreen(toHome: () -> Unit) {
                         .getCookie(url)
                         ?.takeIf {
                             state.checkChocolate(it)
-                        }
-                        ?.let {
+                        }?.let {
                             state.login(it)
                         }
                 }

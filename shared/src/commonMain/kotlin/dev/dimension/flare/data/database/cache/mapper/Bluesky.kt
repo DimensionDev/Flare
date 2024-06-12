@@ -81,7 +81,9 @@ object Bluesky {
             }
 
             val exsitingUsers =
-                database.dbUserQueries.findByKeys(user.map { it.user_key }).executeAsList()
+                database.dbUserQueries
+                    .findByKeys(user.map { it.user_key })
+                    .executeAsList()
                     .filter {
                         it.content is UserContent.Bluesky
                     }.map {

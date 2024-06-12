@@ -46,7 +46,9 @@ fun AdaptiveGrid(
                 val firstColumnCount = measurables.size.mod(rowCount)
 
                 val columnCount =
-                    ceil((measurables.size - firstColumnCount).toDouble() / rowCount).toInt().coerceAtLeast(1)
+                    ceil((measurables.size - firstColumnCount).toDouble() / rowCount)
+                        .toInt()
+                        .coerceAtLeast(1)
                         .let {
                             if (firstColumnCount > 0) {
                                 it + 1

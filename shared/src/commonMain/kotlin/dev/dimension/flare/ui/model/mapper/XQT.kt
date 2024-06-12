@@ -28,28 +28,36 @@ import kotlinx.datetime.toInstant
 
 internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
     val retweet =
-        legacy?.retweetedStatusResult?.result?.let {
-            when (it) {
-                is Tweet -> it
-                is TweetTombstone -> null
-                is TweetWithVisibilityResults -> it.tweet
-            }
-        }?.toUi(accountKey = accountKey)
+        legacy
+            ?.retweetedStatusResult
+            ?.result
+            ?.let {
+                when (it) {
+                    is Tweet -> it
+                    is TweetTombstone -> null
+                    is TweetWithVisibilityResults -> it.tweet
+                }
+            }?.toUi(accountKey = accountKey)
     val quote =
-        quotedStatusResult?.result?.let {
-            when (it) {
-                is Tweet -> it
-                is TweetTombstone -> null
-                is TweetWithVisibilityResults -> it.tweet
-            }
-        }?.toUi(accountKey = accountKey)
+        quotedStatusResult
+            ?.result
+            ?.let {
+                when (it) {
+                    is Tweet -> it
+                    is TweetTombstone -> null
+                    is TweetWithVisibilityResults -> it.tweet
+                }
+            }?.toUi(accountKey = accountKey)
     val user =
-        core?.userResults?.result?.let {
-            when (it) {
-                is User -> it
-                is UserUnavailable -> null
-            }
-        }?.toUi(accountKey = accountKey)
+        core
+            ?.userResults
+            ?.result
+            ?.let {
+                when (it) {
+                    is User -> it
+                    is UserUnavailable -> null
+                }
+            }?.toUi(accountKey = accountKey)
     requireNotNull(user) { "user is null" }
     val uiCard =
         card?.legacy?.let {
@@ -58,7 +66,11 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
             val description = it.get("description")?.stringValue
             val cardUrl =
                 it.get("card_url")?.stringValue?.let {
-                    legacy?.entities?.urls?.firstOrNull { url -> url.url == it }?.expandedUrl
+                    legacy
+                        ?.entities
+                        ?.urls
+                        ?.firstOrNull { url -> url.url == it }
+                        ?.expandedUrl
                 }
             if (title != null && cardUrl != null) {
                 UiCard(
@@ -89,16 +101,17 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
                         cardLegacy.get("choice${index}_count")?.stringValue?.toLong() ?: 0
                     }
                 val options =
-                    (1..4).mapNotNull { index ->
-                        val count = cardLegacy.get("choice${index}_count")?.stringValue?.toLong() ?: 0
-                        cardLegacy.get("choice${index}_label")?.stringValue?.let {
-                            UiPoll.Option(
-                                title = it,
-                                votesCount = count,
-                                percentage = count.toFloat() / max.coerceAtLeast(1).toFloat(),
-                            )
-                        }
-                    }.toImmutableList()
+                    (1..4)
+                        .mapNotNull { index ->
+                            val count = cardLegacy.get("choice${index}_count")?.stringValue?.toLong() ?: 0
+                            cardLegacy.get("choice${index}_label")?.stringValue?.let {
+                                UiPoll.Option(
+                                    title = it,
+                                    votesCount = count,
+                                    percentage = count.toFloat() / max.coerceAtLeast(1).toFloat(),
+                                )
+                            }
+                        }.toImmutableList()
                 UiPoll(
                     // xqt dose not have id
                     id = "",
@@ -114,47 +127,57 @@ internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
             }
         }
     val medias =
-        legacy?.entities?.media?.map { media ->
-            when (media.type) {
-                Media.Type.photo ->
-                    UiMedia.Image(
-                        url = media.mediaUrlHttps + "?name=orig",
-                        previewUrl = media.mediaUrlHttps,
-                        height = media.originalInfo.height.toFloat(),
-                        width = media.originalInfo.width.toFloat(),
-                        sensitive = legacy.possiblySensitive == true,
-                        description = media.ext_alt_text,
-                    )
+        legacy
+            ?.entities
+            ?.media
+            ?.map { media ->
+                when (media.type) {
+                    Media.Type.photo ->
+                        UiMedia.Image(
+                            url = media.mediaUrlHttps + "?name=orig",
+                            previewUrl = media.mediaUrlHttps,
+                            height = media.originalInfo.height.toFloat(),
+                            width = media.originalInfo.width.toFloat(),
+                            sensitive = legacy.possiblySensitive == true,
+                            description = media.ext_alt_text,
+                        )
 
-                Media.Type.video, Media.Type.animatedGif ->
-                    UiMedia.Video(
-                        url = media.videoInfo?.variants?.maxByOrNull { it.bitrate ?: 0 }?.url ?: "",
-                        thumbnailUrl = media.mediaUrlHttps,
-                        height = media.originalInfo.height.toFloat(),
-                        width = media.originalInfo.width.toFloat(),
-                        description = media.ext_alt_text,
-                    )
-            }
-        }?.toImmutableList() ?: persistentListOf()
+                    Media.Type.video, Media.Type.animatedGif ->
+                        UiMedia.Video(
+                            url =
+                                media.videoInfo
+                                    ?.variants
+                                    ?.maxByOrNull { it.bitrate ?: 0 }
+                                    ?.url ?: "",
+                            thumbnailUrl = media.mediaUrlHttps,
+                            height = media.originalInfo.height.toFloat(),
+                            width = media.originalInfo.width.toFloat(),
+                            description = media.ext_alt_text,
+                        )
+                }
+            }?.toImmutableList() ?: persistentListOf()
     val text =
         noteTweet?.noteTweetResults?.result?.text
-            ?: legacy?.fullText?.let {
-                if (legacy.displayTextRange.size == 2) {
-                    it.codePointSequence()
-                        .drop(legacy.displayTextRange[0])
-                        .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
-                        .flatMap { codePoint ->
-                            codePoint.toChars()
-                                .toList()
-                        }
-                        .joinToString("")
-                        .replace("&amp;", "&")
-                        .replace("&lt;", "<")
-                        .replace("&gt;", ">")
-                } else {
-                    it
-                }
-            }.orEmpty()
+            ?: legacy
+                ?.fullText
+                ?.let {
+                    if (legacy.displayTextRange.size == 2) {
+                        it
+                            .codePointSequence()
+                            .drop(legacy.displayTextRange[0])
+                            .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
+                            .flatMap { codePoint ->
+                                codePoint
+                                    .toChars()
+                                    .toList()
+                            }.joinToString("")
+                            .replace("&amp;", "&")
+                            .replace("&lt;", "<")
+                            .replace("&gt;", ">")
+                    } else {
+                        it
+                    }
+                }.orEmpty()
     return UiStatus.XQT(
         accountKey = accountKey,
         statusKey =
@@ -219,7 +242,10 @@ internal fun User.toUi(accountKey: MicroBlogKey) =
         location = legacy.location?.takeIf { it.isNotEmpty() },
         url =
             legacy.url?.takeIf { it.isNotEmpty() }?.let { url ->
-                legacy.entities.url?.urls?.firstOrNull { it.url == url }?.expandedUrl
+                legacy.entities.url
+                    ?.urls
+                    ?.firstOrNull { it.url == url }
+                    ?.expandedUrl
             } ?: legacy.url,
         protected = legacy.protected ?: false,
         raw = this,
@@ -244,8 +270,18 @@ private fun String.replaceWithOriginImageUrl() = this.replace("_normal.", ".")
 private fun parseCustomDateTime(dateTimeStr: String): Instant? {
     val months =
         mapOf(
-            "Jan" to 1, "Feb" to 2, "Mar" to 3, "Apr" to 4, "May" to 5, "Jun" to 6,
-            "Jul" to 7, "Aug" to 8, "Sep" to 9, "Oct" to 10, "Nov" to 11, "Dec" to 12,
+            "Jan" to 1,
+            "Feb" to 2,
+            "Mar" to 3,
+            "Apr" to 4,
+            "May" to 5,
+            "Jun" to 6,
+            "Jul" to 7,
+            "Aug" to 8,
+            "Sep" to 9,
+            "Oct" to 10,
+            "Nov" to 11,
+            "Dec" to 12,
         )
 
     val parts = dateTimeStr.split(" ")

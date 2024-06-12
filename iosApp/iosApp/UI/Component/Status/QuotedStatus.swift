@@ -73,6 +73,24 @@ struct QuotedStatus: View {
                 sensitive: xqt.sensitive
             )
         case .xQTNotification(let xqtNotification): EmptyView()
+        case .vVO(let vvo):
+            QuotedContent(
+                content: vvo.extra.contentMarkdown,
+                user: vvo.displayUser,
+                medias: vvo.media,
+                timestamp: vvo.createdAt.epochSeconds,
+                onMediaClick: onMediaClick,
+                onUserClick: {
+                    if let user = vvo.rawUser {
+                        onUserClick(user)
+                    }
+                },
+                onStatusClick: {
+                    onStatusClick(vvo)
+                },
+                sensitive: false
+            )
+        case .vVONotification(let vvoNotification): EmptyView()
         }
     }
 }
@@ -81,7 +99,7 @@ private struct QuotedContent: View {
     @Environment(\.appSettings) private var appSettings
     @State var showMedia: Bool = false
     let content: String
-    let user: UiUser
+    let user: UiUser?
     let medias: [UiMedia]
     let timestamp: Int64
     let onMediaClick: (Int, String?) -> Void
@@ -93,23 +111,25 @@ private struct QuotedContent: View {
             VStack(alignment: .leading) {
                 Spacer()
                     .frame(height: 8)
-                Button(action: onUserClick, label: {
-                    UserAvatar(data: user.avatarUrl, size: 20)
-                    Markdown(user.extra.nameMarkdown)
-                        .lineLimit(1)
-                        .font(.subheadline)
-                        .markdownInlineImageProvider(.emoji)
-                    Text(user.handle)
-                        .lineLimit(1)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    Spacer()
-                    dateFormatter(Date(timeIntervalSince1970: .init(integerLiteral: timestamp)))
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                })
-                .buttonStyle(.plain)
-                .padding(.horizontal)
+                if let user = user {
+                    Button(action: onUserClick, label: {
+                        UserAvatar(data: user.avatarUrl, size: 20)
+                        Markdown(user.extra.nameMarkdown)
+                            .lineLimit(1)
+                            .font(.subheadline)
+                            .markdownInlineImageProvider(.emoji)
+                        Text(user.handle)
+                            .lineLimit(1)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        Spacer()
+                        dateFormatter(Date(timeIntervalSince1970: .init(integerLiteral: timestamp)))
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    })
+                    .buttonStyle(.plain)
+                    .padding(.horizontal)
+                }
                 Markdown(content)
                     .font(.body)
                     .markdownInlineImageProvider(.emoji)

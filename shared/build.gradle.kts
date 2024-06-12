@@ -74,10 +74,8 @@ kotlin {
                 implementation(libs.kotlin.codepoints.deluxe)
                 implementation(libs.ktml)
                 implementation(libs.mfm.multiplatform)
-                api(libs.bluesky)
                 implementation(libs.twitter.parser)
                 implementation(libs.molecule.runtime)
-                implementation(libs.skie.annotations)
             }
         }
         val androidMain by getting {
@@ -85,11 +83,12 @@ kotlin {
                 implementation(libs.sqldelight.android.driver)
                 implementation(project.dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.foundation)
+                api(libs.bluesky)
             }
         }
         val appleMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-client-darwin:${libs.versions.ktor.get()}")
+                implementation(libs.ktor.client.darwin)
             }
         }
         val nativeMain by getting {
@@ -97,6 +96,10 @@ kotlin {
                 implementation(libs.sqldelight.native.driver)
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
+                api(libs.bluesky.get().toString()) {
+                    exclude("co.touchlab.skie")
+                }
+                implementation("co.touchlab.skie:runtime-kotlin:${libs.versions.skie.get()}")
             }
         }
         val jvmMain by getting {
@@ -104,8 +107,9 @@ kotlin {
                 implementation(libs.sqldelight.jvm.driver)
                 // DO NOT upgrade the version since jvm target should be 1.8, ikvm only supports 1.8
                 implementation("org.xerial:sqlite-jdbc:3.39.2.0")
-                implementation("io.ktor:ktor-client-okhttp:${libs.versions.ktor.get()}")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:${libs.versions.kotlinx.coroutines.get()}")
+                implementation(libs.ktor.client.okhttp)
+                implementation(libs.kotlinx.coroutines.slf4j)
+                api(libs.bluesky)
             }
         }
     }
@@ -161,6 +165,12 @@ skie {
     }
     features {
         coroutinesInterop.set(true)
-        enableSwiftUIObservingPreview.set(true)
+        enableFlowCombineConvertorPreview.set(true)
     }
+}
+
+afterEvaluate {
+//    val kspCommonMainKotlinMetadata by tasks
+    val runKtlintFormatOverCommonMainSourceSet by tasks
+    runKtlintFormatOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
 }

@@ -3,7 +3,7 @@
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
 
-![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20|%20X%20|%20VVO-ffffff)
+![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20|%20X%20|%20VVO-black)
 
 ![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-17.0-black)

@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import dev.dimension.flare.common.LazyPagingItemsProxy
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -59,7 +59,7 @@ class VVOStatusDetailPresenter(
                 require(it is VVODataSource)
                 remember(statusKey, accountType) {
                     it.statusRepost(statusKey)
-                }.collectPagingProxy()
+                }.collectAsLazyPagingItems()
             }
 
         val comment =
@@ -67,7 +67,7 @@ class VVOStatusDetailPresenter(
                 require(it is VVODataSource)
                 remember(statusKey, accountType) {
                     it.statusComment(statusKey)
-                }.collectPagingProxy()
+                }.collectAsLazyPagingItems()
             }
 
         return object : VVOStatusDetailState {
@@ -81,6 +81,6 @@ class VVOStatusDetailPresenter(
 @Immutable
 interface VVOStatusDetailState {
     val status: UiState<UiStatus.VVO>
-    val comment: UiState<LazyPagingItemsProxy<UiStatus.VVONotification>>
-    val repost: UiState<LazyPagingItemsProxy<UiStatus.VVO>>
+    val comment: UiState<LazyPagingItems<UiStatus.VVONotification>>
+    val repost: UiState<LazyPagingItems<UiStatus.VVO>>
 }

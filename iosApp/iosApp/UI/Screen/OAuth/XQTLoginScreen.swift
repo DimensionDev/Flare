@@ -6,33 +6,31 @@ struct XQTLoginScreen: View {
     @State var viewModel: XQTViewModel
     let url = "https://" + UiApplicationXQT.shared.host
     init(toHome: @escaping () -> Void) {
-        viewModel = XQTViewModel(toHome: toHome)
+        viewModel = .init(toHome: toHome)
         viewModel.clearCookie()
     }
     var body: some View {
-        ZStack {
-            if viewModel.canShowWebView {
-                WebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
-                    webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
-                    viewModel.observe(webView: webView)
+        Observing(viewModel.presenter.models) { state in
+            ZStack {
+                if viewModel.canShowWebView {
+                    WebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
+                        webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
+                        viewModel.observe(webView: webView)
+                    }
                 }
             }
         }
-        .activateViewModel(viewModel: viewModel)
     }
 }
 
 @Observable
-class XQTViewModel: MoleculeViewModelProto {
-    typealias Model = XQTLoginState
+class XQTViewModel {
     typealias Presenter = XQTLoginPresenter
     let presenter: XQTLoginPresenter
-    var model: Model
     var canShowWebView = false
     private var observers = [NSKeyValueObservation]()
     init(toHome: @escaping () -> Void) {
-        presenter = XQTLoginPresenter(toHome: toHome)
-        model = presenter.models.value
+        presenter = .init(toHome: toHome)
     }
     var configuration: WKWebViewConfiguration {
         let configuration = WKWebViewConfiguration()
@@ -64,7 +62,7 @@ class XQTViewModel: MoleculeViewModelProto {
                     cookieString += "\(cookie.name)=\(cookie.value); "
                 }
             }
-            if self.model.checkChocolate(cookie: cookieString), !self.presenter.models.value.loading {
+            if self.presenter.models.value.checkChocolate(cookie: cookieString), !self.presenter.models.value.loading {
                 self.presenter.models.value.login(chocolate: cookieString)
             }
         }

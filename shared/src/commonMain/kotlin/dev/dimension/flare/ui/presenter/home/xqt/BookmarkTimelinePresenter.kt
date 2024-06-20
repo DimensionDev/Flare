@@ -3,8 +3,8 @@ package dev.dimension.flare.ui.presenter.home.xqt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import dev.dimension.flare.common.LazyPagingItemsProxy
-import dev.dimension.flare.common.collectPagingProxy
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -17,14 +17,14 @@ class BookmarkTimelinePresenter(
     private val accountType: AccountType,
 ) : TimelinePresenter() {
     @Composable
-    override fun listState(): UiState<LazyPagingItemsProxy<UiStatus>> {
+    override fun listState(): UiState<LazyPagingItems<UiStatus>> {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType)
         return serviceState.map { service ->
             remember(service) {
                 require(service is XQTDataSource)
                 service.bookmarkTimeline(scope = scope)
-            }.collectPagingProxy()
+            }.collectAsLazyPagingItems()
         }
     }
 }

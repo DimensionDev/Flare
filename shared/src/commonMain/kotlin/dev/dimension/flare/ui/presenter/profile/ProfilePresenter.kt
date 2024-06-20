@@ -3,9 +3,10 @@ package dev.dimension.flare.ui.presenter.profile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import dev.dimension.flare.common.LazyPagingItemsProxy
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.collectPagingProxy
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -47,7 +48,7 @@ class ProfilePresenter(
                         userKey ?: service.account.accountKey,
                         scope = scope,
                     )
-                }.collectPagingProxy()
+                }.collectAsLazyPagingItems()
             }
         val mediaState =
             remember {
@@ -137,8 +138,8 @@ class ProfilePresenter(
 
 abstract class ProfileState(
     val userState: UiState<UiUser>,
-    val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
-    val mediaState: UiState<LazyPagingItemsProxy<ProfileMedia>>,
+    val listState: UiState<LazyPagingItems<UiStatus>>,
+    val mediaState: UiState<LazyPagingItems<ProfileMedia>>,
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,
     val actions: UiState<ImmutableListWrapper<ProfileAction>>,

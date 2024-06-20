@@ -3,8 +3,8 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import dev.dimension.flare.common.LazyPagingItemsProxy
-import dev.dimension.flare.common.collectPagingProxy
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiHashtag
@@ -27,7 +27,7 @@ class DiscoverPresenter(
                     runCatching {
                         dataSource.discoverUsers()
                     }.getOrNull()
-                }?.collectPagingProxy().let {
+                }?.collectAsLazyPagingItems().let {
                     if (it == null) {
                         UiState.Error(Throwable("No data"))
                     } else {
@@ -41,7 +41,7 @@ class DiscoverPresenter(
                     runCatching {
                         dataSource.discoverStatuses(scope = scope)
                     }.getOrNull()
-                }?.collectPagingProxy().let {
+                }?.collectAsLazyPagingItems().let {
                     if (it == null) {
                         UiState.Error(Throwable("No data"))
                     } else {
@@ -55,7 +55,7 @@ class DiscoverPresenter(
                     runCatching {
                         dataSource.discoverHashtags()
                     }.getOrNull()
-                }?.collectPagingProxy().let {
+                }?.collectAsLazyPagingItems().let {
                     if (it == null) {
                         UiState.Error(Throwable("No data"))
                     } else {
@@ -73,7 +73,7 @@ class DiscoverPresenter(
 }
 
 interface DiscoverState {
-    val users: UiState<LazyPagingItemsProxy<UiUser>>
-    val status: UiState<LazyPagingItemsProxy<UiStatus>>
-    val hashtags: UiState<LazyPagingItemsProxy<UiHashtag>>
+    val users: UiState<LazyPagingItems<UiUser>>
+    val status: UiState<LazyPagingItems<UiStatus>>
+    val hashtags: UiState<LazyPagingItems<UiHashtag>>
 }

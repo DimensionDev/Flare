@@ -68,7 +68,6 @@ fun FlareScaffold(
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = contentColorFor(containerColor),
-    // 80.dp for the bottom bar
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets.add(WindowInsets(bottom = LocalBottomBarHeight.current)),
     content: @Composable (PaddingValues) -> Unit,
 ) {

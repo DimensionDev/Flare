@@ -169,7 +169,7 @@ struct ProfileScreen: View {
 }
 
 struct LargeProfileImagePreviews: View {
-    let state: UiState<LazyPagingItemsProxy<ProfileMedia>>
+    let state: UiState<LazyPagingItems<ProfileMedia>>
     var body: some View {
         switch onEnum(of: state) {
         case .error:
@@ -204,7 +204,7 @@ struct LargeProfileImagePreviews: View {
 }
 
 struct SmallProfileMediaPreviews: View {
-    let state: UiState<LazyPagingItemsProxy<ProfileMedia>>
+    let state: UiState<LazyPagingItems<ProfileMedia>>
     var body: some View {
         switch onEnum(of: state) {
         case .error:

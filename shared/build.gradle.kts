@@ -1,6 +1,5 @@
 
 import app.cash.sqldelight.core.capitalize
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
@@ -15,14 +14,7 @@ plugins {
 }
 
 kotlin {
-    applyDefaultHierarchyTemplate {
-        common {
-            group("nonAndroid") {
-                withApple()
-                withJvm()
-            }
-        }
-    }
+    applyDefaultHierarchyTemplate()
 
     androidTarget()
 
@@ -39,14 +31,6 @@ kotlin {
             embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
         }
     }
-
-    // export as jar for ikvm
-    jvm {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_1_8)
-        }
-    }
-
     targets.forEach { target ->
         target.name.takeIf {
             it != "metadata"
@@ -100,16 +84,6 @@ kotlin {
                     exclude("co.touchlab.skie")
                 }
                 implementation("co.touchlab.skie:runtime-kotlin:${libs.versions.skie.get()}")
-            }
-        }
-        val jvmMain by getting {
-            dependencies {
-                implementation(libs.sqldelight.jvm.driver)
-                // DO NOT upgrade the version since jvm target should be 1.8, ikvm only supports 1.8
-                implementation("org.xerial:sqlite-jdbc:3.39.2.0")
-                implementation(libs.ktor.client.okhttp)
-                implementation(libs.kotlinx.coroutines.slf4j)
-                api(libs.bluesky)
             }
         }
     }

@@ -19,5 +19,4 @@ dependencyResolutionManagement {
 rootProject.name = "Flare"
 include(":app")
 include(":shared")
-include(":windowsApp")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

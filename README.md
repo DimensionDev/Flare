@@ -38,7 +38,6 @@ Here're some features we're planning to implement in the future, you can check t
  - [x] Translation
  - [ ] Local history
  - [ ] Quick reply
- - [ ] Windows support
 
 ### Mastodon
  - [ ] Support for polls

@@ -8,8 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.LazyPagingItemsProxy
-import dev.dimension.flare.common.collectPagingProxy
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -54,7 +55,7 @@ class NotificationPresenter(
                                 type = currentType,
                                 scope = scope,
                             )
-                        }.collectPagingProxy(),
+                        }.collectAsLazyPagingItems(),
                     )
                 }
             }
@@ -82,7 +83,7 @@ class NotificationPresenter(
 
 @Immutable
 abstract class NotificationState(
-    val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
+    val listState: UiState<LazyPagingItems<UiStatus>>,
     val notificationType: NotificationFilter?,
     val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {

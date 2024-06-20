@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.LazyPagingItemsProxy
-import dev.dimension.flare.common.collectPagingProxy
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
@@ -34,7 +34,7 @@ class SearchPresenter(
                     UiState.Success(
                         remember(service, query) {
                             service.searchUser(query, scope = scope)
-                        }.collectPagingProxy(),
+                        }.collectAsLazyPagingItems(),
                     )
                 }
             }
@@ -47,7 +47,7 @@ class SearchPresenter(
                     UiState.Success(
                         remember(service, query) {
                             service.searchStatus(query, scope = scope)
-                        }.collectPagingProxy(),
+                        }.collectAsLazyPagingItems(),
                     )
                 }
             }
@@ -67,8 +67,8 @@ class SearchPresenter(
 }
 
 interface SearchState {
-    val users: UiState<LazyPagingItemsProxy<UiUser>>
-    val status: UiState<LazyPagingItemsProxy<UiStatus>>
+    val users: UiState<LazyPagingItems<UiUser>>
+    val status: UiState<LazyPagingItems<UiStatus>>
     val searching: Boolean
 
     fun search(new: String)

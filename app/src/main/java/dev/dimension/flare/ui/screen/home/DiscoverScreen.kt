@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
@@ -39,11 +41,11 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onNotEmptyOrLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -350,18 +352,18 @@ private fun discoverPresenter(
                     state.status is UiState.Loading ||
                     state.hashtags is UiState.Loading ||
                     state.users is UiState.Success &&
-                    (state.users as UiState.Success<LazyPagingItemsProxy<UiUser>>).data.isRefreshing ||
+                    (state.users as UiState.Success<LazyPagingItems<UiUser>>).data.isRefreshing ||
                     state.status is UiState.Success &&
-                    (state.status as UiState.Success<LazyPagingItemsProxy<UiStatus>>).data.isRefreshing ||
+                    (state.status as UiState.Success<LazyPagingItems<UiStatus>>).data.isRefreshing ||
                     state.hashtags is UiState.Success &&
-                    (state.hashtags as UiState.Success<LazyPagingItemsProxy<UiHashtag>>).data.isRefreshing
+                    (state.hashtags as UiState.Success<LazyPagingItems<UiHashtag>>).data.isRefreshing
             } else {
                 searchState.users is UiState.Loading ||
                     searchState.status is UiState.Loading ||
                     searchState.users is UiState.Success &&
-                    (searchState.users as UiState.Success<LazyPagingItemsProxy<UiUser>>).data.isRefreshing ||
+                    (searchState.users as UiState.Success<LazyPagingItems<UiUser>>).data.isRefreshing ||
                     searchState.status is UiState.Success &&
-                    (searchState.status as UiState.Success<LazyPagingItemsProxy<UiStatus>>).data.isRefreshing
+                    (searchState.status as UiState.Success<LazyPagingItems<UiStatus>>).data.isRefreshing
             }
 
         fun refresh() {

@@ -81,6 +81,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import androidx.paging.compose.LazyPagingItems
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
@@ -92,7 +93,6 @@ import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRoute
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onNotEmptyOrLoading
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -1201,7 +1201,7 @@ internal fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ProfileMeidasPreview(
-    mediaState: UiState<LazyPagingItemsProxy<ProfileMedia>>,
+    mediaState: UiState<LazyPagingItems<ProfileMedia>>,
     maxLines: Int,
     itemSize: Dp,
     modifier: Modifier = Modifier,

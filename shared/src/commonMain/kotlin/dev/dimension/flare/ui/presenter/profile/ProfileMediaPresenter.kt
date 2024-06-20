@@ -3,9 +3,9 @@ package dev.dimension.flare.ui.presenter.profile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.flatMap
-import dev.dimension.flare.common.LazyPagingItemsProxy
-import dev.dimension.flare.common.collectPagingProxy
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -44,7 +44,7 @@ class ProfileMediaPresenter(
                                 }
                             }
                         }
-                }.collectPagingProxy()
+                }.collectAsLazyPagingItems()
             }
         return object : ProfileMediaState {
             override val mediaState = mediaState
@@ -53,7 +53,7 @@ class ProfileMediaPresenter(
 }
 
 interface ProfileMediaState {
-    val mediaState: UiState<LazyPagingItemsProxy<ProfileMedia>>
+    val mediaState: UiState<LazyPagingItems<ProfileMedia>>
 }
 
 data class ProfileMedia(

@@ -3,51 +3,40 @@ import SwiftUI
 import shared
 
 struct RouterView: View {
-    @State var viewModel = RouterViewModel()
+    let presenter = SplashPresenter(toHome: {}, toLogin: {})
     @State var appSettings = AppSettings()
     var body: some View {
-        ZStack {
-            switch viewModel.model.toSwiftEnum() {
-            case .home:
-                HomeScreen()
-            case .login:
-                SplashScreen()
-            case .splash:
-                SplashScreen()
-            }
-        }.sheet(isPresented: Binding(get: {
-            if case .login = viewModel.model.toSwiftEnum() {
-                true
-            } else {
-                false
-            }
-        }, set: { _ in
-        }), content: {
-            if case .login = viewModel.model.toSwiftEnum() {
-                ServiceSelectScreen(
-                    toHome: {
-                    }
-                )
-#if os(macOS)
-    .frame(minWidth: 600, minHeight: 400)
-#endif
-                    .interactiveDismissDisabled()
-            }
-        })
-        .environment(\.appSettings, appSettings)
-        .activateViewModel(viewModel: viewModel)
-    }
-}
-
-@Observable
-class RouterViewModel: MoleculeViewModelProto {
-    typealias Model = __SplashType
-    typealias Presenter = SplashPresenter
-    let presenter: Presenter
-    var model: Model
-    init() {
-        presenter = SplashPresenter(toHome: {}, toLogin: {})
-        model = presenter.models.value
+        Observing(presenter.models) { state in
+            ZStack {
+                switch state.toSwiftEnum() {
+                case .home:
+                    HomeScreen()
+                case .login:
+                    SplashScreen()
+                case .splash:
+                    SplashScreen()
+                }
+            }.sheet(isPresented: Binding(get: {
+                if case .login = state.toSwiftEnum() {
+                    true
+                } else {
+                    false
+                }
+            }, set: { _ in
+            }), content: {
+                if case .login = state.toSwiftEnum() {
+                    ServiceSelectScreen(
+                        toHome: {
+                        }
+                    )
+    #if os(macOS)
+        .frame(minWidth: 600, minHeight: 400)
+    #endif
+                        .interactiveDismissDisabled()
+                }
+            })
+            .environment(\.appSettings, appSettings)
+        }
     }
 }
 

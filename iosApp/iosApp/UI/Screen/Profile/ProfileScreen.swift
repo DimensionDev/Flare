@@ -5,31 +5,33 @@ import MarkdownUI
 
 struct ProfileScreen: View {
     let toProfileMedia: (MicroBlogKey) -> Void
-    @State var viewModel: ProfileViewModel
+    let presenter: ProfilePresenter
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.toProfileMedia = toProfileMedia
-        _viewModel = .init(initialValue: .init(accountType: accountType, userKey: userKey))
+        presenter = .init(accountType: accountType, userKey: userKey)
     }
     var sideProfileHeader: some View {
-        ScrollView {
-            VStack {
-                ProfileHeader(
-                    user: viewModel.model.userState,
-                    relation: viewModel.model.relationState,
-                    isMe: viewModel.model.isMe,
-                    onFollowClick: { user, relation in
-                        viewModel.model.follow(user: user, data: relation)
+        Observing(presenter.models) { state in
+            ScrollView {
+                VStack {
+                    ProfileHeader(
+                        user: state.userState,
+                        relation: state.relationState,
+                        isMe: state.isMe,
+                        onFollowClick: { user, relation in
+                            state.follow(user: user, data: relation)
+                        }
+                    )
+                    if case .success(let userState) = onEnum(of: state.userState) {
+                        Button(action: {
+                            toProfileMedia(userState.data.userKey)
+                        }, label: {
+                            LargeProfileImagePreviews(state: state.mediaState)
+                        })
+                        .buttonStyle(.borderless)
                     }
-                )
-                if case .success(let userState) = onEnum(of: viewModel.model.userState) {
-                    Button(action: {
-                        toProfileMedia(userState.data.userKey)
-                    }, label: {
-                        LargeProfileImagePreviews(state: viewModel.model.mediaState)
-                    })
-                    .buttonStyle(.borderless)
                 }
             }
         }
@@ -38,133 +40,136 @@ struct ProfileScreen: View {
 #endif
     }
     var profileListContent: some View {
-        List {
-            if horizontalSizeClass == .compact {
-                ProfileHeader(
-                    user: viewModel.model.userState,
-                    relation: viewModel.model.relationState,
-                    isMe: viewModel.model.isMe,
-                    onFollowClick: { user, relation in
-                        viewModel.model.follow(user: user, data: relation)
+        Observing(presenter.models) { state in
+            List {
+                if horizontalSizeClass == .compact {
+                    ProfileHeader(
+                        user: state.userState,
+                        relation: state.relationState,
+                        isMe: state.isMe,
+                        onFollowClick: { user, relation in
+                            state.follow(user: user, data: relation)
+                        }
+                    )
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets())
+                    if case .success(let userState) = onEnum(of: state.userState) {
+                        Button(action: {
+                            toProfileMedia(userState.data.userKey)
+                        }, label: {
+                            SmallProfileMediaPreviews(state: state.mediaState)
+                        })
+                        .buttonStyle(.borderless)
+                        .listRowInsets(.none)
                     }
-                )
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets())
-                if case .success(let userState) = onEnum(of: viewModel.model.userState) {
-                    Button(action: {
-                        toProfileMedia(userState.data.userKey)
-                    }, label: {
-                        SmallProfileMediaPreviews(state: viewModel.model.mediaState)
-                    })
-                    .buttonStyle(.borderless)
-                    .listRowInsets(.none)
                 }
+                StatusTimelineComponent(
+                    data: state.listState,
+                    mastodonEvent: statusEvent,
+                    misskeyEvent: statusEvent,
+                    blueskyEvent: statusEvent,
+                    xqtEvent: statusEvent
+                )
             }
-            StatusTimelineComponent(
-                data: viewModel.model.listState,
-                mastodonEvent: statusEvent,
-                misskeyEvent: statusEvent,
-                blueskyEvent: statusEvent,
-                xqtEvent: statusEvent
-            )
+            .refreshable {
+                try? await state.refresh()
+            }
+            .listStyle(.plain)
         }
-        .refreshable {
-            try? await viewModel.model.refresh()
-        }
-        .listStyle(.plain)
     }
     var body: some View {
-        let title: LocalizedStringKey = if case .success(let user) = onEnum(of: viewModel.model.userState) {
-            LocalizedStringKey(user.data.extra.nameMarkdown)
-        } else {
-            LocalizedStringKey("loading")
-        }
-        ZStack {
-#if os(macOS)
-            HSplitView {
-                if horizontalSizeClass != .compact {
-                    sideProfileHeader
-                }
-                profileListContent
+        Observing(presenter.models) { state in
+            let title: LocalizedStringKey = if case .success(let user) = onEnum(of: state.userState) {
+                LocalizedStringKey(user.data.extra.nameMarkdown)
+            } else {
+                LocalizedStringKey("loading")
             }
-#else
-            HStack {
-                if horizontalSizeClass != .compact {
-                    sideProfileHeader
-                }
-                profileListContent
-            }
-#endif
-        }
-#if os(iOS)
-        .if(horizontalSizeClass == .compact, transform: { view in
-            view
-                .ignoresSafeArea(edges: .top)
-        })
-#endif
-        .if(horizontalSizeClass != .compact, transform: { view in
-            view
-#if os(iOS)
-                .navigationBarTitleDisplayMode(.inline)
-#endif
-                .navigationTitle(title)
-        })
-        .toolbar {
-            Menu {
-                if case .success(let user) = onEnum(of: viewModel.model.userState) {
-                    if case .success(let isMe) = onEnum(of: viewModel.model.isMe), !isMe.data.boolValue {
-                        if case .success(let relation) = onEnum(of: viewModel.model.relationState),
-                           case .success(let actions) = onEnum(of: viewModel.model.actions) {
-                            ForEach(0...actions.data.size, id: \.self) { index in
-                                let item = actions.data.get(index: index)
-                                Button(action: {
-                                    Task {
-                                        try? await item.invoke(userKey: user.data.userKey, relation: relation.data)
-                                    }
-                                }, label: {
-                                    let text = switch onEnum(of: item) {
-                                    case .block(let block): if block.relationState(relation: relation.data) {
-                                        String(localized: "unblock")
-                                    } else {
-                                        String(localized: "block")
-                                    }
-                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                        String(localized: "unmute")
-                                    } else {
-                                        String(localized: "mute")
-                                    }
-                                    }
-                                    let icon = switch onEnum(of: item) {
-                                    case .block(let block): if block.relationState(relation: relation.data) {
-                                        "xmark.circle"
-                                    } else {
-                                        "checkmark.circle"
-                                    }
-                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                        "speaker"
-                                    } else {
-                                        "speaker.slash"
-                                    }
-                                    }
-                                        Label(text, systemImage: icon)
-                                    })
-                            }
-                        }
-                        Button(action: { viewModel.model.report(user: user.data) }, label: {
-                            Label("report", systemImage: "exclamationmark.bubble")
-                        })
+            ZStack {
+    #if os(macOS)
+                HSplitView {
+                    if horizontalSizeClass != .compact {
+                        sideProfileHeader
                     }
+                    profileListContent
                 }
-            } label: {
-                Image(systemName: "ellipsis.circle")
+    #else
+                HStack {
+                    if horizontalSizeClass != .compact {
+                        sideProfileHeader
+                    }
+                    profileListContent
+                }
+    #endif
+            }
+    #if os(iOS)
+            .if(horizontalSizeClass == .compact, transform: { view in
+                view
+                    .ignoresSafeArea(edges: .top)
+            })
+    #endif
+            .if(horizontalSizeClass != .compact, transform: { view in
+                view
+    #if os(iOS)
+                    .navigationBarTitleDisplayMode(.inline)
+    #endif
+                    .navigationTitle(title)
+            })
+            .toolbar {
+                Menu {
+                    if case .success(let user) = onEnum(of: state.userState) {
+                        if case .success(let isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
+                            if case .success(let relation) = onEnum(of: state.relationState),
+                               case .success(let actions) = onEnum(of: state.actions) {
+                                ForEach(0...actions.data.size - 1, id: \.self) { index in
+                                    let item = actions.data.get(index: index)
+                                    Button(action: {
+                                        Task {
+                                            try? await item.invoke(userKey: user.data.userKey, relation: relation.data)
+                                        }
+                                    }, label: {
+                                        let text = switch onEnum(of: item) {
+                                        case .block(let block): if block.relationState(relation: relation.data) {
+                                            String(localized: "unblock")
+                                        } else {
+                                            String(localized: "block")
+                                        }
+                                        case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                            String(localized: "unmute")
+                                        } else {
+                                            String(localized: "mute")
+                                        }
+                                        }
+                                        let icon = switch onEnum(of: item) {
+                                        case .block(let block): if block.relationState(relation: relation.data) {
+                                            "xmark.circle"
+                                        } else {
+                                            "checkmark.circle"
+                                        }
+                                        case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                            "speaker"
+                                        } else {
+                                            "speaker.slash"
+                                        }
+                                        }
+                                            Label(text, systemImage: icon)
+                                        })
+                                }
+                            }
+                            Button(action: { state.report(user: user.data) }, label: {
+                                Label("report", systemImage: "exclamationmark.bubble")
+                            })
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
             }
         }
-        .activateViewModel(viewModel: viewModel)
     }
 }
 
 struct LargeProfileImagePreviews: View {
-    let state: UiState<LazyPagingItemsProxy<ProfileMedia>>
+    let state: UiState<LazyPagingItems<ProfileMedia>>
     var body: some View {
         switch onEnum(of: state) {
         case .error:
@@ -199,7 +204,7 @@ struct LargeProfileImagePreviews: View {
 }
 
 struct SmallProfileMediaPreviews: View {
-    let state: UiState<LazyPagingItemsProxy<ProfileMedia>>
+    let state: UiState<LazyPagingItems<ProfileMedia>>
     var body: some View {
         switch onEnum(of: state) {
         case .error:
@@ -334,16 +339,5 @@ struct FieldsView: View {
         } else {
             EmptyView()
         }
-    }
-}
-@Observable
-class ProfileViewModel: MoleculeViewModelProto {
-    let presenter: ProfilePresenter
-    var model: ProfileState
-    typealias Model = ProfileState
-    typealias Presenter = ProfilePresenter
-    init(accountType: AccountType, userKey: MicroBlogKey?) {
-        self.presenter = .init(accountType: accountType, userKey: userKey)
-        self.model = presenter.models.value
     }
 }

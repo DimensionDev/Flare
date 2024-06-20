@@ -34,6 +34,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import com.ramcosta.composedestinations.generated.destinations.BlueskyReportStatusRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DeleteStatusConfirmRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MastodonReportRouteDestination
@@ -48,7 +51,6 @@ import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteD
 import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.VVOStatusRouteDestination
 import dev.dimension.flare.R
-import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
@@ -81,7 +83,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-context(LazyStaggeredGridScope, UiState<LazyPagingItemsProxy<T>>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
+context(LazyStaggeredGridScope, UiState<LazyPagingItems<T>>, StatusEvent, AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 internal fun <T : UiStatus> status(
     detailStatusKey: MicroBlogKey? = null,

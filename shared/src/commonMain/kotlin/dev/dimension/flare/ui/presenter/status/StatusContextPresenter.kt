@@ -3,8 +3,9 @@ package dev.dimension.flare.ui.presenter.status
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import dev.dimension.flare.common.LazyPagingItemsProxy
-import dev.dimension.flare.common.collectPagingProxy
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -25,7 +26,7 @@ class StatusContextPresenter(
             accountServiceProvider(accountType = accountType).map { service ->
                 remember(service, statusKey) {
                     service.context(statusKey, scope = scope)
-                }.collectPagingProxy()
+                }.collectAsLazyPagingItems()
             }
         return object : StatusContextState(
             listState,
@@ -40,7 +41,7 @@ class StatusContextPresenter(
 }
 
 abstract class StatusContextState(
-    val listState: UiState<LazyPagingItemsProxy<UiStatus>>,
+    val listState: UiState<LazyPagingItems<UiStatus>>,
 ) {
     abstract suspend fun refresh()
 }

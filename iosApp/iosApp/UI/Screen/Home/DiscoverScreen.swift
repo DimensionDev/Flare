@@ -4,63 +4,25 @@ import Combine
 
 struct DiscoverScreen: View {
     private let onUserClicked: (UiUser) -> Void
-    @State private var searchViewModel: SearchViewModel
-    @State private var viewModel: DiscoverViewModel
+    let searchPresenter: SearchPresenter
+    let presenter: DiscoverPresenter
+    @State var searchText = ""
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     init(accountType: AccountType, onUserClicked: @escaping (UiUser) -> Void) {
         self.onUserClicked = onUserClicked
-        _searchViewModel = .init(initialValue: .init(accountType: accountType, initialQuery: ""))
-        _viewModel = .init(initialValue: .init(accountType: accountType))
+        searchPresenter = .init(accountType: accountType, initialQuery: "")
+        presenter = .init(accountType: accountType)
     }
     var body: some View {
-        List {
-            if searchViewModel.model.searching {
-                switch onEnum(of: searchViewModel.model.users) {
-                case .success(let data):
-                    Section("discover_users_title") {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            LazyHStack {
-                                ForEach(0..<data.data.itemCount, id: \.self) { index in
-                                    if let item = data.data.peek(index: index) {
-                                        UserComponent(
-                                            user: item,
-                                            onUserClicked: {
-                                                onUserClicked(item)
-                                            }
-                                        )
-                                            .frame(width: 200, alignment: .leading)
-                                            .onAppear {
-                                                data.data.get(index: index)
-                                            }
-                                    }
-                                }
-                            }
-                            .if(horizontalSizeClass != .compact) { view in
-                                view.padding(.horizontal)
-                            }
-                        }
-                    }
-                default:
-                    EmptyView()
-                        .listRowSeparator(.hidden)
-                }
-                Section("discover_status_title") {
-                    StatusTimelineComponent(
-                        data: searchViewModel.model.status,
-                        mastodonEvent: statusEvent,
-                        misskeyEvent: statusEvent,
-                        blueskyEvent: statusEvent,
-                        xqtEvent: statusEvent
-                    )
-                }
-            } else {
-                switch onEnum(of: viewModel.model.users) {
-                case .success(let data):
-                    if data.data.isNotEmptyOrLoading {
+        Observing(presenter.models, searchPresenter.models) { state, searchState in
+            List {
+                if searchState.searching {
+                    switch onEnum(of: searchState.users) {
+                    case .success(let data):
                         Section("discover_users_title") {
                             ScrollView(.horizontal, showsIndicators: false) {
-                                LazyHGrid(rows: [.init(), .init()]) {
+                                LazyHStack {
                                     ForEach(0..<data.data.itemCount, id: \.self) { index in
                                         if let item = data.data.peek(index: index) {
                                             UserComponent(
@@ -81,89 +43,116 @@ struct DiscoverScreen: View {
                                 }
                             }
                         }
-                        .listRowSeparator(.hidden)
-                    } else {
+                    default:
                         EmptyView()
                             .listRowSeparator(.hidden)
                     }
-                default:
-                    EmptyView()
-                        .listRowSeparator(.hidden)
-                }
-                switch onEnum(of: viewModel.model.hashtags) {
-                case .success(let data):
-                    if data.data.isNotEmptyOrLoading {
-                        Section("discover_hashtags_title") {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                LazyHStack {
-                                    ForEach(0..<data.data.itemCount, id: \.self) { index in
-                                        if let item = data.data.peek(index: index) {
-                                            Text(item.hashtag)
-                                                .padding()
-                                        #if os(iOS)
-                                                .background(Color(UIColor.secondarySystemBackground))
-                                        #else
-                                                .background(Color(NSColor.windowBackgroundColor))
-                                        #endif
-                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                .onTapGesture {
-                                                    searchViewModel.searchText = "#" + item.hashtag
-                                                    searchViewModel.model.search(new: "#" + item.hashtag)
-                                                }
-                                        }
-                                    }
-                                }
-                                .if(horizontalSizeClass != .compact) { view in
-                                    view.padding(.horizontal)
-                                }
-                            }
-                        }
-                        .listRowSeparator(.hidden)
-                    } else {
-                        EmptyView()
-                            .listRowSeparator(.hidden)
-                    }
-                default:
-                    EmptyView()
-                        .listRowSeparator(.hidden)
-                }
-                if case .success(let data) = onEnum(of: viewModel.model.status), data.data.isNotEmptyOrLoading {
                     Section("discover_status_title") {
                         StatusTimelineComponent(
-                            data: viewModel.model.status,
+                            data: searchState.status,
                             mastodonEvent: statusEvent,
                             misskeyEvent: statusEvent,
                             blueskyEvent: statusEvent,
                             xqtEvent: statusEvent
                         )
                     }
+                } else {
+                    switch onEnum(of: state.users) {
+                    case .success(let data):
+                        if data.data.isNotEmptyOrLoading {
+                            Section("discover_users_title") {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    LazyHGrid(rows: [.init(), .init()]) {
+                                        ForEach(0..<data.data.itemCount, id: \.self) { index in
+                                            if let item = data.data.peek(index: index) {
+                                                UserComponent(
+                                                    user: item,
+                                                    onUserClicked: {
+                                                        onUserClicked(item)
+                                                    }
+                                                )
+                                                    .frame(width: 200, alignment: .leading)
+                                                    .onAppear {
+                                                        data.data.get(index: index)
+                                                    }
+                                            }
+                                        }
+                                    }
+                                    .if(horizontalSizeClass != .compact) { view in
+                                        view.padding(.horizontal)
+                                    }
+                                }
+                            }
+                            .listRowSeparator(.hidden)
+                        } else {
+                            EmptyView()
+                                .listRowSeparator(.hidden)
+                        }
+                    default:
+                        EmptyView()
+                            .listRowSeparator(.hidden)
+                    }
+                    switch onEnum(of: state.hashtags) {
+                    case .success(let data):
+                        if data.data.isNotEmptyOrLoading {
+                            Section("discover_hashtags_title") {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    LazyHStack {
+                                        ForEach(0..<data.data.itemCount, id: \.self) { index in
+                                            if let item = data.data.peek(index: index) {
+                                                Text(item.hashtag)
+                                                    .padding()
+                                            #if os(iOS)
+                                                    .background(Color(UIColor.secondarySystemBackground))
+                                            #else
+                                                    .background(Color(NSColor.windowBackgroundColor))
+                                            #endif
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                    .onTapGesture {
+                                                        searchText = "#" + item.hashtag
+                                                        searchState.search(new: "#" + item.hashtag)
+                                                    }
+                                            }
+                                        }
+                                    }
+                                    .if(horizontalSizeClass != .compact) { view in
+                                        view.padding(.horizontal)
+                                    }
+                                }
+                            }
+                            .listRowSeparator(.hidden)
+                        } else {
+                            EmptyView()
+                                .listRowSeparator(.hidden)
+                        }
+                    default:
+                        EmptyView()
+                            .listRowSeparator(.hidden)
+                    }
+                    if case .success(let data) = onEnum(of: state.status), data.data.isNotEmptyOrLoading {
+                        Section("discover_status_title") {
+                            StatusTimelineComponent(
+                                data: state.status,
+                                mastodonEvent: statusEvent,
+                                misskeyEvent: statusEvent,
+                                blueskyEvent: statusEvent,
+                                xqtEvent: statusEvent
+                            )
+                        }
+                    }
                 }
             }
-        }
-        .searchable(text: $searchViewModel.searchText)
-        .onSubmit(of: .search) {
-            searchViewModel.model.search(new: searchViewModel.searchText)
-        }
-        .onChange(of: searchViewModel.searchText) {
-            if searchViewModel.searchText.isEmpty {
-                searchViewModel.model.search(new: "")
+            .searchable(text: $searchText)
+            .onSubmit(of: .search) {
+                searchState.search(new: searchText)
             }
+            .onChange(of: searchText) {
+                if searchText.isEmpty {
+                    searchState.search(new: "")
+                }
+            }
+            .listStyle(.plain)
+            .navigationTitle("discover_title")
         }
-        .listStyle(.plain)
-        .navigationTitle("discover_title")
-        .activateViewModel(viewModel: viewModel)
-        .activateViewModel(viewModel: searchViewModel)
-    }
-}
-
-@Observable
-class DiscoverViewModel: MoleculeViewModelProto {
-    typealias Model = DiscoverState
-    typealias Presenter = DiscoverPresenter
-    let presenter: Presenter
-    var model: Model
-    init(accountType: AccountType) {
-        presenter = .init(accountType: accountType)
-        model = presenter.models.value
     }
 }

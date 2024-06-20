@@ -2,62 +2,20 @@ import SwiftUI
 import shared
 
 struct NotificationScreen: View {
-    @State var viewModel: NotificationViewModel
+    @State var notificationType: NotificationFilter = NotificationFilter.all
+    let presenter: NotificationPresenter
     @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     init(accountType: AccountType) {
-        _viewModel = .init(initialValue: .init(accountType: accountType))
+        presenter = .init(accountType: accountType)
     }
     var body: some View {
-        List {
-            if horizontalSizeClass == .compact,
-               case .success(let data) = onEnum(of: viewModel.model.allTypes),
-               data.data.count > 1 {
-                Picker("notification_type", selection: $viewModel.notificationType) {
-                    ForEach(1...data.data.count, id: \.self) { index in
-                        if let item = data.data[index - 1] as? NotificationFilter {
-                            Text(item.name)
-                                .tag(item)
-                        }
-                    }
-                }
-                .pickerStyle(.segmented)
-                .listRowSeparator(.hidden)
-            }
-            StatusTimelineComponent(
-                data: viewModel.model.listState,
-                mastodonEvent: statusEvent,
-                misskeyEvent: statusEvent,
-                blueskyEvent: statusEvent,
-                xqtEvent: statusEvent
-            )
-        }
-        .listStyle(.plain)
-        .refreshable {
-            try? await viewModel.model.refresh()
-        }
-        .navigationTitle("notification_title")
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #else
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button(action: {
-                    Task {
-                        try? await viewModel.model.refresh()
-                    }
-                }, label: {
-                    Image(systemName: "arrow.clockwise.circle")
-                })
-            }
-        }
-        #endif
-        .toolbar {
-            if horizontalSizeClass != .compact,
-               case .success(let data) = onEnum(of: viewModel.model.allTypes),
-               data.data.count > 1 {
-                ToolbarItem(placement: .primaryAction) {
-                    Picker("notification_type", selection: $viewModel.notificationType) {
+        Observing(presenter.models) { state in
+            List {
+                if horizontalSizeClass == .compact,
+                   case .success(let data) = onEnum(of: state.allTypes),
+                   data.data.count > 1 {
+                    Picker("notification_type", selection: $notificationType) {
                         ForEach(1...data.data.count, id: \.self) { index in
                             if let item = data.data[index - 1] as? NotificationFilter {
                                 Text(item.name)
@@ -66,26 +24,56 @@ struct NotificationScreen: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    .listRowSeparator(.hidden)
+                }
+                StatusTimelineComponent(
+                    data: state.listState,
+                    mastodonEvent: statusEvent,
+                    misskeyEvent: statusEvent,
+                    blueskyEvent: statusEvent,
+                    xqtEvent: statusEvent
+                )
+            }
+            .onChange(of: notificationType) {
+                state.onNotificationTypeChanged(value: notificationType)
+            }
+            .listStyle(.plain)
+            .refreshable {
+                try? await state.refresh()
+            }
+            .navigationTitle("notification_title")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #else
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(action: {
+                        Task {
+                            try? await viewModel.model.refresh()
+                        }
+                    }, label: {
+                        Image(systemName: "arrow.clockwise.circle")
+                    })
+                }
+            }
+            #endif
+            .toolbar {
+                if horizontalSizeClass != .compact,
+                   case .success(let data) = onEnum(of: state.allTypes),
+                   data.data.count > 1 {
+                    ToolbarItem(placement: .primaryAction) {
+                        Picker("notification_type", selection: $notificationType) {
+                            ForEach(1...data.data.count, id: \.self) { index in
+                                if let item = data.data[index - 1] as? NotificationFilter {
+                                    Text(item.name)
+                                        .tag(item)
+                                }
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
                 }
             }
         }
-        .activateViewModel(viewModel: viewModel)
-    }
-}
-
-@Observable
-class NotificationViewModel: MoleculeViewModelProto {
-    typealias Model = NotificationState
-    typealias Presenter = NotificationPresenter
-    let presenter: Presenter
-    var model: Model
-    var notificationType: NotificationFilter = NotificationFilter.all {
-        willSet {
-            model.onNotificationTypeChanged(value: newValue)
-        }
-    }
-    init(accountType: AccountType) {
-        presenter = .init(accountType: accountType)
-        model = presenter.models.value
     }
 }

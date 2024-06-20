@@ -3,7 +3,7 @@ import shared
 
 struct StatusTimelineComponent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    let data: UiState<LazyPagingItemsProxy<UiStatus>>
+    let data: UiState<LazyPagingItems<UiStatus>>
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
     let blueskyEvent: BlueskyStatusEvent
@@ -51,7 +51,7 @@ struct StatusTimelineComponent: View {
 struct StatusTimeline: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    let pagingSource: LazyPagingItemsProxy<UiStatus>
+    let pagingSource: LazyPagingItems<UiStatus>
     let mastodonEvent: MastodonStatusEvent
     let misskeyEvent: MisskeyStatusEvent
     let blueskyEvent: BlueskyStatusEvent
@@ -85,7 +85,7 @@ struct StatusTimeline: View {
                             xqtEvent: xqtEvent
                         )
                         .onTapGesture {
-                            openURL(URL(string: AppDeepLink.StatusDetail.shared.invoke(statusKey: status.statusKey))!)
+                            openURL(URL(string: AppDeepLink.StatusDetail.shared.invoke(accountKey: status.accountKey, statusKey: status.statusKey))!)
                         }
                     } else {
                         StatusPlaceHolder()

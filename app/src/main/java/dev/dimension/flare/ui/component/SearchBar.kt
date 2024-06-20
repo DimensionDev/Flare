@@ -38,8 +38,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import dev.dimension.flare.R
-import dev.dimension.flare.common.LazyPagingItemsProxy
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
@@ -197,8 +197,8 @@ private fun SearchContent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 internal fun LazyStaggeredGridScope.searchContent(
-    searchUsers: UiState<LazyPagingItemsProxy<UiUser>>,
-    searchStatus: UiState<LazyPagingItemsProxy<UiStatus>>,
+    searchUsers: UiState<LazyPagingItems<UiUser>>,
+    searchStatus: UiState<LazyPagingItems<UiStatus>>,
     statusEvent: StatusEvent,
     toUser: (MicroBlogKey) -> Unit,
 ) {

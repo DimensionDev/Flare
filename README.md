@@ -3,15 +3,10 @@
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
 
-![badge-Mastodon](https://img.shields.io/badge/Mastodon-5d52ea)
-![badge-Misskey](https://img.shields.io/badge/Misskey-acea31)
-![badge-Bluesky](https://img.shields.io/badge/Bluesky-blue)
-![badge-xQt](https://img.shields.io/badge/xQt-black)
-![badge-VVo](https://img.shields.io/badge/VVo-red)
+![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20|%20X%20|%20VVO-ffffff)
 
 ![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-17.0-black)
-![badge-macOS](https://img.shields.io/badge/macOS-14.0-black)
 
 
 The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS/macOS, still in development.  
@@ -23,8 +18,9 @@ The ultimate next generation* open-sourced AI powered** decentralized social net
 <a href='https://play.google.com/store/apps/details?id=dev.dimension.flare&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='docs\src\assets\en_badge_web_generic.png' height=50/></a>
 
 ## Features
- - Support for Mastodon, Misskey, Bluesky, xQt, and more in the future
- - Consistent experience across platforms, and is a native app
+ - Consolidate all your social networks into one client, featuring Mastodon, Misskey, Bluesky, X, VVO, and more to come.
+ - Crosspost your content simultaneously across all your platforms.
+ - It is FOSS and privacy-centric, ensuring that no data is collected from you.
 
 ## Roadmap
 Here're some features we're planning to implement in the future, you can check the project board [here](https://github.com/orgs/DimensionDev/projects/3) for progress.
@@ -36,6 +32,7 @@ Here're some features we're planning to implement in the future, you can check t
  - [x] Local filtering
  - [x] Crossposting
  - [x] Translation
+ - [ ] Auto thread
  - [ ] Local history
  - [ ] Quick reply
 
@@ -51,7 +48,7 @@ Here're some features we're planning to implement in the future, you can check t
 ### Bluesky
  - [ ] Support for lists/feeds
 
-### xQt
+### X
  - [ ] Support for polls
  - [ ] Support for lists
  - [x] Support for bookmarks/favorites timelines

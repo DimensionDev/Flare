@@ -13,7 +13,7 @@ actual abstract class PresenterBase<Model : Any> {
     private val scope = CoroutineScope(Dispatchers.Main + DisplayLinkClock)
 
     actual val models: StateFlow<Model> by lazy {
-        scope.launchMolecule(mode = RecompositionMode.Immediate) {
+        scope.launchMolecule(mode = RecompositionMode.ContextClock) {
             body()
         }
     }

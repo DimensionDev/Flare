@@ -12,6 +12,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.humanizer.humanize
+import dev.dimension.flare.ui.model.UiStatus.VVO.Companion.replaceMentionAndHashtag
 import io.ktor.http.decodeURLPart
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -752,7 +753,11 @@ sealed class UiStatus {
         }
 
         val contentToken by lazy {
-            Ktml.parse(text)
+            val element = Ktml.parse(text)
+            element.children.forEach {
+                replaceMentionAndHashtag(element, it, accountKey)
+            }
+            element
         }
         val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
         val isFromMe by lazy {

@@ -41,6 +41,9 @@ internal enum class CursorType(
 
     @SerialName(value = "Gap")
     gap("Gap"),
+
+    @SerialName(value = "ShowMoreThreadsPrompt")
+    showMoreThreadsPrompt("ShowMoreThreadsPrompt"),
     ;
 
     /**

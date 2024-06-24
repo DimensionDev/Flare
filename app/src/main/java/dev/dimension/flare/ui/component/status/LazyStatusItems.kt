@@ -102,26 +102,7 @@ internal fun <T : UiStatus> status(
                                 LoginExpiredError()
                             }
 
-                            else -> {
-                                Column(
-                                    modifier =
-                                        Modifier
-                                            .clickable {
-                                            },
-                                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoodBad,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(48.dp),
-                                    )
-                                    Text(
-                                        text = stringResource(id = R.string.status_loadmore_error_retry),
-                                        modifier = Modifier.padding(16.dp),
-                                    )
-                                }
-                            }
+                            else -> Unit
                         }
                     }
                 else -> Unit

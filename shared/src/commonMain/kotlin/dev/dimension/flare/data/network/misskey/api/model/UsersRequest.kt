@@ -37,7 +37,9 @@ internal data class UsersRequest(
      * Values: PlusFollower,MinusFollower,PlusCreatedAt,MinusCreatedAt,PlusUpdatedAt,MinusUpdatedAt
      */
     @Serializable
-    enum class Sort(val value: kotlin.String) {
+    enum class Sort(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "+follower")
         PlusFollower("+follower"),
 
@@ -62,7 +64,9 @@ internal data class UsersRequest(
      * Values: All,Alive
      */
     @Serializable
-    enum class State(val value: kotlin.String) {
+    enum class State(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "all")
         All("all"),
 
@@ -75,7 +79,9 @@ internal data class UsersRequest(
      * Values: Combined,Local,Remote
      */
     @Serializable
-    enum class Origin(val value: kotlin.String) {
+    enum class Origin(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "combined")
         Combined("combined"),
 

@@ -28,4 +28,5 @@ import kotlinx.serialization.Serializable
 internal class TimelinePrompt(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName? = null,
-) : ItemContentUnion
+) :
+    ItemContentUnion

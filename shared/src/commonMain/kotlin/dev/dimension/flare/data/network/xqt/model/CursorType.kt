@@ -24,7 +24,9 @@ import kotlinx.serialization.Serializable
  * Values: top,bottom,showMore,showMoreThreads,gap
  */
 @Serializable
-internal enum class CursorType(val value: kotlin.String) {
+internal enum class CursorType(
+    val value: kotlin.String,
+) {
     @SerialName(value = "Top")
     top("Top"),
 

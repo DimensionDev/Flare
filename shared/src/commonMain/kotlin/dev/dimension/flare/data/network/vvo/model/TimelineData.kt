@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.vvo.model
 
+import dev.dimension.flare.common.JSON
 import kotlinx.datetime.Instant
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.format.DateTimeComponents.Companion.Format
@@ -16,7 +17,9 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.floatOrNull
 
 @Serializable
@@ -458,9 +461,17 @@ internal data class Comment(
     @SerialName("feedback_menu_type")
     val feedbackMenuType: Long? = null,
     val bid: String? = null,
-//    val comments: List<Comment>? = null,
+    val comments: JsonElement? = null,
     val pic: StatusPic? = null,
-)
+) {
+    val commentList: List<Comment>?
+        get() =
+            if (comments is JsonArray) {
+                JSON.decodeFromJsonElement(comments)
+            } else {
+                null
+            }
+}
 
 @Serializable
 internal data class Attitude(

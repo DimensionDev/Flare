@@ -41,4 +41,5 @@ internal data class TimelineTimelineCursor(
     val entryType: ContentEntryType? = null,
     @Contextual @SerialName(value = "itemType")
     val itemType: ContentEntryType? = null,
-) : ContentUnion, ItemContentUnion
+) : ContentUnion,
+    ItemContentUnion

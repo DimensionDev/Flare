@@ -24,7 +24,9 @@ import kotlinx.serialization.Serializable
  * Values: timelineTweet,timelineTimelineCursor,timelineUser,timelinePrompt,timelineMessagePrompt,timelineCommunity
  */
 @Serializable
-internal enum class ContentItemType(val value: kotlin.String) {
+internal enum class ContentItemType(
+    val value: kotlin.String,
+) {
     @SerialName(value = "TimelineTweet")
     timelineTweet("TimelineTweet"),
 

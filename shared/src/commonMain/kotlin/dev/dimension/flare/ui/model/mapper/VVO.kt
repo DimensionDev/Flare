@@ -122,6 +122,14 @@ internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification =
         content =
             UiStatus.VVONotification.Content.Comment(
                 text = text.orEmpty(),
+                likeCount = likeCount ?: 0,
+                liked = liked ?: false,
+                comments =
+                    commentList
+                        ?.mapNotNull {
+                            it.toUi(accountKey)
+                        }.orEmpty()
+                        .toImmutableList(),
                 media =
                     listOfNotNull(
                         pic?.let {

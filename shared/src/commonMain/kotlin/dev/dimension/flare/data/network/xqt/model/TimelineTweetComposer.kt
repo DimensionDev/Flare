@@ -8,4 +8,5 @@ import kotlinx.serialization.Serializable
 internal class TimelineTweetComposer(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName? = null,
-) : ItemContentUnion
+) :
+    ItemContentUnion

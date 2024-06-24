@@ -35,7 +35,9 @@ internal data class INotificationsRequest(
      * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App,PollVote,GroupInvited
      */
     @Serializable
-    enum class IncludeTypes(val value: kotlin.String) {
+    enum class IncludeTypes(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "follow")
         Follow("follow"),
 
@@ -81,7 +83,9 @@ internal data class INotificationsRequest(
      * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App,PollVote,GroupInvited
      */
     @Serializable
-    enum class ExcludeTypes(val value: kotlin.String) {
+    enum class ExcludeTypes(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "follow")
         Follow("follow"),
 

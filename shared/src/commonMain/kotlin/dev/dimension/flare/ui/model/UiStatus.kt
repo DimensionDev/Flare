@@ -633,11 +633,19 @@ sealed class UiStatus {
             data class Comment(
                 val text: String,
                 val media: ImmutableList<UiMedia>,
+                val likeCount: Long,
+                val liked: Boolean,
+                val comments: ImmutableList<VVONotification>,
             ) : Content {
                 val contentToken by lazy {
                     Ktml.parse(text)
                 }
+                val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
             }
+        }
+
+        val isFromMe by lazy {
+            rawUser?.userKey == accountKey
         }
 
         val displayUser by lazy {

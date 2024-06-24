@@ -41,7 +41,9 @@ internal data class BirdwatchEntityRef(
      * Values: timelineUrl
      */
     @Serializable
-    enum class Type(val value: kotlin.String) {
+    enum class Type(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "TimelineUrl")
         timelineUrl("TimelineUrl"),
     }
@@ -52,7 +54,9 @@ internal data class BirdwatchEntityRef(
      * Values: externalUrl
      */
     @Serializable
-    enum class UrlType(val value: kotlin.String) {
+    enum class UrlType(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "ExternalUrl")
         externalUrl("ExternalUrl"),
     }

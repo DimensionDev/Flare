@@ -46,7 +46,9 @@ internal data class CoverCta(
      * Values: primary
      */
     @Serializable
-    enum class ButtonStyle(val value: kotlin.String) {
+    enum class ButtonStyle(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "Primary")
         primary("Primary"),
     }

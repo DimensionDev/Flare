@@ -34,7 +34,9 @@ internal data class UsersSearchRequest(
      * Values: Local,Remote,Combined
      */
     @Serializable
-    enum class Origin(val value: kotlin.String) {
+    enum class Origin(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "local")
         Local("local"),
 

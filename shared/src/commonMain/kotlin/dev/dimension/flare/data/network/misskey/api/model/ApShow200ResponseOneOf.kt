@@ -31,7 +31,9 @@ internal data class ApShow200ResponseOneOf(
      * Values: User
      */
     @Serializable
-    enum class Type(val value: kotlin.String) {
+    enum class Type(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "User")
         User("User"),
     }

@@ -56,7 +56,9 @@ internal data class MeDetailedOnly(
      * Values: Full,Partial,None
      */
     @Serializable
-    enum class TwoFactorBackupCodes(val value: kotlin.String) {
+    enum class TwoFactorBackupCodes(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "full")
         Full("full"),
 

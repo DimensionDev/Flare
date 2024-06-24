@@ -5,6 +5,7 @@ import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -20,7 +21,7 @@ internal interface StatusApi {
 
     @GET("detail/{id}")
     suspend fun getStatusDetail(
-        @Query("id") id: String,
+        @Path("id") id: String,
     ): String
 
     @POST("api/statuses/update")

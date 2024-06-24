@@ -108,7 +108,9 @@ internal data class User(
      * Values: Unknown,Online,Active,Offline
      */
     @Serializable
-    enum class OnlineStatus(val value: kotlin.String) {
+    enum class OnlineStatus(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "unknown")
         Unknown("unknown"),
 
@@ -127,7 +129,9 @@ internal data class User(
      * Values: Full,Partial,None
      */
     @Serializable
-    enum class TwoFactorBackupCodes(val value: kotlin.String) {
+    enum class TwoFactorBackupCodes(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "full")
         Full("full"),
 

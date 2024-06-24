@@ -81,7 +81,9 @@ internal data class UserDetailedNotMe(
      * Values: Unknown,Online,Active,Offline
      */
     @Serializable
-    enum class OnlineStatus(val value: kotlin.String) {
+    enum class OnlineStatus(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "unknown")
         Unknown("unknown"),
 

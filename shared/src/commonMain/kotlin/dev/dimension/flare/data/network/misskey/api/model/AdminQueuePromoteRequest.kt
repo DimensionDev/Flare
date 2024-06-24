@@ -30,7 +30,9 @@ internal data class AdminQueuePromoteRequest(
      * Values: Deliver,Inbox
      */
     @Serializable
-    enum class Type(val value: kotlin.String) {
+    enum class Type(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "deliver")
         Deliver("deliver"),
 

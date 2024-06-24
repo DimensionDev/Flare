@@ -33,7 +33,9 @@ internal data class ChartsUserDriveRequest(
      * Values: Day,Hour
      */
     @Serializable
-    enum class Span(val value: kotlin.String) {
+    enum class Span(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "day")
         Day("day"),
 

@@ -91,12 +91,39 @@ internal fun <T : UiStatus> status(
 ) {
     onSuccess { lazyPagingItems ->
         if (lazyPagingItems.itemCount > 0) {
-            if (lazyPagingItems.loadState.refresh is LoadState.Error) {
-                item(
-                    span = StaggeredGridItemSpan.FullLine,
-                ) {
-                    LoginExpiredError()
-                }
+            when (val refresh = lazyPagingItems.loadState.refresh) {
+                is LoadState.Error ->
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
+                        when (refresh.error) {
+                            is LoginExpiredException -> {
+                                LoginExpiredError()
+                            }
+
+                            else -> {
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .clickable {
+                                            },
+                                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoodBad,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(48.dp),
+                                    )
+                                    Text(
+                                        text = stringResource(id = R.string.status_loadmore_error_retry),
+                                        modifier = Modifier.padding(16.dp),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                else -> Unit
             }
             with(lazyPagingItems) {
                 items(

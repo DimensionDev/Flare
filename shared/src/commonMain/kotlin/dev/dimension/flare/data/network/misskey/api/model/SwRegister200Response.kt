@@ -34,7 +34,9 @@ internal data class SwRegister200Response(
      * Values: AlreadyMinusSubscribed,Subscribed
      */
     @Serializable
-    enum class State(val value: kotlin.String) {
+    enum class State(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "already-subscribed")
         AlreadyMinusSubscribed("already-subscribed"),
 

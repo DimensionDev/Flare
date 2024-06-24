@@ -33,7 +33,9 @@ internal data class AdminInviteListRequest(
      * Values: Unused,Used,Expired,All
      */
     @Serializable
-    enum class Type(val value: kotlin.String) {
+    enum class Type(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "unused")
         Unused("unused"),
 
@@ -52,7 +54,9 @@ internal data class AdminInviteListRequest(
      * Values: PlusCreatedAt,MinusCreatedAt,PlusUsedAt,MinusUsedAt
      */
     @Serializable
-    enum class Sort(val value: kotlin.String) {
+    enum class Sort(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "+createdAt")
         PlusCreatedAt("+createdAt"),
 

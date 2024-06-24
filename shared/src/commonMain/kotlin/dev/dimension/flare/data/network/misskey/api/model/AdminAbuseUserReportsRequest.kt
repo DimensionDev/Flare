@@ -38,7 +38,9 @@ internal data class AdminAbuseUserReportsRequest(
      * Values: Combined,Local,Remote
      */
     @Serializable
-    enum class ReporterOrigin(val value: kotlin.String) {
+    enum class ReporterOrigin(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "combined")
         Combined("combined"),
 
@@ -54,7 +56,9 @@ internal data class AdminAbuseUserReportsRequest(
      * Values: Combined,Local,Remote
      */
     @Serializable
-    enum class TargetUserOrigin(val value: kotlin.String) {
+    enum class TargetUserOrigin(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "combined")
         Combined("combined"),
 

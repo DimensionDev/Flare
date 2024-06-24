@@ -48,7 +48,9 @@ internal data class TimelineUser(
      * Values: user,userDetailed,subscribableUser
      */
     @Serializable
-    enum class UserDisplayType(val value: kotlin.String) {
+    enum class UserDisplayType(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "User")
         user("User"),
 

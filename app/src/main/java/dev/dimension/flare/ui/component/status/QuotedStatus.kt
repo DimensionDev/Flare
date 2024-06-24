@@ -6,6 +6,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiStatus
@@ -156,46 +158,15 @@ private fun QuotedStatus(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 if (user != null) {
-                    with(user) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            AvatarComponent(
-                                data = avatarUrl,
-                                size = 20.dp,
-                            )
-                            Row(
-                                modifier =
-                                    Modifier
-                                        .weight(1f),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                HtmlText(
-                                    element = nameElement,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                Text(
-                                    text = handle,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier =
-                                        Modifier
-                                            .alpha(MediumAlpha),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            }
-                            Text(
-                                text = createdAt,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier =
-                                    Modifier
-                                        .alpha(MediumAlpha),
-                                maxLines = 1,
-                            )
-                        }
+                    UserCompat(user) {
+                        Text(
+                            text = createdAt,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier
+                                    .alpha(MediumAlpha),
+                            maxLines = 1,
+                        )
                     }
                 }
                 HtmlText(element = contentElement, layoutDirection = contentLayoutDirection)
@@ -207,6 +178,49 @@ private fun QuotedStatus(
                     sensitive = sensitive,
                 )
             }
+        }
+    }
+}
+
+@Composable
+internal fun UserCompat(
+    user: UiUser,
+    modifier: Modifier = Modifier,
+    trailing: @Composable RowScope.() -> Unit = {},
+) {
+    with(user) {
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AvatarComponent(
+                data = avatarUrl,
+                size = AvatarComponentDefaults.compatSize,
+            )
+            Row(
+                modifier =
+                    Modifier
+                        .weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HtmlText(
+                    element = nameElement,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = handle,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier =
+                        Modifier
+                            .alpha(MediumAlpha),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            trailing.invoke(this)
         }
     }
 }

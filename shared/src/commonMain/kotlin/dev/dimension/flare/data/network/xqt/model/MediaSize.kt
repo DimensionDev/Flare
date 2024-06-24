@@ -40,7 +40,9 @@ internal data class MediaSize(
      * Values: crop,fit
      */
     @Serializable
-    enum class Resize(val value: kotlin.String) {
+    enum class Resize(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "crop")
         crop("crop"),
 

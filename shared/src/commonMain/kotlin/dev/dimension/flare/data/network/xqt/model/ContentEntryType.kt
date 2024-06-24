@@ -24,7 +24,9 @@ import kotlinx.serialization.Serializable
  * Values: timelineTimelineItem,timelineTimelineCursor,timelineTimelineModule
  */
 @Serializable
-internal enum class ContentEntryType(val value: kotlin.String) {
+internal enum class ContentEntryType(
+    val value: kotlin.String,
+) {
     @SerialName(value = "TimelineTimelineItem")
     timelineTimelineItem("TimelineTimelineItem"),
 

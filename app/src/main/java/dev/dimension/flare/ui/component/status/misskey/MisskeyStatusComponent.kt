@@ -125,7 +125,7 @@ internal fun MisskeyStatusComponent(
         contentDirection = actualData.contentDirection,
         contentWarning = actualData.contentWarningText,
         user = actualData.user,
-        medias = actualData.media,
+        medias = actualData.medias,
         card = actualData.card,
         humanizedTime = actualData.localizedShortTime,
         expandedTime = data.localizedFullTime,

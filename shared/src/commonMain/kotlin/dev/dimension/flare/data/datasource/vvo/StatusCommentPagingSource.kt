@@ -12,8 +12,8 @@ internal class StatusCommentPagingSource(
     private val service: VVOService,
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
-) : PagingSource<Long, UiStatus.VVONotification>() {
-    override suspend fun load(params: LoadParams<Long>): LoadResult<Long, UiStatus.VVONotification> {
+) : PagingSource<Long, UiStatus.VVOComment>() {
+    override suspend fun load(params: LoadParams<Long>): LoadResult<Long, UiStatus.VVOComment> {
         return try {
             val config = service.config()
             if (config.data?.login != true) {
@@ -44,5 +44,5 @@ internal class StatusCommentPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Long, UiStatus.VVONotification>): Long? = null
+    override fun getRefreshKey(state: PagingState<Long, UiStatus.VVOComment>): Long? = null
 }

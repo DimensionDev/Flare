@@ -79,7 +79,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
         rawUser = user?.toUi(accountKey),
         regionName = regionName,
         source = source,
-        media = media.toImmutableList(),
+        medias = media.toImmutableList(),
         quote = retweetedStatus?.toUi(accountKey),
         canReblog = visible?.type == null || visible.type == 0L,
     )
@@ -112,44 +112,41 @@ internal fun User.toUi(accountKey: MicroBlogKey): UiUser.VVO =
             ),
     )
 
-internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification =
-    UiStatus.VVONotification(
+internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVOComment =
+    UiStatus.VVOComment(
         statusKey = MicroBlogKey(id = id, host = vvoHost),
         accountKey = accountKey,
         createdAt = createdAt ?: Instant.DISTANT_PAST,
         source = source,
         rawUser = user?.toUi(accountKey),
-        content =
-            UiStatus.VVONotification.Content.Comment(
-                text = text.orEmpty(),
-                likeCount = likeCount ?: 0,
-                liked = liked ?: false,
-                comments =
-                    commentList
-                        ?.mapNotNull {
-                            it.toUi(accountKey)
-                        }.orEmpty()
-                        .toImmutableList(),
-                media =
-                    listOfNotNull(
-                        pic?.let {
-                            val url = it.large?.url ?: it.url
-                            val previewUrl = it.url ?: url
-                            if (!url.isNullOrEmpty() && !previewUrl.isNullOrEmpty()) {
-                                UiMedia.Image(
-                                    url = url,
-                                    width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
-                                    height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
-                                    previewUrl = previewUrl,
-                                    description = null,
-                                    sensitive = false,
-                                )
-                            } else {
-                                null
-                            }
-                        },
-                    ).toImmutableList(),
-            ),
+        text = text.orEmpty(),
+        likeCount = likeCount ?: 0,
+        liked = liked ?: false,
+        comments =
+            commentList
+                ?.mapNotNull {
+                    it.toUi(accountKey)
+                }.orEmpty()
+                .toImmutableList(),
+        medias =
+            listOfNotNull(
+                pic?.let {
+                    val url = it.large?.url ?: it.url
+                    val previewUrl = it.url ?: url
+                    if (!url.isNullOrEmpty() && !previewUrl.isNullOrEmpty()) {
+                        UiMedia.Image(
+                            url = url,
+                            width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
+                            height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
+                            previewUrl = previewUrl,
+                            description = null,
+                            sensitive = false,
+                        )
+                    } else {
+                        null
+                    }
+                },
+            ).toImmutableList(),
         status = status?.toUi(accountKey),
     )
 
@@ -160,6 +157,5 @@ internal fun Attitude.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification =
         createdAt = createdAt ?: Instant.DISTANT_PAST,
         source = source?.let { Ktml.parse(it).innerText },
         rawUser = user?.toUi(accountKey),
-        content = UiStatus.VVONotification.Content.Like,
         status = status?.toUi(accountKey),
     )

@@ -81,6 +81,6 @@ class VVOStatusDetailPresenter(
 @Immutable
 interface VVOStatusDetailState {
     val status: UiState<UiStatus.VVO>
-    val comment: UiState<LazyPagingItems<UiStatus.VVONotification>>
+    val comment: UiState<LazyPagingItems<UiStatus.VVOComment>>
     val repost: UiState<LazyPagingItems<UiStatus.VVO>>
 }

@@ -66,6 +66,7 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.component.status.vvo.VVOCommentComponent
 import dev.dimension.flare.ui.component.status.vvo.VVONotificationComponent
 import dev.dimension.flare.ui.component.status.vvo.VVOStatusComponent
 import dev.dimension.flare.ui.component.status.vvo.VVOStatusEvent
@@ -496,6 +497,14 @@ internal fun StatusItem(
                 event = event,
                 modifier = modifier.padding(horizontal = horizontalPadding),
                 showStatus = showVVOStatus,
+            )
+        }
+
+        is UiStatus.VVOComment -> {
+            VVOCommentComponent(
+                data = item,
+                event = event,
+                modifier = modifier.padding(horizontal = horizontalPadding),
             )
         }
     }

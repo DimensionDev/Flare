@@ -29,7 +29,6 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.contentDirection
 import dev.dimension.flare.ui.model.localizedShortTime
-import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
 import moe.tlaster.ktml.dom.Element
@@ -54,7 +53,7 @@ internal fun UiStatusQuoted(
                 user = status.user,
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
-                medias = status.media,
+                medias = status.medias,
                 createdAt = status.localizedShortTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
@@ -70,7 +69,7 @@ internal fun UiStatusQuoted(
                 user = status.user,
                 contentElement = status.contentToken,
                 contentLayoutDirection = status.contentDirection,
-                medias = status.media,
+                medias = status.medias,
                 createdAt = status.localizedShortTime,
                 onMediaClick = onMediaClick,
                 modifier = modifier,
@@ -126,6 +125,7 @@ internal fun UiStatusQuoted(
                 colors = colors,
             )
         is UiStatus.VVONotification -> Unit
+        is UiStatus.VVOComment -> Unit
     }
 }
 

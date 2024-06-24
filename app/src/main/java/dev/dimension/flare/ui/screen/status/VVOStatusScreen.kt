@@ -231,7 +231,7 @@ private fun StatusContent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 private fun LazyStaggeredGridScope.reactionContent(
-    comment: UiState<LazyPagingItems<UiStatus.VVONotification>>,
+    comment: UiState<LazyPagingItems<UiStatus.VVOComment>>,
     repost: UiState<LazyPagingItems<UiStatus.VVO>>,
     event: StatusEvent,
     detailType: DetailType,

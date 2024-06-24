@@ -37,7 +37,6 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
 import dev.dimension.flare.ui.model.localizedFullTime
 import dev.dimension.flare.ui.model.localizedShortTime
-import dev.dimension.flare.ui.model.medias
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)

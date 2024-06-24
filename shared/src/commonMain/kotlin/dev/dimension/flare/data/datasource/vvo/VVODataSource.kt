@@ -507,7 +507,7 @@ class VVODataSource(
         }
     }
 
-    fun statusComment(statusKey: MicroBlogKey): Flow<PagingData<UiStatus.VVONotification>> =
+    fun statusComment(statusKey: MicroBlogKey): Flow<PagingData<UiStatus.VVOComment>> =
         Pager(
             config = PagingConfig(pageSize = 20),
         ) {

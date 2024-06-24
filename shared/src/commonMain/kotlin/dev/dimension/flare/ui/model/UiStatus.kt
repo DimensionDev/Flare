@@ -9,11 +9,13 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.misskey.api.model.NotificationType
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.humanizer.humanize
 import io.ktor.http.decodeURLPart
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import moe.tlaster.ktml.Ktml
@@ -77,102 +79,10 @@ sealed class UiStatus {
     open val itemKey: String by lazy {
         statusKey.toString()
     }
-
-    val itemType: String by lazy {
-        when (this) {
-            is Mastodon ->
-                buildString {
-                    append("mastodon")
-                    if (reblogStatus != null) append("_reblog")
-                    with(reblogStatus ?: this@UiStatus) {
-                        if (media.isNotEmpty()) append("_media")
-                        if (poll != null) append("_poll")
-                        if (card != null) append("_card")
-                    }
-                }
-
-            is MastodonNotification ->
-                buildString {
-                    append("mastodon_notification")
-                    append("_${type.name.lowercase()}")
-                    if (status != null) {
-                        append(status.itemType)
-                    }
-                }
-
-            is Misskey ->
-                buildString {
-                    append("misskey")
-                    if (renote != null) {
-                        append("_reblog")
-                        append("_${renote.itemType}")
-                    }
-                    if (quote != null) {
-                        append("_quote")
-                        append("_${quote.itemType}")
-                    }
-                    if (media.isNotEmpty()) append("_media")
-                    if (poll != null) append("_poll")
-                    if (card != null) append("_card")
-                }
-
-            is MisskeyNotification ->
-                buildString {
-                    append("misskey_notification")
-                    append("_${type.name.lowercase()}")
-                    if (note != null) {
-                        append(note.itemType)
-                    }
-                }
-
-            is Bluesky ->
-                buildString {
-                    append("bluesky")
-                    if (repostBy != null) append("_reblog")
-                    if (medias.isNotEmpty()) append("_media")
-                    if (quote != null) {
-                        append("_quote")
-                        append("_${quote.itemType}")
-                    }
-                }
-
-            is BlueskyNotification ->
-                buildString {
-                    append("bluesky_notification")
-                    append("_${reason.name.lowercase()}")
-                }
-
-            is XQT ->
-                buildString {
-                    append("xqt")
-                    if (retweet != null) {
-                        append("_retweet_")
-                        append(retweet.itemType)
-                    }
-                    if (quote != null) {
-                        append("_quote_")
-                        append(quote.itemType)
-                    }
-                    if (card != null) append("_card")
-                }
-
-            is XQTNotification ->
-                buildString {
-                    append("xqt_notification")
-                }
-
-            is VVO ->
-                buildString {
-                    append("vvo")
-                    if (media.isNotEmpty()) append("_media")
-                }
-
-            is VVONotification ->
-                buildString {
-                    append("vvo_notification")
-                }
-        }
-    }
+    abstract val itemType: String
+    abstract val platformType: PlatformType
+    abstract val textToFilter: ImmutableList<String>
+    abstract val medias: ImmutableList<UiMedia>
 
     @Immutable
     data class MastodonNotification(
@@ -182,7 +92,26 @@ sealed class UiStatus {
         val createdAt: Instant,
         val status: Mastodon?,
         val type: NotificationTypes,
-    ) : UiStatus()
+    ) : UiStatus() {
+        override val itemType: String =
+            buildString {
+                append("mastodon_notification")
+                append("_${type.name.lowercase()}")
+                if (status != null) {
+                    append(status.itemType)
+                }
+            }
+
+        override val platformType: PlatformType = PlatformType.Mastodon
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            listOfNotNull(status?.content, status?.contentWarningText).toImmutableList()
+        }
+
+        override val medias: ImmutableList<UiMedia> by lazy {
+            persistentListOf()
+        }
+    }
 
     @Immutable
     data class Mastodon internal constructor(
@@ -192,7 +121,7 @@ sealed class UiStatus {
         val content: String,
         val contentWarningText: String?,
         val matrices: Matrices,
-        val media: ImmutableList<UiMedia>,
+        override val medias: ImmutableList<UiMedia>,
         val createdAt: Instant,
         val visibility: Visibility,
         val poll: UiPoll?,
@@ -250,6 +179,28 @@ sealed class UiStatus {
             }
         }
 
+        override val itemType: String =
+            buildString {
+                append("mastodon")
+                if (reblogStatus != null) append("_reblog")
+                with(reblogStatus ?: this@Mastodon) {
+                    if (medias.isNotEmpty()) append("_media")
+                    if (poll != null) append("_poll")
+                    if (card != null) append("_card")
+                }
+            }
+
+        override val platformType: PlatformType = PlatformType.Mastodon
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            listOfNotNull(
+                content,
+                contentWarningText,
+                reblogStatus?.content,
+                reblogStatus?.contentWarningText,
+            ).toImmutableList()
+        }
+
         val contentToken by lazy {
             parseContent(raw, content, accountKey)
         }
@@ -287,14 +238,14 @@ sealed class UiStatus {
     }
 
     @Immutable
-    data class Misskey(
+    data class Misskey internal constructor(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
         val user: UiUser.Misskey,
         val content: String,
         val contentWarningText: String?,
         val matrices: Matrices,
-        val media: ImmutableList<UiMedia>,
+        override val medias: ImmutableList<UiMedia>,
         val createdAt: Instant,
         val visibility: Visibility,
         val poll: UiPoll?,
@@ -304,6 +255,35 @@ sealed class UiStatus {
         val quote: Misskey?,
         val renote: Misskey?,
     ) : UiStatus() {
+        override val itemType: String =
+            buildString {
+                append("misskey")
+                if (renote != null) {
+                    append("_reblog")
+                    append("_${renote.itemType}")
+                }
+                if (quote != null) {
+                    append("_quote")
+                    append("_${quote.itemType}")
+                }
+                if (medias.isNotEmpty()) append("_media")
+                if (poll != null) append("_poll")
+                if (card != null) append("_card")
+            }
+
+        override val platformType: PlatformType = PlatformType.Misskey
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            listOfNotNull(
+                content,
+                contentWarningText,
+                quote?.content,
+                quote?.contentWarningText,
+                renote?.content,
+                renote?.contentWarningText,
+            ).toImmutableList()
+        }
+
         val contentToken by lazy {
             misskeyParser.parse(content).toHtml(accountKey)
         }
@@ -359,10 +339,36 @@ sealed class UiStatus {
         val note: Misskey?,
         val type: NotificationType,
         val achievement: String?,
-    ) : UiStatus()
+    ) : UiStatus() {
+        override val itemType: String =
+            buildString {
+                append("misskey_notification")
+                append("_${type.name.lowercase()}")
+                if (note != null) {
+                    append(note.itemType)
+                }
+            }
+
+        override val platformType: PlatformType = PlatformType.Misskey
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            listOfNotNull(
+                note?.content,
+                note?.contentWarningText,
+                note?.quote?.content,
+                note?.quote?.contentWarningText,
+                note?.renote?.content,
+                note?.renote?.contentWarningText,
+            ).toImmutableList()
+        }
+
+        override val medias: ImmutableList<UiMedia> by lazy {
+            persistentListOf()
+        }
+    }
 
     @Immutable
-    data class Bluesky(
+    data class Bluesky internal constructor(
         override val accountKey: MicroBlogKey,
         override val statusKey: MicroBlogKey,
         val user: UiUser.Bluesky,
@@ -370,13 +376,30 @@ sealed class UiStatus {
         val repostBy: UiUser.Bluesky?,
         val quote: Bluesky?,
         val content: String,
-        val medias: ImmutableList<UiMedia>,
+        override val medias: ImmutableList<UiMedia>,
         val card: UiCard?,
         val matrices: Matrices,
         val reaction: Reaction,
         val cid: String,
         val uri: String,
     ) : UiStatus() {
+        override val itemType: String =
+            buildString {
+                append("bluesky")
+                if (repostBy != null) append("_reblog")
+                if (medias.isNotEmpty()) append("_media")
+                if (quote != null) {
+                    append("_quote")
+                    append("_${quote.itemType}")
+                }
+            }
+
+        override val platformType: PlatformType = PlatformType.Bluesky
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            listOfNotNull(content, quote?.content).toImmutableList()
+        }
+
         val contentToken by lazy {
             blueskyParser.parse(content).toHtml(accountKey)
         }
@@ -414,13 +437,29 @@ sealed class UiStatus {
     }
 
     @Immutable
-    data class BlueskyNotification(
+    data class BlueskyNotification internal constructor(
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
         val user: UiUser.Bluesky,
         val reason: ListNotificationsReason,
         val indexedAt: Instant,
     ) : UiStatus() {
+        override val itemType: String =
+            buildString {
+                append("bluesky_notification")
+                append("_${reason.name.lowercase()}")
+            }
+
+        override val platformType: PlatformType = PlatformType.Bluesky
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            persistentListOf()
+        }
+
+        override val medias: ImmutableList<UiMedia> by lazy {
+            persistentListOf()
+        }
+
         override val itemKey: String by lazy {
             statusKey.toString() + "_${user.userKey}"
         }
@@ -433,7 +472,7 @@ sealed class UiStatus {
         val user: UiUser.XQT,
         val createdAt: Instant,
         val content: String,
-        val medias: ImmutableList<UiMedia>,
+        override val medias: ImmutableList<UiMedia>,
         val sensitive: Boolean,
         val card: UiCard?,
         val matrices: Matrices,
@@ -446,6 +485,26 @@ sealed class UiStatus {
         val inReplyToUserId: String?,
         internal val raw: Tweet,
     ) : UiStatus() {
+        override val itemType: String =
+            buildString {
+                append("xqt")
+                if (retweet != null) {
+                    append("_retweet_")
+                    append(retweet.itemType)
+                }
+                if (quote != null) {
+                    append("_quote_")
+                    append(quote.itemType)
+                }
+                if (card != null) append("_card")
+            }
+
+        override val platformType: PlatformType = PlatformType.xQt
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            listOfNotNull(content, retweet?.content, quote?.content).toImmutableList()
+        }
+
         val isFromMe by lazy {
             user.userKey == accountKey
         }
@@ -517,6 +576,18 @@ sealed class UiStatus {
         val data: XQT?,
         val createdAt: Instant,
     ) : UiStatus() {
+        override val itemType: String = "xqt_notification"
+
+        override val platformType: PlatformType = PlatformType.xQt
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            persistentListOf()
+        }
+
+        override val medias: ImmutableList<UiMedia> by lazy {
+            persistentListOf()
+        }
+
         enum class Type {
             Follow,
             Like,
@@ -534,7 +605,7 @@ sealed class UiStatus {
         val content: String,
         val rawContent: String,
         val createdAt: Instant,
-        val media: ImmutableList<UiMedia>,
+        override val medias: ImmutableList<UiMedia>,
         val liked: Boolean,
         val matrices: Matrices,
         val regionName: String?,
@@ -564,7 +635,8 @@ sealed class UiStatus {
                         } else if (href.startsWith("https://$vvoHost/search")) {
                             node.attributes["href"] = AppDeepLink.Search(accountKey, node.innerText)
                         } else if (href.startsWith("https://weibo.cn/sinaurl?u=")) {
-                            val url = href.removePrefix("https://weibo.cn/sinaurl?u=").decodeURLPart()
+                            val url =
+                                href.removePrefix("https://weibo.cn/sinaurl?u=").decodeURLPart()
                             if (url.contains("sinaimg.cn/")) {
                                 node.attributes["href"] = AppDeepLink.RawImage(url)
                             }
@@ -573,6 +645,21 @@ sealed class UiStatus {
                     node.children.forEach { replaceMentionAndHashtag(element, it, accountKey) }
                 }
             }
+        }
+
+        override val itemType: String =
+            buildString {
+                append("vvo")
+                if (medias.isNotEmpty()) append("_media")
+            }
+
+        override val platformType: PlatformType = PlatformType.VVo
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            listOfNotNull(
+                content,
+                quote?.content,
+            ).toImmutableList()
         }
 
         val contentToken by lazy {
@@ -619,31 +706,55 @@ sealed class UiStatus {
         override val statusKey: MicroBlogKey,
         override val accountKey: MicroBlogKey,
         val rawUser: UiUser.VVO?,
-        val content: Content,
         val createdAt: Instant,
         val source: String?,
         val status: VVO?,
     ) : UiStatus() {
-        @Immutable
-        sealed interface Content {
-            @Immutable
-            data object Like : Content
+        override val itemType: String = "vvo_notification"
 
-            @Immutable
-            data class Comment(
-                val text: String,
-                val media: ImmutableList<UiMedia>,
-                val likeCount: Long,
-                val liked: Boolean,
-                val comments: ImmutableList<VVONotification>,
-            ) : Content {
-                val contentToken by lazy {
-                    Ktml.parse(text)
-                }
-                val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
-            }
+        override val platformType: PlatformType = PlatformType.VVo
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            persistentListOf()
         }
 
+        override val medias: ImmutableList<UiMedia> by lazy {
+            persistentListOf()
+        }
+
+        val displayUser by lazy {
+            rawUser?.copy(
+                handle = source ?: rawUser.handle,
+            )
+        }
+    }
+
+    @Immutable
+    data class VVOComment internal constructor(
+        override val statusKey: MicroBlogKey,
+        override val accountKey: MicroBlogKey,
+        val rawUser: UiUser.VVO?,
+        val text: String,
+        override val medias: ImmutableList<UiMedia>,
+        val likeCount: Long,
+        val liked: Boolean,
+        val comments: ImmutableList<VVOComment>,
+        val createdAt: Instant,
+        val source: String?,
+        val status: VVO?,
+    ) : UiStatus() {
+        override val itemType: String = "vvo_comment"
+
+        override val platformType: PlatformType = PlatformType.VVo
+
+        override val textToFilter: ImmutableList<String> by lazy {
+            listOfNotNull(text, status?.content).toImmutableList()
+        }
+
+        val contentToken by lazy {
+            Ktml.parse(text)
+        }
+        val humanizedLikeCount by lazy { if (likeCount > 0) likeCount.humanize() else null }
         val isFromMe by lazy {
             rawUser?.userKey == accountKey
         }
@@ -914,7 +1025,7 @@ private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon =
                 reblogCount = 5,
                 favouriteCount = 15,
             ),
-        media = persistentListOf(),
+        medias = persistentListOf(),
         createdAt = Clock.System.now(),
         visibility = UiStatus.Mastodon.Visibility.Public,
         poll = null,
@@ -968,7 +1079,7 @@ private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey =
                 replyCount = 15,
                 renoteCount = 25,
             ),
-        media = persistentListOf(),
+        medias = persistentListOf(),
         createdAt = Clock.System.now(),
         visibility = UiStatus.Misskey.Visibility.Public,
         poll = null,
@@ -1022,7 +1133,7 @@ fun createVVOStatus(user: UiUser.VVO): UiStatus.VVO =
         content = "VVO post content",
         rawContent = "VVO post content",
         createdAt = Clock.System.now(),
-        media = persistentListOf(),
+        medias = persistentListOf(),
         liked = false,
         matrices =
             UiStatus.VVO.Matrices(
@@ -1035,19 +1146,3 @@ fun createVVOStatus(user: UiUser.VVO): UiStatus.VVO =
         quote = null,
         canReblog = true,
     )
-
-val UiStatus.medias: ImmutableList<UiMedia>
-    get() {
-        return when (this) {
-            is UiStatus.Mastodon -> media
-            is UiStatus.Misskey -> media
-            is UiStatus.Bluesky -> medias
-            is UiStatus.XQT -> medias
-            is UiStatus.VVO -> media
-            is UiStatus.MastodonNotification -> persistentListOf()
-            is UiStatus.MisskeyNotification -> persistentListOf()
-            is UiStatus.BlueskyNotification -> persistentListOf()
-            is UiStatus.XQTNotification -> persistentListOf()
-            is UiStatus.VVONotification -> persistentListOf()
-        }
-    }

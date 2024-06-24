@@ -100,7 +100,7 @@ internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
                 Visibility.Followers -> UiStatus.Misskey.Visibility.Followers
                 Visibility.Specified -> UiStatus.Misskey.Visibility.Specified
             },
-        media =
+        medias =
             files
                 ?.mapNotNull { file ->
                     file.toUi()

@@ -58,7 +58,7 @@ internal class MentionRemoteMediator(
                     }
                 }
 
-            VVO.save(
+            VVO.saveStatus(
                 accountKey = accountKey,
                 pagingKey = pagingKey,
                 database = database,

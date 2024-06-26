@@ -276,6 +276,8 @@ internal interface VVOStatusEvent {
 
     fun onLikeClick(data: UiStatus.VVO)
 
+    fun onLikeClick(data: UiStatus.VVOComment)
+
     fun onDeleteClick(
         data: UiStatus.VVO,
         uriHandler: UriHandler,
@@ -283,6 +285,16 @@ internal interface VVOStatusEvent {
 
     fun onReportClick(
         data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    )
+
+    fun onDeleteClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    )
+
+    fun onReportClick(
+        data: UiStatus.VVOComment,
         uriHandler: UriHandler,
     )
 

@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.StatusExtend
 import dev.dimension.flare.data.network.vvo.model.VVOResponse
+import kotlinx.serialization.json.JsonElement
 
 internal interface StatusApi {
     @GET("statuses/extend")
@@ -95,4 +96,22 @@ internal interface StatusApi {
         @Field("attitude") attitude: String = "heart",
         @Header("X-Xsrf-Token") xsrfToken: String = st,
     ): VVOResponse<String>
+
+    @POST("api/likes/update")
+    @FormUrlEncoded
+    suspend fun likesUpdate(
+        @Field("id") id: String,
+        @Field("st") st: String,
+        @Field("type") type: String = "comment",
+        @Header("X-Xsrf-Token") xsrfToken: String = st,
+    ): VVOResponse<JsonElement>
+
+    @POST("api/likes/destroy")
+    @FormUrlEncoded
+    suspend fun likesDestroy(
+        @Field("id") id: String,
+        @Field("st") st: String,
+        @Field("type") type: String = "comment",
+        @Header("X-Xsrf-Token") xsrfToken: String = st,
+    ): VVOResponse<JsonElement>
 }

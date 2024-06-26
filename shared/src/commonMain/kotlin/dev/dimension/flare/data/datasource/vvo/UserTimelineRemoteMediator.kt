@@ -94,7 +94,7 @@ internal class UserTimelineRemoteMediator(
                     ?.mapNotNull { it.mblog }
                     .orEmpty()
 
-            VVO.save(
+            VVO.saveStatus(
                 accountKey = accountKey,
                 pagingKey = pagingKey,
                 database = database,

@@ -268,7 +268,7 @@ class VVODataSource(
                 val item = json.firstOrNull()?.status
 
                 if (item != null) {
-                    VVO.save(
+                    VVO.saveStatus(
                         accountKey = account.accountKey,
                         pagingKey = pagingKey,
                         database = database,
@@ -507,27 +507,51 @@ class VVODataSource(
         }
     }
 
-    fun statusComment(statusKey: MicroBlogKey): Flow<PagingData<UiStatus.VVOComment>> =
-        Pager(
-            config = PagingConfig(pageSize = 20),
-        ) {
-            StatusCommentPagingSource(
-                service = service,
-                accountKey = account.accountKey,
-                statusKey = statusKey,
-            )
-        }.flow
+    fun statusComment(
+        statusKey: MicroBlogKey,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        val pagingKey = "status_comment_$statusKey"
+        return timelinePager(
+            pageSize = 20,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                StatusCommentRemoteMediator(
+                    service = service,
+                    accountKey = account.accountKey,
+                    statusKey = statusKey,
+                    pagingKey = pagingKey,
+                    database = database,
+                ),
+        )
+    }
 
-    fun statusRepost(statusKey: MicroBlogKey): Flow<PagingData<UiStatus.VVO>> =
-        Pager(
-            config = PagingConfig(pageSize = 20),
-        ) {
-            StatusRepostPagingSource(
-                service = service,
-                accountKey = account.accountKey,
-                statusKey = statusKey,
-            )
-        }.flow
+    fun statusRepost(
+        statusKey: MicroBlogKey,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        val pagingKey = "status_repost_$statusKey"
+        return timelinePager(
+            pageSize = 20,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                StatusRepostRemoteMediator(
+                    service = service,
+                    accountKey = account.accountKey,
+                    statusKey = statusKey,
+                    pagingKey = pagingKey,
+                    database = database,
+                ),
+        )
+    }
 
     fun statusExtendedText(statusKey: MicroBlogKey): Flow<UiState<String>> =
         MemCacheable(
@@ -584,6 +608,59 @@ class VVODataSource(
                                         it.data.attitudesCount?.plus(1)
                                     } else {
                                         it.data.attitudesCount?.minus(1)
+                                    },
+                            ),
+                    )
+                },
+            )
+        }.onSuccess {
+        }
+    }
+
+    suspend fun like(status: UiStatus.VVOComment) {
+        updateStatusUseCase<StatusContent.VVOComment>(
+            statusKey = status.statusKey,
+            accountKey = status.accountKey,
+            cacheDatabase = database,
+            update = {
+                it.copy(
+                    data =
+                        it.data.copy(
+                            liked = !status.liked,
+                            likeCount =
+                                if (status.liked) {
+                                    it.data.likeCount?.minus(1)
+                                } else {
+                                    it.data.likeCount?.plus(1)
+                                },
+                        ),
+                )
+            },
+        )
+
+        runCatching {
+            val st = service.config().data?.st
+            requireNotNull(st) { "st is null" }
+            if (status.liked) {
+                service.likesDestroy(id = status.statusKey.id, st = st)
+            } else {
+                service.likesUpdate(id = status.statusKey.id, st = st)
+            }
+        }.onFailure {
+            updateStatusUseCase<StatusContent.VVOComment>(
+                statusKey = status.statusKey,
+                accountKey = status.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                liked = status.liked,
+                                likeCount =
+                                    if (status.liked) {
+                                        it.data.likeCount?.plus(1)
+                                    } else {
+                                        it.data.likeCount?.minus(1)
                                     },
                             ),
                     )

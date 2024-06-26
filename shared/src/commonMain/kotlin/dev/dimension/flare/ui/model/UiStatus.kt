@@ -82,7 +82,7 @@ sealed class UiStatus {
     }
     abstract val itemType: String
     abstract val platformType: PlatformType
-    abstract val textToFilter: ImmutableList<String>
+    internal abstract val textToFilter: ImmutableList<String>
     abstract val medias: ImmutableList<UiMedia>
 
     @Immutable

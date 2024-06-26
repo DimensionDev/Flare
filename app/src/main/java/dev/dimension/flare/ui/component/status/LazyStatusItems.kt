@@ -933,6 +933,33 @@ internal class DefaultStatusEvent(
             ).deeplink(),
         )
     }
+
+    override fun onLikeClick(data: UiStatus.VVOComment) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.VVo ?: return@launch
+            account.dataSource.like(data)
+        }
+    }
+
+    override fun onReportClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) {
+        // TODO
+    }
+
+    override fun onDeleteClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            DeleteStatusConfirmRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                statusKey = data.statusKey,
+            ).deeplink(),
+        )
+    }
 }
 
 internal data object EmptyStatusEvent : StatusEvent {
@@ -1055,6 +1082,8 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onLikeClick(data: UiStatus.VVO) = Unit
 
+    override fun onLikeClick(data: UiStatus.VVOComment) = Unit
+
     override fun onReportClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -1070,6 +1099,11 @@ internal data object EmptyStatusEvent : StatusEvent {
         uriHandler: UriHandler,
     ) = Unit
 
+    override fun onReportClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) = Unit
+
     override fun onDeleteClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -1082,6 +1116,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onDeleteClick(
         data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onDeleteClick(
+        data: UiStatus.VVOComment,
         uriHandler: UriHandler,
     ) = Unit
 

@@ -54,6 +54,11 @@ internal fun StatusContent.toUi(accountKey: MicroBlogKey) =
             data.toUi(
                 accountKey = accountKey,
             )
+
+        is StatusContent.VVOComment ->
+            data.toUi(
+                accountKey = accountKey,
+            )
     }
 
 internal fun DbUser.toUi(accountKey: MicroBlogKey): UiUser =

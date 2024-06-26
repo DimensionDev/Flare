@@ -168,7 +168,7 @@ internal fun VVOCommentComponent(
                         Modifier
                             .weight(1f),
                     onClicked = {
-//                            event.onLikeClick(data)
+                        event.onLikeClick(data)
                     },
                     color =
                         if (data.liked) {
@@ -199,7 +199,7 @@ internal fun VVOCommentComponent(
                                 },
                                 onClick = {
                                     closeMenu.invoke()
-//                                            event.onDeleteClick(data, uriHandler)
+                                    event.onDeleteClick(data, uriHandler)
                                 },
                             )
                         } else {
@@ -219,7 +219,7 @@ internal fun VVOCommentComponent(
                                 },
                                 onClick = {
                                     closeMenu.invoke()
-//                                            event.onReportClick(data, uriHandler)
+                                    event.onReportClick(data, uriHandler)
                                 },
                             )
                         }

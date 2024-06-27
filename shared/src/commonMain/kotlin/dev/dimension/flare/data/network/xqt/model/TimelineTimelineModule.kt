@@ -53,7 +53,9 @@ internal data class TimelineTimelineModule(
      * Values: vertical,verticalConversation,carousel
      */
     @Serializable
-    enum class DisplayType(val value: kotlin.String) {
+    enum class DisplayType(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "Vertical")
         vertical("Vertical"),
 

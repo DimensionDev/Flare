@@ -34,7 +34,9 @@ internal data class ChannelsSearchRequest(
      * Values: NameAndDescription,NameOnly
      */
     @Serializable
-    enum class Type(val value: kotlin.String) {
+    enum class Type(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "nameAndDescription")
         NameAndDescription("nameAndDescription"),
 

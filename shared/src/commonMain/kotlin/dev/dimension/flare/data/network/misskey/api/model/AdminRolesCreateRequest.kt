@@ -43,7 +43,9 @@ internal data class AdminRolesCreateRequest(
      * Values: Manual,Conditional
      */
     @Serializable
-    enum class Target(val value: kotlin.String) {
+    enum class Target(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "manual")
         Manual("manual"),
 

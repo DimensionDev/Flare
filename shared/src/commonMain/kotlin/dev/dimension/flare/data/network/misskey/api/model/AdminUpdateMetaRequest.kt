@@ -105,7 +105,9 @@ internal data class AdminUpdateMetaRequest(
      * Values: None,All,Local,Remote
      */
     @Serializable
-    enum class SensitiveMediaDetection(val value: kotlin.String) {
+    enum class SensitiveMediaDetection(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "none")
         None("none"),
 
@@ -124,7 +126,9 @@ internal data class AdminUpdateMetaRequest(
      * Values: Medium,Low,High,VeryLow,VeryHigh
      */
     @Serializable
-    enum class SensitiveMediaDetectionSensitivity(val value: kotlin.String) {
+    enum class SensitiveMediaDetectionSensitivity(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "medium")
         Medium("medium"),
 

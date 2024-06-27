@@ -38,7 +38,9 @@ internal data class TimelineTerminateTimeline(
      * Values: top,bottom
      */
     @Serializable
-    enum class Direction(val value: kotlin.String) {
+    enum class Direction(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "Top")
         top("Top"),
 

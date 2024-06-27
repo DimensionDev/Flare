@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.collectAsState
@@ -24,6 +25,7 @@ class VVOStatusDetailPresenter(
 ) : PresenterBase<VVOStatusDetailState>() {
     @Composable
     override fun body(): VVOStatusDetailState {
+        val scope = rememberCoroutineScope()
         val service = accountServiceProvider(accountType)
         val status =
             service
@@ -58,7 +60,7 @@ class VVOStatusDetailPresenter(
             service.map {
                 require(it is VVODataSource)
                 remember(statusKey, accountType) {
-                    it.statusRepost(statusKey)
+                    it.statusRepost(statusKey = statusKey, scope = scope)
                 }.collectAsLazyPagingItems()
             }
 
@@ -66,7 +68,7 @@ class VVOStatusDetailPresenter(
             service.map {
                 require(it is VVODataSource)
                 remember(statusKey, accountType) {
-                    it.statusComment(statusKey)
+                    it.statusComment(statusKey = statusKey, scope = scope)
                 }.collectAsLazyPagingItems()
             }
 
@@ -81,6 +83,6 @@ class VVOStatusDetailPresenter(
 @Immutable
 interface VVOStatusDetailState {
     val status: UiState<UiStatus.VVO>
-    val comment: UiState<LazyPagingItems<UiStatus.VVONotification>>
-    val repost: UiState<LazyPagingItems<UiStatus.VVO>>
+    val comment: UiState<LazyPagingItems<UiStatus>>
+    val repost: UiState<LazyPagingItems<UiStatus>>
 }

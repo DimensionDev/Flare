@@ -121,7 +121,7 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
                     Visibility.Direct -> UiStatus.Mastodon.Visibility.Direct
                 }
             } ?: UiStatus.Mastodon.Visibility.Public,
-        media =
+        medias =
             mediaAttachments
                 ?.mapNotNull { attachment ->
                     attachment.toUi(sensitive = sensitive ?: false)

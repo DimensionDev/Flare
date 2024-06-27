@@ -52,7 +52,9 @@ internal data class TimelineHalfCover(
      * Values: cover
      */
     @Serializable
-    enum class HalfCoverDisplayType(val value: kotlin.String) {
+    enum class HalfCoverDisplayType(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "Cover")
         cover("Cover"),
     }
@@ -63,7 +65,9 @@ internal data class TimelineHalfCover(
      * Values: timelineHalfCover
      */
     @Serializable
-    enum class Type(val value: kotlin.String) {
+    enum class Type(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "TimelineHalfCover")
         timelineHalfCover("TimelineHalfCover"),
     }

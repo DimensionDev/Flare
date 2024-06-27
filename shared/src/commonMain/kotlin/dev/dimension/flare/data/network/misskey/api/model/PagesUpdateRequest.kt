@@ -40,7 +40,9 @@ internal data class PagesUpdateRequest(
      * Values: Serif,SansMinusSerif
      */
     @Serializable
-    enum class Font(val value: kotlin.String) {
+    enum class Font(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "serif")
         Serif("serif"),
 

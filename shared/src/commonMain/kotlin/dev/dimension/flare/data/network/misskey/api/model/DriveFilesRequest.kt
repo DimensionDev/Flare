@@ -35,7 +35,9 @@ internal data class DriveFilesRequest(
      * Values: PlusCreatedAt,MinusCreatedAt,PlusName,MinusName,PlusSize,MinusSize
      */
     @Serializable
-    enum class Sort(val value: kotlin.String) {
+    enum class Sort(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "+createdAt")
         PlusCreatedAt("+createdAt"),
 

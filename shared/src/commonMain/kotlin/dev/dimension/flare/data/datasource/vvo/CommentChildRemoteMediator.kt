@@ -12,14 +12,15 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
-internal class DiscoverStatusRemoteMediator(
+internal class CommentChildRemoteMediator(
     private val service: VVOService,
-    private val database: CacheDatabase,
+    private val commentKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
+    private val database: CacheDatabase,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+    private var maxId: Long? = null
     private var page = 0
-    private val containerId = "102803"
 
     override suspend fun load(
         loadType: LoadType,
@@ -36,43 +37,45 @@ internal class DiscoverStatusRemoteMediator(
                 when (loadType) {
                     LoadType.REFRESH -> {
                         page = 0
-                        service.getContainerIndex(containerId = containerId).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        service
+                            .getHotFlowChild(
+                                cid = commentKey.id,
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
-
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(
                             endOfPaginationReached = true,
                         )
                     }
+
                     LoadType.APPEND -> {
                         page++
-                        service.getContainerIndex(containerId = containerId, sinceId = page.toString())
+                        service.getHotFlowChild(
+                            cid = commentKey.id,
+                            maxId = maxId,
+                        )
                     }
                 }
 
+            maxId = response.maxID?.takeIf { it != 0L }
             val status =
-                response.data
-                    ?.cards
-                    ?.mapNotNull { it.mblog }
-                    .orEmpty()
-
-            VVO.saveStatus(
-                database = database,
+                response.data.orEmpty()
+            VVO.saveComment(
                 accountKey = accountKey,
                 pagingKey = pagingKey,
-                statuses = status,
+                database = database,
+                statuses = response.data.orEmpty(),
                 sortIdProvider = {
                     val index = status.indexOf(it)
                     -(index + page * state.config.pageSize).toLong()
                 },
             )
-
             MediatorResult.Success(
-                endOfPaginationReached = status.isEmpty(),
+                endOfPaginationReached = maxId == null,
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)

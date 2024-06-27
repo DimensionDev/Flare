@@ -35,7 +35,9 @@ internal data class AdminAbuseReportResolverCreateRequest(
      * Values: _1hour,_12hours,_1day,_1week,_1month,_3months,_6months,_1year,Indefinitely
      */
     @Serializable
-    enum class ExpiresAt(val value: kotlin.String) {
+    enum class ExpiresAt(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "1hour")
         _1hour("1hour"),
 

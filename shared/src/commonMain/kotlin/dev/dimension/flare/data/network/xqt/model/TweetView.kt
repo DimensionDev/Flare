@@ -37,7 +37,9 @@ internal data class TweetView(
      * Values: enabledWithCount
      */
     @Serializable
-    enum class State(val value: kotlin.String) {
+    enum class State(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "EnabledWithCount")
         enabledWithCount("EnabledWithCount"),
     }

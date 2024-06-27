@@ -59,7 +59,9 @@ internal data class IUpdateRequest(
      * Values: Null,Ach,Ady,Af,AfMinusNA,AfMinusZA,Ak,Ar,ArMinusAR,ArMinusMA,ArMinusSA,AyMinusBO,Az,AzMinusAZ,BeMinusBY,Bg,BgMinusBG,Bn,BnMinusIN,BnMinusBD,Br,BsMinusBA,Ca,CaMinusES,Cak,CkMinusUS,Cs,CsMinusCZ,Cy,CyMinusGB,Da,DaMinusDK,De,DeMinusAT,DeMinusDE,DeMinusCH,Dsb,El,ElMinusGR,En,EnMinusGB,EnMinusAU,EnMinusCA,EnMinusIE,EnMinusIN,EnMinusPI,EnMinusSG,EnMinusUD,EnMinusUS,EnMinusZA,EnAtPirate,Eo,EoMinusEO,Es,EsMinusAR,EsMinus419,EsMinusCL,EsMinusCO,EsMinusEC,EsMinusES,EsMinusLA,EsMinusNI,EsMinusMX,EsMinusUS,EsMinusVE,Et,EtMinusEE,Eu,EuMinusES,Fa,FaMinusIR,FbMinusLT,Ff,Fi,FiMinusFI,Fo,FoMinusFO,Fr,FrMinusCA,FrMinusFR,FrMinusBE,FrMinusCH,FyMinusNL,Ga,GaMinusIE,Gd,Gl,GlMinusES,GnMinusPY,GuMinusIN,Gv,GxMinusGR,He,HeMinusIL,Hi,HiMinusIN,Hr,HrMinusHR,Hsb,Ht,Hu,HuMinusHU,Hy,HyMinusAM,Id,IdMinusID,Is,IsMinusIS,It,ItMinusIT,Ja,JaMinusJP,JvMinusID,KaMinusGE,KkMinusKZ,Km,Kl,KmMinusKH,Kab,Kn,KnMinusIN,Ko,KoMinusKR,KuMinusTR,Kw,La,LaMinusVA,Lb,LiMinusNL,Lt,LtMinusLT,Lv,LvMinusLV,Mai,MgMinusMG,Mk,MkMinusMK,Ml,MlMinusIN,MnMinusMN,Mr,MrMinusIN,Ms,MsMinusMY,Mt,MtMinusMT,My,No,Nb,NbMinusNO,Ne,NeMinusNP,Nl,NlMinusBE,NlMinusNL,NnMinusNO,Oc,OrMinusIN,Pa,PaMinusIN,Pl,PlMinusPL,PsMinusAF,Pt,PtMinusBR,PtMinusPT,QuMinusPE,RmMinusCH,Ro,RoMinusRO,Ru,RuMinusRU,SaMinusIN,SeMinusNO,Sh,SiMinusLK,Sk,SkMinusSK,Sl,SlMinusSI,SoMinusSO,Sq,SqMinusAL,Sr,SrMinusRS,Su,Sv,SvMinusSE,Sw,SwMinusKE,Ta,TaMinusIN,Te,TeMinusIN,Tg,TgMinusTJ,Th,ThMinusTH,Fil,Tlh,Tr,TrMinusTR,TtMinusRU,Uk,UkMinusUA,Ur,UrMinusPK,Uz,UzMinusUZ,Vi,ViMinusVN,XhMinusZA,Yi,YiMinusDE,Zh,ZhMinusHans,ZhMinusHant,ZhMinusCN,ZhMinusHK,ZhMinusSG,ZhMinusTW,ZuMinusZA
      */
     @Serializable
-    enum class Lang(val value: kotlin.String) {
+    enum class Lang(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "null")
         Null("null"),
 
@@ -732,7 +734,9 @@ internal data class IUpdateRequest(
      * Values: Public,Followers,Private
      */
     @Serializable
-    enum class FfVisibility(val value: kotlin.String) {
+    enum class FfVisibility(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "public")
         Public("public"),
 
@@ -748,7 +752,9 @@ internal data class IUpdateRequest(
      * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App
      */
     @Serializable
-    enum class MutingNotificationTypes(val value: kotlin.String) {
+    enum class MutingNotificationTypes(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "follow")
         Follow("follow"),
 

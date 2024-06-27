@@ -40,7 +40,9 @@ internal data class AntennasUpdateRequest(
      * Values: Home,All,Users,List
      */
     @Serializable
-    enum class Src(val value: kotlin.String) {
+    enum class Src(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "home")
         Home("home"),
 

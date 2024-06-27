@@ -28,5 +28,6 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra =
                 is UiStatus.XQTNotification -> ""
                 is UiStatus.VVO -> status.contentToken.toMarkdown()
                 is UiStatus.VVONotification -> ""
+                is UiStatus.VVOComment -> status.contentToken.toMarkdown()
             },
     )

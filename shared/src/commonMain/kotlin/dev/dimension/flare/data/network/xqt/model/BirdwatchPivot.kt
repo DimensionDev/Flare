@@ -56,7 +56,9 @@ internal data class BirdwatchPivot(
      * Values: birdwatchV1Icon
      */
     @Serializable
-    enum class IconType(val value: kotlin.String) {
+    enum class IconType(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "BirdwatchV1Icon")
         birdwatchV1Icon("BirdwatchV1Icon"),
     }
@@ -67,7 +69,9 @@ internal data class BirdwatchPivot(
      * Values: default
      */
     @Serializable
-    enum class VisualStyle(val value: kotlin.String) {
+    enum class VisualStyle(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "Default")
         default("Default"),
     }

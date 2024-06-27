@@ -36,14 +36,14 @@ sealed interface StatusContent {
 
     @Serializable
     @SerialName("bluesky")
-    data class Bluesky(
+    data class Bluesky internal constructor(
         val data: PostView,
         val reason: FeedViewPostReasonUnion?,
     ) : StatusContent
 
     @Serializable
     @SerialName("bluesky-notification")
-    data class BlueskyNotification(
+    data class BlueskyNotification internal constructor(
         val data: app.bsky.notification.ListNotificationsNotification,
     ) : StatusContent
 
@@ -57,6 +57,12 @@ sealed interface StatusContent {
     @SerialName("vvo")
     data class VVO internal constructor(
         internal val data: dev.dimension.flare.data.network.vvo.model.Status,
+    ) : StatusContent
+
+    @Serializable
+    @SerialName("vvo-comment")
+    data class VVOComment internal constructor(
+        internal val data: dev.dimension.flare.data.network.vvo.model.Comment,
     ) : StatusContent
 }
 

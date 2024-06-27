@@ -30,7 +30,9 @@ internal data class IClaimAchievementRequest(
      * Values: Notes1,Notes10,Notes100,Notes500,Notes1000,Notes5000,Notes10000,Notes20000,Notes30000,Notes40000,Notes50000,Notes60000,Notes70000,Notes80000,Notes90000,Notes100000,Login3,Login7,Login15,Login30,Login60,Login100,Login200,Login300,Login400,Login500,Login600,Login700,Login800,Login900,Login1000,PassedSinceAccountCreated1,PassedSinceAccountCreated2,PassedSinceAccountCreated3,LoggedInOnBirthday,LoggedInOnNewYearsDay,NoteClipped1,NoteFavorited1,MyNoteFavorited1,ProfileFilled,MarkedAsCat,Following1,Following10,Following50,Following100,Following300,Followers1,Followers10,Followers50,Followers100,Followers300,Followers500,Followers1000,CollectAchievements30,ViewAchievements3min,ILoveMisskey,FoundTreasure,Client30min,Client60min,NoteDeletedWithin1min,PostedAtLateNight,PostedAt0min0sec,SelfQuote,Htl20npm,ViewInstanceChart,OutputHelloWorldOnScratchpad,Open3windows,DriveFolderCircularReference,ReactWithoutRead,ClickedClickHere,JustPlainLucky,SetNameToSyuilo,CookieClicked,BrainDiver
      */
     @Serializable
-    enum class Name(val value: kotlin.String) {
+    enum class Name(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "notes1")
         Notes1("notes1"),
 

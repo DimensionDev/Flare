@@ -65,7 +65,9 @@ internal data class Media(
      * Values: photo,video,animatedGif
      */
     @Serializable
-    enum class Type(val value: kotlin.String) {
+    enum class Type(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "photo")
         photo("photo"),
 

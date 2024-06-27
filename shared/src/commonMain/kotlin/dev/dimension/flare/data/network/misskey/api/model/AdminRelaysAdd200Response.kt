@@ -32,7 +32,9 @@ internal data class AdminRelaysAdd200Response(
      * Values: Requesting,Accepted,Rejected
      */
     @Serializable
-    enum class Status(val value: kotlin.String) {
+    enum class Status(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "requesting")
         Requesting("requesting"),
 

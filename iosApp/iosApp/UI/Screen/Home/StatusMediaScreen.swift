@@ -25,8 +25,8 @@ struct StatusMediaScreen: View {
                         ScrollViewReader { reader in
                             ScrollView(.horizontal) {
                                 LazyHStack(spacing: 0) {
-                                    ForEach(0..<success.data.medias_.count, id: \.self) { index in
-                                        let item = success.data.medias_[index]
+                                    ForEach(0..<success.data.medias.count, id: \.self) { index in
+                                        let item = success.data.medias[index]
                                         FullScreenImageViewer(media: item)
                                             .frame(width: geometry.size.width)
                                     }

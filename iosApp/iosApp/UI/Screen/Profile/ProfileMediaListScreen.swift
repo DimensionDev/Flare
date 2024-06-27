@@ -27,7 +27,7 @@ struct ProfileMediaListScreen: View {
                                     .aspectRatio(1, contentMode: .fill)
                                     .clipped()
                                     .onTapGesture {
-                                        let index = item.status.medias_.firstIndex { it in
+                                        let index = item.status.medias.firstIndex { it in
                                             it === media
                                         } ?? 0
                                         statusEvent.onMediaClick(statusKey: item.status.statusKey, index: index, preview: nil)

@@ -34,7 +34,9 @@ internal data class CtaClientEventInfo(
      * Values: primaryCta
      */
     @Serializable
-    enum class Action(val value: kotlin.String) {
+    enum class Action(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "primary_cta")
         primaryCta("primary_cta"),
     }

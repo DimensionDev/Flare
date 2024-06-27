@@ -35,7 +35,9 @@ internal data class IWebhooksUpdateRequest(
      * Values: Mention,Unfollow,Follow,Followed,Note,Reply,Renote,Reaction
      */
     @Serializable
-    enum class On(val value: kotlin.String) {
+    enum class On(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "mention")
         Mention("mention"),
 

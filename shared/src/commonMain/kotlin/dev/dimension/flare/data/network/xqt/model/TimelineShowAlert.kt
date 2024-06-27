@@ -59,7 +59,9 @@ internal data class TimelineShowAlert(
      * Values: newTweets
      */
     @Serializable
-    enum class AlertType(val value: kotlin.String) {
+    enum class AlertType(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "NewTweets")
         newTweets("NewTweets"),
     }
@@ -70,7 +72,9 @@ internal data class TimelineShowAlert(
      * Values: top
      */
     @Serializable
-    enum class DisplayLocation(val value: kotlin.String) {
+    enum class DisplayLocation(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "Top")
         top("Top"),
     }

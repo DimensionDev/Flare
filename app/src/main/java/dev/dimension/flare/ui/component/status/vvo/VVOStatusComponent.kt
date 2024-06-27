@@ -37,7 +37,6 @@ import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.contentDirection
 import dev.dimension.flare.ui.model.localizedFullTime
 import dev.dimension.flare.ui.model.localizedShortTime
-import dev.dimension.flare.ui.model.medias
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -270,12 +269,19 @@ internal interface VVOStatusEvent {
         uriHandler: UriHandler,
     )
 
+    fun onCommentClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    )
+
     fun onReblogClick(
         data: UiStatus.VVO,
         uriHandler: UriHandler,
     )
 
     fun onLikeClick(data: UiStatus.VVO)
+
+    fun onLikeClick(data: UiStatus.VVOComment)
 
     fun onDeleteClick(
         data: UiStatus.VVO,
@@ -287,8 +293,23 @@ internal interface VVOStatusEvent {
         uriHandler: UriHandler,
     )
 
+    fun onDeleteClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    )
+
+    fun onReportClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    )
+
     fun onStatusClick(
         data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    )
+
+    fun onCommentItemClick(
+        data: UiStatus.VVOComment,
         uriHandler: UriHandler,
     )
 }

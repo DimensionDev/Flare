@@ -37,7 +37,9 @@ internal data class ExtMediaAvailability(
      * Values: available,unavailable
      */
     @Serializable
-    enum class Status(val value: kotlin.String) {
+    enum class Status(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "Available")
         available("Available"),
 

@@ -74,7 +74,9 @@ internal data class Session(
      * Values: notStarted
      */
     @Serializable
-    enum class SuperFollowsApplicationStatus(val value: kotlin.String) {
+    enum class SuperFollowsApplicationStatus(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "NotStarted")
         notStarted("NotStarted"),
     }

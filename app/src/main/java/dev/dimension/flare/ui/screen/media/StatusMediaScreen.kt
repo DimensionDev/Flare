@@ -76,7 +76,6 @@ import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.map
-import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke

@@ -39,4 +39,5 @@ fun AvatarComponent(
 
 object AvatarComponentDefaults {
     val size = 44.dp
+    val compatSize = 20.dp
 }

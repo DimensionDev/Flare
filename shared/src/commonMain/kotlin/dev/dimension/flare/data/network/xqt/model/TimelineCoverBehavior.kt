@@ -34,7 +34,9 @@ internal data class TimelineCoverBehavior(
      * Values: timelineCoverBehaviorDismiss
      */
     @Serializable
-    enum class Type(val value: kotlin.String) {
+    enum class Type(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "TimelineCoverBehaviorDismiss")
         timelineCoverBehaviorDismiss("TimelineCoverBehaviorDismiss"),
     }

@@ -64,21 +64,7 @@ class ComposePresenter(
                 accountState
                     .flatMap { current ->
                         replyState?.map {
-                            current to
-                                listOf(
-                                    when (it) {
-                                        is UiStatus.Mastodon -> PlatformType.Mastodon
-                                        is UiStatus.Misskey -> PlatformType.Misskey
-                                        is UiStatus.XQT -> PlatformType.xQt
-                                        is UiStatus.Bluesky -> PlatformType.Bluesky
-                                        is UiStatus.BlueskyNotification -> PlatformType.Bluesky
-                                        is UiStatus.MastodonNotification -> PlatformType.Mastodon
-                                        is UiStatus.MisskeyNotification -> PlatformType.Misskey
-                                        is UiStatus.XQTNotification -> PlatformType.xQt
-                                        is UiStatus.VVO -> PlatformType.VVo
-                                        is UiStatus.VVONotification -> PlatformType.VVo
-                                    },
-                                )
+                            current to listOf(it.platformType)
                         } ?: UiState.Success(current to PlatformType.entries.toList())
                     }.map { (current, platforms) ->
                         data
@@ -312,9 +298,14 @@ sealed interface ComposeStatus {
         override val statusKey: MicroBlogKey,
     ) : ComposeStatus
 
-    data class Reply(
+    open class Reply(
         override val statusKey: MicroBlogKey,
     ) : ComposeStatus
+
+    data class VVOComment(
+        override val statusKey: MicroBlogKey,
+        val rootId: String,
+    ) : Reply(statusKey)
 }
 
 @Immutable

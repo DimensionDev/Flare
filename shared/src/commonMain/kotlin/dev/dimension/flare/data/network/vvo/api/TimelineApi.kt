@@ -4,6 +4,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
+import dev.dimension.flare.data.network.vvo.model.HotflowChildData
 import dev.dimension.flare.data.network.vvo.model.HotflowData
 import dev.dimension.flare.data.network.vvo.model.RepostTimeline
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -44,4 +45,11 @@ internal interface TimelineApi {
         @Query("id") id: String,
         @Query("page") page: Int,
     ): VVOResponse<RepostTimeline>
+
+    @GET("comments/hotFlowChild")
+    suspend fun getHotFlowChild(
+        @Query("cid") cid: String,
+        @Query("max_id") maxId: Long? = null,
+        @Query("max_id_type") maxIdType: Int = 0,
+    ): HotflowChildData
 }

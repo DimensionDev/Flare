@@ -49,7 +49,9 @@ import com.ramcosta.composedestinations.generated.destinations.ReplyRouteDestina
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.VVOCommentRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.VVOStatusRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.VVoReplyCommentRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.repository.AccountRepository
@@ -66,6 +68,7 @@ import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.misskey.MisskeyNotificationComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusComponent
 import dev.dimension.flare.ui.component.status.misskey.MisskeyStatusEvent
+import dev.dimension.flare.ui.component.status.vvo.VVOCommentComponent
 import dev.dimension.flare.ui.component.status.vvo.VVONotificationComponent
 import dev.dimension.flare.ui.component.status.vvo.VVOStatusComponent
 import dev.dimension.flare.ui.component.status.vvo.VVOStatusEvent
@@ -91,12 +94,20 @@ internal fun <T : UiStatus> status(
 ) {
     onSuccess { lazyPagingItems ->
         if (lazyPagingItems.itemCount > 0) {
-            if (lazyPagingItems.loadState.refresh is LoadState.Error) {
-                item(
-                    span = StaggeredGridItemSpan.FullLine,
-                ) {
-                    LoginExpiredError()
-                }
+            when (val refresh = lazyPagingItems.loadState.refresh) {
+                is LoadState.Error ->
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
+                        when (refresh.error) {
+                            is LoginExpiredException -> {
+                                LoginExpiredError()
+                            }
+
+                            else -> Unit
+                        }
+                    }
+                else -> Unit
             }
             with(lazyPagingItems) {
                 items(
@@ -469,6 +480,14 @@ internal fun StatusItem(
                 event = event,
                 modifier = modifier.padding(horizontal = horizontalPadding),
                 showStatus = showVVOStatus,
+            )
+        }
+
+        is UiStatus.VVOComment -> {
+            VVOCommentComponent(
+                data = item,
+                event = event,
+                modifier = modifier.padding(horizontal = horizontalPadding),
             )
         }
     }
@@ -916,6 +935,61 @@ internal class DefaultStatusEvent(
             ).deeplink(),
         )
     }
+
+    override fun onLikeClick(data: UiStatus.VVOComment) {
+        scope.launch {
+            val account =
+                accountRepository.get(data.accountKey) as? UiAccount.VVo ?: return@launch
+            account.dataSource.like(data)
+        }
+    }
+
+    override fun onReportClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) {
+        // TODO
+    }
+
+    override fun onDeleteClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            DeleteStatusConfirmRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                statusKey = data.statusKey,
+            ).deeplink(),
+        )
+    }
+
+    override fun onCommentClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) {
+        val rootId = data.rootId
+        if (rootId != null) {
+            uriHandler.openUri(
+                VVoReplyCommentRouteDestination(
+                    accountType = AccountType.Specific(data.accountKey),
+                    replyTo = data.statusKey,
+                    rootId = rootId,
+                ).deeplink(),
+            )
+        }
+    }
+
+    override fun onCommentItemClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            VVOCommentRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                commentKey = data.statusKey,
+            ).deeplink(),
+        )
+    }
 }
 
 internal data object EmptyStatusEvent : StatusEvent {
@@ -953,6 +1027,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onCommentClick(
         data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onCommentClick(
+        data: UiStatus.VVOComment,
         uriHandler: UriHandler,
     ) = Unit
 
@@ -1038,6 +1117,8 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onLikeClick(data: UiStatus.VVO) = Unit
 
+    override fun onLikeClick(data: UiStatus.VVOComment) = Unit
+
     override fun onReportClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -1053,6 +1134,11 @@ internal data object EmptyStatusEvent : StatusEvent {
         uriHandler: UriHandler,
     ) = Unit
 
+    override fun onReportClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) = Unit
+
     override fun onDeleteClick(
         data: UiStatus.Bluesky,
         uriHandler: UriHandler,
@@ -1065,6 +1151,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onDeleteClick(
         data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onDeleteClick(
+        data: UiStatus.VVOComment,
         uriHandler: UriHandler,
     ) = Unit
 
@@ -1086,6 +1177,11 @@ internal data object EmptyStatusEvent : StatusEvent {
     override fun onRawMediaClick(
         url: String,
         preview: String?,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onCommentItemClick(
+        data: UiStatus.VVOComment,
         uriHandler: UriHandler,
     ) = Unit
 }

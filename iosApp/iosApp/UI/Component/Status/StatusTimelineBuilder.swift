@@ -127,6 +127,7 @@ struct StatusItemView: View {
         case .xQTNotification(let xqtNotification): EmptyView() // TODO: xqt notification
         case .vVO(let vvo): EmptyView() // TODO: vvo
         case .vVONotification(let vvoNotification): EmptyView() // TODO: vvo
+        case .vVOComment(let vvoComment): EmptyView() // TODO: vvo
         }
     }
 }

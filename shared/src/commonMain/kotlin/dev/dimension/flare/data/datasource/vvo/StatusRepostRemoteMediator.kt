@@ -12,14 +12,14 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
-internal class DiscoverStatusRemoteMediator(
+internal class StatusRepostRemoteMediator(
     private val service: VVOService,
-    private val database: CacheDatabase,
+    private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
+    private val database: CacheDatabase,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
-    private var page = 0
-    private val containerId = "102803"
+    private var page = 1
 
     override suspend fun load(
         loadType: LoadType,
@@ -35,29 +35,35 @@ internal class DiscoverStatusRemoteMediator(
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        page = 0
-                        service.getContainerIndex(containerId = containerId).also {
-                            database.transaction {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                        page = 1
+                        service
+                            .getRepostTimeline(
+                                id = statusKey.id,
+                                page = page,
+                            ).also {
+                                database.transaction {
+                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                }
                             }
-                        }
                     }
-
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(
                             endOfPaginationReached = true,
                         )
                     }
+
                     LoadType.APPEND -> {
                         page++
-                        service.getContainerIndex(containerId = containerId, sinceId = page.toString())
+                        service.getRepostTimeline(
+                            id = statusKey.id,
+                            page = page,
+                        )
                     }
                 }
 
             val status =
                 response.data
-                    ?.cards
-                    ?.mapNotNull { it.mblog }
+                    ?.data
                     .orEmpty()
 
             VVO.saveStatus(

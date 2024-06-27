@@ -141,10 +141,14 @@ internal class XQTHeaderPlugin(
                 )
                 if (chocolate != null) {
                     val guestToken =
-                        chocolate.split("; ").firstOrNull { it.startsWith("gt=") }
+                        chocolate
+                            .split("; ")
+                            .firstOrNull { it.startsWith("gt=") }
                             ?.removePrefix("gt=")
                     val csrfToken =
-                        chocolate.split("; ").firstOrNull { it.startsWith("ct0=") }
+                        chocolate
+                            .split("; ")
+                            .firstOrNull { it.startsWith("ct0=") }
                             ?.removePrefix("ct0=")
                     if (guestToken != null && csrfToken != null) {
                         append("x-guest-token", guestToken)

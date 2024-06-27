@@ -34,7 +34,9 @@ internal data class HashtagsListRequest(
      * Values: PlusMentionedUsers,MinusMentionedUsers,PlusMentionedLocalUsers,MinusMentionedLocalUsers,PlusMentionedRemoteUsers,MinusMentionedRemoteUsers,PlusAttachedUsers,MinusAttachedUsers,PlusAttachedLocalUsers,MinusAttachedLocalUsers,PlusAttachedRemoteUsers,MinusAttachedRemoteUsers
      */
     @Serializable
-    enum class Sort(val value: kotlin.String) {
+    enum class Sort(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "+mentionedUsers")
         PlusMentionedUsers("+mentionedUsers"),
 

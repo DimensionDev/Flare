@@ -40,7 +40,9 @@ internal data class NoteTweetResultRichTextTag(
      * Values: bold,italic
      */
     @Serializable
-    enum class RichtextTypes(val value: kotlin.String) {
+    enum class RichtextTypes(
+        val value: kotlin.String,
+    ) {
         @SerialName(value = "Bold")
         bold("Bold"),
 

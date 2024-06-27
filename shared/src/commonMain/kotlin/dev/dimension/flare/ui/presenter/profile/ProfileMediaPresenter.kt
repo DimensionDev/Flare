@@ -13,7 +13,6 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
-import dev.dimension.flare.ui.model.medias
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.map
 

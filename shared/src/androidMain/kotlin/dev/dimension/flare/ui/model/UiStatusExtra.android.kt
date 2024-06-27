@@ -197,4 +197,11 @@ internal actual fun createStatusExtra(status: UiStatus): UiStatusExtra =
                 createdAt = status.createdAt,
             )
         }
+
+        is UiStatus.VVOComment -> {
+            UiStatusExtra(
+                contentDirection = LayoutDirection.Ltr,
+                createdAt = status.createdAt,
+            )
+        }
     }

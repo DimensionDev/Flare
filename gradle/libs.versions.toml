@@ -158,7 +158,7 @@ okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 uuid = { group = "com.benasher44", name = "uuid", version.ref = "uuid" }
 
 napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
-kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.8.0" }
+kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.9.0" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }

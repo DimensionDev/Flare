@@ -54,7 +54,7 @@ internal val misskeyParser by lazy {
 }
 
 internal val blueskyParser by lazy {
-    TwitterParser(enableDotInUserName = true)
+    TwitterParser(validMarkInUserName = listOf('.'))
 }
 
 internal val twitterParser by lazy {

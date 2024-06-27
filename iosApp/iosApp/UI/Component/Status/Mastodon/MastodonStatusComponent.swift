@@ -23,7 +23,7 @@ struct MastodonStatusComponent: View {
                 content: actual.extra.contentMarkdown,
                 contentWarning: actual.contentWarningText,
                 user: actual.user,
-                medias: actual.media,
+                medias: actual.medias,
                 timestamp: actual.createdAt.epochSeconds,
                 headerTrailing: {
                     MastodonVisibilityIcon(visibility: actual.visibility)

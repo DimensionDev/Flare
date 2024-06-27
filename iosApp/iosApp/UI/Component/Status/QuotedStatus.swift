@@ -13,7 +13,7 @@ struct QuotedStatus: View {
             QuotedContent(
                 content: mastodon.extra.contentMarkdown,
                 user: mastodon.user,
-                medias: mastodon.media,
+                medias: mastodon.medias,
                 timestamp: mastodon.createdAt.epochSeconds,
                 onMediaClick: onMediaClick,
                 onUserClick: {
@@ -29,7 +29,7 @@ struct QuotedStatus: View {
             QuotedContent(
                 content: misskey.extra.contentMarkdown,
                 user: misskey.user,
-                medias: misskey.media,
+                medias: misskey.medias,
                 timestamp: misskey.createdAt.epochSeconds,
                 onMediaClick: onMediaClick,
                 onUserClick: {
@@ -77,7 +77,7 @@ struct QuotedStatus: View {
             QuotedContent(
                 content: vvo.extra.contentMarkdown,
                 user: vvo.displayUser,
-                medias: vvo.media,
+                medias: vvo.medias,
                 timestamp: vvo.createdAt.epochSeconds,
                 onMediaClick: onMediaClick,
                 onUserClick: {
@@ -91,6 +91,23 @@ struct QuotedStatus: View {
                 sensitive: false
             )
         case .vVONotification(let vvoNotification): EmptyView()
+        case .vVOComment(let vvo):
+            QuotedContent(
+                content: vvo.extra.contentMarkdown,
+                user: vvo.displayUser,
+                medias: vvo.medias,
+                timestamp: vvo.createdAt.epochSeconds,
+                onMediaClick: onMediaClick,
+                onUserClick: {
+                    if let user = vvo.rawUser {
+                        onUserClick(user)
+                    }
+                },
+                onStatusClick: {
+                    onStatusClick(vvo)
+                },
+                sensitive: false
+            )
         }
     }
 }

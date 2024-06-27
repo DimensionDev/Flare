@@ -307,4 +307,9 @@ internal interface VVOStatusEvent {
         data: UiStatus.VVO,
         uriHandler: UriHandler,
     )
+
+    fun onCommentItemClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    )
 }

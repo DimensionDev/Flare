@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component.status.vvo
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,7 +57,11 @@ internal fun VVOCommentComponent(
 ) {
     val uriHandler = LocalUriHandler.current
     Column(
-        modifier = modifier,
+        modifier =
+            modifier
+                .clickable {
+                    event.onCommentItemClick(data, uriHandler)
+                },
     ) {
         data.displayUser?.let {
             StatusHeaderComponent(

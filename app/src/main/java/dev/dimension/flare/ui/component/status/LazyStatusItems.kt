@@ -49,6 +49,7 @@ import com.ramcosta.composedestinations.generated.destinations.ReplyRouteDestina
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.VVOCommentRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.VVOStatusRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.VVoReplyCommentRouteDestination
 import dev.dimension.flare.R
@@ -977,6 +978,18 @@ internal class DefaultStatusEvent(
             )
         }
     }
+
+    override fun onCommentItemClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) {
+        uriHandler.openUri(
+            VVOCommentRouteDestination(
+                accountType = AccountType.Specific(data.accountKey),
+                commentKey = data.statusKey,
+            ).deeplink(),
+        )
+    }
 }
 
 internal data object EmptyStatusEvent : StatusEvent {
@@ -1164,6 +1177,11 @@ internal data object EmptyStatusEvent : StatusEvent {
     override fun onRawMediaClick(
         url: String,
         preview: String?,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onCommentItemClick(
+        data: UiStatus.VVOComment,
         uriHandler: UriHandler,
     ) = Unit
 }

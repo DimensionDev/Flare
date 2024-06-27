@@ -288,6 +288,36 @@ class VVODataSource(
         )
     }
 
+    fun comment(statusKey: MicroBlogKey): CacheData<UiStatus> {
+        val pagingKey = "comment_only_$statusKey"
+        return Cacheable(
+            fetchSource = {
+                val item =
+                    service
+                        .getHotFlowChild(statusKey.id)
+                        .rootComment
+                        ?.firstOrNull()
+                if (item != null) {
+                    VVO.saveComment(
+                        accountKey = account.accountKey,
+                        pagingKey = pagingKey,
+                        database = database,
+                        statuses = listOf(item),
+                    )
+                } else {
+                    throw Exception("status not found")
+                }
+            },
+            cacheSource = {
+                database.dbStatusQueries
+                    .get(statusKey, account.accountKey)
+                    .asFlow()
+                    .mapToOneNotNull(Dispatchers.IO)
+                    .mapNotNull { it.content.toUi(account.accountKey) }
+            },
+        )
+    }
+
     private suspend fun uploadMedia(
         fileItem: FileItem,
         st: String,
@@ -547,6 +577,29 @@ class VVODataSource(
                     service = service,
                     accountKey = account.accountKey,
                     statusKey = statusKey,
+                    pagingKey = pagingKey,
+                    database = database,
+                ),
+        )
+    }
+
+    fun commentChild(
+        commentKey: MicroBlogKey,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiStatus>> {
+        val pagingKey = "comment_child_$commentKey"
+        return timelinePager(
+            pageSize = 20,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                CommentChildRemoteMediator(
+                    service = service,
+                    accountKey = account.accountKey,
+                    commentKey = commentKey,
                     pagingKey = pagingKey,
                     database = database,
                 ),

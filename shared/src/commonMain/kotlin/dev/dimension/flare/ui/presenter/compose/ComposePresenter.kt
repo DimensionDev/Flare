@@ -298,9 +298,14 @@ sealed interface ComposeStatus {
         override val statusKey: MicroBlogKey,
     ) : ComposeStatus
 
-    data class Reply(
+    open class Reply(
         override val statusKey: MicroBlogKey,
     ) : ComposeStatus
+
+    data class VVOComment(
+        override val statusKey: MicroBlogKey,
+        val rootId: String,
+    ) : Reply(statusKey)
 }
 
 @Immutable

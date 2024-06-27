@@ -50,6 +50,7 @@ import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRout
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.VVOStatusRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.VVoReplyCommentRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.repository.AccountRepository
@@ -960,6 +961,22 @@ internal class DefaultStatusEvent(
             ).deeplink(),
         )
     }
+
+    override fun onCommentClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    ) {
+        val rootId = data.rootId
+        if (rootId != null) {
+            uriHandler.openUri(
+                VVoReplyCommentRouteDestination(
+                    accountType = AccountType.Specific(data.accountKey),
+                    replyTo = data.statusKey,
+                    rootId = rootId,
+                ).deeplink(),
+            )
+        }
+    }
 }
 
 internal data object EmptyStatusEvent : StatusEvent {
@@ -997,6 +1014,11 @@ internal data object EmptyStatusEvent : StatusEvent {
 
     override fun onCommentClick(
         data: UiStatus.VVO,
+        uriHandler: UriHandler,
+    ) = Unit
+
+    override fun onCommentClick(
+        data: UiStatus.VVOComment,
         uriHandler: UriHandler,
     ) = Unit
 

@@ -154,6 +154,31 @@ fun ShortcutComposeRoute(
 
 @Destination<RootGraph>(
     style = DestinationStyle.Dialog::class,
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+    ],
+    wrappers = [ThemeWrapper::class],
+)
+@Composable
+fun VVoReplyCommentRoute(
+    navigator: DestinationsNavigator,
+    accountType: AccountType,
+    replyTo: MicroBlogKey,
+    rootId: String,
+) {
+    ComposeScreen(
+        onBack = {
+            navigator.navigateUp()
+        },
+        accountType = accountType,
+        status = ComposeStatus.VVOComment(replyTo, rootId),
+    )
+}
+
+@Destination<RootGraph>(
+    style = DestinationStyle.Dialog::class,
     wrappers = [ThemeWrapper::class],
 )
 @Composable
@@ -1223,6 +1248,7 @@ private fun composePresenter(
                                 content = textFieldState.text.toString(),
                                 repostId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 commentId = (status as? ComposeStatus.Reply)?.statusKey?.id,
+                                replyId = (status as? ComposeStatus.VVOComment)?.rootId,
                             )
 
                         UiAccount.Guest -> throw IllegalStateException("Guest account cannot compose")

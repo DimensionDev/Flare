@@ -125,7 +125,20 @@ internal fun UiStatusQuoted(
                 colors = colors,
             )
         is UiStatus.VVONotification -> Unit
-        is UiStatus.VVOComment -> Unit
+        is UiStatus.VVOComment ->
+            QuotedStatus(
+                user = status.displayUser,
+                contentElement = status.contentToken,
+                contentLayoutDirection = status.contentDirection,
+                medias = status.medias,
+                createdAt = status.localizedShortTime,
+                onMediaClick = onMediaClick,
+                modifier = modifier,
+                onClick = onClick,
+                sensitive = false,
+                showMedia = showMedia,
+                colors = colors,
+            )
     }
 }
 

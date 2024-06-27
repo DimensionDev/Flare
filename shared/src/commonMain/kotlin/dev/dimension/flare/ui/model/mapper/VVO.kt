@@ -148,6 +148,7 @@ internal fun Comment.toUi(accountKey: MicroBlogKey): UiStatus.VVOComment =
                 },
             ).toImmutableList(),
         status = status?.toUi(accountKey),
+        rootId = rootidstr,
     )
 
 internal fun Attitude.toUi(accountKey: MicroBlogKey): UiStatus.VVONotification =

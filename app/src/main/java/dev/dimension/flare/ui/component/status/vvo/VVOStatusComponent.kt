@@ -269,6 +269,11 @@ internal interface VVOStatusEvent {
         uriHandler: UriHandler,
     )
 
+    fun onCommentClick(
+        data: UiStatus.VVOComment,
+        uriHandler: UriHandler,
+    )
+
     fun onReblogClick(
         data: UiStatus.VVO,
         uriHandler: UriHandler,

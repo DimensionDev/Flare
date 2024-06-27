@@ -743,6 +743,7 @@ sealed class UiStatus {
         val createdAt: Instant,
         val source: String?,
         val status: VVO?,
+        val rootId: String?,
     ) : UiStatus() {
         override val itemType: String = "vvo_comment"
 

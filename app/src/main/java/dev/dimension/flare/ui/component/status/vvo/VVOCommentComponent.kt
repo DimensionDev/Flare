@@ -153,7 +153,7 @@ internal fun VVOCommentComponent(
                         Modifier
                             .weight(1f),
                     onClicked = {
-//                            event.onCommentClick(data, uriHandler)
+                        event.onCommentClick(data, uriHandler)
                     },
                 )
                 StatusActionButton(

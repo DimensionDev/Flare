@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -10,7 +11,9 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -32,15 +35,37 @@ fun FlareTheme(
     content: @Composable () -> Unit,
 ) {
     val seed = Color(LocalAppearanceSettings.current.colorSeed)
+    val amoledOptimized = LocalAppearanceSettings.current.amoledOptimized
     val colorScheme =
         when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
                 val context = LocalContext.current
-                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+                remember(
+                    darkTheme,
+                    amoledOptimized,
+                ) {
+                    if (darkTheme) {
+                        dynamicDarkColorScheme(context)
+                            .let {
+                                if (amoledOptimized) {
+                                    it.copy(
+                                        background = Color.Black,
+                                        surface = Color.Black,
+                                        onBackground = Color.White,
+                                        onSurface = Color.White,
+                                    )
+                                } else {
+                                    it
+                                }
+                            }
+                    } else {
+                        dynamicLightColorScheme(context)
+                    }
+                }
             }
 
-            darkTheme -> rememberDynamicColorScheme(seed, true)
-            else -> rememberDynamicColorScheme(seed, false)
+            darkTheme -> rememberDynamicColorScheme(seed, isDark = true, isAmoled = amoledOptimized)
+            else -> rememberDynamicColorScheme(seed, isDark = false, isAmoled = amoledOptimized)
         }
     val view = LocalView.current
     if (!view.isInEditMode && view.context is Activity) {
@@ -65,3 +90,6 @@ fun FlareTheme(
 private fun isDarkTheme(): Boolean =
     LocalAppearanceSettings.current.theme == Theme.DARK ||
         (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
+
+@Composable
+fun ColorScheme.isLight() = this.background.luminance() > 0.5

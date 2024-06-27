@@ -271,6 +271,8 @@
     <string name="settings_appearance_compat_link_previews_description">Show link previews in simplify mode in the status</string>
     <string name="settings_appearance_theme_color">Theme color</string>
     <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
+    <string name="settings_appearance_amoled_optimization">AMOLED optimization</string>
+    <string name="settings_appearance_amoled_optimization_description">Optimize the app for AMOLED displays</string>
 
     <string name="settings_appearance_mastodon_show_visibility">Show visibility</string>
     <string name="settings_appearance_mastodon_show_visibility_description">Show visibility in the status</string>

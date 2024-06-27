@@ -257,6 +257,34 @@ private fun AppearanceScreen(
                         },
                     )
                 }
+                AnimatedVisibility(
+                    visible = appearanceSettings.theme == Theme.DARK || appearanceSettings.theme == Theme.SYSTEM,
+                ) {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_amoled_optimization))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_amoled_optimization_description))
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = appearanceSettings.amoledOptimized,
+                                onCheckedChange = {
+                                    state.updateSettings {
+                                        copy(amoledOptimized = it)
+                                    }
+                                },
+                            )
+                        },
+                        modifier =
+                            Modifier.clickable {
+                                state.updateSettings {
+                                    copy(amoledOptimized = !amoledOptimized)
+                                }
+                            },
+                    )
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     ListItem(
                         headlineContent = {

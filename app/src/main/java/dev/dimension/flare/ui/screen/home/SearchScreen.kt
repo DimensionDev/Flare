@@ -57,9 +57,9 @@ import org.koin.compose.koinInject
 )
 @Composable
 internal fun AnimatedVisibilityScope.SearchDeepLink(
+    accountKey: MicroBlogKey,
     keyword: String,
     navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey,
     drawerState: DrawerState,
     tabState: TabState,
     sharedTransitionScope: SharedTransitionScope,

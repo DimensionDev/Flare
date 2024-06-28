@@ -75,6 +75,7 @@ internal data class Card(
 internal data class CardGroup(
     val desc: String? = null,
     val user: User? = null,
+    val mblog: Status? = null,
 )
 
 @Serializable

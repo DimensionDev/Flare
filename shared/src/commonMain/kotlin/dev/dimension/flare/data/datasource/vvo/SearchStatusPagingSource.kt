@@ -69,7 +69,7 @@ internal class SearchStatusRemoteMediator(
             val status =
                 response.data
                     ?.cards
-                    ?.mapNotNull { it.mblog }
+                    ?.flatMap { listOfNotNull(it.mblog) + it.cardGroup?.mapNotNull { it.mblog }.orEmpty() }
                     .orEmpty()
 
             VVO.saveStatus(

@@ -103,6 +103,7 @@
   <string name="status_empty">Niets te zien hier</string>
   <string name="status_sensitive_media">Gevoelige media</string>
   <string name="show_media">Media tonen</string>
+  <string name="login_expired_message">Klik om opnieuw in te loggen</string>
   <string name="service_select_welcome_title">Welkom bij Flare</string>
   <string name="service_select_welcome_message">Verlaging is een sociale netwerkclient voor Android.\nSelecteer een service om verbinding te maken met Android.</string>
   <string name="mastodon_login_title">Inloggen op Mastodon</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">Toon linkvoorbeelden in de eenvoudigere modus in de status</string>
   <string name="settings_appearance_theme_color">Thema kleur</string>
   <string name="settings_appearance_theme_color_description">Verander de themakleur van de app</string>
+  <string name="settings_appearance_theme_pure_color">Pure kleur</string>
+  <string name="settings_appearance_theme_pure_color_description">Gebruik pure witte of zwarte kleur in plaats van de thema kleur als achtergrondkleur</string>
   <string name="settings_appearance_mastodon_show_visibility">Zichtbaarheid weergeven</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Zichtbaarheid in status weergeven</string>
   <string name="settings_appearance_misskey_show_visibility">Zichtbaarheid weergeven</string>

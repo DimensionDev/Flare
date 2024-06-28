@@ -5,10 +5,8 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
@@ -21,12 +19,6 @@ import com.materialkolor.rememberDynamicColorScheme
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
 
-private val DarkColorScheme =
-    darkColorScheme()
-
-private val LightColorScheme =
-    lightColorScheme()
-
 @Composable
 fun FlareTheme(
     darkTheme: Boolean = isDarkTheme(),
@@ -35,19 +27,19 @@ fun FlareTheme(
     content: @Composable () -> Unit,
 ) {
     val seed = Color(LocalAppearanceSettings.current.colorSeed)
-    val amoledOptimized = LocalAppearanceSettings.current.amoledOptimized
+    val pureColorMode = LocalAppearanceSettings.current.pureColorMode
     val colorScheme =
         when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
                 val context = LocalContext.current
                 remember(
                     darkTheme,
-                    amoledOptimized,
+                    pureColorMode,
                 ) {
                     if (darkTheme) {
                         dynamicDarkColorScheme(context)
                             .let {
-                                if (amoledOptimized) {
+                                if (pureColorMode) {
                                     it.copy(
                                         background = Color.Black,
                                         surface = Color.Black,
@@ -60,12 +52,24 @@ fun FlareTheme(
                             }
                     } else {
                         dynamicLightColorScheme(context)
+                            .let {
+                                if (pureColorMode) {
+                                    it.copy(
+                                        background = Color.White,
+                                        surface = Color.White,
+                                        onBackground = Color.Black,
+                                        onSurface = Color.Black,
+                                    )
+                                } else {
+                                    it
+                                }
+                            }
                     }
                 }
             }
 
-            darkTheme -> rememberDynamicColorScheme(seed, isDark = true, isAmoled = amoledOptimized)
-            else -> rememberDynamicColorScheme(seed, isDark = false, isAmoled = amoledOptimized)
+            darkTheme -> rememberDynamicColorScheme(seed, isDark = true, isAmoled = pureColorMode)
+            else -> rememberDynamicColorScheme(seed, isDark = false, isAmoled = pureColorMode)
         }
     val view = LocalView.current
     if (!view.isInEditMode && view.context is Activity) {

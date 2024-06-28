@@ -68,6 +68,7 @@ fun VideoPlayer(
     contentScale: ContentScale = ContentScale.Crop,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    autoPlay: Boolean = true,
     playerPool: VideoPlayerPool = koinInject(),
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)? = null,
     loadingPlaceholder: @Composable BoxScope.() -> Unit = {
@@ -119,7 +120,9 @@ fun VideoPlayer(
                     playerPool
                         .get(uri)
                         .apply {
-                            play()
+                            if (autoPlay) {
+                                play()
+                            }
                             volume = if (muted) 0f else 1f
                         }
                 val parser = context.resources.getXml(R.xml.video_view)
@@ -146,11 +149,9 @@ fun VideoPlayer(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
-//                    if (aspectRatio == null) {
                     if (contentScale == ContentScale.Crop) {
                         this.resizeMode = RESIZE_MODE_ZOOM
                     }
-//                    }
                     this.keepScreenOn = keepScreenOn
                     if (onClick != null) {
                         setOnClickListener {
@@ -218,7 +219,7 @@ class CacheDataSourceFactory(
     }
 }
 
-@UnstableApi
+@OptIn(UnstableApi::class)
 object VideoCache {
     private var cache: SimpleCache? = null
 
@@ -236,7 +237,7 @@ object VideoCache {
     }
 }
 
-@UnstableApi
+@OptIn(UnstableApi::class)
 class VideoPlayerPool(
     private val context: Context,
     private val factory: ProgressiveMediaSource.Factory,
@@ -286,6 +287,8 @@ class VideoPlayerPool(
                 }
             }
         }
+
+    fun peek(uri: String): ExoPlayer? = pool.get(uri)
 
     fun get(uri: String): ExoPlayer {
         lock(uri)

@@ -103,6 +103,7 @@
   <string name="status_empty">Nada que ver aquí</string>
   <string name="status_sensitive_media">Medios sensitivos</string>
   <string name="show_media">Mostrar medios</string>
+  <string name="login_expired_message">Haga clic para volver a iniciar sesión</string>
   <string name="service_select_welcome_title">Bienvenido a Bengala</string>
   <string name="service_select_welcome_message">Flare es un cliente de red social para Android.\nPara empezar, seleccione un servicio para conectarse.</string>
   <string name="mastodon_login_title">Iniciar sesión en Mastodon</string>
@@ -223,6 +224,8 @@
   <string name="settings_appearance_compat_link_previews_description">Mostrar previsualizaciones de enlaces en modo simplificado en el estado</string>
   <string name="settings_appearance_theme_color">Color del tema</string>
   <string name="settings_appearance_theme_color_description">Cambiar el color del tema de la aplicación</string>
+  <string name="settings_appearance_theme_pure_color">Color puro</string>
+  <string name="settings_appearance_theme_pure_color_description">Usa el color blanco puro o negro en lugar del color temático como color de fondo</string>
   <string name="settings_appearance_mastodon_show_visibility">Mostrar visibilidad</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Mostrar visibilidad en el estado</string>
   <string name="settings_appearance_misskey_show_visibility">Mostrar visibilidad</string>

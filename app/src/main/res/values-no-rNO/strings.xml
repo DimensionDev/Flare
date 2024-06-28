@@ -103,6 +103,7 @@
   <string name="status_empty">Ingenting å se her</string>
   <string name="status_sensitive_media">Sensitive medier</string>
   <string name="show_media">Vis media</string>
+  <string name="login_expired_message">Trykk for å logge inn igjen</string>
   <string name="service_select_welcome_title">Velkommen til oppsprett</string>
   <string name="service_select_welcome_message">Oppblussing er en sosial nettverksklient for Android.\nFor å komme i gang, velg en tjeneste du vil koble til.</string>
   <string name="mastodon_login_title">Logg inn på Mastodon</string>
@@ -223,6 +224,8 @@
   <string name="settings_appearance_compat_link_previews_description">Vis forhåndsvisninger av link i forenklingsmodus i status</string>
   <string name="settings_appearance_theme_color">Tema farge</string>
   <string name="settings_appearance_theme_color_description">Endre temafargen på appen</string>
+  <string name="settings_appearance_theme_pure_color">Ren farge</string>
+  <string name="settings_appearance_theme_pure_color_description">Bruk ren hvit eller svart farge i stedet for temafargen som bakgrunnsfarge</string>
   <string name="settings_appearance_mastodon_show_visibility">Vis synlighet</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Vis synlighet i status</string>
   <string name="settings_appearance_misskey_show_visibility">Vis synlighet</string>

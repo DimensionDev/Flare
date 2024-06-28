@@ -103,6 +103,7 @@
   <string name="status_empty">Intet at se her</string>
   <string name="status_sensitive_media">Følsomme medier</string>
   <string name="show_media">Vis medier</string>
+  <string name="login_expired_message">Klik for at logge ind igen</string>
   <string name="service_select_welcome_title">Velkommen til Flare</string>
   <string name="service_select_welcome_message">Flare er en social netværk klient til Android.\nFor at komme i gang, skal du vælge en tjeneste at oprette forbindelse til.</string>
   <string name="mastodon_login_title">Log ind på Mastodon</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">Vis link forhåndsvisninger i forenklet tilstand i status</string>
   <string name="settings_appearance_theme_color">Tema farve</string>
   <string name="settings_appearance_theme_color_description">Skift temafarven på app\'en</string>
+  <string name="settings_appearance_theme_pure_color">Ren farve</string>
+  <string name="settings_appearance_theme_pure_color_description">Brug ren hvid eller sort farve i stedet for den tema farve som baggrundsfarve</string>
   <string name="settings_appearance_mastodon_show_visibility">Vis synlighed</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Vis synlighed i status</string>
   <string name="settings_appearance_misskey_show_visibility">Vis synlighed</string>

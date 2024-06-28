@@ -103,6 +103,7 @@
   <string name="status_empty">Ei mitään nähtävää tässä</string>
   <string name="status_sensitive_media">Herkkä media</string>
   <string name="show_media">Näytä media</string>
+  <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
   <string name="service_select_welcome_title">Tervetuloa Flareen</string>
   <string name="service_select_welcome_message">Flare on sosiaalisen verkon asiakas Androidille.\nPäästäksesi alkuun, valitse palvelu, johon haluat yhteyden.</string>
   <string name="mastodon_login_title">Kirjaudu sisään Mastodoniin</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">Näytä linkkien esikatselut yksinkertaisuuden tilassa tilassa</string>
   <string name="settings_appearance_theme_color">Teeman väri</string>
   <string name="settings_appearance_theme_color_description">Muuta sovelluksen teeman väriä</string>
+  <string name="settings_appearance_theme_pure_color">Todellinen väri</string>
+  <string name="settings_appearance_theme_pure_color_description">Käytä puhdasta valkoista tai mustaa väriä teeman sijaan taustaväri</string>
   <string name="settings_appearance_mastodon_show_visibility">Näytä näkyvyys</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Näytä näkyvyys tilassa</string>
   <string name="settings_appearance_misskey_show_visibility">Näytä näkyvyys</string>

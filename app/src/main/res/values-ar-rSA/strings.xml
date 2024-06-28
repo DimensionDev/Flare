@@ -102,6 +102,7 @@
   <string name="status_empty">لا شيء لرؤيته هنا</string>
   <string name="status_sensitive_media">الوسائط الحساسة</string>
   <string name="show_media">إظهار الوسائط</string>
+  <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
   <string name="service_select_welcome_title">مرحبا بكم في Felle</string>
   <string name="mastodon_login_title">تسجيل الدخول إلى ماستدون</string>
   <string name="mastodon_login_message">الرجاء إدخال عنوان URL الخاص بك أدناه.</string>
@@ -222,6 +223,8 @@
   <string name="settings_appearance_compat_link_previews_description">إظهار معاينات الرابط في وضع التبسيط في الحالة</string>
   <string name="settings_appearance_theme_color">لون السمة</string>
   <string name="settings_appearance_theme_color_description">تغيير لون السمة للتطبيق</string>
+  <string name="settings_appearance_theme_pure_color">لون خالص</string>
+  <string name="settings_appearance_theme_pure_color_description">استخدام اللون الأبيض أو الأسود النقي بدلاً من لون الموضوع كلون الخلفية</string>
   <string name="settings_appearance_mastodon_show_visibility">إظهار الرؤية</string>
   <string name="settings_appearance_mastodon_show_visibility_description">إظهار الرؤية في الحالة</string>
   <string name="settings_appearance_misskey_show_visibility">إظهار الرؤية</string>

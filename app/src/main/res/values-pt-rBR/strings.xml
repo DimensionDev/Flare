@@ -103,6 +103,7 @@
   <string name="status_empty">Nada para ver aqui</string>
   <string name="status_sensitive_media">Mídia sensível</string>
   <string name="show_media">Mostrar mídia</string>
+  <string name="login_expired_message">Clique para entrar novamente</string>
   <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
   <string name="service_select_welcome_message">Sinalizador é um cliente de rede social para Android.\nPara começar, por favor, selecione um serviço para se conectar.</string>
   <string name="mastodon_login_title">Login para o Mastodon</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">Mostrar pré-visualizações de links no modo de simplificação no status</string>
   <string name="settings_appearance_theme_color">Cor do tema</string>
   <string name="settings_appearance_theme_color_description">Alterar a cor do tema do aplicativo</string>
+  <string name="settings_appearance_theme_pure_color">Cor pura</string>
+  <string name="settings_appearance_theme_pure_color_description">Usar cor pura branca ou preta em vez da cor temática como cor de fundo</string>
   <string name="settings_appearance_mastodon_show_visibility">Mostrar visibilidade</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Mostrar visibilidade no estado</string>
   <string name="settings_appearance_misskey_show_visibility">Mostrar visibilidade</string>

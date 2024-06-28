@@ -103,6 +103,7 @@
   <string name="status_empty">Nichts zu sehen</string>
   <string name="status_sensitive_media">Sensitive Medien</string>
   <string name="show_media">Medien anzeigen</string>
+  <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
   <string name="service_select_welcome_title">Willkommen bei Leuchtturm</string>
   <string name="service_select_welcome_message">Flare ist ein Social-Network-Client für Android.\nUm loszulegen, wählen Sie bitte einen Dienst zum Verbinden aus.</string>
   <string name="mastodon_login_title">Bei Mastodon anmelden</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">Link-Vorschau im vereinfachten Modus im Status anzeigen</string>
   <string name="settings_appearance_theme_color">Theme-Farbe</string>
   <string name="settings_appearance_theme_color_description">Ändern Sie die Designfarbe der App</string>
+  <string name="settings_appearance_theme_pure_color">Reine Farbe</string>
+  <string name="settings_appearance_theme_pure_color_description">Verwende reine weiße oder schwarze Farbe anstelle der Farbe des Themes als Hintergrundfarbe</string>
   <string name="settings_appearance_mastodon_show_visibility">Sichtbarkeit anzeigen</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Sichtbarkeit im Status anzeigen</string>
   <string name="settings_appearance_misskey_show_visibility">Sichtbarkeit anzeigen</string>

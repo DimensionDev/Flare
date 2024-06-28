@@ -103,6 +103,7 @@
   <string name="status_empty">Rien à voir ici</string>
   <string name="status_sensitive_media">Média sensible</string>
   <string name="show_media">Afficher les médias</string>
+  <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>
   <string name="service_select_welcome_title">Bienvenue dans Flare</string>
   <string name="service_select_welcome_message">Fusée éclairante est un client de réseau social pour Android.\nPour commencer, veuillez sélectionner un service auquel vous connecter.</string>
   <string name="mastodon_login_title">Se connecter à Mastodon</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">Afficher les aperçus des liens en mode simplification dans le statut</string>
   <string name="settings_appearance_theme_color">Couleur du thème</string>
   <string name="settings_appearance_theme_color_description">Changer la couleur du thème de l\'application</string>
+  <string name="settings_appearance_theme_pure_color">Couleur pure</string>
+  <string name="settings_appearance_theme_pure_color_description">Utiliser une couleur blanche ou noire pure au lieu de la couleur de thème comme couleur de fond</string>
   <string name="settings_appearance_mastodon_show_visibility">Afficher la visibilité</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Afficher la visibilité dans le statut</string>
   <string name="settings_appearance_misskey_show_visibility">Afficher la visibilité</string>

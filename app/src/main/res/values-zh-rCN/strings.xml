@@ -103,6 +103,8 @@
   <string name="status_empty">这里什么都没有</string>
   <string name="status_sensitive_media">敏感内容</string>
   <string name="show_media">显示媒体内容</string>
+  <string name="login_expired">登录会话已过期</string>
+  <string name="login_expired_message">点击重新登录</string>
   <string name="service_select_welcome_title">欢迎使用 Flare</string>
   <string name="service_select_welcome_message">Flare 是一个 Android 平台社交客户端。\n请先选择一个服务来开始。</string>
   <string name="mastodon_login_title">登录到 Mastodon</string>
@@ -224,6 +226,8 @@
   <string name="settings_appearance_compat_link_previews_description">使用简化链接预览</string>
   <string name="settings_appearance_theme_color">主题颜色</string>
   <string name="settings_appearance_theme_color_description">更改应用的主题颜色</string>
+  <string name="settings_appearance_theme_pure_color">纯色模式</string>
+  <string name="settings_appearance_theme_pure_color_description">使用纯白色或纯黑色作为背景色</string>
   <string name="settings_appearance_mastodon_show_visibility">显示可见性</string>
   <string name="settings_appearance_mastodon_show_visibility_description">在状态中显示可见性</string>
   <string name="settings_appearance_misskey_show_visibility">显示可见性</string>

@@ -103,6 +103,7 @@
   <string name="status_empty">Nimic de văzut aici</string>
   <string name="status_sensitive_media">Media sensibilă</string>
   <string name="show_media">Arată media</string>
+  <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>
   <string name="service_select_welcome_title">Bun venit la Flare</string>
   <string name="service_select_welcome_message">Flare este un client de rețea socială pentru Android.\nPentru a începe, vă rugăm să selectați un serviciu la care să vă conectați.</string>
   <string name="mastodon_login_title">Autentificare în Mastodon</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">Arată previzualizările link-ului în modul de simplificare în stare</string>
   <string name="settings_appearance_theme_color">Culoarea temei</string>
   <string name="settings_appearance_theme_color_description">Schimbă culoarea aplicației pentru temă</string>
+  <string name="settings_appearance_theme_pure_color">Culoare pură</string>
+  <string name="settings_appearance_theme_pure_color_description">Folosește culoarea pur albă sau neagră în loc de culoarea tematică ca culoare de fundal</string>
   <string name="settings_appearance_mastodon_show_visibility">Arată vizibilitatea</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Arată vizibilitatea în stare</string>
   <string name="settings_appearance_misskey_show_visibility">Arată vizibilitatea</string>

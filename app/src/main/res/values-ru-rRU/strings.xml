@@ -103,6 +103,7 @@
   <string name="status_empty">Здесь нечего видеть</string>
   <string name="status_sensitive_media">Конфиденциальные медиа</string>
   <string name="show_media">Показать медиа</string>
+  <string name="login_expired_message">Нажмите, чтобы войти снова</string>
   <string name="service_select_welcome_title">Добро пожаловать в Сигнал</string>
   <string name="mastodon_login_title">Войти в Мастодон</string>
   <string name="mastodon_login_message">Пожалуйста, введите адрес экземпляра ниже.</string>
@@ -222,6 +223,8 @@
   <string name="settings_appearance_compat_link_previews_description">Показывать предпросмотр ссылок в упрощенном режиме в статусе</string>
   <string name="settings_appearance_theme_color">Цвет темы</string>
   <string name="settings_appearance_theme_color_description">Изменить цвет темы приложения</string>
+  <string name="settings_appearance_theme_pure_color">Чистый цвет</string>
+  <string name="settings_appearance_theme_pure_color_description">Использовать чистый белый или черный цвет вместо цвета темы в качестве цвета фона</string>
   <string name="settings_appearance_mastodon_show_visibility">Показать видимость</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Показать видимость в статусе</string>
   <string name="settings_appearance_misskey_show_visibility">Показать видимость</string>

@@ -103,6 +103,7 @@
   <string name="status_empty">ここに表示するものはありません</string>
   <string name="status_sensitive_media">敏感なメディア</string>
   <string name="show_media">メディアを表示</string>
+  <string name="login_expired_message">クリックして再度ログインする</string>
   <string name="service_select_welcome_title">フレアへようこそ</string>
   <string name="service_select_welcome_message">Flare は Android 用のソーシャルネットワーククライアントです。\n開始するには、接続するサービスを選択してください。</string>
   <string name="mastodon_login_title">Mastodonにログイン</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">シンプルモードでリンクのプレビューをステータスに表示する</string>
   <string name="settings_appearance_theme_color">テーマの色</string>
   <string name="settings_appearance_theme_color_description">アプリのテーマカラーを変更する</string>
+  <string name="settings_appearance_theme_pure_color">純粋な色</string>
+  <string name="settings_appearance_theme_pure_color_description">背景色にテーマカラーの代わりに純粋な白または黒の色を使用します</string>
   <string name="settings_appearance_mastodon_show_visibility">表示を表示</string>
   <string name="settings_appearance_mastodon_show_visibility_description">ステータスに表示を表示する</string>
   <string name="settings_appearance_misskey_show_visibility">表示を表示</string>

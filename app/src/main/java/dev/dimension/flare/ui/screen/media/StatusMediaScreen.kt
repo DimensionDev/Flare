@@ -475,6 +475,32 @@ private fun ImageItem(
             setLockPager(it > 0.01f)
         } ?: setLockPager(false)
     }
+    val aspectRatio =
+        remember(zoomableState.transformedContentBounds) {
+            zoomableState.transformedContentBounds.let {
+                it.height / it.width
+            }
+        }
+
+    val alignment =
+        remember(aspectRatio) {
+            val targetAspectRatio = 19.5 / 9
+            if (aspectRatio > targetAspectRatio) {
+                Alignment.TopCenter
+            } else {
+                Alignment.Center
+            }
+        }
+
+    val contentScale =
+        remember(aspectRatio) {
+            val targetAspectRatio = 19.5 / 9
+            if (aspectRatio > targetAspectRatio) {
+                ContentScale.FillWidth
+            } else {
+                ContentScale.Fit
+            }
+        }
 
     ZoomableAsyncImage(
         model =
@@ -487,6 +513,8 @@ private fun ImageItem(
         contentDescription = description,
         state = rememberZoomableImageState(zoomableState),
         modifier = modifier,
+        contentScale = contentScale,
+        alignment = alignment,
         onClick = {
             onClick.invoke()
         },

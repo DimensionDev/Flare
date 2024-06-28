@@ -4,9 +4,11 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 sealed interface UiMedia {
+    val url: String
+
     @Immutable
     data class Image(
-        val url: String,
+        override val url: String,
         val previewUrl: String,
         val description: String?,
         val height: Float,
@@ -19,7 +21,7 @@ sealed interface UiMedia {
 
     @Immutable
     data class Video(
-        val url: String,
+        override val url: String,
         val thumbnailUrl: String,
         val description: String?,
         val height: Float,
@@ -31,7 +33,7 @@ sealed interface UiMedia {
 
     @Immutable
     data class Gif(
-        val url: String,
+        override val url: String,
         val previewUrl: String,
         val description: String?,
         val height: Float,
@@ -43,7 +45,7 @@ sealed interface UiMedia {
 
     @Immutable
     data class Audio(
-        val url: String,
+        override val url: String,
         val description: String?,
         val previewUrl: String?,
     ) : UiMedia

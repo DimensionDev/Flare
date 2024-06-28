@@ -280,6 +280,8 @@ internal data class StatusPic(
     val size: String? = null,
     val geo: StatusPicGeo? = null,
     val large: Large? = null,
+    val type: String? = null,
+    val videoSrc: String? = null,
 )
 
 @Serializable

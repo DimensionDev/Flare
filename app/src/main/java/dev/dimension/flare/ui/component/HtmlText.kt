@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.ui.theme.isLight
 import moe.tlaster.ktml.dom.Comment
 import moe.tlaster.ktml.dom.Doctype
 import moe.tlaster.ktml.dom.Element
@@ -39,6 +40,8 @@ import moe.tlaster.ktml.dom.Node
 import moe.tlaster.ktml.dom.Text
 
 private const val ID_IMAGE = "image"
+private val lightLinkColor = Color(0xff0066cc)
+private val darkLinkColor = Color(0xff99c3ff)
 
 @Composable
 fun HtmlText(
@@ -58,7 +61,10 @@ fun HtmlText(
     overflow: TextOverflow = TextOverflow.Ellipsis,
     softWrap: Boolean = true,
     textStyle: TextStyle = LocalTextStyle.current,
-    linkStyle: TextStyle = textStyle.copy(MaterialTheme.colorScheme.primary),
+    linkStyle: TextStyle =
+        textStyle.copy(
+            color = if (MaterialTheme.colorScheme.isLight()) lightLinkColor else darkLinkColor,
+        ),
 ) {
     CompositionLocalProvider(
         LocalLayoutDirection provides layoutDirection,

@@ -163,14 +163,6 @@ internal fun HomeScreen(
                     currentWindowAdaptiveInfo(),
                 )
             val actualLayoutType = state.navigationState.type ?: layoutType
-            BackHandler(
-                enabled = drawerState.isOpen,
-                onBack = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                },
-            )
             FlareTheme {
                 ModalNavigationDrawer(
                     drawerState = drawerState,
@@ -491,6 +483,15 @@ internal fun HomeScreen(
                     }
                 }
             }
+
+            BackHandler(
+                enabled = drawerState.isOpen,
+                onBack = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                },
+            )
         }.onLoading {
             SplashScreen()
         }

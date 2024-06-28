@@ -72,6 +72,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.VideoPlayer
+import dev.dimension.flare.ui.component.VideoPlayerPool
 import dev.dimension.flare.ui.component.status.UiStatusQuoted
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
@@ -149,6 +150,7 @@ private fun StatusMediaScreen(
     index: Int,
     preview: String?,
     toStatus: () -> Unit,
+    playerPool: VideoPlayerPool = koinInject(),
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -191,11 +193,18 @@ private fun StatusMediaScreen(
                             }
                         },
                     )
-                state.medias.onSuccess {
+                state.medias.onSuccess { media ->
                     LaunchedEffect(pagerState.currentPage) {
-                        state.setWithVideoPadding(it[pagerState.currentPage] is UiMedia.Video)
+                        state.setWithVideoPadding(media[pagerState.currentPage] is UiMedia.Video)
+                        state.setCurrentPage(pagerState.currentPage)
                     }
-                    state.setCurrentPage(pagerState.currentPage)
+                    DisposableEffect(pagerState.currentPage) {
+                        val player = playerPool.peek(media[pagerState.currentPage].url)
+                        player?.play()
+                        onDispose {
+                            player?.pause()
+                        }
+                    }
                 }
                 HorizontalPager(
                     state = pagerState,
@@ -223,6 +232,7 @@ private fun StatusMediaScreen(
                                         uri = media.url,
                                         previewUri = null,
                                         contentDescription = media.description,
+                                        autoPlay = false,
                                         modifier =
                                             Modifier
                                                 .fillMaxSize(),
@@ -240,6 +250,7 @@ private fun StatusMediaScreen(
                                         uri = media.url,
                                         previewUri = media.previewUrl,
                                         contentDescription = media.description,
+                                        autoPlay = false,
                                         modifier =
                                             Modifier
 //                                                .sharedElement(
@@ -286,6 +297,7 @@ private fun StatusMediaScreen(
                                         uri = media.url,
                                         previewUri = media.thumbnailUrl,
                                         contentDescription = media.description,
+                                        autoPlay = false,
                                         modifier =
                                             Modifier
                                                 .fillMaxSize(),
@@ -463,6 +475,32 @@ private fun ImageItem(
             setLockPager(it > 0.01f)
         } ?: setLockPager(false)
     }
+    val aspectRatio =
+        remember(zoomableState.transformedContentBounds) {
+            zoomableState.transformedContentBounds.let {
+                it.height / it.width
+            }
+        }
+
+    val alignment =
+        remember(aspectRatio) {
+            val targetAspectRatio = 19.5 / 9
+            if (aspectRatio > targetAspectRatio) {
+                Alignment.TopCenter
+            } else {
+                Alignment.Center
+            }
+        }
+
+    val contentScale =
+        remember(aspectRatio) {
+            val targetAspectRatio = 19.5 / 9
+            if (aspectRatio > targetAspectRatio) {
+                ContentScale.FillWidth
+            } else {
+                ContentScale.Fit
+            }
+        }
 
     ZoomableAsyncImage(
         model =
@@ -475,6 +513,8 @@ private fun ImageItem(
         contentDescription = description,
         state = rememberZoomableImageState(zoomableState),
         modifier = modifier,
+        contentScale = contentScale,
+        alignment = alignment,
         onClick = {
             onClick.invoke()
         },

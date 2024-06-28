@@ -257,6 +257,30 @@ private fun AppearanceScreen(
                         },
                     )
                 }
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_theme_pure_color))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_theme_pure_color_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = appearanceSettings.pureColorMode,
+                            onCheckedChange = {
+                                state.updateSettings {
+                                    copy(pureColorMode = it)
+                                }
+                            },
+                        )
+                    },
+                    modifier =
+                        Modifier.clickable {
+                            state.updateSettings {
+                                copy(pureColorMode = !pureColorMode)
+                            }
+                        },
+                )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     ListItem(
                         headlineContent = {

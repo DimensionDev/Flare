@@ -21,14 +21,25 @@ internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
             if (url.isNullOrEmpty()) {
                 null
             } else {
-                UiMedia.Image(
-                    url = url,
-                    width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
-                    height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
-                    previewUrl = it.url ?: url,
-                    description = null,
-                    sensitive = false,
-                )
+                if (it.type == "video") {
+                    null
+//                    UiMedia.Video(
+//                        url = it.videoSrc,
+//                        thumbnailUrl = it.url ?: url,
+//                        width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
+//                        height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
+//                        description = null,
+//                    )
+                } else {
+                    UiMedia.Image(
+                        url = url,
+                        width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
+                        height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
+                        previewUrl = it.url ?: url,
+                        description = null,
+                        sensitive = false,
+                    )
+                }
             }
         } +
             listOfNotNull(

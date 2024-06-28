@@ -2,7 +2,6 @@ package dev.dimension.flare.common
 
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.encodeURLPathPart
-import io.ktor.http.encodeURLQueryComponent
 
 const val APPSCHEMA = "flare"
 
@@ -18,7 +17,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             keyword: String,
-        ) = "$APPSCHEMA://Search/$accountKey/${keyword.encodeURLQueryComponent()}"
+        ) = "$APPSCHEMA://Search/$accountKey/${keyword.encodeURLPathPart()}"
     }
 
     object Profile {

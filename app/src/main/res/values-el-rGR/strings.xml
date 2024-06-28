@@ -99,6 +99,7 @@
   <string name="status_empty">Τίποτα για να δείτε εδώ</string>
   <string name="status_sensitive_media">Ευαίσθητα μέσα</string>
   <string name="show_media">Εμφάνιση πολυμέσων</string>
+  <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>
   <string name="service_select_welcome_title">Καλώς ήλθατε στο Flare</string>
   <string name="service_select_welcome_message">Το Flare είναι ένας πελάτης κοινωνικής δικτύωσης για το Android.\nΓια να ξεκινήσετε, παρακαλώ επιλέξτε μια υπηρεσία με την οποία θα συνδεθείτε.</string>
   <string name="mastodon_login_title">Συνδεθείτε στο Mastodon</string>
@@ -220,6 +221,8 @@
   <string name="settings_appearance_compat_link_previews_description">Εμφάνιση προεπισκοπήσεων συνδέσμων σε λειτουργία απλοποίησης στην κατάσταση</string>
   <string name="settings_appearance_theme_color">Χρώμα θέματος</string>
   <string name="settings_appearance_theme_color_description">Αλλαγή του χρώματος του θέματος της εφαρμογής</string>
+  <string name="settings_appearance_theme_pure_color">Καθαρό χρώμα</string>
+  <string name="settings_appearance_theme_pure_color_description">Χρήση αμιγούς λευκού ή μαύρου χρώματος αντί του θέματος ως χρώματος φόντου</string>
   <string name="settings_appearance_mastodon_show_visibility">Εμφάνιση ορατότητας</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Εμφάνιση ορατότητας στην κατάσταση</string>
   <string name="settings_appearance_misskey_show_visibility">Εμφάνιση ορατότητας</string>

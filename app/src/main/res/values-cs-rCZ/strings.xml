@@ -103,6 +103,7 @@
   <string name="status_empty">Nic zde k zobrazení</string>
   <string name="status_sensitive_media">Citlivá média</string>
   <string name="show_media">Zobrazit média</string>
+  <string name="login_expired_message">Klikněte pro přihlášení znovu</string>
   <string name="service_select_welcome_title">Vítejte na Flare</string>
   <string name="service_select_welcome_message">Flare je sociální síťový klient pro Android.\nChcete-li začít, vyberte službu, ke které se chcete připojit.</string>
   <string name="mastodon_login_title">Přihlásit se do Mastodonu</string>
@@ -224,6 +225,8 @@
   <string name="settings_appearance_compat_link_previews_description">Zobrazit náhledy odkazů v režimu zjednodušení ve stavu</string>
   <string name="settings_appearance_theme_color">Barva motivu</string>
   <string name="settings_appearance_theme_color_description">Změnit barvu motivu aplikace</string>
+  <string name="settings_appearance_theme_pure_color">Barva čisté</string>
+  <string name="settings_appearance_theme_pure_color_description">Použít čistě bílou nebo černou barvu namísto barvy motivu jako barvu pozadí</string>
   <string name="settings_appearance_mastodon_show_visibility">Zobrazit viditelnost</string>
   <string name="settings_appearance_mastodon_show_visibility_description">Zobrazit viditelnost ve stavu</string>
   <string name="settings_appearance_misskey_show_visibility">Zobrazit viditelnost</string>

@@ -514,6 +514,7 @@ private fun ColumnScope.DrawerHeader(
         AccountItem(
             userState = accountTypeState.user,
             onClick = {},
+            toLogin = {},
         )
     }
     if (showFab) {

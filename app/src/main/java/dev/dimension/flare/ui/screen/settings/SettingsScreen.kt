@@ -204,6 +204,9 @@ internal fun SettingsScreen(
                         supportingContent = {
                             Text(text = stringResource(id = R.string.settings_accounts_title))
                         },
+                        toLogin = {
+                            toAccounts.invoke()
+                        },
                     )
                 }.onError {
                     ListItem(

@@ -120,6 +120,7 @@
     <string name="show_media">Show media</string>
     <string name="login_expired">Login session expired</string>
     <string name="login_expired_message">Click to login again</string>
+    <string name="login_expired_relogin">Login again</string>
 
     <string name="service_select_welcome_title">Welcome to Flare</string>
     <string name="service_select_welcome_message">Flare is a social network client for Android.\nTo get started, please select a service to connect to.</string>
@@ -349,4 +350,7 @@
 
     <string name="status_detail_comment">Comment</string>
     <string name="status_detail_repost">Repost</string>
+
+    <string name="account_item_error_title">Error</string>
+    <string name="account_item_error_message">Failed to load account</string>
 </resources>

@@ -101,6 +101,10 @@ fun <T : Any> UiState<T>.takeSuccess(): T? = (this as? UiState.Success)?.data
 
 fun <T : Any> UiState<T>.takeSuccessOr(value: T): T = (this as? UiState.Success)?.data ?: value
 
+val <T : Any> UiState<T>.isSuccess: Boolean get() = this is UiState.Success
+val <T : Any> UiState<T>.isError: Boolean get() = this is UiState.Error
+val <T : Any> UiState<T>.isLoading: Boolean get() = this is UiState.Loading
+
 @OptIn(ExperimentalObjCRefinement::class)
 @Composable
 @HiddenFromObjC

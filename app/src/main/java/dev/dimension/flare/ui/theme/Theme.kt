@@ -19,6 +19,47 @@ import com.materialkolor.rememberDynamicColorScheme
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
 
+private object MoreColors {
+    val Gray50 = Color(0xFFFAFAFA)
+    val Gray100 = Color(0xFFF5F5F5)
+    val Gray200 = Color(0xFFEEEEEE)
+    val Gray300 = Color(0xFFE0E0E0)
+    val Gray400 = Color(0xFFBDBDBD)
+    val Gray500 = Color(0xFF9E9E9E)
+    val Gray600 = Color(0xFF757575)
+    val Gray700 = Color(0xFF616161)
+    val Gray800 = Color(0xFF424242)
+    val Gray900 = Color(0xFF212121)
+}
+
+private fun ColorScheme.withPureColorLightMode(): ColorScheme =
+    copy(
+        background = Color.White,
+        surface = Color.White,
+        onBackground = Color.Black,
+        onSurface = Color.Black,
+        surfaceContainer = MoreColors.Gray200,
+        surfaceContainerLow = MoreColors.Gray100,
+        surfaceContainerHigh = MoreColors.Gray300,
+        surfaceContainerLowest = MoreColors.Gray50,
+        surfaceContainerHighest = MoreColors.Gray400,
+        onSurfaceVariant = MoreColors.Gray800,
+    )
+
+private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
+    copy(
+        background = Color.Black,
+        surface = Color.Black,
+        onBackground = Color.White,
+        onSurface = Color.White,
+        surfaceContainer = MoreColors.Gray900,
+        surfaceContainerLow = MoreColors.Gray900,
+        surfaceContainerHigh = MoreColors.Gray900,
+        surfaceContainerLowest = MoreColors.Gray900,
+        surfaceContainerHighest = MoreColors.Gray900,
+        onSurfaceVariant = MoreColors.Gray500,
+    )
+
 @Composable
 fun FlareTheme(
     darkTheme: Boolean = isDarkTheme(),
@@ -40,12 +81,7 @@ fun FlareTheme(
                         dynamicDarkColorScheme(context)
                             .let {
                                 if (pureColorMode) {
-                                    it.copy(
-                                        background = Color.Black,
-                                        surface = Color.Black,
-                                        onBackground = Color.White,
-                                        onSurface = Color.White,
-                                    )
+                                    it.withPureColorDarkMode()
                                 } else {
                                     it
                                 }
@@ -54,12 +90,7 @@ fun FlareTheme(
                         dynamicLightColorScheme(context)
                             .let {
                                 if (pureColorMode) {
-                                    it.copy(
-                                        background = Color.White,
-                                        surface = Color.White,
-                                        onBackground = Color.Black,
-                                        onSurface = Color.Black,
-                                    )
+                                    it.withPureColorLightMode()
                                 } else {
                                     it
                                 }
@@ -68,8 +99,33 @@ fun FlareTheme(
                 }
             }
 
-            darkTheme -> rememberDynamicColorScheme(seed, isDark = true, isAmoled = pureColorMode)
-            else -> rememberDynamicColorScheme(seed, isDark = false, isAmoled = pureColorMode)
+            darkTheme ->
+                rememberDynamicColorScheme(
+                    seed,
+                    isDark = true,
+                    isAmoled = pureColorMode,
+                    modifyColorScheme = {
+                        if (pureColorMode) {
+                            it.withPureColorDarkMode()
+                        } else {
+                            it
+                        }
+                    },
+                )
+
+            else ->
+                rememberDynamicColorScheme(
+                    seed,
+                    isDark = false,
+                    isAmoled = pureColorMode,
+                    modifyColorScheme = {
+                        if (pureColorMode) {
+                            it.withPureColorLightMode()
+                        } else {
+                            it
+                        }
+                    },
+                )
         }
     val view = LocalView.current
     if (!view.isInEditMode && view.context is Activity) {

@@ -32,11 +32,12 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
             accounts.map {
                 it
                     .map { account ->
-                        accountServiceProvider(accountType = AccountType.Specific(account.accountKey)).flatMap { service ->
-                            remember(account.accountKey) {
-                                service.userById(account.accountKey.id)
-                            }.collectAsState().toUi()
-                        }
+                        account.accountKey to
+                            accountServiceProvider(accountType = AccountType.Specific(account.accountKey)).flatMap { service ->
+                                remember(account.accountKey) {
+                                    service.userById(account.accountKey.id)
+                                }.collectAsState().toUi()
+                            }
                     }.toImmutableList()
                     .toImmutableListWrapper()
             }
@@ -57,7 +58,7 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
 
 @Immutable
 abstract class AccountsState(
-    val accounts: UiState<ImmutableListWrapper<UiState<UiUser>>>,
+    val accounts: UiState<ImmutableListWrapper<Pair<MicroBlogKey, UiState<UiUser>>>>,
     val activeAccount: UiState<UiAccount>,
 ) {
     abstract fun setActiveAccount(accountKey: MicroBlogKey)

@@ -212,7 +212,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                 state.allTabs.accountTabs.onSuccess {
                     it.forEach { (userState, tabState) ->
                         stickyHeader {
-                            AccountItem(userState = userState, onClick = {})
+                            AccountItem(userState = userState.second, onClick = {}, toLogin = {})
                         }
                         tabState.onSuccess {
                             items(it) { tab ->
@@ -579,7 +579,7 @@ private fun allTabsPresenter() =
             accountState.accounts.map {
                 it
                     .toImmutableList()
-                    .associateWith { userState ->
+                    .associateWith { (_, userState) ->
                         userState.map { user ->
                             TimelineTabItem.defaultPrimary(user) + TimelineTabItem.defaultSecondary(user)
                         }

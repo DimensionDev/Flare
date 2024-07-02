@@ -12,7 +12,7 @@ struct AccountsScreen: View {
                     if data.data.size > 0 {
                         ForEach(1...data.data.size, id: \.self) { index in
                             let item = data.data.get(index: index - 1)
-                            switch onEnum(of: item) {
+                            switch onEnum(of: item.second) {
                             case .success(let user):
                                 Button {
                                     state.setActiveAccount(accountKey: user.data.userKey)
@@ -55,6 +55,8 @@ struct AccountsScreen: View {
                                 Text("error")
                             case .loading:
                                 Text("loading")
+                            case .none:
+                                EmptyView()
                             }
                         }
                     } else {

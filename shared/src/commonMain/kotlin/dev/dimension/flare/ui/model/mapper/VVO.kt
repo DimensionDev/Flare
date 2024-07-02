@@ -16,7 +16,7 @@ import moe.tlaster.ktml.Ktml
 
 internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.VVO {
     val media =
-        pics.orEmpty().mapNotNull {
+        picsList.orEmpty().mapNotNull {
             val url = it.large?.url ?: it.url
             if (url.isNullOrEmpty()) {
                 null

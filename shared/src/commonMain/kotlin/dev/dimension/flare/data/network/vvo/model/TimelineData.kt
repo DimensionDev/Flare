@@ -18,6 +18,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.floatOrNull
@@ -147,13 +148,30 @@ internal data class Status(
     val canRemark: Boolean? = null,
     @SerialName("safe_tags")
     val safeTags: Long? = null,
-    val pics: List<StatusPic>? = null,
+    val pics: JsonElement? = null,
     val picStatus: String? = null,
     @SerialName("attitude_dynamic_members_message")
     val attitudeDynamicMembersMessage: AttitudeDynamicMembersMessage? = null,
     @SerialName("page_info")
     val pageInfo: StatusPageInfo? = null,
-)
+) {
+    val picsList: List<StatusPic>?
+        get() =
+            when (pics) {
+                is JsonArray -> {
+                    JSON.decodeFromJsonElement(pics)
+                }
+
+                is JsonObject -> {
+                    pics.values.map {
+                        JSON.decodeFromJsonElement(it)
+                    }
+                }
+                else -> {
+                    null
+                }
+            }
+}
 
 @Serializable
 internal data class AttitudeDynamicMembersMessage(

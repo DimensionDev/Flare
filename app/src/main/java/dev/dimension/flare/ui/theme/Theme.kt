@@ -38,11 +38,11 @@ private fun ColorScheme.withPureColorLightMode(): ColorScheme =
         surface = Color.White,
         onBackground = Color.Black,
         onSurface = Color.Black,
-        surfaceContainer = MoreColors.Gray200,
+        surfaceContainer = MoreColors.Gray100,
         surfaceContainerLow = MoreColors.Gray100,
-        surfaceContainerHigh = MoreColors.Gray300,
-        surfaceContainerLowest = MoreColors.Gray50,
-        surfaceContainerHighest = MoreColors.Gray400,
+        surfaceContainerHigh = MoreColors.Gray100,
+        surfaceContainerLowest = MoreColors.Gray100,
+        surfaceContainerHighest = MoreColors.Gray100,
         onSurfaceVariant = MoreColors.Gray800,
     )
 

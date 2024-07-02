@@ -57,7 +57,7 @@ private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
         surfaceContainerHigh = MoreColors.Gray900,
         surfaceContainerLowest = MoreColors.Gray900,
         surfaceContainerHighest = MoreColors.Gray900,
-        onSurfaceVariant = MoreColors.Gray500,
+        onSurfaceVariant = MoreColors.Gray400,
     )
 
 @Composable

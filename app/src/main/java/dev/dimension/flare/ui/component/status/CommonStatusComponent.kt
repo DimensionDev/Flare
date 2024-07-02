@@ -238,20 +238,7 @@ fun CommonStatusDetailComponent(
                 )
                 contentFooter.invoke(this)
                 Spacer(modifier = Modifier.height(4.dp))
-                CompositionLocalProvider(
-                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,
-                    LocalTextStyle provides MaterialTheme.typography.bodyMedium,
-                ) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        statusActions.invoke(this)
-                    }
-                }
+                StatusActions(statusActions)
             },
             beforeMedia = {
                 var enabledTranslate by rememberSaveable("translate-$statusKey") {
@@ -531,24 +518,32 @@ fun CommonStatusComponent(
 
             if (showActions) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    CompositionLocalProvider(
-                        LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,
-                        LocalTextStyle provides MaterialTheme.typography.bodySmall,
-                    ) {
-                        statusActions.invoke(this)
-                    }
-                }
+                StatusActions(statusActions)
                 Spacer(modifier = Modifier.height(4.dp))
             } else {
                 Spacer(modifier = Modifier.height(8.dp))
             }
+        }
+    }
+}
+
+@Composable
+private fun StatusActions(
+    statusActions: @Composable (RowScope.() -> Unit),
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        CompositionLocalProvider(
+            LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
+            LocalTextStyle provides MaterialTheme.typography.bodySmall,
+        ) {
+            statusActions.invoke(this)
         }
     }
 }

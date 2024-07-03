@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.EditTabDialogRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
@@ -94,12 +96,18 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 internal fun TabCustomizeRoute(navigator: ProxyDestinationsNavigator) {
     TabCustomizeScreen(
         onBack = navigator::navigateUp,
+        onEditTab = { key ->
+            navigator.navigate(EditTabDialogRouteDestination(key))
+        },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun TabCustomizeScreen(onBack: () -> Unit) {
+private fun TabCustomizeScreen(
+    onBack: () -> Unit,
+    onEditTab: (String) -> Unit,
+) {
     val haptics = LocalHapticFeedback.current
     val state by producePresenter { presenter() }
     DisposableEffect(Unit) {
@@ -150,11 +158,14 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                 when (item) {
                     is ActualTabItem -> {
                         tabItem(
-                            item,
-                            state::deleteTab,
-                            reorderableLazyColumnState,
-                            haptics,
-                            state.canSwipeToDelete,
+                            item = item,
+                            deleteTab = state::deleteTab,
+                            editTab = {
+                                onEditTab.invoke(it.key)
+                            },
+                            reorderableLazyColumnState = reorderableLazyColumnState,
+                            haptics = haptics,
+                            canSwipeToDelete = state.canSwipeToDelete,
                         )
                     }
                     PrimaryTabItemState -> {
@@ -245,6 +256,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
 private fun LazyListScope.tabItem(
     item: ActualTabItem,
     deleteTab: (ActualTabItem) -> Unit,
+    editTab: (ActualTabItem) -> Unit,
     reorderableLazyColumnState: ReorderableLazyListState,
     haptics: HapticFeedback,
     canSwipeToDelete: Boolean,
@@ -324,7 +336,9 @@ private fun LazyListScope.tabItem(
                             trailingContent = {
                                 Row {
                                     IconButton(
-                                        onClick = {},
+                                        onClick = {
+                                            editTab.invoke(item)
+                                        },
                                     ) {
                                         Icon(
                                             Icons.Default.Edit,
@@ -550,20 +564,24 @@ private fun presenter(
     }
 }
 
+@Immutable
 private sealed interface TabItemState {
     val key: String
 }
 
+@Immutable
 private data object PrimaryTabItemState : TabItemState {
     override val key: String
         get() = "primary"
 }
 
+@Immutable
 private data object SecondaryTabItemState : TabItemState {
     override val key: String
         get() = "secondary"
 }
 
+@Immutable
 private data class ActualTabItem(
     val tabItem: TabItem,
 ) : TabItemState {

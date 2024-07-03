@@ -40,7 +40,12 @@ fun <T : Any> Flow<T>.toUiState(): Flow<UiState<T>> =
 
 inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
     when (this) {
-        is UiState.Success -> UiState.Success(transform(data))
+        is UiState.Success ->
+            try {
+                UiState.Success(transform(data))
+            } catch (e: Throwable) {
+                UiState.Error(e)
+            }
         is UiState.Error -> UiState.Error(throwable)
         is UiState.Loading -> UiState.Loading()
     }

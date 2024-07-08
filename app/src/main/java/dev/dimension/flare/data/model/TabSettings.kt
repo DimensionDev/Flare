@@ -46,6 +46,8 @@ sealed interface TabItem {
     val metaData: TabMetaData
     val account: AccountType
     val key: String
+
+    fun update(metaData: TabMetaData = this.metaData): TabItem
 }
 
 @Serializable
@@ -122,6 +124,11 @@ sealed interface IconType {
             Bookmark,
             Heart, ;
 
+            //            Twitter,
+//            Mastodon,
+//            Misskey,
+//            Bluesky, ;
+
             fun toIcon(): ImageVector =
                 when (this) {
                     Home -> Icons.Default.Home
@@ -134,6 +141,10 @@ sealed interface IconType {
                     Featured -> Icons.AutoMirrored.Filled.FeaturedPlayList
                     Bookmark -> Icons.Default.Bookmarks
                     Heart -> Icons.Default.Favorite
+//                    Twitter -> FontAwesomeIcons.Brands.Twitter
+//                    Mastodon -> FontAwesomeIcons.Brands.Mastodon
+//                    Misskey -> FontAwesomeIcons.Brands.Misskey
+//                    Bluesky -> FontAwesomeIcons.Brands.Bluesky
                 }
         }
     }
@@ -151,6 +162,8 @@ data class NotificationTabItem(
     override val metaData: TabMetaData,
 ) : TabItem {
     override val key: String = "notification_$account"
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
 @Serializable
@@ -531,6 +544,8 @@ data class HomeTimelineTabItem(
     override val key: String = "home_$account"
 
     override fun createPresenter(): TimelinePresenter = HomeTimelinePresenter(account)
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
 object Mastodon {
@@ -544,6 +559,8 @@ object Mastodon {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
                 .LocalTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
     @Serializable
@@ -556,6 +573,8 @@ object Mastodon {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
                 .PublicTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
     @Serializable
@@ -568,6 +587,8 @@ object Mastodon {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
                 .BookmarkTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
     @Serializable
@@ -580,6 +601,8 @@ object Mastodon {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
                 .FavouriteTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 }
 
@@ -594,6 +617,8 @@ object Misskey {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.misskey
                 .LocalTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
     @Serializable
@@ -606,6 +631,8 @@ object Misskey {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.misskey
                 .PublicTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 }
 
@@ -620,6 +647,8 @@ object XQT {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.xqt
                 .FeaturedTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
     @Serializable
@@ -632,6 +661,8 @@ object XQT {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.xqt
                 .BookmarkTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 }
 
@@ -642,6 +673,8 @@ data class ProfileTabItem(
     override val metaData: TabMetaData,
 ) : TabItem {
     override val key: String = "profile_${account}_$userKey"
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
 @Serializable
@@ -650,6 +683,8 @@ data class DiscoverTabItem(
     override val metaData: TabMetaData,
 ) : TabItem {
     override val key: String = "discover_$account"
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
 @Serializable
@@ -664,6 +699,8 @@ data object SettingsTabItem : TabItem {
                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Settings),
                 icon = IconType.Material(IconType.Material.MaterialIcon.Settings),
             )
+
+    override fun update(metaData: TabMetaData): TabItem = this
 }
 
 @OptIn(ExperimentalSerializationApi::class)

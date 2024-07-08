@@ -58,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.EditTabDialogRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
@@ -96,24 +95,30 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 internal fun TabCustomizeRoute(navigator: ProxyDestinationsNavigator) {
     TabCustomizeScreen(
         onBack = navigator::navigateUp,
-        onEditTab = { key ->
-            navigator.navigate(EditTabDialogRouteDestination(key))
-        },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun TabCustomizeScreen(
-    onBack: () -> Unit,
-    onEditTab: (String) -> Unit,
-) {
+private fun TabCustomizeScreen(onBack: () -> Unit) {
     val haptics = LocalHapticFeedback.current
     val state by producePresenter { presenter() }
     DisposableEffect(Unit) {
         onDispose {
             state.commit()
         }
+    }
+    state.selectedEditTab?.let {
+        EditTabDialog(
+            tabItem = it,
+            onDismissRequest = {
+                state.setEditTab(null)
+            },
+            onConfirm = {
+                state.setEditTab(null)
+                state.updateTab(it)
+            },
+        )
     }
     FlareScaffold(
         topBar = {
@@ -161,7 +166,7 @@ private fun TabCustomizeScreen(
                             item = item,
                             deleteTab = state::deleteTab,
                             editTab = {
-                                onEditTab.invoke(it.key)
+                                state.setEditTab(it.tabItem)
                             },
                             reorderableLazyColumnState = reorderableLazyColumnState,
                             haptics = haptics,
@@ -489,7 +494,7 @@ private fun presenter(
             mutableStateListOf<TabItemState>()
         }
     var showAddTab by remember { mutableStateOf(false) }
-
+    var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
     tabSettings
         .onSuccess {
             LaunchedEffect(it.items.size) {
@@ -516,6 +521,7 @@ private fun presenter(
         val allTabs = allTabs
         val showAddTab = showAddTab
         val canSwipeToDelete = cacheTabs.filterIsInstance<ActualTabItem>().size > 1
+        val selectedEditTab = selectedEditTab
 
         fun moveTab(
             from: Any,
@@ -560,6 +566,15 @@ private fun presenter(
 
         fun addTab(tab: TabItem) {
             cacheTabs.add(ActualTabItem(tab))
+        }
+
+        fun setEditTab(tab: TabItem?) {
+            selectedEditTab = tab
+        }
+
+        fun updateTab(tab: TabItem) {
+            val index = cacheTabs.indexOfFirst { it.key == tab.key }
+            cacheTabs[index] = ActualTabItem(tab)
         }
     }
 }

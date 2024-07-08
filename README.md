@@ -27,6 +27,7 @@ Here're some features we're planning to implement in the future, you can check t
  - [ ] Mixed timeline
  - [ ] AI powered features
  - [x] Support for vvo platform
+ - [ ] Support for Meta Threads
  - [x] Anonymous mode, no need to login
  - [x] Customizable tabs
  - [x] Local filtering

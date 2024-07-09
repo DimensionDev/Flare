@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.settings
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
@@ -74,6 +75,28 @@ internal fun EditTabDialog(
                     headlineContent = {
                         Text(text = stringResource(id = R.string.edit_tab_icon))
                     },
+                    supportingContent =
+                        if (tabItem.account is AccountType.Specific) {
+                            {
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                state.setWithAvatar(!state.withAvatar)
+                                            },
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                ) {
+                                    Checkbox(
+                                        checked = state.withAvatar,
+                                        onCheckedChange = state::setWithAvatar,
+                                    )
+                                    Text(text = stringResource(id = R.string.edit_tab_with_avatar))
+                                }
+                            }
+                        } else {
+                            null
+                        },
                     trailingContent = {
                         IconButton(onClick = {
                             state.setShowIconPicker(true)
@@ -111,24 +134,6 @@ internal fun EditTabDialog(
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 )
-                if (tabItem.account is AccountType.Specific) {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.edit_tab_with_avatar))
-                        },
-                        trailingContent = {
-                            Checkbox(
-                                checked = state.withAvatar,
-                                onCheckedChange = state::setWithAvatar,
-                            )
-                        },
-                        modifier =
-                            Modifier.clickable {
-                                state.setWithAvatar(!state.withAvatar)
-                            },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    )
-                }
                 OutlinedTextField2(
                     state = state.text,
                     modifier = Modifier.fillMaxWidth(),

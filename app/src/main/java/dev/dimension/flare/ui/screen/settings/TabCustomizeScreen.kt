@@ -430,7 +430,9 @@ fun TabIcon(
                         is TitleType.Localized -> stringResource(id = title.resId)
                         is TitleType.Text -> title.content
                     },
-                modifier = modifier,
+                modifier =
+                    modifier
+                        .size(24.dp),
             )
         }
 
@@ -443,7 +445,9 @@ fun TabIcon(
                             is TitleType.Localized -> stringResource(id = title.resId)
                             is TitleType.Text -> title.content
                         },
-                    modifier = modifier,
+                    modifier =
+                        modifier
+                            .size(24.dp),
                 )
             } else {
                 val userState by producePresenter(key = "$accountType:${icon.userKey}") {

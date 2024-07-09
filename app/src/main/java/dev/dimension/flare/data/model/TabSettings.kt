@@ -17,9 +17,15 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStore
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Brands
+import compose.icons.fontawesomeicons.brands.Bluesky
+import compose.icons.fontawesomeicons.brands.Mastodon
+import compose.icons.fontawesomeicons.brands.Twitter
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
@@ -122,12 +128,11 @@ sealed interface IconType {
             World,
             Featured,
             Bookmark,
-            Heart, ;
-
-            //            Twitter,
-//            Mastodon,
-//            Misskey,
-//            Bluesky, ;
+            Heart,
+            Twitter,
+            Mastodon,
+            Misskey,
+            Bluesky, ;
 
             fun toIcon(): ImageVector =
                 when (this) {
@@ -141,10 +146,10 @@ sealed interface IconType {
                     Featured -> Icons.AutoMirrored.Filled.FeaturedPlayList
                     Bookmark -> Icons.Default.Bookmarks
                     Heart -> Icons.Default.Favorite
-//                    Twitter -> FontAwesomeIcons.Brands.Twitter
-//                    Mastodon -> FontAwesomeIcons.Brands.Mastodon
-//                    Misskey -> FontAwesomeIcons.Brands.Misskey
-//                    Bluesky -> FontAwesomeIcons.Brands.Bluesky
+                    Twitter -> FontAwesomeIcons.Brands.Twitter
+                    Mastodon -> FontAwesomeIcons.Brands.Mastodon
+                    Misskey -> FontAwesomeIcons.Brands.Misskey
+                    Bluesky -> FontAwesomeIcons.Brands.Bluesky
                 }
         }
     }

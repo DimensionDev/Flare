@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -107,6 +108,18 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
             state.commit()
         }
     }
+    state.selectedEditTab?.let {
+        EditTabDialog(
+            tabItem = it,
+            onDismissRequest = {
+                state.setEditTab(null)
+            },
+            onConfirm = {
+                state.setEditTab(null)
+                state.updateTab(it)
+            },
+        )
+    }
     FlareScaffold(
         topBar = {
             TopAppBar(
@@ -150,11 +163,14 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                 when (item) {
                     is ActualTabItem -> {
                         tabItem(
-                            item,
-                            state::deleteTab,
-                            reorderableLazyColumnState,
-                            haptics,
-                            state.canSwipeToDelete,
+                            item = item,
+                            deleteTab = state::deleteTab,
+                            editTab = {
+                                state.setEditTab(it.tabItem)
+                            },
+                            reorderableLazyColumnState = reorderableLazyColumnState,
+                            haptics = haptics,
+                            canSwipeToDelete = state.canSwipeToDelete,
                         )
                     }
                     PrimaryTabItemState -> {
@@ -245,6 +261,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
 private fun LazyListScope.tabItem(
     item: ActualTabItem,
     deleteTab: (ActualTabItem) -> Unit,
+    editTab: (ActualTabItem) -> Unit,
     reorderableLazyColumnState: ReorderableLazyListState,
     haptics: HapticFeedback,
     canSwipeToDelete: Boolean,
@@ -324,7 +341,9 @@ private fun LazyListScope.tabItem(
                             trailingContent = {
                                 Row {
                                     IconButton(
-                                        onClick = {},
+                                        onClick = {
+                                            editTab.invoke(item)
+                                        },
                                     ) {
                                         Icon(
                                             Icons.Default.Edit,
@@ -411,7 +430,9 @@ fun TabIcon(
                         is TitleType.Localized -> stringResource(id = title.resId)
                         is TitleType.Text -> title.content
                     },
-                modifier = modifier,
+                modifier =
+                    modifier
+                        .size(24.dp),
             )
         }
 
@@ -424,7 +445,9 @@ fun TabIcon(
                             is TitleType.Localized -> stringResource(id = title.resId)
                             is TitleType.Text -> title.content
                         },
-                    modifier = modifier,
+                    modifier =
+                        modifier
+                            .size(24.dp),
                 )
             } else {
                 val userState by producePresenter(key = "$accountType:${icon.userKey}") {
@@ -475,7 +498,7 @@ private fun presenter(
             mutableStateListOf<TabItemState>()
         }
     var showAddTab by remember { mutableStateOf(false) }
-
+    var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
     tabSettings
         .onSuccess {
             LaunchedEffect(it.items.size) {
@@ -502,6 +525,7 @@ private fun presenter(
         val allTabs = allTabs
         val showAddTab = showAddTab
         val canSwipeToDelete = cacheTabs.filterIsInstance<ActualTabItem>().size > 1
+        val selectedEditTab = selectedEditTab
 
         fun moveTab(
             from: Any,
@@ -547,23 +571,36 @@ private fun presenter(
         fun addTab(tab: TabItem) {
             cacheTabs.add(ActualTabItem(tab))
         }
+
+        fun setEditTab(tab: TabItem?) {
+            selectedEditTab = tab
+        }
+
+        fun updateTab(tab: TabItem) {
+            val index = cacheTabs.indexOfFirst { it.key == tab.key }
+            cacheTabs[index] = ActualTabItem(tab)
+        }
     }
 }
 
+@Immutable
 private sealed interface TabItemState {
     val key: String
 }
 
+@Immutable
 private data object PrimaryTabItemState : TabItemState {
     override val key: String
         get() = "primary"
 }
 
+@Immutable
 private data object SecondaryTabItemState : TabItemState {
     override val key: String
         get() = "secondary"
 }
 
+@Immutable
 private data class ActualTabItem(
     val tabItem: TabItem,
 ) : TabItemState {

@@ -84,6 +84,7 @@ sealed class UiStatus {
     abstract val platformType: PlatformType
     internal abstract val textToFilter: ImmutableList<String>
     abstract val medias: ImmutableList<UiMedia>
+    abstract val actions: ImmutableList<UiStatusAction>
 
     @Immutable
     data class MastodonNotification(

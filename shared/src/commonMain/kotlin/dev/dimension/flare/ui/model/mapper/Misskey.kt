@@ -1,9 +1,11 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
 import dev.dimension.flare.data.network.misskey.api.model.Note
 import dev.dimension.flare.data.network.misskey.api.model.Notification
+import dev.dimension.flare.data.network.misskey.api.model.NotificationType
 import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
@@ -13,12 +15,192 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiStatusAction
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.toHtml
+import dev.dimension.flare.ui.render.Render
+import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Instant
+import moe.tlaster.ktml.dom.Element
+import moe.tlaster.mfm.parser.MFMParser
+
+internal fun Notification.render(
+    accountKey: MicroBlogKey,
+    dataSource: MisskeyDataSource,
+): Render.Item {
+    requireNotNull(user) { "account is null" }
+    val user = user.render(accountKey)
+    val status = note?.renderStatus(accountKey, dataSource)
+    val topMessageType =
+        when (this.type) {
+            NotificationType.Follow -> Render.TopMessage.MessageType.Misskey.Follow
+            NotificationType.Mention -> Render.TopMessage.MessageType.Misskey.Mention
+            NotificationType.Reply -> Render.TopMessage.MessageType.Misskey.Reply
+            NotificationType.Renote -> Render.TopMessage.MessageType.Misskey.Renote
+            NotificationType.Quote -> Render.TopMessage.MessageType.Misskey.Quote
+            NotificationType.Reaction -> Render.TopMessage.MessageType.Misskey.Reaction
+            NotificationType.PollEnded -> Render.TopMessage.MessageType.Misskey.PollEnded
+            NotificationType.ReceiveFollowRequest -> Render.TopMessage.MessageType.Misskey.ReceiveFollowRequest
+            NotificationType.FollowRequestAccepted -> Render.TopMessage.MessageType.Misskey.FollowRequestAccepted
+            NotificationType.AchievementEarned -> Render.TopMessage.MessageType.Misskey.AchievementEarned
+            NotificationType.App -> Render.TopMessage.MessageType.Misskey.App
+        }
+    val topMessage =
+        Render.TopMessage(
+            user = user,
+            icon = Render.TopMessage.Icon.Retweet,
+            message = topMessageType,
+        )
+    return Render.Item(
+        topMessage = topMessage,
+        content =
+            when {
+                type in
+                    listOf(
+                        NotificationType.Follow,
+                        NotificationType.FollowRequestAccepted,
+                        NotificationType.ReceiveFollowRequest,
+                    )
+                ->
+                    user
+
+                else ->
+                    status ?: user
+            },
+    )
+}
+
+internal fun Note.render(
+    accountKey: MicroBlogKey,
+    dataSource: MisskeyDataSource,
+): Render.Item {
+    requireNotNull(user) { "account is null" }
+    val user = user.render(accountKey)
+    val topMessage =
+        if (renote == null || !text.isNullOrEmpty()) {
+            null
+        } else {
+            Render.TopMessage(
+                user = user,
+                icon = Render.TopMessage.Icon.Retweet,
+                message = Render.TopMessage.MessageType.Mastodon.Reblogged,
+            )
+        }
+    val actualStatus = renote ?: this
+    return Render.Item(
+        topMessage = topMessage,
+        content = actualStatus.renderStatus(accountKey, dataSource),
+    )
+}
+
+internal fun Note.renderStatus(
+    accountKey: MicroBlogKey,
+    dataSource: MisskeyDataSource,
+): Render.ItemContent.Status {
+    val user = user.render(accountKey)
+    val isFromMe = user.key == accountKey
+    val canReblog = visibility in listOf(Visibility.Public, Visibility.Home)
+    return Render.ItemContent.Status(
+        images =
+            files
+                ?.mapNotNull { file ->
+                    file.toUi()
+                }?.toPersistentList() ?: persistentListOf(),
+        contentWarning = cw,
+        user = user,
+        quote =
+            if (text != null || !files.isNullOrEmpty() || cw != null) {
+                renote?.renderStatus(accountKey, dataSource)
+            } else {
+                null
+            },
+        content = misskeyParser.parse(text.orEmpty()).toHtml(accountKey).toUi(),
+        actions =
+            listOfNotNull(
+                UiStatusAction.Action.Reply(
+                    count = repliesCount.toLong() ?: 0,
+                    onClicked = {},
+                ),
+                if (canReblog) {
+                    UiStatusAction.Group(
+                        displayAction =
+                            UiStatusAction.Action.Retweet(
+                                count = renoteCount.toLong() ?: 0,
+                                retweeted = renoteId != null,
+                                onClicked = {},
+                            ),
+                        actions =
+                            listOfNotNull(
+                                UiStatusAction.Action.Retweet(
+                                    count = renoteCount.toLong() ?: 0,
+                                    retweeted = renoteId != null,
+                                    onClicked = {},
+                                ),
+                                UiStatusAction.Action.Quote(
+                                    count = 0,
+                                    onClicked = {},
+                                ),
+                            ).toImmutableList(),
+                    )
+                } else {
+                    null
+                },
+                UiStatusAction.Action.Reaction(
+                    reacted = myReaction != null,
+                ),
+                UiStatusAction.Group(
+                    displayAction = UiStatusAction.Action.More,
+                    actions =
+                        listOfNotNull(
+                            if (isFromMe) {
+                                UiStatusAction.Action.Delete(
+                                    onClicked = {},
+                                )
+                            } else {
+                                UiStatusAction.Action.Report(
+                                    onClicked = {},
+                                )
+                            },
+                        ).toImmutableList(),
+                ),
+            ).toImmutableList(),
+        poll =
+            poll?.let {
+                UiPoll(
+                    // misskey poll doesn't have id
+                    id = "",
+                    options =
+                        poll.choices
+                            .map { option ->
+                                UiPoll.Option(
+                                    title = option.text,
+                                    votesCount = option.votes.toLong(),
+                                    percentage =
+                                        option.votes
+                                            .toFloat()
+                                            .div(
+                                                poll.choices.sumOf { it.votes }.toFloat(),
+                                            ).takeUnless { it.isNaN() } ?: 0f,
+                                )
+                            }.toPersistentList(),
+                    expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
+                    multiple = poll.multiple,
+                    ownVotes = List(poll.choices.filter { it.isVoted }.size) { index -> index }.toPersistentList(),
+                )
+            },
+        statusKey =
+            MicroBlogKey(
+                id,
+                host = user.key.host,
+            ),
+        card = null,
+    )
+}
 
 internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus.MisskeyNotification {
     val user = user?.toUi(accountKey)
@@ -145,6 +327,25 @@ private fun DriveFile.toUi(): UiMedia? {
     }
 }
 
+internal fun UserLite.render(accountKey: MicroBlogKey): Render.ItemContent.User {
+    val remoteHost =
+        if (host.isNullOrEmpty()) {
+            accountKey.host
+        } else {
+            host
+        }
+    return Render.ItemContent.User(
+        avatar = avatarUrl.orEmpty(),
+        name = parseName(name.orEmpty(), accountKey).toUi(),
+        handle = "@$username@$remoteHost",
+        key =
+            MicroBlogKey(
+                id = id,
+                host = accountKey.host,
+            ),
+    )
+}
+
 internal fun UserLite.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
     val remoteHost =
         if (host.isNullOrEmpty()) {
@@ -184,6 +385,25 @@ internal fun UserLite.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
             ),
         accountKey = accountKey,
         fields = persistentMapOf(),
+    )
+}
+
+internal fun User.render(accountKey: MicroBlogKey): Render.ItemContent.User {
+    val remoteHost =
+        if (host.isNullOrEmpty()) {
+            accountKey.host
+        } else {
+            host
+        }
+    return Render.ItemContent.User(
+        avatar = avatarUrl.orEmpty(),
+        name = parseName(name.orEmpty(), accountKey).toUi(),
+        handle = "@$username@$remoteHost",
+        key =
+            MicroBlogKey(
+                id = id,
+                host = accountKey.host,
+            ),
     )
 }
 
@@ -252,3 +472,17 @@ internal fun resolveMisskeyEmoji(
             "https://$accountHost/emoji/$it.webp"
         }
     }
+
+private val misskeyParser by lazy {
+    MFMParser()
+}
+
+private fun parseName(
+    name: String,
+    accountKey: MicroBlogKey,
+): Element {
+    if (name.isEmpty()) {
+        return Element("body")
+    }
+    return misskeyParser.parse(name).toHtml(accountKey) as? Element ?: Element("body")
+}

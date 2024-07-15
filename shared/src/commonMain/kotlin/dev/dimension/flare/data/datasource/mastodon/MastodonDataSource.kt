@@ -412,18 +412,21 @@ class MastodonDataSource(
         progress(ComposeProgress(maxProgress, maxProgress))
     }
 
-    suspend fun like(status: UiStatus.Mastodon) {
+    suspend fun like(
+        statusKey: MicroBlogKey,
+        liked: Boolean,
+    ) {
         updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
+            statusKey = statusKey,
+            accountKey = account.accountKey,
             cacheDatabase = database,
             update = {
                 it.copy(
                     data =
                         it.data.copy(
-                            favourited = !status.reaction.liked,
+                            favourited = !liked,
                             favouritesCount =
-                                if (status.reaction.liked) {
+                                if (liked) {
                                     it.data.favouritesCount?.minus(1)
                                 } else {
                                     it.data.favouritesCount?.plus(1)
@@ -434,24 +437,35 @@ class MastodonDataSource(
         )
 
         runCatching {
-            if (status.reaction.liked) {
-                service.unfavourite(status.statusKey.id)
+            if (liked) {
+                service.unfavourite(statusKey.id)
             } else {
-                service.favourite(status.statusKey.id)
+                service.favourite(statusKey.id)
             }
         }.onFailure {
             updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(data = status.raw)
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                favourited = liked,
+                                favouritesCount =
+                                    if (!liked) {
+                                        it.data.favouritesCount?.minus(1)
+                                    } else {
+                                        it.data.favouritesCount?.plus(1)
+                                    },
+                            ),
+                    )
                 },
             )
         }.onSuccess { result ->
             updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(data = result)

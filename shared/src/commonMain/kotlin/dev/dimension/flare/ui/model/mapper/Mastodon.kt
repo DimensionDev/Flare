@@ -4,6 +4,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.cache.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
 import dev.dimension.flare.data.network.mastodon.api.model.MediaType
@@ -20,7 +21,6 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiStatusAction
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.render.Render
 import dev.dimension.flare.ui.render.toUi
@@ -58,7 +58,7 @@ internal fun Notification.render(
             Render.TopMessage(
                 user = user,
                 icon = null,
-                message = it,
+                type = it,
             )
         }
     return Render.Item(
@@ -67,6 +67,7 @@ internal fun Notification.render(
             when {
                 type in listOf(NotificationTypes.Follow, NotificationTypes.FollowRequest) ->
                     user
+
                 else -> status ?: user
             },
     )
@@ -85,7 +86,7 @@ internal fun Status.render(
             Render.TopMessage(
                 user = user,
                 icon = Render.TopMessage.Icon.Retweet,
-                message = Render.TopMessage.MessageType.Mastodon.Reblogged,
+                type = Render.TopMessage.MessageType.Mastodon.Reblogged,
             )
         }
     val actualStatus = reblog ?: this
@@ -103,6 +104,11 @@ private fun Status.renderStatus(
     val actualUser = account.render(accountKey.host)
     val isFromMe = actualUser.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted)
+    val statusKey =
+        MicroBlogKey(
+            id = id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
+            host = actualUser.key.host,
+        )
     return Render.ItemContent.Status(
         images =
             mediaAttachments
@@ -111,7 +117,7 @@ private fun Status.renderStatus(
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning = spoilerText,
         user = actualUser,
-        quote = null,
+        quote = persistentListOf(),
         content = parseContent(this, accountKey).toUi(),
         card =
             card?.url?.let { url ->
@@ -134,45 +140,42 @@ private fun Status.renderStatus(
             },
         actions =
             listOfNotNull(
-                UiStatusAction.Action.Reply(
+                StatusAction.Item.Reply(
                     count = repliesCount ?: 0,
-                    onClicked = {},
                 ),
                 if (canReblog) {
-                    UiStatusAction.Action.Retweet(
+                    StatusAction.Item.Retweet(
                         count = reblogsCount ?: 0,
                         retweeted = reblogged ?: false,
                         onClicked = {
-//                                dataSource.reblog(accountKey, actualUser.key, id ?: "")
+                            dataSource.reblog(statusKey, reblogged ?: false)
                         },
                     )
                 } else {
                     null
                 },
-                UiStatusAction.Action.Like(
+                StatusAction.Item.Like(
                     count = favouritesCount ?: 0,
                     liked = favourited ?: false,
                     onClicked = {
-//                            dataSource.like(accountKey, favourited ?: false)
+                        dataSource.like(statusKey, favourited ?: false)
                     },
                 ),
-                UiStatusAction.Group(
-                    displayAction = UiStatusAction.Action.More,
+                StatusAction.Group(
+                    displayItem = StatusAction.Item.More,
                     actions =
                         listOfNotNull(
-                            UiStatusAction.Action.Bookmark(
+                            StatusAction.Item.Bookmark(
                                 count = 0,
                                 bookmarked = bookmarked ?: false,
-                                onClicked = {},
+                                onClicked = {
+                                    dataSource.bookmark(statusKey, bookmarked ?: false)
+                                },
                             ),
                             if (isFromMe) {
-                                UiStatusAction.Action.Delete(
-                                    onClicked = {},
-                                )
+                                StatusAction.Item.Delete
                             } else {
-                                UiStatusAction.Action.Report(
-                                    onClicked = {},
-                                )
+                                StatusAction.Item.Report
                             },
                         ).toImmutableList(),
                 ),
@@ -204,11 +207,8 @@ private fun Status.renderStatus(
                     ownVotes = it.ownVotes?.toPersistentList() ?: persistentListOf(),
                 )
             },
-        statusKey =
-            MicroBlogKey(
-                id = id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
-                host = actualUser.key.host,
-            ),
+        statusKey = statusKey,
+        createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
     )
 }
 

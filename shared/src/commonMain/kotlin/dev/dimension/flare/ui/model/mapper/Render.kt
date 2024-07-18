@@ -2,9 +2,12 @@ package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.vvo.VVODataSource
+import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.Render
 
@@ -47,8 +50,10 @@ internal fun StatusContent.render(
         reason?.render(
             accountKey = accountKey,
             data = data,
+            dataSource = dataSource as BlueskyDataSource,
         ) ?: data.render(
             accountKey = accountKey,
+            dataSource = dataSource as BlueskyDataSource,
         )
 
     is StatusContent.BlueskyNotification ->
@@ -59,15 +64,18 @@ internal fun StatusContent.render(
     is StatusContent.XQT ->
         data.render(
             accountKey = accountKey,
+            dataSource = dataSource as XQTDataSource,
         )
 
     is StatusContent.VVO ->
         data.render(
             accountKey = accountKey,
+            dataSource = dataSource as VVODataSource,
         )
 
     is StatusContent.VVOComment ->
         data.render(
             accountKey = accountKey,
+            dataSource = dataSource as VVODataSource,
         )
 }

@@ -40,8 +40,10 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +51,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -59,6 +62,7 @@ class MastodonDataSource(
     KoinComponent {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
+    private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://${account.credential.instance}/",
@@ -70,7 +74,7 @@ class MastodonDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -91,7 +95,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "local_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -113,7 +117,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "bookmarked_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -134,7 +138,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "favourite_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -155,7 +159,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "public_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -178,7 +182,7 @@ class MastodonDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -279,7 +283,7 @@ class MastodonDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -303,7 +307,7 @@ class MastodonDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -322,7 +326,7 @@ class MastodonDataSource(
                 ),
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    override fun status(statusKey: MicroBlogKey): CacheData<Render.Item> {
         val pagingKey = "status_only_$statusKey"
         return Cacheable(
             fetchSource = {
@@ -342,7 +346,7 @@ class MastodonDataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, this) }
             },
         )
     }
@@ -412,10 +416,10 @@ class MastodonDataSource(
         progress(ComposeProgress(maxProgress, maxProgress))
     }
 
-    suspend fun like(
+    fun like(
         statusKey: MicroBlogKey,
         liked: Boolean,
-    ) {
+    ) = coroutineScope.launch {
         updateStatusUseCase<StatusContent.Mastodon>(
             statusKey = statusKey,
             accountKey = account.accountKey,
@@ -474,18 +478,21 @@ class MastodonDataSource(
         }
     }
 
-    suspend fun reblog(status: UiStatus.Mastodon) {
+    fun reblog(
+        statusKey: MicroBlogKey,
+        reblogged: Boolean,
+    ) = coroutineScope.launch {
         updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
+            statusKey = statusKey,
+            accountKey = account.accountKey,
             cacheDatabase = database,
             update = {
                 it.copy(
                     data =
                         it.data.copy(
-                            reblogged = !status.reaction.reblogged,
+                            reblogged = !reblogged,
                             reblogsCount =
-                                if (status.reaction.reblogged) {
+                                if (reblogged) {
                                     it.data.reblogsCount?.minus(1)
                                 } else {
                                     it.data.reblogsCount?.plus(1)
@@ -496,24 +503,35 @@ class MastodonDataSource(
         )
 
         runCatching {
-            if (status.reaction.reblogged) {
-                service.unreblog(status.statusKey.id)
+            if (reblogged) {
+                service.unreblog(statusKey.id)
             } else {
-                service.reblog(status.statusKey.id)
+                service.reblog(statusKey.id)
             }
         }.onFailure {
             updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(data = status.raw)
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                reblogged = reblogged,
+                                reblogsCount =
+                                    if (!reblogged) {
+                                        it.data.reblogsCount?.minus(1)
+                                    } else {
+                                        it.data.reblogsCount?.plus(1)
+                                    },
+                            ),
+                    )
                 },
             )
         }.onSuccess { result ->
             updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(data = result)
@@ -537,40 +555,48 @@ class MastodonDataSource(
         }
     }
 
-    suspend fun bookmark(status: UiStatus.Mastodon) {
+    fun bookmark(
+        statusKey: MicroBlogKey,
+        bookmarked: Boolean,
+    ) = coroutineScope.launch {
         updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
+            statusKey = statusKey,
+            accountKey = account.accountKey,
             cacheDatabase = database,
             update = {
                 it.copy(
                     data =
                         it.data.copy(
-                            bookmarked = !status.reaction.bookmarked,
+                            bookmarked = !bookmarked,
                         ),
                 )
             },
         )
 
         runCatching {
-            if (status.reaction.bookmarked) {
-                service.unbookmark(status.statusKey.id)
+            if (bookmarked) {
+                service.unbookmark(statusKey.id)
             } else {
-                service.bookmark(status.statusKey.id)
+                service.bookmark(statusKey.id)
             }
         }.onFailure {
             updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
-                    it.copy(data = status.raw)
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                bookmarked = bookmarked,
+                            ),
+                    )
                 },
             )
         }.onSuccess { result ->
             updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(data = result)
@@ -739,7 +765,7 @@ class MastodonDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -770,7 +796,7 @@ class MastodonDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,

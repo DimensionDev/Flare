@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
@@ -15,7 +16,6 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiStatusAction
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.Render
@@ -54,7 +54,7 @@ internal fun Notification.render(
         Render.TopMessage(
             user = user,
             icon = Render.TopMessage.Icon.Retweet,
-            message = topMessageType,
+            type = topMessageType,
         )
     return Render.Item(
         topMessage = topMessage,
@@ -88,7 +88,7 @@ internal fun Note.render(
             Render.TopMessage(
                 user = user,
                 icon = Render.TopMessage.Icon.Retweet,
-                message = Render.TopMessage.MessageType.Mastodon.Reblogged,
+                type = Render.TopMessage.MessageType.Mastodon.Reblogged,
             )
         }
     val actualStatus = renote ?: this
@@ -114,57 +114,53 @@ internal fun Note.renderStatus(
         contentWarning = cw,
         user = user,
         quote =
-            if (text != null || !files.isNullOrEmpty() || cw != null) {
-                renote?.renderStatus(accountKey, dataSource)
-            } else {
-                null
-            },
+            listOfNotNull(
+                if (text != null || !files.isNullOrEmpty() || cw != null) {
+                    renote?.renderStatus(accountKey, dataSource)
+                } else {
+                    null
+                },
+            ).toImmutableList(),
         content = misskeyParser.parse(text.orEmpty()).toHtml(accountKey).toUi(),
         actions =
             listOfNotNull(
-                UiStatusAction.Action.Reply(
+                StatusAction.Item.Reply(
                     count = repliesCount.toLong() ?: 0,
-                    onClicked = {},
                 ),
                 if (canReblog) {
-                    UiStatusAction.Group(
-                        displayAction =
-                            UiStatusAction.Action.Retweet(
+                    StatusAction.Group(
+                        displayItem =
+                            StatusAction.Item.Retweet(
                                 count = renoteCount.toLong() ?: 0,
                                 retweeted = renoteId != null,
                                 onClicked = {},
                             ),
                         actions =
                             listOfNotNull(
-                                UiStatusAction.Action.Retweet(
+                                StatusAction.Item.Retweet(
                                     count = renoteCount.toLong() ?: 0,
                                     retweeted = renoteId != null,
                                     onClicked = {},
                                 ),
-                                UiStatusAction.Action.Quote(
+                                StatusAction.Item.Quote(
                                     count = 0,
-                                    onClicked = {},
                                 ),
                             ).toImmutableList(),
                     )
                 } else {
                     null
                 },
-                UiStatusAction.Action.Reaction(
+                StatusAction.Item.Reaction(
                     reacted = myReaction != null,
                 ),
-                UiStatusAction.Group(
-                    displayAction = UiStatusAction.Action.More,
+                StatusAction.Group(
+                    displayItem = StatusAction.Item.More,
                     actions =
                         listOfNotNull(
                             if (isFromMe) {
-                                UiStatusAction.Action.Delete(
-                                    onClicked = {},
-                                )
+                                StatusAction.Item.Delete
                             } else {
-                                UiStatusAction.Action.Report(
-                                    onClicked = {},
-                                )
+                                StatusAction.Item.Report
                             },
                         ).toImmutableList(),
                 ),
@@ -199,6 +195,7 @@ internal fun Note.renderStatus(
                 host = user.key.host,
             ),
         card = null,
+        createdAt = Instant.parse(createdAt).toUi(),
     )
 }
 

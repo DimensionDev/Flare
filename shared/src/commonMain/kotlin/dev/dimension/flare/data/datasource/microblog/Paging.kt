@@ -12,8 +12,8 @@ import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.render.Render
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 @OptIn(ExperimentalPagingApi::class)
-internal fun timelinePager(
+internal fun MicroblogDataSource.timelinePager(
     pageSize: Int,
     pagingKey: String,
     accountKey: MicroBlogKey,
@@ -29,7 +29,7 @@ internal fun timelinePager(
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
     mediator: RemoteMediator<Int, DbPagingTimelineWithStatusView>,
-): Flow<PagingData<UiStatus>> {
+): Flow<PagingData<Render.Item>> {
     val pagerFlow =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -57,16 +57,17 @@ internal fun timelinePager(
     return combine(pagerFlow, filterFlow) { pagingData, filters ->
         pagingData
             .map {
-                it.toUi()
+                it.render(this)
             }.filter {
                 !it.contains(filters)
             }
     }.cachedIn(scope)
 }
 
-private fun UiStatus.contains(keywords: List<String>): Boolean {
-    val text = textToFilter
-    return keywords.any { keyword ->
-        text.any { it.contains(keyword, ignoreCase = true) }
-    }
+private fun Render.Item.contains(keywords: List<String>): Boolean {
+    return false
+//    val text = textToFilter
+//    return keywords.any { keyword ->
+//        text.any { it.contains(keyword, ignoreCase = true) }
+//    }
 }

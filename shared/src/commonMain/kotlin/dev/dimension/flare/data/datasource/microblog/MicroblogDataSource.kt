@@ -7,8 +7,8 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.render.Render
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -19,14 +19,14 @@ interface MicroblogDataSource {
         pageSize: Int = 20,
         pagingKey: String = "home_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>>
+    ): Flow<PagingData<Render.Item>>
 
     fun notification(
         type: NotificationFilter = NotificationFilter.All,
         pageSize: Int = 20,
         pagingKey: String = "notification_${type}_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>>
+    ): Flow<PagingData<Render.Item>>
 
     val supportedNotificationFilter: List<NotificationFilter>
 
@@ -42,16 +42,16 @@ interface MicroblogDataSource {
         pageSize: Int = 20,
         mediaOnly: Boolean = false,
         pagingKey: String = "user_${userKey}_${if (mediaOnly) "media" else "all"}",
-    ): Flow<PagingData<UiStatus>>
+    ): Flow<PagingData<Render.Item>>
 
     fun context(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int = 20,
         pagingKey: String = "status_$statusKey",
-    ): Flow<PagingData<UiStatus>>
+    ): Flow<PagingData<Render.Item>>
 
-    fun status(statusKey: MicroBlogKey): CacheData<UiStatus>
+    fun status(statusKey: MicroBlogKey): CacheData<Render.Item>
 
     suspend fun compose(
         data: ComposeData,
@@ -65,7 +65,7 @@ interface MicroblogDataSource {
         scope: CoroutineScope,
         pageSize: Int = 20,
         pagingKey: String = "search_$query",
-    ): Flow<PagingData<UiStatus>>
+    ): Flow<PagingData<Render.Item>>
 
     fun searchUser(
         query: String,
@@ -79,7 +79,7 @@ interface MicroblogDataSource {
         pageSize: Int = 20,
         scope: CoroutineScope,
         pagingKey: String = "discover_status_${account.accountKey}",
-    ): Flow<PagingData<UiStatus>>
+    ): Flow<PagingData<Render.Item>>
 
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
 

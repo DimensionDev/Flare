@@ -4,7 +4,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
-import dev.dimension.flare.ui.model.UiStatusAction
 import kotlinx.collections.immutable.ImmutableList
 
 object Render {
@@ -13,12 +12,13 @@ object Render {
             val images: ImmutableList<UiMedia>,
             val contentWarning: String?,
             val user: User?,
-            val quote: Status?,
+            val quote: ImmutableList<Status>,
             val content: UiRichText,
-            val actions: ImmutableList<UiStatusAction>,
+            val actions: ImmutableList<StatusAction>,
             val poll: UiPoll?,
             val statusKey: MicroBlogKey,
             val card: UiCard?,
+            val createdAt: UiDateTime,
         ) : ItemContent
 
         data class User(
@@ -27,17 +27,21 @@ object Render {
             val handle: String,
             val key: MicroBlogKey,
         ) : ItemContent
+
+        data class UserList(
+            val users: ImmutableList<User>,
+        ) : ItemContent
     }
 
     data class Item(
         val topMessage: TopMessage?,
-        val content: ItemContent,
+        val content: ItemContent?,
     )
 
     data class TopMessage(
         val user: ItemContent.User?,
         val icon: Icon?,
-        val message: MessageType,
+        val type: MessageType,
     ) {
         enum class Icon {
             Retweet,
@@ -86,6 +90,42 @@ object Render {
                 data object AchievementEarned : Misskey
 
                 data object App : Misskey
+            }
+
+            sealed interface Bluesky : MessageType {
+                data object Like : Bluesky
+
+                data object Repost : Bluesky
+
+                data object Follow : Bluesky
+
+                data object Mention : Bluesky
+
+                data object Reply : Bluesky
+
+                data object Quote : Bluesky
+            }
+
+            sealed interface XQT : MessageType {
+                data object Retweet : XQT
+
+                data object Follow : XQT
+
+                data object Like : XQT
+
+                data object Logo : XQT
+
+                data class Custom(
+                    val message: String,
+                ) : XQT
+
+                data object Mention : XQT
+            }
+
+            sealed interface VVO : MessageType {
+                data class Custom(
+                    val message: String,
+                ) : VVO
             }
         }
     }

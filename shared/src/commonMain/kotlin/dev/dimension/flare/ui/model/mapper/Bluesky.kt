@@ -10,17 +10,201 @@ import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.notification.ListNotificationsNotification
+import app.bsky.notification.ListNotificationsReason
 import dev.dimension.flare.common.jsonObjectOrNull
+import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.bluesky.jsonElement
+import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.toHtml
+import dev.dimension.flare.ui.render.Render
+import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.jsonPrimitive
+import moe.tlaster.ktml.dom.Element
+import moe.tlaster.ktml.dom.Text
+import moe.tlaster.twitter.parser.TwitterParser
+
+private val blueskyParser by lazy {
+    TwitterParser(validMarkInUserName = listOf('.'))
+}
+
+internal fun FeedViewPostReasonUnion.render(
+    accountKey: MicroBlogKey,
+    data: PostView,
+    dataSource: BlueskyDataSource,
+): Render.Item =
+    Render.Item(
+        topMessage =
+            (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.let {
+                Render.TopMessage(
+                    user = it.render(accountKey),
+                    icon = Render.TopMessage.Icon.Retweet,
+                    type = Render.TopMessage.MessageType.Bluesky.Repost,
+                )
+            },
+        content = data.renderStatus(accountKey, dataSource),
+    )
+
+internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): Render.Item {
+    UiStatus.BlueskyNotification(
+        user = author.toUi(accountKey),
+        statusKey =
+            MicroBlogKey(
+                id = uri.atUri,
+                host = accountKey.host,
+            ),
+        accountKey = accountKey,
+        reason = reason,
+        indexedAt = indexedAt,
+    )
+
+    return Render.Item(
+        topMessage =
+            Render.TopMessage(
+                user = author.render(accountKey),
+                icon = null,
+                type =
+                    when (reason) {
+                        ListNotificationsReason.LIKE -> Render.TopMessage.MessageType.Bluesky.Like
+                        ListNotificationsReason.REPOST -> Render.TopMessage.MessageType.Bluesky.Repost
+                        ListNotificationsReason.FOLLOW -> Render.TopMessage.MessageType.Bluesky.Follow
+                        ListNotificationsReason.MENTION -> Render.TopMessage.MessageType.Bluesky.Mention
+                        ListNotificationsReason.REPLY -> Render.TopMessage.MessageType.Bluesky.Reply
+                        ListNotificationsReason.QUOTE -> Render.TopMessage.MessageType.Bluesky.Quote
+                    },
+            ),
+        content = author.render(accountKey),
+    )
+}
+
+internal fun PostView.render(
+    accountKey: MicroBlogKey,
+    dataSource: BlueskyDataSource,
+) = Render.Item(
+    topMessage = null,
+    content = renderStatus(accountKey, dataSource),
+)
+
+internal fun PostView.renderStatus(
+    accountKey: MicroBlogKey,
+    dataSource: BlueskyDataSource,
+): Render.ItemContent.Status {
+    val user = author.render(accountKey)
+    val isFromMe = user.key == accountKey
+    return Render.ItemContent.Status(
+        user = user,
+        images = findMedias(this),
+        card = findCard(this),
+        statusKey =
+            MicroBlogKey(
+                id = uri.atUri,
+                host = accountKey.host,
+            ),
+        content =
+            record
+                .jsonElement()
+                .jsonObjectOrNull
+                ?.get("text")
+                ?.jsonPrimitive
+                ?.content
+                .orEmpty()
+                .let {
+                    blueskyParser
+                        .parse(it)
+                        .toHtml(accountKey)
+                        .toUi()
+                },
+        poll = null,
+        quote = listOfNotNull(findQuote2(accountKey, this)).toImmutableList(),
+        contentWarning = null,
+        actions =
+            listOfNotNull(
+                StatusAction.Item.Reply(
+                    count = replyCount ?: 0,
+                ),
+                StatusAction.Group(
+                    displayItem =
+                        StatusAction.Item.Retweet(
+                            count = repostCount ?: 0,
+                            retweeted = viewer?.repost?.atUri != null,
+                            onClicked = {
+                            },
+                        ),
+                    actions =
+                        listOfNotNull(
+                            StatusAction.Item.Retweet(
+                                count = repostCount ?: 0,
+                                retweeted = viewer?.repost?.atUri != null,
+                                onClicked = {
+                                },
+                            ),
+                            StatusAction.Item.Quote(
+                                count = 0,
+                            ),
+                        ).toImmutableList(),
+                ),
+                StatusAction.Item.Like(
+                    count = likeCount ?: 0,
+                    liked = viewer?.like?.atUri != null,
+                    onClicked = {
+//                            dataSource.like(accountKey, favourited ?: false)
+                    },
+                ),
+                StatusAction.Group(
+                    displayItem = StatusAction.Item.More,
+                    actions =
+                        listOfNotNull(
+                            if (isFromMe) {
+                                StatusAction.Item.Delete
+                            } else {
+                                StatusAction.Item.Report
+                            },
+                        ).toImmutableList(),
+                ),
+            ).toImmutableList(),
+        createdAt = indexedAt.toUi(),
+    )
+}
+
+internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): Render.ItemContent.User =
+    Render.ItemContent.User(
+        avatar = avatar?.uri.orEmpty(),
+        name =
+            Element("span")
+                .apply {
+                    children.add(Text(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@${handle.handle}",
+        key =
+            MicroBlogKey(
+                id = did.did,
+                host = accountKey.host,
+            ),
+    )
+
+internal fun ProfileView.render(accountKey: MicroBlogKey): Render.ItemContent.User =
+    Render.ItemContent.User(
+        avatar = avatar?.uri.orEmpty(),
+        name =
+            Element("span")
+                .apply {
+                    children.add(Text(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@${handle.handle}",
+        key =
+            MicroBlogKey(
+                id = did.did,
+                host = accountKey.host,
+            ),
+    )
 
 internal fun FeedViewPostReasonUnion.toUi(
     accountKey: MicroBlogKey,
@@ -170,6 +354,150 @@ private fun findQuote(
                 accountKey,
                 embed.value.record.record,
             )
+
+        else -> null
+    }
+
+private fun findQuote2(
+    accountKey: MicroBlogKey,
+    postView: PostView,
+): Render.ItemContent.Status? =
+    when (val embed = postView.embed) {
+        is PostViewEmbedUnion.RecordView -> render(accountKey, embed.value.record)
+        is PostViewEmbedUnion.RecordWithMediaView ->
+            render(
+                accountKey,
+                embed.value.record.record,
+            )
+
+        else -> null
+    }
+
+private fun render(
+    accountKey: MicroBlogKey,
+    record: RecordViewRecordUnion,
+): Render.ItemContent.Status? =
+    when (record) {
+        is RecordViewRecordUnion.ViewRecord -> {
+            val user = record.value.author.render(accountKey)
+            val isFromMe = user.key == accountKey
+            Render.ItemContent.Status(
+                user = user,
+                images =
+                    record.value.embeds
+                        .mapNotNull {
+                            when (it) {
+                                is RecordViewRecordEmbedUnion.ImagesView ->
+                                    it.value.images.map {
+                                        UiMedia.Image(
+                                            url = it.fullsize.uri,
+                                            previewUrl = it.thumb.uri,
+                                            description = it.alt,
+                                            width = it.aspectRatio?.width?.toFloat() ?: 0f,
+                                            height = it.aspectRatio?.height?.toFloat() ?: 0f,
+                                            sensitive = false,
+                                        )
+                                    }
+
+                                else -> null
+                            }
+                        }.flatten()
+                        .toImmutableList(),
+                card =
+                    record.value.embeds
+                        .mapNotNull {
+                            when (it) {
+                                is RecordViewRecordEmbedUnion.ExternalView ->
+                                    UiCard(
+                                        url = it.value.external.uri.uri,
+                                        title = it.value.external.title,
+                                        description = it.value.external.description,
+                                        media =
+                                            it.value.external.thumb?.let {
+                                                UiMedia.Image(
+                                                    url = it.uri,
+                                                    previewUrl = it.uri,
+                                                    description = null,
+                                                    width = 0f,
+                                                    height = 0f,
+                                                    sensitive = false,
+                                                )
+                                            },
+                                    )
+
+                                else -> null
+                            }
+                        }.firstOrNull(),
+                statusKey =
+                    MicroBlogKey(
+                        id = record.value.uri.atUri,
+                        host = accountKey.host,
+                    ),
+                content =
+                    record.value.value
+                        .jsonElement()
+                        .jsonObjectOrNull
+                        ?.get("text")
+                        ?.jsonPrimitive
+                        ?.content
+                        .orEmpty()
+                        .let {
+                            blueskyParser
+                                .parse(it)
+                                .toHtml(accountKey)
+                                .toUi()
+                        },
+                actions =
+                    listOfNotNull(
+                        StatusAction.Item.Reply(
+                            count = record.value.replyCount ?: 0,
+                        ),
+                        StatusAction.Group(
+                            displayItem =
+                                StatusAction.Item.Retweet(
+                                    count = record.value.repostCount ?: 0,
+                                    retweeted = false,
+                                    onClicked = {
+                                    },
+                                ),
+                            actions =
+                                listOfNotNull(
+                                    StatusAction.Item.Retweet(
+                                        count = record.value.repostCount ?: 0,
+                                        retweeted = false,
+                                        onClicked = {
+                                        },
+                                    ),
+                                    StatusAction.Item.Quote(
+                                        count = 0,
+                                    ),
+                                ).toImmutableList(),
+                        ),
+                        StatusAction.Item.Like(
+                            count = record.value.likeCount ?: 0,
+                            liked = false,
+                            onClicked = {
+//                            dataSource.like(accountKey, favourited ?: false)
+                            },
+                        ),
+                        StatusAction.Group(
+                            displayItem = StatusAction.Item.More,
+                            actions =
+                                listOfNotNull(
+                                    if (isFromMe) {
+                                        StatusAction.Item.Delete
+                                    } else {
+                                        StatusAction.Item.Report
+                                    },
+                                ).toImmutableList(),
+                        ),
+                    ).toImmutableList(),
+                contentWarning = null,
+                poll = null,
+                quote = persistentListOf(),
+                createdAt = record.value.indexedAt.toUi(),
+            )
+        }
 
         else -> null
     }

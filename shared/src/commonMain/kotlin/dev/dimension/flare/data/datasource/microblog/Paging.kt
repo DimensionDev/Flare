@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 @OptIn(ExperimentalPagingApi::class)
-internal fun MicroblogDataSource.timelinePager(
+internal fun StatusEvent.timelinePager(
     pageSize: Int,
     pagingKey: String,
     accountKey: MicroBlogKey,

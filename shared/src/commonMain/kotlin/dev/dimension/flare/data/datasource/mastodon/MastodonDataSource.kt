@@ -24,6 +24,7 @@ import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -59,7 +60,8 @@ import org.koin.core.component.inject
 class MastodonDataSource(
     override val account: UiAccount.Mastodon,
 ) : MicroblogDataSource,
-    KoinComponent {
+    KoinComponent,
+    StatusEvent.Mastodon {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -416,37 +418,11 @@ class MastodonDataSource(
         progress(ComposeProgress(maxProgress, maxProgress))
     }
 
-    fun like(
+    override fun like(
         statusKey: MicroBlogKey,
         liked: Boolean,
-    ) = coroutineScope.launch {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = statusKey,
-            accountKey = account.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            favourited = !liked,
-                            favouritesCount =
-                                if (liked) {
-                                    it.data.favouritesCount?.minus(1)
-                                } else {
-                                    it.data.favouritesCount?.plus(1)
-                                },
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            if (liked) {
-                service.unfavourite(statusKey.id)
-            } else {
-                service.favourite(statusKey.id)
-            }
-        }.onFailure {
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = statusKey,
                 accountKey = account.accountKey,
@@ -455,9 +431,9 @@ class MastodonDataSource(
                     it.copy(
                         data =
                             it.data.copy(
-                                favourited = liked,
+                                favourited = !liked,
                                 favouritesCount =
-                                    if (!liked) {
+                                    if (liked) {
                                         it.data.favouritesCount?.minus(1)
                                     } else {
                                         it.data.favouritesCount?.plus(1)
@@ -466,49 +442,51 @@ class MastodonDataSource(
                     )
                 },
             )
-        }.onSuccess { result ->
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = statusKey,
-                accountKey = account.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = result)
-                },
-            )
+
+            runCatching {
+                if (liked) {
+                    service.unfavourite(statusKey.id)
+                } else {
+                    service.favourite(statusKey.id)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    favourited = liked,
+                                    favouritesCount =
+                                        if (!liked) {
+                                            it.data.favouritesCount?.minus(1)
+                                        } else {
+                                            it.data.favouritesCount?.plus(1)
+                                        },
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess { result ->
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(data = result)
+                    },
+                )
+            }
         }
     }
 
-    fun reblog(
+    override fun reblog(
         statusKey: MicroBlogKey,
         reblogged: Boolean,
-    ) = coroutineScope.launch {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = statusKey,
-            accountKey = account.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            reblogged = !reblogged,
-                            reblogsCount =
-                                if (reblogged) {
-                                    it.data.reblogsCount?.minus(1)
-                                } else {
-                                    it.data.reblogsCount?.plus(1)
-                                },
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            if (reblogged) {
-                service.unreblog(statusKey.id)
-            } else {
-                service.reblog(statusKey.id)
-            }
-        }.onFailure {
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = statusKey,
                 accountKey = account.accountKey,
@@ -517,9 +495,9 @@ class MastodonDataSource(
                     it.copy(
                         data =
                             it.data.copy(
-                                reblogged = reblogged,
+                                reblogged = !reblogged,
                                 reblogsCount =
-                                    if (!reblogged) {
+                                    if (reblogged) {
                                         it.data.reblogsCount?.minus(1)
                                     } else {
                                         it.data.reblogsCount?.plus(1)
@@ -528,15 +506,43 @@ class MastodonDataSource(
                     )
                 },
             )
-        }.onSuccess { result ->
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = statusKey,
-                accountKey = account.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = result)
-                },
-            )
+
+            runCatching {
+                if (reblogged) {
+                    service.unreblog(statusKey.id)
+                } else {
+                    service.reblog(statusKey.id)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    reblogged = reblogged,
+                                    reblogsCount =
+                                        if (!reblogged) {
+                                            it.data.reblogsCount?.minus(1)
+                                        } else {
+                                            it.data.reblogsCount?.plus(1)
+                                        },
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess { result ->
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(data = result)
+                    },
+                )
+            }
         }
     }
 
@@ -555,31 +561,11 @@ class MastodonDataSource(
         }
     }
 
-    fun bookmark(
+    override fun bookmark(
         statusKey: MicroBlogKey,
         bookmarked: Boolean,
-    ) = coroutineScope.launch {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = statusKey,
-            accountKey = account.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            bookmarked = !bookmarked,
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            if (bookmarked) {
-                service.unbookmark(statusKey.id)
-            } else {
-                service.bookmark(statusKey.id)
-            }
-        }.onFailure {
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = statusKey,
                 accountKey = account.accountKey,
@@ -588,20 +574,42 @@ class MastodonDataSource(
                     it.copy(
                         data =
                             it.data.copy(
-                                bookmarked = bookmarked,
+                                bookmarked = !bookmarked,
                             ),
                     )
                 },
             )
-        }.onSuccess { result ->
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = statusKey,
-                accountKey = account.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = result)
-                },
-            )
+
+            runCatching {
+                if (bookmarked) {
+                    service.unbookmark(statusKey.id)
+                } else {
+                    service.bookmark(statusKey.id)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    bookmarked = bookmarked,
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess { result ->
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(data = result)
+                    },
+                )
+            }
         }
     }
 

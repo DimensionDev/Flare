@@ -23,6 +23,7 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
@@ -42,8 +43,10 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +54,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -58,9 +62,11 @@ import org.koin.core.component.inject
 class MisskeyDataSource(
     override val account: UiAccount.Misskey,
 ) : MicroblogDataSource,
-    KoinComponent {
+    KoinComponent,
+    StatusEvent.Misskey {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
+    private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://${account.credential.host}/api/",
@@ -72,7 +78,7 @@ class MisskeyDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -93,7 +99,7 @@ class MisskeyDataSource(
         pageSize: Int = 20,
         pagingKey: String = "local_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -114,7 +120,7 @@ class MisskeyDataSource(
         pageSize: Int = 20,
         pagingKey: String = "public_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -136,7 +142,7 @@ class MisskeyDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -255,7 +261,7 @@ class MisskeyDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -279,7 +285,7 @@ class MisskeyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -298,7 +304,7 @@ class MisskeyDataSource(
                 ),
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    override fun status(statusKey: MicroBlogKey): CacheData<Render.Item> {
         val pagingKey = "status_only_$statusKey"
         return Cacheable(
             fetchSource = {
@@ -319,7 +325,7 @@ class MisskeyDataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, this) }
             },
         )
     }
@@ -396,12 +402,14 @@ class MisskeyDataSource(
         progress(ComposeProgress(maxProgress, maxProgress))
     }
 
-    suspend fun renote(status: UiStatus.Misskey) {
-        service.notesRenotes(
-            NotesChildrenRequest(
-                noteId = status.statusKey.id,
-            ),
-        )
+    override fun renote(statusKey: MicroBlogKey) {
+        coroutineScope.launch {
+            service.notesRenotes(
+                NotesChildrenRequest(
+                    noteId = statusKey.id,
+                ),
+            )
+        }
     }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
@@ -424,66 +432,68 @@ class MisskeyDataSource(
         }
     }
 
-    suspend fun react(
-        status: UiStatus.Misskey,
+    override fun react(
+        statusKey: MicroBlogKey,
+        hasReacted: Boolean,
         reaction: String,
     ) {
-        val hasReacted = status.reaction.myReaction != null
-        updateStatusUseCase<StatusContent.Misskey>(
-            status.statusKey,
-            account.accountKey,
-            database,
-        ) {
-            it.copy(
-                data =
-                    it.data.copy(
-                        myReaction = if (hasReacted) null else reaction,
-                        reactions =
-                            it.data.reactions.toMutableMap().apply {
-                                if (hasReacted) {
-                                    remove(reaction)
-                                } else {
-                                    put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
-                                }
-                            },
-                    ),
-            )
-        }
-        runCatching {
-            if (hasReacted) {
-                service.notesReactionsDelete(
-                    IPinRequest(
-                        noteId = status.statusKey.id,
-                    ),
-                )
-            } else {
-                service.notesReactionsCreate(
-                    NotesReactionsCreateRequest(
-                        noteId = status.statusKey.id,
-                        reaction = reaction,
-                    ),
-                )
-            }
-        }.onFailure {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.Misskey>(
-                status.statusKey,
+                statusKey,
                 account.accountKey,
                 database,
             ) {
                 it.copy(
                     data =
                         it.data.copy(
-                            myReaction = if (hasReacted) reaction else null,
+                            myReaction = if (hasReacted) null else reaction,
                             reactions =
                                 it.data.reactions.toMutableMap().apply {
                                     if (hasReacted) {
-                                        put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
-                                    } else {
                                         remove(reaction)
+                                    } else {
+                                        put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
                                     }
                                 },
                         ),
                 )
+            }
+            runCatching {
+                if (hasReacted) {
+                    service.notesReactionsDelete(
+                        IPinRequest(
+                            noteId = statusKey.id,
+                        ),
+                    )
+                } else {
+                    service.notesReactionsCreate(
+                        NotesReactionsCreateRequest(
+                            noteId = statusKey.id,
+                            reaction = reaction,
+                        ),
+                    )
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Misskey>(
+                    statusKey,
+                    account.accountKey,
+                    database,
+                ) {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                myReaction = if (hasReacted) reaction else null,
+                                reactions =
+                                    it.data.reactions.toMutableMap().apply {
+                                        if (hasReacted) {
+                                            put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
+                                        } else {
+                                            remove(reaction)
+                                        }
+                                    },
+                            ),
+                    )
+                }
             }
         }
     }
@@ -653,7 +663,7 @@ class MisskeyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -700,7 +710,7 @@ class MisskeyDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,

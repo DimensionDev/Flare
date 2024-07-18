@@ -12,9 +12,9 @@ import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsReason
 import dev.dimension.flare.common.jsonObjectOrNull
-import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.bluesky.jsonElement
 import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
@@ -39,7 +39,7 @@ private val blueskyParser by lazy {
 internal fun FeedViewPostReasonUnion.render(
     accountKey: MicroBlogKey,
     data: PostView,
-    dataSource: BlueskyDataSource,
+    event: StatusEvent.Bluesky,
 ): Render.Item =
     Render.Item(
         topMessage =
@@ -50,7 +50,7 @@ internal fun FeedViewPostReasonUnion.render(
                     type = Render.TopMessage.MessageType.Bluesky.Repost,
                 )
             },
-        content = data.renderStatus(accountKey, dataSource),
+        content = data.renderStatus(accountKey, event),
     )
 
 internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): Render.Item {
@@ -87,27 +87,28 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): Ren
 
 internal fun PostView.render(
     accountKey: MicroBlogKey,
-    dataSource: BlueskyDataSource,
+    event: StatusEvent.Bluesky,
 ) = Render.Item(
     topMessage = null,
-    content = renderStatus(accountKey, dataSource),
+    content = renderStatus(accountKey, event),
 )
 
 internal fun PostView.renderStatus(
     accountKey: MicroBlogKey,
-    dataSource: BlueskyDataSource,
+    event: StatusEvent.Bluesky,
 ): Render.ItemContent.Status {
     val user = author.render(accountKey)
     val isFromMe = user.key == accountKey
+    val statusKey =
+        MicroBlogKey(
+            id = uri.atUri,
+            host = accountKey.host,
+        )
     return Render.ItemContent.Status(
         user = user,
         images = findMedias(this),
         card = findCard(this),
-        statusKey =
-            MicroBlogKey(
-                id = uri.atUri,
-                host = accountKey.host,
-            ),
+        statusKey = statusKey,
         content =
             record
                 .jsonElement()
@@ -144,6 +145,12 @@ internal fun PostView.renderStatus(
                                 count = repostCount ?: 0,
                                 retweeted = viewer?.repost?.atUri != null,
                                 onClicked = {
+                                    event.reblog(
+                                        statusKey = statusKey,
+                                        cid = cid.cid,
+                                        uri = uri.atUri,
+                                        repostUri = viewer?.repost?.atUri,
+                                    )
                                 },
                             ),
                             StatusAction.Item.Quote(
@@ -155,7 +162,12 @@ internal fun PostView.renderStatus(
                     count = likeCount ?: 0,
                     liked = viewer?.like?.atUri != null,
                     onClicked = {
-//                            dataSource.like(accountKey, favourited ?: false)
+                        event.like(
+                            statusKey = statusKey,
+                            cid = cid.cid,
+                            uri = uri.atUri,
+                            likedUri = viewer?.like?.atUri,
+                        )
                     },
                 ),
                 StatusAction.Group(

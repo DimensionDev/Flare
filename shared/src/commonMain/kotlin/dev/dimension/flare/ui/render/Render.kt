@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.render
 
+import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
@@ -19,7 +21,43 @@ object Render {
             val statusKey: MicroBlogKey,
             val card: UiCard?,
             val createdAt: UiDateTime,
-        ) : ItemContent
+            val bottomContent: BottomContent? = null,
+            val topEndContent: TopEndContent? = null,
+        ) : ItemContent {
+            sealed interface BottomContent {
+                data class Reaction(
+                    val emojiReactions: ImmutableList<EmojiReaction>,
+                    val myReaction: String?,
+                ) : BottomContent {
+                    data class EmojiReaction(
+                        val name: String,
+                        val url: String,
+                        val count: Long,
+                        val onClicked: () -> Unit,
+                    ) {
+                        val humanizedCount by lazy {
+                            count.humanize()
+                        }
+                        val isImageReaction by lazy {
+                            name.startsWith(":") && name.endsWith(":")
+                        }
+                    }
+                }
+            }
+
+            sealed interface TopEndContent {
+                data class Visibility(
+                    val visibility: Type,
+                ) : TopEndContent {
+                    enum class Type {
+                        Public,
+                        Home,
+                        Followers,
+                        Specified,
+                    }
+                }
+            }
+        }
 
         data class User(
             val avatar: String,

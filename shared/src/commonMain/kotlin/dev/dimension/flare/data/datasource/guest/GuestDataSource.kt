@@ -19,6 +19,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -38,7 +39,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-object GuestDataSource : MicroblogDataSource, KoinComponent {
+object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodon {
     private val database: CacheDatabase by inject()
     override val account: UiAccount
         get() = UiAccount.Guest
@@ -223,4 +224,22 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
     }
 
     override fun profileActions(): List<ProfileAction> = emptyList()
+
+    override fun reblog(
+        statusKey: MicroBlogKey,
+        reblogged: Boolean,
+    ) {
+    }
+
+    override fun like(
+        statusKey: MicroBlogKey,
+        liked: Boolean,
+    ) {
+    }
+
+    override fun bookmark(
+        statusKey: MicroBlogKey,
+        bookmarked: Boolean,
+    ) {
+    }
 }

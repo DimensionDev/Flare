@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.datasource.microblog.StatusAction
-import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
 import dev.dimension.flare.data.network.misskey.api.model.Note
@@ -31,11 +31,11 @@ import moe.tlaster.mfm.parser.MFMParser
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,
-    dataSource: MisskeyDataSource,
+    event: StatusEvent.Misskey,
 ): Render.Item {
     requireNotNull(user) { "account is null" }
     val user = user.render(accountKey)
-    val status = note?.renderStatus(accountKey, dataSource)
+    val status = note?.renderStatus(accountKey, event)
     val topMessageType =
         when (this.type) {
             NotificationType.Follow -> Render.TopMessage.MessageType.Misskey.Follow
@@ -77,7 +77,7 @@ internal fun Notification.render(
 
 internal fun Note.render(
     accountKey: MicroBlogKey,
-    dataSource: MisskeyDataSource,
+    event: StatusEvent.Misskey,
 ): Render.Item {
     requireNotNull(user) { "account is null" }
     val user = user.render(accountKey)
@@ -94,17 +94,45 @@ internal fun Note.render(
     val actualStatus = renote ?: this
     return Render.Item(
         topMessage = topMessage,
-        content = actualStatus.renderStatus(accountKey, dataSource),
+        content = actualStatus.renderStatus(accountKey, event),
     )
 }
 
 internal fun Note.renderStatus(
     accountKey: MicroBlogKey,
-    dataSource: MisskeyDataSource,
+    event: StatusEvent.Misskey,
 ): Render.ItemContent.Status {
     val user = user.render(accountKey)
     val isFromMe = user.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Home)
+    val renderedVisibility =
+        when (visibility) {
+            Visibility.Public -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Public
+            Visibility.Home -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Home
+            Visibility.Followers -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Followers
+            Visibility.Specified -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+        }
+    val statusKey =
+        MicroBlogKey(
+            id,
+            host = user.key.host,
+        )
+    val reaction =
+        reactions
+            .map { emoji ->
+                Render.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
+                    name = emoji.key,
+                    count = emoji.value,
+                    url = resolveMisskeyEmoji(emoji.key, accountKey.host),
+                    onClicked = {
+                        event.react(
+                            statusKey = statusKey,
+                            hasReacted = myReaction != null,
+                            reaction = emoji.key,
+                        )
+                    },
+                )
+            }.toPersistentList()
     return Render.ItemContent.Status(
         images =
             files
@@ -116,7 +144,7 @@ internal fun Note.renderStatus(
         quote =
             listOfNotNull(
                 if (text != null || !files.isNullOrEmpty() || cw != null) {
-                    renote?.renderStatus(accountKey, dataSource)
+                    renote?.renderStatus(accountKey, event)
                 } else {
                     null
                 },
@@ -125,22 +153,26 @@ internal fun Note.renderStatus(
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(
-                    count = repliesCount.toLong() ?: 0,
+                    count = repliesCount.toLong(),
                 ),
                 if (canReblog) {
                     StatusAction.Group(
                         displayItem =
                             StatusAction.Item.Retweet(
-                                count = renoteCount.toLong() ?: 0,
+                                count = renoteCount.toLong(),
                                 retweeted = renoteId != null,
                                 onClicked = {},
                             ),
                         actions =
                             listOfNotNull(
                                 StatusAction.Item.Retweet(
-                                    count = renoteCount.toLong() ?: 0,
+                                    count = renoteCount.toLong(),
                                     retweeted = renoteId != null,
-                                    onClicked = {},
+                                    onClicked = {
+                                        event.renote(
+                                            statusKey = statusKey,
+                                        )
+                                    },
                                 ),
                                 StatusAction.Item.Quote(
                                     count = 0,
@@ -189,13 +221,15 @@ internal fun Note.renderStatus(
                     ownVotes = List(poll.choices.filter { it.isVoted }.size) { index -> index }.toPersistentList(),
                 )
             },
-        statusKey =
-            MicroBlogKey(
-                id,
-                host = user.key.host,
-            ),
+        statusKey = statusKey,
         card = null,
         createdAt = Instant.parse(createdAt).toUi(),
+        topEndContent =
+            Render.ItemContent.Status.TopEndContent
+                .Visibility(renderedVisibility),
+        bottomContent =
+            Render.ItemContent.Status.BottomContent
+                .Reaction(reaction, myReaction),
     )
 }
 

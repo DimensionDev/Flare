@@ -42,6 +42,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.getService
@@ -54,9 +55,11 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
+import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -64,6 +67,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -85,16 +89,18 @@ import sh.christian.ozone.api.model.JsonContent
 class BlueskyDataSource(
     override val account: UiAccount.Bluesky,
 ) : MicroblogDataSource,
-    KoinComponent {
+    KoinComponent,
+    StatusEvent.Bluesky {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
+    private val coroutineScope: CoroutineScope by inject()
 
     override fun homeTimeline(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -116,7 +122,7 @@ class BlueskyDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -222,7 +228,7 @@ class BlueskyDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -246,7 +252,7 @@ class BlueskyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -265,7 +271,7 @@ class BlueskyDataSource(
                 ),
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    override fun status(statusKey: MicroBlogKey): CacheData<Render.Item> {
         val pagingKey = "status_only_$statusKey"
         val service = account.getService(appDatabase)
         return Cacheable(
@@ -294,7 +300,7 @@ class BlueskyDataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, this) }
             },
         )
     }
@@ -367,8 +373,14 @@ class BlueskyDataSource(
                                     ?.jsonObjectOrNull
                                     ?.let { root ->
                                         StrongRef(
-                                            uri = AtUri(root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri),
-                                            cid = Cid(root["cid"]?.jsonPrimitive?.content ?: item.cid.cid),
+                                            uri =
+                                                AtUri(
+                                                    root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri,
+                                                ),
+                                            cid =
+                                                Cid(
+                                                    root["cid"]?.jsonPrimitive?.content ?: item.cid.cid,
+                                                ),
                                         )
                                     } ?: StrongRef(
                                     uri = item.uri,
@@ -428,230 +440,232 @@ class BlueskyDataSource(
         }
     }
 
-    suspend fun reblog(data: UiStatus.Bluesky) {
-        updateStatusUseCase<StatusContent.Bluesky>(
-            statusKey = data.statusKey,
-            accountKey = account.accountKey,
-            cacheDatabase = database,
-        ) { content ->
-            val uri =
-                if (data.reaction.reposted) {
-                    null
-                } else {
-                    AtUri("")
-                }
-            val count =
-                if (data.reaction.reposted) {
-                    (content.data.repostCount ?: 0) - 1
-                } else {
-                    (content.data.repostCount ?: 0) + 1
-                }.coerceAtLeast(0)
-            content.copy(
-                data =
-                    content.data.copy(
-                        viewer =
-                            content.data.viewer?.copy(
-                                repost = uri,
-                            ) ?: ViewerState(
-                                repost = uri,
-                            ),
-                        repostCount = count,
-                    ),
-            )
-        }
-        runCatching {
-            val service = account.getService(appDatabase)
-            if (data.reaction.reposted && data.reaction.repostUri != null) {
-                service.deleteRecord(
-                    DeleteRecordRequest(
-                        repo = Did(did = account.accountKey.id),
-                        collection = Nsid("app.bsky.feed.repost"),
-                        rkey = data.reaction.repostUri.substringAfterLast('/'),
-                    ),
-                )
-            } else {
-                val result =
-                    service
-                        .createRecord(
-                            CreateRecordRequest(
-                                repo = Did(did = account.accountKey.id),
-                                collection = Nsid("app.bsky.feed.repost"),
-                                record =
-                                    buildJsonObject {
-                                        put("\$type", "app.bsky.feed.repost")
-                                        put("createdAt", Clock.System.now().toString())
-                                        put(
-                                            "subject",
-                                            buildJsonObject {
-                                                put("cid", data.cid)
-                                                put("uri", data.uri)
-                                            },
-                                        )
-                                    }.jsonContent(),
-                            ),
-                        ).requireResponse()
-                updateStatusUseCase<StatusContent.Bluesky>(
-                    statusKey = data.statusKey,
-                    accountKey = account.accountKey,
-                    cacheDatabase = database,
-                ) { content ->
-                    content.copy(
-                        data =
-                            content.data.copy(
-                                viewer =
-                                    content.data.viewer?.copy(
-                                        repost = AtUri(result.uri.atUri),
-                                    ) ?: ViewerState(
-                                        repost = AtUri(result.uri.atUri),
-                                    ),
-                            ),
-                    )
-                }
-            }
-        }.onFailure {
+    override fun reblog(
+        statusKey: MicroBlogKey,
+        cid: String,
+        uri: String,
+        repostUri: String?,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.Bluesky>(
-                statusKey = data.statusKey,
+                statusKey = statusKey,
                 accountKey = account.accountKey,
                 cacheDatabase = database,
             ) { content ->
-                val uri =
-                    if (data.reaction.reposted) {
-                        AtUri(data.reaction.repostUri ?: "")
-                    } else {
+                val newUri =
+                    if (repostUri != null) {
                         null
+                    } else {
+                        AtUri("")
                     }
                 val count =
-                    if (data.reaction.reposted) {
-                        (content.data.repostCount ?: 0) + 1
-                    } else {
+                    if (repostUri != null) {
                         (content.data.repostCount ?: 0) - 1
+                    } else {
+                        (content.data.repostCount ?: 0) + 1
                     }.coerceAtLeast(0)
                 content.copy(
                     data =
                         content.data.copy(
                             viewer =
                                 content.data.viewer?.copy(
-                                    repost = uri,
+                                    repost = newUri,
                                 ) ?: ViewerState(
-                                    repost = uri,
+                                    repost = newUri,
                                 ),
                             repostCount = count,
                         ),
                 )
             }
-        }
-    }
-
-    suspend fun like(data: UiStatus.Bluesky) {
-        updateStatusUseCase<StatusContent.Bluesky>(
-            statusKey = data.statusKey,
-            accountKey = account.accountKey,
-            cacheDatabase = database,
-        ) { content ->
-            val uri =
-                if (data.reaction.liked) {
-                    null
+            runCatching {
+                val service = account.getService(appDatabase)
+                if (repostUri != null) {
+                    service.deleteRecord(
+                        DeleteRecordRequest(
+                            repo = Did(did = account.accountKey.id),
+                            collection = Nsid("app.bsky.feed.repost"),
+                            rkey = repostUri.substringAfterLast('/'),
+                        ),
+                    )
                 } else {
-                    AtUri("")
+                    val result =
+                        service
+                            .createRecord(
+                                CreateRecordRequest(
+                                    repo = Did(did = account.accountKey.id),
+                                    collection = Nsid("app.bsky.feed.repost"),
+                                    record =
+                                        buildJsonObject {
+                                            put("\$type", "app.bsky.feed.repost")
+                                            put("createdAt", Clock.System.now().toString())
+                                            put(
+                                                "subject",
+                                                buildJsonObject {
+                                                    put("cid", cid)
+                                                    put("uri", uri)
+                                                },
+                                            )
+                                        }.jsonContent(),
+                                ),
+                            ).requireResponse()
+                    updateStatusUseCase<StatusContent.Bluesky>(
+                        statusKey = statusKey,
+                        accountKey = account.accountKey,
+                        cacheDatabase = database,
+                    ) { content ->
+                        content.copy(
+                            data =
+                                content.data.copy(
+                                    viewer =
+                                        content.data.viewer?.copy(
+                                            repost = AtUri(result.uri.atUri),
+                                        ) ?: ViewerState(
+                                            repost = AtUri(result.uri.atUri),
+                                        ),
+                                ),
+                        )
+                    }
                 }
-            val count =
-                if (data.reaction.liked) {
-                    (content.data.likeCount ?: 0) - 1
-                } else {
-                    (content.data.likeCount ?: 0) + 1
-                }.coerceAtLeast(0)
-            content.copy(
-                data =
-                    content.data.copy(
-                        viewer =
-                            content.data.viewer?.copy(
-                                like = uri,
-                            ) ?: ViewerState(
-                                like = uri,
-                            ),
-                        likeCount = count,
-                    ),
-            )
-        }
-        runCatching {
-            val service = account.getService(appDatabase)
-            if (data.reaction.liked && data.reaction.likedUri != null) {
-                service.deleteRecord(
-                    DeleteRecordRequest(
-                        repo = Did(did = account.accountKey.id),
-                        collection = Nsid("app.bsky.feed.like"),
-                        rkey = data.reaction.likedUri.substringAfterLast('/'),
-                    ),
-                )
-            } else {
-                val result =
-                    service
-                        .createRecord(
-                            CreateRecordRequest(
-                                repo = Did(did = account.accountKey.id),
-                                collection = Nsid("app.bsky.feed.like"),
-                                record =
-                                    buildJsonObject {
-                                        put("\$type", "app.bsky.feed.like")
-                                        put("createdAt", Clock.System.now().toString())
-                                        put(
-                                            "subject",
-                                            buildJsonObject {
-                                                put("cid", data.cid)
-                                                put("uri", data.uri)
-                                            },
-                                        )
-                                    }.jsonContent(),
-                            ),
-                        ).requireResponse()
+            }.onFailure {
                 updateStatusUseCase<StatusContent.Bluesky>(
-                    statusKey = data.statusKey,
+                    statusKey = statusKey,
                     accountKey = account.accountKey,
                     cacheDatabase = database,
                 ) { content ->
+                    val count =
+                        if (repostUri != null) {
+                            (content.data.repostCount ?: 0) + 1
+                        } else {
+                            (content.data.repostCount ?: 0) - 1
+                        }.coerceAtLeast(0)
                     content.copy(
                         data =
                             content.data.copy(
                                 viewer =
                                     content.data.viewer?.copy(
-                                        like = AtUri(result.uri.atUri),
+                                        repost = repostUri?.let { it1 -> AtUri(it1) },
                                     ) ?: ViewerState(
-                                        like = AtUri(result.uri.atUri),
+                                        repost = repostUri?.let { it1 -> AtUri(it1) },
                                     ),
+                                repostCount = count,
                             ),
                     )
                 }
             }
-        }.onFailure {
+        }
+    }
+
+    override fun like(
+        statusKey: MicroBlogKey,
+        cid: String,
+        uri: String,
+        likedUri: String?,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.Bluesky>(
-                statusKey = data.statusKey,
+                statusKey = statusKey,
                 accountKey = account.accountKey,
                 cacheDatabase = database,
             ) { content ->
-                val uri =
-                    if (data.reaction.liked) {
-                        AtUri(data.reaction.likedUri ?: "")
-                    } else {
+                val newUri =
+                    if (likedUri != null) {
                         null
+                    } else {
+                        AtUri("")
                     }
                 val count =
-                    if (data.reaction.liked) {
-                        (content.data.likeCount ?: 0) + 1
-                    } else {
+                    if (likedUri != null) {
                         (content.data.likeCount ?: 0) - 1
+                    } else {
+                        (content.data.likeCount ?: 0) + 1
                     }.coerceAtLeast(0)
                 content.copy(
                     data =
                         content.data.copy(
                             viewer =
                                 content.data.viewer?.copy(
-                                    like = uri,
+                                    like = newUri,
                                 ) ?: ViewerState(
-                                    like = uri,
+                                    like = newUri,
                                 ),
                             likeCount = count,
                         ),
                 )
+            }
+            runCatching {
+                val service = account.getService(appDatabase)
+                if (likedUri != null) {
+                    service.deleteRecord(
+                        DeleteRecordRequest(
+                            repo = Did(did = account.accountKey.id),
+                            collection = Nsid("app.bsky.feed.like"),
+                            rkey = likedUri.substringAfterLast('/'),
+                        ),
+                    )
+                } else {
+                    val result =
+                        service
+                            .createRecord(
+                                CreateRecordRequest(
+                                    repo = Did(did = account.accountKey.id),
+                                    collection = Nsid("app.bsky.feed.like"),
+                                    record =
+                                        buildJsonObject {
+                                            put("\$type", "app.bsky.feed.like")
+                                            put("createdAt", Clock.System.now().toString())
+                                            put(
+                                                "subject",
+                                                buildJsonObject {
+                                                    put("cid", cid)
+                                                    put("uri", uri)
+                                                },
+                                            )
+                                        }.jsonContent(),
+                                ),
+                            ).requireResponse()
+                    updateStatusUseCase<StatusContent.Bluesky>(
+                        statusKey = statusKey,
+                        accountKey = account.accountKey,
+                        cacheDatabase = database,
+                    ) { content ->
+                        content.copy(
+                            data =
+                                content.data.copy(
+                                    viewer =
+                                        content.data.viewer?.copy(
+                                            like = AtUri(result.uri.atUri),
+                                        ) ?: ViewerState(
+                                            like = AtUri(result.uri.atUri),
+                                        ),
+                                ),
+                        )
+                    }
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Bluesky>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                ) { content ->
+                    val count =
+                        if (likedUri != null) {
+                            (content.data.likeCount ?: 0) + 1
+                        } else {
+                            (content.data.likeCount ?: 0) - 1
+                        }.coerceAtLeast(0)
+                    content.copy(
+                        data =
+                            content.data.copy(
+                                viewer =
+                                    content.data.viewer?.copy(
+                                        like = likedUri?.let { it1 -> AtUri(it1) },
+                                    ) ?: ViewerState(
+                                        like = likedUri?.let { it1 -> AtUri(it1) },
+                                    ),
+                                likeCount = count,
+                            ),
+                    )
+                }
             }
         }
     }
@@ -667,8 +681,14 @@ class BlueskyDataSource(
                 ),
             )
             // delete status from cache
-            database.dbStatusQueries.delete(status_key = statusKey, account_key = account.accountKey)
-            database.dbPagingTimelineQueries.deleteStatus(account_key = account.accountKey, status_key = statusKey)
+            database.dbStatusQueries.delete(
+                status_key = statusKey,
+                account_key = account.accountKey,
+            )
+            database.dbPagingTimelineQueries.deleteStatus(
+                account_key = account.accountKey,
+                status_key = statusKey,
+            )
         }
     }
 
@@ -865,7 +885,7 @@ class BlueskyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<Render.Item>> {
         val service = account.getService(appDatabase)
         return timelinePager(
             pageSize = pageSize,
@@ -921,7 +941,7 @@ class BlueskyDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
+    ): Flow<PagingData<Render.Item>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
 
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(

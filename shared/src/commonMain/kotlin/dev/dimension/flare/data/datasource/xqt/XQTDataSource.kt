@@ -23,6 +23,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -59,8 +60,10 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.render.Render
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -84,7 +87,8 @@ private const val MAX_ASYNC_UPLOAD_SIZE = 10
 class XQTDataSource(
     override val account: UiAccount.XQT,
 ) : MicroblogDataSource,
-    KoinComponent {
+    KoinComponent,
+    StatusEvent.XQT {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val service by lazy {
@@ -95,7 +99,7 @@ class XQTDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -116,7 +120,7 @@ class XQTDataSource(
         pageSize: Int = 20,
         pagingKey: String = "featured_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -137,7 +141,7 @@ class XQTDataSource(
         pageSize: Int = 20,
         pagingKey: String = "bookmark_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -159,7 +163,7 @@ class XQTDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<Render.Item>> {
         if (type == NotificationFilter.All) {
             return Pager(
                 config = PagingConfig(pageSize = pageSize),
@@ -295,7 +299,7 @@ class XQTDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -328,7 +332,7 @@ class XQTDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = 1,
             pagingKey = pagingKey,
@@ -347,7 +351,7 @@ class XQTDataSource(
                 ),
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    override fun status(statusKey: MicroBlogKey): CacheData<Render.Item> {
         val pagingKey = "status_only_$statusKey"
         return Cacheable(
             fetchSource = {
@@ -382,7 +386,7 @@ class XQTDataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, this) }
             },
         )
     }
@@ -552,7 +556,7 @@ class XQTDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -599,7 +603,7 @@ class XQTDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<Render.Item>> {
         // not supported
         throw UnsupportedOperationException("Bluesky does not support discover statuses")
     }

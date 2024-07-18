@@ -3,8 +3,8 @@ package dev.dimension.flare.ui.model.mapper
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.cache.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
 import dev.dimension.flare.data.network.mastodon.api.model.MediaType
@@ -36,11 +36,11 @@ import moe.tlaster.ktml.dom.Node
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,
-    dataSource: MastodonDataSource,
+    event: StatusEvent.Mastodon,
 ): Render.Item {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey.host)
-    val status = status?.renderStatus(accountKey, dataSource)
+    val status = status?.renderStatus(accountKey, event)
     val topMessageType =
         when (type) {
             NotificationTypes.Follow -> Render.TopMessage.MessageType.Mastodon.Follow
@@ -75,7 +75,7 @@ internal fun Notification.render(
 
 internal fun Status.render(
     accountKey: MicroBlogKey,
-    dataSource: MastodonDataSource,
+    event: StatusEvent.Mastodon,
 ): Render.Item {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey.host)
@@ -92,13 +92,13 @@ internal fun Status.render(
     val actualStatus = reblog ?: this
     return Render.Item(
         topMessage = topMessage,
-        content = actualStatus.renderStatus(accountKey, dataSource),
+        content = actualStatus.renderStatus(accountKey, event),
     )
 }
 
 private fun Status.renderStatus(
     accountKey: MicroBlogKey,
-    dataSource: MastodonDataSource,
+    dataSource: StatusEvent.Mastodon,
 ): Render.ItemContent.Status {
     requireNotNull(account) { "actualStatus.account is null" }
     val actualUser = account.render(accountKey.host)
@@ -109,6 +109,14 @@ private fun Status.renderStatus(
             id = id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
             host = actualUser.key.host,
         )
+    val renderedVisibility =
+        when (visibility) {
+            Visibility.Public -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Public
+            Visibility.Unlisted -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Home
+            Visibility.Private -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Followers
+            Visibility.Direct -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+            null -> null
+        }
     return Render.ItemContent.Status(
         images =
             mediaAttachments
@@ -209,6 +217,11 @@ private fun Status.renderStatus(
             },
         statusKey = statusKey,
         createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
+        topEndContent =
+            renderedVisibility?.let {
+                Render.ItemContent.Status.TopEndContent
+                    .Visibility(it)
+            },
     )
 }
 

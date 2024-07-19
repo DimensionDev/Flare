@@ -9,13 +9,13 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -52,9 +52,9 @@ class MisskeyReactionPresenter(
                     status.onSuccess { status ->
                         scope.launch {
                             val content = status.content
-                            if (content is Render.ItemContent.Status) {
+                            if (content is UiTimeline.ItemContent.Status) {
                                 val bottomContent = content.bottomContent
-                                if (bottomContent is Render.ItemContent.Status.BottomContent.Reaction) {
+                                if (bottomContent is UiTimeline.ItemContent.Status.BottomContent.Reaction) {
                                     dataSource.react(
                                         statusKey = statusKey,
                                         hasReacted = bottomContent.myReaction != null,

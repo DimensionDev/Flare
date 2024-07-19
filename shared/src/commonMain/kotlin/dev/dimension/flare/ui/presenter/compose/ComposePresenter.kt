@@ -21,6 +21,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
@@ -32,7 +33,6 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
@@ -313,7 +313,7 @@ sealed interface ComposeStatus {
 abstract class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
-    val replyState: UiState<Render.Item>?,
+    val replyState: UiState<UiTimeline>?,
     val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
     val composeConfig: UiState<ComposeConfig>,
     val enableCrossPost: UiState<Boolean>,

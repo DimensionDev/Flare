@@ -1,20 +1,24 @@
-package dev.dimension.flare.ui.render
+package dev.dimension.flare.ui.model
 
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.humanize
-import dev.dimension.flare.ui.model.UiCard
-import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiPoll
+import dev.dimension.flare.ui.render.UiDateTime
+import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
+import kotlin.jvm.JvmInline
 
-object Render {
+data class UiTimeline(
+    val topMessage: TopMessage?,
+    val content: ItemContent?,
+    val platformType: PlatformType,
+) {
     sealed interface ItemContent {
         data class Status(
             val images: ImmutableList<UiMedia>,
             val contentWarning: String?,
-            val user: User?,
+            val user: UiUserV2?,
             val quote: ImmutableList<Status>,
             val content: UiRichText,
             val actions: ImmutableList<StatusAction>,
@@ -60,26 +64,18 @@ object Render {
             }
         }
 
-        data class User(
-            val avatar: String,
-            val name: UiRichText,
-            val handle: String,
-            val key: MicroBlogKey,
+        @JvmInline
+        value class User(
+            val value: UiUserV2,
         ) : ItemContent
 
         data class UserList(
-            val users: ImmutableList<User>,
+            val users: ImmutableList<UiUserV2>,
         ) : ItemContent
     }
 
-    data class Item(
-        val topMessage: TopMessage?,
-        val content: ItemContent?,
-        val platformType: PlatformType,
-    )
-
     data class TopMessage(
-        val user: ItemContent.User?,
+        val user: UiUserV2?,
         val icon: Icon?,
         val type: MessageType,
     ) {

@@ -13,8 +13,9 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.render.Render
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.render.toUi
 import io.ktor.http.decodeURLPart
 import kotlinx.collections.immutable.toImmutableList
@@ -28,16 +29,16 @@ import moe.tlaster.ktml.dom.Text
 internal fun Status.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.VVO,
-): Render.Item {
+): UiTimeline {
     val message = title?.text
-    return Render.Item(
+    return UiTimeline(
         topMessage =
             message?.let {
-                Render.TopMessage(
+                UiTimeline.TopMessage(
                     user = user?.render(accountKey),
                     icon = null,
                     type =
-                        Render.TopMessage.MessageType.VVO
+                        UiTimeline.TopMessage.MessageType.VVO
                             .Custom(it),
                 )
             },
@@ -49,7 +50,7 @@ internal fun Status.render(
 internal fun Status.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.VVO,
-): Render.ItemContent.Status {
+): UiTimeline.ItemContent.Status {
     val media =
         picsList.orEmpty().mapNotNull {
             val url = it.large?.url ?: it.url
@@ -121,7 +122,7 @@ internal fun Status.renderStatus(
             id = id,
             host = vvoHost,
         )
-    return Render.ItemContent.Status(
+    return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
         content = element.toUi(),
         user = displayUser,
@@ -174,8 +175,8 @@ internal fun Status.renderStatus(
     )
 }
 
-internal fun User.render(accountKey: MicroBlogKey): Render.ItemContent.User =
-    Render.ItemContent.User(
+internal fun User.render(accountKey: MicroBlogKey): UiUserV2 =
+    UiUserV2(
         key =
             MicroBlogKey(
                 id = id.toString(),
@@ -193,8 +194,8 @@ internal fun User.render(accountKey: MicroBlogKey): Render.ItemContent.User =
 internal fun Comment.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.VVO,
-): Render.Item =
-    Render.Item(
+): UiTimeline =
+    UiTimeline(
         topMessage = null,
         content = renderStatus(accountKey, event),
         platformType = PlatformType.VVo,
@@ -203,7 +204,7 @@ internal fun Comment.render(
 internal fun Comment.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.VVO,
-): Render.ItemContent.Status {
+): UiTimeline.ItemContent.Status {
     val element = Ktml.parse(text.orEmpty())
     element.children.forEach {
         replaceMentionAndHashtag(element, it, accountKey)
@@ -219,7 +220,7 @@ internal fun Comment.renderStatus(
             id = id,
             host = vvoHost,
         )
-    return Render.ItemContent.Status(
+    return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
         content = element.toUi(),
         user = displayUser,
@@ -285,14 +286,14 @@ internal fun Comment.renderStatus(
 internal fun Attitude.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.VVO,
-): Render.Item {
+): UiTimeline {
     val content = status?.renderStatus(accountKey, event)
-    return Render.Item(
+    return UiTimeline(
         topMessage =
-            Render.TopMessage(
+            UiTimeline.TopMessage(
                 user = null,
                 icon = null,
-                type = Render.TopMessage.MessageType.VVO.Like,
+                type = UiTimeline.TopMessage.MessageType.VVO.Like,
             ),
         content = content,
         platformType = PlatformType.VVo,

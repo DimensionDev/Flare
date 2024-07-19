@@ -17,9 +17,10 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
-import dev.dimension.flare.ui.render.Render
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -33,31 +34,31 @@ import moe.tlaster.mfm.parser.MFMParser
 internal fun Notification.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
-): Render.Item {
+): UiTimeline {
     requireNotNull(user) { "account is null" }
     val user = user.render(accountKey)
     val status = note?.renderStatus(accountKey, event)
     val topMessageType =
         when (this.type) {
-            NotificationType.Follow -> Render.TopMessage.MessageType.Misskey.Follow
-            NotificationType.Mention -> Render.TopMessage.MessageType.Misskey.Mention
-            NotificationType.Reply -> Render.TopMessage.MessageType.Misskey.Reply
-            NotificationType.Renote -> Render.TopMessage.MessageType.Misskey.Renote
-            NotificationType.Quote -> Render.TopMessage.MessageType.Misskey.Quote
-            NotificationType.Reaction -> Render.TopMessage.MessageType.Misskey.Reaction
-            NotificationType.PollEnded -> Render.TopMessage.MessageType.Misskey.PollEnded
-            NotificationType.ReceiveFollowRequest -> Render.TopMessage.MessageType.Misskey.ReceiveFollowRequest
-            NotificationType.FollowRequestAccepted -> Render.TopMessage.MessageType.Misskey.FollowRequestAccepted
-            NotificationType.AchievementEarned -> Render.TopMessage.MessageType.Misskey.AchievementEarned
-            NotificationType.App -> Render.TopMessage.MessageType.Misskey.App
+            NotificationType.Follow -> UiTimeline.TopMessage.MessageType.Misskey.Follow
+            NotificationType.Mention -> UiTimeline.TopMessage.MessageType.Misskey.Mention
+            NotificationType.Reply -> UiTimeline.TopMessage.MessageType.Misskey.Reply
+            NotificationType.Renote -> UiTimeline.TopMessage.MessageType.Misskey.Renote
+            NotificationType.Quote -> UiTimeline.TopMessage.MessageType.Misskey.Quote
+            NotificationType.Reaction -> UiTimeline.TopMessage.MessageType.Misskey.Reaction
+            NotificationType.PollEnded -> UiTimeline.TopMessage.MessageType.Misskey.PollEnded
+            NotificationType.ReceiveFollowRequest -> UiTimeline.TopMessage.MessageType.Misskey.ReceiveFollowRequest
+            NotificationType.FollowRequestAccepted -> UiTimeline.TopMessage.MessageType.Misskey.FollowRequestAccepted
+            NotificationType.AchievementEarned -> UiTimeline.TopMessage.MessageType.Misskey.AchievementEarned
+            NotificationType.App -> UiTimeline.TopMessage.MessageType.Misskey.App
         }
     val topMessage =
-        Render.TopMessage(
+        UiTimeline.TopMessage(
             user = user,
-            icon = Render.TopMessage.Icon.Retweet,
+            icon = UiTimeline.TopMessage.Icon.Retweet,
             type = topMessageType,
         )
-    return Render.Item(
+    return UiTimeline(
         topMessage = topMessage,
         content =
             when {
@@ -68,10 +69,10 @@ internal fun Notification.render(
                         NotificationType.ReceiveFollowRequest,
                     )
                 ->
-                    user
+                    UiTimeline.ItemContent.User(user)
 
                 else ->
-                    status ?: user
+                    status ?: UiTimeline.ItemContent.User(user)
             },
         platformType = PlatformType.Misskey,
     )
@@ -80,21 +81,21 @@ internal fun Notification.render(
 internal fun Note.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
-): Render.Item {
+): UiTimeline {
     requireNotNull(user) { "account is null" }
     val user = user.render(accountKey)
     val topMessage =
         if (renote == null || !text.isNullOrEmpty()) {
             null
         } else {
-            Render.TopMessage(
+            UiTimeline.TopMessage(
                 user = user,
-                icon = Render.TopMessage.Icon.Retweet,
-                type = Render.TopMessage.MessageType.Mastodon.Reblogged,
+                icon = UiTimeline.TopMessage.Icon.Retweet,
+                type = UiTimeline.TopMessage.MessageType.Mastodon.Reblogged,
             )
         }
     val actualStatus = renote ?: this
-    return Render.Item(
+    return UiTimeline(
         topMessage = topMessage,
         content = actualStatus.renderStatus(accountKey, event),
         platformType = PlatformType.Misskey,
@@ -104,16 +105,16 @@ internal fun Note.render(
 internal fun Note.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
-): Render.ItemContent.Status {
+): UiTimeline.ItemContent.Status {
     val user = user.render(accountKey)
     val isFromMe = user.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Home)
     val renderedVisibility =
         when (visibility) {
-            Visibility.Public -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Public
-            Visibility.Home -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Home
-            Visibility.Followers -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Followers
-            Visibility.Specified -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+            Visibility.Public -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public
+            Visibility.Home -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
+            Visibility.Followers -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
+            Visibility.Specified -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified
         }
     val statusKey =
         MicroBlogKey(
@@ -123,7 +124,7 @@ internal fun Note.renderStatus(
     val reaction =
         reactions
             .map { emoji ->
-                Render.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
+                UiTimeline.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
                     name = emoji.key,
                     count = emoji.value,
                     url = resolveMisskeyEmoji(emoji.key, accountKey.host),
@@ -136,7 +137,7 @@ internal fun Note.renderStatus(
                     },
                 )
             }.toPersistentList()
-    return Render.ItemContent.Status(
+    return UiTimeline.ItemContent.Status(
         images =
             files
                 ?.mapNotNull { file ->
@@ -228,10 +229,10 @@ internal fun Note.renderStatus(
         card = null,
         createdAt = Instant.parse(createdAt).toUi(),
         topEndContent =
-            Render.ItemContent.Status.TopEndContent
+            UiTimeline.ItemContent.Status.TopEndContent
                 .Visibility(renderedVisibility),
         bottomContent =
-            Render.ItemContent.Status.BottomContent
+            UiTimeline.ItemContent.Status.BottomContent
                 .Reaction(reaction, myReaction),
     )
 }
@@ -361,14 +362,14 @@ private fun DriveFile.toUi(): UiMedia? {
     }
 }
 
-internal fun UserLite.render(accountKey: MicroBlogKey): Render.ItemContent.User {
+internal fun UserLite.render(accountKey: MicroBlogKey): UiUserV2 {
     val remoteHost =
         if (host.isNullOrEmpty()) {
             accountKey.host
         } else {
             host
         }
-    return Render.ItemContent.User(
+    return UiUserV2(
         avatar = avatarUrl.orEmpty(),
         name = parseName(name.orEmpty(), accountKey).toUi(),
         handle = "@$username@$remoteHost",
@@ -422,14 +423,14 @@ internal fun UserLite.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
     )
 }
 
-internal fun User.render(accountKey: MicroBlogKey): Render.ItemContent.User {
+internal fun User.render(accountKey: MicroBlogKey): UiUserV2 {
     val remoteHost =
         if (host.isNullOrEmpty()) {
             accountKey.host
         } else {
             host
         }
-    return Render.ItemContent.User(
+    return UiUserV2(
         avatar = avatarUrl.orEmpty(),
         name = parseName(name.orEmpty(), accountKey).toUi(),
         handle = "@$username@$remoteHost",

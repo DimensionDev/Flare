@@ -13,6 +13,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -22,7 +23,6 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
-import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
@@ -138,7 +138,7 @@ class ProfilePresenter(
 
 abstract class ProfileState(
     val userState: UiState<UiUser>,
-    val listState: UiState<LazyPagingItems<Render.Item>>,
+    val listState: UiState<LazyPagingItems<UiTimeline>>,
     val mediaState: UiState<LazyPagingItems<ProfileMedia>>,
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,

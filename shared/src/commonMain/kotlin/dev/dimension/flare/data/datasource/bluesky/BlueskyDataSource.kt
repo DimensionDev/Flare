@@ -54,12 +54,12 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
-import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -100,7 +100,7 @@ class BlueskyDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -122,7 +122,7 @@ class BlueskyDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -228,7 +228,7 @@ class BlueskyDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -252,7 +252,7 @@ class BlueskyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -271,7 +271,7 @@ class BlueskyDataSource(
                 ),
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<Render.Item> {
+    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
         val service = account.getService(appDatabase)
         return Cacheable(
@@ -885,7 +885,7 @@ class BlueskyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> {
+    ): Flow<PagingData<UiTimeline>> {
         val service = account.getService(appDatabase)
         return timelinePager(
             pageSize = pageSize,
@@ -941,7 +941,7 @@ class BlueskyDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
+    ): Flow<PagingData<UiTimeline>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
 
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(

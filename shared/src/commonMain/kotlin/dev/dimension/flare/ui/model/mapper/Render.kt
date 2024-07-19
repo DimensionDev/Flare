@@ -4,9 +4,9 @@ import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.render.Render
+import dev.dimension.flare.ui.model.UiTimeline
 
-internal fun DbPagingTimelineWithStatusView.render(event: StatusEvent): Render.Item =
+internal fun DbPagingTimelineWithStatusView.render(event: StatusEvent): UiTimeline =
     status_content.render(
         timeline_account_key,
         event,

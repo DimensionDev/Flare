@@ -4,16 +4,16 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.render.Render
 
 internal class GuestSearchStatusPagingSource(
     private val query: String,
     private val event: StatusEvent.Mastodon,
-) : PagingSource<String, Render.Item>() {
-    override fun getRefreshKey(state: PagingState<String, Render.Item>): String? = null
+) : PagingSource<String, UiTimeline>() {
+    override fun getRefreshKey(state: PagingState<String, UiTimeline>): String? = null
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, Render.Item> =
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiTimeline> =
         try {
             val result =
                 if (query.startsWith("#")) {

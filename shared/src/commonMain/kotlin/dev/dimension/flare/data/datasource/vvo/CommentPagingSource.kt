@@ -6,15 +6,15 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.render.Render
 
 internal class CommentPagingSource(
     private val service: VVOService,
     private val event: StatusEvent.VVO,
     private val accountKey: MicroBlogKey,
-) : PagingSource<Int, Render.Item>() {
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Render.Item> {
+) : PagingSource<Int, UiTimeline>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiTimeline> {
         return try {
             val config = service.config()
             if (config.data?.login != true) {
@@ -43,5 +43,5 @@ internal class CommentPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, Render.Item>): Int? = null
+    override fun getRefreshKey(state: PagingState<Int, UiTimeline>): Int? = null
 }

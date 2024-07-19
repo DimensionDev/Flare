@@ -12,8 +12,8 @@ import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.render.Render
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -29,7 +29,7 @@ internal fun StatusEvent.timelinePager(
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
     mediator: RemoteMediator<Int, DbPagingTimelineWithStatusView>,
-): Flow<PagingData<Render.Item>> {
+): Flow<PagingData<UiTimeline>> {
     val pagerFlow =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -64,7 +64,7 @@ internal fun StatusEvent.timelinePager(
     }.cachedIn(scope)
 }
 
-private fun Render.Item.contains(keywords: List<String>): Boolean {
+private fun UiTimeline.contains(keywords: List<String>): Boolean {
     return false
 //    val text = textToFilter
 //    return keywords.any { keyword ->

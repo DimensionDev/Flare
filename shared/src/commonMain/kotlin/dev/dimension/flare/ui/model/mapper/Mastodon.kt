@@ -22,8 +22,9 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.render.Render
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
@@ -38,38 +39,38 @@ import moe.tlaster.ktml.dom.Node
 internal fun Notification.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Mastodon,
-): Render.Item {
+): UiTimeline {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey.host)
     val status = status?.renderStatus(accountKey, event)
     val topMessageType =
         when (type) {
-            NotificationTypes.Follow -> Render.TopMessage.MessageType.Mastodon.Follow
-            NotificationTypes.Favourite -> Render.TopMessage.MessageType.Mastodon.Favourite
-            NotificationTypes.Reblog -> Render.TopMessage.MessageType.Mastodon.Reblog
-            NotificationTypes.Mention -> Render.TopMessage.MessageType.Mastodon.Mention
-            NotificationTypes.Poll -> Render.TopMessage.MessageType.Mastodon.Poll
-            NotificationTypes.FollowRequest -> Render.TopMessage.MessageType.Mastodon.FollowRequest
-            NotificationTypes.Status -> Render.TopMessage.MessageType.Mastodon.Status
-            NotificationTypes.Update -> Render.TopMessage.MessageType.Mastodon.Update
+            NotificationTypes.Follow -> UiTimeline.TopMessage.MessageType.Mastodon.Follow
+            NotificationTypes.Favourite -> UiTimeline.TopMessage.MessageType.Mastodon.Favourite
+            NotificationTypes.Reblog -> UiTimeline.TopMessage.MessageType.Mastodon.Reblog
+            NotificationTypes.Mention -> UiTimeline.TopMessage.MessageType.Mastodon.Mention
+            NotificationTypes.Poll -> UiTimeline.TopMessage.MessageType.Mastodon.Poll
+            NotificationTypes.FollowRequest -> UiTimeline.TopMessage.MessageType.Mastodon.FollowRequest
+            NotificationTypes.Status -> UiTimeline.TopMessage.MessageType.Mastodon.Status
+            NotificationTypes.Update -> UiTimeline.TopMessage.MessageType.Mastodon.Update
             null -> null
         }
     val topMessage =
         topMessageType?.let {
-            Render.TopMessage(
+            UiTimeline.TopMessage(
                 user = user,
                 icon = null,
                 type = it,
             )
         }
-    return Render.Item(
+    return UiTimeline(
         topMessage = topMessage,
         content =
             when {
                 type in listOf(NotificationTypes.Follow, NotificationTypes.FollowRequest) ->
-                    user
+                    UiTimeline.ItemContent.User(user)
 
-                else -> status ?: user
+                else -> status ?: UiTimeline.ItemContent.User(user)
             },
         platformType = PlatformType.Mastodon,
     )
@@ -78,21 +79,21 @@ internal fun Notification.render(
 internal fun Status.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Mastodon,
-): Render.Item {
+): UiTimeline {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey.host)
     val topMessage =
         if (reblog == null) {
             null
         } else {
-            Render.TopMessage(
+            UiTimeline.TopMessage(
                 user = user,
-                icon = Render.TopMessage.Icon.Retweet,
-                type = Render.TopMessage.MessageType.Mastodon.Reblogged,
+                icon = UiTimeline.TopMessage.Icon.Retweet,
+                type = UiTimeline.TopMessage.MessageType.Mastodon.Reblogged,
             )
         }
     val actualStatus = reblog ?: this
-    return Render.Item(
+    return UiTimeline(
         topMessage = topMessage,
         content = actualStatus.renderStatus(accountKey, event),
         platformType = PlatformType.Mastodon,
@@ -102,7 +103,7 @@ internal fun Status.render(
 private fun Status.renderStatus(
     accountKey: MicroBlogKey,
     dataSource: StatusEvent.Mastodon,
-): Render.ItemContent.Status {
+): UiTimeline.ItemContent.Status {
     requireNotNull(account) { "actualStatus.account is null" }
     val actualUser = account.render(accountKey.host)
     val isFromMe = actualUser.key == accountKey
@@ -114,13 +115,13 @@ private fun Status.renderStatus(
         )
     val renderedVisibility =
         when (visibility) {
-            Visibility.Public -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Public
-            Visibility.Unlisted -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Home
-            Visibility.Private -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Followers
-            Visibility.Direct -> Render.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+            Visibility.Public -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public
+            Visibility.Unlisted -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
+            Visibility.Private -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
+            Visibility.Direct -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified
             null -> null
         }
-    return Render.ItemContent.Status(
+    return UiTimeline.ItemContent.Status(
         images =
             mediaAttachments
                 ?.mapNotNull { attachment ->
@@ -222,7 +223,7 @@ private fun Status.renderStatus(
         createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
         topEndContent =
             renderedVisibility?.let {
-                Render.ItemContent.Status.TopEndContent
+                UiTimeline.ItemContent.Status.TopEndContent
                     .Visibility(it)
             },
     )
@@ -382,14 +383,14 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
         else -> null
     }
 
-internal fun Account.render(host: String): Render.ItemContent.User {
+internal fun Account.render(host: String): UiUserV2 {
     val remoteHost =
         if (acct != null && acct.contains('@')) {
             acct.substring(acct.indexOf('@') + 1)
         } else {
             host
         }
-    return Render.ItemContent.User(
+    return UiUserV2(
         avatar = avatar.orEmpty(),
         name = parseName(this).toUi(),
         handle = "@$username@$remoteHost",

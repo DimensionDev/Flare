@@ -12,11 +12,11 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.persistentListOf
 
 class VVOCommentPresenter(
@@ -55,5 +55,5 @@ class VVOCommentPresenter(
 
 interface VVOCommentState {
     val root: UiState<UiStatus.VVOComment>
-    val list: UiState<LazyPagingItems<Render.Item>>
+    val list: UiState<LazyPagingItems<UiTimeline>>
 }

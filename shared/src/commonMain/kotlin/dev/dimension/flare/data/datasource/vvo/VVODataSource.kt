@@ -37,11 +37,11 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
-import dev.dimension.flare.ui.render.Render
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -69,7 +69,7 @@ class VVODataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -91,7 +91,7 @@ class VVODataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         when (type) {
             NotificationFilter.All -> TODO()
             NotificationFilter.Mention ->
@@ -226,7 +226,7 @@ class VVODataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -250,11 +250,11 @@ class VVODataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> {
+    ): Flow<PagingData<UiTimeline>> {
         TODO("Not yet implemented")
     }
 
-    override fun status(statusKey: MicroBlogKey): CacheData<Render.Item> {
+    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
         val regex =
             "\\\$render_data\\s*=\\s*(\\[\\{.*?\\}\\])\\[0\\]\\s*\\|\\|\\s*\\{\\};"
@@ -402,7 +402,7 @@ class VVODataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -443,7 +443,7 @@ class VVODataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -548,7 +548,7 @@ class VVODataSource(
     fun statusComment(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> {
+    ): Flow<PagingData<UiTimeline>> {
         val pagingKey = "status_comment_$statusKey"
         return timelinePager(
             pageSize = 20,
@@ -571,7 +571,7 @@ class VVODataSource(
     fun statusRepost(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> {
+    ): Flow<PagingData<UiTimeline>> {
         val pagingKey = "status_repost_$statusKey"
         return timelinePager(
             pageSize = 20,
@@ -594,7 +594,7 @@ class VVODataSource(
     fun commentChild(
         commentKey: MicroBlogKey,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> {
+    ): Flow<PagingData<UiTimeline>> {
         val pagingKey = "comment_child_$commentKey"
         return timelinePager(
             pageSize = 20,

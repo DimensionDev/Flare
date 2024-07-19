@@ -40,11 +40,11 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
-import dev.dimension.flare.ui.render.Render
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,7 +76,7 @@ class MastodonDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -97,7 +97,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "local_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -119,7 +119,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "bookmarked_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -140,7 +140,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "favourite_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -161,7 +161,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "public_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -184,7 +184,7 @@ class MastodonDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -285,7 +285,7 @@ class MastodonDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -309,7 +309,7 @@ class MastodonDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -328,7 +328,7 @@ class MastodonDataSource(
                 ),
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<Render.Item> {
+    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
         return Cacheable(
             fetchSource = {
@@ -773,7 +773,7 @@ class MastodonDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -804,7 +804,7 @@ class MastodonDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<Render.Item>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,

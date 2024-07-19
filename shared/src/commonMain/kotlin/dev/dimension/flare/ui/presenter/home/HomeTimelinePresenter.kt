@@ -8,14 +8,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
-import dev.dimension.flare.ui.render.Render
 
 class HomeTimelinePresenter(
     private val accountType: AccountType,
 ) : TimelinePresenter() {
     @Composable
-    override fun listState(): UiState<LazyPagingItems<Render.Item>> {
+    override fun listState(): UiState<LazyPagingItems<UiTimeline>> {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType)
         return serviceState.map { service ->

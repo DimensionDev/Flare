@@ -23,9 +23,10 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
-import dev.dimension.flare.ui.render.Render
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -46,7 +47,7 @@ private val twitterParser by lazy {
 internal fun TopLevel.renderNotifications(
     accountKey: MicroBlogKey,
     event: StatusEvent.XQT,
-): List<Render.Item> {
+): List<UiTimeline> {
     return timeline
         ?.instructions
         ?.asSequence()
@@ -84,11 +85,11 @@ internal fun TopLevel.renderNotifications(
                     }
                 val messageType =
                     when (data?.icon?.id) {
-                        "person_icon" -> Render.TopMessage.MessageType.XQT.Follow
-                        "heart_icon" -> Render.TopMessage.MessageType.XQT.Like
-                        "bird_icon" -> Render.TopMessage.MessageType.XQT.Logo
+                        "person_icon" -> UiTimeline.TopMessage.MessageType.XQT.Follow
+                        "heart_icon" -> UiTimeline.TopMessage.MessageType.XQT.Like
+                        "bird_icon" -> UiTimeline.TopMessage.MessageType.XQT.Logo
                         else ->
-                            Render.TopMessage.MessageType.XQT
+                            UiTimeline.TopMessage.MessageType.XQT
                                 .Custom(message = message.orEmpty())
                     }
                 val tweet =
@@ -114,13 +115,15 @@ internal fun TopLevel.renderNotifications(
                     }
                 val itemContent =
                     when {
-                        messageType in listOf(Render.TopMessage.MessageType.XQT.Follow) && users != null ->
+                        messageType in listOf(UiTimeline.TopMessage.MessageType.XQT.Follow) && users != null ->
                             if (users.size > 1) {
-                                Render.ItemContent.UserList(
+                                UiTimeline.ItemContent.UserList(
                                     users = users.toImmutableList(),
                                 )
                             } else if (users.size == 1) {
-                                users.first()
+                                UiTimeline.ItemContent.User(
+                                    value = users.first(),
+                                )
                             } else {
                                 null
                             }
@@ -128,11 +131,11 @@ internal fun TopLevel.renderNotifications(
                         else -> null
                     }
 
-                Render.Item(
+                UiTimeline(
                     topMessage =
-                        Render.TopMessage(
+                        UiTimeline.TopMessage(
                             user = users?.firstOrNull(),
-                            icon = Render.TopMessage.Icon.Retweet,
+                            icon = UiTimeline.TopMessage.Icon.Retweet,
                             type = messageType,
                         ),
                     content = itemContent,
@@ -170,12 +173,12 @@ internal fun TopLevel.renderNotifications(
                             ),
                         legacy = tweet,
                     ).renderStatus(accountKey, event)
-                Render.Item(
+                UiTimeline(
                     topMessage =
-                        Render.TopMessage(
+                        UiTimeline.TopMessage(
                             user = renderedUser,
-                            icon = Render.TopMessage.Icon.Retweet,
-                            type = Render.TopMessage.MessageType.XQT.Mention,
+                            icon = UiTimeline.TopMessage.Icon.Retweet,
+                            type = UiTimeline.TopMessage.MessageType.XQT.Mention,
                         ),
                     content = data,
                     platformType = PlatformType.xQt,
@@ -190,7 +193,7 @@ internal fun TopLevel.renderNotifications(
 internal fun Tweet.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.XQT,
-): Render.Item {
+): UiTimeline {
     val retweet =
         legacy
             ?.retweetedStatusResult
@@ -206,15 +209,15 @@ internal fun Tweet.render(
     val user = renderStatus(accountKey, event).user
     val topMessage =
         if (retweet != null && user != null) {
-            Render.TopMessage(
+            UiTimeline.TopMessage(
                 user = user,
-                icon = Render.TopMessage.Icon.Retweet,
-                type = Render.TopMessage.MessageType.XQT.Retweet,
+                icon = UiTimeline.TopMessage.Icon.Retweet,
+                type = UiTimeline.TopMessage.MessageType.XQT.Retweet,
             )
         } else {
             null
         }
-    return Render.Item(
+    return UiTimeline(
         content = actualTweet.renderStatus(accountKey = accountKey, event = event),
         topMessage = topMessage,
         platformType = PlatformType.xQt,
@@ -224,7 +227,7 @@ internal fun Tweet.render(
 internal fun Tweet.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.XQT,
-): Render.ItemContent.Status {
+): UiTimeline.ItemContent.Status {
     val quote =
         quotedStatusResult
             ?.result
@@ -401,7 +404,7 @@ internal fun Tweet.renderStatus(
             id = legacy?.idStr ?: restId,
             host = accountKey.host,
         )
-    return Render.ItemContent.Status(
+    return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
         user = user,
         content = content.toUi(),
@@ -467,7 +470,7 @@ internal fun Tweet.renderStatus(
 }
 
 internal fun User.render(accountKey: MicroBlogKey) =
-    Render.ItemContent.User(
+    UiUserV2(
         key =
             MicroBlogKey(
                 id = restId,

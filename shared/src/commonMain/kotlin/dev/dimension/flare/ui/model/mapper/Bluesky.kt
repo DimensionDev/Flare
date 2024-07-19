@@ -21,9 +21,10 @@ import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
-import dev.dimension.flare.ui.render.Render
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -41,21 +42,21 @@ internal fun FeedViewPostReasonUnion.render(
     accountKey: MicroBlogKey,
     data: PostView,
     event: StatusEvent.Bluesky,
-): Render.Item =
-    Render.Item(
+): UiTimeline =
+    UiTimeline(
         topMessage =
             (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.let {
-                Render.TopMessage(
+                UiTimeline.TopMessage(
                     user = it.render(accountKey),
-                    icon = Render.TopMessage.Icon.Retweet,
-                    type = Render.TopMessage.MessageType.Bluesky.Repost,
+                    icon = UiTimeline.TopMessage.Icon.Retweet,
+                    type = UiTimeline.TopMessage.MessageType.Bluesky.Repost,
                 )
             },
         content = data.renderStatus(accountKey, event),
         platformType = PlatformType.Bluesky,
     )
 
-internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): Render.Item {
+internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiTimeline {
     UiStatus.BlueskyNotification(
         user = author.toUi(accountKey),
         statusKey =
@@ -68,22 +69,22 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): Ren
         indexedAt = indexedAt,
     )
 
-    return Render.Item(
+    return UiTimeline(
         topMessage =
-            Render.TopMessage(
+            UiTimeline.TopMessage(
                 user = author.render(accountKey),
                 icon = null,
                 type =
                     when (reason) {
-                        ListNotificationsReason.LIKE -> Render.TopMessage.MessageType.Bluesky.Like
-                        ListNotificationsReason.REPOST -> Render.TopMessage.MessageType.Bluesky.Repost
-                        ListNotificationsReason.FOLLOW -> Render.TopMessage.MessageType.Bluesky.Follow
-                        ListNotificationsReason.MENTION -> Render.TopMessage.MessageType.Bluesky.Mention
-                        ListNotificationsReason.REPLY -> Render.TopMessage.MessageType.Bluesky.Reply
-                        ListNotificationsReason.QUOTE -> Render.TopMessage.MessageType.Bluesky.Quote
+                        ListNotificationsReason.LIKE -> UiTimeline.TopMessage.MessageType.Bluesky.Like
+                        ListNotificationsReason.REPOST -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
+                        ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
+                        ListNotificationsReason.MENTION -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
+                        ListNotificationsReason.REPLY -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
+                        ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
                     },
             ),
-        content = author.render(accountKey),
+        content = UiTimeline.ItemContent.User(author.render(accountKey)),
         platformType = PlatformType.Bluesky,
     )
 }
@@ -91,7 +92,7 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): Ren
 internal fun PostView.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Bluesky,
-) = Render.Item(
+) = UiTimeline(
     topMessage = null,
     content = renderStatus(accountKey, event),
     platformType = PlatformType.Bluesky,
@@ -100,7 +101,7 @@ internal fun PostView.render(
 internal fun PostView.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.Bluesky,
-): Render.ItemContent.Status {
+): UiTimeline.ItemContent.Status {
     val user = author.render(accountKey)
     val isFromMe = user.key == accountKey
     val statusKey =
@@ -108,7 +109,7 @@ internal fun PostView.renderStatus(
             id = uri.atUri,
             host = accountKey.host,
         )
-    return Render.ItemContent.Status(
+    return UiTimeline.ItemContent.Status(
         user = user,
         images = findMedias(this),
         card = findCard(this),
@@ -190,8 +191,8 @@ internal fun PostView.renderStatus(
     )
 }
 
-internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): Render.ItemContent.User =
-    Render.ItemContent.User(
+internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiUserV2 =
+    UiUserV2(
         avatar = avatar?.uri.orEmpty(),
         name =
             Element("span")
@@ -206,8 +207,8 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): Render.ItemConte
             ),
     )
 
-internal fun ProfileView.render(accountKey: MicroBlogKey): Render.ItemContent.User =
-    Render.ItemContent.User(
+internal fun ProfileView.render(accountKey: MicroBlogKey): UiUserV2 =
+    UiUserV2(
         avatar = avatar?.uri.orEmpty(),
         name =
             Element("span")
@@ -377,7 +378,7 @@ private fun findQuote(
 private fun findQuote2(
     accountKey: MicroBlogKey,
     postView: PostView,
-): Render.ItemContent.Status? =
+): UiTimeline.ItemContent.Status? =
     when (val embed = postView.embed) {
         is PostViewEmbedUnion.RecordView -> render(accountKey, embed.value.record)
         is PostViewEmbedUnion.RecordWithMediaView ->
@@ -392,12 +393,12 @@ private fun findQuote2(
 private fun render(
     accountKey: MicroBlogKey,
     record: RecordViewRecordUnion,
-): Render.ItemContent.Status? =
+): UiTimeline.ItemContent.Status? =
     when (record) {
         is RecordViewRecordUnion.ViewRecord -> {
             val user = record.value.author.render(accountKey)
             val isFromMe = user.key == accountKey
-            Render.ItemContent.Status(
+            UiTimeline.ItemContent.Status(
                 user = user,
                 images =
                     record.value.embeds

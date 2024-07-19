@@ -9,15 +9,15 @@ import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
-import dev.dimension.flare.ui.render.Render
 
 class BookmarkTimelinePresenter(
     private val accountType: AccountType,
 ) : TimelinePresenter() {
     @Composable
-    override fun listState(): UiState<LazyPagingItems<Render.Item>> {
+    override fun listState(): UiState<LazyPagingItems<UiTimeline>> {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType)
         return serviceState.map { service ->

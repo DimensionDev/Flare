@@ -11,9 +11,9 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.render.Render
 import kotlinx.coroutines.flow.map
 
 class ProfileMediaPresenter(
@@ -35,7 +35,7 @@ class ProfileMediaPresenter(
                         ).map { data ->
                             data.flatMap { status ->
                                 val content = status.content
-                                if (content is Render.ItemContent.Status) {
+                                if (content is UiTimeline.ItemContent.Status) {
                                     content.images.map {
                                         ProfileMedia(
                                             it,
@@ -62,6 +62,6 @@ interface ProfileMediaState {
 
 data class ProfileMedia(
     val media: UiMedia,
-    val status: Render.Item,
+    val status: UiTimeline,
     val index: Int,
 )

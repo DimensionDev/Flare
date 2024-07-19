@@ -11,10 +11,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.render.Render
 
 class SearchPresenter(
     private val accountType: AccountType,
@@ -68,7 +68,7 @@ class SearchPresenter(
 
 interface SearchState {
     val users: UiState<LazyPagingItems<UiUser>>
-    val status: UiState<LazyPagingItems<Render.Item>>
+    val status: UiState<LazyPagingItems<UiTimeline>>
     val searching: Boolean
 
     fun search(new: String)

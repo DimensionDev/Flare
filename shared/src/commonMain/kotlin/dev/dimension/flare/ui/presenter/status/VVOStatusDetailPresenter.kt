@@ -14,11 +14,11 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.render.Render
 
 class VVOStatusDetailPresenter(
     private val accountType: AccountType,
@@ -84,6 +84,6 @@ class VVOStatusDetailPresenter(
 @Immutable
 interface VVOStatusDetailState {
     val status: UiState<UiStatus.VVO>
-    val comment: UiState<LazyPagingItems<Render.Item>>
-    val repost: UiState<LazyPagingItems<Render.Item>>
+    val comment: UiState<LazyPagingItems<UiTimeline>>
+    val repost: UiState<LazyPagingItems<UiTimeline>>
 }

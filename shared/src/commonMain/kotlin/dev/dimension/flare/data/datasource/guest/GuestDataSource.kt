@@ -27,9 +27,10 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.render.Render
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -48,9 +49,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestTimelinePagingSource()
+            GuestTimelinePagingSource(event = this)
         }.flow
 
     override fun notification(
@@ -58,7 +59,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<Render.Item>> {
         TODO("Not yet implemented")
     }
 
@@ -124,9 +125,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestUserTimelinePagingSource(userKey.id, onlyMedia = mediaOnly)
+            GuestUserTimelinePagingSource(userKey.id, event = this, onlyMedia = mediaOnly)
         }.flow
 
     override fun context(
@@ -134,12 +135,12 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestStatusDetailPagingSource(statusKey, statusOnly = false)
+            GuestStatusDetailPagingSource(statusKey, event = this, statusOnly = false)
         }.flow
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    override fun status(statusKey: MicroBlogKey): CacheData<Render.Item> {
         val pagingKey = "status_only_$statusKey"
         return MemCacheable(
             key = pagingKey,
@@ -147,7 +148,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
                 GuestMastodonService
                     .lookupStatus(
                         statusKey.id,
-                    ).toUi(GuestMastodonService.GuestKey)
+                    ).render(GuestMastodonService.GuestKey, this)
             },
         )
     }
@@ -166,9 +167,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestSearchStatusPagingSource(query)
+            GuestSearchStatusPagingSource(query, event = this)
         }.flow
 
     override fun searchUser(
@@ -200,9 +201,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<Render.Item>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestDiscoverStatusPagingSource()
+            GuestDiscoverStatusPagingSource(event = this)
         }.flow
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =

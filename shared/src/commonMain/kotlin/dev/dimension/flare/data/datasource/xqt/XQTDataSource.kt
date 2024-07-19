@@ -46,9 +46,6 @@ import dev.dimension.flare.data.network.xqt.model.PostDeleteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
-import dev.dimension.flare.data.network.xqt.model.Tweet
-import dev.dimension.flare.data.network.xqt.model.TweetTombstone
-import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.repository.LocalFilterRepository
@@ -74,6 +71,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
@@ -91,6 +89,7 @@ class XQTDataSource(
     StatusEvent.XQT {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
+    private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         XQTService(chocolate = account.credential.chocolate)
     }
@@ -169,9 +168,10 @@ class XQTDataSource(
                 config = PagingConfig(pageSize = pageSize),
             ) {
                 NotificationPagingSource(
-                    "en",
-                    service,
-                    account.accountKey,
+                    locale = "en",
+                    service = service,
+                    accountKey = account.accountKey,
+                    event = this,
                 )
             }.flow.cachedIn(scope)
         } else {
@@ -681,112 +681,81 @@ class XQTDataSource(
         )
     }
 
-    suspend fun like(status: UiStatus.XQT) {
-        updateStatusUseCase<StatusContent.XQT>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            legacy =
-                                it.data.legacy?.copy(
-                                    favorited = !status.reaction.liked,
-                                    favoriteCount =
-                                        if (status.reaction.liked) {
-                                            it.data.legacy.favoriteCount
-                                                .minus(1)
-                                        } else {
-                                            it.data.legacy.favoriteCount
-                                                .plus(1)
-                                        },
-                                    retweetedStatusResult =
-                                        it.data.legacy.retweetedStatusResult?.copy(
-                                            result =
-                                                when (it.data.legacy.retweetedStatusResult.result) {
-                                                    is Tweet ->
-                                                        it.data.legacy.retweetedStatusResult.result.copy(
-                                                            legacy =
-                                                                it.data.legacy.retweetedStatusResult.result.legacy?.copy(
-                                                                    favorited = !status.reaction.liked,
-                                                                    favoriteCount =
-                                                                        if (status.reaction.liked) {
-                                                                            it.data.legacy.retweetedStatusResult.result
-                                                                                .legacy.favoriteCount
-                                                                                .minus(1)
-                                                                        } else {
-                                                                            it.data.legacy.retweetedStatusResult.result
-                                                                                .legacy.favoriteCount
-                                                                                .plus(1)
-                                                                        },
-                                                                ),
-                                                        )
-
-                                                    is TweetTombstone -> it.data.legacy.retweetedStatusResult.result
-                                                    is TweetWithVisibilityResults ->
-                                                        it.data.legacy.retweetedStatusResult.result.copy(
-                                                            tweet =
-                                                                it.data.legacy.retweetedStatusResult.result.tweet.copy(
-                                                                    legacy =
-                                                                        it.data.legacy.retweetedStatusResult.result
-                                                                            .tweet.legacy
-                                                                            ?.copy(
-                                                                                favorited = !status.reaction.liked,
-                                                                                favoriteCount =
-                                                                                    if (status.reaction.liked) {
-                                                                                        it.data.legacy.retweetedStatusResult
-                                                                                            .result.tweet.legacy.favoriteCount
-                                                                                            .minus(1)
-                                                                                    } else {
-                                                                                        it.data.legacy.retweetedStatusResult
-                                                                                            .result.tweet.legacy.favoriteCount
-                                                                                            .plus(1)
-                                                                                    },
-                                                                            ),
-                                                                ),
-                                                        )
-
-                                                    null -> null
-                                                },
-                                        ),
-                                ),
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            if (status.reaction.liked) {
-                service.postUnfavoriteTweet(
-                    postUnfavoriteTweetRequest =
-                        PostUnfavoriteTweetRequest(
-                            variables = PostCreateRetweetRequestVariables(tweetId = status.statusKey.id),
-                        ),
-                )
-            } else {
-                service.postFavoriteTweet(
-                    postFavoriteTweetRequest =
-                        PostFavoriteTweetRequest(
-                            variables =
-                                PostCreateRetweetRequestVariables(
-                                    tweetId = status.statusKey.id,
-                                ),
-                        ),
-                )
-            }
-        }.onFailure {
+    override fun like(
+        statusKey: MicroBlogKey,
+        liked: Boolean,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.XQT>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data = status.raw,
+                        data =
+                            it.data.copy(
+                                legacy =
+                                    it.data.legacy?.copy(
+                                        favorited = !liked,
+                                        favoriteCount =
+                                            if (liked) {
+                                                it.data.legacy.favoriteCount
+                                                    .minus(1)
+                                            } else {
+                                                it.data.legacy.favoriteCount
+                                                    .plus(1)
+                                            },
+                                    ),
+                            ),
                     )
                 },
             )
-        }.onSuccess {
+
+            runCatching {
+                if (liked) {
+                    service.postUnfavoriteTweet(
+                        postUnfavoriteTweetRequest =
+                            PostUnfavoriteTweetRequest(
+                                variables = PostCreateRetweetRequestVariables(tweetId = statusKey.id),
+                            ),
+                    )
+                } else {
+                    service.postFavoriteTweet(
+                        postFavoriteTweetRequest =
+                            PostFavoriteTweetRequest(
+                                variables =
+                                    PostCreateRetweetRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.XQT>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    legacy =
+                                        it.data.legacy?.copy(
+                                            favorited = liked,
+                                            favoriteCount =
+                                                if (liked) {
+                                                    it.data.legacy.favoriteCount
+                                                        .plus(1)
+                                                } else {
+                                                    it.data.legacy.favoriteCount
+                                                        .minus(1)
+                                                },
+                                        ),
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess {
 //            updateStatusUseCase<StatusContent.XQT>(
 //                statusKey = status.statusKey,
 //                accountKey = status.accountKey,
@@ -797,114 +766,86 @@ class XQTDataSource(
 //                    )
 //                },
 //            )
+            }
         }
     }
 
-    suspend fun retweet(status: UiStatus.XQT) {
-        updateStatusUseCase<StatusContent.XQT>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            legacy =
-                                it.data.legacy?.copy(
-                                    retweeted = !status.reaction.retweeted,
-                                    retweetCount =
-                                        if (status.reaction.retweeted) {
-                                            it.data.legacy.retweetCount
-                                                .minus(1)
-                                        } else {
-                                            it.data.legacy.retweetCount
-                                                .plus(1)
-                                        },
-                                    retweetedStatusResult =
-                                        it.data.legacy.retweetedStatusResult?.copy(
-                                            result =
-                                                when (it.data.legacy.retweetedStatusResult.result) {
-                                                    is Tweet ->
-                                                        it.data.legacy.retweetedStatusResult.result.copy(
-                                                            legacy =
-                                                                it.data.legacy.retweetedStatusResult.result.legacy?.copy(
-                                                                    retweeted = !status.reaction.retweeted,
-                                                                    retweetCount =
-                                                                        if (status.reaction.retweeted) {
-                                                                            it.data.legacy.retweetedStatusResult
-                                                                                .result.legacy.retweetCount
-                                                                                .minus(1)
-                                                                        } else {
-                                                                            it.data.legacy.retweetedStatusResult
-                                                                                .result.legacy.retweetCount
-                                                                                .plus(1)
-                                                                        },
-                                                                ),
-                                                        )
-
-                                                    is TweetTombstone -> it.data.legacy.retweetedStatusResult.result
-                                                    is TweetWithVisibilityResults ->
-                                                        it.data.legacy.retweetedStatusResult.result.copy(
-                                                            tweet =
-                                                                it.data.legacy.retweetedStatusResult.result.tweet.copy(
-                                                                    legacy =
-                                                                        it.data.legacy.retweetedStatusResult.result.tweet.legacy?.copy(
-                                                                            retweeted = !status.reaction.retweeted,
-                                                                            retweetCount =
-                                                                                if (status.reaction.retweeted) {
-                                                                                    it.data.legacy.retweetedStatusResult
-                                                                                        .result.tweet.legacy.retweetCount
-                                                                                        .minus(1)
-                                                                                } else {
-                                                                                    it.data.legacy.retweetedStatusResult
-                                                                                        .result.tweet.legacy.retweetCount
-                                                                                        .plus(1)
-                                                                                },
-                                                                        ),
-                                                                ),
-                                                        )
-
-                                                    null -> null
-                                                },
-                                        ),
-                                ),
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            if (status.reaction.retweeted) {
-                service.postDeleteRetweet(
-                    postDeleteRetweetRequest =
-                        PostDeleteRetweetRequest(
-                            variables = PostDeleteRetweetRequestVariables(sourceTweetId = status.statusKey.id),
-                        ),
-                )
-            } else {
-                service.postCreateRetweet(
-                    postCreateRetweetRequest =
-                        PostCreateRetweetRequest(
-                            variables =
-                                PostCreateRetweetRequestVariables(
-                                    tweetId = status.statusKey.id,
-                                ),
-                        ),
-                )
-            }
-        }.onFailure {
-            it.printStackTrace()
+    override fun retweet(
+        statusKey: MicroBlogKey,
+        retweeted: Boolean,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.XQT>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data = status.raw,
+                        data =
+                            it.data.copy(
+                                legacy =
+                                    it.data.legacy?.copy(
+                                        retweeted = !retweeted,
+                                        retweetCount =
+                                            if (retweeted) {
+                                                it.data.legacy.retweetCount
+                                                    .minus(1)
+                                            } else {
+                                                it.data.legacy.retweetCount
+                                                    .plus(1)
+                                            },
+                                    ),
+                            ),
                     )
                 },
             )
-        }.onSuccess {
+
+            runCatching {
+                if (retweeted) {
+                    service.postDeleteRetweet(
+                        postDeleteRetweetRequest =
+                            PostDeleteRetweetRequest(
+                                variables = PostDeleteRetweetRequestVariables(sourceTweetId = statusKey.id),
+                            ),
+                    )
+                } else {
+                    service.postCreateRetweet(
+                        postCreateRetweetRequest =
+                            PostCreateRetweetRequest(
+                                variables =
+                                    PostCreateRetweetRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                }
+            }.onFailure {
+                it.printStackTrace()
+                updateStatusUseCase<StatusContent.XQT>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    legacy =
+                                        it.data.legacy?.copy(
+                                            retweeted = retweeted,
+                                            retweetCount =
+                                                if (retweeted) {
+                                                    it.data.legacy.retweetCount
+                                                        .plus(1)
+                                                } else {
+                                                    it.data.legacy.retweetCount
+                                                        .minus(1)
+                                                },
+                                        ),
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess {
 //            updateStatusUseCase<StatusContent.XQT>(
 //                statusKey = status.statusKey,
 //                accountKey = status.accountKey,
@@ -915,6 +856,7 @@ class XQTDataSource(
 //                    )
 //                },
 //            )
+            }
         }
     }
 

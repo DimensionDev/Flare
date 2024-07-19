@@ -2,12 +2,13 @@ package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.User
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
@@ -26,7 +27,7 @@ import moe.tlaster.ktml.dom.Text
 
 internal fun Status.render(
     accountKey: MicroBlogKey,
-    dataSource: VVODataSource,
+    event: StatusEvent.VVO,
 ): Render.Item {
     val message = title?.text
     return Render.Item(
@@ -40,13 +41,14 @@ internal fun Status.render(
                             .Custom(it),
                 )
             },
-        content = renderStatus(accountKey, dataSource),
+        content = renderStatus(accountKey, event),
+        platformType = PlatformType.VVo,
     )
 }
 
 internal fun Status.renderStatus(
     accountKey: MicroBlogKey,
-    dataSource: VVODataSource,
+    event: StatusEvent.VVO,
 ): Render.ItemContent.Status {
     val media =
         picsList.orEmpty().mapNotNull {
@@ -114,19 +116,20 @@ internal fun Status.renderStatus(
     element.children.forEach {
         replaceMentionAndHashtag(element, it, accountKey)
     }
+    val statusKey =
+        MicroBlogKey(
+            id = id,
+            host = vvoHost,
+        )
     return Render.ItemContent.Status(
-        statusKey =
-            MicroBlogKey(
-                id = id,
-                host = vvoHost,
-            ),
+        statusKey = statusKey,
         content = element.toUi(),
         user = displayUser,
         quote =
             listOfNotNull(
                 retweetedStatus?.renderStatus(
                     accountKey,
-                    dataSource,
+                    event,
                 ),
             ).toImmutableList(),
         card = null,
@@ -149,9 +152,9 @@ internal fun Status.renderStatus(
                 ),
                 StatusAction.Item.Like(
                     count = attitudesCount ?: 0,
-                    liked = false,
+                    liked = favorited ?: false,
                     onClicked = {
-//                            dataSource.like(accountKey, favourited ?: false)
+                        event.like(statusKey, favorited ?: false)
                     },
                 ),
                 StatusAction.Group(
@@ -189,16 +192,17 @@ internal fun User.render(accountKey: MicroBlogKey): Render.ItemContent.User =
 
 internal fun Comment.render(
     accountKey: MicroBlogKey,
-    dataSource: VVODataSource,
+    event: StatusEvent.VVO,
 ): Render.Item =
     Render.Item(
         topMessage = null,
-        content = renderStatus(accountKey, dataSource),
+        content = renderStatus(accountKey, event),
+        platformType = PlatformType.VVo,
     )
 
 internal fun Comment.renderStatus(
     accountKey: MicroBlogKey,
-    dataSource: VVODataSource,
+    event: StatusEvent.VVO,
 ): Render.ItemContent.Status {
     val element = Ktml.parse(text.orEmpty())
     element.children.forEach {
@@ -210,12 +214,13 @@ internal fun Comment.renderStatus(
         rawUser?.copy(
             handle = source ?: rawUser.handle,
         )
+    val statusKey =
+        MicroBlogKey(
+            id = id,
+            host = vvoHost,
+        )
     return Render.ItemContent.Status(
-        statusKey =
-            MicroBlogKey(
-                id = id,
-                host = vvoHost,
-            ),
+        statusKey = statusKey,
         content = element.toUi(),
         user = displayUser,
         quote =
@@ -223,7 +228,7 @@ internal fun Comment.renderStatus(
                 ?.map {
                     it.renderStatus(
                         accountKey,
-                        dataSource,
+                        event,
                     )
                 }.orEmpty()
                 .toImmutableList(),
@@ -256,9 +261,9 @@ internal fun Comment.renderStatus(
                 ),
                 StatusAction.Item.Like(
                     count = likeCount ?: 0,
-                    liked = false,
+                    liked = liked ?: false,
                     onClicked = {
-//                            dataSource.like(accountKey, favourited ?: false)
+                        event.likeComment(statusKey, liked ?: false)
                     },
                 ),
                 StatusAction.Group(
@@ -274,6 +279,23 @@ internal fun Comment.renderStatus(
                 ),
             ).toImmutableList(),
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+    )
+}
+
+internal fun Attitude.render(
+    accountKey: MicroBlogKey,
+    event: StatusEvent.VVO,
+): Render.Item {
+    val content = status?.renderStatus(accountKey, event)
+    return Render.Item(
+        topMessage =
+            Render.TopMessage(
+                user = null,
+                icon = null,
+                type = Render.TopMessage.MessageType.VVO.Like,
+            ),
+        content = content,
+        platformType = PlatformType.VVo,
     )
 }
 

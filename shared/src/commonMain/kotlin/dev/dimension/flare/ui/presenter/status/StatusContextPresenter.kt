@@ -10,10 +10,10 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.render.Render
 
 class StatusContextPresenter(
     private val accountType: AccountType,
@@ -41,7 +41,7 @@ class StatusContextPresenter(
 }
 
 abstract class StatusContextState(
-    val listState: UiState<LazyPagingItems<UiStatus>>,
+    val listState: UiState<LazyPagingItems<Render.Item>>,
 ) {
     abstract suspend fun refresh()
 }

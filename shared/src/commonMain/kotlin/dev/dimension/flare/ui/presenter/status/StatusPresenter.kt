@@ -7,10 +7,10 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.render.Render
 
 class StatusPresenter(
     private val accountType: AccountType,
@@ -27,11 +27,11 @@ class StatusPresenter(
             }
 
         return object : StatusState {
-            override val status: UiState<UiStatus> = accountServiceState
+            override val status: UiState<Render.Item> = accountServiceState
         }
     }
 }
 
 interface StatusState {
-    val status: UiState<UiStatus>
+    val status: UiState<Render.Item>
 }

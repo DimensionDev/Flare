@@ -16,6 +16,7 @@ import dev.dimension.flare.data.datasource.bluesky.jsonElement
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiRelation
@@ -51,6 +52,7 @@ internal fun FeedViewPostReasonUnion.render(
                 )
             },
         content = data.renderStatus(accountKey, event),
+        platformType = PlatformType.Bluesky,
     )
 
 internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): Render.Item {
@@ -82,6 +84,7 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): Ren
                     },
             ),
         content = author.render(accountKey),
+        platformType = PlatformType.Bluesky,
     )
 }
 
@@ -91,6 +94,7 @@ internal fun PostView.render(
 ) = Render.Item(
     topMessage = null,
     content = renderStatus(accountKey, event),
+    platformType = PlatformType.Bluesky,
 )
 
 internal fun PostView.renderStatus(

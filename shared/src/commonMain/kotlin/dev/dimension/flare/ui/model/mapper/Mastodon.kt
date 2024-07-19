@@ -15,6 +15,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.RelationshipResponse
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
@@ -70,6 +71,7 @@ internal fun Notification.render(
 
                 else -> status ?: user
             },
+        platformType = PlatformType.Mastodon,
     )
 }
 
@@ -93,6 +95,7 @@ internal fun Status.render(
     return Render.Item(
         topMessage = topMessage,
         content = actualStatus.renderStatus(accountKey, event),
+        platformType = PlatformType.Mastodon,
     )
 }
 

@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.render
 
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
@@ -74,6 +75,7 @@ object Render {
     data class Item(
         val topMessage: TopMessage?,
         val content: ItemContent?,
+        val platformType: PlatformType,
     )
 
     data class TopMessage(
@@ -164,6 +166,8 @@ object Render {
                 data class Custom(
                     val message: String,
                 ) : VVO
+
+                data object Like : VVO
             }
         }
     }

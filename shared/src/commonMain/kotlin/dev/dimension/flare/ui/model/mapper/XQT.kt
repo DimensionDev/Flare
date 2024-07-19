@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.model.mapper
 
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.data.datasource.microblog.StatusAction
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
 import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.Tweet
@@ -16,6 +16,7 @@ import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
@@ -44,7 +45,7 @@ private val twitterParser by lazy {
 
 internal fun TopLevel.renderNotifications(
     accountKey: MicroBlogKey,
-    dataSource: XQTDataSource,
+    event: StatusEvent.XQT,
 ): List<Render.Item> {
     return timeline
         ?.instructions
@@ -109,7 +110,7 @@ internal fun TopLevel.renderNotifications(
                                         ),
                                 ),
                             legacy = it,
-                        ).renderStatus(accountKey, dataSource)
+                        ).renderStatus(accountKey, event)
                     }
                 val itemContent =
                     when {
@@ -135,6 +136,7 @@ internal fun TopLevel.renderNotifications(
                             type = messageType,
                         ),
                     content = itemContent,
+                    platformType = PlatformType.xQt,
                 )
             } else if (mentionTweet != null) {
                 val tweet = globalObjects?.tweets?.get(mentionTweet.id) ?: return@mapNotNull null
@@ -167,7 +169,7 @@ internal fun TopLevel.renderNotifications(
                                     ),
                             ),
                         legacy = tweet,
-                    ).renderStatus(accountKey, dataSource)
+                    ).renderStatus(accountKey, event)
                 Render.Item(
                     topMessage =
                         Render.TopMessage(
@@ -176,6 +178,7 @@ internal fun TopLevel.renderNotifications(
                             type = Render.TopMessage.MessageType.XQT.Mention,
                         ),
                     content = data,
+                    platformType = PlatformType.xQt,
                 )
             } else {
                 null
@@ -186,7 +189,7 @@ internal fun TopLevel.renderNotifications(
 
 internal fun Tweet.render(
     accountKey: MicroBlogKey,
-    dataSource: XQTDataSource,
+    event: StatusEvent.XQT,
 ): Render.Item {
     val retweet =
         legacy
@@ -200,7 +203,7 @@ internal fun Tweet.render(
                 }
             }
     val actualTweet = retweet ?: this
-    val user = renderStatus(accountKey, dataSource).user
+    val user = renderStatus(accountKey, event).user
     val topMessage =
         if (retweet != null && user != null) {
             Render.TopMessage(
@@ -212,14 +215,15 @@ internal fun Tweet.render(
             null
         }
     return Render.Item(
-        content = actualTweet.renderStatus(accountKey = accountKey, dataSource = dataSource),
+        content = actualTweet.renderStatus(accountKey = accountKey, event = event),
         topMessage = topMessage,
+        platformType = PlatformType.xQt,
     )
 }
 
 internal fun Tweet.renderStatus(
     accountKey: MicroBlogKey,
-    dataSource: XQTDataSource,
+    event: StatusEvent.XQT,
 ): Render.ItemContent.Status {
     val quote =
         quotedStatusResult
@@ -230,7 +234,7 @@ internal fun Tweet.renderStatus(
                     is TweetTombstone -> null
                     is TweetWithVisibilityResults -> it.tweet
                 }
-            }?.renderStatus(accountKey = accountKey, dataSource = dataSource)
+            }?.renderStatus(accountKey = accountKey, event = event)
     val user =
         core
             ?.userResults
@@ -392,12 +396,13 @@ internal fun Tweet.renderStatus(
     val isFromMe = user?.key == accountKey
     val createAt =
         legacy?.createdAt?.let { parseCustomDateTime(it) } ?: Clock.System.now()
+    val statusKey =
+        MicroBlogKey(
+            id = legacy?.idStr ?: restId,
+            host = accountKey.host,
+        )
     return Render.ItemContent.Status(
-        statusKey =
-            MicroBlogKey(
-                id = legacy?.idStr ?: restId,
-                host = accountKey.host,
-            ),
+        statusKey = statusKey,
         user = user,
         content = content.toUi(),
         card = uiCard,
@@ -425,6 +430,7 @@ internal fun Tweet.renderStatus(
                                 count = legacy?.retweetCount?.toLong() ?: 0,
                                 retweeted = legacy?.retweeted ?: false,
                                 onClicked = {
+                                    event.retweet(statusKey, legacy?.retweeted ?: false)
                                 },
                             ),
                             StatusAction.Item.Quote(
@@ -436,6 +442,7 @@ internal fun Tweet.renderStatus(
                     count = legacy?.favoriteCount?.toLong() ?: 0,
                     liked = legacy?.favorited ?: false,
                     onClicked = {
+                        event.like(statusKey, legacy?.favorited ?: false)
                     },
                 ),
                 StatusAction.Group(

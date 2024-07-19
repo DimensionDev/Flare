@@ -46,7 +46,27 @@ sealed interface StatusEvent {
         )
     }
 
-    interface XQT : StatusEvent
+    interface XQT : StatusEvent {
+        fun retweet(
+            statusKey: MicroBlogKey,
+            retweeted: Boolean,
+        )
 
-    interface VVO : StatusEvent
+        fun like(
+            statusKey: MicroBlogKey,
+            liked: Boolean,
+        )
+    }
+
+    interface VVO : StatusEvent {
+        fun like(
+            statusKey: MicroBlogKey,
+            liked: Boolean,
+        )
+
+        fun likeComment(
+            statusKey: MicroBlogKey,
+            liked: Boolean,
+        )
+    }
 }

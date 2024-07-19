@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
@@ -72,6 +73,7 @@ internal fun Notification.render(
                 else ->
                     status ?: user
             },
+        platformType = PlatformType.Misskey,
     )
 }
 
@@ -95,6 +97,7 @@ internal fun Note.render(
     return Render.Item(
         topMessage = topMessage,
         content = actualStatus.renderStatus(accountKey, event),
+        platformType = PlatformType.Misskey,
     )
 }
 

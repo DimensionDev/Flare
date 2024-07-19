@@ -3,8 +3,6 @@ package dev.dimension.flare.ui.model.mapper
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
-import dev.dimension.flare.data.datasource.vvo.VVODataSource
-import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.Render
 
@@ -60,18 +58,18 @@ internal fun StatusContent.render(
     is StatusContent.XQT ->
         data.render(
             accountKey = accountKey,
-            dataSource = dataSource as XQTDataSource,
+            event = event as StatusEvent.XQT,
         )
 
     is StatusContent.VVO ->
         data.render(
             accountKey = accountKey,
-            dataSource = dataSource as VVODataSource,
+            event = event as StatusEvent.VVO,
         )
 
     is StatusContent.VVOComment ->
         data.render(
             accountKey = accountKey,
-            dataSource = dataSource as VVODataSource,
+            event = event as StatusEvent.VVO,
         )
 }

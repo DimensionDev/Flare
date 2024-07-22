@@ -36,7 +36,7 @@ internal fun Status.render(
             message?.let {
                 UiTimeline.TopMessage(
                     user = user?.render(accountKey),
-                    icon = null,
+                    icon = UiTimeline.TopMessage.Icon.Info,
                     type =
                         UiTimeline.TopMessage.MessageType.VVO
                             .Custom(it),
@@ -172,6 +172,7 @@ internal fun Status.renderStatus(
             ).toImmutableList(),
         poll = null,
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+        sensitive = false,
     )
 }
 
@@ -280,6 +281,7 @@ internal fun Comment.renderStatus(
                 ),
             ).toImmutableList(),
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+        sensitive = false,
     )
 }
 
@@ -288,11 +290,12 @@ internal fun Attitude.render(
     event: StatusEvent.VVO,
 ): UiTimeline {
     val content = status?.renderStatus(accountKey, event)
+    val user = user?.render(accountKey)
     return UiTimeline(
         topMessage =
             UiTimeline.TopMessage(
-                user = null,
-                icon = null,
+                user = user,
+                icon = UiTimeline.TopMessage.Icon.Favourite,
                 type = UiTimeline.TopMessage.MessageType.VVO.Like,
             ),
         content = content,

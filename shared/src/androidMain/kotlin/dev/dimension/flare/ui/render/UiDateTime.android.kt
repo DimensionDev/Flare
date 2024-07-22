@@ -9,15 +9,14 @@ import kotlinx.datetime.toLocalDateTime
 import java.time.LocalDateTime
 
 actual data class UiDateTime(
-    val value: LocalizedShortTime,
-)
-
-actual fun Instant.toUi(): UiDateTime {
-    val compareTo = Clock.System.now()
-    val timeZone = TimeZone.currentSystemDefault()
-    val time = toLocalDateTime(timeZone)
-    val diff = compareTo - this
-    val value =
+    val value: Instant,
+//    val value: LocalizedShortTime,
+) {
+    val shortTime by lazy {
+        val compareTo = Clock.System.now()
+        val timeZone = TimeZone.currentSystemDefault()
+        val time = value.toLocalDateTime(timeZone)
+        val diff = compareTo - value
         when {
             // dd MMM yy
             compareTo.toLocalDateTime(timeZone).year != time.year -> {
@@ -31,7 +30,7 @@ actual fun Instant.toUi(): UiDateTime {
             diff.inWholeDays >= 1 -> {
                 DateUtils
                     .getRelativeTimeSpanString(
-                        toEpochMilliseconds(),
+                        value.toEpochMilliseconds(),
                         System.currentTimeMillis(),
                         DateUtils.DAY_IN_MILLIS,
                         DateUtils.FORMAT_ABBREV_RELATIVE,
@@ -42,7 +41,7 @@ actual fun Instant.toUi(): UiDateTime {
             diff.inWholeHours >= 1 -> {
                 DateUtils
                     .getRelativeTimeSpanString(
-                        toEpochMilliseconds(),
+                        value.toEpochMilliseconds(),
                         System.currentTimeMillis(),
                         DateUtils.HOUR_IN_MILLIS,
                         DateUtils.FORMAT_ABBREV_RELATIVE,
@@ -53,7 +52,7 @@ actual fun Instant.toUi(): UiDateTime {
             diff.inWholeMinutes < 1 -> {
                 DateUtils
                     .getRelativeTimeSpanString(
-                        toEpochMilliseconds(),
+                        value.toEpochMilliseconds(),
                         System.currentTimeMillis(),
                         DateUtils.SECOND_IN_MILLIS,
                         DateUtils.FORMAT_ABBREV_RELATIVE,
@@ -64,7 +63,7 @@ actual fun Instant.toUi(): UiDateTime {
             else -> {
                 DateUtils
                     .getRelativeTimeSpanString(
-                        toEpochMilliseconds(),
+                        value.toEpochMilliseconds(),
                         System.currentTimeMillis(),
                         DateUtils.MINUTE_IN_MILLIS,
                         DateUtils.FORMAT_ABBREV_RELATIVE,
@@ -72,8 +71,10 @@ actual fun Instant.toUi(): UiDateTime {
                     .let(LocalizedShortTime::String)
             }
         }
-    return UiDateTime(value)
+    }
 }
+
+actual fun Instant.toUi(): UiDateTime = UiDateTime(this)
 
 sealed interface LocalizedShortTime {
     data class String(

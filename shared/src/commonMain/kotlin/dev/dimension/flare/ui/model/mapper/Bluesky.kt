@@ -73,7 +73,15 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiT
         topMessage =
             UiTimeline.TopMessage(
                 user = author.render(accountKey),
-                icon = null,
+                icon =
+                    when (reason) {
+                        ListNotificationsReason.LIKE -> UiTimeline.TopMessage.Icon.Favourite
+                        ListNotificationsReason.REPOST -> UiTimeline.TopMessage.Icon.Retweet
+                        ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.Icon.Follow
+                        ListNotificationsReason.MENTION -> UiTimeline.TopMessage.Icon.Mention
+                        ListNotificationsReason.REPLY -> UiTimeline.TopMessage.Icon.Reply
+                        ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.Icon.Reply
+                    },
                 type =
                     when (reason) {
                         ListNotificationsReason.LIKE -> UiTimeline.TopMessage.MessageType.Bluesky.Like
@@ -188,6 +196,7 @@ internal fun PostView.renderStatus(
                 ),
             ).toImmutableList(),
         createdAt = indexedAt.toUi(),
+        sensitive = false,
     )
 }
 
@@ -513,6 +522,7 @@ private fun render(
                 poll = null,
                 quote = persistentListOf(),
                 createdAt = record.value.indexedAt.toUi(),
+                sensitive = false,
             )
         }
 

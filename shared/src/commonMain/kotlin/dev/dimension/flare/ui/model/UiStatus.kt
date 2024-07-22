@@ -1018,7 +1018,7 @@ fun createSampleStatus(user: UiUser) =
         is UiUser.VVO -> createVVOStatus(user)
     }
 
-private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon =
+private fun createMastodonStatus(user: UiUser.Mastodon): UiTimeline =
     UiStatus.Mastodon(
         statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
         accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
@@ -1047,7 +1047,7 @@ private fun createMastodonStatus(user: UiUser.Mastodon): UiStatus.Mastodon =
         raw = Status(),
     )
 
-private fun createBlueskyStatus(user: UiUser.Bluesky): UiStatus.Bluesky =
+private fun createBlueskyStatus(user: UiUser.Bluesky): UiTimeline =
     UiStatus.Bluesky(
         accountKey = MicroBlogKey(id = "123", host = user.userKey.host),
         statusKey = MicroBlogKey(id = "456", host = user.userKey.host),
@@ -1073,7 +1073,7 @@ private fun createBlueskyStatus(user: UiUser.Bluesky): UiStatus.Bluesky =
         uri = "https://bluesky.post/uri",
     )
 
-private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey =
+private fun createMisskeyStatus(user: UiUser.Misskey): UiTimeline =
     UiStatus.Misskey(
         statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
         accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
@@ -1100,7 +1100,7 @@ private fun createMisskeyStatus(user: UiUser.Misskey): UiStatus.Misskey =
         renote = null,
     )
 
-fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT =
+fun createXQTStatus(user: UiUser.XQT): UiTimeline =
     UiStatus.XQT(
         statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
         accountKey = MicroBlogKey(id = "456", host = user.userKey.host),
@@ -1131,7 +1131,7 @@ fun createXQTStatus(user: UiUser.XQT): UiStatus.XQT =
         raw = Tweet(restId = ""),
     )
 
-fun createVVOStatus(user: UiUser.VVO): UiStatus.VVO =
+fun createVVOStatus(user: UiUser.VVO): UiTimeline =
     UiStatus.VVO(
         statusKey = MicroBlogKey(id = "123", host = user.userKey.host),
         accountKey = MicroBlogKey(id = "456", host = user.userKey.host),

@@ -56,6 +56,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
@@ -922,7 +923,7 @@ class BlueskyDataSource(
         }.flow.cachedIn(scope)
     }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> {
         val service = account.getService(appDatabase)
         return Pager(
             config = PagingConfig(pageSize = pageSize),

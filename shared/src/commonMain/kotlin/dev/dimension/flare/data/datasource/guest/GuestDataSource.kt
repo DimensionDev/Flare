@@ -29,6 +29,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import kotlinx.coroutines.CoroutineScope
@@ -187,7 +188,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
             )
         }.flow
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> =
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {

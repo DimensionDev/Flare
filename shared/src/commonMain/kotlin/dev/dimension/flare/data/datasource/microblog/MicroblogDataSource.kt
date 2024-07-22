@@ -9,6 +9,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -73,7 +74,7 @@ interface MicroblogDataSource {
         pageSize: Int = 20,
     ): Flow<PagingData<UiUser>>
 
-    fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUser>>
+    fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUserV2>>
 
     fun discoverStatuses(
         pageSize: Int = 20,

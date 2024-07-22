@@ -47,7 +47,7 @@ internal fun Notification.render(
         when (type) {
             NotificationTypes.Follow -> UiTimeline.TopMessage.MessageType.Mastodon.Follow
             NotificationTypes.Favourite -> UiTimeline.TopMessage.MessageType.Mastodon.Favourite
-            NotificationTypes.Reblog -> UiTimeline.TopMessage.MessageType.Mastodon.Reblog
+            NotificationTypes.Reblog -> UiTimeline.TopMessage.MessageType.Mastodon.Reblogged
             NotificationTypes.Mention -> UiTimeline.TopMessage.MessageType.Mastodon.Mention
             NotificationTypes.Poll -> UiTimeline.TopMessage.MessageType.Mastodon.Poll
             NotificationTypes.FollowRequest -> UiTimeline.TopMessage.MessageType.Mastodon.FollowRequest
@@ -59,7 +59,18 @@ internal fun Notification.render(
         topMessageType?.let {
             UiTimeline.TopMessage(
                 user = user,
-                icon = null,
+                icon =
+                    when (type) {
+                        NotificationTypes.Follow -> UiTimeline.TopMessage.Icon.Follow
+                        NotificationTypes.Favourite -> UiTimeline.TopMessage.Icon.Favourite
+                        NotificationTypes.Reblog -> UiTimeline.TopMessage.Icon.Retweet
+                        NotificationTypes.Mention -> UiTimeline.TopMessage.Icon.Mention
+                        NotificationTypes.Poll -> UiTimeline.TopMessage.Icon.Poll
+                        NotificationTypes.FollowRequest -> UiTimeline.TopMessage.Icon.Follow
+                        NotificationTypes.Status -> UiTimeline.TopMessage.Icon.Edit
+                        NotificationTypes.Update -> UiTimeline.TopMessage.Icon.Edit
+                        null -> UiTimeline.TopMessage.Icon.Info
+                    },
                 type = it,
             )
         }
@@ -226,6 +237,7 @@ private fun Status.renderStatus(
                 UiTimeline.ItemContent.Status.TopEndContent
                     .Visibility(it)
             },
+        sensitive = sensitive ?: false,
     )
 }
 

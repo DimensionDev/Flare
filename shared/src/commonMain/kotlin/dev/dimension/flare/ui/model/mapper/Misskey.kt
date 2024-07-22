@@ -234,6 +234,7 @@ internal fun Note.renderStatus(
         bottomContent =
             UiTimeline.ItemContent.Status.BottomContent
                 .Reaction(reaction, myReaction),
+        sensitive = files?.any { it.isSensitive } ?: false,
     )
 }
 

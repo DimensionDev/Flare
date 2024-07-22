@@ -44,11 +44,10 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiSearchHistory
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
@@ -198,8 +197,7 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 internal fun LazyStaggeredGridScope.searchContent(
     searchUsers: UiState<LazyPagingItems<UiUser>>,
-    searchStatus: UiState<LazyPagingItems<UiStatus>>,
-    statusEvent: StatusEvent,
+    searchStatus: UiState<LazyPagingItems<UiTimeline>>,
     toUser: (MicroBlogKey) -> Unit,
 ) {
     searchUsers.onSuccess { users ->
@@ -280,9 +278,7 @@ internal fun LazyStaggeredGridScope.searchContent(
             )
         }
         with(searchStatus) {
-            with(statusEvent) {
-                status()
-            }
+            status()
         }
     }
 }

@@ -33,7 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
@@ -59,6 +58,7 @@ import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusEvent
+import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.mastodon.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiHashtag
@@ -178,7 +178,7 @@ private fun DiscoverScreen(
                                             .onSuccess {
                                                 items(
                                                     users.itemCount,
-                                                    key = users.itemKey { it.itemKey },
+//                                                    key = users.itemKey { it.key },
                                                 ) {
                                                     val user = users[it]
                                                     Card(

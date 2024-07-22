@@ -10,26 +10,51 @@ sealed interface StatusAction {
     ) : StatusAction
 
     sealed interface Item : StatusAction {
+        sealed interface Clickable : Item {
+            val onClicked: () -> Unit
+        }
+
+        sealed interface Colorized : Item {
+            val color: Color
+
+            enum class Color {
+                Red,
+                Error,
+                ContentColor,
+                PrimaryColor,
+            }
+        }
+
         data object More : Item
 
         data class Like(
             val count: Long,
             val liked: Boolean,
-            val onClicked: () -> Unit,
-        ) : Item {
+            override val onClicked: () -> Unit,
+        ) : Item,
+            Clickable,
+            Colorized {
             val humanizedCount by lazy {
                 count.humanize()
             }
+
+            override val color: Colorized.Color
+                get() = if (liked) Colorized.Color.Red else Colorized.Color.ContentColor
         }
 
         data class Retweet(
             val count: Long,
             val retweeted: Boolean,
-            val onClicked: () -> Unit,
-        ) : Item {
+            override val onClicked: () -> Unit,
+        ) : Item,
+            Clickable,
+            Colorized {
             val humanizedCount by lazy {
                 count.humanize()
             }
+
+            override val color: Colorized.Color
+                get() = if (retweeted) Colorized.Color.PrimaryColor else Colorized.Color.ContentColor
         }
 
         data class Reply(
@@ -51,16 +76,23 @@ sealed interface StatusAction {
         data class Bookmark(
             val count: Long,
             val bookmarked: Boolean,
-            val onClicked: () -> Unit,
-        ) : Item {
+            override val onClicked: () -> Unit,
+        ) : Item,
+            Clickable {
             val humanizedCount by lazy {
                 count.humanize()
             }
         }
 
-        data object Delete : Item
+        data object Delete : Item, Colorized {
+            override val color: Colorized.Color
+                get() = Colorized.Color.Error
+        }
 
-        data object Report : Item
+        data object Report : Item, Colorized {
+            override val color: Colorized.Color
+                get() = Colorized.Color.Error
+        }
 
         data class Reaction(
             val reacted: Boolean,

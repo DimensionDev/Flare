@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.createSampleStatus
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -26,5 +26,5 @@ class AppearancePresenter : PresenterBase<AppearanceState>() {
 }
 
 interface AppearanceState {
-    val sampleStatus: UiState<UiStatus>
+    val sampleStatus: UiState<UiTimeline>
 }

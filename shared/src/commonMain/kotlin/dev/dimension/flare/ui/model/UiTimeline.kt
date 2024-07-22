@@ -9,14 +9,53 @@ import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
 import kotlin.jvm.JvmInline
 
+// TODO: Handling click event internally
 data class UiTimeline(
     val topMessage: TopMessage?,
     val content: ItemContent?,
     val platformType: PlatformType,
 ) {
+    val itemKey: String
+        get() =
+            buildString {
+                append(platformType.name)
+                if (topMessage != null) {
+                    append("withTopMessage")
+                }
+                if (content != null) {
+                    append("withContent")
+                    append(content.itemKey)
+                }
+            }
+    val itemType: String
+        get() =
+            buildString {
+                append(platformType.name)
+                if (topMessage != null) {
+                    append("withTopMessage")
+                }
+                if (content != null) {
+                    append("withContent")
+                    when (content) {
+                        is ItemContent.Status -> {
+                            append("Status")
+                        }
+                        is ItemContent.User -> {
+                            append("User")
+                        }
+                        is ItemContent.UserList -> {
+                            append("UserList")
+                        }
+                    }
+                }
+            }
+
     sealed interface ItemContent {
+        val itemKey: String
+
         data class Status(
             val images: ImmutableList<UiMedia>,
+            val sensitive: Boolean,
             val contentWarning: String?,
             val user: UiUserV2?,
             val quote: ImmutableList<Status>,
@@ -28,7 +67,37 @@ data class UiTimeline(
             val createdAt: UiDateTime,
             val bottomContent: BottomContent? = null,
             val topEndContent: TopEndContent? = null,
+            val aboveTextContent: AboveTextContent? = null,
         ) : ItemContent {
+            override val itemKey: String
+                get() =
+                    buildString {
+                        append("Status")
+                        append(statusKey)
+                    }
+
+            sealed interface Embed {
+                @JvmInline
+                value class Quote(
+                    val data: Status,
+                ) : Embed
+
+                @JvmInline
+                value class QuoteList(
+                    val data: ImmutableList<Status>,
+                ) : Embed
+
+                @JvmInline
+                value class Poll(
+                    val data: UiPoll,
+                ) : Embed
+
+                @JvmInline
+                value class Card(
+                    val data: UiCard,
+                ) : Embed
+            }
+
             sealed interface BottomContent {
                 data class Reaction(
                     val emojiReactions: ImmutableList<EmojiReaction>,
@@ -62,25 +131,52 @@ data class UiTimeline(
                     }
                 }
             }
+
+            sealed interface AboveTextContent {
+                data class ReplyTo(
+                    val handle: String,
+                ) : AboveTextContent
+            }
         }
 
         @JvmInline
         value class User(
             val value: UiUserV2,
-        ) : ItemContent
+        ) : ItemContent {
+            override val itemKey: String
+                get() =
+                    buildString {
+                        append("User")
+                        append(value.key)
+                    }
+        }
 
         data class UserList(
             val users: ImmutableList<UiUserV2>,
-        ) : ItemContent
+        ) : ItemContent {
+            override val itemKey: String
+                get() =
+                    buildString {
+                        append("UserList")
+                        append(users.hashCode())
+                    }
+        }
     }
 
     data class TopMessage(
         val user: UiUserV2?,
-        val icon: Icon?,
+        val icon: Icon,
         val type: MessageType,
     ) {
         enum class Icon {
             Retweet,
+            Follow,
+            Favourite,
+            Mention,
+            Poll,
+            Edit,
+            Info,
+            Reply,
         }
 
         sealed interface MessageType {
@@ -90,8 +186,6 @@ data class UiTimeline(
                 data object Follow : Mastodon
 
                 data object Favourite : Mastodon
-
-                data object Reblog : Mastodon
 
                 data object Mention : Mastodon
 
@@ -144,12 +238,6 @@ data class UiTimeline(
 
             sealed interface XQT : MessageType {
                 data object Retweet : XQT
-
-                data object Follow : XQT
-
-                data object Like : XQT
-
-                data object Logo : XQT
 
                 data class Custom(
                     val message: String,

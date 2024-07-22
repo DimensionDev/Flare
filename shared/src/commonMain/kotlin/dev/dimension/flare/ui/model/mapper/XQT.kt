@@ -83,14 +83,12 @@ internal fun TopLevel.renderNotifications(
                     data?.timestampMS?.toLongOrNull()?.let {
                         Instant.fromEpochMilliseconds(it)
                     }
-                val messageType =
+                val icon =
                     when (data?.icon?.id) {
-                        "person_icon" -> UiTimeline.TopMessage.MessageType.XQT.Follow
-                        "heart_icon" -> UiTimeline.TopMessage.MessageType.XQT.Like
-                        "bird_icon" -> UiTimeline.TopMessage.MessageType.XQT.Logo
-                        else ->
-                            UiTimeline.TopMessage.MessageType.XQT
-                                .Custom(message = message.orEmpty())
+                        "person_icon" -> UiTimeline.TopMessage.Icon.Follow
+                        "heart_icon" -> UiTimeline.TopMessage.Icon.Favourite
+                        "bird_icon" -> UiTimeline.TopMessage.Icon.Info
+                        else -> UiTimeline.TopMessage.Icon.Info
                     }
                 val tweet =
                     notificationTweet?.firstOrNull()?.let {
@@ -115,7 +113,7 @@ internal fun TopLevel.renderNotifications(
                     }
                 val itemContent =
                     when {
-                        messageType in listOf(UiTimeline.TopMessage.MessageType.XQT.Follow) && users != null ->
+                        data?.icon?.id in listOf("person_icon") && users != null ->
                             if (users.size > 1) {
                                 UiTimeline.ItemContent.UserList(
                                     users = users.toImmutableList(),
@@ -136,7 +134,9 @@ internal fun TopLevel.renderNotifications(
                         UiTimeline.TopMessage(
                             user = users?.firstOrNull(),
                             icon = UiTimeline.TopMessage.Icon.Retweet,
-                            type = messageType,
+                            type =
+                                UiTimeline.TopMessage.MessageType.XQT
+                                    .Custom(message = message.orEmpty()),
                         ),
                     content = itemContent,
                     platformType = PlatformType.xQt,
@@ -396,6 +396,13 @@ internal fun Tweet.renderStatus(
                 }
             }.toHtml(accountKey)
 
+    val aboveTextContent =
+        legacy?.in_reply_to_screen_name?.let { screenName ->
+            UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo(
+                handle = "@$screenName",
+            )
+        }
+
     val isFromMe = user?.key == accountKey
     val createAt =
         legacy?.createdAt?.let { parseCustomDateTime(it) } ?: Clock.System.now()
@@ -414,6 +421,7 @@ internal fun Tweet.renderStatus(
         images = medias,
         contentWarning = null,
         createdAt = createAt.toUi(),
+        aboveTextContent = aboveTextContent,
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(
@@ -466,6 +474,7 @@ internal fun Tweet.renderStatus(
                         ).toImmutableList(),
                 ),
             ).toImmutableList(),
+        sensitive = legacy?.possiblySensitive == true,
     )
 }
 

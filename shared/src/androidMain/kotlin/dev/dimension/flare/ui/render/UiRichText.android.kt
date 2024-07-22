@@ -5,13 +5,15 @@ import moe.tlaster.ktml.dom.Element
 import java.text.Bidi
 
 actual data class UiRichText(
-    val element: Element,
+    val data: Element,
     val direction: LayoutDirection,
-)
+) {
+    val innerText = data.innerText
+}
 
 actual fun Element.toUi(): UiRichText =
     UiRichText(
-        element = this,
+        data = this,
         direction =
             if (Bidi(
                     innerText,

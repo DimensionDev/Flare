@@ -5,7 +5,6 @@ import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
-import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
@@ -19,11 +18,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.ImmutableList
@@ -56,20 +52,8 @@ internal fun FeedViewPostReasonUnion.render(
         platformType = PlatformType.Bluesky,
     )
 
-internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiTimeline {
-    UiStatus.BlueskyNotification(
-        user = author.toUi(accountKey),
-        statusKey =
-            MicroBlogKey(
-                id = uri.atUri,
-                host = accountKey.host,
-            ),
-        accountKey = accountKey,
-        reason = reason,
-        indexedAt = indexedAt,
-    )
-
-    return UiTimeline(
+internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiTimeline =
+    UiTimeline(
         topMessage =
             UiTimeline.TopMessage(
                 user = author.render(accountKey),
@@ -95,7 +79,6 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiT
         content = UiTimeline.ItemContent.User(author.render(accountKey)),
         platformType = PlatformType.Bluesky,
     )
-}
 
 internal fun PostView.render(
     accountKey: MicroBlogKey,
@@ -137,7 +120,7 @@ internal fun PostView.renderStatus(
                         .toUi()
                 },
         poll = null,
-        quote = listOfNotNull(findQuote2(accountKey, this)).toImmutableList(),
+        quote = listOfNotNull(findQuote(accountKey, this)).toImmutableList(),
         contentWarning = null,
         actions =
             listOfNotNull(
@@ -200,8 +183,8 @@ internal fun PostView.renderStatus(
     )
 }
 
-internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiUserV2 =
-    UiUserV2(
+internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile =
+    UiProfile(
         avatar = avatar?.uri.orEmpty(),
         name =
             Element("span")
@@ -214,119 +197,68 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiUserV2 =
                 id = did.did,
                 host = accountKey.host,
             ),
-    )
-
-internal fun ProfileView.render(accountKey: MicroBlogKey): UiUserV2 =
-    UiUserV2(
-        avatar = avatar?.uri.orEmpty(),
-        name =
-            Element("span")
-                .apply {
-                    children.add(Text(displayName.orEmpty()))
-                }.toUi(),
-        handle = "@${handle.handle}",
-        key =
-            MicroBlogKey(
-                id = did.did,
-                host = accountKey.host,
-            ),
-    )
-
-internal fun FeedViewPostReasonUnion.toUi(
-    accountKey: MicroBlogKey,
-    data: PostView,
-): UiStatus.Bluesky =
-    data.toUi(accountKey).copy(
-        repostBy = (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
-    )
-
-internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky =
-    with(post) {
-        UiStatus.Bluesky(
-            user = author.toUi(accountKey),
-            statusKey =
-                MicroBlogKey(
-                    id = uri.atUri,
-                    host = accountKey.host,
-                ),
-            accountKey = accountKey,
-            content =
-                record
-                    .jsonElement()
-                    .jsonObjectOrNull
-                    ?.get("text")
-                    ?.jsonPrimitive
-                    ?.content
-                    .orEmpty(),
-            indexedAt = indexedAt,
-            repostBy = (reason as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
-            quote = findQuote(accountKey, this),
-            medias = findMedias(this),
-            card = findCard(this),
-            reaction =
-                UiStatus.Bluesky.Reaction(
-                    repostUri = viewer?.repost?.atUri,
-                    likedUri = viewer?.like?.atUri,
-                ),
-            matrices =
-                UiStatus.Bluesky.Matrices(
-                    replyCount = replyCount ?: 0,
-                    likeCount = likeCount ?: 0,
-                    repostCount = repostCount ?: 0,
-                ),
-            cid = cid.cid,
-            uri = uri.atUri,
-        )
-    }
-
-internal fun ListNotificationsNotification.toUi(accountKey: MicroBlogKey): UiStatus.BlueskyNotification =
-    UiStatus.BlueskyNotification(
-        user = author.toUi(accountKey),
-        statusKey =
-            MicroBlogKey(
-                id = uri.atUri,
-                host = accountKey.host,
-            ),
-        accountKey = accountKey,
-        reason = reason,
-        indexedAt = indexedAt,
-    )
-
-internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky =
-    UiStatus.Bluesky(
-        user = author.toUi(accountKey),
-        statusKey =
-            MicroBlogKey(
-                id = uri.atUri,
-                host = accountKey.host,
-            ),
-        accountKey = accountKey,
-        content =
-            record
-                .jsonElement()
-                .jsonObjectOrNull
-                ?.get("text")
-                ?.jsonPrimitive
-                ?.content
-                .orEmpty(),
-        indexedAt = indexedAt,
-        repostBy = null,
-        quote = findQuote(accountKey, this),
-        medias = findMedias(this),
-        card = findCard(this),
-        reaction =
-            UiStatus.Bluesky.Reaction(
-                repostUri = viewer?.repost?.atUri,
-                likedUri = viewer?.like?.atUri,
-            ),
+        banner = null,
+        description = null,
         matrices =
-            UiStatus.Bluesky.Matrices(
-                replyCount = replyCount ?: 0,
-                likeCount = likeCount ?: 0,
-                repostCount = repostCount ?: 0,
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
             ),
-        cid = cid.cid,
-        uri = uri.atUri,
+        mark = persistentListOf(),
+        bottomContent = null,
+    )
+
+internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile =
+    UiProfile(
+        avatar = avatar?.uri.orEmpty(),
+        name =
+            Element("span")
+                .apply {
+                    children.add(Text(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@${handle.handle}",
+        key =
+            MicroBlogKey(
+                id = did.did,
+                host = accountKey.host,
+            ),
+        banner = null,
+        description = Element("span").apply { children.add(Text(description.orEmpty())) }.toUi(),
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
+            ),
+        mark = persistentListOf(),
+        bottomContent = null,
+    )
+
+internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile =
+    UiProfile(
+        avatar = avatar?.uri.orEmpty(),
+        name =
+            Element("span")
+                .apply {
+                    children.add(Text(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@${handle.handle}",
+        key =
+            MicroBlogKey(
+                id = did.did,
+                host = accountKey.host,
+            ),
+        banner = banner?.uri,
+        description = Element("span").apply { children.add(Text(description.orEmpty())) }.toUi(),
+        matrices =
+            UiProfile.Matrices(
+                fansCount = followersCount ?: 0,
+                followsCount = followsCount ?: 0,
+                statusesCount = postsCount ?: 0,
+            ),
+        mark = persistentListOf(),
+        bottomContent = null,
     )
 
 private fun findCard(postView: PostView): UiCard? =
@@ -370,21 +302,6 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
     }.toImmutableList()
 
 private fun findQuote(
-    accountKey: MicroBlogKey,
-    postView: PostView,
-): UiStatus.Bluesky? =
-    when (val embed = postView.embed) {
-        is PostViewEmbedUnion.RecordView -> toUi(accountKey, embed.value.record)
-        is PostViewEmbedUnion.RecordWithMediaView ->
-            toUi(
-                accountKey,
-                embed.value.record.record,
-            )
-
-        else -> null
-    }
-
-private fun findQuote2(
     accountKey: MicroBlogKey,
     postView: PostView,
 ): UiTimeline.ItemContent.Status? =
@@ -528,176 +445,3 @@ private fun render(
 
         else -> null
     }
-
-private fun toUi(
-    accountKey: MicroBlogKey,
-    record: RecordViewRecordUnion,
-): UiStatus.Bluesky? =
-    when (record) {
-        is RecordViewRecordUnion.ViewRecord ->
-            UiStatus.Bluesky(
-                accountKey = accountKey,
-                statusKey =
-                    MicroBlogKey(
-                        id = record.value.uri.atUri,
-                        host = accountKey.host,
-                    ),
-                content =
-                    record.value.value
-                        .jsonElement()
-                        .jsonObjectOrNull
-                        ?.get("text")
-                        ?.jsonPrimitive
-                        ?.content
-                        .orEmpty(),
-                indexedAt = record.value.indexedAt,
-                repostBy = null,
-                quote = null,
-                medias =
-                    record.value.embeds
-                        .mapNotNull {
-                            when (it) {
-                                is RecordViewRecordEmbedUnion.ImagesView ->
-                                    it.value.images.map {
-                                        UiMedia.Image(
-                                            url = it.fullsize.uri,
-                                            previewUrl = it.thumb.uri,
-                                            description = it.alt,
-                                            width = it.aspectRatio?.width?.toFloat() ?: 0f,
-                                            height = it.aspectRatio?.height?.toFloat() ?: 0f,
-                                            sensitive = false,
-                                        )
-                                    }
-
-                                else -> null
-                            }
-                        }.flatten()
-                        .toImmutableList(),
-                card =
-                    record.value.embeds
-                        .mapNotNull {
-                            when (it) {
-                                is RecordViewRecordEmbedUnion.ExternalView ->
-                                    UiCard(
-                                        url = it.value.external.uri.uri,
-                                        title = it.value.external.title,
-                                        description = it.value.external.description,
-                                        media =
-                                            it.value.external.thumb?.let {
-                                                UiMedia.Image(
-                                                    url = it.uri,
-                                                    previewUrl = it.uri,
-                                                    description = null,
-                                                    width = 0f,
-                                                    height = 0f,
-                                                    sensitive = false,
-                                                )
-                                            },
-                                    )
-
-                                else -> null
-                            }
-                        }.firstOrNull(),
-                user = record.value.author.toUi(accountKey),
-                // TODO: add reaction
-                reaction =
-                    UiStatus.Bluesky.Reaction(
-                        repostUri = null,
-                        likedUri = null,
-                    ),
-                matrices =
-                    UiStatus.Bluesky.Matrices(
-                        replyCount = 0,
-                        likeCount = 0,
-                        repostCount = 0,
-                    ),
-                cid = record.value.cid.cid,
-                uri = record.value.uri.atUri,
-            )
-
-        else -> null
-    }
-
-internal fun ProfileViewDetailed.toUi(accountKey: MicroBlogKey): UiUser =
-    UiUser.Bluesky(
-        userKey =
-            MicroBlogKey(
-                id = did.did,
-                host = accountKey.host,
-            ),
-        displayName = displayName.orEmpty(),
-        handleInternal = handle.handle,
-        avatarUrl = avatar?.uri.orEmpty(),
-        bannerUrl = banner?.uri,
-        description = description,
-        matrices =
-            UiUser.Bluesky.Matrices(
-                fansCount = followersCount ?: 0,
-                followsCount = followsCount ?: 0,
-                statusesCount = postsCount ?: 0,
-            ),
-        relation =
-            UiRelation.Bluesky(
-                following = viewer?.following?.atUri != null,
-                isFans = viewer?.followedBy?.atUri != null,
-                blocking = viewer?.blockedBy ?: false,
-                muting = viewer?.muted ?: false,
-            ),
-        accountKey = accountKey,
-    )
-
-internal fun ProfileViewBasic.toUi(accountKey: MicroBlogKey): UiUser.Bluesky =
-    UiUser.Bluesky(
-        userKey =
-            MicroBlogKey(
-                id = did.did,
-                host = accountKey.host,
-            ),
-        displayName = displayName.orEmpty(),
-        handleInternal = handle.handle,
-        avatarUrl = avatar?.uri.orEmpty(),
-        bannerUrl = null,
-        description = null,
-        matrices =
-            UiUser.Bluesky.Matrices(
-                fansCount = 0,
-                followsCount = 0,
-                statusesCount = 0,
-            ),
-        relation =
-            UiRelation.Bluesky(
-                following = viewer?.following?.atUri != null,
-                isFans = viewer?.followedBy?.atUri != null,
-                blocking = viewer?.blockedBy ?: false,
-                muting = viewer?.muted ?: false,
-            ),
-        accountKey = accountKey,
-    )
-
-internal fun ProfileView.toUi(accountKey: MicroBlogKey): UiUser.Bluesky =
-    UiUser.Bluesky(
-        userKey =
-            MicroBlogKey(
-                id = did.did,
-                host = accountKey.host,
-            ),
-        displayName = displayName.orEmpty(),
-        handleInternal = handle.handle,
-        avatarUrl = avatar?.uri.orEmpty(),
-        bannerUrl = null,
-        description = description,
-        matrices =
-            UiUser.Bluesky.Matrices(
-                fansCount = 0,
-                followsCount = 0,
-                statusesCount = 0,
-            ),
-        relation =
-            UiRelation.Bluesky(
-                following = viewer?.following?.atUri != null,
-                isFans = viewer?.followedBy?.atUri != null,
-                blocking = viewer?.blockedBy ?: false,
-                muting = viewer?.muted ?: false,
-            ),
-        accountKey = accountKey,
-    )

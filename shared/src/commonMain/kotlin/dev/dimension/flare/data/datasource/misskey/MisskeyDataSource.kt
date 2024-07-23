@@ -39,11 +39,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
@@ -180,7 +179,7 @@ class MisskeyDataSource(
                 NotificationFilter.Mention,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiUser> {
+    override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
@@ -204,12 +203,12 @@ class MisskeyDataSource(
                     .findByHandleAndHost(name, host, PlatformType.Misskey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> {
+    override fun userById(id: String): CacheData<UiProfile> {
         val userKey = MicroBlogKey(id, account.accountKey.host)
         return Cacheable(
             fetchSource = {
@@ -233,7 +232,7 @@ class MisskeyDataSource(
                     .findByKey(userKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
@@ -242,18 +241,18 @@ class MisskeyDataSource(
         MemCacheable<UiRelation>(
             relationKeyWithUserKey(userKey),
         ) {
-            service
-                .usersShow(UsersShowRequest(userId = userKey.id))
-                .body()!!
-                .toDbUser(account.accountKey.host)
-                .toUi(account.accountKey)
-                .let {
-                    if (it is UiUser.Misskey) {
-                        it.relation
-                    } else {
-                        throw IllegalStateException("User is not a Misskey user")
-                    }
-                }
+            val user =
+                service
+                    .usersShow(UsersShowRequest(userId = userKey.id))
+                    .body()!!
+            UiRelation(
+                following = user.isFollowing ?: false,
+                isFans = user.isFollowed ?: false,
+                blocking = user.isBlocking ?: false,
+                muted = user.isMuted ?: false,
+                hasPendingFollowRequestFromYou = user.hasPendingFollowRequestFromYou ?: false,
+                hasPendingFollowRequestToYou = user.hasPendingFollowRequestToYou ?: false,
+            )
         }.toUi()
 
     override fun userTimeline(
@@ -380,10 +379,10 @@ class MisskeyDataSource(
                 text = data.content,
                 visibility =
                     when (data.visibility) {
-                        UiStatus.Misskey.Visibility.Public -> "public"
-                        UiStatus.Misskey.Visibility.Home -> "home"
-                        UiStatus.Misskey.Visibility.Followers -> "followers"
-                        UiStatus.Misskey.Visibility.Specified -> "specified"
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public -> "public"
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home -> "home"
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> "followers"
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> "specified"
                     },
                 renoteId = data.renoteId,
                 replyId = data.inReplyToID,
@@ -528,7 +527,7 @@ class MisskeyDataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Misskey>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -538,7 +537,7 @@ class MisskeyDataSource(
         runCatching {
             service.followingDelete(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Misskey>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -550,7 +549,7 @@ class MisskeyDataSource(
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Misskey>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -560,7 +559,7 @@ class MisskeyDataSource(
         runCatching {
             service.followingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Misskey>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -572,7 +571,7 @@ class MisskeyDataSource(
 
     suspend fun block(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Misskey>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -583,7 +582,7 @@ class MisskeyDataSource(
             service.blockingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
             it.printStackTrace()
-            MemCacheable.updateWith<UiRelation.Misskey>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -595,7 +594,7 @@ class MisskeyDataSource(
 
     suspend fun unblock(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Misskey>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -605,7 +604,7 @@ class MisskeyDataSource(
         runCatching {
             service.blockingDelete(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Misskey>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -617,7 +616,7 @@ class MisskeyDataSource(
 
     suspend fun mute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Misskey>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -627,7 +626,7 @@ class MisskeyDataSource(
         runCatching {
             service.muteCreate(MuteCreateRequest(userId = userKey.id))
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Misskey>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -639,7 +638,7 @@ class MisskeyDataSource(
 
     suspend fun unmute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Misskey>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -649,7 +648,7 @@ class MisskeyDataSource(
         runCatching {
             service.muteDelete(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Misskey>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -686,7 +685,7 @@ class MisskeyDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> =
+    ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
@@ -751,7 +750,6 @@ class MisskeyDataSource(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {
-        require(relation is UiRelation.Misskey)
         when {
             relation.following -> unfollow(userKey)
             relation.blocking -> unblock(userKey)
@@ -760,14 +758,13 @@ class MisskeyDataSource(
         }
     }
 
-    override fun profileActions(): List<ProfileAction> {
-        return listOf(
+    override fun profileActions(): List<ProfileAction> =
+        listOf(
             object : ProfileAction.Mute {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.Misskey)
                     if (relation.muted) {
                         unmute(userKey)
                     } else {
@@ -775,17 +772,13 @@ class MisskeyDataSource(
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.Misskey)
-                    return relation.muted
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.muted
             },
             object : ProfileAction.Block {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.Misskey)
                     if (relation.blocking) {
                         unblock(userKey)
                     } else {
@@ -793,11 +786,7 @@ class MisskeyDataSource(
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.Misskey)
-                    return relation.blocking
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
-    }
 }

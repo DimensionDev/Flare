@@ -56,6 +56,11 @@ sealed interface StatusEvent {
             statusKey: MicroBlogKey,
             liked: Boolean,
         )
+
+        fun bookmark(
+            statusKey: MicroBlogKey,
+            bookmarked: Boolean,
+        )
     }
 
     interface VVO : StatusEvent {

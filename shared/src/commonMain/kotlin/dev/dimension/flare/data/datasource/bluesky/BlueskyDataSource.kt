@@ -51,11 +51,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
@@ -148,7 +147,7 @@ class BlueskyDataSource(
     override val supportedNotificationFilter: List<NotificationFilter>
         get() = listOf(NotificationFilter.All)
 
-    override fun userByAcct(acct: String): CacheData<UiUser> {
+    override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
@@ -172,12 +171,12 @@ class BlueskyDataSource(
                     .findByHandleAndHost(name, host, PlatformType.Bluesky)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.toUi(account.accountKey) }
+                    .mapNotNull { it.render(account.accountKey) }
             },
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> =
+    override fun userById(id: String): CacheData<UiProfile> =
         Cacheable(
             fetchSource = {
                 val user =
@@ -200,27 +199,25 @@ class BlueskyDataSource(
                     .findByKey(MicroBlogKey(id, account.accountKey.host))
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.toUi(account.accountKey) }
+                    .mapNotNull { it.render(account.accountKey) }
             },
         )
 
     override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
-        MemCacheable<UiRelation>(
+        MemCacheable(
             relationKeyWithUserKey(userKey),
         ) {
-            account
-                .getService(appDatabase)
-                .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
-                .requireResponse()
-                .toDbUser(account.accountKey.host)
-                .toUi(account.accountKey)
-                .let {
-                    if (it is UiUser.Bluesky) {
-                        it.relation
-                    } else {
-                        throw IllegalStateException("User is not a Bluesky user")
-                    }
-                }
+            val user =
+                account
+                    .getService(appDatabase)
+                    .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
+                    .requireResponse()
+            UiRelation(
+                following = user.viewer?.following?.atUri != null,
+                isFans = user.viewer?.followedBy?.atUri != null,
+                blocking = user.viewer?.blockedBy ?: false,
+                muted = user.viewer?.muted ?: false,
+            )
         }.toUi()
 
     override fun userTimeline(
@@ -412,32 +409,40 @@ class BlueskyDataSource(
     }
 
     suspend fun report(
-        data: UiStatus.Bluesky,
+        statusKey: MicroBlogKey,
         reason: BlueskyReportStatusState.ReportReason,
     ) {
         runCatching {
             val service = account.getService(appDatabase)
-            service.createReport(
-                CreateReportRequest(
-                    reasonType =
-                        when (reason) {
-                            BlueskyReportStatusState.ReportReason.Spam -> Token.REASON_SPAM
-                            BlueskyReportStatusState.ReportReason.Violation -> Token.REASON_VIOLATION
-                            BlueskyReportStatusState.ReportReason.Misleading -> Token.REASON_MISLEADING
-                            BlueskyReportStatusState.ReportReason.Sexual -> Token.REASON_SEXUAL
-                            BlueskyReportStatusState.ReportReason.Rude -> Token.REASON_RUDE
-                            BlueskyReportStatusState.ReportReason.Other -> Token.REASON_OTHER
-                        },
-                    subject =
-                        CreateReportRequestSubjectUnion.RepoStrongRef(
-                            value =
-                                StrongRef(
-                                    uri = AtUri(data.uri),
-                                    cid = Cid(data.cid),
-                                ),
-                        ),
-                ),
-            )
+            val post =
+                service
+                    .getPosts(GetPostsQueryParams(persistentListOf(AtUri(statusKey.id))))
+                    .maybeResponse()
+                    ?.posts
+                    ?.firstOrNull()
+            if (post != null) {
+                service.createReport(
+                    CreateReportRequest(
+                        reasonType =
+                            when (reason) {
+                                BlueskyReportStatusState.ReportReason.Spam -> Token.REASON_SPAM
+                                BlueskyReportStatusState.ReportReason.Violation -> Token.REASON_VIOLATION
+                                BlueskyReportStatusState.ReportReason.Misleading -> Token.REASON_MISLEADING
+                                BlueskyReportStatusState.ReportReason.Sexual -> Token.REASON_SEXUAL
+                                BlueskyReportStatusState.ReportReason.Rude -> Token.REASON_RUDE
+                                BlueskyReportStatusState.ReportReason.Other -> Token.REASON_OTHER
+                            },
+                        subject =
+                            CreateReportRequestSubjectUnion.RepoStrongRef(
+                                value =
+                                    StrongRef(
+                                        uri = post.uri,
+                                        cid = post.cid,
+                                    ),
+                            ),
+                    ),
+                )
+            }
         }
     }
 
@@ -695,7 +700,7 @@ class BlueskyDataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Bluesky>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -720,7 +725,7 @@ class BlueskyDataSource(
                 )
             }
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Bluesky>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -732,7 +737,7 @@ class BlueskyDataSource(
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Bluesky>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -754,7 +759,7 @@ class BlueskyDataSource(
                 ),
             )
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Bluesky>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -766,7 +771,7 @@ class BlueskyDataSource(
 
     suspend fun block(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Bluesky>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -788,7 +793,7 @@ class BlueskyDataSource(
                 ),
             )
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Bluesky>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -800,7 +805,7 @@ class BlueskyDataSource(
 
     suspend fun unblock(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Bluesky>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -825,7 +830,7 @@ class BlueskyDataSource(
                 )
             }
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Bluesky>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -837,22 +842,22 @@ class BlueskyDataSource(
 
     suspend fun mute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Bluesky>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = true,
+                muted = true,
             )
         }
         runCatching {
             val service = account.getService(appDatabase)
             service.muteActor(MuteActorRequest(actor = Did(did = userKey.id)))
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Bluesky>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = false,
+                    muted = false,
                 )
             }
         }
@@ -860,22 +865,22 @@ class BlueskyDataSource(
 
     suspend fun unmute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Bluesky>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = false,
+                muted = false,
             )
         }
         runCatching {
             val service = account.getService(appDatabase)
             service.unmuteActor(UnmuteActorRequest(actor = Did(did = userKey.id)))
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Bluesky>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = true,
+                    muted = true,
                 )
             }
         }
@@ -910,7 +915,7 @@ class BlueskyDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> {
+    ): Flow<PagingData<UiUserV2>> {
         val service = account.getService(appDatabase)
         return Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -954,7 +959,6 @@ class BlueskyDataSource(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {
-        require(relation is UiRelation.Bluesky)
         when {
             relation.following -> unfollow(userKey)
             relation.blocking -> unblock(userKey)
@@ -962,32 +966,27 @@ class BlueskyDataSource(
         }
     }
 
-    override fun profileActions(): List<ProfileAction> {
-        return listOf(
+    override fun profileActions(): List<ProfileAction> =
+        listOf(
             object : ProfileAction.Mute {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.Bluesky)
-                    if (relation.muting) {
+                    if (relation.muted) {
                         unmute(userKey)
                     } else {
                         mute(userKey)
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.Bluesky)
-                    return relation.muting
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.muted
             },
             object : ProfileAction.Block {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.Bluesky)
                     if (relation.blocking) {
                         unblock(userKey)
                     } else {
@@ -995,13 +994,9 @@ class BlueskyDataSource(
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.Bluesky)
-                    return relation.blocking
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
-    }
 }
 
 fun JsonElement.jsonContent(): JsonContent = JSON.decodeFromJsonElement(this)

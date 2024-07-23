@@ -1,7 +1,9 @@
 package dev.dimension.flare.ui.model.mapper
 
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
+import dev.dimension.flare.data.cache.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
@@ -73,3 +75,14 @@ internal fun StatusContent.render(
             event = event as StatusEvent.VVO,
         )
 }
+
+internal fun DbUser.render(accountKey: MicroBlogKey) =
+    when (content) {
+        is UserContent.Bluesky -> content.data.render(accountKey = accountKey)
+        is UserContent.BlueskyLite -> content.data.render(accountKey = accountKey)
+        is UserContent.Mastodon -> content.data.render(accountKey = accountKey)
+        is UserContent.Misskey -> content.data.render(accountKey = accountKey)
+        is UserContent.MisskeyLite -> content.data.render(accountKey = accountKey)
+        is UserContent.VVO -> content.data.render(accountKey = accountKey)
+        is UserContent.XQT -> content.data.render(accountKey = accountKey)
+    }

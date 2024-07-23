@@ -5,10 +5,10 @@ import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.UiUserV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -31,9 +31,9 @@ interface MicroblogDataSource {
 
     val supportedNotificationFilter: List<NotificationFilter>
 
-    fun userByAcct(acct: String): CacheData<UiUser>
+    fun userByAcct(acct: String): CacheData<UiUserV2>
 
-    fun userById(id: String): CacheData<UiUser>
+    fun userById(id: String): CacheData<UiProfile>
 
     fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>>
 
@@ -72,7 +72,7 @@ interface MicroblogDataSource {
         query: String,
         scope: CoroutineScope,
         pageSize: Int = 20,
-    ): Flow<PagingData<UiUser>>
+    ): Flow<PagingData<UiUserV2>>
 
     fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUserV2>>
 

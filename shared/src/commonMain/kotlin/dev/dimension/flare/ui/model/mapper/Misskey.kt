@@ -15,18 +15,14 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Instant
 import moe.tlaster.ktml.dom.Element
 import moe.tlaster.mfm.parser.MFMParser
@@ -238,108 +234,6 @@ internal fun Note.renderStatus(
     )
 }
 
-internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus.MisskeyNotification {
-    val user = user?.toUi(accountKey)
-    return UiStatus.MisskeyNotification(
-        statusKey =
-            MicroBlogKey(
-                id,
-                host = accountKey.host,
-            ),
-        user = user,
-        createdAt = Instant.parse(createdAt),
-        note = note?.toUi(accountKey),
-        type = type,
-        accountKey = accountKey,
-        achievement = achievement,
-    )
-}
-
-internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
-    val user = user.toUi(accountKey)
-    return UiStatus.Misskey(
-        statusKey =
-            MicroBlogKey(
-                id,
-                host = user.userKey.host,
-            ),
-        sensitive = files?.any { it.isSensitive } ?: false,
-        poll =
-            poll?.let {
-                UiPoll(
-                    // misskey poll doesn't have id
-                    id = "",
-                    options =
-                        poll.choices
-                            .map { option ->
-                                UiPoll.Option(
-                                    title = option.text,
-                                    votesCount = option.votes.toLong(),
-                                    percentage =
-                                        option.votes
-                                            .toFloat()
-                                            .div(
-                                                poll.choices.sumOf { it.votes }.toFloat(),
-                                            ).takeUnless { it.isNaN() } ?: 0f,
-                                )
-                            }.toPersistentList(),
-                    expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
-                    multiple = poll.multiple,
-                    ownVotes = List(poll.choices.filter { it.isVoted }.size) { index -> index }.toPersistentList(),
-                )
-            },
-        // TODO: parse card content lazily
-        card = null,
-        createdAt = Instant.parse(createdAt),
-        content = text.orEmpty(),
-        contentWarningText = cw?.takeIf { it.isNotEmpty() },
-        user = user,
-        matrices =
-            UiStatus.Misskey.Matrices(
-                replyCount = repliesCount.toLong(),
-                renoteCount = renoteCount.toLong(),
-            ),
-        renote =
-            if (text.isNullOrEmpty()) {
-                renote?.toUi(accountKey)
-            } else {
-                null
-            },
-        quote =
-            if (text != null || !files.isNullOrEmpty() || cw != null) {
-                renote?.toUi(accountKey)
-            } else {
-                null
-            },
-        visibility =
-            when (visibility) {
-                Visibility.Public -> UiStatus.Misskey.Visibility.Public
-                Visibility.Home -> UiStatus.Misskey.Visibility.Home
-                Visibility.Followers -> UiStatus.Misskey.Visibility.Followers
-                Visibility.Specified -> UiStatus.Misskey.Visibility.Specified
-            },
-        medias =
-            files
-                ?.mapNotNull { file ->
-                    file.toUi()
-                }?.toPersistentList() ?: persistentListOf(),
-        reaction =
-            UiStatus.Misskey.Reaction(
-                myReaction = myReaction,
-                emojiReactions =
-                    reactions
-                        .map { emoji ->
-                            UiStatus.Misskey.EmojiReaction(
-                                name = emoji.key,
-                                count = emoji.value,
-                                url = resolveMisskeyEmoji(emoji.key, accountKey.host),
-                            )
-                        }.toPersistentList(),
-            ),
-        accountKey = accountKey,
-    )
-}
-
 private fun DriveFile.toUi(): UiMedia? {
     if (type.startsWith("image/")) {
         return UiMedia.Image(
@@ -363,14 +257,14 @@ private fun DriveFile.toUi(): UiMedia? {
     }
 }
 
-internal fun UserLite.render(accountKey: MicroBlogKey): UiUserV2 {
+internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
     val remoteHost =
         if (host.isNullOrEmpty()) {
             accountKey.host
         } else {
             host
         }
-    return UiUserV2(
+    return UiProfile(
         avatar = avatarUrl.orEmpty(),
         name = parseName(name.orEmpty(), accountKey).toUi(),
         handle = "@$username@$remoteHost",
@@ -379,59 +273,27 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiUserV2 {
                 id = id,
                 host = accountKey.host,
             ),
-    )
-}
-
-internal fun UserLite.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
-    val remoteHost =
-        if (host.isNullOrEmpty()) {
-            accountKey.host
-        } else {
-            host
-        }
-    return UiUser.Misskey(
-        userKey =
-            MicroBlogKey(
-                id = id,
-                host = accountKey.host,
-            ),
-        name = name.orEmpty(),
-        avatarUrl = avatarUrl.orEmpty(),
-        bannerUrl = null,
+        banner = null,
         description = null,
         matrices =
-            UiUser.Misskey.Matrices(
+            UiProfile.Matrices(
                 fansCount = 0,
                 followsCount = 0,
                 statusesCount = 0,
             ),
-        handleInternal = username,
-        remoteHost = remoteHost,
-        isCat = isCat ?: false,
-        isBot = isBot ?: false,
-        relation =
-            UiRelation.Misskey(
-                following = false,
-                isFans = false,
-                blocking = false,
-                blocked = false,
-                muted = false,
-                hasPendingFollowRequestFromYou = false,
-                hasPendingFollowRequestToYou = false,
-            ),
-        accountKey = accountKey,
-        fields = persistentMapOf(),
+        mark = persistentListOf(),
+        bottomContent = null,
     )
 }
 
-internal fun User.render(accountKey: MicroBlogKey): UiUserV2 {
+internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     val remoteHost =
         if (host.isNullOrEmpty()) {
             accountKey.host
         } else {
             host
         }
-    return UiUserV2(
+    return UiProfile(
         avatar = avatarUrl.orEmpty(),
         name = parseName(name.orEmpty(), accountKey).toUi(),
         handle = "@$username@$remoteHost",
@@ -440,54 +302,40 @@ internal fun User.render(accountKey: MicroBlogKey): UiUserV2 {
                 id = id,
                 host = accountKey.host,
             ),
-    )
-}
-
-internal fun User.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
-    val remoteHost =
-        if (host.isNullOrEmpty()) {
-            accountKey.host
-        } else {
-            host
-        }
-    return UiUser.Misskey(
-        userKey =
-            MicroBlogKey(
-                id = id,
-                host = accountKey.host,
-            ),
-        name = name.orEmpty(),
-        avatarUrl = avatarUrl.orEmpty(),
-        bannerUrl = bannerUrl,
-        description = description,
+        banner = bannerUrl,
+        description = description?.let { misskeyParser.parse(it).toHtml(accountKey).toUi() },
         matrices =
-            UiUser.Misskey.Matrices(
+            UiProfile.Matrices(
                 fansCount = followersCount.toLong(),
                 followsCount = followingCount.toLong(),
                 statusesCount = notesCount.toLong(),
             ),
-        handleInternal = username,
-        remoteHost = remoteHost,
-        isCat = isCat ?: false,
-        isBot = isBot ?: false,
-        relation =
-            UiRelation.Misskey(
-                following = isFollowing ?: false,
-                isFans = isFollowed ?: false,
-                blocking = isBlocking ?: false,
-                blocked = isBlocked ?: false,
-                muted = isMuted ?: false,
-                hasPendingFollowRequestFromYou = hasPendingFollowRequestFromYou ?: false,
-                hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false,
-            ),
-        accountKey = accountKey,
-        fields =
+        mark =
+            listOfNotNull(
+                if (isCat == true) {
+                    UiProfile.Mark.Cat
+                } else {
+                    null
+                },
+                if (isBot == true) {
+                    UiProfile.Mark.Bot
+                } else {
+                    null
+                },
+            ).toImmutableList(),
+        bottomContent =
             fields
-                .map {
-                    it.name to it.value
-                }.filter { it.first.isNotEmpty() }
-                .toMap()
-                .toPersistentMap(),
+                .takeIf {
+                    it.any()
+                }?.let {
+                    UiProfile.BottomContent.Fields(
+                        fields =
+                            it
+                                .associate { (key, value) ->
+                                    key to misskeyParser.parse(value).toHtml(accountKey).toUi()
+                                }.toImmutableMap(),
+                    )
+                },
     )
 }
 

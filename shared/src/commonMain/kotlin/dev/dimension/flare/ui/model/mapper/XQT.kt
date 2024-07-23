@@ -21,11 +21,9 @@ import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
@@ -464,6 +462,7 @@ internal fun Tweet.renderStatus(
                                 count = legacy?.bookmarkCount?.toLong() ?: 0,
                                 bookmarked = legacy?.bookmarked ?: false,
                                 onClicked = {
+                                    event.bookmark(statusKey, legacy?.bookmarked ?: false)
                                 },
                             ),
                             if (isFromMe) {
@@ -479,7 +478,7 @@ internal fun Tweet.renderStatus(
 }
 
 internal fun User.render(accountKey: MicroBlogKey) =
-    UiUserV2(
+    UiProfile(
         key =
             MicroBlogKey(
                 id = restId,
@@ -492,244 +491,69 @@ internal fun User.render(accountKey: MicroBlogKey) =
                     children.add(Text(legacy.name))
                 }.toUi(),
         handle = "@${legacy.screenName}@$xqtHost",
-    )
-
-internal fun Tweet.toUi(accountKey: MicroBlogKey): UiStatus.XQT {
-    val retweet =
-        legacy
-            ?.retweetedStatusResult
-            ?.result
-            ?.let {
-                when (it) {
-                    is Tweet -> it
-                    is TweetTombstone -> null
-                    is TweetWithVisibilityResults -> it.tweet
-                }
-            }?.toUi(accountKey = accountKey)
-    val quote =
-        quotedStatusResult
-            ?.result
-            ?.let {
-                when (it) {
-                    is Tweet -> it
-                    is TweetTombstone -> null
-                    is TweetWithVisibilityResults -> it.tweet
-                }
-            }?.toUi(accountKey = accountKey)
-    val user =
-        core
-            ?.userResults
-            ?.result
-            ?.let {
-                when (it) {
-                    is User -> it
-                    is UserUnavailable -> null
-                }
-            }?.toUi(accountKey = accountKey)
-    requireNotNull(user) { "user is null" }
-    val uiCard =
-        card?.legacy?.let {
-            val title = it.get("title")?.stringValue
-            val image = it.get("photo_image_full_size_original")?.imageValue
-            val description = it.get("description")?.stringValue
-            val cardUrl =
-                it.get("card_url")?.stringValue?.let {
-                    legacy
-                        ?.entities
-                        ?.urls
-                        ?.firstOrNull { url -> url.url == it }
-                        ?.expandedUrl
-                }
-            if (title != null && cardUrl != null) {
-                UiCard(
-                    title = title,
-                    media =
-                        image?.url?.let {
-                            UiMedia.Image(
-                                url = it,
-                                previewUrl = it,
-                                height = image.height?.toFloat() ?: 0f,
-                                width = image.width?.toFloat() ?: 0f,
-                                sensitive = false,
-                                description = null,
-                            )
-                        },
-                    description = description,
-                    url = cardUrl,
-                )
-            } else {
-                null
-            }
-        }
-    val poll =
-        card?.legacy?.let { cardLegacy ->
-            if (cardLegacy.get("choice1_label") != null) {
-                val max =
-                    (1..4).sumOf { index ->
-                        cardLegacy.get("choice${index}_count")?.stringValue?.toLong() ?: 0
-                    }
-                val options =
-                    (1..4)
-                        .mapNotNull { index ->
-                            val count =
-                                cardLegacy.get("choice${index}_count")?.stringValue?.toLong() ?: 0
-                            cardLegacy.get("choice${index}_label")?.stringValue?.let {
-                                UiPoll.Option(
-                                    title = it,
-                                    votesCount = count,
-                                    percentage = count.toFloat() / max.coerceAtLeast(1).toFloat(),
-                                )
+        banner = legacy.profileBannerUrl,
+        description =
+            legacy.description?.takeIf { it.isNotEmpty() }?.let {
+                twitterParser
+                    .parse(it)
+                    .map { token ->
+                        if (token is UrlToken) {
+                            val actual =
+                                legacy.entities.description
+                                    ?.urls
+                                    ?.firstOrNull { it.url == token.value.trim() }
+                                    ?.expandedUrl
+                            if (actual != null) {
+                                UrlToken(actual)
+                            } else {
+                                token
                             }
-                        }.toImmutableList()
-                UiPoll(
-                    // xqt dose not have id
-                    id = "",
-                    options = options,
-                    multiple = false,
-                    ownVotes = persistentListOf(),
-                    expiresAt =
-                        cardLegacy.get("end_datetime_utc")?.stringValue?.let { parseCustomDateTime(it) }
-                            ?: Clock.System.now(),
-                )
-            } else {
-                null
-            }
-        }
-    val medias =
-        legacy
-            ?.entities
-            ?.media
-            ?.map { media ->
-                when (media.type) {
-                    Media.Type.photo ->
-                        UiMedia.Image(
-                            url = media.mediaUrlHttps + "?name=orig",
-                            previewUrl = media.mediaUrlHttps,
-                            height = media.originalInfo.height.toFloat(),
-                            width = media.originalInfo.width.toFloat(),
-                            sensitive = legacy.possiblySensitive == true,
-                            description = media.ext_alt_text,
-                        )
-
-                    Media.Type.video, Media.Type.animatedGif ->
-                        UiMedia.Video(
-                            url =
-                                media.videoInfo
-                                    ?.variants
-                                    ?.maxByOrNull { it.bitrate ?: 0 }
-                                    ?.url ?: "",
-                            thumbnailUrl = media.mediaUrlHttps,
-                            height = media.originalInfo.height.toFloat(),
-                            width = media.originalInfo.width.toFloat(),
-                            description = media.ext_alt_text,
-                        )
-                }
-            }?.toImmutableList() ?: persistentListOf()
-    val text =
-        noteTweet?.noteTweetResults?.result?.text
-            ?: legacy
-                ?.fullText
-                ?.let {
-                    if (legacy.displayTextRange.size == 2) {
-                        it
-                            .codePointSequence()
-                            .drop(legacy.displayTextRange[0])
-                            .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
-                            .flatMap { codePoint ->
-                                codePoint
-                                    .toChars()
-                                    .toList()
-                            }.joinToString("")
-                            .replace("&amp;", "&")
-                            .replace("&lt;", "<")
-                            .replace("&gt;", ">")
-                    } else {
-                        it
-                    }
-                }.orEmpty()
-    return UiStatus.XQT(
-        accountKey = accountKey,
-        statusKey =
-            MicroBlogKey(
-                id = legacy?.idStr ?: restId,
-                host = accountKey.host,
-            ),
-        user = user,
-        createdAt = legacy?.createdAt?.let { parseCustomDateTime(it) } ?: Clock.System.now(),
-        content = text,
-        medias = medias,
-        card = uiCard,
+                        } else {
+                            token
+                        }
+                    }.toHtml(accountKey)
+                    .toUi()
+            },
         matrices =
-            UiStatus.XQT.Matrices(
-                replyCount = legacy?.replyCount?.toLong() ?: 0,
-                likeCount = legacy?.favoriteCount?.toLong() ?: 0,
-                retweetCount = legacy?.retweetCount?.toLong() ?: 0,
-            ),
-        reaction =
-            UiStatus.XQT.Reaction(
-                liked = legacy?.favorited ?: false,
-                retweeted = legacy?.retweeted ?: false,
-                bookmarked = legacy?.bookmarked ?: false,
-            ),
-        retweet = retweet,
-        quote = quote,
-        inReplyToScreenName = legacy?.in_reply_to_screen_name,
-        inReplyToStatusId = legacy?.in_reply_to_status_id_str,
-        inReplyToUserId = legacy?.in_reply_to_user_id_str,
-        poll = poll,
-        sensitive = legacy?.possiblySensitive == true,
-        raw = this,
-    )
-}
-
-private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value
-
-internal fun User.toUi(accountKey: MicroBlogKey) =
-    UiUser.XQT(
-        userKey =
-            MicroBlogKey(
-                id = restId,
-                host = xqtHost,
-            ),
-        displayName = legacy.name,
-        rawHandle = legacy.screenName,
-        avatarUrl = legacy.profileImageUrlHttps.replaceWithOriginImageUrl(),
-        bannerUrl = legacy.profileBannerUrl,
-        description = legacy.description?.takeIf { it.isNotEmpty() },
-        matrices =
-            UiUser.XQT.Matrices(
+            UiProfile.Matrices(
                 fansCount = legacy.followersCount.toLong(),
                 followsCount = legacy.friendsCount.toLong(),
                 statusesCount = legacy.statusesCount.toLong(),
             ),
-        verifyType =
-            when {
-                isBlueVerified && legacy.verifiedType != null -> UiUser.XQT.VerifyType.Company
-                isBlueVerified -> UiUser.XQT.VerifyType.Money
-                else -> null
+        mark =
+            listOfNotNull(
+                if (legacy.verified) {
+                    UiProfile.Mark.Verified
+                } else {
+                    null
+                },
+                if (legacy.protected == true) {
+                    UiProfile.Mark.Locked
+                } else {
+                    null
+                },
+            ).toImmutableList(),
+        bottomContent =
+            if (legacy.location != null || legacy.url != null) {
+                UiProfile.BottomContent.XQT(
+                    location = legacy.location,
+                    url = legacy.url,
+                )
+            } else {
+                null
             },
-        location = legacy.location?.takeIf { it.isNotEmpty() },
-        url =
-            legacy.url?.takeIf { it.isNotEmpty() }?.let { url ->
-                legacy.entities.url
-                    ?.urls
-                    ?.firstOrNull { it.url == url }
-                    ?.expandedUrl
-            } ?: legacy.url,
-        protected = legacy.protected ?: false,
-        raw = this,
-        accountKey = accountKey,
     )
+
+private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value
 
 internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelation {
     with(data.userResultByScreenName.result.legacy) {
-        return UiRelation.XQT(
+        return UiRelation(
             following = following ?: false,
             isFans = followedBy ?: false,
             blocking = blocking ?: false,
             blockedBy = blockedBy ?: false,
-            protected = protected ?: false,
-            muting = muting,
+            muted = muting,
         )
     }
 }

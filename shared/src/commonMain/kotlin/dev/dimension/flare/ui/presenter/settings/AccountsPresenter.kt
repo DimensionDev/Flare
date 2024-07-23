@@ -12,8 +12,8 @@ import dev.dimension.flare.data.repository.allAccountsPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
@@ -58,7 +58,7 @@ class AccountsPresenter : PresenterBase<AccountsState>() {
 
 @Immutable
 abstract class AccountsState(
-    val accounts: UiState<ImmutableListWrapper<Pair<MicroBlogKey, UiState<UiUser>>>>,
+    val accounts: UiState<ImmutableListWrapper<Pair<MicroBlogKey, UiState<UiProfile>>>>,
     val activeAccount: UiState<UiAccount>,
 ) {
     abstract fun setActiveAccount(accountKey: MicroBlogKey)

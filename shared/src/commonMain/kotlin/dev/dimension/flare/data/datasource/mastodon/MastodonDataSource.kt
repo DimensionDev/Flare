@@ -37,11 +37,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
@@ -222,7 +221,7 @@ class MastodonDataSource(
                 NotificationFilter.Mention,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiUser> {
+    override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
@@ -244,12 +243,12 @@ class MastodonDataSource(
                     .findByHandleAndHost(name, host, PlatformType.Mastodon)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> {
+    override fun userById(id: String): CacheData<UiProfile> {
         val userKey = MicroBlogKey(id, account.accountKey.host)
         return Cacheable(
             fetchSource = {
@@ -268,7 +267,7 @@ class MastodonDataSource(
                     .findByKey(userKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
@@ -397,10 +396,10 @@ class MastodonDataSource(
                 status = data.content,
                 visibility =
                     when (data.visibility) {
-                        UiStatus.Mastodon.Visibility.Public -> Visibility.Public
-                        UiStatus.Mastodon.Visibility.Unlisted -> Visibility.Unlisted
-                        UiStatus.Mastodon.Visibility.Private -> Visibility.Private
-                        UiStatus.Mastodon.Visibility.Direct -> Visibility.Direct
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public -> Visibility.Public
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home -> Visibility.Unlisted
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> Visibility.Private
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> Visibility.Direct
                     },
                 inReplyToID = data.inReplyToID,
                 mediaIDS = mediaIds.takeIf { it.isNotEmpty() },
@@ -630,7 +629,7 @@ class MastodonDataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -640,7 +639,7 @@ class MastodonDataSource(
         runCatching {
             service.unfollow(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -652,7 +651,7 @@ class MastodonDataSource(
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -662,7 +661,7 @@ class MastodonDataSource(
         runCatching {
             service.follow(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -674,7 +673,7 @@ class MastodonDataSource(
 
     suspend fun block(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -684,7 +683,7 @@ class MastodonDataSource(
         runCatching {
             service.block(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -696,7 +695,7 @@ class MastodonDataSource(
 
     suspend fun unblock(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -706,7 +705,7 @@ class MastodonDataSource(
         runCatching {
             service.unblock(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -718,21 +717,21 @@ class MastodonDataSource(
 
     suspend fun mute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = true,
+                muted = true,
             )
         }
         runCatching {
             service.muteUser(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = false,
+                    muted = false,
                 )
             }
         }
@@ -740,21 +739,21 @@ class MastodonDataSource(
 
     suspend fun unmute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = false,
+                muted = false,
             )
         }
         runCatching {
             service.unmuteUser(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = true,
+                    muted = true,
                 )
             }
         }
@@ -766,7 +765,7 @@ class MastodonDataSource(
         ) {
             TrendsUserPagingSource(
                 service,
-                account.accountKey.host,
+                account.accountKey,
             )
         }.flow
 
@@ -827,13 +826,13 @@ class MastodonDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> =
+    ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
                 service,
-                account.accountKey.host,
+                account.accountKey,
                 query,
             )
         }.flow.cachedIn(scope)
@@ -852,41 +851,35 @@ class MastodonDataSource(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {
-        require(relation is UiRelation.Mastodon)
         when {
             relation.following -> unfollow(userKey)
             relation.blocking -> unblock(userKey)
-            relation.requested -> Unit // you can't cancel follow request on mastodon
+            relation.hasPendingFollowRequestFromYou -> Unit // you can't cancel follow request on mastodon
             else -> follow(userKey)
         }
     }
 
-    override fun profileActions(): List<ProfileAction> {
-        return listOf(
+    override fun profileActions(): List<ProfileAction> =
+        listOf(
             object : ProfileAction.Mute {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.Mastodon)
-                    if (relation.muting) {
+                    if (relation.muted) {
                         unmute(userKey)
                     } else {
                         mute(userKey)
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.Mastodon)
-                    return relation.muting
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.muted
             },
             object : ProfileAction.Block {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.Mastodon)
                     if (relation.blocking) {
                         unblock(userKey)
                     } else {
@@ -894,11 +887,7 @@ class MastodonDataSource(
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.Mastodon)
-                    return relation.blocking
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
-    }
 }

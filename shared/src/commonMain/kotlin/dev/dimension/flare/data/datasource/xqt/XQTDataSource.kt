@@ -53,11 +53,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
@@ -197,7 +196,7 @@ class XQTDataSource(
     override val supportedNotificationFilter: List<NotificationFilter>
         get() = listOf(NotificationFilter.All, NotificationFilter.Mention)
 
-    override fun userByAcct(acct: String): CacheData<UiUser> {
+    override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
         return Cacheable(
             fetchSource = {
@@ -228,12 +227,12 @@ class XQTDataSource(
                     .findByHandleAndHost(name, host, PlatformType.xQt)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> {
+    override fun userById(id: String): CacheData<UiProfile> {
         val userKey = MicroBlogKey(id, account.accountKey.host)
         return Cacheable(
             fetchSource = {
@@ -264,7 +263,7 @@ class XQTDataSource(
                     .findByKey(userKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
@@ -343,12 +342,13 @@ class XQTDataSource(
             scope = scope,
             mediator =
                 StatusDetailRemoteMediator(
-                    statusKey,
-                    service,
-                    database,
-                    account.accountKey,
-                    pagingKey,
+                    statusKey = statusKey,
+                    service = service,
+                    database = database,
+                    accountKey = account.accountKey,
+                    pagingKey = pagingKey,
                     statusOnly = false,
+                    event = this,
                 ),
         )
 
@@ -579,7 +579,7 @@ class XQTDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> =
+    ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
@@ -633,7 +633,6 @@ class XQTDataSource(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {
-        require(relation is UiRelation.XQT)
         when {
             relation.following -> unfollow(userKey)
             relation.blocking -> unblock(userKey)
@@ -641,32 +640,27 @@ class XQTDataSource(
         }
     }
 
-    override fun profileActions(): List<ProfileAction> {
-        return listOf(
+    override fun profileActions(): List<ProfileAction> =
+        listOf(
             object : ProfileAction.Mute {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.XQT)
-                    if (relation.muting) {
+                    if (relation.muted) {
                         unmute(userKey)
                     } else {
                         mute(userKey)
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.XQT)
-                    return relation.muting
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.muted
             },
             object : ProfileAction.Block {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.XQT)
                     if (relation.blocking) {
                         unblock(userKey)
                     } else {
@@ -674,13 +668,9 @@ class XQTDataSource(
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.XQT)
-                    return relation.blocking
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
-    }
 
     override fun like(
         statusKey: MicroBlogKey,
@@ -861,64 +851,75 @@ class XQTDataSource(
         }
     }
 
-    suspend fun bookmark(status: UiStatus.XQT) {
-        updateStatusUseCase<StatusContent.XQT>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            legacy =
-                                it.data.legacy?.copy(
-                                    bookmarked = !status.reaction.bookmarked,
-                                ),
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            if (status.reaction.bookmarked) {
-                service.postDeleteBookmark(
-                    postDeleteBookmarkRequest =
-                        DeleteBookmarkRequest(
-                            variables =
-                                DeleteBookmarkRequestVariables(
-                                    tweetId = status.statusKey.id,
-                                ),
-                        ),
-                )
-            } else {
-                service.postCreateBookmark(
-                    postCreateBookmarkRequest =
-                        CreateBookmarkRequest(
-                            variables =
-                                CreateBookmarkRequestVariables(
-                                    tweetId = status.statusKey.id,
-                                ),
-                        ),
-                )
-            }
-        }.onFailure {
+    override fun bookmark(
+        statusKey: MicroBlogKey,
+        bookmarked: Boolean,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.XQT>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data = status.raw,
+                        data =
+                            it.data.copy(
+                                legacy =
+                                    it.data.legacy?.copy(
+                                        bookmarked = !bookmarked,
+                                    ),
+                            ),
                     )
                 },
             )
-        }.onSuccess {
+
+            runCatching {
+                if (bookmarked) {
+                    service.postDeleteBookmark(
+                        postDeleteBookmarkRequest =
+                            DeleteBookmarkRequest(
+                                variables =
+                                    DeleteBookmarkRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                } else {
+                    service.postCreateBookmark(
+                        postCreateBookmarkRequest =
+                            CreateBookmarkRequest(
+                                variables =
+                                    CreateBookmarkRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.XQT>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    legacy =
+                                        it.data.legacy?.copy(
+                                            bookmarked = bookmarked,
+                                        ),
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess {
+            }
         }
     }
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -928,7 +929,7 @@ class XQTDataSource(
         runCatching {
             service.postCreateFriendships(userId = userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -940,7 +941,7 @@ class XQTDataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -950,7 +951,7 @@ class XQTDataSource(
         runCatching {
             service.postDestroyFriendships(userId = userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -962,21 +963,21 @@ class XQTDataSource(
 
     suspend fun mute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = true,
+                muted = true,
             )
         }
         runCatching {
             service.postMutesUsersCreate(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = false,
+                    muted = false,
                 )
             }
         }
@@ -984,21 +985,21 @@ class XQTDataSource(
 
     suspend fun unmute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = false,
+                muted = false,
             )
         }
         runCatching {
             service.postMutesUsersDestroy(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = true,
+                    muted = true,
                 )
             }
         }
@@ -1006,7 +1007,7 @@ class XQTDataSource(
 
     suspend fun block(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -1016,7 +1017,7 @@ class XQTDataSource(
         runCatching {
             service.postBlocksCreate(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -1028,7 +1029,7 @@ class XQTDataSource(
 
     suspend fun unblock(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -1038,7 +1039,7 @@ class XQTDataSource(
         runCatching {
             service.postBlocksDestroy(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(

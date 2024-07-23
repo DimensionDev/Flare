@@ -34,14 +34,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -143,7 +141,7 @@ class VVODataSource(
                 NotificationFilter.Like,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiUser> {
+    override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
         return Cacheable(
             fetchSource = {
@@ -169,12 +167,12 @@ class VVODataSource(
                     .findByHandleAndHost(name, host, PlatformType.VVo)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> {
+    override fun userById(id: String): CacheData<UiProfile> {
         val userKey = MicroBlogKey(id, account.accountKey.host)
         return Cacheable(
             fetchSource = {
@@ -198,7 +196,7 @@ class VVODataSource(
                     .findByKey(userKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
@@ -214,11 +212,11 @@ class VVODataSource(
             val user =
                 profile.data
                     ?.user
-                    ?.toDbUser()
-                    ?.toUi(account.accountKey)
             requireNotNull(user) { "user not found" }
-            require(user is UiUser.VVO)
-            user.relation
+            UiRelation(
+                following = user.following ?: false,
+                isFans = user.followMe ?: false,
+            )
         }.toUi()
 
     override fun userTimeline(
@@ -297,7 +295,7 @@ class VVODataSource(
         )
     }
 
-    fun comment(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    fun comment(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "comment_only_$statusKey"
         return Cacheable(
             fetchSource = {
@@ -322,7 +320,7 @@ class VVODataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, event = this) }
             },
         )
     }
@@ -425,7 +423,7 @@ class VVODataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> =
+    ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
@@ -480,7 +478,6 @@ class VVODataSource(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {
-        require(relation is UiRelation.VVO)
         if (relation.following) {
             unfollow(userKey)
         } else {
@@ -492,7 +489,7 @@ class VVODataSource(
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.VVO>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -508,7 +505,7 @@ class VVODataSource(
                 uid = userKey.id,
             )
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.VVO>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -520,7 +517,7 @@ class VVODataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.VVO>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -536,7 +533,7 @@ class VVODataSource(
                 uid = userKey.id,
             )
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.VVO>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(

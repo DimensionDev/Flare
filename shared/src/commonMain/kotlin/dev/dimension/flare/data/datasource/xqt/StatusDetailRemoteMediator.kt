@@ -11,10 +11,12 @@ import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -25,6 +27,7 @@ internal class StatusDetailRemoteMediator(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
+    private val event: StatusEvent.XQT,
     private val pagingKey: String,
     private val statusOnly: Boolean,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
@@ -87,12 +90,9 @@ internal class StatusDetailRemoteMediator(
                                 ?.content
                                 ?.let { it as? StatusContent.XQT }
                                 ?.data
-                                ?.toUi(accountKey)
+                                ?.render(accountKey, event = event)
                                 ?.let {
-                                    it
-                                        .retweet
-                                        ?.statusKey
-                                        ?.id ?: it.statusKey.id
+                                    (it.content as? UiTimeline.ItemContent.Status)?.statusKey?.id
                                 } ?: run {
                                 val response =
                                     service

@@ -20,9 +20,8 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
@@ -78,7 +77,11 @@ class ComposePresenter(
                                     .flatMap { service ->
                                         remember(account.accountKey) {
                                             service.userById(account.accountKey.id)
-                                        }.collectAsState().toUi()
+                                        }.collectAsState()
+                                            .toUi()
+                                            .map {
+                                                it as UiUserV2
+                                            }
                                     } to account
                             }.toImmutableList()
                             .toImmutableListWrapper()
@@ -203,13 +206,13 @@ class ComposePresenter(
             mutableStateOf(false)
         }
         var visibility by remember {
-            mutableStateOf(UiStatus.Misskey.Visibility.Public)
+            mutableStateOf(UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home)
         }
         return object : MisskeyVisibilityState(
             visibility = visibility,
             showVisibilityMenu = showVisibilityMenu,
             allVisibilities =
-                UiStatus.Misskey.Visibility.entries
+                UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.entries
                     .toImmutableList(),
             localOnly = localOnly,
         ) {
@@ -217,7 +220,7 @@ class ComposePresenter(
                 localOnly = value
             }
 
-            override fun setVisibility(value: UiStatus.Misskey.Visibility) {
+            override fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type) {
                 visibility = value
             }
 
@@ -237,16 +240,16 @@ class ComposePresenter(
             mutableStateOf(false)
         }
         var visibility by remember {
-            mutableStateOf(UiStatus.Mastodon.Visibility.Public)
+            mutableStateOf(UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public)
         }
         return object : MastodonVisibilityState(
             visibility = visibility,
             showVisibilityMenu = showVisibilityMenu,
             allVisibilities =
-                UiStatus.Mastodon.Visibility.entries
+                UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.entries
                     .toImmutableList(),
         ) {
-            override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
+            override fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type) {
                 visibility = value
             }
 
@@ -265,11 +268,11 @@ sealed interface VisibilityState
 
 @Immutable
 abstract class MastodonVisibilityState(
-    val visibility: UiStatus.Mastodon.Visibility,
+    val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
     val showVisibilityMenu: Boolean,
-    val allVisibilities: ImmutableList<UiStatus.Mastodon.Visibility>,
+    val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>,
 ) : VisibilityState {
-    abstract fun setVisibility(value: UiStatus.Mastodon.Visibility)
+    abstract fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type)
 
     abstract fun showVisibilityMenu()
 
@@ -278,14 +281,14 @@ abstract class MastodonVisibilityState(
 
 @Immutable
 abstract class MisskeyVisibilityState(
-    val visibility: UiStatus.Misskey.Visibility,
+    val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
     val showVisibilityMenu: Boolean,
-    val allVisibilities: ImmutableList<UiStatus.Misskey.Visibility>,
+    val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>,
     val localOnly: Boolean,
 ) : VisibilityState {
     abstract fun setLocalOnly(value: Boolean)
 
-    abstract fun setVisibility(value: UiStatus.Misskey.Visibility)
+    abstract fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type)
 
     abstract fun showVisibilityMenu()
 
@@ -318,8 +321,8 @@ abstract class ComposeState(
     val composeConfig: UiState<ComposeConfig>,
     val enableCrossPost: UiState<Boolean>,
     val selectedAccounts: ImmutableList<UiAccount>,
-    val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiUser>, UiAccount>>>,
-    val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiUser>, UiAccount>>>,
+    val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
+    val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
 ) {
     abstract fun send(data: ComposeData)
 

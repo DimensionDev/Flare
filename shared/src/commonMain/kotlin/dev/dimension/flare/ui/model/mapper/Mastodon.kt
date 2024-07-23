@@ -20,17 +20,14 @@ import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Instant
 import moe.tlaster.ktml.Ktml
 import moe.tlaster.ktml.dom.Element
@@ -41,7 +38,7 @@ internal fun Notification.render(
     event: StatusEvent.Mastodon,
 ): UiTimeline {
     requireNotNull(account) { "account is null" }
-    val user = account.render(accountKey.host)
+    val user = account.render(accountKey)
     val status = status?.renderStatus(accountKey, event)
     val topMessageType =
         when (type) {
@@ -92,7 +89,7 @@ internal fun Status.render(
     event: StatusEvent.Mastodon,
 ): UiTimeline {
     requireNotNull(account) { "account is null" }
-    val user = account.render(accountKey.host)
+    val user = account.render(accountKey)
     val topMessage =
         if (reblog == null) {
             null
@@ -116,7 +113,7 @@ private fun Status.renderStatus(
     dataSource: StatusEvent.Mastodon,
 ): UiTimeline.ItemContent.Status {
     requireNotNull(account) { "actualStatus.account is null" }
-    val actualUser = account.render(accountKey.host)
+    val actualUser = account.render(accountKey)
     val isFromMe = actualUser.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted)
     val statusKey =
@@ -241,120 +238,6 @@ private fun Status.renderStatus(
     )
 }
 
-internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus {
-    requireNotNull(account) { "account is null" }
-    val user = account.toUi(accountKey.host)
-    return UiStatus.MastodonNotification(
-        statusKey =
-            MicroBlogKey(
-                id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
-                host = user.userKey.host,
-            ),
-        user = user,
-        createdAt = createdAt ?: Instant.DISTANT_PAST,
-        status = status?.toUi(accountKey),
-        type =
-            type
-                ?: throw IllegalArgumentException("mastodon Notification.type should not be null"),
-        accountKey = accountKey,
-    )
-}
-
-internal fun Status.toUi(accountKey: MicroBlogKey): UiStatus.Mastodon {
-    requireNotNull(account) { "account is null" }
-    val user = account.toUi(accountKey.host)
-    return UiStatus.Mastodon(
-        statusKey =
-            MicroBlogKey(
-                id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
-                host = user.userKey.host,
-            ),
-        sensitive = sensitive ?: false,
-        poll =
-            poll?.let {
-                UiPoll(
-                    id = poll.id ?: "",
-                    options =
-                        poll.options
-                            ?.map { option ->
-                                UiPoll.Option(
-                                    title = option.title.orEmpty(),
-                                    votesCount = option.votesCount ?: 0,
-                                    percentage =
-                                        option.votesCount
-                                            ?.toFloat()
-                                            ?.div(
-                                                if (poll.multiple == true) {
-                                                    poll.votersCount ?: 1
-                                                } else {
-                                                    poll.votesCount
-                                                        ?: 1
-                                                },
-                                            )?.takeUnless { it.isNaN() } ?: 0f,
-                                )
-                            }?.toPersistentList() ?: persistentListOf(),
-                    expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
-                    multiple = poll.multiple ?: false,
-                    ownVotes = poll.ownVotes?.toPersistentList() ?: persistentListOf(),
-                )
-            },
-        card =
-            card?.url?.let { url ->
-                UiCard(
-                    url = url,
-                    title = card.title.orEmpty(),
-                    description = card.description?.takeIf { it.isNotEmpty() && it.isNotBlank() },
-                    media =
-                        card.image?.let {
-                            UiMedia.Image(
-                                url = card.image,
-                                previewUrl = card.image,
-                                description = card.description,
-                                width = card.width?.toFloat() ?: 0f,
-                                height = card.height?.toFloat() ?: 0f,
-                                sensitive = false,
-                            )
-                        },
-                )
-            },
-        createdAt =
-            createdAt
-                ?: throw IllegalArgumentException("mastodon Status.createdAt should not be null"),
-        content = content.orEmpty(),
-        contentWarningText = spoilerText?.takeIf { it.isNotEmpty() },
-        user = user,
-        matrices =
-            UiStatus.Mastodon.Matrices(
-                replyCount = repliesCount ?: 0,
-                reblogCount = reblogsCount ?: 0,
-                favouriteCount = favouritesCount ?: 0,
-            ),
-        reblogStatus = reblog?.toUi(accountKey),
-        visibility =
-            visibility?.let { visibility ->
-                when (visibility) {
-                    Visibility.Public -> UiStatus.Mastodon.Visibility.Public
-                    Visibility.Unlisted -> UiStatus.Mastodon.Visibility.Unlisted
-                    Visibility.Private -> UiStatus.Mastodon.Visibility.Private
-                    Visibility.Direct -> UiStatus.Mastodon.Visibility.Direct
-                }
-            } ?: UiStatus.Mastodon.Visibility.Public,
-        medias =
-            mediaAttachments
-                ?.mapNotNull { attachment ->
-                    attachment.toUi(sensitive = sensitive ?: false)
-                }?.toPersistentList() ?: persistentListOf(),
-        reaction =
-            UiStatus.Mastodon.Reaction(
-                liked = favourited ?: false,
-                reblogged = reblogged ?: false,
-                bookmarked = bookmarked ?: false,
-            ),
-        accountKey = accountKey,
-        raw = this,
-    )
-}
-
 private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
     when (type) {
         MediaType.Image ->
@@ -395,14 +278,15 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
         else -> null
     }
 
-internal fun Account.render(host: String): UiUserV2 {
+internal fun Account.render(accountKey: MicroBlogKey): UiProfile {
+    val host = accountKey.host
     val remoteHost =
         if (acct != null && acct.contains('@')) {
             acct.substring(acct.indexOf('@') + 1)
         } else {
             host
         }
-    return UiUserV2(
+    return UiProfile(
         avatar = avatar.orEmpty(),
         name = parseName(this).toUi(),
         handle = "@$username@$remoteHost",
@@ -411,54 +295,68 @@ internal fun Account.render(host: String): UiUserV2 {
                 id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
                 host = host,
             ),
-    )
-}
-
-internal fun Account.toUi(host: String): UiUser.Mastodon {
-    val remoteHost =
-        if (acct != null && acct.contains('@')) {
-            acct.substring(acct.indexOf('@') + 1)
-        } else {
-            host
-        }
-    return UiUser.Mastodon(
-        userKey =
-            MicroBlogKey(
-                id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
-                host = host,
-            ),
-        name = displayName.orEmpty(),
-        avatarUrl = avatar.orEmpty(),
-        bannerUrl = header,
-        description = note,
+        banner = header,
+        description = parseNote(this).toUi(),
         matrices =
-            UiUser.Mastodon.Matrices(
+            UiProfile.Matrices(
                 fansCount = followersCount ?: 0,
                 followsCount = followingCount ?: 0,
                 statusesCount = statusesCount ?: 0,
             ),
-        locked = locked ?: false,
-        handleInternal = username.orEmpty(),
-        remoteHost = remoteHost,
-        fields =
+        mark =
+            listOfNotNull(
+                if (locked == true) {
+                    UiProfile.Mark.Locked
+                } else {
+                    null
+                },
+                if (bot == true) {
+                    UiProfile.Mark.Bot
+                } else {
+                    null
+                },
+            ).toImmutableList(),
+        bottomContent =
             fields
-                ?.map {
-                    it.name.orEmpty() to it.value.orEmpty()
-                }?.filter { it.first.isNotEmpty() }
-                ?.toMap()
-                ?.toPersistentMap() ?: persistentMapOf(),
-        raw = this,
+                ?.takeIf {
+                    it.any()
+                }?.let {
+                    UiProfile.BottomContent.Fields(
+                        fields =
+                            it
+                                .mapNotNull { (name, value) ->
+                                    name?.let {
+                                        value?.let {
+                                            name to Ktml.parse(value).toUi()
+                                        }
+                                    }
+                                }.toMap()
+                                .toImmutableMap(),
+                    )
+                },
     )
 }
 
-internal fun RelationshipResponse.toUi(): UiRelation.Mastodon =
-    UiRelation.Mastodon(
+private fun parseNote(account: Account): Element {
+    val emoji = account.emojis.orEmpty()
+    var content = account.note.orEmpty()
+    emoji.forEach {
+        content =
+            content.replace(
+                ":${it.shortcode}:",
+                "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
+            )
+    }
+    return Ktml.parse(content)
+}
+
+internal fun RelationshipResponse.toUi(): UiRelation =
+    UiRelation(
         following = following ?: false,
         isFans = followedBy ?: false,
         blocking = blocking ?: false,
-        muting = muting ?: false,
-        requested = requested ?: false,
-        domainBlocking = domainBlocking ?: false,
+        muted = muting ?: false,
+        hasPendingFollowRequestFromYou = requested ?: false,
     )
 
 internal fun DbEmoji.toUi(): List<UiEmoji> =

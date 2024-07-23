@@ -11,13 +11,11 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.persistentListOf
 
 class VVOCommentPresenter(
     private val accountType: AccountType,
@@ -34,10 +32,6 @@ class VVOCommentPresenter(
                         require(service is VVODataSource)
                         service.comment(commentKey)
                     }.collectAsState().toUi()
-                }.map {
-                    it as UiStatus.VVOComment
-                }.map {
-                    it.copy(comments = persistentListOf())
                 }
         val list =
             serviceState.map { service ->
@@ -54,6 +48,6 @@ class VVOCommentPresenter(
 }
 
 interface VVOCommentState {
-    val root: UiState<UiStatus.VVOComment>
+    val root: UiState<UiTimeline>
     val list: UiState<LazyPagingItems<UiTimeline>>
 }

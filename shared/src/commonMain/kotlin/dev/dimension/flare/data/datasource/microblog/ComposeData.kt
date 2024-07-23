@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 
 sealed interface ComposeData
 
@@ -18,7 +18,8 @@ data class BlueskyComposeData(
 data class MastodonComposeData(
     val account: UiAccount.Mastodon,
     val content: String,
-    val visibility: UiStatus.Mastodon.Visibility = UiStatus.Mastodon.Visibility.Public,
+    val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type =
+        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
     val inReplyToID: String? = null,
     val medias: List<FileItem> = emptyList(),
     val sensitive: Boolean = false,
@@ -35,7 +36,8 @@ data class MastodonComposeData(
 data class MisskeyComposeData(
     val account: UiAccount.Misskey,
     val content: String,
-    val visibility: UiStatus.Misskey.Visibility = UiStatus.Misskey.Visibility.Public,
+    val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type =
+        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
     val inReplyToID: String? = null,
     val renoteId: String? = null,
     val medias: List<FileItem> = emptyList(),

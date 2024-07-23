@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -9,8 +10,9 @@ import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
 import kotlin.jvm.JvmInline
 
-// TODO: Handling click event internally
-data class UiTimeline(
+// TODO: Handling item click event internally
+@Immutable
+data class UiTimeline internal constructor(
     val topMessage: TopMessage?,
     val content: ItemContent?,
     val platformType: PlatformType,

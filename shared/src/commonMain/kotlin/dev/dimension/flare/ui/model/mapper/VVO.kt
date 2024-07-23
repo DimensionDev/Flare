@@ -201,6 +201,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile =
                 },
             ).toImmutableList(),
         bottomContent = null,
+        platformType = PlatformType.VVo,
     )
 
 internal fun Comment.render(

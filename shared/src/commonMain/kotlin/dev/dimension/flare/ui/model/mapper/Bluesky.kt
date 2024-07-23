@@ -207,6 +207,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile =
             ),
         mark = persistentListOf(),
         bottomContent = null,
+        platformType = PlatformType.Bluesky,
     )
 
 internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile =
@@ -233,6 +234,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile =
             ),
         mark = persistentListOf(),
         bottomContent = null,
+        platformType = PlatformType.Bluesky,
     )
 
 internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile =
@@ -259,6 +261,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile =
             ),
         mark = persistentListOf(),
         bottomContent = null,
+        platformType = PlatformType.Bluesky,
     )
 
 private fun findCard(postView: PostView): UiCard? =

@@ -40,7 +40,6 @@ import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.NotificationPresenter
@@ -51,7 +50,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
@@ -116,7 +114,7 @@ private fun NotificationScreen(
                             IconButton(
                                 onClick = toQuickMenu,
                             ) {
-                                AvatarComponent(it.avatarUrl, size = 24.dp)
+                                AvatarComponent(it.avatar, size = 24.dp)
                             }
                         }
                     }
@@ -153,9 +151,7 @@ private fun NotificationScreen(
                         }
                     }
                     with(state.state.listState) {
-                        with(state.statusEvent) {
-                            status()
-                        }
+                        status()
                     }
                 }
             },
@@ -200,25 +196,23 @@ private val NotificationFilter.title: Int
         }
 
 @Composable
-private fun notificationPresenter(
-    accountType: AccountType,
-    statusEvent: StatusEvent = koinInject(),
-) = run {
-    val scope = rememberCoroutineScope()
-    var isRefreshing by remember { mutableStateOf(false) }
-    val accountState = remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
-    val state = remember { NotificationPresenter(accountType = accountType) }.invoke()
-    object : UserState by accountState {
-        val state = state
-        val statusEvent = statusEvent
-        val isRefreshing = isRefreshing
+private fun notificationPresenter(accountType: AccountType) =
+    run {
+        val scope = rememberCoroutineScope()
+        var isRefreshing by remember { mutableStateOf(false) }
+        val accountState =
+            remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
+        val state = remember { NotificationPresenter(accountType = accountType) }.invoke()
+        object : UserState by accountState {
+            val state = state
+            val isRefreshing = isRefreshing
 
-        fun refresh() {
-            scope.launch {
-                isRefreshing = true
-                state.refresh()
-                isRefreshing = false
+            fun refresh() {
+                scope.launch {
+                    isRefreshing = true
+                    state.refresh()
+                    isRefreshing = false
+                }
             }
         }
     }
-}

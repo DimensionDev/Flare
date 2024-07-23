@@ -33,12 +33,10 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -102,11 +100,9 @@ internal fun StatusScreen(
                     contentPadding = it,
                 ) {
                     with(state.state.listState) {
-                        with(state.statusEvent) {
-                            status(
-                                detailStatusKey = statusKey,
-                            )
-                        }
+                        status(
+                            detailStatusKey = statusKey,
+                        )
                     }
                 }
             },
@@ -118,7 +114,6 @@ internal fun StatusScreen(
 private fun statusPresenter(
     statusKey: MicroBlogKey,
     accountType: AccountType,
-    statusEvent: StatusEvent = koinInject(),
 ) = run {
     val scope = rememberCoroutineScope()
     var isRefreshing by remember { mutableStateOf(false) }
@@ -129,7 +124,6 @@ private fun statusPresenter(
 
     object {
         val state = state
-        val statusEvent = statusEvent
         val isRefreshing = isRefreshing
 
         fun refresh() {

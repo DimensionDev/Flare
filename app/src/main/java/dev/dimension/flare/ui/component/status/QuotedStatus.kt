@@ -44,7 +44,7 @@ internal fun QuotedStatus(
             data.user?.let {
                 UserCompat(it) {
                     Text(
-                        text = data.createdAt.value.localizedShortTime,
+                        text = data.createdAt.shortTime.localizedShortTime,
                         style = MaterialTheme.typography.bodySmall,
                         modifier =
                             Modifier

@@ -542,6 +542,7 @@ internal fun User.render(accountKey: MicroBlogKey) =
             } else {
                 null
             },
+        platformType = PlatformType.xQt,
     )
 
 private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value

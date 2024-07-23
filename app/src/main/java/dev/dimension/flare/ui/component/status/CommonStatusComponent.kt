@@ -400,7 +400,7 @@ private fun TranslationComponent(
 }
 
 @Composable
-private fun StatusVisibilityComponent(
+internal fun StatusVisibilityComponent(
     visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
     modifier: Modifier = Modifier,
 ) {

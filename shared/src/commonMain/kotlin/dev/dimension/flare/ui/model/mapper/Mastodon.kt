@@ -334,6 +334,7 @@ internal fun Account.render(accountKey: MicroBlogKey): UiProfile {
                                 .toImmutableMap(),
                     )
                 },
+        platformType = PlatformType.Mastodon,
     )
 }
 

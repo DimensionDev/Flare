@@ -26,7 +26,8 @@ import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.icons.Misskey
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.collections.immutable.persistentListOf
@@ -233,22 +234,22 @@ sealed interface TimelineTabItem : TabItem {
                 SettingsTabItem,
             )
 
-        fun defaultPrimary(user: UiUser) =
-            when (user) {
-                is UiUser.Mastodon -> mastodon(user.userKey)
-                is UiUser.Misskey -> misskey(user.userKey)
-                is UiUser.Bluesky -> bluesky(user.userKey)
-                is UiUser.XQT -> xqt(user.userKey)
-                is UiUser.VVO -> vvo(user.userKey)
+        fun defaultPrimary(user: UiUserV2) =
+            when (user.platformType) {
+                PlatformType.Mastodon -> mastodon(user.key)
+                PlatformType.Misskey -> misskey(user.key)
+                PlatformType.Bluesky -> bluesky(user.key)
+                PlatformType.xQt -> xqt(user.key)
+                PlatformType.VVo -> vvo(user.key)
             }
 
-        fun defaultSecondary(user: UiUser) =
-            when (user) {
-                is UiUser.Mastodon -> defaultMastodonSecondaryItems(user.userKey)
-                is UiUser.Misskey -> defaultMisskeySecondaryItems(user.userKey)
-                is UiUser.Bluesky -> defaultBlueskySecondaryItems(user.userKey)
-                is UiUser.XQT -> defaultXqtSecondaryItems(user.userKey)
-                is UiUser.VVO -> defaultVVOSecondaryItems(user.userKey)
+        fun defaultSecondary(user: UiUserV2) =
+            when (user.platformType) {
+                PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.key)
+                PlatformType.Misskey -> defaultMisskeySecondaryItems(user.key)
+                PlatformType.Bluesky -> defaultBlueskySecondaryItems(user.key)
+                PlatformType.xQt -> defaultXqtSecondaryItems(user.key)
+                PlatformType.VVo -> defaultVVOSecondaryItems(user.key)
             }
 
         private fun mastodon(accountKey: MicroBlogKey) =

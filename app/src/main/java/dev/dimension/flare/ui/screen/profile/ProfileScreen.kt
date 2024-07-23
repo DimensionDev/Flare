@@ -43,11 +43,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -68,6 +75,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
@@ -91,6 +99,9 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.generated.destinations.MediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Cat
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.onNotEmptyOrLoading
@@ -103,18 +114,19 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.MatricesDisplay
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.component.UserFields
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
-import dev.dimension.flare.ui.component.status.StatusEvent
-import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
+import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUser
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -125,10 +137,11 @@ import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.screen.home.TabState
+import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.launch
 import moe.tlaster.ktml.dom.Element
-import org.koin.compose.koinInject
 import kotlin.math.max
 import kotlin.reflect.KFunction1
 
@@ -163,14 +176,14 @@ internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostDeeplinkRoute(
     state
         .onSuccess {
             ProfileScreen(
-                userKey = it.userKey,
+                userKey = it.key,
                 onBack = {
                     navigator.navigateUp()
                 },
                 onProfileMediaClick = {
                     navigator.navigate(
                         ProfileMediaRouteDestination(
-                            it.userKey,
+                            it.key,
                             accountType = AccountType.Specific(accountKey),
                         ),
                     )
@@ -228,14 +241,14 @@ internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostRoute(
     state
         .onSuccess {
             ProfileScreen(
-                userKey = it.userKey,
+                userKey = it.key,
                 onBack = {
                     navigator.navigateUp()
                 },
                 onProfileMediaClick = {
                     navigator.navigate(
                         ProfileMediaRouteDestination(
-                            it.userKey,
+                            it.key,
                             accountType = accountType,
                         ),
                     )
@@ -554,7 +567,7 @@ private fun ProfileScreen(
                         title = {
                             state.state.userState.onSuccess {
                                 HtmlText(
-                                    element = it.nameElement,
+                                    element = it.name.data,
                                     modifier =
                                         Modifier.graphicsLayer {
                                             alpha = titleAlpha
@@ -633,12 +646,12 @@ private fun ProfileScreen(
                             expandMatrices = true,
                             onAvatarClick = {
                                 state.state.userState.onSuccess {
-                                    onMediaClick(it.avatarUrl)
+                                    onMediaClick(it.avatar)
                                 }
                             },
                             onBannerClick = {
                                 state.state.userState.onSuccess {
-                                    it.bannerUrl?.let { it1 -> onMediaClick(it1) }
+                                    it.banner?.let { it1 -> onMediaClick(it1) }
                                 }
                             },
                         )
@@ -687,12 +700,12 @@ private fun ProfileScreen(
                                     expandMatrices = false,
                                     onAvatarClick = {
                                         state.state.userState.onSuccess {
-                                            onMediaClick(it.avatarUrl)
+                                            onMediaClick(it.avatar)
                                         }
                                     },
                                     onBannerClick = {
                                         state.state.userState.onSuccess {
-                                            it.bannerUrl?.let { it1 -> onMediaClick(it1) }
+                                            it.banner?.let { it1 -> onMediaClick(it1) }
                                         }
                                     },
                                 )
@@ -717,9 +730,7 @@ private fun ProfileScreen(
                             }
                         }
                         with(state.state.listState) {
-                            with(state.statusEvent) {
-                                status()
-                            }
+                            status()
                         }
                     }
                 },
@@ -759,15 +770,28 @@ private fun ProfileMenu(
                                             when (action) {
                                                 is ProfileAction.Block ->
                                                     if (action.relationState(relation)) {
-                                                        stringResource(id = R.string.user_unblock, user.handle)
+                                                        stringResource(
+                                                            id = R.string.user_unblock,
+                                                            user.handle,
+                                                        )
                                                     } else {
-                                                        stringResource(id = R.string.user_block, user.handle)
+                                                        stringResource(
+                                                            id = R.string.user_block,
+                                                            user.handle,
+                                                        )
                                                     }
+
                                                 is ProfileAction.Mute ->
                                                     if (action.relationState(relation)) {
-                                                        stringResource(id = R.string.user_unmute, user.handle)
+                                                        stringResource(
+                                                            id = R.string.user_unmute,
+                                                            user.handle,
+                                                        )
                                                     } else {
-                                                        stringResource(id = R.string.user_mute, user.handle)
+                                                        stringResource(
+                                                            id = R.string.user_mute,
+                                                            user.handle,
+                                                        )
                                                     }
                                             }
                                         Text(text = text)
@@ -775,7 +799,7 @@ private fun ProfileMenu(
                                     onClick = {
                                         setShowMoreMenus(false)
                                         profileState.onProfileActionClick(
-                                            user = user,
+                                            userKey = user.key,
                                             relation = relation,
                                             action = action,
                                         )
@@ -796,7 +820,7 @@ private fun ProfileMenu(
                         },
                         onClick = {
                             setShowMoreMenus(false)
-                            profileState.report(user)
+                            profileState.report(user.key)
                         },
                     )
                 }
@@ -809,9 +833,9 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ProfileHeader(
-    userState: UiState<UiUser>,
+    userState: UiState<UiProfile>,
     relationState: UiState<UiRelation>,
-    onFollowClick: (UiUser, UiRelation) -> Unit,
+    onFollowClick: (userKey: MicroBlogKey, UiRelation) -> Unit,
     onAvatarClick: () -> Unit,
     onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
@@ -859,9 +883,9 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ProfileHeaderSuccess(
-    user: UiUser,
+    user: UiProfile,
     relationState: UiState<UiRelation>,
-    onFollowClick: (UiUser, UiRelation) -> Unit,
+    onFollowClick: (userKey: MicroBlogKey, UiRelation) -> Unit,
     onAvatarClick: () -> Unit,
     onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
@@ -869,83 +893,160 @@ private fun ProfileHeaderSuccess(
     modifier: Modifier = Modifier,
     expandMatrices: Boolean = false,
 ) {
-    when (user) {
-        is UiUser.Mastodon -> {
-            MastodonProfileHeader(
-                user = user,
-                relationState = relationState,
-                modifier = modifier,
-                isMe = isMe,
-                onFollowClick = {
-                    onFollowClick(user, it)
-                },
-                menu = menu,
-                expandMatrices = expandMatrices,
-                onAvatarClick = onAvatarClick,
-                onBannerClick = onBannerClick,
-            )
-        }
+    CommonProfileHeader(
+        modifier = modifier,
+        bannerUrl = user.banner,
+        avatarUrl = user.avatar,
+        displayName = user.name.data,
+        userKey = user.key,
+        handle = user.handle,
+        headerTrailing = {
+            isMe.onSuccess {
+                if (!it) {
+                    when (relationState) {
+                        is UiState.Error -> Unit
+                        is UiState.Loading -> {
+                            FilledTonalButton(
+                                onClick = {
+                                    // No-op
+                                },
+                                modifier =
+                                    Modifier.placeholder(
+                                        true,
+                                        shape = ButtonDefaults.filledTonalShape,
+                                    ),
+                            ) {
+                                Text(text = stringResource(R.string.profile_header_button_follow))
+                            }
+                        }
 
-        is UiUser.Misskey -> {
-            MisskeyProfileHeader(
-                user = user,
-                relationState = relationState,
-                modifier = modifier,
-                isMe = isMe,
-                onFollowClick = {
-                    onFollowClick(user, it)
-                },
-                menu = menu,
-                expandMatrices = expandMatrices,
-                onAvatarClick = onAvatarClick,
-                onBannerClick = onBannerClick,
-            )
-        }
-
-        is UiUser.Bluesky ->
-            BlueskyProfileHeader(
-                user = user,
-                relationState = relationState,
-                modifier = modifier,
-                isMe = isMe,
-                onFollowClick = {
-                    onFollowClick(user, it)
-                },
-                menu = menu,
-                expandMatrices = expandMatrices,
-                onAvatarClick = onAvatarClick,
-                onBannerClick = onBannerClick,
-            )
-
-        is UiUser.XQT ->
-            XQTProfileHeader(
-                user = user,
-                relationState = relationState,
-                modifier = modifier,
-                isMe = isMe,
-                onFollowClick = {
-                    onFollowClick(user, it)
-                },
-                menu = menu,
-                expandMatrices = expandMatrices,
-                onAvatarClick = onAvatarClick,
-                onBannerClick = onBannerClick,
-            )
-        is UiUser.VVO ->
-            VVOProfileHeader(
-                user = user,
-                relationState = relationState,
-                modifier = modifier,
-                isMe = isMe,
-                onFollowClick = {
-                    onFollowClick(user, it)
-                },
-                menu = menu,
-                expandMatrices = expandMatrices,
-                onAvatarClick = onAvatarClick,
-                onBannerClick = onBannerClick,
-            )
-    }
+                        is UiState.Success -> {
+                            FilledTonalButton(onClick = {
+                                onFollowClick.invoke(user.key, relationState.data)
+                            }) {
+                                Text(
+                                    text =
+                                        stringResource(
+                                            id =
+                                                when {
+                                                    relationState.data.blocking ->
+                                                        R.string.profile_header_button_blocked
+                                                    relationState.data.following ->
+                                                        R.string.profile_header_button_following
+                                                    relationState.data.hasPendingFollowRequestFromYou ->
+                                                        R.string.profile_header_button_requested
+                                                    else ->
+                                                        R.string.profile_header_button_follow
+                                                },
+                                        ),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            menu.invoke(this)
+        },
+        onAvatarClick = onAvatarClick,
+        onBannerClick = onBannerClick,
+        handleTrailing = {
+            user.mark.forEach {
+                when (it) {
+                    UiProfile.Mark.Verified ->
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
+                            tint = Color.Blue,
+                        )
+                    UiProfile.Mark.Cat ->
+                        Icon(
+                            imageVector = FontAwesomeIcons.Solid.Cat,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
+                        )
+                    UiProfile.Mark.Bot ->
+                        Icon(
+                            imageVector = Icons.Default.SmartToy,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
+                        )
+                    UiProfile.Mark.Locked ->
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
+                        )
+                }
+            }
+        },
+        content = {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = screenHorizontalPadding),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                user.description?.let {
+                    HtmlText(
+                        element = it.data,
+                        layoutDirection = it.direction,
+                    )
+                }
+                when (val content = user.bottomContent) {
+                    is UiProfile.BottomContent.Fields ->
+                        UserFields(
+                            fields = content.fields,
+                        )
+                    is UiProfile.BottomContent.XQT -> {
+                        content.location?.let {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Icon(Icons.Default.LocationOn, contentDescription = null)
+                                Text(text = it)
+                            }
+                        }
+                        content.url?.let {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Icon(Icons.Default.Public, contentDescription = null)
+                                Text(text = it)
+                            }
+                        }
+                    }
+                    null -> Unit
+                }
+                MatricesDisplay(
+                    matrices =
+                        remember(user.matrices) {
+                            persistentMapOf(
+                                R.string.profile_misskey_header_status_count to user.matrices.statusesCountHumanized,
+                                R.string.profile_header_following_count to user.matrices.followsCountHumanized,
+                                R.string.profile_header_fans_count to user.matrices.fansCountHumanized,
+                            )
+                        },
+                    expanded = expandMatrices,
+                )
+            }
+        },
+    )
 }
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
@@ -1299,7 +1400,6 @@ private fun ProfileMeidasPreview(
 private fun profilePresenter(
     userKey: MicroBlogKey?,
     accountType: AccountType,
-    statusEvent: StatusEvent = koinInject(),
 ) = run {
     val scope = rememberCoroutineScope()
     var isRefreshing by remember { mutableStateOf(false) }
@@ -1315,7 +1415,6 @@ private fun profilePresenter(
     }
     object {
         val state = state
-        val statusEvent = statusEvent
         val showMoreMenus = showMoreMenus
         val isRefreshing = isRefreshing
 

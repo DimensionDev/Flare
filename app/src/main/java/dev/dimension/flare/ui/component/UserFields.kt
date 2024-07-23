@@ -9,12 +9,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableMap
-import moe.tlaster.ktml.dom.Element
 
 @Composable
 fun UserFields(
-    fields: ImmutableMap<String, Element>,
+    fields: ImmutableMap<String, UiRichText>,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -36,7 +36,7 @@ fun UserFields(
 @Composable
 fun UserField(
     key: String,
-    value: Element,
+    value: UiRichText,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -47,7 +47,7 @@ fun UserField(
             style = MaterialTheme.typography.bodySmall,
         )
         HtmlText(
-            element = value,
+            element = value.data,
         )
     }
 }

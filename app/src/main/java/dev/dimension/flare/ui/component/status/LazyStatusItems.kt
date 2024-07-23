@@ -47,7 +47,6 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.status.mastodon.StatusPlaceholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.onError

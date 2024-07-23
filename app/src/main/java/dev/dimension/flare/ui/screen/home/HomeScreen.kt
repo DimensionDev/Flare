@@ -302,7 +302,7 @@ internal fun HomeScreen(
                             ) {
                                 accountTypeState.user
                                     .onSuccess {
-                                        AvatarComponent(it.avatarUrl)
+                                        AvatarComponent(it.avatar)
                                     }.onLoading {
                                         AvatarComponent(null, modifier = Modifier.placeholder(true))
                                     }.onError {

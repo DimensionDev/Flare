@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
@@ -9,11 +10,12 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlin.jvm.JvmInline
 
 @Immutable
-data class UiProfile(
+data class UiProfile internal constructor(
     override val key: MicroBlogKey,
     override val handle: String,
     override val avatar: String,
     override val name: UiRichText,
+    override val platformType: PlatformType,
     val banner: String?,
     val description: UiRichText?,
     val matrices: Matrices,

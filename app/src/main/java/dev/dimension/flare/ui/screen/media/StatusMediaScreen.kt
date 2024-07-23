@@ -28,6 +28,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -73,9 +74,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.VideoPlayerPool
-import dev.dimension.flare.ui.component.status.UiStatusQuoted
+import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -84,6 +86,7 @@ import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.FlareTheme
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -92,6 +95,7 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
+import okhttp3.internal.toImmutableList
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -378,29 +382,32 @@ private fun StatusMediaScreen(
                 }
             }
             state.status.onSuccess { status ->
-                AnimatedVisibility(
-                    visible = state.showUi,
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomCenter),
-                    enter = slideInVertically { it },
-                    exit = slideOutVertically { it },
-                ) {
-                    UiStatusQuoted(
-                        status = status,
-                        onMediaClick = {},
-                        onClick = toStatus,
-                        showMedia = false,
+                val content = status.content
+                if (content is UiTimeline.ItemContent.Status) {
+                    AnimatedVisibility(
+                        visible = state.showUi,
                         modifier =
                             Modifier
-                                .padding(
-                                    bottom = if (state.withVideoPadding) 72.dp else 0.dp,
-                                ).systemBarsPadding(),
-                        colors =
-                            CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            ),
-                    )
+                                .align(Alignment.BottomCenter),
+                        enter = slideInVertically { it },
+                        exit = slideOutVertically { it },
+                    ) {
+                        Card(
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                ),
+                        ) {
+                            QuotedStatus(
+                                data = content,
+                                modifier =
+                                    Modifier
+                                        .padding(
+                                            bottom = if (state.withVideoPadding) 72.dp else 0.dp,
+                                        ).systemBarsPadding(),
+                            )
+                        }
+                    }
                 }
             }
             state.medias.onSuccess { medias ->
@@ -551,7 +558,7 @@ private fun statusMediaPresenter(
         }.invoke()
     val medias =
         state.status.map {
-            it.medias
+            (it.content as? UiTimeline.ItemContent.Status)?.images.orEmpty().toImmutableList()
         }
     var currentPage by remember {
         mutableIntStateOf(initialIndex)

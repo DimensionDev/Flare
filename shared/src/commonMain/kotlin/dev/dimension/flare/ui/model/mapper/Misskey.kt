@@ -283,6 +283,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
             ),
         mark = persistentListOf(),
         bottomContent = null,
+        platformType = PlatformType.Misskey,
     )
 }
 
@@ -336,6 +337,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                 }.toImmutableMap(),
                     )
                 },
+        platformType = PlatformType.Misskey,
     )
 }
 

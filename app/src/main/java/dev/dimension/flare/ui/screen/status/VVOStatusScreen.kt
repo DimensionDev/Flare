@@ -57,11 +57,10 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -69,7 +68,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailPresenter
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -139,8 +137,8 @@ private fun VVOStatusScreen(
                 }
             Row {
                 StatusContent(
+                    detailStatusKey = statusKey,
                     statusState = state.status,
-                    event = state.statusEvent,
                     modifier =
                         Modifier
                             .verticalScroll(rememberScrollState())
@@ -153,7 +151,6 @@ private fun VVOStatusScreen(
                     reactionContent(
                         comment = state.comment,
                         repost = state.repost,
-                        event = state.statusEvent,
                         detailType = state.type,
                         onDetailTypeChange = state::onTypeChanged,
                     )
@@ -164,12 +161,11 @@ private fun VVOStatusScreen(
                 contentPadding = contentPadding,
             ) {
                 item {
-                    StatusContent(statusState = state.status, event = state.statusEvent)
+                    StatusContent(statusState = state.status, detailStatusKey = statusKey)
                 }
                 reactionContent(
                     comment = state.comment,
                     repost = state.repost,
-                    event = state.statusEvent,
                     detailType = state.type,
                     onDetailTypeChange = state::onTypeChanged,
                 )
@@ -182,16 +178,16 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun StatusContent(
-    statusState: UiState<UiStatus.VVO>,
-    event: StatusEvent,
+    statusState: UiState<UiTimeline>,
+    detailStatusKey: MicroBlogKey,
     modifier: Modifier = Modifier,
 ) {
     statusState
         .onSuccess { status ->
-            key(status.statusKey, status.content) {
+            key(status.itemKey, status.content) {
                 StatusItem(
                     item = status,
-                    event = event,
+                    detailStatusKey = detailStatusKey,
                     modifier =
                         modifier.sharedBounds(
                             rememberSharedContentState(key = status.itemKey),
@@ -204,11 +200,13 @@ private fun StatusContent(
                             renderInOverlayDuringTransition = false,
                             placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                         ),
-                    isDetail = true,
                 )
             }
         }.onLoading {
-            StatusItem(item = null, event = event, modifier = modifier, isDetail = true)
+            StatusItem(
+                item = null,
+                modifier = modifier,
+            )
         }.onError {
             Column(
                 modifier = modifier,
@@ -231,9 +229,8 @@ private fun StatusContent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 private fun LazyStaggeredGridScope.reactionContent(
-    comment: UiState<LazyPagingItems<UiStatus>>,
-    repost: UiState<LazyPagingItems<UiStatus>>,
-    event: StatusEvent,
+    comment: UiState<LazyPagingItems<UiTimeline>>,
+    repost: UiState<LazyPagingItems<UiTimeline>>,
     detailType: DetailType,
     onDetailTypeChange: (DetailType) -> Unit,
 ) {
@@ -260,18 +257,16 @@ private fun LazyStaggeredGridScope.reactionContent(
             }
         }
     }
-    with(event) {
-        when (detailType) {
-            DetailType.Comment ->
-                with(comment) {
-                    status(showVVOStatus = false)
-                }
+    when (detailType) {
+        DetailType.Comment ->
+            with(comment) {
+                status(showVVOStatus = false)
+            }
 
-            DetailType.Repost ->
-                with(repost) {
-                    status(showVVOStatus = false)
-                }
-        }
+        DetailType.Repost ->
+            with(repost) {
+                status(showVVOStatus = false)
+            }
     }
 }
 
@@ -279,7 +274,6 @@ private fun LazyStaggeredGridScope.reactionContent(
 private fun presenter(
     statusKey: MicroBlogKey,
     accountType: AccountType,
-    statusEvent: StatusEvent = koinInject(),
 ) = run {
     var type by remember {
         mutableStateOf(DetailType.Comment)
@@ -294,7 +288,6 @@ private fun presenter(
 
     object : VVOStatusDetailState by state {
         val type = type
-        val statusEvent = statusEvent
 
         fun onTypeChanged(value: DetailType) {
             type = value

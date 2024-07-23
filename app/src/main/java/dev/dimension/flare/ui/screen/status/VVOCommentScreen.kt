@@ -34,7 +34,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onLoading
@@ -42,7 +41,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOCommentPresenter
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
@@ -74,7 +72,6 @@ private fun VVOCommentScreen(
     commentKey: MicroBlogKey,
     onBack: () -> Unit,
     accountType: AccountType,
-    statusEvent: StatusEvent = koinInject(),
 ) {
     val state by producePresenter("comment_$commentKey") {
         presenter(
@@ -112,15 +109,13 @@ private fun VVOCommentScreen(
                     item {
                         state.state.root
                             .onSuccess {
-                                StatusItem(item = it, event = statusEvent)
+                                StatusItem(item = it)
                             }.onLoading {
-                                StatusItem(item = null, event = statusEvent)
+                                StatusItem(item = null)
                             }
                     }
                     with(state.state.list) {
-                        with(statusEvent) {
-                            status()
-                        }
+                        status()
                     }
                 }
             },

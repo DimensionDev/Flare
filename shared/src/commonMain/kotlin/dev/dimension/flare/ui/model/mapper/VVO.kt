@@ -16,6 +16,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
 import io.ktor.http.decodeURLPart
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.datetime.Clock
 import moe.tlaster.ktml.Ktml
 import moe.tlaster.ktml.dom.Element
@@ -30,12 +31,23 @@ internal fun Status.render(
     return UiTimeline(
         topMessage =
             message?.let {
+                val rendered = user?.render(accountKey)
                 UiTimeline.TopMessage(
-                    user = user?.render(accountKey),
+                    user = rendered,
                     icon = UiTimeline.TopMessage.Icon.Info,
                     type =
                         UiTimeline.TopMessage.MessageType.VVO
                             .Custom(it),
+                    onClicked = {
+                        if (rendered != null) {
+                            launcher.launch(
+                                AppDeepLink.Profile(
+                                    accountKey = accountKey,
+                                    userKey = rendered.key,
+                                ),
+                            )
+                        }
+                    },
                 )
             },
         content = renderStatus(accountKey, event),
@@ -136,6 +148,12 @@ internal fun Status.renderStatus(
                         count = repostsCount?.content?.toLongOrNull() ?: 0,
                         retweeted = false,
                         onClicked = {
+                            launcher.launch(
+                                AppDeepLink.Compose.Quote(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ),
+                            )
                         },
                     )
                 } else {
@@ -143,6 +161,14 @@ internal fun Status.renderStatus(
                 },
                 StatusAction.Item.Reply(
                     count = commentsCount ?: 0,
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Compose.Reply(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
+                        )
+                    },
                 ),
                 StatusAction.Item.Like(
                     count = attitudesCount ?: 0,
@@ -156,9 +182,22 @@ internal fun Status.renderStatus(
                     actions =
                         listOfNotNull(
                             if (isFromMe) {
-                                StatusAction.Item.Delete
+                                StatusAction.Item.Delete(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.DeleteStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
                             } else {
-                                StatusAction.Item.Report
+                                StatusAction.Item.Report(
+                                    onClicked = {
+                                        // TODO: Report
+                                    },
+                                )
                             },
                         ).toImmutableList(),
                 ),
@@ -166,16 +205,25 @@ internal fun Status.renderStatus(
         poll = null,
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
         sensitive = false,
+        onClicked = {
+            launcher.launch(
+                AppDeepLink.VVO.StatusDetail(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                ),
+            )
+        },
     )
 }
 
-internal fun User.render(accountKey: MicroBlogKey): UiProfile =
-    UiProfile(
-        key =
-            MicroBlogKey(
-                id = id.toString(),
-                host = vvoHost,
-            ),
+internal fun User.render(accountKey: MicroBlogKey): UiProfile {
+    val userKey =
+        MicroBlogKey(
+            id = id.toString(),
+            host = vvoHost,
+        )
+    return UiProfile(
+        key = userKey,
         avatar = avatarHD ?: profileImageURL ?: "",
         handle = "@$screenName@${vvoHost.removePrefix("m.")}",
         name =
@@ -200,9 +248,25 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile =
                     null
                 },
             ).toImmutableList(),
-        bottomContent = null,
+        bottomContent =
+            verifiedReason?.let {
+                UiProfile.BottomContent.Iconify(
+                    items =
+                        mapOf(
+                            UiProfile.BottomContent.Iconify.Icon.Verify to
+                                Element("span")
+                                    .apply {
+                                        children.add(Text(it))
+                                    }.toUi(),
+                        ).toImmutableMap(),
+                )
+            },
         platformType = PlatformType.VVo,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
     )
+}
 
 internal fun Comment.render(
     accountKey: MicroBlogKey,
@@ -237,10 +301,20 @@ internal fun Comment.renderStatus(
         quote =
             commentList
                 ?.map {
-                    it.renderStatus(
-                        accountKey,
-                        event,
-                    )
+                    it
+                        .renderStatus(
+                            accountKey,
+                            event,
+                        ).copy(
+                            onClicked = {
+                                launcher.launch(
+                                    AppDeepLink.VVO.CommentDetail(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ),
+                                )
+                            },
+                        )
                 }.orEmpty()
                 .toImmutableList(),
         card = null,
@@ -269,6 +343,17 @@ internal fun Comment.renderStatus(
             listOfNotNull(
                 StatusAction.Item.Reply(
                     count = replyCount ?: 0,
+                    onClicked = {
+                        if (rootidstr != null) {
+                            launcher.launch(
+                                AppDeepLink.VVO.ReplyToComment(
+                                    accountKey = accountKey,
+                                    replyTo = statusKey,
+                                    rootId = rootidstr,
+                                ),
+                            )
+                        }
+                    },
                 ),
                 StatusAction.Item.Like(
                     count = likeCount ?: 0,
@@ -282,15 +367,36 @@ internal fun Comment.renderStatus(
                     actions =
                         listOfNotNull(
                             if (isFromMe) {
-                                StatusAction.Item.Delete
+                                StatusAction.Item.Delete(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.DeleteStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
                             } else {
-                                StatusAction.Item.Report
+                                StatusAction.Item.Report(
+                                    onClicked = {
+                                        // TODO: Report
+                                    },
+                                )
                             },
                         ).toImmutableList(),
                 ),
             ).toImmutableList(),
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
         sensitive = false,
+        onClicked = {
+            launcher.launch(
+                AppDeepLink.VVO.CommentDetail(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                ),
+            )
+        },
     )
 }
 
@@ -306,6 +412,16 @@ internal fun Attitude.render(
                 user = user,
                 icon = UiTimeline.TopMessage.Icon.Favourite,
                 type = UiTimeline.TopMessage.MessageType.VVO.Like,
+                onClicked = {
+                    if (user != null) {
+                        launcher.launch(
+                            AppDeepLink.Profile(
+                                accountKey = accountKey,
+                                userKey = user.key,
+                            ),
+                        )
+                    }
+                },
             ),
         content = content,
         platformType = PlatformType.VVo,

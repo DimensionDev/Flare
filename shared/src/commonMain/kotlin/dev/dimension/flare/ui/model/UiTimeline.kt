@@ -23,6 +23,7 @@ data class UiTimeline internal constructor(
                 append(platformType.name)
                 if (topMessage != null) {
                     append("withTopMessage")
+                    append(topMessage.itemKey)
                 }
                 if (content != null) {
                     append("withContent")
@@ -70,6 +71,7 @@ data class UiTimeline internal constructor(
             val bottomContent: BottomContent? = null,
             val topEndContent: TopEndContent? = null,
             val aboveTextContent: AboveTextContent? = null,
+            val onClicked: ClickContext.() -> Unit,
         ) : ItemContent {
             override val itemKey: String
                 get() =
@@ -169,7 +171,18 @@ data class UiTimeline internal constructor(
         val user: UiUserV2?,
         val icon: Icon,
         val type: MessageType,
+        val onClicked: ClickContext.() -> Unit,
     ) {
+        val itemKey: String
+            get() =
+                buildString {
+                    append("TopMessage")
+                    append(type)
+                    if (user != null) {
+                        append(user.key)
+                    }
+                }
+
         enum class Icon {
             Retweet,
             Follow,

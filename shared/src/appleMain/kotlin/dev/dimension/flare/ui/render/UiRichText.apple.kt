@@ -6,9 +6,16 @@ import moe.tlaster.ktml.dom.Element
 import moe.tlaster.ktml.dom.Node
 import moe.tlaster.ktml.dom.Text
 
-typealias UiRichText = String
+actual data class UiRichText(
+    val markdown: String,
+    actual val raw: String,
+)
 
-actual fun Element.toUi(): UiRichText = toMarkdown()
+actual fun Element.toUi(): UiRichText =
+    UiRichText(
+        markdown = toMarkdown(),
+        raw = innerText,
+    )
 
 internal fun Node.toMarkdown(): String =
     when (this) {

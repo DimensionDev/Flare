@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.ui.humanizer.humanize
+import dev.dimension.flare.ui.model.ClickContext
 import kotlinx.collections.immutable.ImmutableList
 
 sealed interface StatusAction {
@@ -11,7 +12,7 @@ sealed interface StatusAction {
 
     sealed interface Item : StatusAction {
         sealed interface Clickable : Item {
-            val onClicked: () -> Unit
+            val onClicked: ClickContext.() -> Unit
         }
 
         sealed interface Colorized : Item {
@@ -30,7 +31,7 @@ sealed interface StatusAction {
         data class Like(
             val count: Long,
             val liked: Boolean,
-            override val onClicked: () -> Unit,
+            override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
             Colorized {
@@ -45,7 +46,7 @@ sealed interface StatusAction {
         data class Retweet(
             val count: Long,
             val retweeted: Boolean,
-            override val onClicked: () -> Unit,
+            override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
             Colorized {
@@ -59,7 +60,9 @@ sealed interface StatusAction {
 
         data class Reply(
             val count: Long,
-        ) : Item {
+            override val onClicked: ClickContext.() -> Unit,
+        ) : Item,
+            Clickable {
             val humanizedCount by lazy {
                 count.humanize()
             }
@@ -67,7 +70,9 @@ sealed interface StatusAction {
 
         data class Quote(
             val count: Long,
-        ) : Item {
+            override val onClicked: ClickContext.() -> Unit,
+        ) : Item,
+            Clickable {
             val humanizedCount by lazy {
                 count.humanize()
             }
@@ -76,7 +81,7 @@ sealed interface StatusAction {
         data class Bookmark(
             val count: Long,
             val bookmarked: Boolean,
-            override val onClicked: () -> Unit,
+            override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable {
             val humanizedCount by lazy {
@@ -84,18 +89,28 @@ sealed interface StatusAction {
             }
         }
 
-        data object Delete : Item, Colorized {
+        data class Delete(
+            override val onClicked: ClickContext.() -> Unit,
+        ) : Item,
+            Colorized,
+            Clickable {
             override val color: Colorized.Color
                 get() = Colorized.Color.Error
         }
 
-        data object Report : Item, Colorized {
+        data class Report(
+            override val onClicked: ClickContext.() -> Unit,
+        ) : Item,
+            Colorized,
+            Clickable {
             override val color: Colorized.Color
                 get() = Colorized.Color.Error
         }
 
         data class Reaction(
             val reacted: Boolean,
-        ) : Item
+            override val onClicked: ClickContext.() -> Unit,
+        ) : Item,
+            Clickable
     }
 }

@@ -16,6 +16,7 @@ data class UiProfile internal constructor(
     override val avatar: String,
     override val name: UiRichText,
     override val platformType: PlatformType,
+    override val onClicked: ClickContext.() -> Unit,
     val banner: String?,
     val description: UiRichText?,
     val matrices: Matrices,
@@ -40,10 +41,15 @@ data class UiProfile internal constructor(
             val fields: ImmutableMap<String, UiRichText>,
         ) : BottomContent
 
-        data class XQT(
-            val location: String?,
-            val url: String?,
-        ) : BottomContent
+        data class Iconify(
+            val items: ImmutableMap<Icon, UiRichText>,
+        ) : BottomContent {
+            enum class Icon {
+                Location,
+                Url,
+                Verify,
+            }
+        }
     }
 
     enum class Mark {

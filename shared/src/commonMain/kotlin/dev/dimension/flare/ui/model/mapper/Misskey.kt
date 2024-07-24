@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
@@ -53,6 +54,9 @@ internal fun Notification.render(
             user = user,
             icon = UiTimeline.TopMessage.Icon.Retweet,
             type = topMessageType,
+            onClicked = {
+                launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+            },
         )
     return UiTimeline(
         topMessage = topMessage,
@@ -78,7 +82,6 @@ internal fun Note.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
 ): UiTimeline {
-    requireNotNull(user) { "account is null" }
     val user = user.render(accountKey)
     val topMessage =
         if (renote == null || !text.isNullOrEmpty()) {
@@ -88,12 +91,31 @@ internal fun Note.render(
                 user = user,
                 icon = UiTimeline.TopMessage.Icon.Retweet,
                 type = UiTimeline.TopMessage.MessageType.Mastodon.Reblogged,
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.Profile(
+                            accountKey = accountKey,
+                            userKey = user.key,
+                        ),
+                    )
+                },
             )
         }
+    val currentStatus = this.renderStatus(accountKey, event)
     val actualStatus = renote ?: this
     return UiTimeline(
         topMessage = topMessage,
-        content = actualStatus.renderStatus(accountKey, event),
+        content =
+            actualStatus.renderStatus(accountKey, event).copy(
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.StatusDetail(
+                            accountKey = accountKey,
+                            statusKey = currentStatus.statusKey,
+                        ),
+                    )
+                },
+            ),
         platformType = PlatformType.Misskey,
     )
 }
@@ -154,6 +176,14 @@ internal fun Note.renderStatus(
             listOfNotNull(
                 StatusAction.Item.Reply(
                     count = repliesCount.toLong(),
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Compose.Reply(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
+                        )
+                    },
                 ),
                 if (canReblog) {
                     StatusAction.Group(
@@ -176,6 +206,14 @@ internal fun Note.renderStatus(
                                 ),
                                 StatusAction.Item.Quote(
                                     count = 0,
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.Compose.Quote(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
                                 ),
                             ).toImmutableList(),
                     )
@@ -184,15 +222,42 @@ internal fun Note.renderStatus(
                 },
                 StatusAction.Item.Reaction(
                     reacted = myReaction != null,
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Misskey.AddReaction(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
+                        )
+                    },
                 ),
                 StatusAction.Group(
                     displayItem = StatusAction.Item.More,
                     actions =
                         listOfNotNull(
                             if (isFromMe) {
-                                StatusAction.Item.Delete
+                                StatusAction.Item.Delete(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.DeleteStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
                             } else {
-                                StatusAction.Item.Report
+                                StatusAction.Item.Report(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.Misskey.ReportStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                                userKey = user.key,
+                                            ),
+                                        )
+                                    },
+                                )
                             },
                         ).toImmutableList(),
                 ),
@@ -231,6 +296,14 @@ internal fun Note.renderStatus(
             UiTimeline.ItemContent.Status.BottomContent
                 .Reaction(reaction, myReaction),
         sensitive = files?.any { it.isSensitive } ?: false,
+        onClicked = {
+            launcher.launch(
+                AppDeepLink.StatusDetail(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                ),
+            )
+        },
     )
 }
 
@@ -264,15 +337,16 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         } else {
             host
         }
+    val userKey =
+        MicroBlogKey(
+            id = id,
+            host = accountKey.host,
+        )
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
         name = parseName(name.orEmpty(), accountKey).toUi(),
         handle = "@$username@$remoteHost",
-        key =
-            MicroBlogKey(
-                id = id,
-                host = accountKey.host,
-            ),
+        key = userKey,
         banner = null,
         description = null,
         matrices =
@@ -284,6 +358,9 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformType = PlatformType.Misskey,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
     )
 }
 
@@ -294,15 +371,16 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         } else {
             host
         }
+    val userKey =
+        MicroBlogKey(
+            id = id,
+            host = accountKey.host,
+        )
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
         name = parseName(name.orEmpty(), accountKey).toUi(),
         handle = "@$username@$remoteHost",
-        key =
-            MicroBlogKey(
-                id = id,
-                host = accountKey.host,
-            ),
+        key = userKey,
         banner = bannerUrl,
         description = description?.let { misskeyParser.parse(it).toHtml(accountKey).toUi() },
         matrices =
@@ -338,6 +416,9 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     )
                 },
         platformType = PlatformType.Misskey,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
     )
 }
 

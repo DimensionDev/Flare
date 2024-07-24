@@ -9,6 +9,7 @@ actual data class UiRichText(
     val direction: LayoutDirection,
 ) {
     val innerText = data.innerText
+    actual val raw: String = data.innerText
 }
 
 actual fun Element.toUi(): UiRichText =

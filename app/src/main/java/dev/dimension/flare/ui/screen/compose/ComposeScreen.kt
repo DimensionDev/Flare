@@ -90,6 +90,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -99,7 +100,6 @@ import dev.dimension.flare.data.datasource.microblog.VVOComposeData
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -158,13 +158,16 @@ fun ShortcutComposeRoute(
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.VVO.ReplyToComment.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun VVoReplyCommentRoute(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
+    accountKey: MicroBlogKey,
     replyTo: MicroBlogKey,
     rootId: String,
 ) {
@@ -172,7 +175,7 @@ fun VVoReplyCommentRoute(
         onBack = {
             navigator.navigateUp()
         },
-        accountType = accountType,
+        accountType = AccountType.Specific(accountKey = accountKey),
         status = ComposeStatus.VVOComment(replyTo, rootId),
     )
 }
@@ -200,21 +203,24 @@ fun ComposeRoute(
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.Compose.Reply.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun ReplyRoute(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
-    replyTo: MicroBlogKey,
+    accountKey: MicroBlogKey,
+    statusKey: MicroBlogKey,
 ) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
         },
-        status = ComposeStatus.Reply(replyTo),
-        accountType = accountType,
+        status = ComposeStatus.Reply(statusKey),
+        accountType = AccountType.Specific(accountKey = accountKey),
     )
 }
 
@@ -224,21 +230,24 @@ fun ReplyRoute(
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.Compose.Quote.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun Quote(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
-    quoted: MicroBlogKey,
+    accountKey: MicroBlogKey,
+    statusKey: MicroBlogKey,
 ) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
         },
-        status = ComposeStatus.Quote(quoted),
-        accountType = accountType,
+        status = ComposeStatus.Quote(statusKey),
+        accountType = AccountType.Specific(accountKey = accountKey),
     )
 }
 
@@ -841,136 +850,6 @@ private fun ComposeScreen(
     }
 }
 
-// @Composable
-// private fun MisskeyVisibilityContent(visibilityState: MisskeyVisibilityState) {
-//    IconButton(
-//        onClick = {
-//            visibilityState.showVisibilityMenu()
-//        },
-//    ) {
-//        dev.dimension.flare.ui.component.status.misskey
-//            .VisibilityIcon(visibility = visibilityState.visibility)
-//        DropdownMenu(
-//            expanded = visibilityState.showVisibilityMenu,
-//            onDismissRequest = {
-//                visibilityState.hideVisibilityMenu()
-//            },
-//            properties = PopupProperties(focusable = false),
-//        ) {
-//            visibilityState.allVisibilities.forEach { visibility ->
-//                DropdownMenuItem(
-//                    onClick = {
-//                        visibilityState.setVisibility(visibility)
-//                        visibilityState.hideVisibilityMenu()
-//                    },
-//                    text = {
-//                        Column(
-//                            verticalArrangement = Arrangement.spacedBy(4.dp),
-//                            horizontalAlignment = Alignment.Start,
-//                        ) {
-//                            Text(
-//                                text = stringResource(id = visibility.localName),
-//                                style = MaterialTheme.typography.bodyLarge,
-//                            )
-//                            Text(
-//                                text = stringResource(id = visibility.localDescription),
-//                                style = MaterialTheme.typography.bodySmall,
-//                            )
-//                        }
-//                    },
-//                    leadingIcon = {
-//                        dev.dimension.flare.ui.component.status.misskey
-//                            .VisibilityIcon(visibility = visibility)
-//                    },
-//                    contentPadding =
-//                        PaddingValues(
-//                            horizontal = 16.dp,
-//                            vertical = 8.dp,
-//                        ),
-//                )
-//            }
-//            DropdownMenuItem(
-//                text = {
-//                    Column(
-//                        verticalArrangement = Arrangement.spacedBy(4.dp),
-//                        horizontalAlignment = Alignment.Start,
-//                    ) {
-//                        Text(
-//                            text = stringResource(id = R.string.misskey_compose_local_only),
-//                            style = MaterialTheme.typography.bodyLarge,
-//                        )
-//                        Text(
-//                            text = stringResource(id = R.string.misskey_compose_local_only_description),
-//                            style = MaterialTheme.typography.bodySmall,
-//                        )
-//                    }
-//                },
-//                leadingIcon = {
-//                    Checkbox(
-//                        checked = visibilityState.localOnly,
-//                        onCheckedChange = {
-//                            visibilityState.setLocalOnly(it)
-//                        },
-//                    )
-//                },
-//                onClick = {
-//                    visibilityState.setLocalOnly(!visibilityState.localOnly)
-//                },
-//            )
-//        }
-//    }
-// }
-//
-// @Composable
-// private fun MastodonVisibilityContent(visibilityState: MastodonVisibilityState) {
-//    IconButton(
-//        onClick = {
-//            visibilityState.showVisibilityMenu()
-//        },
-//    ) {
-//        VisibilityIcon(visibility = visibilityState.visibility)
-//        DropdownMenu(
-//            expanded = visibilityState.showVisibilityMenu,
-//            onDismissRequest = {
-//                visibilityState.hideVisibilityMenu()
-//            },
-//            properties = PopupProperties(focusable = false),
-//        ) {
-//            visibilityState.allVisibilities.forEach { visibility ->
-//                DropdownMenuItem(
-//                    onClick = {
-//                        visibilityState.setVisibility(visibility)
-//                        visibilityState.hideVisibilityMenu()
-//                    },
-//                    text = {
-//                        Column(
-//                            verticalArrangement = Arrangement.spacedBy(4.dp),
-//                            horizontalAlignment = Alignment.Start,
-//                        ) {
-//                            Text(
-//                                text = stringResource(id = visibility.localName),
-//                                style = MaterialTheme.typography.bodyLarge,
-//                            )
-//                            Text(
-//                                text = stringResource(id = visibility.localDescription),
-//                                style = MaterialTheme.typography.bodySmall,
-//                            )
-//                        }
-//                    },
-//                    leadingIcon = {
-//                        VisibilityIcon(visibility = visibility)
-//                    },
-//                    contentPadding =
-//                        PaddingValues(
-//                            horizontal = 16.dp,
-//                            vertical = 8.dp,
-//                        ),
-//                )
-//            }
-//        }
-//    }
-// }
-
 @Composable
 private fun PollOption(
     textFieldState: TextFieldState,
@@ -1045,26 +924,12 @@ private fun composePresenter(
                 contentWarningPresenter()
             }
 
-    state.replyState?.onSuccess {
+    state.initialTextState?.onSuccess {
         LaunchedEffect(it) {
-            val content = it.content
-            if (textFieldState.text.isEmpty() && content is UiTimeline.ItemContent.Status) {
-                when (it.platformType) {
-                    PlatformType.VVo -> {
-                        if (content.quote.any() && status is ComposeStatus.Quote) {
-                            textFieldState.edit {
-                                append("//@${content.user?.name?.innerText}:${content.content.innerText}")
-                                selection = TextRange.Zero
-                            }
-                        }
-                    }
-                    PlatformType.Mastodon -> {
-                        textFieldState.edit {
-                            append("${content.user?.handle} ")
-                        }
-                    }
-
-                    else -> Unit
+            if (it.text.isNotEmpty()) {
+                textFieldState.edit {
+                    append(it.text)
+                    selection = TextRange(it.cursorPosition)
                 }
             }
         }

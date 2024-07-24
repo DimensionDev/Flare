@@ -27,6 +27,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.runtime.Composable
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -50,6 +52,7 @@ import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -68,6 +71,32 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailPresenter
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+@Destination<RootGraph>(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+        DeepLink(
+            uriPattern = AppDeepLink.VVO.StatusDetail.ROUTE,
+        ),
+    ],
+    wrappers = [ThemeWrapper::class],
+)
+internal fun AnimatedVisibilityScope.VVOStatusDeeplinkRoute(
+    statusKey: MicroBlogKey,
+    navigator: DestinationsNavigator,
+    accountKey: MicroBlogKey,
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
+    VVOStatusScreen(
+        statusKey,
+        onBack = navigator::navigateUp,
+        accountType = AccountType.Specific(accountKey = accountKey),
+    )
+}
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -111,10 +140,12 @@ private fun VVOStatusScreen(
         with(LocalDensity.current) {
             currentWindowSize().toSize().toDpSize()
         }
+    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
     FlareScaffold(
         topBar = {
             TopAppBar(
+                scrollBehavior = topAppBarScrollBehavior,
                 title = {
                     Text(text = stringResource(id = R.string.status_title))
                 },
@@ -128,6 +159,7 @@ private fun VVOStatusScreen(
                 },
             )
         },
+        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
         if (bigScreen) {
             val width =

@@ -288,6 +288,7 @@ fun createSampleStatus(user: UiUserV2) =
                 bottomContent = null,
                 topEndContent = null,
                 aboveTextContent = null,
+                onClicked = {},
             ),
         platformType = PlatformType.Mastodon,
     )

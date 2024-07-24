@@ -53,17 +53,55 @@ class ComposePresenter(
                 selectedAccounts.add(it)
             }
         }
-        val replyState =
+        val statusState =
             status?.let { status ->
                 remember(status.statusKey) {
                     StatusPresenter(accountType = accountType, statusKey = status.statusKey)
                 }.body().status
             }
+        val replyState =
+            statusState?.map {
+                if (it.platformType == PlatformType.VVo) {
+                    it.copy(
+                        content = (it.content as? UiTimeline.ItemContent.Status)?.quote?.firstOrNull() ?: it.content,
+                    )
+                } else {
+                    it
+                }
+            }
+        val initialTextState =
+            statusState?.mapNotNull {
+                val content = it.content
+                if (content is UiTimeline.ItemContent.Status) {
+                    when (it.platformType) {
+                        PlatformType.VVo -> {
+                            if (content.quote.any() && status is ComposeStatus.Quote) {
+                                InitialText(
+                                    text = "//@${content.user?.name?.raw}:${content.content.raw}",
+                                    cursorPosition = 0,
+                                )
+                            } else {
+                                null
+                            }
+                        }
+                        PlatformType.Mastodon -> {
+                            val text = "${content.user?.handle} "
+                            InitialText(
+                                text = text,
+                                cursorPosition = text.length,
+                            )
+                        }
+                        else -> null
+                    }
+                } else {
+                    null
+                }
+            }
         val allUsers =
             accounts.flatMap { data ->
                 accountState
                     .flatMap { current ->
-                        replyState?.map {
+                        statusState?.map {
                             current to listOf(it.platformType)
                         } ?: UiState.Success(current to PlatformType.entries.toList())
                     }.map { (current, platforms) ->
@@ -153,6 +191,7 @@ class ComposePresenter(
             selectedAccounts = selectedAccounts.toImmutableList(),
             selectedUsers = selectedUsers,
             otherAccounts = remainingAccounts,
+            initialTextState = initialTextState,
         ) {
             override fun send(data: ComposeData) {
                 composeUseCase.invoke(data) {
@@ -242,6 +281,7 @@ abstract class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
     val replyState: UiState<UiTimeline>?,
+    val initialTextState: UiState<InitialText>?,
     val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
     val composeConfig: UiState<ComposeConfig>,
     val enableCrossPost: UiState<Boolean>,
@@ -253,3 +293,9 @@ abstract class ComposeState(
 
     abstract fun selectAccount(account: UiAccount)
 }
+
+@Immutable
+data class InitialText internal constructor(
+    val text: String,
+    val cursorPosition: Int,
+)

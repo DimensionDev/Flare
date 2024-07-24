@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.map
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -20,6 +21,8 @@ import dev.dimension.flare.ui.model.mapper.renderVVOText
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.map
 
 class VVOStatusDetailPresenter(
     private val accountType: AccountType,
@@ -76,7 +79,16 @@ class VVOStatusDetailPresenter(
             service.map {
                 require(it is VVODataSource)
                 remember(statusKey, accountType) {
-                    it.statusRepost(statusKey = statusKey, scope = scope)
+                    it.statusRepost(statusKey = statusKey, scope = scope).map {
+                        it.map {
+                            it.copy(
+                                content =
+                                    (it.content as? UiTimeline.ItemContent.Status)?.copy(
+                                        quote = persistentListOf(),
+                                    ) ?: it.content,
+                            )
+                        }
+                    }
                 }.collectAsLazyPagingItems()
             }
 

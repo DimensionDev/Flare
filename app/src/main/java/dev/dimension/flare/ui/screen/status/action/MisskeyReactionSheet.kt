@@ -20,6 +20,7 @@ import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -35,13 +36,16 @@ import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.Misskey.AddReaction.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
 @Composable
 internal fun MisskeyReactionRoute(
     statusKey: MicroBlogKey,
-    accountType: AccountType,
+    accountKey: MicroBlogKey,
     navigator: DestinationsNavigator,
 ) {
     Dialog(onDismissRequest = navigator::navigateUp) {
@@ -49,7 +53,7 @@ internal fun MisskeyReactionRoute(
             MisskeyReactionSheet(
                 statusKey = statusKey,
                 onBack = navigator::navigateUp,
-                accountType = accountType,
+                accountType = AccountType.Specific(accountKey),
             )
         }
     }

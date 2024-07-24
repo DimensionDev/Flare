@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component.status
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,12 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.localizedShortTime
@@ -31,9 +34,19 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 internal fun QuotedStatus(
     data: UiTimeline.ItemContent.Status,
     modifier: Modifier = Modifier,
+    maxLines: Int = 6,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
-        modifier = modifier,
+        modifier =
+            modifier
+                .clickable {
+                    data.onClicked.invoke(
+                        ClickContext(
+                            launcher = uriHandler::openUri,
+                        ),
+                    )
+                },
     ) {
         Column(
             modifier =
@@ -53,12 +66,29 @@ internal fun QuotedStatus(
                     )
                 }
             }
-            HtmlText(element = data.content.data, layoutDirection = data.content.direction)
+            HtmlText(
+                element = data.content.data,
+                layoutDirection = data.content.direction,
+                maxLines = maxLines,
+            )
         }
         if (!data.images.isEmpty() && LocalAppearanceSettings.current.showMedia) {
             StatusMediaComponent(
                 data = data.images,
                 onMediaClick = {
+//                    uriHandler.openUri(
+//                        StatusMediaRouteDestination(
+//                            statusKey = data.statusKey,
+//                            index = data.images.indexOf(it),
+//                            preview = when (it) {
+//                                is UiMedia.Image -> it.previewUrl
+//                                is UiMedia.Video -> it.thumbnailUrl
+//                                is UiMedia.Gif -> it.previewUrl
+//                                else -> null
+//                            },
+//                            accountType = data.accountType
+//                        ).deeplink()
+//                    )
                 },
                 sensitive = data.sensitive,
             )

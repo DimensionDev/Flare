@@ -1011,23 +1011,20 @@ private fun ProfileHeaderSuccess(
                         UserFields(
                             fields = content.fields,
                         )
-                    is UiProfile.BottomContent.XQT -> {
-                        content.location?.let {
+                    is UiProfile.BottomContent.Iconify -> {
+                        content.items.forEach { (key, value) ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
-                                Icon(Icons.Default.LocationOn, contentDescription = null)
-                                Text(text = it)
-                            }
-                        }
-                        content.url?.let {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Icon(Icons.Default.Public, contentDescription = null)
-                                Text(text = it)
+                                val icon =
+                                    when (key) {
+                                        UiProfile.BottomContent.Iconify.Icon.Location -> Icons.Default.LocationOn
+                                        UiProfile.BottomContent.Iconify.Icon.Url -> Icons.Default.Public
+                                        UiProfile.BottomContent.Iconify.Icon.Verify -> Icons.Default.CheckCircle
+                                    }
+                                Icon(icon, contentDescription = null)
+                                HtmlText(element = value.data, layoutDirection = value.direction)
                             }
                         }
                     }

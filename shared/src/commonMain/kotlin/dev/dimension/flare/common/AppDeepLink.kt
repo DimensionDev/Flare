@@ -48,10 +48,107 @@ object AppDeepLink {
         ) = "$APPSCHEMA://StatusDetail/$accountKey/$statusKey"
     }
 
-    object Compose {
-        const val ROUTE = "$APPSCHEMA://Compose"
+    object VVO {
+        object StatusDetail {
+            const val ROUTE = "$APPSCHEMA://VVO/StatusDetail/{accountKey}/{statusKey}"
 
-        operator fun invoke() = "$APPSCHEMA://Compose"
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+            ) = "$APPSCHEMA://VVO/StatusDetail/$accountKey/$statusKey"
+        }
+
+        object CommentDetail {
+            const val ROUTE = "$APPSCHEMA://VVO/CommentDetail/{accountKey}/{statusKey}"
+
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+            ) = "$APPSCHEMA://VVO/CommentDetail/$accountKey/$statusKey"
+        }
+
+        object ReplyToComment {
+            const val ROUTE = "$APPSCHEMA://VVO/ReplyToComment/{accountKey}/{replyTo}/{rootId}"
+
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                replyTo: MicroBlogKey,
+                rootId: String,
+            ) = "$APPSCHEMA://VVO/ReplyToComment/$accountKey/$replyTo/$rootId"
+        }
+    }
+
+    object Compose {
+        object Reply {
+            const val ROUTE = "$APPSCHEMA://Compose/Reply/{accountKey}/{statusKey}"
+
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+            ) = "$APPSCHEMA://Compose/Reply/$accountKey/$statusKey"
+        }
+
+        object Quote {
+            const val ROUTE = "$APPSCHEMA://Compose/Quote/{accountKey}/{statusKey}"
+
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+            ) = "$APPSCHEMA://Compose/Quote/$accountKey/$statusKey"
+        }
+    }
+
+    object DeleteStatus {
+        const val ROUTE = "$APPSCHEMA://DeleteStatus/{accountKey}/{statusKey}"
+
+        operator fun invoke(
+            accountKey: MicroBlogKey,
+            statusKey: MicroBlogKey,
+        ) = "$APPSCHEMA://DeleteStatus/$accountKey/$statusKey"
+    }
+
+    object Bluesky {
+        object ReportStatus {
+            const val ROUTE = "$APPSCHEMA://Bluesky/ReportStatus/{accountKey}/{statusKey}"
+
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+            ) = "$APPSCHEMA://Bluesky/ReportStatus/$accountKey/$statusKey"
+        }
+    }
+
+    object Mastodon {
+        object ReportStatus {
+            const val ROUTE = "$APPSCHEMA://Mastodon/ReportStatus/{accountKey}/{statusKey}/{userKey}"
+
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+                userKey: MicroBlogKey,
+            ) = "$APPSCHEMA://Mastodon/ReportStatus/$accountKey/$statusKey/$userKey"
+        }
+    }
+
+    object Misskey {
+        object ReportStatus {
+            const val ROUTE = "$APPSCHEMA://Misskey/ReportStatus/{accountKey}/{statusKey}/{userKey}"
+
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+                userKey: MicroBlogKey,
+            ) = "$APPSCHEMA://Misskey/ReportStatus/$accountKey/$statusKey/$userKey"
+        }
+
+        object AddReaction {
+            const val ROUTE = "$APPSCHEMA://Misskey/AddReaction/{accountKey}/{statusKey}"
+
+            operator fun invoke(
+                accountKey: MicroBlogKey,
+                statusKey: MicroBlogKey,
+            ) = "$APPSCHEMA://Misskey/AddReaction/$accountKey/$statusKey"
+        }
     }
 
     object RawImage {

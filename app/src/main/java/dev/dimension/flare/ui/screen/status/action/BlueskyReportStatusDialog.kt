@@ -20,6 +20,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -36,17 +37,20 @@ import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.Bluesky.ReportStatus.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun BlueskyReportStatusRoute(
+internal fun BlueskyReportStatusRoute(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
+    accountKey: MicroBlogKey,
     statusKey: MicroBlogKey,
 ) {
     BlueskyReportStatusDialog(
         statusKey = statusKey,
-        accountType = accountType,
+        accountType = AccountType.Specific(accountKey),
         onBack = {
             navigator.navigateUp()
         },
@@ -54,7 +58,7 @@ fun BlueskyReportStatusRoute(
 }
 
 @Composable
-internal fun BlueskyReportStatusDialog(
+private fun BlueskyReportStatusDialog(
     statusKey: MicroBlogKey,
     accountType: AccountType,
     onBack: () -> Unit,

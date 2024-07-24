@@ -14,6 +14,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -29,12 +30,15 @@ import dev.dimension.flare.ui.presenter.status.action.DeleteStatusState
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.DeleteStatus.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun DeleteStatusConfirmRoute(
+internal fun DeleteStatusConfirmRoute(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
+    accountKey: MicroBlogKey,
     statusKey: MicroBlogKey,
 ) {
     DeleteStatusConfirmDialog(
@@ -42,12 +46,12 @@ fun DeleteStatusConfirmRoute(
         onBack = {
             navigator.navigateUp()
         },
-        accountType = accountType,
+        accountType = AccountType.Specific(accountKey),
     )
 }
 
 @Composable
-fun DeleteStatusConfirmDialog(
+private fun DeleteStatusConfirmDialog(
     statusKey: MicroBlogKey,
     accountType: AccountType,
     onBack: () -> Unit,
@@ -86,7 +90,7 @@ fun DeleteStatusConfirmDialog(
 }
 
 @Composable
-fun deleteStatusConfirmPresenter(
+private fun deleteStatusConfirmPresenter(
     statusKey: MicroBlogKey,
     accountType: AccountType,
 ) = run {

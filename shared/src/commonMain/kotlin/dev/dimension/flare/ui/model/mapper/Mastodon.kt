@@ -69,6 +69,14 @@ internal fun Notification.render(
                         null -> UiTimeline.TopMessage.Icon.Info
                     },
                 type = it,
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.Profile(
+                            accountKey = accountKey,
+                            userKey = user.key,
+                        ),
+                    )
+                },
             )
         }
     return UiTimeline(
@@ -98,12 +106,31 @@ internal fun Status.render(
                 user = user,
                 icon = UiTimeline.TopMessage.Icon.Retweet,
                 type = UiTimeline.TopMessage.MessageType.Mastodon.Reblogged,
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.Profile(
+                            accountKey = accountKey,
+                            userKey = user.key,
+                        ),
+                    )
+                },
             )
         }
+    val currentStatus = this.renderStatus(accountKey, event)
     val actualStatus = reblog ?: this
     return UiTimeline(
         topMessage = topMessage,
-        content = actualStatus.renderStatus(accountKey, event),
+        content =
+            actualStatus.renderStatus(accountKey, event).copy(
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.StatusDetail(
+                            accountKey = accountKey,
+                            statusKey = currentStatus.statusKey,
+                        ),
+                    )
+                },
+            ),
         platformType = PlatformType.Mastodon,
     )
 }
@@ -162,6 +189,14 @@ private fun Status.renderStatus(
             listOfNotNull(
                 StatusAction.Item.Reply(
                     count = repliesCount ?: 0,
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Compose.Reply(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
+                        )
+                    },
                 ),
                 if (canReblog) {
                     StatusAction.Item.Retweet(
@@ -193,9 +228,28 @@ private fun Status.renderStatus(
                                 },
                             ),
                             if (isFromMe) {
-                                StatusAction.Item.Delete
+                                StatusAction.Item.Delete(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.DeleteStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
                             } else {
-                                StatusAction.Item.Report
+                                StatusAction.Item.Report(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.Mastodon.ReportStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                                userKey = actualUser.key,
+                                            ),
+                                        )
+                                    },
+                                )
                             },
                         ).toImmutableList(),
                 ),
@@ -235,6 +289,14 @@ private fun Status.renderStatus(
                     .Visibility(it)
             },
         sensitive = sensitive ?: false,
+        onClicked = {
+            launcher.launch(
+                AppDeepLink.StatusDetail(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                ),
+            )
+        },
     )
 }
 
@@ -286,15 +348,16 @@ internal fun Account.render(accountKey: MicroBlogKey): UiProfile {
         } else {
             host
         }
+    val userKey =
+        MicroBlogKey(
+            id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
+            host = host,
+        )
     return UiProfile(
         avatar = avatar.orEmpty(),
         name = parseName(this).toUi(),
         handle = "@$username@$remoteHost",
-        key =
-            MicroBlogKey(
-                id = id ?: throw IllegalArgumentException("mastodon Account.id should not be null"),
-                host = host,
-            ),
+        key = userKey,
         banner = header,
         description = parseNote(this).toUi(),
         matrices =
@@ -335,6 +398,9 @@ internal fun Account.render(accountKey: MicroBlogKey): UiProfile {
                     )
                 },
         platformType = PlatformType.Mastodon,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
     )
 }
 

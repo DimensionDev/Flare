@@ -12,4 +12,5 @@ sealed interface UiUserV2 {
     val handle: String
     val key: MicroBlogKey
     val platformType: PlatformType
+    val onClicked: ClickContext.() -> Unit
 }

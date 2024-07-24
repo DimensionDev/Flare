@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import de.cketti.codepoints.deluxe.codePointSequence
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
@@ -28,6 +29,7 @@ import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -131,10 +133,15 @@ internal fun TopLevel.renderNotifications(
                     topMessage =
                         UiTimeline.TopMessage(
                             user = users?.firstOrNull(),
-                            icon = UiTimeline.TopMessage.Icon.Retweet,
+                            icon = icon,
                             type =
                                 UiTimeline.TopMessage.MessageType.XQT
                                     .Custom(message = message.orEmpty()),
+                            onClicked = {
+                                if (itemContent == null && url != null) {
+                                    launcher.launch(url)
+                                }
+                            },
                         ),
                     content = itemContent,
                     platformType = PlatformType.xQt,
@@ -177,6 +184,9 @@ internal fun TopLevel.renderNotifications(
                             user = renderedUser,
                             icon = UiTimeline.TopMessage.Icon.Retweet,
                             type = UiTimeline.TopMessage.MessageType.XQT.Mention,
+                            onClicked = {
+                                launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = renderedUser.key))
+                            },
                         ),
                     content = data,
                     platformType = PlatformType.xQt,
@@ -211,12 +221,26 @@ internal fun Tweet.render(
                 user = user,
                 icon = UiTimeline.TopMessage.Icon.Retweet,
                 type = UiTimeline.TopMessage.MessageType.XQT.Retweet,
+                onClicked = {
+                    launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+                },
             )
         } else {
             null
         }
+    val currentTweet = this.renderStatus(accountKey, event)
     return UiTimeline(
-        content = actualTweet.renderStatus(accountKey = accountKey, event = event),
+        content =
+            actualTweet.renderStatus(accountKey = accountKey, event = event).copy(
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.StatusDetail(
+                            accountKey = accountKey,
+                            statusKey = currentTweet.statusKey,
+                        ),
+                    )
+                },
+            ),
         topMessage = topMessage,
         platformType = PlatformType.xQt,
     )
@@ -424,6 +448,14 @@ internal fun Tweet.renderStatus(
             listOfNotNull(
                 StatusAction.Item.Reply(
                     count = legacy?.replyCount?.toLong() ?: 0,
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Compose.Reply(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
+                        )
+                    },
                 ),
                 StatusAction.Group(
                     displayItem =
@@ -444,6 +476,14 @@ internal fun Tweet.renderStatus(
                             ),
                             StatusAction.Item.Quote(
                                 count = 0,
+                                onClicked = {
+                                    launcher.launch(
+                                        AppDeepLink.Compose.Quote(
+                                            accountKey = accountKey,
+                                            statusKey = statusKey,
+                                        ),
+                                    )
+                                },
                             ),
                         ).toImmutableList(),
                 ),
@@ -466,24 +506,41 @@ internal fun Tweet.renderStatus(
                                 },
                             ),
                             if (isFromMe) {
-                                StatusAction.Item.Delete
+                                StatusAction.Item.Delete(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.DeleteStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
                             } else {
-                                StatusAction.Item.Report
+                                StatusAction.Item.Report(
+                                    onClicked = {
+                                        // TODO: implement report
+                                    },
+                                )
                             },
                         ).toImmutableList(),
                 ),
             ).toImmutableList(),
         sensitive = legacy?.possiblySensitive == true,
+        onClicked = {
+            launcher.launch(AppDeepLink.StatusDetail(accountKey = accountKey, statusKey = statusKey))
+        },
     )
 }
 
-internal fun User.render(accountKey: MicroBlogKey) =
-    UiProfile(
-        key =
-            MicroBlogKey(
-                id = restId,
-                host = xqtHost,
-            ),
+internal fun User.render(accountKey: MicroBlogKey): UiProfile {
+    val userKey =
+        MicroBlogKey(
+            id = restId,
+            host = xqtHost,
+        )
+    return UiProfile(
+        key = userKey,
         avatar = legacy.profileImageUrlHttps.replaceWithOriginImageUrl(),
         name =
             Element("span")
@@ -535,15 +592,47 @@ internal fun User.render(accountKey: MicroBlogKey) =
             ).toImmutableList(),
         bottomContent =
             if (legacy.location != null || legacy.url != null) {
-                UiProfile.BottomContent.XQT(
-                    location = legacy.location,
-                    url = legacy.url,
+                UiProfile.BottomContent.Iconify(
+                    items =
+                        listOfNotNull(
+                            if (legacy.location != null) {
+                                UiProfile.BottomContent.Iconify.Icon.Location to
+                                    Element("span")
+                                        .apply {
+                                            children.add(Text(legacy.location))
+                                        }.toUi()
+                            } else {
+                                null
+                            },
+                            if (legacy.url != null) {
+                                val actualUrl = legacy.entities.urls?.firstOrNull { it.url == legacy.url }
+                                val displayUrl = actualUrl?.displayUrl ?: legacy.url
+                                val url = actualUrl?.expandedUrl ?: legacy.url
+                                UiProfile.BottomContent.Iconify.Icon.Url to
+                                    Element("a")
+                                        .apply {
+                                            children.add(Text(displayUrl))
+                                            attributes["href"] = url
+                                        }.toUi()
+                            } else {
+                                null
+                            },
+                            if (legacy.verified) {
+                                UiProfile.BottomContent.Iconify.Icon.Verify to Element("span").toUi()
+                            } else {
+                                null
+                            },
+                        ).toMap().toPersistentMap(),
                 )
             } else {
                 null
             },
         platformType = PlatformType.xQt,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
     )
+}
 
 private fun TweetCardLegacy.get(key: String): TweetCardLegacyBindingValueData? = bindingValues.firstOrNull { it.key == key }?.value
 

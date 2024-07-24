@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -83,10 +82,10 @@ import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.localizedFullTime
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onError
@@ -105,42 +104,60 @@ fun CommonStatusComponent(
     isDetail: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalAppearanceSettings.current
     Column(
-        modifier = modifier,
+        modifier =
+            modifier
+                .clickable {
+                    item.onClicked.invoke(
+                        ClickContext(
+                            launcher = {
+                                uriHandler.openUri(it)
+                            },
+                        ),
+                    )
+                },
     ) {
-        item.user?.let {
-            StatusHeaderComponent(
-                user = it,
-                onUserClick = { },
-                headerTrailing = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        when (val content = item.topEndContent) {
-                            is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
-                                StatusVisibilityComponent(
-                                    visibility = content.visibility,
-                                    modifier =
-                                        Modifier
-                                            .size(14.dp)
-                                            .alpha(MediumAlpha),
-                                )
-                            }
-
-                            null -> Unit
-                        }
-                        if (!isDetail) {
-                            Text(
-                                text = item.createdAt.shortTime.localizedShortTime,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        item.user?.let { user ->
+            CommonStatusHeaderComponent(
+                data = user,
+                onUserClick = {
+                    user.onClicked.invoke(
+                        ClickContext(
+                            launcher = {
+                                uriHandler.openUri(it)
+                            },
+                        ),
+                    )
+                },
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    when (val content = item.topEndContent) {
+                        is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
+                            StatusVisibilityComponent(
+                                visibility = content.visibility,
+                                modifier =
+                                    Modifier
+                                        .size(14.dp)
+                                        .alpha(MediumAlpha),
                             )
                         }
+
+                        null -> Unit
                     }
-                },
-            )
+                    if (!isDetail) {
+                        Text(
+                            text = item.createdAt.shortTime.localizedShortTime,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
         when (val content = item.aboveTextContent) {
             is UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo -> {
@@ -160,6 +177,7 @@ fun CommonStatusComponent(
                     contentDirection = item.content.direction,
                     contentWarning = item.contentWarning,
                     poll = item.poll,
+                    maxLines = Int.MAX_VALUE,
                 )
             }
         } else {
@@ -169,6 +187,7 @@ fun CommonStatusComponent(
                 contentDirection = item.content.direction,
                 contentWarning = item.contentWarning,
                 poll = item.poll,
+                maxLines = 6,
             )
         }
 
@@ -210,8 +229,8 @@ fun CommonStatusComponent(
             null -> Unit
         }
 
-//        contentFooter.invoke(this)
         if (isDetail) {
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = item.createdAt.value.localizedFullTime,
                 style = MaterialTheme.typography.bodySmall,
@@ -220,7 +239,16 @@ fun CommonStatusComponent(
         }
         if (appearanceSettings.showActions || isDetail) {
             Spacer(modifier = Modifier.height(8.dp))
-            StatusActions(item.actions)
+            if (isDetail) {
+                StatusActions(item.actions)
+            } else {
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
+                    LocalTextStyle provides MaterialTheme.typography.bodySmall,
+                ) {
+                    StatusActions(item.actions)
+                }
+            }
             Spacer(modifier = Modifier.height(4.dp))
         } else {
             Spacer(modifier = Modifier.height(8.dp))
@@ -440,6 +468,7 @@ private fun StatusActions(
     items: ImmutableList<StatusAction>,
     modifier: Modifier = Modifier,
 ) {
+    val launcher = LocalUriHandler.current
     Row(
         modifier =
             modifier
@@ -447,58 +476,65 @@ private fun StatusActions(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        CompositionLocalProvider(
-            LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
-            LocalTextStyle provides MaterialTheme.typography.bodySmall,
-        ) {
-            items.forEach { action ->
-                when (action) {
-                    is StatusAction.Group -> {
-                        StatusActionGroup(
-                            icon = action.displayItem.icon,
-                            text = action.displayItem.iconText,
-                            color = statusActionItemColor(item = action.displayItem),
-                        ) {
-                            action.actions.forEach { subActions ->
-                                if (subActions is StatusAction.Item) {
-                                    val color = statusActionItemColor(subActions)
-                                    DropdownMenuItem(
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = subActions.icon,
-                                                contentDescription = subActions.iconText,
-                                                tint = color,
+        items.forEach { action ->
+            when (action) {
+                is StatusAction.Group -> {
+                    StatusActionGroup(
+                        icon = action.displayItem.icon,
+                        text = action.displayItem.iconText,
+                        color = statusActionItemColor(item = action.displayItem),
+                    ) {
+                        action.actions.forEach { subActions ->
+                            if (subActions is StatusAction.Item) {
+                                val color = statusActionItemColor(subActions)
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = subActions.icon,
+                                            contentDescription = subActions.iconText,
+                                            tint = color,
+                                        )
+                                    },
+                                    text = {
+                                        Text(
+                                            text = statusActionItemText(item = subActions),
+                                            color = color,
+                                        )
+                                    },
+                                    onClick = {
+                                        if (subActions is StatusAction.Item.Clickable) {
+                                            subActions.onClicked.invoke(
+                                                ClickContext(
+                                                    launcher = {
+                                                        launcher.openUri(it)
+                                                    },
+                                                ),
                                             )
-                                        },
-                                        text = {
-                                            Text(
-                                                text = statusActionItemText(item = subActions),
-                                                color = color,
-                                            )
-                                        },
-                                        onClick = {
-                                            if (subActions is StatusAction.Item.Clickable) {
-                                                subActions.onClicked.invoke()
-                                            }
-                                        },
-                                    )
-                                }
+                                        }
+                                    },
+                                )
                             }
                         }
                     }
+                }
 
-                    is StatusAction.Item -> {
-                        StatusActionButton(
-                            icon = action.icon,
-                            text = action.iconText,
-                            color = statusActionItemColor(item = action),
-                            onClicked = {
-                                if (action is StatusAction.Item.Clickable) {
-                                    action.onClicked.invoke()
-                                }
-                            },
-                        )
-                    }
+                is StatusAction.Item -> {
+                    StatusActionButton(
+                        icon = action.icon,
+                        text = action.iconText,
+                        color = statusActionItemColor(item = action),
+                        onClicked = {
+                            if (action is StatusAction.Item.Clickable) {
+                                action.onClicked.invoke(
+                                    ClickContext(
+                                        launcher = {
+                                            launcher.openUri(it)
+                                        },
+                                    ),
+                                )
+                            }
+                        },
+                    )
                 }
             }
         }
@@ -516,7 +552,7 @@ private val StatusAction.Item.icon: ImageVector
                 }
             }
 
-            StatusAction.Item.Delete -> Icons.Default.Delete
+            is StatusAction.Item.Delete -> Icons.Default.Delete
             is StatusAction.Item.Like -> {
                 if (liked) {
                     Icons.Default.Favorite
@@ -536,7 +572,7 @@ private val StatusAction.Item.icon: ImageVector
             }
 
             is StatusAction.Item.Reply -> Icons.AutoMirrored.Filled.Reply
-            StatusAction.Item.Report -> Icons.Default.Report
+            is StatusAction.Item.Report -> Icons.Default.Report
             is StatusAction.Item.Retweet -> FontAwesomeIcons.Solid.Retweet
         }
 
@@ -544,13 +580,13 @@ private val StatusAction.Item.iconText: String?
     get() =
         when (this) {
             is StatusAction.Item.Bookmark -> humanizedCount
-            StatusAction.Item.Delete -> null
+            is StatusAction.Item.Delete -> null
             is StatusAction.Item.Like -> humanizedCount
             StatusAction.Item.More -> null
             is StatusAction.Item.Quote -> humanizedCount
             is StatusAction.Item.Reaction -> null
             is StatusAction.Item.Reply -> humanizedCount
-            StatusAction.Item.Report -> null
+            is StatusAction.Item.Report -> null
             is StatusAction.Item.Retweet -> humanizedCount
         }
 
@@ -578,7 +614,7 @@ private fun statusActionItemText(item: StatusAction.Item) =
             }
         }
 
-        StatusAction.Item.Delete -> stringResource(id = R.string.delete)
+        is StatusAction.Item.Delete -> stringResource(id = R.string.delete)
         is StatusAction.Item.Like -> {
             if (item.liked) {
                 stringResource(id = R.string.unlike)
@@ -598,7 +634,7 @@ private fun statusActionItemText(item: StatusAction.Item) =
         }
 
         is StatusAction.Item.Reply -> stringResource(id = R.string.reply)
-        StatusAction.Item.Report -> stringResource(id = R.string.report)
+        is StatusAction.Item.Report -> stringResource(id = R.string.report)
         is StatusAction.Item.Retweet -> {
             if (item.retweeted) {
                 stringResource(id = R.string.retweet_remove)
@@ -635,24 +671,6 @@ private fun StatusReplyComponent(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Composable
-internal fun StatusHeaderComponent(
-    user: UiUserV2,
-    onUserClick: (MicroBlogKey) -> Unit,
-    modifier: Modifier = Modifier,
-    headerTrailing: @Composable RowScope.() -> Unit = {},
-) {
-    CommonStatusHeaderComponent(
-        data = user,
-        onUserClick = onUserClick,
-        modifier = modifier,
-    ) {
-        headerTrailing.invoke(this)
-    }
-}
-
 @Composable
 private fun StatusContentComponent(
     rawContent: String,
@@ -660,6 +678,7 @@ private fun StatusContentComponent(
     contentDirection: LayoutDirection,
     contentWarning: String?,
     poll: UiPoll?,
+    maxLines: Int,
     modifier: Modifier = Modifier,
 ) {
     var expanded by rememberSaveable {
@@ -698,6 +717,7 @@ private fun StatusContentComponent(
                         element = content,
                         layoutDirection = contentDirection,
                         modifier = Modifier.fillMaxWidth(),
+                        maxLines = maxLines,
                     )
                 }
                 poll?.let {

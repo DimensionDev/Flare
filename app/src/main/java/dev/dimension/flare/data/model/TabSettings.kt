@@ -25,8 +25,8 @@ import compose.icons.fontawesomeicons.brands.Twitter
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter

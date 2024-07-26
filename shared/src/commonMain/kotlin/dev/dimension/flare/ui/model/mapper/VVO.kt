@@ -213,6 +213,7 @@ internal fun Status.renderStatus(
                 ),
             )
         },
+        accountKey = accountKey,
     )
 }
 
@@ -249,18 +250,21 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 },
             ).toImmutableList(),
         bottomContent =
-            verifiedReason?.let {
-                UiProfile.BottomContent.Iconify(
-                    items =
-                        mapOf(
-                            UiProfile.BottomContent.Iconify.Icon.Verify to
-                                Element("span")
-                                    .apply {
-                                        children.add(Text(it))
-                                    }.toUi(),
-                        ).toImmutableMap(),
-                )
-            },
+            verifiedReason
+                ?.takeIf {
+                    it.isNotEmpty() && verified == true
+                }?.let {
+                    UiProfile.BottomContent.Iconify(
+                        items =
+                            mapOf(
+                                UiProfile.BottomContent.Iconify.Icon.Verify to
+                                    Element("span")
+                                        .apply {
+                                            children.add(Text(it))
+                                        }.toUi(),
+                            ).toImmutableMap(),
+                    )
+                },
         platformType = PlatformType.VVo,
         onClicked = {
             launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
@@ -397,6 +401,7 @@ internal fun Comment.renderStatus(
                 ),
             )
         },
+        accountKey = accountKey,
     )
 }
 

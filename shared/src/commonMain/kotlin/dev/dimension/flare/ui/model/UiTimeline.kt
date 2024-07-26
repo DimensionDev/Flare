@@ -66,6 +66,7 @@ data class UiTimeline internal constructor(
             val actions: ImmutableList<StatusAction>,
             val poll: UiPoll?,
             val statusKey: MicroBlogKey,
+            val accountKey: MicroBlogKey,
             val card: UiCard?,
             val createdAt: UiDateTime,
             val bottomContent: BottomContent? = null,

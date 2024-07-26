@@ -70,13 +70,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
+import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
+import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AdaptiveGrid
@@ -84,6 +87,7 @@ import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.localizedFullTime
@@ -215,8 +219,6 @@ fun CommonStatusComponent(
             Spacer(modifier = Modifier.height(4.dp))
             StatusQuoteComponent(
                 quotes = item.quote,
-                onClick = {
-                },
             )
         }
 
@@ -263,21 +265,26 @@ private fun StatusMediasComponent(
     appearanceSettings: AppearanceSettings,
     item: UiTimeline.ItemContent.Status,
 ) {
+    val uriLauncher = LocalUriHandler.current
     var showMedia by remember { mutableStateOf(false) }
     if (appearanceSettings.showMedia || showMedia) {
         StatusMediaComponent(
             data = item.images,
             onMediaClick = {
-//                        onMediaClick.invoke(
-//                            statusKey,
-//                            medias.indexOf(it),
-//                            when (it) {
-//                                is UiMedia.Image -> it.previewUrl
-//                                is UiMedia.Video -> it.thumbnailUrl
-//                                is UiMedia.Gif -> it.previewUrl
-//                                else -> null
-//                            },
-//                        )
+                uriLauncher.openUri(
+                    StatusMediaRouteDestination(
+                        statusKey = item.statusKey,
+                        index = item.images.indexOf(it),
+                        preview =
+                            when (it) {
+                                is UiMedia.Image -> it.previewUrl
+                                is UiMedia.Video -> it.thumbnailUrl
+                                is UiMedia.Gif -> it.previewUrl
+                                else -> null
+                            },
+                        accountType = AccountType.Specific(item.accountKey),
+                    ).deeplink(),
+                )
             },
             sensitive = item.sensitive,
         )
@@ -316,16 +323,33 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 @Composable
 private fun StatusQuoteComponent(
     quotes: ImmutableList<UiTimeline.ItemContent.Status>,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val uriLauncher = LocalUriHandler.current
     Card(
         modifier = modifier,
-        onClick = onClick,
     ) {
         Column {
             quotes.forEachIndexed { index, quote ->
-                QuotedStatus(data = quote)
+                QuotedStatus(
+                    data = quote,
+                    onMediaClick = {
+                        uriLauncher.openUri(
+                            StatusMediaRouteDestination(
+                                statusKey = quote.statusKey,
+                                index = quote.images.indexOf(it),
+                                preview =
+                                    when (it) {
+                                        is UiMedia.Image -> it.previewUrl
+                                        is UiMedia.Video -> it.thumbnailUrl
+                                        is UiMedia.Gif -> it.previewUrl
+                                        else -> null
+                                    },
+                                accountType = AccountType.Specific(quote.accountKey),
+                            ).deeplink(),
+                        )
+                    },
+                )
                 if (index != quotes.lastIndex && quotes.size > 1) {
                     HorizontalDivider()
                 }

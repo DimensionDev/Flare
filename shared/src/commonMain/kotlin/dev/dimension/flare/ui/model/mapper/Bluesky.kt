@@ -237,6 +237,7 @@ internal fun PostView.renderStatus(
                 ),
             )
         },
+        accountKey = accountKey,
     )
 }
 
@@ -572,6 +573,7 @@ private fun render(
                         ),
                     )
                 },
+                accountKey = accountKey,
             )
         }
 

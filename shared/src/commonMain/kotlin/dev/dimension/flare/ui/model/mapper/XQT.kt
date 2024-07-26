@@ -530,6 +530,7 @@ internal fun Tweet.renderStatus(
         onClicked = {
             launcher.launch(AppDeepLink.StatusDetail(accountKey = accountKey, statusKey = statusKey))
         },
+        accountKey = accountKey,
     )
 }
 

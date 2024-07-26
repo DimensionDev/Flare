@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.localizedShortTime
@@ -35,6 +36,7 @@ internal fun QuotedStatus(
     data: UiTimeline.ItemContent.Status,
     modifier: Modifier = Modifier,
     maxLines: Int = 6,
+    onMediaClick: (UiMedia) -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     Column(
@@ -75,21 +77,7 @@ internal fun QuotedStatus(
         if (!data.images.isEmpty() && LocalAppearanceSettings.current.showMedia) {
             StatusMediaComponent(
                 data = data.images,
-                onMediaClick = {
-//                    uriHandler.openUri(
-//                        StatusMediaRouteDestination(
-//                            statusKey = data.statusKey,
-//                            index = data.images.indexOf(it),
-//                            preview = when (it) {
-//                                is UiMedia.Image -> it.previewUrl
-//                                is UiMedia.Video -> it.thumbnailUrl
-//                                is UiMedia.Gif -> it.previewUrl
-//                                else -> null
-//                            },
-//                            accountType = data.accountType
-//                        ).deeplink()
-//                    )
-                },
+                onMediaClick = onMediaClick,
                 sensitive = data.sensitive,
             )
         }

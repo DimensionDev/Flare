@@ -485,7 +485,6 @@ private fun ProfileScreen(
     onBack: () -> Unit = {},
     onProfileMediaClick: () -> Unit = {},
     onMediaClick: (url: String) -> Unit = {},
-    showTopBar: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val state by producePresenter(key = "${accountType}_$userKey") {
@@ -507,111 +506,109 @@ private fun ProfileScreen(
                 .contentWindowInsets
                 .exclude(WindowInsets.statusBars),
         topBar = {
-            if (showTopBar) {
-                val titleAlpha by remember {
-                    derivedStateOf {
-                        if (listState.firstVisibleItemIndex > 0 ||
-                            listState.layoutInfo.visibleItemsInfo.isEmpty() ||
-                            bigScreen
-                        ) {
-                            1f
-                        } else {
-                            max(
-                                0f,
-                                (
-                                    listState.firstVisibleItemScrollOffset /
-                                        listState.layoutInfo.visibleItemsInfo[0]
-                                            .size.height
-                                            .toFloat()
-                                ),
-                            )
-                        }
+            val titleAlpha by remember {
+                derivedStateOf {
+                    if (listState.firstVisibleItemIndex > 0 ||
+                        listState.layoutInfo.visibleItemsInfo.isEmpty() ||
+                        bigScreen
+                    ) {
+                        1f
+                    } else {
+                        max(
+                            0f,
+                            (
+                                listState.firstVisibleItemScrollOffset /
+                                    listState.layoutInfo.visibleItemsInfo[0]
+                                        .size.height
+                                        .toFloat()
+                            ),
+                        )
                     }
                 }
-                Box {
-                    if (!bigScreen) {
-                        Column(
+            }
+            Box {
+                if (!bigScreen) {
+                    Column(
+                        modifier =
+                            Modifier
+                                .graphicsLayer {
+                                    alpha = titleAlpha
+                                },
+                    ) {
+                        Spacer(
                             modifier =
                                 Modifier
-                                    .graphicsLayer {
+                                    .fillMaxWidth()
+                                    .windowInsetsTopHeight(WindowInsets.statusBars)
+                                    .background(
+                                        color =
+                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                3.dp,
+                                            ),
+                                    ),
+                        )
+                        Spacer(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(64.dp)
+                                    .background(
+                                        color =
+                                            MaterialTheme.colorScheme.surfaceColorAtElevation(
+                                                3.dp,
+                                            ),
+                                    ),
+                        )
+                    }
+                }
+                TopAppBar(
+                    title = {
+                        state.state.userState.onSuccess {
+                            HtmlText(
+                                element = it.name.data,
+                                modifier =
+                                    Modifier.graphicsLayer {
                                         alpha = titleAlpha
                                     },
-                        ) {
-                            Spacer(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .windowInsetsTopHeight(WindowInsets.statusBars)
-                                        .background(
-                                            color =
-                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                    3.dp,
-                                                ),
-                                        ),
-                            )
-                            Spacer(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .height(64.dp)
-                                        .background(
-                                            color =
-                                                MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                                    3.dp,
-                                                ),
-                                        ),
                             )
                         }
-                    }
-                    TopAppBar(
-                        title = {
-                            state.state.userState.onSuccess {
-                                HtmlText(
-                                    element = it.name.data,
-                                    modifier =
-                                        Modifier.graphicsLayer {
-                                            alpha = titleAlpha
-                                        },
-                                )
-                            }
+                    },
+                    colors =
+                        if (!bigScreen) {
+                            TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                containerColor = Color.Transparent,
+                                scrolledContainerColor = Color.Transparent,
+                            )
+                        } else {
+                            TopAppBarDefaults.centerAlignedTopAppBarColors()
                         },
-                        colors =
+                    modifier =
+                        Modifier.let {
                             if (!bigScreen) {
-                                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                    containerColor = Color.Transparent,
-                                    scrolledContainerColor = Color.Transparent,
-                                )
+                                it.windowInsetsPadding(WindowInsets.statusBars)
                             } else {
-                                TopAppBarDefaults.centerAlignedTopAppBarColors()
-                            },
-                        modifier =
-                            Modifier.let {
-                                if (!bigScreen) {
-                                    it.windowInsetsPadding(WindowInsets.statusBars)
-                                } else {
-                                    it
-                                }
-                            },
-                        scrollBehavior = scrollBehavior,
-                        navigationIcon = {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                                    contentDescription = stringResource(id = R.string.navigate_back),
-                                )
+                                it
                             }
                         },
-                        actions = {
-                            if (!bigScreen) {
-                                ProfileMenu(
-                                    profileState = state.state,
-                                    setShowMoreMenus = state::setShowMoreMenus,
-                                    showMoreMenus = state.showMoreMenus,
-                                )
-                            }
-                        },
-                    )
-                }
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                                contentDescription = stringResource(id = R.string.navigate_back),
+                            )
+                        }
+                    },
+                    actions = {
+                        if (!bigScreen) {
+                            ProfileMenu(
+                                profileState = state.state,
+                                setShowMoreMenus = state::setShowMoreMenus,
+                                showMoreMenus = state.showMoreMenus,
+                            )
+                        }
+                    },
+                )
             }
         },
     ) {
@@ -931,10 +928,13 @@ private fun ProfileHeaderSuccess(
                                                 when {
                                                     relationState.data.blocking ->
                                                         R.string.profile_header_button_blocked
+
                                                     relationState.data.following ->
                                                         R.string.profile_header_button_following
+
                                                     relationState.data.hasPendingFollowRequestFromYou ->
                                                         R.string.profile_header_button_requested
+
                                                     else ->
                                                         R.string.profile_header_button_follow
                                                 },
@@ -962,6 +962,7 @@ private fun ProfileHeaderSuccess(
                                     .alpha(MediumAlpha),
                             tint = Color.Blue,
                         )
+
                     UiProfile.Mark.Cat ->
                         Icon(
                             imageVector = FontAwesomeIcons.Solid.Cat,
@@ -971,6 +972,7 @@ private fun ProfileHeaderSuccess(
                                     .size(12.dp)
                                     .alpha(MediumAlpha),
                         )
+
                     UiProfile.Mark.Bot ->
                         Icon(
                             imageVector = Icons.Default.SmartToy,
@@ -980,6 +982,7 @@ private fun ProfileHeaderSuccess(
                                     .size(12.dp)
                                     .alpha(MediumAlpha),
                         )
+
                     UiProfile.Mark.Locked ->
                         Icon(
                             imageVector = Icons.Default.Lock,
@@ -1011,6 +1014,7 @@ private fun ProfileHeaderSuccess(
                         UserFields(
                             fields = content.fields,
                         )
+
                     is UiProfile.BottomContent.Iconify -> {
                         content.items.forEach { (key, value) ->
                             Row(
@@ -1028,6 +1032,7 @@ private fun ProfileHeaderSuccess(
                             }
                         }
                     }
+
                     null -> Unit
                 }
                 MatricesDisplay(

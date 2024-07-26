@@ -83,10 +83,9 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import dev.dimension.flare.ui.presenter.status.StatusState
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.FlareTheme
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -393,6 +392,11 @@ private fun StatusMediaScreen(
                         exit = slideOutVertically { it },
                     ) {
                         Card(
+                            modifier =
+                                Modifier
+                                    .padding(
+                                        bottom = if (state.withVideoPadding) 72.dp else 0.dp,
+                                    ).systemBarsPadding(),
                             colors =
                                 CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -400,11 +404,6 @@ private fun StatusMediaScreen(
                         ) {
                             QuotedStatus(
                                 data = content,
-                                modifier =
-                                    Modifier
-                                        .padding(
-                                            bottom = if (state.withVideoPadding) 72.dp else 0.dp,
-                                        ).systemBarsPadding(),
                             )
                         }
                     }
@@ -563,7 +562,16 @@ private fun statusMediaPresenter(
     var currentPage by remember {
         mutableIntStateOf(initialIndex)
     }
-    object : StatusState by state {
+    object {
+        val status =
+            state.status.map {
+                it.copy(
+                    content =
+                        (it.content as? UiTimeline.ItemContent.Status)?.copy(
+                            images = persistentListOf(),
+                        ),
+                )
+            }
         val medias = medias
         val showUi = showUi
         val withVideoPadding = withVideoPadding

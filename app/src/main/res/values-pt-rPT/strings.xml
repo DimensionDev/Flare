@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">Tem certeza de que deseja denunciar isto?</string>
   <string name="misskey_item_action_delete">excluir</string>
   <string name="misskey_item_action_report">Denunciar</string>
-  <string name="xqt_item_unbookmark">Desfavoritar</string>
-  <string name="xqt_item_bookmark">Favorito</string>
-  <string name="xqt_item_delete">excluir</string>
-  <string name="xqt_item_report">Denunciar</string>
   <string name="user_report">Denunciar %1$s</string>
   <string name="user_block">Bloquear %1$s</string>
   <string name="user_unblock">Desbloquear %1$s</string>

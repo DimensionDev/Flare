@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">Weet u zeker dat u dit wilt melden?</string>
   <string name="misskey_item_action_delete">Verwijderen</string>
   <string name="misskey_item_action_report">Rapporteren</string>
-  <string name="xqt_item_unbookmark">Niet bladwijzer</string>
-  <string name="xqt_item_bookmark">Bladwijzer</string>
-  <string name="xqt_item_delete">Verwijderen</string>
-  <string name="xqt_item_report">Rapporteren</string>
   <string name="user_report">Rapporteer %1$s</string>
   <string name="user_block">Blokkeren %1$s</string>
   <string name="user_unblock">Deblokkeer %1$s</string>

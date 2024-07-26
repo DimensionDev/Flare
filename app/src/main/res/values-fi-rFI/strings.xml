@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">Oletko varma, että haluat raportoida tästä?</string>
   <string name="misskey_item_action_delete">Poista</string>
   <string name="misskey_item_action_report">Raportoi</string>
-  <string name="xqt_item_unbookmark">Poista kirjanmerkki</string>
-  <string name="xqt_item_bookmark">Kirjanmerkki</string>
-  <string name="xqt_item_delete">Poista</string>
-  <string name="xqt_item_report">Raportoi</string>
   <string name="user_report">Ilmoita %1$s</string>
   <string name="user_block">Estä %1$s</string>
   <string name="user_unblock">Poista %1$s Esto</string>

@@ -159,10 +159,6 @@
   <string name="mastodon_report_description">Είστε βέβαιοι ότι θέλετε να αναφέρετε αυτό?</string>
   <string name="misskey_item_action_delete">Διαγραφή</string>
   <string name="misskey_item_action_report">Αναφορά</string>
-  <string name="xqt_item_unbookmark">Μη Σελιδοδείκτης</string>
-  <string name="xqt_item_bookmark">Σελιδοδείκτης</string>
-  <string name="xqt_item_delete">Διαγραφή</string>
-  <string name="xqt_item_report">Αναφορά</string>
   <string name="user_report">Αναφορά %1$s</string>
   <string name="user_block">Αποκλεισμός %1$s</string>
   <string name="user_unblock">Ξεμπλοκάρισμα %1$s</string>

@@ -162,10 +162,6 @@
   <string name="mastodon_report_description">Вы уверены, что хотите сообщить об этом?</string>
   <string name="misskey_item_action_delete">Удалить</string>
   <string name="misskey_item_action_report">Отчет</string>
-  <string name="xqt_item_unbookmark">Снять закладку</string>
-  <string name="xqt_item_bookmark">Закладка</string>
-  <string name="xqt_item_delete">Удалить</string>
-  <string name="xqt_item_report">Отчет</string>
   <string name="user_block">Блокировать %1$s</string>
   <string name="user_unblock">Разблокировать %1$s</string>
   <string name="user_mute">Выключить звук %1$s</string>

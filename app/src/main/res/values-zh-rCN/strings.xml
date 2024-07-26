@@ -164,10 +164,6 @@
   <string name="mastodon_report_description">您确定要举报此内容吗？</string>
   <string name="misskey_item_action_delete">删除</string>
   <string name="misskey_item_action_report">举报</string>
-  <string name="xqt_item_unbookmark">取消书签</string>
-  <string name="xqt_item_bookmark">添加书签</string>
-  <string name="xqt_item_delete">删除</string>
-  <string name="xqt_item_report">举报</string>
   <string name="user_report">举报 %1$s</string>
   <string name="user_block">屏蔽 %1$s</string>
   <string name="user_unblock">取消屏蔽 %1$s</string>

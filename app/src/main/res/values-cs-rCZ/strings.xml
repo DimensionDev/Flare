@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">Opravdu to chcete nahlásit?</string>
   <string name="misskey_item_action_delete">Vymazat</string>
   <string name="misskey_item_action_report">Nahlásit</string>
-  <string name="xqt_item_unbookmark">Zrušit záložku</string>
-  <string name="xqt_item_bookmark">Záložka</string>
-  <string name="xqt_item_delete">Vymazat</string>
-  <string name="xqt_item_report">Nahlásit</string>
   <string name="user_report">Nahlásit %1$s</string>
   <string name="user_block">Blokovat %1$s</string>
   <string name="user_unblock">Odblokovat %1$s</string>

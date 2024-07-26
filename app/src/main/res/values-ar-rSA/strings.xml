@@ -161,10 +161,6 @@
   <string name="mastodon_report_description">هل أنت متأكد من أنك تريد الإبلاغ عن هذا؟</string>
   <string name="misskey_item_action_delete">حذف</string>
   <string name="misskey_item_action_report">تقرير</string>
-  <string name="xqt_item_unbookmark">إلغاء الإشارة</string>
-  <string name="xqt_item_bookmark">إشارة</string>
-  <string name="xqt_item_delete">حذف</string>
-  <string name="xqt_item_report">تقرير</string>
   <string name="user_report">التقرير %1$s</string>
   <string name="user_block">حظر %1$s</string>
   <string name="user_unblock">إلغاء حظر %1$s</string>

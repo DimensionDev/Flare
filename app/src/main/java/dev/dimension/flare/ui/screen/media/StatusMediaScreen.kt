@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.imageLoader
 import coil.request.ImageRequest
+import coil.size.Size
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -515,6 +516,7 @@ private fun ImageItem(
                 .data(url)
                 .placeholderMemoryCacheKey(previewUrl)
                 .crossfade(1_000)
+                .size(Size.ORIGINAL)
                 .build(),
         contentDescription = description,
         state = rememberZoomableImageState(zoomableState),

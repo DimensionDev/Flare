@@ -65,15 +65,14 @@ internal fun Status.renderStatus(
             if (url.isNullOrEmpty()) {
                 null
             } else {
-                if (it.type == "video") {
-                    null
-//                    UiMedia.Video(
-//                        url = it.videoSrc,
-//                        thumbnailUrl = it.url ?: url,
-//                        width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
-//                        height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
-//                        description = null,
-//                    )
+                if (it.type == "video" && it.videoSrc != null) {
+                    UiMedia.Video(
+                        url = it.videoSrc,
+                        thumbnailUrl = it.url ?: url,
+                        width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
+                        height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
+                        description = null,
+                    )
                 } else {
                     UiMedia.Image(
                         url = url,
@@ -85,35 +84,63 @@ internal fun Status.renderStatus(
                     )
                 }
             }
-        } +
-            listOfNotNull(
-                pageInfo
-                    ?.takeIf {
-                        it.type == "video"
-                    }?.let {
-                        val description = it.title ?: it.content2 ?: it.content1
-                        val height = it.pagePic?.height?.toFloatOrNull() ?: 0f
-                        val width = it.pagePic?.width?.toFloatOrNull() ?: 0f
-                        val previewUrl = it.pagePic?.url
-                        val videoUrl =
-                            it.urls?.mp4720PMp4
-                                ?: it.urls?.mp4HDMp4
-                                ?: it.urls?.mp4LdMp4
-                                ?: it.mediaInfo?.streamURLHD
-                                ?: it.mediaInfo?.streamURL
-                        if (videoUrl != null && previewUrl != null) {
-                            UiMedia.Video(
-                                url = videoUrl,
-                                thumbnailUrl = previewUrl,
-                                width = width,
-                                height = height,
-                                description = description,
-                            )
-                        } else {
-                            null
-                        }
-                    },
-            )
+        }
+    val pageInfoVideo =
+        listOfNotNull(
+            pageInfo
+                ?.takeIf {
+                    it.type == "video"
+                }?.let {
+                    val description = it.title ?: it.content2 ?: it.content1
+                    val height = it.pagePic?.height?.toFloatOrNull() ?: 0f
+                    val width = it.pagePic?.width?.toFloatOrNull() ?: 0f
+                    val previewUrl = it.pagePic?.url
+                    val videoUrl =
+                        it.urls?.mp4720PMp4
+                            ?: it.urls?.mp4HDMp4
+                            ?: it.urls?.mp4LdMp4
+                            ?: it.mediaInfo?.streamURLHD
+                            ?: it.mediaInfo?.streamURL
+                    if (videoUrl != null && previewUrl != null) {
+                        UiMedia.Video(
+                            url = videoUrl,
+                            thumbnailUrl = previewUrl,
+                            width = width,
+                            height = height,
+                            description = description,
+                        )
+                    } else {
+                        null
+                    }
+                },
+        )
+    val pageInfoImage =
+        listOfNotNull(
+            pageInfo
+                ?.takeIf {
+                    it.type == "bigPic"
+                }?.let {
+                    val url = it.pagePic?.url
+                    if (url != null) {
+                        UiMedia.Image(
+                            url = url,
+                            width = it.pagePic.width?.toFloatOrNull() ?: 0f,
+                            height = it.pagePic.height?.toFloatOrNull() ?: 0f,
+                            previewUrl = url,
+                            description = null,
+                            sensitive = false,
+                        )
+                    } else {
+                        null
+                    }
+                },
+        )
+    val actualMedia =
+        media.takeIf {
+            it.isNotEmpty()
+        } ?: pageInfoVideo.takeIf {
+            it.isNotEmpty()
+        } ?: pageInfoImage
     val canReblog = visible?.type == null || visible.type == 0L
     val rawUser = this.user?.render(accountKey)
     val isFromMe = rawUser?.key == accountKey
@@ -140,7 +167,7 @@ internal fun Status.renderStatus(
             ).toImmutableList(),
         card = null,
         contentWarning = null,
-        images = media.toImmutableList(),
+        images = actualMedia.toImmutableList(),
         actions =
             listOfNotNull(
                 if (canReblog) {

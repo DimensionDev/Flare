@@ -100,6 +100,7 @@ import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -284,7 +285,10 @@ internal fun HomeScreen(
                             },
                         )
                     },
-                    gesturesEnabled = state.navigationState.drawerEnabled && actualLayoutType != NavigationSuiteType.NavigationDrawer,
+                    gesturesEnabled =
+                        state.navigationState.drawerEnabled &&
+                            actualLayoutType != NavigationSuiteType.NavigationDrawer &&
+                            accountTypeState.user.isSuccess,
                 ) {
                     NavigationSuiteScaffold2(
                         layoutType = actualLayoutType,
@@ -306,7 +310,10 @@ internal fun HomeScreen(
                                     }.onLoading {
                                         AvatarComponent(null, modifier = Modifier.placeholder(true))
                                     }.onError {
-                                        Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+                                        Icon(
+                                            imageVector = Icons.Default.Menu,
+                                            contentDescription = null,
+                                        )
                                     }
                             }
                             accountTypeState.user.onSuccess {
@@ -321,7 +328,10 @@ internal fun HomeScreen(
                                             )
                                         }
                                     },
-                                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp),
+                                    elevation =
+                                        FloatingActionButtonDefaults.elevation(
+                                            defaultElevation = 0.dp,
+                                        ),
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Edit,
@@ -453,7 +463,14 @@ internal fun HomeScreen(
                                             direction = TabSplashScreenDestination,
                                         ) {
                                             dependency(rootNavController)
-                                            dependency(SplashScreenArgs(getDirection(tab, tab.account)))
+                                            dependency(
+                                                SplashScreenArgs(
+                                                    getDirection(
+                                                        tab,
+                                                        tab.account,
+                                                    ),
+                                                ),
+                                            )
                                             dependency(tabState)
                                             dependency(drawerState)
                                             dependency(this@SharedTransitionLayout)

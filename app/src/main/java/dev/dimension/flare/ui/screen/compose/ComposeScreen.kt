@@ -668,13 +668,15 @@ private fun ComposeScreen(
                     if (content is UiTimeline.ItemContent.Status) {
                         AnimatedVisibility(true) {
                             SharedTransitionLayout {
-                                QuotedStatus(
-                                    data = content,
-                                    modifier =
-                                        Modifier
-                                            .padding(horizontal = screenHorizontalPadding)
-                                            .fillMaxWidth(),
-                                )
+                                Card {
+                                    QuotedStatus(
+                                        data = content,
+                                        modifier =
+                                            Modifier
+                                                .padding(horizontal = screenHorizontalPadding)
+                                                .fillMaxWidth(),
+                                    )
+                                }
                             }
                         }
                     }

@@ -6,6 +6,8 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -43,6 +45,7 @@ internal fun UiTimelineComponent(
         modifier = modifier,
     ) {
         item.topMessage?.let { TopMessageComponent(it) }
+        Spacer(modifier = Modifier.height(4.dp))
         item.content?.let {
             ItemContentComponent(
                 item = it,

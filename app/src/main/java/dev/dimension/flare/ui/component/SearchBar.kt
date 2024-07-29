@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -57,7 +58,6 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
-import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
@@ -222,9 +222,15 @@ internal fun LazyStaggeredGridScope.searchContent(
                 users
                     .onLoading {
                         items(10) {
-                            ProfileHeaderLoading(
-                                modifier = Modifier.width(256.dp),
-                            )
+                            Card(
+                                modifier =
+                                    Modifier
+                                        .width(256.dp),
+                            ) {
+                                UserPlaceholder(
+                                    modifier = Modifier.padding(8.dp),
+                                )
+                            }
                         }
                     }.onSuccess {
                         items(users.itemCount) {
@@ -235,45 +241,18 @@ internal fun LazyStaggeredGridScope.searchContent(
                                         .width(256.dp),
                             ) {
                                 if (item == null) {
-                                    UserPlaceholder()
+                                    UserPlaceholder(
+                                        modifier = Modifier.padding(8.dp),
+                                    )
                                 } else {
                                     CommonStatusHeaderComponent(
+                                        modifier = Modifier.padding(8.dp),
                                         data = item,
                                         onUserClick = {
                                             toUser(item.key)
                                         },
                                     )
                                 }
-//                                if (item == null) {
-//                                    ProfileHeaderLoading(
-//                                        modifier =
-//                                            Modifier
-//                                                .width(256.dp),
-//                                    )
-//                                } else {
-//                                    CommonProfileHeader(
-//                                        bannerUrl = item.bannerUrl,
-//                                        avatarUrl = item.avatarUrl,
-//                                        displayName = item.nameElement,
-//                                        handle = item.handle,
-//                                        content = {
-//                                            item.descriptionElement?.let {
-//                                                HtmlText(
-//                                                    element = it,
-//                                                    maxLines = 2,
-//                                                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-//                                                )
-//                                            }
-//                                        },
-//                                        userKey = item.userKey,
-//                                        modifier =
-//                                            Modifier
-//                                                .width(256.dp)
-//                                                .clickable {
-//                                                    toUser(item.userKey)
-//                                                },
-//                                    )
-//                                }
                             }
                         }
                     }

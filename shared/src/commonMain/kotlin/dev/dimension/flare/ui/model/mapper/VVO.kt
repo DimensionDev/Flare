@@ -31,22 +31,13 @@ internal fun Status.render(
     return UiTimeline(
         topMessage =
             message?.let {
-                val rendered = user?.render(accountKey)
                 UiTimeline.TopMessage(
-                    user = rendered,
+                    user = null,
                     icon = UiTimeline.TopMessage.Icon.Info,
                     type =
                         UiTimeline.TopMessage.MessageType.VVO
                             .Custom(it),
                     onClicked = {
-                        if (rendered != null) {
-                            launcher.launch(
-                                AppDeepLink.Profile(
-                                    accountKey = accountKey,
-                                    userKey = rendered.key,
-                                ),
-                            )
-                        }
                     },
                 )
             },

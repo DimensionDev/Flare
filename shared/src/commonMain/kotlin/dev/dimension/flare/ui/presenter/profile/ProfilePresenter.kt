@@ -22,6 +22,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import kotlinx.collections.immutable.toImmutableList
@@ -175,15 +176,18 @@ class ProfileWithUserNameAndHostPresenter(
     private val userName: String,
     private val host: String,
     private val accountType: AccountType,
-) : PresenterBase<UiState<UiUserV2>>() {
+) : PresenterBase<UserState>() {
     @Composable
-    override fun body(): UiState<UiUserV2> {
+    override fun body(): UserState {
         val userState =
             accountServiceProvider(accountType = accountType).flatMap { service ->
                 remember(service) {
                     service.userByAcct("$userName@$host")
                 }.collectAsState().toUi()
             }
-        return userState
+        return object : UserState {
+            override val user: UiState<UiUserV2>
+                get() = userState
+        }
     }
 }

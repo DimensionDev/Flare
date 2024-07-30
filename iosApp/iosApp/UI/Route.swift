@@ -109,7 +109,7 @@ extension View {
                     accountType: accountType.toKotlin(),
                     initialQuery: data,
                     onUserClicked: { user in
-                        router.navigate(to: .profileMedia(accountType: accountType, userKey: user.userKey.description()))
+                        router.navigate(to: .profileMedia(accountType: accountType, userKey: user.key.description()))
                     }
                 )
             case let .profileMedia(accountType, userKey):

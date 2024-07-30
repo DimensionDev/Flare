@@ -141,14 +141,13 @@ struct ComposeScreen: View {
                                 }
                             }
                             if let replyState = viewModel.model.replyState,
-                               case .success(let reply) = onEnum(of: replyState) {
+                               case .success(let reply) = onEnum(of: replyState),
+                               let content = reply.data.content as? UiTimelineItemContentStatus {
                                 Spacer()
                                     .frame(height: 8)
                                 QuotedStatus(
-                                    data: reply.data,
-                                    onMediaClick: { _, _ in },
-                                    onUserClick: { _ in },
-                                    onStatusClick: { _ in }
+                                    data: content,
+                                    onMediaClick: { _, _ in }
                                 )
                             }
                         }
@@ -182,37 +181,40 @@ struct ComposeScreen: View {
                                 })
                             }
                             if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
-                                switch onEnum(of: visibilityState.data) {
-                                case .misskeyVisibilityState(let misskeyVisibility):
-                                    Menu {
-                                        ForEach(misskeyVisibility.allVisibilities, id: \.self) { visibility in
-                                            Button {
-                                                misskeyVisibility.setVisibility(value: visibility)
-                                            } label: {
-                                                MisskeyVisibilityIcon(visibility: visibility)
-                                                Text(visibility.name)
-                                            }
-                                        }
-                                    } label: {
-                                        MisskeyVisibilityIcon(visibility: misskeyVisibility.visibility)
-                                            .frame(width: iconSize, height: iconSize)
-                                    }
-                                case .mastodonVisibilityState(let mastodonVisibility):
-                                    Menu {
-                                        ForEach(mastodonVisibility.allVisibilities, id: \.self) { visibility in
-                                            Button {
-                                                mastodonVisibility.setVisibility(value: visibility)
-                                            } label: {
-                                                MastodonVisibilityIcon(visibility: visibility)
-                                                Text(visibility.name)
-                                            }
-                                        }
-                                    } label: {
-                                        MastodonVisibilityIcon(visibility: mastodonVisibility.visibility)
-                                            .frame(width: iconSize, height: iconSize)
-                                    }
-                                }
+                                
                             }
+//                            if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
+//                                switch onEnum(of: visibilityState.data) {
+//                                case .misskeyVisibilityState(let misskeyVisibility):
+//                                    Menu {
+//                                        ForEach(misskeyVisibility.allVisibilities, id: \.self) { visibility in
+//                                            Button {
+//                                                misskeyVisibility.setVisibility(value: visibility)
+//                                            } label: {
+//                                                MisskeyVisibilityIcon(visibility: visibility)
+//                                                Text(visibility.name)
+//                                            }
+//                                        }
+//                                    } label: {
+//                                        MisskeyVisibilityIcon(visibility: misskeyVisibility.visibility)
+//                                            .frame(width: iconSize, height: iconSize)
+//                                    }
+//                                case .mastodonVisibilityState(let mastodonVisibility):
+//                                    Menu {
+//                                        ForEach(mastodonVisibility.allVisibilities, id: \.self) { visibility in
+//                                            Button {
+//                                                mastodonVisibility.setVisibility(value: visibility)
+//                                            } label: {
+//                                                MastodonVisibilityIcon(visibility: visibility)
+//                                                Text(visibility.name)
+//                                            }
+//                                        }
+//                                    } label: {
+//                                        MastodonVisibilityIcon(visibility: mastodonVisibility.visibility)
+//                                            .frame(width: iconSize, height: iconSize)
+//                                    }
+//                                }
+//                            }
                             
                             if case .success(let data) = onEnum(of: viewModel.model.composeConfig),
                                 data.data.contentWarning != nil {

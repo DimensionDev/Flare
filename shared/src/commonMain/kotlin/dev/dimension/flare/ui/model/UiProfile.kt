@@ -5,9 +5,11 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
-import kotlin.jvm.JvmInline
+import kotlinx.collections.immutable.persistentListOf
+import moe.tlaster.ktml.dom.Element
 
 @Immutable
 data class UiProfile internal constructor(
@@ -36,8 +38,7 @@ data class UiProfile internal constructor(
     }
 
     sealed interface BottomContent {
-        @JvmInline
-        value class Fields(
+        data class Fields(
             val fields: ImmutableMap<String, UiRichText>,
         ) : BottomContent
 
@@ -58,4 +59,25 @@ data class UiProfile internal constructor(
         Bot,
         Locked,
     }
+}
+
+fun createSampleUser(): UiProfile {
+    return UiProfile(
+        key = MicroBlogKey("sampleKey", "sampleHost"),
+        handle = "@sampleUser",
+        avatar = "https://example.com/avatar.jpg",
+        name = Element("span").toUi(),
+        platformType = PlatformType.Mastodon,
+        onClicked = { /* Handle click */ },
+        banner = "https://example.com/banner.jpg",
+        description = null,
+        matrices = UiProfile.Matrices(
+            fansCount = 1000,
+            followsCount = 500,
+            statusesCount = 300,
+            platformFansCount = "1K"
+        ),
+        mark = persistentListOf(),
+        bottomContent = null,
+    )
 }

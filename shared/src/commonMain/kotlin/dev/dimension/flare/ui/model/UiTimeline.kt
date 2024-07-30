@@ -8,7 +8,6 @@ import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
-import kotlin.jvm.JvmInline
 
 // TODO: Handling item click event internally
 @Immutable
@@ -81,28 +80,6 @@ data class UiTimeline internal constructor(
                         append(statusKey)
                     }
 
-            sealed interface Embed {
-                @JvmInline
-                value class Quote(
-                    val data: Status,
-                ) : Embed
-
-                @JvmInline
-                value class QuoteList(
-                    val data: ImmutableList<Status>,
-                ) : Embed
-
-                @JvmInline
-                value class Poll(
-                    val data: UiPoll,
-                ) : Embed
-
-                @JvmInline
-                value class Card(
-                    val data: UiCard,
-                ) : Embed
-            }
-
             sealed interface BottomContent {
                 data class Reaction(
                     val emojiReactions: ImmutableList<EmojiReaction>,
@@ -144,8 +121,7 @@ data class UiTimeline internal constructor(
             }
         }
 
-        @JvmInline
-        value class User(
+        data class User(
             val value: UiUserV2,
         ) : ItemContent {
             override val itemKey: String

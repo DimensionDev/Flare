@@ -381,7 +381,7 @@ private fun profileWithUserNameAndHostPresenter(
             host = host,
             accountType = accountType,
         )
-    }.invoke()
+    }.invoke().user
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)

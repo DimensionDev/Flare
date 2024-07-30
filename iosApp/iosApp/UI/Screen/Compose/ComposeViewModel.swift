@@ -122,12 +122,11 @@ class ComposeViewModel: MoleculeViewModelProto {
             nil
         }
     }
-    private func getMastodonVisibility() -> UiStatus.Mastodon.MastodonVisibility {
-        return if case .success(let data) = onEnum(of: model.visibilityState),
-                  let state = data.data as? MastodonVisibilityState {
-            state.visibility
+    private func getMastodonVisibility() -> UiTimelineItemContentStatusTopEndContentVisibility.Type_ {
+        return if case .success(let data) = onEnum(of: model.visibilityState) {
+            data.data.visibility
         } else {
-            UiStatus.Mastodon.MastodonVisibility.public
+            UiTimelineItemContentStatusTopEndContentVisibility.Type_.public
         }
     }
     private func getMastodonPoll() -> MastodonComposeData.Poll? {
@@ -143,12 +142,11 @@ class ComposeViewModel: MoleculeViewModelProto {
             nil
         }
     }
-    private func getMisskeyVisibility() -> UiStatus.Misskey.MisskeyVisibility {
-        return if case .success(let data) = onEnum(of: model.visibilityState),
-                  let state = data.data as? MisskeyVisibilityState {
-            state.visibility
+    private func getMisskeyVisibility() -> UiTimelineItemContentStatusTopEndContentVisibility.Type_ {
+        return if case .success(let data) = onEnum(of: model.visibilityState) {
+            data.data.visibility
         } else {
-            UiStatus.Misskey.MisskeyVisibility.public
+            UiTimelineItemContentStatusTopEndContentVisibility.Type_.public
         }
     }
     private func getMisskeyPoll() -> MisskeyComposeData.Poll? {
@@ -179,8 +177,8 @@ class ComposeViewModel: MoleculeViewModelProto {
     }
     private func getXQTUserName() -> String? {
         if case .success(let data) = onEnum(of: self.model.replyState),
-           let status = data.data as? UiStatus.XQT {
-            status.user.rawHandle
+           let status = data.data.content as? UiTimelineItemContentStatus {
+            status.user?.handle // TODO: remove prefix and suffix
         } else {
             nil
         }

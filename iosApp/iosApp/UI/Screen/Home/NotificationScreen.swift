@@ -4,7 +4,6 @@ import shared
 struct NotificationScreen: View {
     @State var notificationType: NotificationFilter = NotificationFilter.all
     let presenter: NotificationPresenter
-    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     init(accountType: AccountType) {
         presenter = .init(accountType: accountType)
@@ -27,11 +26,7 @@ struct NotificationScreen: View {
                     .listRowSeparator(.hidden)
                 }
                 StatusTimelineComponent(
-                    data: state.listState,
-                    mastodonEvent: statusEvent,
-                    misskeyEvent: statusEvent,
-                    blueskyEvent: statusEvent,
-                    xqtEvent: statusEvent
+                    data: state.listState
                 )
             }
             .onChange(of: notificationType) {

@@ -14,7 +14,7 @@ struct ProfileWithUserNameScreen: View {
     var body: some View {
         Observing(presenter.models) { state in
             ZStack {
-                switch onEnum(of: state) {
+                switch onEnum(of: state.user) {
                 case .error:
                     Text("error")
                 case .loading:
@@ -38,7 +38,7 @@ struct ProfileWithUserNameScreen: View {
                         .listRowInsets(EdgeInsets())
                     }
                 case .success(let data):
-                    ProfileScreen(accountType: accountType, userKey: data.data.userKey, toProfileMedia: toProfileMedia)
+                    ProfileScreen(accountType: accountType, userKey: data.data.key, toProfileMedia: toProfileMedia)
                 }
             }
         }

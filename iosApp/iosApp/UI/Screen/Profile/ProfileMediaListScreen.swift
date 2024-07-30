@@ -3,7 +3,6 @@ import shared
 
 struct ProfileMediaListScreen: View {
     let presenter: ProfileMediaPresenter
-    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     init(accountType: AccountType, userKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, userKey: userKey)
     }
@@ -27,10 +26,12 @@ struct ProfileMediaListScreen: View {
                                     .aspectRatio(1, contentMode: .fill)
                                     .clipped()
                                     .onTapGesture {
-                                        let index = item.status.medias.firstIndex { it in
-                                            it === media
-                                        } ?? 0
-                                        statusEvent.onMediaClick(statusKey: item.status.statusKey, index: index, preview: nil)
+                                        if case .status(let data) = onEnum(of: item.status.content) {
+                                            let index = data.images.firstIndex { it in
+                                                it === media
+                                            } ?? 0
+//                                            statusEvent.onMediaClick(statusKey: item.status.statusKey, index: index, preview: nil)
+                                        }
                                     }
                             }
                         }

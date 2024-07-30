@@ -3,13 +3,12 @@ import shared
 import Combine
 
 struct DiscoverScreen: View {
-    private let onUserClicked: (UiUser) -> Void
+    private let onUserClicked: (UiUserV2) -> Void
     let searchPresenter: SearchPresenter
     let presenter: DiscoverPresenter
     @State var searchText = ""
-    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    init(accountType: AccountType, onUserClicked: @escaping (UiUser) -> Void) {
+    init(accountType: AccountType, onUserClicked: @escaping (UiUserV2) -> Void) {
         self.onUserClicked = onUserClicked
         searchPresenter = .init(accountType: accountType, initialQuery: "")
         presenter = .init(accountType: accountType)
@@ -49,11 +48,7 @@ struct DiscoverScreen: View {
                     }
                     Section("discover_status_title") {
                         StatusTimelineComponent(
-                            data: searchState.status,
-                            mastodonEvent: statusEvent,
-                            misskeyEvent: statusEvent,
-                            blueskyEvent: statusEvent,
-                            xqtEvent: statusEvent
+                            data: searchState.status
                         )
                     }
                 } else {
@@ -132,11 +127,7 @@ struct DiscoverScreen: View {
                     if case .success(let data) = onEnum(of: state.status), data.data.isNotEmptyOrLoading {
                         Section("discover_status_title") {
                             StatusTimelineComponent(
-                                data: state.status,
-                                mastodonEvent: statusEvent,
-                                misskeyEvent: statusEvent,
-                                blueskyEvent: statusEvent,
-                                xqtEvent: statusEvent
+                                data: state.status
                             )
                         }
                     }

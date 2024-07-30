@@ -4,7 +4,7 @@ import NetworkImage
 import MarkdownUI
 
 struct UserComponent: View {
-    let user: UiUser
+    let user: UiUserV2
     let onUserClicked: () -> Void
     var body: some View {
         HStack {
@@ -14,12 +14,12 @@ struct UserComponent: View {
 //                    openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
                 },
                 label: {
-                    UserAvatar(data: user.avatarUrl, size: 48)
+                    UserAvatar(data: user.avatar, size: 48)
                 }
             )
             .buttonStyle(.borderless)
             VStack(alignment: .leading) {
-                Markdown(user.extra.nameMarkdown)
+                Markdown(user.name.markdown)
                     .lineLimit(1)
                     .font(.headline)
                     .markdownInlineImageProvider(.emoji)
@@ -33,8 +33,8 @@ struct UserComponent: View {
 }
 
 struct AccountItem: View {
-    let userState: UiState<UiUser>
-    var supportingContent: (UiUser) -> AnyView = { user in
+    let userState: UiState<UiUserV2>
+    var supportingContent: (UiUserV2) -> AnyView = { user in
         AnyView(
             Text(user.handle)
                 .lineLimit(1)
@@ -64,9 +64,9 @@ struct AccountItem: View {
         case .success(let success):
             let user = success.data
             HStack {
-                UserAvatar(data: user.avatarUrl, size: 48)
+                UserAvatar(data: user.avatar, size: 48)
                 VStack(alignment: .leading) {
-                    Markdown(user.extra.nameMarkdown)
+                    Markdown(user.name.markdown)
                         .lineLimit(1)
                         .font(.headline)
                         .markdownInlineImageProvider(.emoji)

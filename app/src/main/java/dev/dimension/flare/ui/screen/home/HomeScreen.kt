@@ -81,7 +81,6 @@ import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.spec.Direction
 import com.ramcosta.composedestinations.spec.NavHostGraphSpec
-import com.ramcosta.composedestinations.spec.Route
 import com.ramcosta.composedestinations.utils.composable
 import com.ramcosta.composedestinations.utils.dialogComposable
 import com.ramcosta.composedestinations.utils.toDestinationsNavigator
@@ -593,7 +592,7 @@ private fun getDirection(
 @Composable
 internal fun Router(
     navGraph: NavHostGraphSpec,
-    direction: Route,
+    direction: Direction,
     modifier: Modifier = Modifier,
     dependenciesContainerBuilder: @Composable DependenciesContainerBuilder<*>.() -> Unit = {},
 ) {
@@ -613,7 +612,7 @@ internal fun Router(
             navController = innerNavController,
             navGraph = navGraph,
             defaultTransitions = DefaultFadingTransitions,
-            startRoute = direction,
+            start = direction,
             dependenciesContainerBuilder = dependenciesContainerBuilder,
         )
     }

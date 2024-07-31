@@ -61,8 +61,8 @@ data class UiProfile internal constructor(
     }
 }
 
-fun createSampleUser(): UiProfile {
-    return UiProfile(
+fun createSampleUser(): UiProfile =
+    UiProfile(
         key = MicroBlogKey("sampleKey", "sampleHost"),
         handle = "@sampleUser",
         avatar = "https://example.com/avatar.jpg",
@@ -71,13 +71,13 @@ fun createSampleUser(): UiProfile {
         onClicked = { /* Handle click */ },
         banner = "https://example.com/banner.jpg",
         description = null,
-        matrices = UiProfile.Matrices(
-            fansCount = 1000,
-            followsCount = 500,
-            statusesCount = 300,
-            platformFansCount = "1K"
-        ),
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 1000,
+                followsCount = 500,
+                statusesCount = 300,
+                platformFansCount = "1K",
+            ),
         mark = persistentListOf(),
         bottomContent = null,
     )
-}

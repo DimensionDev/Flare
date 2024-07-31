@@ -11,7 +11,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.map
@@ -34,12 +34,17 @@ class ProfileMediaPresenter(
                             mediaOnly = true,
                         ).map { data ->
                             data.flatMap { status ->
-                                status.medias.map {
-                                    ProfileMedia(
-                                        it,
-                                        status,
-                                        status.medias.indexOf(it),
-                                    )
+                                val content = status.content
+                                if (content is UiTimeline.ItemContent.Status) {
+                                    content.images.map {
+                                        ProfileMedia(
+                                            it,
+                                            status,
+                                            content.images.indexOf(it),
+                                        )
+                                    }
+                                } else {
+                                    emptyList()
                                 }
                             }
                         }
@@ -57,6 +62,6 @@ interface ProfileMediaState {
 
 data class ProfileMedia(
     val media: UiMedia,
-    val status: UiStatus,
+    val status: UiTimeline,
     val index: Int,
 )

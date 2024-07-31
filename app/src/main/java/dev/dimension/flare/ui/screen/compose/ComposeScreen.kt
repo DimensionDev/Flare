@@ -90,6 +90,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -99,18 +100,19 @@ import dev.dimension.flare.data.datasource.microblog.VVOComposeData
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.component.status.UiStatusQuoted
-import dev.dimension.flare.ui.component.status.mastodon.VisibilityIcon
+import dev.dimension.flare.ui.component.status.QuotedStatus
+import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
@@ -119,8 +121,6 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
-import dev.dimension.flare.ui.presenter.compose.MastodonVisibilityState
-import dev.dimension.flare.ui.presenter.compose.MisskeyVisibilityState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -158,13 +158,16 @@ fun ShortcutComposeRoute(
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.VVO.ReplyToComment.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun VVoReplyCommentRoute(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
+    accountKey: MicroBlogKey,
     replyTo: MicroBlogKey,
     rootId: String,
 ) {
@@ -172,7 +175,7 @@ fun VVoReplyCommentRoute(
         onBack = {
             navigator.navigateUp()
         },
-        accountType = accountType,
+        accountType = AccountType.Specific(accountKey = accountKey),
         status = ComposeStatus.VVOComment(replyTo, rootId),
     )
 }
@@ -200,21 +203,24 @@ fun ComposeRoute(
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.Compose.Reply.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun ReplyRoute(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
-    replyTo: MicroBlogKey,
+    accountKey: MicroBlogKey,
+    statusKey: MicroBlogKey,
 ) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
         },
-        status = ComposeStatus.Reply(replyTo),
-        accountType = accountType,
+        status = ComposeStatus.Reply(statusKey),
+        accountType = AccountType.Specific(accountKey = accountKey),
     )
 }
 
@@ -224,21 +230,24 @@ fun ReplyRoute(
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.Compose.Quote.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
 @Composable
 fun Quote(
     navigator: DestinationsNavigator,
-    accountType: AccountType,
-    quoted: MicroBlogKey,
+    accountKey: MicroBlogKey,
+    statusKey: MicroBlogKey,
 ) {
     ComposeScreen(
         onBack = {
             navigator.navigateUp()
         },
-        status = ComposeStatus.Quote(quoted),
-        accountType = accountType,
+        status = ComposeStatus.Quote(statusKey),
+        accountType = AccountType.Specific(accountKey = accountKey),
     )
 }
 
@@ -360,7 +369,7 @@ private fun ComposeScreen(
                                             Text(it.handle)
                                         },
                                         leadingIcon = {
-                                            AvatarComponent(it.avatarUrl, size = 24.dp)
+                                            AvatarComponent(it.avatar, size = 24.dp)
                                         },
                                         shape = RoundedCornerShape(100),
                                     )
@@ -394,7 +403,7 @@ private fun ComposeScreen(
                                                             },
                                                             leadingIcon = {
                                                                 AvatarComponent(
-                                                                    data.avatarUrl,
+                                                                    data.avatar,
                                                                     size = 24.dp,
                                                                 )
                                                             },
@@ -655,17 +664,20 @@ private fun ComposeScreen(
 
             state.state.replyState?.let { replyState ->
                 replyState.onSuccess { state ->
-                    AnimatedVisibility(true) {
-                        SharedTransitionLayout {
-                            UiStatusQuoted(
-                                status = state,
-                                onMediaClick = {},
-                                colors = CardDefaults.cardColors(),
-                                modifier =
-                                    Modifier
-                                        .padding(horizontal = screenHorizontalPadding)
-                                        .fillMaxWidth(),
-                            )
+                    val content = state.content
+                    if (content is UiTimeline.ItemContent.Status) {
+                        AnimatedVisibility(true) {
+                            SharedTransitionLayout {
+                                Card {
+                                    QuotedStatus(
+                                        data = content,
+                                        modifier =
+                                            Modifier
+                                                .padding(horizontal = screenHorizontalPadding)
+                                                .fillMaxWidth(),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -712,16 +724,51 @@ private fun ComposeScreen(
                     }
                 }
                 state.state.visibilityState.onSuccess { visibilityState ->
-                    when (visibilityState) {
-                        is MastodonVisibilityState ->
-                            MastodonVisibilityContent(
-                                visibilityState,
-                            )
-
-                        is MisskeyVisibilityState ->
-                            MisskeyVisibilityContent(
-                                visibilityState,
-                            )
+                    IconButton(
+                        onClick = {
+                            visibilityState.showVisibilityMenu()
+                        },
+                    ) {
+                        StatusVisibilityComponent(visibility = visibilityState.visibility)
+                        DropdownMenu(
+                            expanded = visibilityState.showVisibilityMenu,
+                            onDismissRequest = {
+                                visibilityState.hideVisibilityMenu()
+                            },
+                            properties = PopupProperties(focusable = false),
+                        ) {
+                            visibilityState.allVisibilities.forEach { visibility ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        visibilityState.setVisibility(visibility)
+                                        visibilityState.hideVisibilityMenu()
+                                    },
+                                    text = {
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                                            horizontalAlignment = Alignment.Start,
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = visibility.localName),
+                                                style = MaterialTheme.typography.bodyLarge,
+                                            )
+                                            Text(
+                                                text = stringResource(id = visibility.localDescription),
+                                                style = MaterialTheme.typography.bodySmall,
+                                            )
+                                        }
+                                    },
+                                    leadingIcon = {
+                                        StatusVisibilityComponent(visibility = visibility)
+                                    },
+                                    contentPadding =
+                                        PaddingValues(
+                                            horizontal = 16.dp,
+                                            vertical = 8.dp,
+                                        ),
+                                )
+                            }
+                        }
                     }
                 }
                 state.contentWarningState.onSuccess {
@@ -806,136 +853,6 @@ private fun ComposeScreen(
 }
 
 @Composable
-private fun MisskeyVisibilityContent(visibilityState: MisskeyVisibilityState) {
-    IconButton(
-        onClick = {
-            visibilityState.showVisibilityMenu()
-        },
-    ) {
-        dev.dimension.flare.ui.component.status.misskey
-            .VisibilityIcon(visibility = visibilityState.visibility)
-        DropdownMenu(
-            expanded = visibilityState.showVisibilityMenu,
-            onDismissRequest = {
-                visibilityState.hideVisibilityMenu()
-            },
-            properties = PopupProperties(focusable = false),
-        ) {
-            visibilityState.allVisibilities.forEach { visibility ->
-                DropdownMenuItem(
-                    onClick = {
-                        visibilityState.setVisibility(visibility)
-                        visibilityState.hideVisibilityMenu()
-                    },
-                    text = {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            horizontalAlignment = Alignment.Start,
-                        ) {
-                            Text(
-                                text = stringResource(id = visibility.localName),
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Text(
-                                text = stringResource(id = visibility.localDescription),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
-                    },
-                    leadingIcon = {
-                        dev.dimension.flare.ui.component.status.misskey
-                            .VisibilityIcon(visibility = visibility)
-                    },
-                    contentPadding =
-                        PaddingValues(
-                            horizontal = 16.dp,
-                            vertical = 8.dp,
-                        ),
-                )
-            }
-            DropdownMenuItem(
-                text = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        horizontalAlignment = Alignment.Start,
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.misskey_compose_local_only),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                        Text(
-                            text = stringResource(id = R.string.misskey_compose_local_only_description),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                },
-                leadingIcon = {
-                    Checkbox(
-                        checked = visibilityState.localOnly,
-                        onCheckedChange = {
-                            visibilityState.setLocalOnly(it)
-                        },
-                    )
-                },
-                onClick = {
-                    visibilityState.setLocalOnly(!visibilityState.localOnly)
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun MastodonVisibilityContent(visibilityState: MastodonVisibilityState) {
-    IconButton(
-        onClick = {
-            visibilityState.showVisibilityMenu()
-        },
-    ) {
-        VisibilityIcon(visibility = visibilityState.visibility)
-        DropdownMenu(
-            expanded = visibilityState.showVisibilityMenu,
-            onDismissRequest = {
-                visibilityState.hideVisibilityMenu()
-            },
-            properties = PopupProperties(focusable = false),
-        ) {
-            visibilityState.allVisibilities.forEach { visibility ->
-                DropdownMenuItem(
-                    onClick = {
-                        visibilityState.setVisibility(visibility)
-                        visibilityState.hideVisibilityMenu()
-                    },
-                    text = {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            horizontalAlignment = Alignment.Start,
-                        ) {
-                            Text(
-                                text = stringResource(id = visibility.localName),
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Text(
-                                text = stringResource(id = visibility.localDescription),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
-                    },
-                    leadingIcon = {
-                        VisibilityIcon(visibility = visibility)
-                    },
-                    contentPadding =
-                        PaddingValues(
-                            horizontal = 16.dp,
-                            vertical = 8.dp,
-                        ),
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun PollOption(
     textFieldState: TextFieldState,
     index: Int,
@@ -1009,32 +926,12 @@ private fun composePresenter(
                 contentWarningPresenter()
             }
 
-    state.replyState?.onSuccess {
+    state.initialTextState?.onSuccess {
         LaunchedEffect(it) {
-            if (textFieldState.text.isEmpty()) {
-                when (val item = it) {
-                    is UiStatus.Mastodon -> {
-                        textFieldState.edit {
-                            append("${item.user.handle} ")
-                        }
-                    }
-
-                    is UiStatus.Misskey -> {
-//                        textFieldState.edit {
-//                            append("${item.user.handle} ")
-//                        }
-                    }
-
-                    is UiStatus.VVO -> {
-                        if (item.quote != null && status is ComposeStatus.Quote) {
-                            textFieldState.edit {
-                                append("//@${item.rawUser?.rawHandle}:${item.rawContent}")
-                                selection = TextRange.Zero
-                            }
-                        }
-                    }
-
-                    else -> Unit
+            if (it.text.isNotEmpty()) {
+                textFieldState.edit {
+                    append(it.text)
+                    selection = TextRange(it.cursorPosition)
                 }
             }
         }
@@ -1125,9 +1022,8 @@ private fun composePresenter(
                                 visibility =
                                     state.visibilityState
                                         .takeSuccess()
-                                        ?.let { it as? MastodonVisibilityState }
                                         ?.visibility
-                                        ?: UiStatus.Mastodon.Visibility.Public,
+                                        ?: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 account = it,
                             )
@@ -1163,18 +1059,12 @@ private fun composePresenter(
                                 visibility =
                                     state.visibilityState
                                         .takeSuccess()
-                                        ?.let { it as? MisskeyVisibilityState }
                                         ?.visibility
-                                        ?: UiStatus.Misskey.Visibility.Public,
+                                        ?: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
                                 inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
                                 renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
                                 content = textFieldState.text.toString(),
-                                localOnly =
-                                    state.visibilityState
-                                        .takeSuccess()
-                                        ?.let { it as? MisskeyVisibilityState }
-                                        ?.localOnly
-                                        ?: false,
+                                localOnly = false,
                             )
 
                         is UiAccount.Bluesky ->
@@ -1210,9 +1100,11 @@ private fun composePresenter(
                                             (state.replyState as UiState.Success)
                                                 .data
                                                 .let {
-                                                    it as? UiStatus.XQT
+                                                    it.content as? UiTimeline.ItemContent.Status
                                                 }?.user
-                                                ?.rawHandle
+                                                ?.handle
+                                                ?.removePrefix("@")
+                                                ?.removeSuffix("@$xqtHost")
                                         } else {
                                             null
                                         }
@@ -1390,38 +1282,28 @@ internal enum class PollExpiration(
     Days7(R.string.compose_poll_expiration_7_days, 7.days),
 }
 
-internal val UiStatus.Mastodon.Visibility.localName: Int
+internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localName: Int
     get() =
         when (this) {
-            UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public
-            UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted
-            UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private
-            UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+                R.string.misskey_visibility_public
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+                R.string.misskey_visibility_home
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+                R.string.misskey_visibility_followers
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+                R.string.misskey_visibility_specified
         }
 
-internal val UiStatus.Mastodon.Visibility.localDescription: Int
+internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localDescription: Int
     get() =
         when (this) {
-            UiStatus.Mastodon.Visibility.Public -> dev.dimension.flare.R.string.mastodon_visibility_public_description
-            UiStatus.Mastodon.Visibility.Unlisted -> dev.dimension.flare.R.string.mastodon_visibility_unlisted_description
-            UiStatus.Mastodon.Visibility.Private -> dev.dimension.flare.R.string.mastodon_visibility_private_description
-            UiStatus.Mastodon.Visibility.Direct -> dev.dimension.flare.R.string.mastodon_visibility_direct_description
-        }
-
-internal val UiStatus.Misskey.Visibility.localName: Int
-    get() =
-        when (this) {
-            UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public
-            UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home
-            UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers
-            UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified
-        }
-
-internal val UiStatus.Misskey.Visibility.localDescription: Int
-    get() =
-        when (this) {
-            UiStatus.Misskey.Visibility.Public -> dev.dimension.flare.R.string.misskey_visibility_public_description
-            UiStatus.Misskey.Visibility.Home -> dev.dimension.flare.R.string.misskey_visibility_home_description
-            UiStatus.Misskey.Visibility.Followers -> dev.dimension.flare.R.string.misskey_visibility_followers_description
-            UiStatus.Misskey.Visibility.Specified -> dev.dimension.flare.R.string.misskey_visibility_specified_description
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+                R.string.misskey_visibility_public_description
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+                R.string.misskey_visibility_home_description
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+                R.string.misskey_visibility_followers_description
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+                R.string.misskey_visibility_specified_description
         }

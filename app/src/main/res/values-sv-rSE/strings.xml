@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">Är du säker på att du vill rapportera detta?</string>
   <string name="misskey_item_action_delete">Radera</string>
   <string name="misskey_item_action_report">Rapportera</string>
-  <string name="xqt_item_unbookmark">Avbokmärke</string>
-  <string name="xqt_item_bookmark">Bokmärke</string>
-  <string name="xqt_item_delete">Radera</string>
-  <string name="xqt_item_report">Rapportera</string>
   <string name="user_report">Rapportera %1$s</string>
   <string name="user_block">Blockera %1$s</string>
   <string name="user_unblock">Avblockera %1$s</string>

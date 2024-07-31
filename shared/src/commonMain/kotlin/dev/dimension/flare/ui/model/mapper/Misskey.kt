@@ -1,51 +1,286 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
 import dev.dimension.flare.data.network.misskey.api.model.Note
 import dev.dimension.flare.data.network.misskey.api.model.Notification
+import dev.dimension.flare.data.network.misskey.api.model.NotificationType
 import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Instant
+import moe.tlaster.ktml.dom.Element
+import moe.tlaster.ktml.dom.Text
+import moe.tlaster.mfm.parser.MFMParser
+import moe.tlaster.mfm.parser.tree.BoldNode
+import moe.tlaster.mfm.parser.tree.CashNode
+import moe.tlaster.mfm.parser.tree.CenterNode
+import moe.tlaster.mfm.parser.tree.CodeBlockNode
+import moe.tlaster.mfm.parser.tree.EmojiCodeNode
+import moe.tlaster.mfm.parser.tree.FnNode
+import moe.tlaster.mfm.parser.tree.HashtagNode
+import moe.tlaster.mfm.parser.tree.InlineCodeNode
+import moe.tlaster.mfm.parser.tree.ItalicNode
+import moe.tlaster.mfm.parser.tree.LinkNode
+import moe.tlaster.mfm.parser.tree.MathBlockNode
+import moe.tlaster.mfm.parser.tree.MathInlineNode
+import moe.tlaster.mfm.parser.tree.MentionNode
+import moe.tlaster.mfm.parser.tree.QuoteNode
+import moe.tlaster.mfm.parser.tree.RootNode
+import moe.tlaster.mfm.parser.tree.SearchNode
+import moe.tlaster.mfm.parser.tree.SmallNode
+import moe.tlaster.mfm.parser.tree.StrikeNode
+import moe.tlaster.mfm.parser.tree.UrlNode
 
-internal fun Notification.toUi(accountKey: MicroBlogKey): UiStatus.MisskeyNotification {
-    val user = user?.toUi(accountKey)
-    return UiStatus.MisskeyNotification(
-        statusKey =
-            MicroBlogKey(
-                id,
-                host = accountKey.host,
-            ),
-        user = user,
-        createdAt = Instant.parse(createdAt),
-        note = note?.toUi(accountKey),
-        type = type,
-        accountKey = accountKey,
-        achievement = achievement,
+internal fun Notification.render(
+    accountKey: MicroBlogKey,
+    event: StatusEvent.Misskey,
+): UiTimeline {
+    requireNotNull(user) { "account is null" }
+    val user = user.render(accountKey)
+    val status = note?.renderStatus(accountKey, event)
+    val topMessageType =
+        when (this.type) {
+            NotificationType.Follow -> UiTimeline.TopMessage.MessageType.Misskey.Follow
+            NotificationType.Mention -> UiTimeline.TopMessage.MessageType.Misskey.Mention
+            NotificationType.Reply -> UiTimeline.TopMessage.MessageType.Misskey.Reply
+            NotificationType.Renote -> UiTimeline.TopMessage.MessageType.Misskey.Renote
+            NotificationType.Quote -> UiTimeline.TopMessage.MessageType.Misskey.Quote
+            NotificationType.Reaction -> UiTimeline.TopMessage.MessageType.Misskey.Reaction
+            NotificationType.PollEnded -> UiTimeline.TopMessage.MessageType.Misskey.PollEnded
+            NotificationType.ReceiveFollowRequest -> UiTimeline.TopMessage.MessageType.Misskey.ReceiveFollowRequest
+            NotificationType.FollowRequestAccepted -> UiTimeline.TopMessage.MessageType.Misskey.FollowRequestAccepted
+            NotificationType.AchievementEarned -> UiTimeline.TopMessage.MessageType.Misskey.AchievementEarned
+            NotificationType.App -> UiTimeline.TopMessage.MessageType.Misskey.App
+        }
+    val topMessage =
+        UiTimeline.TopMessage(
+            user = user,
+            icon = UiTimeline.TopMessage.Icon.Retweet,
+            type = topMessageType,
+            onClicked = {
+                launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+            },
+        )
+    return UiTimeline(
+        topMessage = topMessage,
+        content =
+            when {
+                type in
+                    listOf(
+                        NotificationType.Follow,
+                        NotificationType.FollowRequestAccepted,
+                        NotificationType.ReceiveFollowRequest,
+                    )
+                ->
+                    UiTimeline.ItemContent.User(user)
+
+                else ->
+                    status ?: UiTimeline.ItemContent.User(user)
+            },
+        platformType = PlatformType.Misskey,
     )
 }
 
-internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
-    val user = user.toUi(accountKey)
-    return UiStatus.Misskey(
-        statusKey =
-            MicroBlogKey(
-                id,
-                host = user.userKey.host,
+internal fun Note.render(
+    accountKey: MicroBlogKey,
+    event: StatusEvent.Misskey,
+): UiTimeline {
+    val user = user.render(accountKey)
+    val topMessage =
+        if (renote == null || !text.isNullOrEmpty()) {
+            null
+        } else {
+            UiTimeline.TopMessage(
+                user = user,
+                icon = UiTimeline.TopMessage.Icon.Retweet,
+                type = UiTimeline.TopMessage.MessageType.Mastodon.Reblogged,
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.Profile(
+                            accountKey = accountKey,
+                            userKey = user.key,
+                        ),
+                    )
+                },
+            )
+        }
+    val currentStatus = this.renderStatus(accountKey, event)
+    val actualStatus = renote ?: this
+    return UiTimeline(
+        topMessage = topMessage,
+        content =
+            actualStatus.renderStatus(accountKey, event).copy(
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.StatusDetail(
+                            accountKey = accountKey,
+                            statusKey = currentStatus.statusKey,
+                        ),
+                    )
+                },
             ),
-        sensitive = files?.any { it.isSensitive } ?: false,
+        platformType = PlatformType.Misskey,
+    )
+}
+
+internal fun Note.renderStatus(
+    accountKey: MicroBlogKey,
+    event: StatusEvent.Misskey,
+): UiTimeline.ItemContent.Status {
+    val user = user.render(accountKey)
+    val isFromMe = user.key == accountKey
+    val canReblog = visibility in listOf(Visibility.Public, Visibility.Home)
+    val renderedVisibility =
+        when (visibility) {
+            Visibility.Public -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public
+            Visibility.Home -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
+            Visibility.Followers -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
+            Visibility.Specified -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+        }
+    val statusKey =
+        MicroBlogKey(
+            id,
+            host = user.key.host,
+        )
+    val reaction =
+        reactions
+            .map { emoji ->
+                UiTimeline.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
+                    name = emoji.key,
+                    count = emoji.value,
+                    url = resolveMisskeyEmoji(emoji.key, accountKey.host),
+                    onClicked = {
+                        event.react(
+                            statusKey = statusKey,
+                            hasReacted = myReaction != null,
+                            reaction = emoji.key,
+                        )
+                    },
+                )
+            }.toPersistentList()
+    return UiTimeline.ItemContent.Status(
+        images =
+            files
+                ?.mapNotNull { file ->
+                    file.toUi()
+                }?.toPersistentList() ?: persistentListOf(),
+        contentWarning = cw,
+        user = user,
+        quote =
+            listOfNotNull(
+                if (text != null || !files.isNullOrEmpty() || cw != null) {
+                    renote?.renderStatus(accountKey, event)
+                } else {
+                    null
+                },
+            ).toImmutableList(),
+        content = misskeyParser.parse(text.orEmpty()).toHtml(accountKey).toUi(),
+        actions =
+            listOfNotNull(
+                StatusAction.Item.Reply(
+                    count = repliesCount.toLong(),
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Compose.Reply(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
+                        )
+                    },
+                ),
+                if (canReblog) {
+                    StatusAction.Group(
+                        displayItem =
+                            StatusAction.Item.Retweet(
+                                count = renoteCount.toLong(),
+                                retweeted = renoteId != null,
+                                onClicked = {},
+                            ),
+                        actions =
+                            listOfNotNull(
+                                StatusAction.Item.Retweet(
+                                    count = renoteCount.toLong(),
+                                    retweeted = renoteId != null,
+                                    onClicked = {
+                                        event.renote(
+                                            statusKey = statusKey,
+                                        )
+                                    },
+                                ),
+                                StatusAction.Item.Quote(
+                                    count = 0,
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.Compose.Quote(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                ),
+                            ).toImmutableList(),
+                    )
+                } else {
+                    null
+                },
+                StatusAction.Item.Reaction(
+                    reacted = myReaction != null,
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Misskey.AddReaction(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
+                        )
+                    },
+                ),
+                StatusAction.Group(
+                    displayItem = StatusAction.Item.More,
+                    actions =
+                        listOfNotNull(
+                            if (isFromMe) {
+                                StatusAction.Item.Delete(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.DeleteStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
+                            } else {
+                                StatusAction.Item.Report(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.Misskey.ReportStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                                userKey = user.key,
+                                            ),
+                                        )
+                                    },
+                                )
+                            },
+                        ).toImmutableList(),
+                ),
+            ).toImmutableList(),
         poll =
             poll?.let {
                 UiPoll(
@@ -70,54 +305,24 @@ internal fun Note.toUi(accountKey: MicroBlogKey): UiStatus.Misskey {
                     ownVotes = List(poll.choices.filter { it.isVoted }.size) { index -> index }.toPersistentList(),
                 )
             },
-        // TODO: parse card content lazily
+        statusKey = statusKey,
         card = null,
-        createdAt = Instant.parse(createdAt),
-        content = text.orEmpty(),
-        contentWarningText = cw?.takeIf { it.isNotEmpty() },
-        user = user,
-        matrices =
-            UiStatus.Misskey.Matrices(
-                replyCount = repliesCount.toLong(),
-                renoteCount = renoteCount.toLong(),
-            ),
-        renote =
-            if (text.isNullOrEmpty()) {
-                renote?.toUi(accountKey)
-            } else {
-                null
-            },
-        quote =
-            if (text != null || !files.isNullOrEmpty() || cw != null) {
-                renote?.toUi(accountKey)
-            } else {
-                null
-            },
-        visibility =
-            when (visibility) {
-                Visibility.Public -> UiStatus.Misskey.Visibility.Public
-                Visibility.Home -> UiStatus.Misskey.Visibility.Home
-                Visibility.Followers -> UiStatus.Misskey.Visibility.Followers
-                Visibility.Specified -> UiStatus.Misskey.Visibility.Specified
-            },
-        medias =
-            files
-                ?.mapNotNull { file ->
-                    file.toUi()
-                }?.toPersistentList() ?: persistentListOf(),
-        reaction =
-            UiStatus.Misskey.Reaction(
-                myReaction = myReaction,
-                emojiReactions =
-                    reactions
-                        .map { emoji ->
-                            UiStatus.Misskey.EmojiReaction(
-                                name = emoji.key,
-                                count = emoji.value,
-                                url = resolveMisskeyEmoji(emoji.key, accountKey.host),
-                            )
-                        }.toPersistentList(),
-            ),
+        createdAt = Instant.parse(createdAt).toUi(),
+        topEndContent =
+            UiTimeline.ItemContent.Status.TopEndContent
+                .Visibility(renderedVisibility),
+        bottomContent =
+            UiTimeline.ItemContent.Status.BottomContent
+                .Reaction(reaction, myReaction),
+        sensitive = files?.any { it.isSensitive } ?: false,
+        onClicked = {
+            launcher.launch(
+                AppDeepLink.StatusDetail(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                ),
+            )
+        },
         accountKey = accountKey,
     )
 }
@@ -145,93 +350,95 @@ private fun DriveFile.toUi(): UiMedia? {
     }
 }
 
-internal fun UserLite.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
+internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
     val remoteHost =
         if (host.isNullOrEmpty()) {
             accountKey.host
         } else {
             host
         }
-    return UiUser.Misskey(
-        userKey =
-            MicroBlogKey(
-                id = id,
-                host = accountKey.host,
-            ),
-        name = name.orEmpty(),
-        avatarUrl = avatarUrl.orEmpty(),
-        bannerUrl = null,
+    val userKey =
+        MicroBlogKey(
+            id = id,
+            host = accountKey.host,
+        )
+    return UiProfile(
+        avatar = avatarUrl.orEmpty(),
+        name = parseName(name.orEmpty(), accountKey).toUi(),
+        handle = "@$username@$remoteHost",
+        key = userKey,
+        banner = null,
         description = null,
         matrices =
-            UiUser.Misskey.Matrices(
+            UiProfile.Matrices(
                 fansCount = 0,
                 followsCount = 0,
                 statusesCount = 0,
             ),
-        handleInternal = username,
-        remoteHost = remoteHost,
-        isCat = isCat ?: false,
-        isBot = isBot ?: false,
-        relation =
-            UiRelation.Misskey(
-                following = false,
-                isFans = false,
-                blocking = false,
-                blocked = false,
-                muted = false,
-                hasPendingFollowRequestFromYou = false,
-                hasPendingFollowRequestToYou = false,
-            ),
-        accountKey = accountKey,
-        fields = persistentMapOf(),
+        mark = persistentListOf(),
+        bottomContent = null,
+        platformType = PlatformType.Misskey,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
     )
 }
 
-internal fun User.toUi(accountKey: MicroBlogKey): UiUser.Misskey {
+internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     val remoteHost =
         if (host.isNullOrEmpty()) {
             accountKey.host
         } else {
             host
         }
-    return UiUser.Misskey(
-        userKey =
-            MicroBlogKey(
-                id = id,
-                host = accountKey.host,
-            ),
-        name = name.orEmpty(),
-        avatarUrl = avatarUrl.orEmpty(),
-        bannerUrl = bannerUrl,
-        description = description,
+    val userKey =
+        MicroBlogKey(
+            id = id,
+            host = accountKey.host,
+        )
+    return UiProfile(
+        avatar = avatarUrl.orEmpty(),
+        name = parseName(name.orEmpty(), accountKey).toUi(),
+        handle = "@$username@$remoteHost",
+        key = userKey,
+        banner = bannerUrl,
+        description = description?.let { misskeyParser.parse(it).toHtml(accountKey).toUi() },
         matrices =
-            UiUser.Misskey.Matrices(
+            UiProfile.Matrices(
                 fansCount = followersCount.toLong(),
                 followsCount = followingCount.toLong(),
                 statusesCount = notesCount.toLong(),
             ),
-        handleInternal = username,
-        remoteHost = remoteHost,
-        isCat = isCat ?: false,
-        isBot = isBot ?: false,
-        relation =
-            UiRelation.Misskey(
-                following = isFollowing ?: false,
-                isFans = isFollowed ?: false,
-                blocking = isBlocking ?: false,
-                blocked = isBlocked ?: false,
-                muted = isMuted ?: false,
-                hasPendingFollowRequestFromYou = hasPendingFollowRequestFromYou ?: false,
-                hasPendingFollowRequestToYou = hasPendingFollowRequestToYou ?: false,
-            ),
-        accountKey = accountKey,
-        fields =
+        mark =
+            listOfNotNull(
+                if (isCat == true) {
+                    UiProfile.Mark.Cat
+                } else {
+                    null
+                },
+                if (isBot == true) {
+                    UiProfile.Mark.Bot
+                } else {
+                    null
+                },
+            ).toImmutableList(),
+        bottomContent =
             fields
-                .map {
-                    it.name to it.value
-                }.filter { it.first.isNotEmpty() }
-                .toMap()
-                .toPersistentMap(),
+                .takeIf {
+                    it.any()
+                }?.let {
+                    UiProfile.BottomContent.Fields(
+                        fields =
+                            it
+                                .associate { (key, value) ->
+                                    key to misskeyParser.parse(value).toHtml(accountKey).toUi()
+                                }.toImmutableMap(),
+                    )
+                },
+        platformType = PlatformType.Misskey,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
     )
 }
 
@@ -250,5 +457,191 @@ internal fun resolveMisskeyEmoji(
             "https://$accountHost/emoji/${it.dropLast(2)}.webp"
         } else {
             "https://$accountHost/emoji/$it.webp"
+        }
+    }
+
+private val misskeyParser by lazy {
+    MFMParser()
+}
+
+private fun parseName(
+    name: String,
+    accountKey: MicroBlogKey,
+): Element {
+    if (name.isEmpty()) {
+        return Element("body")
+    }
+    return misskeyParser.parse(name).toHtml(accountKey) as? Element ?: Element("body")
+}
+
+private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): Element =
+    when (this) {
+        is CenterNode -> {
+            Element("center").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountKey))
+                }
+            }
+        }
+
+        is CodeBlockNode -> {
+            Element("pre").apply {
+                children.add(
+                    Element("code").apply {
+                        language?.let { attributes["lang"] = it }
+                        children.add(Text(code))
+                    },
+                )
+            }
+        }
+
+        is MathBlockNode -> {
+            Element("pre").apply {
+                children.add(
+                    Element("code").apply {
+                        attributes["lang"] = "math"
+                        children.add(Text(formula))
+                    },
+                )
+            }
+        }
+
+        is QuoteNode -> {
+            Element("blockquote").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountKey))
+                }
+            }
+        }
+
+        is SearchNode -> {
+            Element("search").apply {
+                children.add(Text(query))
+            }
+        }
+
+        is BoldNode -> {
+            Element("strong").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountKey))
+                }
+            }
+        }
+
+        is FnNode -> {
+            Element("fn").apply {
+                attributes["name"] = name
+                content.forEach {
+                    children.add(it.toHtml(accountKey))
+                }
+            }
+        }
+
+        is ItalicNode -> {
+            Element("em").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountKey))
+                }
+            }
+        }
+
+        is RootNode -> {
+            Element("body").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountKey))
+                }
+            }
+        }
+
+        is SmallNode -> {
+            Element("small").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountKey))
+                }
+            }
+        }
+
+        is StrikeNode -> {
+            Element("s").apply {
+                content.forEach {
+                    children.add(it.toHtml(accountKey))
+                }
+            }
+        }
+
+        is CashNode -> {
+            Element("a").apply {
+                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
+                children.add(Text("$$content"))
+            }
+        }
+
+        is EmojiCodeNode -> {
+            Element("img").apply {
+                attributes["src"] = resolveMisskeyEmoji(emoji, accountKey.host)
+                attributes["alt"] = emoji
+            }
+        }
+
+        is HashtagNode -> {
+            Element("a").apply {
+                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
+                children.add(Text("#$tag"))
+            }
+        }
+
+        is InlineCodeNode -> {
+            Element("code").apply {
+                children.add(Text(code))
+            }
+        }
+
+        is LinkNode -> {
+            Element("a").apply {
+                attributes["href"] = url
+                children.add(Text(content))
+            }
+        }
+
+        is MathInlineNode -> {
+            Element("code").apply {
+                attributes["lang"] = "math"
+                children.add(Text(formula))
+            }
+        }
+
+        is MentionNode -> {
+            Element("a").apply {
+                val deeplink =
+                    host?.let {
+                        AppDeepLink.ProfileWithNameAndHost(accountKey, userName, it)
+                    } ?: AppDeepLink.ProfileWithNameAndHost(accountKey, userName, accountKey.host)
+                attributes["href"] = deeplink
+                children.add(
+                    Text(
+                        buildString {
+                            append("@")
+                            append(userName)
+                            if (host != null) {
+                                append("@")
+                                append(host)
+                            }
+                        },
+                    ),
+                )
+            }
+        }
+
+        is moe.tlaster.mfm.parser.tree.TextNode -> {
+            Element("span").apply {
+                children.add(Text(content))
+            }
+        }
+
+        is UrlNode -> {
+            Element("a").apply {
+                attributes["href"] = url
+                children.add(Text(url))
+            }
         }
     }

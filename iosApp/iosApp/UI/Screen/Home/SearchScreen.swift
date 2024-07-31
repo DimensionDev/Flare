@@ -3,11 +3,10 @@ import shared
 
 struct SearchScreen: View {
     var searchText: String = ""
-    private let onUserClicked: (UiUser) -> Void
+    private let onUserClicked: (UiUserV2) -> Void
     let presenter: SearchPresenter
-    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    init(accountType: AccountType, initialQuery: String, onUserClicked: @escaping (UiUser) -> Void) {
+    init(accountType: AccountType, initialQuery: String, onUserClicked: @escaping (UiUserV2) -> Void) {
         self.onUserClicked = onUserClicked
         presenter = .init(accountType: accountType, initialQuery: initialQuery)
     }
@@ -45,11 +44,7 @@ struct SearchScreen: View {
                 }
                 Section("search_status_title") {
                     StatusTimelineComponent(
-                        data: state.status,
-                        mastodonEvent: statusEvent,
-                        misskeyEvent: statusEvent,
-                        blueskyEvent: statusEvent,
-                        xqtEvent: statusEvent
+                        data: state.status
                     )
                 }
             }

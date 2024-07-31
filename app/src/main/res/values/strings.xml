@@ -87,7 +87,8 @@
     <string name="misskey_notification_item_requested_follow">requested to follow you</string>
     <string name="misskey_item_reblogged_status">reposted a status</string>
 
-    <string name="xqt_item_reblogged_status">retweeted</string>
+    <string name="xqt_item_reblogged_status">retweeted your tweet</string>
+    <string name="xqt_item_mention_status">mentions you</string>
 
     <string name="mastodon_visibility_public">Public</string>
     <string name="mastodon_visibility_unlisted">Unlisted</string>
@@ -203,10 +204,18 @@
     <string name="misskey_item_action_delete">Delete</string>
     <string name="misskey_item_action_report">Report</string>
 
-    <string name="xqt_item_unbookmark">Unbookmark</string>
-    <string name="xqt_item_bookmark">Bookmark</string>
-    <string name="xqt_item_delete">Delete</string>
-    <string name="xqt_item_report">Report</string>
+    <string name="bookmark_remove">Remove bookmark</string>
+    <string name="bookmark_add">Add bookmark</string>
+    <string name="like">Like</string>
+    <string name="unlike">Unlike</string>
+    <string name="more">More</string>
+    <string name="quote">Quote</string>
+    <string name="reaction_add">Add reaction</string>
+    <string name="reaction_remove">Remove reaction</string>
+    <string name="reply">Reply</string>
+    <string name="report">Report</string>
+    <string name="retweet">Retweet</string>
+    <string name="retweet_remove">Remove retweet</string>
 
     <string name="user_report">Report %1$s</string>
     <string name="user_block">Block %1$s</string>

@@ -8,8 +8,9 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 
@@ -24,7 +25,11 @@ class ActiveAccountPresenter : PresenterBase<UserState>() {
                 }.flatMap {
                     remember(it.account.accountKey) {
                         it.userById(it.account.accountKey.id)
-                    }.collectAsState().toUi()
+                    }.collectAsState()
+                        .toUi()
+                        .map {
+                            it as UiUserV2
+                        }
                 }
         return object : UserState {
             override val user = user
@@ -33,5 +38,5 @@ class ActiveAccountPresenter : PresenterBase<UserState>() {
 }
 
 interface UserState {
-    val user: UiState<UiUser>
+    val user: UiState<UiUserV2>
 }

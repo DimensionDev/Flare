@@ -27,6 +27,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.runtime.Composable
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -50,6 +52,7 @@ import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -57,11 +60,10 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -69,7 +71,32 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailPresenter
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import org.koin.compose.koinInject
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+@Destination<RootGraph>(
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+        DeepLink(
+            uriPattern = AppDeepLink.VVO.StatusDetail.ROUTE,
+        ),
+    ],
+    wrappers = [ThemeWrapper::class],
+)
+internal fun AnimatedVisibilityScope.VVOStatusDeeplinkRoute(
+    statusKey: MicroBlogKey,
+    navigator: DestinationsNavigator,
+    accountKey: MicroBlogKey,
+    sharedTransitionScope: SharedTransitionScope,
+) = with(sharedTransitionScope) {
+    VVOStatusScreen(
+        statusKey,
+        onBack = navigator::navigateUp,
+        accountType = AccountType.Specific(accountKey = accountKey),
+    )
+}
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -113,10 +140,12 @@ private fun VVOStatusScreen(
         with(LocalDensity.current) {
             currentWindowSize().toSize().toDpSize()
         }
+    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
     FlareScaffold(
         topBar = {
             TopAppBar(
+                scrollBehavior = topAppBarScrollBehavior,
                 title = {
                     Text(text = stringResource(id = R.string.status_title))
                 },
@@ -130,6 +159,7 @@ private fun VVOStatusScreen(
                 },
             )
         },
+        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
         if (bigScreen) {
             val width =
@@ -139,8 +169,8 @@ private fun VVOStatusScreen(
                 }
             Row {
                 StatusContent(
+                    detailStatusKey = statusKey,
                     statusState = state.status,
-                    event = state.statusEvent,
                     modifier =
                         Modifier
                             .verticalScroll(rememberScrollState())
@@ -153,7 +183,6 @@ private fun VVOStatusScreen(
                     reactionContent(
                         comment = state.comment,
                         repost = state.repost,
-                        event = state.statusEvent,
                         detailType = state.type,
                         onDetailTypeChange = state::onTypeChanged,
                     )
@@ -164,12 +193,11 @@ private fun VVOStatusScreen(
                 contentPadding = contentPadding,
             ) {
                 item {
-                    StatusContent(statusState = state.status, event = state.statusEvent)
+                    StatusContent(statusState = state.status, detailStatusKey = statusKey)
                 }
                 reactionContent(
                     comment = state.comment,
                     repost = state.repost,
-                    event = state.statusEvent,
                     detailType = state.type,
                     onDetailTypeChange = state::onTypeChanged,
                 )
@@ -182,16 +210,16 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun StatusContent(
-    statusState: UiState<UiStatus.VVO>,
-    event: StatusEvent,
+    statusState: UiState<UiTimeline>,
+    detailStatusKey: MicroBlogKey,
     modifier: Modifier = Modifier,
 ) {
     statusState
         .onSuccess { status ->
-            key(status.statusKey, status.content) {
+            key(status.itemKey, status.content) {
                 StatusItem(
                     item = status,
-                    event = event,
+                    detailStatusKey = detailStatusKey,
                     modifier =
                         modifier.sharedBounds(
                             rememberSharedContentState(key = status.itemKey),
@@ -204,11 +232,13 @@ private fun StatusContent(
                             renderInOverlayDuringTransition = false,
                             placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                         ),
-                    isDetail = true,
                 )
             }
         }.onLoading {
-            StatusItem(item = null, event = event, modifier = modifier, isDetail = true)
+            StatusItem(
+                item = null,
+                modifier = modifier,
+            )
         }.onError {
             Column(
                 modifier = modifier,
@@ -231,9 +261,8 @@ private fun StatusContent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 private fun LazyStaggeredGridScope.reactionContent(
-    comment: UiState<LazyPagingItems<UiStatus>>,
-    repost: UiState<LazyPagingItems<UiStatus>>,
-    event: StatusEvent,
+    comment: UiState<LazyPagingItems<UiTimeline>>,
+    repost: UiState<LazyPagingItems<UiTimeline>>,
     detailType: DetailType,
     onDetailTypeChange: (DetailType) -> Unit,
 ) {
@@ -260,18 +289,16 @@ private fun LazyStaggeredGridScope.reactionContent(
             }
         }
     }
-    with(event) {
-        when (detailType) {
-            DetailType.Comment ->
-                with(comment) {
-                    status(showVVOStatus = false)
-                }
+    when (detailType) {
+        DetailType.Comment ->
+            with(comment) {
+                status(showVVOStatus = false)
+            }
 
-            DetailType.Repost ->
-                with(repost) {
-                    status(showVVOStatus = false)
-                }
-        }
+        DetailType.Repost ->
+            with(repost) {
+                status(showVVOStatus = false)
+            }
     }
 }
 
@@ -279,7 +306,6 @@ private fun LazyStaggeredGridScope.reactionContent(
 private fun presenter(
     statusKey: MicroBlogKey,
     accountType: AccountType,
-    statusEvent: StatusEvent = koinInject(),
 ) = run {
     var type by remember {
         mutableStateOf(DetailType.Comment)
@@ -294,7 +320,6 @@ private fun presenter(
 
     object : VVOStatusDetailState by state {
         val type = type
-        val statusEvent = statusEvent
 
         fun onTypeChanged(value: DetailType) {
             type = value

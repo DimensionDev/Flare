@@ -154,6 +154,8 @@ internal data class Status(
     val attitudeDynamicMembersMessage: AttitudeDynamicMembersMessage? = null,
     @SerialName("page_info")
     val pageInfo: StatusPageInfo? = null,
+    @SerialName("title")
+    val title: Title? = null,
 ) {
     val picsList: List<StatusPic>?
         get() =
@@ -172,6 +174,11 @@ internal data class Status(
                 }
             }
 }
+
+@Serializable
+internal data class Title(
+    val text: String? = null,
+)
 
 @Serializable
 internal data class AttitudeDynamicMembersMessage(

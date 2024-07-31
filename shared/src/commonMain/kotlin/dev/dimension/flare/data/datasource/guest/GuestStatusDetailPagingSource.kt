@@ -2,18 +2,20 @@ package dev.dimension.flare.data.datasource.guest
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class GuestStatusDetailPagingSource(
     private val statusKey: MicroBlogKey,
+    private val event: StatusEvent.Mastodon,
     private val statusOnly: Boolean,
-) : PagingSource<Int, UiStatus>() {
-    override fun getRefreshKey(state: PagingState<Int, UiStatus>): Int? = null
+) : PagingSource<Int, UiTimeline>() {
+    override fun getRefreshKey(state: PagingState<Int, UiTimeline>): Int? = null
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiStatus> =
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiTimeline> =
         try {
             val result =
                 if (statusOnly) {
@@ -35,7 +37,7 @@ internal class GuestStatusDetailPagingSource(
                 }
 
             LoadResult.Page(
-                data = result.map { it.toUi(GuestMastodonService.GuestKey) },
+                data = result.map { it.render(GuestMastodonService.GuestKey, event) },
                 prevKey = null,
                 nextKey = null,
             )

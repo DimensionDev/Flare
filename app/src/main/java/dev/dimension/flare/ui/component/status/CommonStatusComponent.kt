@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -9,33 +8,47 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.BookmarkRemove
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -48,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -56,24 +70,33 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
+import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Retweet
 import dev.dimension.flare.R
+import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AdaptiveGrid
+import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.localizedFullTime
+import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import moe.tlaster.ktml.dom.Element
 
@@ -81,457 +104,395 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CommonStatusComponent(
-    statusKey: MicroBlogKey,
+    item: UiTimeline.ItemContent.Status,
     isDetail: Boolean,
-    rawContent: String,
-    content: Element,
-    contentDirection: LayoutDirection,
-    user: UiUser?,
-    medias: ImmutableList<UiMedia>,
-    humanizedTime: String,
-    expandedTime: String,
-    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
-    onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
-    sensitive: Boolean = false,
-    showActions: Boolean = LocalAppearanceSettings.current.showActions,
-    contentWarning: String? = null,
-    card: UiCard? = null,
-    quotedStatus: UiStatus? = null,
-    onQuotedStatusClick: ((UiStatus) -> Unit)? = null,
-    poll: UiPoll? = null,
-    headerIcon: ImageVector? = null,
-    headerUser: UiUser? = null,
-    @StringRes headerTextId: Int? = null,
-    replyHandle: String? = null,
-    headerTrailing: @Composable RowScope.() -> Unit = {},
-    contentFooter: @Composable ColumnScope.() -> Unit = {},
-    statusActions: @Composable RowScope.() -> Unit = {},
-    swipeLeftText: String? = null,
-    swipeLeftIcon: ImageVector? = null,
-    onSwipeLeft: (() -> Unit)? = null,
-    swipeRightText: String? = null,
-    swipeRightIcon: ImageVector? = null,
-    onSwipeRight: (() -> Unit)? = null,
 ) {
-    if (isDetail) {
-        CommonStatusDetailComponent(
-            statusKey = statusKey,
-            rawContent = rawContent,
-            content = content,
-            contentDirection = contentDirection,
-            user = user,
-            medias = medias,
-            expandedTime = expandedTime,
-            onMediaClick = onMediaClick,
-            onUserClick = onUserClick,
-            modifier = modifier,
-            sensitive = sensitive,
-            contentWarning = contentWarning,
-            card = card,
-            quotedStatus = quotedStatus,
-            onQuotedStatusClick = onQuotedStatusClick,
-            poll = poll,
-            headerIcon = headerIcon,
-            headerUser = headerUser,
-            headerTextId = headerTextId,
-            replyHandle = replyHandle,
-            headerTrailing = headerTrailing,
-            contentFooter = contentFooter,
-            statusActions = statusActions,
-        )
-    } else {
-        CommonStatusComponent(
-            statusKey = statusKey,
-            rawContent = rawContent,
-            content = content,
-            contentDirection = contentDirection,
-            user = user,
-            medias = medias,
-            humanizedTime = humanizedTime,
-            onMediaClick = onMediaClick,
-            onUserClick = onUserClick,
-            modifier = modifier,
-            sensitive = sensitive,
-            showActions = showActions,
-            contentWarning = contentWarning,
-            card = card,
-            quotedStatus = quotedStatus,
-            onQuotedStatusClick = onQuotedStatusClick,
-            poll = poll,
-            headerIcon = headerIcon,
-            headerUser = headerUser,
-            headerTextId = headerTextId,
-            replyHandle = replyHandle,
-            headerTrailing = headerTrailing,
-            contentFooter = contentFooter,
-            statusActions = statusActions,
-            swipeLeftText = swipeLeftText,
-            swipeLeftIcon = swipeLeftIcon,
-            onSwipeLeft = onSwipeLeft,
-            swipeRightText = swipeRightText,
-            swipeRightIcon = swipeRightIcon,
-            onSwipeRight = onSwipeRight,
-        )
-    }
-}
-
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Composable
-fun CommonStatusDetailComponent(
-    statusKey: MicroBlogKey,
-    rawContent: String,
-    content: Element,
-    contentDirection: LayoutDirection,
-    user: UiUser?,
-    medias: ImmutableList<UiMedia>,
-    expandedTime: String,
-    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
-    onUserClick: (MicroBlogKey) -> Unit,
-    modifier: Modifier = Modifier,
-    sensitive: Boolean = false,
-    contentWarning: String? = null,
-    card: UiCard? = null,
-    quotedStatus: UiStatus? = null,
-    onQuotedStatusClick: ((UiStatus) -> Unit)? = null,
-    poll: UiPoll? = null,
-    headerIcon: ImageVector? = null,
-    headerUser: UiUser? = null,
-    @StringRes headerTextId: Int? = null,
-    replyHandle: String? = null,
-    headerTrailing: @Composable RowScope.() -> Unit = {},
-    contentFooter: @Composable ColumnScope.() -> Unit = {},
-    statusActions: @Composable RowScope.() -> Unit = {},
-) {
-    SelectionContainer {
-        CommonStatusComponent(
-            statusKey = statusKey,
-            rawContent = rawContent,
-            content = content,
-            contentDirection = contentDirection,
-            user = user,
-            medias = medias,
-            humanizedTime = "",
-            onMediaClick = onMediaClick,
-            onUserClick = onUserClick,
-            modifier = modifier,
-            sensitive = sensitive,
-            contentWarning = contentWarning,
-            card = card,
-            quotedStatus = quotedStatus,
-            onQuotedStatusClick = onQuotedStatusClick,
-            poll = poll,
-            headerIcon = headerIcon,
-            headerUser = headerUser,
-            headerTextId = headerTextId,
-            replyHandle = replyHandle,
-            headerTrailing = headerTrailing,
-            statusActions = {},
-            showActions = false,
-            contentFooter = {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = expandedTime,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                contentFooter.invoke(this)
-                Spacer(modifier = Modifier.height(4.dp))
-                StatusActions(statusActions)
-            },
-            beforeMedia = {
-                var enabledTranslate by rememberSaveable("translate-$statusKey") {
-                    mutableStateOf(false)
-                }
-                TextButton(
-                    onClick = {
-                        if (!enabledTranslate) {
-                            enabledTranslate = true
-                        }
-                    },
-                ) {
-                    Text(
-                        text =
-                            stringResource(
-                                id = R.string.status_detail_translate,
-                                Locale.current.platformLocale.displayLanguage,
-                            ),
-                    )
-                }
-                if (enabledTranslate) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    val state by producePresenter(
-                        "translate_${contentWarning}_$rawContent",
-                    ) {
-                        statusTranslatePresenter(contentWarning = contentWarning, content = content)
-                    }
-                    state.contentWarning
-                        ?.onSuccess {
-                            Text(text = it)
-                        }?.onLoading {
-                            Text(
-                                text = "Lores ipsum dolor sit amet",
-                                modifier = Modifier.placeholder(true),
-                            )
-                        }?.onError {
-                            Text(text = it.message ?: "Error")
-                        }
-                    state.text
-                        .onSuccess {
-                            Text(text = it)
-                        }.onLoading {
-                            Text(
-                                text = "Lores ipsum dolor sit amet",
-                                modifier = Modifier.placeholder(true),
-                            )
-                        }.onError {
-                            Text(text = it.message ?: "Error")
-                        }
-                }
-            },
-        )
-    }
-}
-
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
-// damm the parameters are soooooooooooooooo looooooooooooong
-@Composable
-fun CommonStatusComponent(
-    statusKey: MicroBlogKey,
-    rawContent: String,
-    content: Element,
-    contentDirection: LayoutDirection,
-    user: UiUser?,
-    medias: ImmutableList<UiMedia>,
-    humanizedTime: String,
-    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
-    onUserClick: (MicroBlogKey) -> Unit,
-    modifier: Modifier = Modifier,
-    sensitive: Boolean = false,
-    showActions: Boolean = LocalAppearanceSettings.current.showActions,
-    contentWarning: String? = null,
-    card: UiCard? = null,
-    quotedStatus: UiStatus? = null,
-    onQuotedStatusClick: ((UiStatus) -> Unit)? = null,
-    poll: UiPoll? = null,
-    headerIcon: ImageVector? = null,
-    headerUser: UiUser? = null,
-    @StringRes headerTextId: Int? = null,
-    replyHandle: String? = null,
-    headerTrailing: @Composable RowScope.() -> Unit = {},
-    contentFooter: @Composable ColumnScope.() -> Unit = {},
-    statusActions: @Composable RowScope.() -> Unit = {},
-    beforeMedia: @Composable ColumnScope.() -> Unit = {},
-    swipeLeftText: String? = null,
-    swipeLeftIcon: ImageVector? = null,
-    onSwipeLeft: (() -> Unit)? = null,
-    swipeRightText: String? = null,
-    swipeRightIcon: ImageVector? = null,
-    onSwipeRight: (() -> Unit)? = null,
-) {
-    var showMedia by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalAppearanceSettings.current
-    val dismissState =
-        rememberSwipeToDismissBoxState(
-            confirmValueChange = {
-                when (it) {
-                    SwipeToDismissBoxValue.StartToEnd -> {
-                        onSwipeRight?.invoke()
-                    }
-
-                    SwipeToDismissBoxValue.EndToStart -> {
-                        onSwipeLeft?.invoke()
-                    }
-
-                    SwipeToDismissBoxValue.Settled -> Unit
-                }
-                false
-            },
-        )
-    OptionalSwipeToDismissBox(
-        modifier = modifier,
-        state = dismissState,
-        enabled =
-            appearanceSettings.swipeGestures &&
-                (onSwipeLeft != null || onSwipeRight != null),
-        backgroundContent = {
-            val alignment =
-                when (dismissState.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                    SwipeToDismissBoxValue.Settled -> Alignment.Center
-                }
-            val actualAction =
-                when (dismissState.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> onSwipeRight
-                    SwipeToDismissBoxValue.EndToStart -> onSwipeLeft
-                    SwipeToDismissBoxValue.Settled -> null
-                }
-            val actualText =
-                when (dismissState.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> swipeRightText
-                    SwipeToDismissBoxValue.EndToStart -> swipeLeftText
-                    SwipeToDismissBoxValue.Settled -> null
-                }
-            val actualIcon =
-                when (dismissState.dismissDirection) {
-                    SwipeToDismissBoxValue.StartToEnd -> swipeRightIcon
-                    SwipeToDismissBoxValue.EndToStart -> swipeLeftIcon
-                    SwipeToDismissBoxValue.Settled -> null
-                }
-            if (actualAction != null && actualText != null && actualIcon != null) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = screenHorizontalPadding),
-                    contentAlignment = alignment,
-                ) {
-                    StatusSwipeButton(
-                        text = actualText,
-                        icon = actualIcon,
+    Column(
+        modifier =
+            modifier
+                .clickable {
+                    item.onClicked.invoke(
+                        ClickContext(
+                            launcher = {
+                                uriHandler.openUri(it)
+                            },
+                        ),
                     )
+                },
+    ) {
+        item.user?.let { user ->
+            CommonStatusHeaderComponent(
+                data = user,
+                onUserClick = {
+                    user.onClicked.invoke(
+                        ClickContext(
+                            launcher = {
+                                uriHandler.openUri(it)
+                            },
+                        ),
+                    )
+                },
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    when (val content = item.topEndContent) {
+                        is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
+                            StatusVisibilityComponent(
+                                visibility = content.visibility,
+                                modifier =
+                                    Modifier
+                                        .size(14.dp)
+                                        .alpha(MediumAlpha),
+                            )
+                        }
+
+                        null -> Unit
+                    }
+                    if (!isDetail) {
+                        Text(
+                            text = item.createdAt.shortTime.localizedShortTime,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
-        },
-    ) {
-        Column {
-            if (headerIcon != null && headerUser != null && headerTextId != null) {
-                StatusRetweetHeaderComponent(
-                    icon = headerIcon,
-                    user = headerUser,
-                    text = stringResource(id = headerTextId),
-                    modifier =
-                        Modifier.clickable {
-                            onUserClick.invoke(headerUser.userKey)
-                        },
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            if (user != null) {
-                StatusHeaderComponent(
-                    user = user,
-                    humanizedTime = humanizedTime,
-                    onUserClick = { onUserClick(it) },
-                    headerTrailing = headerTrailing,
-                )
-            }
-
-            if (replyHandle != null) {
+        }
+        when (val content = item.aboveTextContent) {
+            is UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo -> {
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusReplyComponent(
-                    replyHandle = replyHandle,
+                    replyHandle = content.handle,
                 )
             }
 
+            null -> Unit
+        }
+        if (isDetail) {
+            SelectionContainer {
+                StatusContentComponent(
+                    rawContent = item.content.innerText,
+                    content = item.content.data,
+                    contentDirection = item.content.direction,
+                    contentWarning = item.contentWarning,
+                    poll = item.poll,
+                    maxLines = Int.MAX_VALUE,
+                )
+            }
+        } else {
             StatusContentComponent(
-                rawContent = rawContent,
-                content = content,
-                contentDirection = contentDirection,
-                contentWarning = contentWarning,
-                poll = poll,
+                rawContent = item.content.innerText,
+                content = item.content.data,
+                contentDirection = item.content.direction,
+                contentWarning = item.contentWarning,
+                poll = item.poll,
+                maxLines = 6,
             )
+        }
 
-            beforeMedia.invoke(this)
+        if (isDetail) {
+            TranslationComponent(
+                statusKey = item.statusKey,
+                contentWarning = item.contentWarning,
+                rawContent = item.content.innerText,
+                content = item.content.data,
+            )
+        }
 
-            if (medias.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                if (appearanceSettings.showMedia || showMedia) {
-                    StatusMediaComponent(
-                        data = medias,
-                        onMediaClick = {
-                            onMediaClick.invoke(
-                                statusKey,
-                                medias.indexOf(it),
-                                when (it) {
-                                    is UiMedia.Image -> it.previewUrl
-                                    is UiMedia.Video -> it.thumbnailUrl
-                                    is UiMedia.Gif -> it.previewUrl
-                                    else -> null
-                                },
-                            )
-                        },
-                        sensitive = sensitive,
-                    )
-                } else {
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    showMedia = true
-                                },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Image,
-                            contentDescription = stringResource(id = R.string.show_media),
-                            modifier =
-                                Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(id = R.string.show_media),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier =
-                                Modifier
-                                    .alpha(MediumAlpha),
-                        )
-                    }
+        if (item.images.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            StatusMediasComponent(appearanceSettings, item)
+        }
+        item.card?.let { card ->
+            if (appearanceSettings.showLinkPreview && item.images.isEmpty() && item.quote.isEmpty()) {
+                StatusCardComponent(
+                    card = card,
+                )
+            }
+        }
+        if (item.quote.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            StatusQuoteComponent(
+                quotes = item.quote,
+            )
+        }
+
+        when (val content = item.bottomContent) {
+            is UiTimeline.ItemContent.Status.BottomContent.Reaction ->
+                StatusReactionComponent(
+                    data = content,
+                )
+
+            null -> Unit
+        }
+
+        if (isDetail) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = item.createdAt.value.localizedFullTime,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (appearanceSettings.showActions || isDetail) {
+            Spacer(modifier = Modifier.height(8.dp))
+            if (isDetail) {
+                StatusActions(item.actions)
+            } else {
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
+                    LocalTextStyle provides MaterialTheme.typography.bodySmall,
+                ) {
+                    StatusActions(item.actions)
                 }
             }
-            card?.let { card ->
-                if (appearanceSettings.showLinkPreview && medias.isEmpty() && quotedStatus == null) {
-                    StatusCardComponent(
-                        card = card,
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(4.dp))
+        } else {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
 
-            if (quotedStatus != null) {
-                Spacer(modifier = Modifier.height(4.dp))
-                UiStatusQuoted(
-                    quotedStatus,
-                    onMediaClick = {
-                        onMediaClick.invoke(
-                            quotedStatus.statusKey,
-                            quotedStatus.medias.indexOf(it),
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun StatusMediasComponent(
+    appearanceSettings: AppearanceSettings,
+    item: UiTimeline.ItemContent.Status,
+) {
+    val uriLauncher = LocalUriHandler.current
+    var showMedia by remember { mutableStateOf(false) }
+    if (appearanceSettings.showMedia || showMedia) {
+        StatusMediaComponent(
+            data = item.images,
+            onMediaClick = {
+                uriLauncher.openUri(
+                    StatusMediaRouteDestination(
+                        statusKey = item.statusKey,
+                        index = item.images.indexOf(it),
+                        preview =
                             when (it) {
                                 is UiMedia.Image -> it.previewUrl
                                 is UiMedia.Video -> it.thumbnailUrl
                                 is UiMedia.Gif -> it.previewUrl
                                 else -> null
                             },
+                        accountType = AccountType.Specific(item.accountKey),
+                    ).deeplink(),
+                )
+            },
+            sensitive = item.sensitive,
+        )
+    } else {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        showMedia = true
+                    },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Image,
+                contentDescription = stringResource(id = R.string.show_media),
+                modifier =
+                    Modifier
+                        .size(12.dp)
+                        .alpha(MediumAlpha),
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = stringResource(id = R.string.show_media),
+                style = MaterialTheme.typography.bodySmall,
+                modifier =
+                    Modifier
+                        .alpha(MediumAlpha),
+            )
+        }
+    }
+}
+
+context(AnimatedVisibilityScope, SharedTransitionScope)
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun StatusQuoteComponent(
+    quotes: ImmutableList<UiTimeline.ItemContent.Status>,
+    modifier: Modifier = Modifier,
+) {
+    val uriLauncher = LocalUriHandler.current
+    Card(
+        modifier = modifier,
+    ) {
+        Column {
+            quotes.forEachIndexed { index, quote ->
+                QuotedStatus(
+                    data = quote,
+                    onMediaClick = {
+                        uriLauncher.openUri(
+                            StatusMediaRouteDestination(
+                                statusKey = quote.statusKey,
+                                index = quote.images.indexOf(it),
+                                preview =
+                                    when (it) {
+                                        is UiMedia.Image -> it.previewUrl
+                                        is UiMedia.Video -> it.thumbnailUrl
+                                        is UiMedia.Gif -> it.previewUrl
+                                        else -> null
+                                    },
+                                accountType = AccountType.Specific(quote.accountKey),
+                            ).deeplink(),
                         )
                     },
-                    onClick = {
-                        onQuotedStatusClick?.invoke(quotedStatus)
-                    },
                 )
-            }
-
-            contentFooter.invoke(this)
-
-            if (showActions) {
-                Spacer(modifier = Modifier.height(8.dp))
-                StatusActions(statusActions)
-                Spacer(modifier = Modifier.height(4.dp))
-            } else {
-                Spacer(modifier = Modifier.height(8.dp))
+                if (index != quotes.lastIndex && quotes.size > 1) {
+                    HorizontalDivider()
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StatusActions(
-    statusActions: @Composable (RowScope.() -> Unit),
+private fun StatusReactionComponent(
+    data: UiTimeline.ItemContent.Status.BottomContent.Reaction,
     modifier: Modifier = Modifier,
 ) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
+    ) {
+        items(data.emojiReactions) { reaction ->
+            Card(
+                shape = RoundedCornerShape(100),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier =
+                        Modifier
+                            .clickable {
+                                reaction.onClicked.invoke()
+                            }.padding(horizontal = 8.dp, vertical = 4.dp),
+                ) {
+                    EmojiImage(
+                        uri = reaction.url,
+                        modifier = Modifier.height(16.dp),
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = reaction.humanizedCount,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TranslationComponent(
+    statusKey: MicroBlogKey,
+    contentWarning: String?,
+    rawContent: String,
+    content: Element,
+) {
+    var enabledTranslate by rememberSaveable("translate-$statusKey") {
+        mutableStateOf(false)
+    }
+    TextButton(
+        onClick = {
+            if (!enabledTranslate) {
+                enabledTranslate = true
+            }
+        },
+    ) {
+        Text(
+            text =
+                stringResource(
+                    id = R.string.status_detail_translate,
+                    Locale.current.platformLocale.displayLanguage,
+                ),
+        )
+    }
+    if (enabledTranslate) {
+        Spacer(modifier = Modifier.height(4.dp))
+        val state by producePresenter(
+            "translate_${contentWarning}_$rawContent",
+        ) {
+            statusTranslatePresenter(contentWarning = contentWarning, content = content)
+        }
+        state.contentWarning
+            ?.onSuccess {
+                Text(text = it)
+            }?.onLoading {
+                Text(
+                    text = "Lores ipsum dolor sit amet",
+                    modifier = Modifier.placeholder(true),
+                )
+            }?.onError {
+                Text(text = it.message ?: "Error")
+            }
+        state.text
+            .onSuccess {
+                Text(text = it)
+            }.onLoading {
+                Text(
+                    text = "Lores ipsum dolor sit amet",
+                    modifier = Modifier.placeholder(true),
+                )
+            }.onError {
+                Text(text = it.message ?: "Error")
+            }
+    }
+}
+
+@Composable
+internal fun StatusVisibilityComponent(
+    visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
+    modifier: Modifier = Modifier,
+) {
+    when (visibility) {
+        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+            Icon(
+                imageVector = Icons.Default.Public,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_public),
+                modifier = modifier,
+            )
+
+        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+            Icon(
+                imageVector = Icons.Default.LockOpen,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
+                modifier = modifier,
+            )
+
+        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_private),
+                modifier = modifier,
+            )
+
+        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+            Icon(
+                imageVector = Icons.Default.MailOutline,
+                contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
+                modifier = modifier,
+            )
+    }
+}
+
+@Composable
+private fun StatusActions(
+    items: ImmutableList<StatusAction>,
+    modifier: Modifier = Modifier,
+) {
+    val launcher = LocalUriHandler.current
     Row(
         modifier =
             modifier
@@ -539,14 +500,173 @@ private fun StatusActions(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        CompositionLocalProvider(
-            LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
-            LocalTextStyle provides MaterialTheme.typography.bodySmall,
-        ) {
-            statusActions.invoke(this)
+        items.forEach { action ->
+            when (action) {
+                is StatusAction.Group -> {
+                    StatusActionGroup(
+                        icon = action.displayItem.icon,
+                        text = action.displayItem.iconText,
+                        color = statusActionItemColor(item = action.displayItem),
+                    ) {
+                        action.actions.forEach { subActions ->
+                            if (subActions is StatusAction.Item) {
+                                val color = statusActionItemColor(subActions)
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = subActions.icon,
+                                            contentDescription = subActions.iconText,
+                                            tint = color,
+                                        )
+                                    },
+                                    text = {
+                                        Text(
+                                            text = statusActionItemText(item = subActions),
+                                            color = color,
+                                        )
+                                    },
+                                    onClick = {
+                                        if (subActions is StatusAction.Item.Clickable) {
+                                            subActions.onClicked.invoke(
+                                                ClickContext(
+                                                    launcher = {
+                                                        launcher.openUri(it)
+                                                    },
+                                                ),
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+
+                is StatusAction.Item -> {
+                    StatusActionButton(
+                        icon = action.icon,
+                        text = action.iconText,
+                        color = statusActionItemColor(item = action),
+                        onClicked = {
+                            if (action is StatusAction.Item.Clickable) {
+                                action.onClicked.invoke(
+                                    ClickContext(
+                                        launcher = {
+                                            launcher.openUri(it)
+                                        },
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                }
+            }
         }
     }
 }
+
+private val StatusAction.Item.icon: ImageVector
+    get() =
+        when (this) {
+            is StatusAction.Item.Bookmark -> {
+                if (bookmarked) {
+                    Icons.Default.BookmarkRemove
+                } else {
+                    Icons.Default.BookmarkAdd
+                }
+            }
+
+            is StatusAction.Item.Delete -> Icons.Default.Delete
+            is StatusAction.Item.Like -> {
+                if (liked) {
+                    Icons.Default.Favorite
+                } else {
+                    Icons.Default.FavoriteBorder
+                }
+            }
+
+            StatusAction.Item.More -> Icons.Default.MoreHoriz
+            is StatusAction.Item.Quote -> Icons.Default.FormatQuote
+            is StatusAction.Item.Reaction -> {
+                if (reacted) {
+                    Icons.Default.Remove
+                } else {
+                    Icons.Default.Add
+                }
+            }
+
+            is StatusAction.Item.Reply -> Icons.AutoMirrored.Filled.Reply
+            is StatusAction.Item.Report -> Icons.Default.Report
+            is StatusAction.Item.Retweet -> FontAwesomeIcons.Solid.Retweet
+        }
+
+private val StatusAction.Item.iconText: String?
+    get() =
+        when (this) {
+            is StatusAction.Item.Bookmark -> humanizedCount
+            is StatusAction.Item.Delete -> null
+            is StatusAction.Item.Like -> humanizedCount
+            StatusAction.Item.More -> null
+            is StatusAction.Item.Quote -> humanizedCount
+            is StatusAction.Item.Reaction -> null
+            is StatusAction.Item.Reply -> humanizedCount
+            is StatusAction.Item.Report -> null
+            is StatusAction.Item.Retweet -> humanizedCount
+        }
+
+@Composable
+private fun statusActionItemColor(item: StatusAction.Item) =
+    if (item is StatusAction.Item.Colorized) {
+        when (item.color) {
+            StatusAction.Item.Colorized.Color.Red -> Color.Red
+            StatusAction.Item.Colorized.Color.Error -> MaterialTheme.colorScheme.error
+            StatusAction.Item.Colorized.Color.ContentColor -> LocalContentColor.current
+            StatusAction.Item.Colorized.Color.PrimaryColor -> MaterialTheme.colorScheme.primary
+        }
+    } else {
+        LocalContentColor.current
+    }
+
+@Composable
+private fun statusActionItemText(item: StatusAction.Item) =
+    when (item) {
+        is StatusAction.Item.Bookmark -> {
+            if (item.bookmarked) {
+                stringResource(id = R.string.bookmark_remove)
+            } else {
+                stringResource(id = R.string.bookmark_add)
+            }
+        }
+
+        is StatusAction.Item.Delete -> stringResource(id = R.string.delete)
+        is StatusAction.Item.Like -> {
+            if (item.liked) {
+                stringResource(id = R.string.unlike)
+            } else {
+                stringResource(id = R.string.like)
+            }
+        }
+
+        StatusAction.Item.More -> stringResource(id = R.string.more)
+        is StatusAction.Item.Quote -> stringResource(id = R.string.quote)
+        is StatusAction.Item.Reaction -> {
+            if (item.reacted) {
+                stringResource(id = R.string.reaction_remove)
+            } else {
+                stringResource(id = R.string.reaction_add)
+            }
+        }
+
+        is StatusAction.Item.Reply -> stringResource(id = R.string.reply)
+        is StatusAction.Item.Report -> stringResource(id = R.string.report)
+        is StatusAction.Item.Retweet -> {
+            if (item.retweeted) {
+                stringResource(id = R.string.retweet_remove)
+            } else {
+                stringResource(id = R.string.retweet)
+            }
+        }
+    }
 
 @Composable
 private fun StatusReplyComponent(
@@ -575,54 +695,6 @@ private fun StatusReplyComponent(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Composable
-internal fun StatusHeaderComponent(
-    user: UiUser,
-    humanizedTime: String,
-    onUserClick: (MicroBlogKey) -> Unit,
-    modifier: Modifier = Modifier,
-    headerTrailing: @Composable RowScope.() -> Unit = {},
-) {
-    CommonStatusHeaderComponent(
-        data = user,
-        onUserClick = onUserClick,
-        modifier = modifier,
-    ) {
-        headerTrailing.invoke(this)
-        Text(
-            text = humanizedTime,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun StatusSwipeButton(
-    text: String?,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = text,
-            modifier = Modifier.size(36.dp),
-        )
-        if (text != null) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
-    }
-}
-
 @Composable
 private fun StatusContentComponent(
     rawContent: String,
@@ -630,6 +702,7 @@ private fun StatusContentComponent(
     contentDirection: LayoutDirection,
     contentWarning: String?,
     poll: UiPoll?,
+    maxLines: Int,
     modifier: Modifier = Modifier,
 ) {
     var expanded by rememberSaveable {
@@ -668,6 +741,7 @@ private fun StatusContentComponent(
                         element = content,
                         layoutDirection = contentDirection,
                         modifier = Modifier.fillMaxWidth(),
+                        maxLines = maxLines,
                     )
                 }
                 poll?.let {

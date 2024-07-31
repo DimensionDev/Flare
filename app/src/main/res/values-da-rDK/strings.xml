@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">Er du sikker på, at du vil rapportere dette?</string>
   <string name="misskey_item_action_delete">Slet</string>
   <string name="misskey_item_action_report">Rapport</string>
-  <string name="xqt_item_unbookmark">Fjern Bogmærke</string>
-  <string name="xqt_item_bookmark">Bogmærke</string>
-  <string name="xqt_item_delete">Slet</string>
-  <string name="xqt_item_report">Rapport</string>
   <string name="user_report">Anmeld %1$s</string>
   <string name="user_block">Bloker %1$s</string>
   <string name="user_unblock">Fjern Blok %1$s</string>

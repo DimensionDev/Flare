@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">Ești sigur că vrei să raportezi acest lucru?</string>
   <string name="misskey_item_action_delete">Ștergere</string>
   <string name="misskey_item_action_report">Raport</string>
-  <string name="xqt_item_unbookmark">Debifare</string>
-  <string name="xqt_item_bookmark">Marcaj</string>
-  <string name="xqt_item_delete">Ștergere</string>
-  <string name="xqt_item_report">Raport</string>
   <string name="user_report">Raportează %1$s</string>
   <string name="user_block">Blochează %1$s</string>
   <string name="user_unblock">Deblochează %1$s</string>

@@ -11,16 +11,18 @@ import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import kotlinx.collections.immutable.toImmutableList
@@ -88,22 +90,22 @@ class ProfilePresenter(
             }
 
             override fun onProfileActionClick(
-                user: UiUser,
+                userKey: MicroBlogKey,
                 relation: UiRelation,
                 action: ProfileAction,
             ) {
                 scope.launch {
-                    action.invoke(user.userKey, relation)
+                    action.invoke(userKey, relation)
                 }
             }
 
             override fun follow(
-                user: UiUser,
+                userKey: MicroBlogKey,
                 data: UiRelation,
             ) {
                 scope.launch {
                     accountServiceState.onSuccess { service ->
-                        service.follow(user.userKey, data)
+                        service.follow(userKey, data)
                     }
                 }
             }
@@ -130,15 +132,15 @@ class ProfilePresenter(
 //                }
 //            }
 
-            override fun report(user: UiUser) {
+            override fun report(userKey: MicroBlogKey) {
             }
         }
     }
 }
 
 abstract class ProfileState(
-    val userState: UiState<UiUser>,
-    val listState: UiState<LazyPagingItems<UiStatus>>,
+    val userState: UiState<UiProfile>,
+    val listState: UiState<LazyPagingItems<UiTimeline>>,
     val mediaState: UiState<LazyPagingItems<ProfileMedia>>,
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,
@@ -147,7 +149,7 @@ abstract class ProfileState(
     abstract suspend fun refresh()
 
     abstract fun follow(
-        user: UiUser,
+        userKey: MicroBlogKey,
         data: UiRelation,
     )
 //
@@ -162,27 +164,30 @@ abstract class ProfileState(
 //    )
 
     abstract fun onProfileActionClick(
-        user: UiUser,
+        userKey: MicroBlogKey,
         relation: UiRelation,
         action: ProfileAction,
     )
 
-    abstract fun report(user: UiUser)
+    abstract fun report(userKey: MicroBlogKey)
 }
 
 class ProfileWithUserNameAndHostPresenter(
     private val userName: String,
     private val host: String,
     private val accountType: AccountType,
-) : PresenterBase<UiState<UiUser>>() {
+) : PresenterBase<UserState>() {
     @Composable
-    override fun body(): UiState<UiUser> {
+    override fun body(): UserState {
         val userState =
             accountServiceProvider(accountType = accountType).flatMap { service ->
                 remember(service) {
                     service.userByAcct("$userName@$host")
                 }.collectAsState().toUi()
             }
-        return userState
+        return object : UserState {
+            override val user: UiState<UiUserV2>
+                get() = userState
+        }
     }
 }

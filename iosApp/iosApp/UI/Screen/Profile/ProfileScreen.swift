@@ -6,7 +6,6 @@ import MarkdownUI
 struct ProfileScreen: View {
     let toProfileMedia: (MicroBlogKey) -> Void
     let presenter: ProfilePresenter
-    @Environment(StatusEvent.self) var statusEvent: StatusEvent
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.toProfileMedia = toProfileMedia
@@ -21,12 +20,12 @@ struct ProfileScreen: View {
                         relation: state.relationState,
                         isMe: state.isMe,
                         onFollowClick: { user, relation in
-                            state.follow(user: user, data: relation)
+                            state.follow(userKey: user.key, data: relation)
                         }
                     )
                     if case .success(let userState) = onEnum(of: state.userState) {
                         Button(action: {
-                            toProfileMedia(userState.data.userKey)
+                            toProfileMedia(userState.data.key)
                         }, label: {
                             LargeProfileImagePreviews(state: state.mediaState)
                         })
@@ -48,14 +47,14 @@ struct ProfileScreen: View {
                         relation: state.relationState,
                         isMe: state.isMe,
                         onFollowClick: { user, relation in
-                            state.follow(user: user, data: relation)
+                            state.follow(userKey: user.key, data: relation)
                         }
                     )
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
                     if case .success(let userState) = onEnum(of: state.userState) {
                         Button(action: {
-                            toProfileMedia(userState.data.userKey)
+                            toProfileMedia(userState.data.key)
                         }, label: {
                             SmallProfileMediaPreviews(state: state.mediaState)
                         })
@@ -64,11 +63,7 @@ struct ProfileScreen: View {
                     }
                 }
                 StatusTimelineComponent(
-                    data: state.listState,
-                    mastodonEvent: statusEvent,
-                    misskeyEvent: statusEvent,
-                    blueskyEvent: statusEvent,
-                    xqtEvent: statusEvent
+                    data: state.listState
                 )
             }
             .refreshable {
@@ -80,7 +75,7 @@ struct ProfileScreen: View {
     var body: some View {
         Observing(presenter.models) { state in
             let title: LocalizedStringKey = if case .success(let user) = onEnum(of: state.userState) {
-                LocalizedStringKey(user.data.extra.nameMarkdown)
+                LocalizedStringKey(user.data.name.markdown)
             } else {
                 LocalizedStringKey("loading")
             }
@@ -124,7 +119,7 @@ struct ProfileScreen: View {
                                     let item = actions.data.get(index: index)
                                     Button(action: {
                                         Task {
-                                            try? await item.invoke(userKey: user.data.userKey, relation: relation.data)
+                                            try? await item.invoke(userKey: user.data.key, relation: relation.data)
                                         }
                                     }, label: {
                                         let text = switch onEnum(of: item) {
@@ -155,7 +150,7 @@ struct ProfileScreen: View {
                                         })
                                 }
                             }
-                            Button(action: { state.report(user: user.data) }, label: {
+                            Button(action: { state.report(userKey: user.data.key) }, label: {
                                 Label("report", systemImage: "exclamationmark.bubble")
                             })
                         }
@@ -240,28 +235,20 @@ struct SmallProfileMediaPreviews: View {
 }
 
 struct ProfileHeader: View {
-    let user: UiState<UiUser>
+    let user: UiState<UiProfile>
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiUser, UiRelation) -> Void
+    let onFollowClick: (UiUserV2, UiRelation) -> Void
     var body: some View {
         switch onEnum(of: user) {
         case .error:
             Text("error")
         case .loading:
             CommonProfileHeader(
-                bannerUrl: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500",
-                avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg",
-                displayName: "test",
-                handle: "test@test.test",
-                description: "tefewfewfewfewfewst",
-                headerTrailing: {
-                    Text("header")
-                }, handleTrailing: {
-                    Text("handle")
-                }, content: {
-                    Text("content")
-                }
+                user: createSampleUser(),
+                relation: relation,
+                isMe: isMe,
+                onFollowClick: { _ in }
             )
             .redacted(reason: .placeholder)
         case .success(let data):
@@ -276,22 +263,12 @@ struct ProfileHeader: View {
 }
 
 struct ProfileHeaderSuccess: View {
-    let user: UiUser
+    let user: UiProfile
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
     let onFollowClick: (UiRelation) -> Void
     var body: some View {
-        switch onEnum(of: user) {
-        case .mastodon(let mastodon):
-            MastodonProfileHeader(user: mastodon, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
-        case .misskey(let misskey):
-            MisskeyProfileHeader(user: misskey, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
-        case .bluesky(let bluesky):
-            BlueskyProfileHeader(user: bluesky, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
-        case .xQT(let xqt):
-            XQTProfileHeader(user: xqt, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
-        case .vVO(let vvo): EmptyView() // TODO: vvo
-        }
+        CommonProfileHeader(user: user, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
     }
 }
 
@@ -311,21 +288,17 @@ struct MatrixView: View {
 }
 
 struct FieldsView: View {
-    let fields: ImmutableListWrapper<KotlinPair<NSString, NSString>>
+    let fields: [String: UiRichText]
     var body: some View {
-        if fields.size > 0 {
+        if fields.count > 0 {
             VStack(alignment: .leading) {
-                ForEach(0..<fields.size, id: \.self) { index in
-                    let key = fields.get(index: index).first as? String ?? ""
-                    let value = fields.get(index: index).second as? String ?? ""
+                ForEach(fields.map { $0.key }, id: \.self) { key in
                     Text(key)
                         .font(.caption)
-                    Markdown(value)
+                    Markdown(fields[key]?.markdown ?? "")
                         .font(.body)
                         .markdownInlineImageProvider(.emoji)
-                    if index != fields.size - 1 {
-                        Divider()
-                    }
+                    Divider()
                 }
                 .padding(.horizontal)
             }

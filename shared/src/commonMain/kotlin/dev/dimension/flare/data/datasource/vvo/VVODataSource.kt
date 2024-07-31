@@ -23,6 +23,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.VVOComposeData
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -33,11 +34,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +47,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -52,9 +55,11 @@ import org.koin.core.component.inject
 class VVODataSource(
     override val account: UiAccount.VVo,
 ) : MicroblogDataSource,
-    KoinComponent {
+    KoinComponent,
+    StatusEvent.VVO {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
+    private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         VVOService(account.credential.chocolate)
     }
@@ -63,7 +68,7 @@ class VVODataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -85,7 +90,7 @@ class VVODataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         when (type) {
             NotificationFilter.All -> TODO()
             NotificationFilter.Mention ->
@@ -112,6 +117,7 @@ class VVODataSource(
                     CommentPagingSource(
                         service = service,
                         accountKey = account.accountKey,
+                        event = this,
                     )
                 }.flow.cachedIn(scope)
 
@@ -122,6 +128,7 @@ class VVODataSource(
                     LikePagingSource(
                         service = service,
                         accountKey = account.accountKey,
+                        event = this,
                     )
                 }.flow.cachedIn(scope)
         }
@@ -134,7 +141,7 @@ class VVODataSource(
                 NotificationFilter.Like,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiUser> {
+    override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
         return Cacheable(
             fetchSource = {
@@ -160,12 +167,12 @@ class VVODataSource(
                     .findByHandleAndHost(name, host, PlatformType.VVo)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> {
+    override fun userById(id: String): CacheData<UiProfile> {
         val userKey = MicroBlogKey(id, account.accountKey.host)
         return Cacheable(
             fetchSource = {
@@ -189,7 +196,7 @@ class VVODataSource(
                     .findByKey(userKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
@@ -205,11 +212,11 @@ class VVODataSource(
             val user =
                 profile.data
                     ?.user
-                    ?.toDbUser()
-                    ?.toUi(account.accountKey)
             requireNotNull(user) { "user not found" }
-            require(user is UiUser.VVO)
-            user.relation
+            UiRelation(
+                following = user.following ?: false,
+                isFans = user.followMe ?: false,
+            )
         }.toUi()
 
     override fun userTimeline(
@@ -218,7 +225,7 @@ class VVODataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -242,11 +249,11 @@ class VVODataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<UiTimeline>> {
         TODO("Not yet implemented")
     }
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
         val regex =
             "\\\$render_data\\s*=\\s*(\\[\\{.*?\\}\\])\\[0\\]\\s*\\|\\|\\s*\\{\\};"
@@ -283,12 +290,12 @@ class VVODataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, this) }
             },
         )
     }
 
-    fun comment(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    fun comment(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "comment_only_$statusKey"
         return Cacheable(
             fetchSource = {
@@ -313,7 +320,7 @@ class VVODataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, event = this) }
             },
         )
     }
@@ -394,7 +401,7 @@ class VVODataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -416,7 +423,7 @@ class VVODataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> =
+    ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
@@ -427,7 +434,7 @@ class VVODataSource(
             )
         }.flow
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> {
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> {
         TODO("Not yet implemented")
     }
 
@@ -435,7 +442,7 @@ class VVODataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -471,7 +478,6 @@ class VVODataSource(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {
-        require(relation is UiRelation.VVO)
         if (relation.following) {
             unfollow(userKey)
         } else {
@@ -483,7 +489,7 @@ class VVODataSource(
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.VVO>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -499,7 +505,7 @@ class VVODataSource(
                 uid = userKey.id,
             )
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.VVO>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -511,7 +517,7 @@ class VVODataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.VVO>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -527,7 +533,7 @@ class VVODataSource(
                 uid = userKey.id,
             )
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.VVO>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -540,7 +546,7 @@ class VVODataSource(
     fun statusComment(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<UiTimeline>> {
         val pagingKey = "status_comment_$statusKey"
         return timelinePager(
             pageSize = 20,
@@ -563,7 +569,7 @@ class VVODataSource(
     fun statusRepost(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<UiTimeline>> {
         val pagingKey = "status_repost_$statusKey"
         return timelinePager(
             pageSize = 20,
@@ -586,7 +592,7 @@ class VVODataSource(
     fun commentChild(
         commentKey: MicroBlogKey,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<UiTimeline>> {
         val pagingKey = "comment_child_$commentKey"
         return timelinePager(
             pageSize = 20,
@@ -617,109 +623,119 @@ class VVODataSource(
             response.data?.longTextContent.orEmpty()
         }.toUi()
 
-    suspend fun like(status: UiStatus.VVO) {
-        updateStatusUseCase<StatusContent.VVO>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            favorited = !status.liked,
-                            attitudesCount =
-                                if (status.liked) {
-                                    it.data.attitudesCount?.minus(1)
-                                } else {
-                                    it.data.attitudesCount?.plus(1)
-                                },
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            val st = service.config().data?.st
-            requireNotNull(st) { "st is null" }
-            if (status.liked) {
-                service.unlikeStatus(id = status.statusKey.id, st = st)
-            } else {
-                service.likeStatus(id = status.statusKey.id, st = st)
-            }
-        }.onFailure {
+    override fun like(
+        statusKey: MicroBlogKey,
+        liked: Boolean,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.VVO>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
                         data =
                             it.data.copy(
-                                favorited = status.liked,
+                                favorited = !liked,
                                 attitudesCount =
-                                    if (status.liked) {
-                                        it.data.attitudesCount?.plus(1)
-                                    } else {
+                                    if (liked) {
                                         it.data.attitudesCount?.minus(1)
+                                    } else {
+                                        it.data.attitudesCount?.plus(1)
                                     },
                             ),
                     )
                 },
             )
-        }.onSuccess {
+
+            runCatching {
+                val st = service.config().data?.st
+                requireNotNull(st) { "st is null" }
+                if (liked) {
+                    service.unlikeStatus(id = statusKey.id, st = st)
+                } else {
+                    service.likeStatus(id = statusKey.id, st = st)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.VVO>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    favorited = liked,
+                                    attitudesCount =
+                                        if (liked) {
+                                            it.data.attitudesCount?.plus(1)
+                                        } else {
+                                            it.data.attitudesCount?.minus(1)
+                                        },
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess {
+            }
         }
     }
 
-    suspend fun like(status: UiStatus.VVOComment) {
-        updateStatusUseCase<StatusContent.VVOComment>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            liked = !status.liked,
-                            likeCount =
-                                if (status.liked) {
-                                    it.data.likeCount?.minus(1)
-                                } else {
-                                    it.data.likeCount?.plus(1)
-                                },
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            val st = service.config().data?.st
-            requireNotNull(st) { "st is null" }
-            if (status.liked) {
-                service.likesDestroy(id = status.statusKey.id, st = st)
-            } else {
-                service.likesUpdate(id = status.statusKey.id, st = st)
-            }
-        }.onFailure {
+    override fun likeComment(
+        statusKey: MicroBlogKey,
+        liked: Boolean,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.VVOComment>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
                         data =
                             it.data.copy(
-                                liked = status.liked,
+                                liked = !liked,
                                 likeCount =
-                                    if (status.liked) {
-                                        it.data.likeCount?.plus(1)
-                                    } else {
+                                    if (liked) {
                                         it.data.likeCount?.minus(1)
+                                    } else {
+                                        it.data.likeCount?.plus(1)
                                     },
                             ),
                     )
                 },
             )
-        }.onSuccess {
+
+            runCatching {
+                val st = service.config().data?.st
+                requireNotNull(st) { "st is null" }
+                if (liked) {
+                    service.likesDestroy(id = statusKey.id, st = st)
+                } else {
+                    service.likesUpdate(id = statusKey.id, st = st)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.VVOComment>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    liked = liked,
+                                    likeCount =
+                                        if (liked) {
+                                            it.data.likeCount?.plus(1)
+                                        } else {
+                                            it.data.likeCount?.minus(1)
+                                        },
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess {
+            }
         }
     }
 }

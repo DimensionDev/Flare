@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">これを報告してもよろしいですか？</string>
   <string name="misskey_item_action_delete">削除</string>
   <string name="misskey_item_action_report">レポート</string>
-  <string name="xqt_item_unbookmark">ブックマークを解除する</string>
-  <string name="xqt_item_bookmark">ブックマーク</string>
-  <string name="xqt_item_delete">削除</string>
-  <string name="xqt_item_report">レポート</string>
   <string name="user_report">%1$sを報告</string>
   <string name="user_block">ブロック %1$s</string>
   <string name="user_unblock">%1$s のブロックを解除</string>

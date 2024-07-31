@@ -15,7 +15,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -83,7 +83,7 @@ class NotificationPresenter(
 
 @Immutable
 abstract class NotificationState(
-    val listState: UiState<LazyPagingItems<UiStatus>>,
+    val listState: UiState<LazyPagingItems<UiTimeline>>,
     val notificationType: NotificationFilter?,
     val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {

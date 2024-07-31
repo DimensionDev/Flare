@@ -23,6 +23,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -45,9 +46,6 @@ import dev.dimension.flare.data.network.xqt.model.PostDeleteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
-import dev.dimension.flare.data.network.xqt.model.Tweet
-import dev.dimension.flare.data.network.xqt.model.TweetTombstone
-import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.repository.LocalFilterRepository
@@ -55,10 +53,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +71,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
@@ -84,9 +85,11 @@ private const val MAX_ASYNC_UPLOAD_SIZE = 10
 class XQTDataSource(
     override val account: UiAccount.XQT,
 ) : MicroblogDataSource,
-    KoinComponent {
+    KoinComponent,
+    StatusEvent.XQT {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
+    private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         XQTService(chocolate = account.credential.chocolate)
     }
@@ -95,7 +98,7 @@ class XQTDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -116,7 +119,7 @@ class XQTDataSource(
         pageSize: Int = 20,
         pagingKey: String = "featured_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -137,7 +140,7 @@ class XQTDataSource(
         pageSize: Int = 20,
         pagingKey: String = "bookmark_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -159,15 +162,16 @@ class XQTDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<UiTimeline>> {
         if (type == NotificationFilter.All) {
             return Pager(
                 config = PagingConfig(pageSize = pageSize),
             ) {
                 NotificationPagingSource(
-                    "en",
-                    service,
-                    account.accountKey,
+                    locale = "en",
+                    service = service,
+                    accountKey = account.accountKey,
+                    event = this,
                 )
             }.flow.cachedIn(scope)
         } else {
@@ -192,7 +196,7 @@ class XQTDataSource(
     override val supportedNotificationFilter: List<NotificationFilter>
         get() = listOf(NotificationFilter.All, NotificationFilter.Mention)
 
-    override fun userByAcct(acct: String): CacheData<UiUser> {
+    override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
         return Cacheable(
             fetchSource = {
@@ -223,12 +227,12 @@ class XQTDataSource(
                     .findByHandleAndHost(name, host, PlatformType.xQt)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> {
+    override fun userById(id: String): CacheData<UiProfile> {
         val userKey = MicroBlogKey(id, account.accountKey.host)
         return Cacheable(
             fetchSource = {
@@ -259,7 +263,7 @@ class XQTDataSource(
                     .findByKey(userKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
@@ -295,7 +299,7 @@ class XQTDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -328,7 +332,7 @@ class XQTDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = 1,
             pagingKey = pagingKey,
@@ -338,16 +342,17 @@ class XQTDataSource(
             scope = scope,
             mediator =
                 StatusDetailRemoteMediator(
-                    statusKey,
-                    service,
-                    database,
-                    account.accountKey,
-                    pagingKey,
+                    statusKey = statusKey,
+                    service = service,
+                    database = database,
+                    accountKey = account.accountKey,
+                    pagingKey = pagingKey,
                     statusOnly = false,
+                    event = this,
                 ),
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
         return Cacheable(
             fetchSource = {
@@ -382,7 +387,7 @@ class XQTDataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, this) }
             },
         )
     }
@@ -552,7 +557,7 @@ class XQTDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -574,7 +579,7 @@ class XQTDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> =
+    ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
@@ -585,7 +590,7 @@ class XQTDataSource(
             )
         }.flow
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> =
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
@@ -599,7 +604,7 @@ class XQTDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> {
+    ): Flow<PagingData<UiTimeline>> {
         // not supported
         throw UnsupportedOperationException("Bluesky does not support discover statuses")
     }
@@ -628,7 +633,6 @@ class XQTDataSource(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {
-        require(relation is UiRelation.XQT)
         when {
             relation.following -> unfollow(userKey)
             relation.blocking -> unblock(userKey)
@@ -636,32 +640,27 @@ class XQTDataSource(
         }
     }
 
-    override fun profileActions(): List<ProfileAction> {
-        return listOf(
+    override fun profileActions(): List<ProfileAction> =
+        listOf(
             object : ProfileAction.Mute {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.XQT)
-                    if (relation.muting) {
+                    if (relation.muted) {
                         unmute(userKey)
                     } else {
                         mute(userKey)
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.XQT)
-                    return relation.muting
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.muted
             },
             object : ProfileAction.Block {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.XQT)
                     if (relation.blocking) {
                         unblock(userKey)
                     } else {
@@ -669,120 +668,85 @@ class XQTDataSource(
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.XQT)
-                    return relation.blocking
+                override fun relationState(relation: UiRelation): Boolean = relation.blocking
+            },
+        )
+
+    override fun like(
+        statusKey: MicroBlogKey,
+        liked: Boolean,
+    ) {
+        coroutineScope.launch {
+            updateStatusUseCase<StatusContent.XQT>(
+                statusKey = statusKey,
+                accountKey = account.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                legacy =
+                                    it.data.legacy?.copy(
+                                        favorited = !liked,
+                                        favoriteCount =
+                                            if (liked) {
+                                                it.data.legacy.favoriteCount
+                                                    .minus(1)
+                                            } else {
+                                                it.data.legacy.favoriteCount
+                                                    .plus(1)
+                                            },
+                                    ),
+                            ),
+                    )
+                },
+            )
+
+            runCatching {
+                if (liked) {
+                    service.postUnfavoriteTweet(
+                        postUnfavoriteTweetRequest =
+                            PostUnfavoriteTweetRequest(
+                                variables = PostCreateRetweetRequestVariables(tweetId = statusKey.id),
+                            ),
+                    )
+                } else {
+                    service.postFavoriteTweet(
+                        postFavoriteTweetRequest =
+                            PostFavoriteTweetRequest(
+                                variables =
+                                    PostCreateRetweetRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
                 }
-            },
-        )
-    }
-
-    suspend fun like(status: UiStatus.XQT) {
-        updateStatusUseCase<StatusContent.XQT>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            legacy =
-                                it.data.legacy?.copy(
-                                    favorited = !status.reaction.liked,
-                                    favoriteCount =
-                                        if (status.reaction.liked) {
-                                            it.data.legacy.favoriteCount
-                                                .minus(1)
-                                        } else {
-                                            it.data.legacy.favoriteCount
-                                                .plus(1)
-                                        },
-                                    retweetedStatusResult =
-                                        it.data.legacy.retweetedStatusResult?.copy(
-                                            result =
-                                                when (it.data.legacy.retweetedStatusResult.result) {
-                                                    is Tweet ->
-                                                        it.data.legacy.retweetedStatusResult.result.copy(
-                                                            legacy =
-                                                                it.data.legacy.retweetedStatusResult.result.legacy?.copy(
-                                                                    favorited = !status.reaction.liked,
-                                                                    favoriteCount =
-                                                                        if (status.reaction.liked) {
-                                                                            it.data.legacy.retweetedStatusResult.result
-                                                                                .legacy.favoriteCount
-                                                                                .minus(1)
-                                                                        } else {
-                                                                            it.data.legacy.retweetedStatusResult.result
-                                                                                .legacy.favoriteCount
-                                                                                .plus(1)
-                                                                        },
-                                                                ),
-                                                        )
-
-                                                    is TweetTombstone -> it.data.legacy.retweetedStatusResult.result
-                                                    is TweetWithVisibilityResults ->
-                                                        it.data.legacy.retweetedStatusResult.result.copy(
-                                                            tweet =
-                                                                it.data.legacy.retweetedStatusResult.result.tweet.copy(
-                                                                    legacy =
-                                                                        it.data.legacy.retweetedStatusResult.result
-                                                                            .tweet.legacy
-                                                                            ?.copy(
-                                                                                favorited = !status.reaction.liked,
-                                                                                favoriteCount =
-                                                                                    if (status.reaction.liked) {
-                                                                                        it.data.legacy.retweetedStatusResult
-                                                                                            .result.tweet.legacy.favoriteCount
-                                                                                            .minus(1)
-                                                                                    } else {
-                                                                                        it.data.legacy.retweetedStatusResult
-                                                                                            .result.tweet.legacy.favoriteCount
-                                                                                            .plus(1)
-                                                                                    },
-                                                                            ),
-                                                                ),
-                                                        )
-
-                                                    null -> null
+            }.onFailure {
+                updateStatusUseCase<StatusContent.XQT>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    legacy =
+                                        it.data.legacy?.copy(
+                                            favorited = liked,
+                                            favoriteCount =
+                                                if (liked) {
+                                                    it.data.legacy.favoriteCount
+                                                        .plus(1)
+                                                } else {
+                                                    it.data.legacy.favoriteCount
+                                                        .minus(1)
                                                 },
                                         ),
                                 ),
-                        ),
+                        )
+                    },
                 )
-            },
-        )
-
-        runCatching {
-            if (status.reaction.liked) {
-                service.postUnfavoriteTweet(
-                    postUnfavoriteTweetRequest =
-                        PostUnfavoriteTweetRequest(
-                            variables = PostCreateRetweetRequestVariables(tweetId = status.statusKey.id),
-                        ),
-                )
-            } else {
-                service.postFavoriteTweet(
-                    postFavoriteTweetRequest =
-                        PostFavoriteTweetRequest(
-                            variables =
-                                PostCreateRetweetRequestVariables(
-                                    tweetId = status.statusKey.id,
-                                ),
-                        ),
-                )
-            }
-        }.onFailure {
-            updateStatusUseCase<StatusContent.XQT>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(
-                        data = status.raw,
-                    )
-                },
-            )
-        }.onSuccess {
+            }.onSuccess {
 //            updateStatusUseCase<StatusContent.XQT>(
 //                statusKey = status.statusKey,
 //                accountKey = status.accountKey,
@@ -793,114 +757,86 @@ class XQTDataSource(
 //                    )
 //                },
 //            )
+            }
         }
     }
 
-    suspend fun retweet(status: UiStatus.XQT) {
-        updateStatusUseCase<StatusContent.XQT>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            legacy =
-                                it.data.legacy?.copy(
-                                    retweeted = !status.reaction.retweeted,
-                                    retweetCount =
-                                        if (status.reaction.retweeted) {
-                                            it.data.legacy.retweetCount
-                                                .minus(1)
-                                        } else {
-                                            it.data.legacy.retweetCount
-                                                .plus(1)
-                                        },
-                                    retweetedStatusResult =
-                                        it.data.legacy.retweetedStatusResult?.copy(
-                                            result =
-                                                when (it.data.legacy.retweetedStatusResult.result) {
-                                                    is Tweet ->
-                                                        it.data.legacy.retweetedStatusResult.result.copy(
-                                                            legacy =
-                                                                it.data.legacy.retweetedStatusResult.result.legacy?.copy(
-                                                                    retweeted = !status.reaction.retweeted,
-                                                                    retweetCount =
-                                                                        if (status.reaction.retweeted) {
-                                                                            it.data.legacy.retweetedStatusResult
-                                                                                .result.legacy.retweetCount
-                                                                                .minus(1)
-                                                                        } else {
-                                                                            it.data.legacy.retweetedStatusResult
-                                                                                .result.legacy.retweetCount
-                                                                                .plus(1)
-                                                                        },
-                                                                ),
-                                                        )
-
-                                                    is TweetTombstone -> it.data.legacy.retweetedStatusResult.result
-                                                    is TweetWithVisibilityResults ->
-                                                        it.data.legacy.retweetedStatusResult.result.copy(
-                                                            tweet =
-                                                                it.data.legacy.retweetedStatusResult.result.tweet.copy(
-                                                                    legacy =
-                                                                        it.data.legacy.retweetedStatusResult.result.tweet.legacy?.copy(
-                                                                            retweeted = !status.reaction.retweeted,
-                                                                            retweetCount =
-                                                                                if (status.reaction.retweeted) {
-                                                                                    it.data.legacy.retweetedStatusResult
-                                                                                        .result.tweet.legacy.retweetCount
-                                                                                        .minus(1)
-                                                                                } else {
-                                                                                    it.data.legacy.retweetedStatusResult
-                                                                                        .result.tweet.legacy.retweetCount
-                                                                                        .plus(1)
-                                                                                },
-                                                                        ),
-                                                                ),
-                                                        )
-
-                                                    null -> null
-                                                },
-                                        ),
-                                ),
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            if (status.reaction.retweeted) {
-                service.postDeleteRetweet(
-                    postDeleteRetweetRequest =
-                        PostDeleteRetweetRequest(
-                            variables = PostDeleteRetweetRequestVariables(sourceTweetId = status.statusKey.id),
-                        ),
-                )
-            } else {
-                service.postCreateRetweet(
-                    postCreateRetweetRequest =
-                        PostCreateRetweetRequest(
-                            variables =
-                                PostCreateRetweetRequestVariables(
-                                    tweetId = status.statusKey.id,
-                                ),
-                        ),
-                )
-            }
-        }.onFailure {
-            it.printStackTrace()
+    override fun retweet(
+        statusKey: MicroBlogKey,
+        retweeted: Boolean,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.XQT>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data = status.raw,
+                        data =
+                            it.data.copy(
+                                legacy =
+                                    it.data.legacy?.copy(
+                                        retweeted = !retweeted,
+                                        retweetCount =
+                                            if (retweeted) {
+                                                it.data.legacy.retweetCount
+                                                    .minus(1)
+                                            } else {
+                                                it.data.legacy.retweetCount
+                                                    .plus(1)
+                                            },
+                                    ),
+                            ),
                     )
                 },
             )
-        }.onSuccess {
+
+            runCatching {
+                if (retweeted) {
+                    service.postDeleteRetweet(
+                        postDeleteRetweetRequest =
+                            PostDeleteRetweetRequest(
+                                variables = PostDeleteRetweetRequestVariables(sourceTweetId = statusKey.id),
+                            ),
+                    )
+                } else {
+                    service.postCreateRetweet(
+                        postCreateRetweetRequest =
+                            PostCreateRetweetRequest(
+                                variables =
+                                    PostCreateRetweetRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                }
+            }.onFailure {
+                it.printStackTrace()
+                updateStatusUseCase<StatusContent.XQT>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    legacy =
+                                        it.data.legacy?.copy(
+                                            retweeted = retweeted,
+                                            retweetCount =
+                                                if (retweeted) {
+                                                    it.data.legacy.retweetCount
+                                                        .plus(1)
+                                                } else {
+                                                    it.data.legacy.retweetCount
+                                                        .minus(1)
+                                                },
+                                        ),
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess {
 //            updateStatusUseCase<StatusContent.XQT>(
 //                statusKey = status.statusKey,
 //                accountKey = status.accountKey,
@@ -911,67 +847,79 @@ class XQTDataSource(
 //                    )
 //                },
 //            )
+            }
         }
     }
 
-    suspend fun bookmark(status: UiStatus.XQT) {
-        updateStatusUseCase<StatusContent.XQT>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            legacy =
-                                it.data.legacy?.copy(
-                                    bookmarked = !status.reaction.bookmarked,
-                                ),
-                        ),
-                )
-            },
-        )
-
-        runCatching {
-            if (status.reaction.bookmarked) {
-                service.postDeleteBookmark(
-                    postDeleteBookmarkRequest =
-                        DeleteBookmarkRequest(
-                            variables =
-                                DeleteBookmarkRequestVariables(
-                                    tweetId = status.statusKey.id,
-                                ),
-                        ),
-                )
-            } else {
-                service.postCreateBookmark(
-                    postCreateBookmarkRequest =
-                        CreateBookmarkRequest(
-                            variables =
-                                CreateBookmarkRequestVariables(
-                                    tweetId = status.statusKey.id,
-                                ),
-                        ),
-                )
-            }
-        }.onFailure {
+    override fun bookmark(
+        statusKey: MicroBlogKey,
+        bookmarked: Boolean,
+    ) {
+        coroutineScope.launch {
             updateStatusUseCase<StatusContent.XQT>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
+                statusKey = statusKey,
+                accountKey = account.accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
-                        data = status.raw,
+                        data =
+                            it.data.copy(
+                                legacy =
+                                    it.data.legacy?.copy(
+                                        bookmarked = !bookmarked,
+                                    ),
+                            ),
                     )
                 },
             )
-        }.onSuccess {
+
+            runCatching {
+                if (bookmarked) {
+                    service.postDeleteBookmark(
+                        postDeleteBookmarkRequest =
+                            DeleteBookmarkRequest(
+                                variables =
+                                    DeleteBookmarkRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                } else {
+                    service.postCreateBookmark(
+                        postCreateBookmarkRequest =
+                            CreateBookmarkRequest(
+                                variables =
+                                    CreateBookmarkRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.XQT>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    legacy =
+                                        it.data.legacy?.copy(
+                                            bookmarked = bookmarked,
+                                        ),
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess {
+            }
         }
     }
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -981,7 +929,7 @@ class XQTDataSource(
         runCatching {
             service.postCreateFriendships(userId = userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -993,7 +941,7 @@ class XQTDataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -1003,7 +951,7 @@ class XQTDataSource(
         runCatching {
             service.postDestroyFriendships(userId = userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -1015,21 +963,21 @@ class XQTDataSource(
 
     suspend fun mute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = true,
+                muted = true,
             )
         }
         runCatching {
             service.postMutesUsersCreate(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = false,
+                    muted = false,
                 )
             }
         }
@@ -1037,21 +985,21 @@ class XQTDataSource(
 
     suspend fun unmute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = false,
+                muted = false,
             )
         }
         runCatching {
             service.postMutesUsersDestroy(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = true,
+                    muted = true,
                 )
             }
         }
@@ -1059,7 +1007,7 @@ class XQTDataSource(
 
     suspend fun block(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -1069,7 +1017,7 @@ class XQTDataSource(
         runCatching {
             service.postBlocksCreate(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -1081,7 +1029,7 @@ class XQTDataSource(
 
     suspend fun unblock(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.XQT>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -1091,7 +1039,7 @@ class XQTDataSource(
         runCatching {
             service.postBlocksDestroy(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.XQT>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(

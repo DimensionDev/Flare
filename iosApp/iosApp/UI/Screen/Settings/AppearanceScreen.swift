@@ -9,11 +9,7 @@ struct AppearanceScreen: View {
             List {
                 if case .success(let success) = onEnum(of: state.sampleStatus) {
                     StatusItemView(
-                        status: success.data,
-                        mastodonEvent: EmptyStatusEvent.shared,
-                        misskeyEvent: EmptyStatusEvent.shared,
-                        blueskyEvent: EmptyStatusEvent.shared,
-                        xqtEvent: EmptyStatusEvent.shared
+                        data: success.data
                     )
                 }
                 Section("appearance_settings_generic") {

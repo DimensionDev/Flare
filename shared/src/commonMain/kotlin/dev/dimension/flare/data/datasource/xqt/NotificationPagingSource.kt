@@ -3,19 +3,21 @@ package dev.dimension.flare.data.datasource.xqt
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import dev.dimension.flare.data.database.cache.mapper.cursor
-import dev.dimension.flare.data.database.cache.mapper.notifications
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.mapper.renderNotifications
 
 internal class NotificationPagingSource(
     private val locale: String,
     private val service: XQTService,
+    private val event: StatusEvent.XQT,
     private val accountKey: MicroBlogKey,
-) : PagingSource<String, UiStatus>() {
-    override fun getRefreshKey(state: PagingState<String, UiStatus>): String? = null
+) : PagingSource<String, UiTimeline>() {
+    override fun getRefreshKey(state: PagingState<String, UiTimeline>): String? = null
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiStatus> =
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, UiTimeline> =
         try {
             val response =
                 service.getNotificationsAll(
@@ -23,7 +25,7 @@ internal class NotificationPagingSource(
                     cursor = params.key,
                 )
 
-            val notifications = response.notifications(accountKey)
+            val notifications = response.renderNotifications(accountKey, event)
             val cursor = response.cursor()
 
             LoadResult.Page(

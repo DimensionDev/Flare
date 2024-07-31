@@ -4,7 +4,6 @@ import shared
 struct HomeTimelineScreen: View {
     @Environment(\.openURL) private var openURL
     let presenter: HomeTimelinePresenter
-    @Environment(StatusEvent.self) var statusEvent: StatusEvent
 
     init(accountType: AccountType) {
         presenter = .init(accountType: accountType)
@@ -14,11 +13,7 @@ struct HomeTimelineScreen: View {
         Observing(presenter.models) { state in
             List {
                 StatusTimelineComponent(
-                    data: state.listState,
-                    mastodonEvent: statusEvent,
-                    misskeyEvent: statusEvent,
-                    blueskyEvent: statusEvent,
-                    xqtEvent: statusEvent
+                    data: state.listState
                 )
             }
             .listStyle(.plain)
@@ -32,7 +27,7 @@ struct HomeTimelineScreen: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {
-                        openURL(URL(string: AppDeepLink.Compose.shared.invoke())!)
+//                        openURL(URL(string: AppDeepLink.Compose.shared.invoke())!)
                     }, label: {
                         Image(systemName: "square.and.pencil")
                     })

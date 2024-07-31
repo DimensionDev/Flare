@@ -7,17 +7,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.map
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.mapper.renderVVOText
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.render.toUi
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.map
 
 class VVOStatusDetailPresenter(
     private val accountType: AccountType,
@@ -33,8 +38,6 @@ class VVOStatusDetailPresenter(
                     remember(statusKey, accountType) {
                         it.status(statusKey)
                     }.collectAsState().toUi()
-                }.map {
-                    it as UiStatus.VVO
                 }
 
         val extendedText =
@@ -46,12 +49,28 @@ class VVOStatusDetailPresenter(
             }
 
         val actualStatus =
-            status.map { item ->
-                when (extendedText) {
-                    is UiState.Error -> item
-                    is UiState.Loading -> item
-                    is UiState.Success -> {
-                        item.copy(content = extendedText.data)
+            status.flatMap { item ->
+                service.map { service ->
+                    when (extendedText) {
+                        is UiState.Error -> item
+                        is UiState.Loading -> item
+                        is UiState.Success -> {
+                            val content = item.content
+                            if (content is UiTimeline.ItemContent.Status) {
+                                item.copy(
+                                    content =
+                                        content.copy(
+                                            content =
+                                                renderVVOText(
+                                                    extendedText.data,
+                                                    service.account.accountKey,
+                                                ).toUi(),
+                                        ),
+                                )
+                            } else {
+                                item
+                            }
+                        }
                     }
                 }
             }
@@ -60,7 +79,16 @@ class VVOStatusDetailPresenter(
             service.map {
                 require(it is VVODataSource)
                 remember(statusKey, accountType) {
-                    it.statusRepost(statusKey = statusKey, scope = scope)
+                    it.statusRepost(statusKey = statusKey, scope = scope).map {
+                        it.map {
+                            it.copy(
+                                content =
+                                    (it.content as? UiTimeline.ItemContent.Status)?.copy(
+                                        quote = persistentListOf(),
+                                    ) ?: it.content,
+                            )
+                        }
+                    }
                 }.collectAsLazyPagingItems()
             }
 
@@ -82,7 +110,7 @@ class VVOStatusDetailPresenter(
 
 @Immutable
 interface VVOStatusDetailState {
-    val status: UiState<UiStatus.VVO>
-    val comment: UiState<LazyPagingItems<UiStatus>>
-    val repost: UiState<LazyPagingItems<UiStatus>>
+    val status: UiState<UiTimeline>
+    val comment: UiState<LazyPagingItems<UiTimeline>>
+    val repost: UiState<LazyPagingItems<UiTimeline>>
 }

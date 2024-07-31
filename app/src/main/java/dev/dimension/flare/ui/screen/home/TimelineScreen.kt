@@ -55,7 +55,6 @@ import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
@@ -69,7 +68,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 // @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
@@ -142,7 +140,7 @@ internal fun TimelineScreen(
                             IconButton(
                                 onClick = toQuickMenu,
                             ) {
-                                AvatarComponent(it.avatarUrl, size = 24.dp)
+                                AvatarComponent(it.avatar, size = 24.dp)
                             }
                         }
                     }
@@ -189,9 +187,7 @@ internal fun TimelineScreen(
                     contentPadding = contentPadding,
                 ) {
                     with(state.listState) {
-                        with(state.statusEvent) {
-                            status()
-                        }
+                        status()
                     }
                 }
                 state.listState.onSuccess {
@@ -228,53 +224,50 @@ internal fun TimelineScreen(
 }
 
 @Composable
-private fun timelinePresenter(
-    tabItem: TimelineTabItem,
-    statusEvent: StatusEvent = koinInject(),
-) = run {
-    val scope = rememberCoroutineScope()
-    var isRefreshing by remember { mutableStateOf(false) }
-    val state = remember(tabItem.account) { tabItem.createPresenter() }.invoke()
-    val accountState =
-        remember(tabItem.account) {
-            UserPresenter(
-                accountType = tabItem.account,
-                userKey = null,
-            )
-        }.invoke()
-    var showNewToots by remember { mutableStateOf(false) }
-    val listState = state.listState
-    if (listState is UiState.Success && listState.data.itemCount > 0) {
-        LaunchedEffect(Unit) {
-            snapshotFlow {
-                if (listState.data.itemCount > 0) {
-                    listState.data.peek(0)?.statusKey
-                } else {
-                    null
-                }
-            }.mapNotNull { it }
-                .distinctUntilChanged()
-                .drop(1)
-                .collect {
-                    showNewToots = true
-                }
+private fun timelinePresenter(tabItem: TimelineTabItem) =
+    run {
+        val scope = rememberCoroutineScope()
+        var isRefreshing by remember { mutableStateOf(false) }
+        val state = remember(tabItem.account) { tabItem.createPresenter() }.invoke()
+        val accountState =
+            remember(tabItem.account) {
+                UserPresenter(
+                    accountType = tabItem.account,
+                    userKey = null,
+                )
+            }.invoke()
+        var showNewToots by remember { mutableStateOf(false) }
+        val listState = state.listState
+        if (listState is UiState.Success && listState.data.itemCount > 0) {
+            LaunchedEffect(Unit) {
+                snapshotFlow {
+                    if (listState.data.itemCount > 0) {
+                        listState.data.peek(0)?.itemKey
+                    } else {
+                        null
+                    }
+                }.mapNotNull { it }
+                    .distinctUntilChanged()
+                    .drop(1)
+                    .collect {
+                        showNewToots = true
+                    }
+            }
         }
-    }
-    object : UserState by accountState, TimelineState by state {
-        val statusEvent = statusEvent
-        val showNewToots = showNewToots
-        val isRefreshing = isRefreshing
+        object : UserState by accountState, TimelineState by state {
+            val showNewToots = showNewToots
+            val isRefreshing = isRefreshing
 
-        fun onNewTootsShown() {
-            showNewToots = false
-        }
+            fun onNewTootsShown() {
+                showNewToots = false
+            }
 
-        fun refreshSync() {
-            scope.launch {
-                isRefreshing = true
-                state.refresh()
-                isRefreshing = false
+            fun refreshSync() {
+                scope.launch {
+                    isRefreshing = true
+                    state.refresh()
+                    isRefreshing = false
+                }
             }
         }
     }
-}

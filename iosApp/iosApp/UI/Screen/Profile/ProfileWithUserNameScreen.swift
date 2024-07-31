@@ -14,31 +14,18 @@ struct ProfileWithUserNameScreen: View {
     var body: some View {
         Observing(presenter.models) { state in
             ZStack {
-                switch onEnum(of: state) {
+                switch onEnum(of: state.user) {
                 case .error:
                     Text("error")
                 case .loading:
                     List {
-                        CommonProfileHeader(
-                            bannerUrl: "https://pbs.twimg.com/profile_banners/1547244200671846406/1684016886/1500x500",
-                            avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg",
-                            displayName: "test",
-                            handle: "test@test.test",
-                            description: "tefewfewfewfewfewst",
-                            headerTrailing: {
-                                Text("header")
-                            }, handleTrailing: {
-                                Text("handle")
-                            }, content: {
-                                Text("content")
-                            }
-                        )
+                        CommonProfileHeader(user: createSampleUser(), relation: UiStateLoading(), isMe: UiStateLoading(), onFollowClick: {_ in })
                         .redacted(reason: .placeholder)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
                     }
                 case .success(let data):
-                    ProfileScreen(accountType: accountType, userKey: data.data.userKey, toProfileMedia: toProfileMedia)
+                    ProfileScreen(accountType: accountType, userKey: data.data.key, toProfileMedia: toProfileMedia)
                 }
             }
         }

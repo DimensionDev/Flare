@@ -163,10 +163,6 @@
   <string name="mastodon_report_description">Bist du sicher, dass du dies melden möchtest?</string>
   <string name="misskey_item_action_delete">Löschen</string>
   <string name="misskey_item_action_report">Bericht</string>
-  <string name="xqt_item_unbookmark">Entfernen</string>
-  <string name="xqt_item_bookmark">Lesezeichen</string>
-  <string name="xqt_item_delete">Löschen</string>
-  <string name="xqt_item_report">Bericht</string>
   <string name="user_report">Bericht %1$s</string>
   <string name="user_block">Blockieren %1$s</string>
   <string name="user_unblock">%1$s entsperren</string>

@@ -3,11 +3,7 @@ import shared
 
 struct StatusTimelineComponent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    let data: UiState<LazyPagingItems<UiStatus>>
-    let mastodonEvent: MastodonStatusEvent
-    let misskeyEvent: MisskeyStatusEvent
-    let blueskyEvent: BlueskyStatusEvent
-    let xqtEvent: XQTStatusEvent
+    let data: UiState<LazyPagingItems<UiTimeline>>
     var body: some View {
         switch onEnum(of: data) {
         case .success(let success):
@@ -28,11 +24,7 @@ struct StatusTimelineComponent: View {
                 Text("timeline_load_empty", comment: "Timeline is empty")
             } else {
                 StatusTimeline(
-                    pagingSource: success.data,
-                    mastodonEvent: mastodonEvent,
-                    misskeyEvent: misskeyEvent,
-                    blueskyEvent: blueskyEvent,
-                    xqtEvent: xqtEvent
+                    pagingSource: success.data
                 )
             }
         case .error(let error):
@@ -51,11 +43,7 @@ struct StatusTimelineComponent: View {
 struct StatusTimeline: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    let pagingSource: LazyPagingItems<UiStatus>
-    let mastodonEvent: MastodonStatusEvent
-    let misskeyEvent: MisskeyStatusEvent
-    let blueskyEvent: BlueskyStatusEvent
-    let xqtEvent: XQTStatusEvent
+    let pagingSource: LazyPagingItems<UiTimeline>
     var body: some View {
         if (pagingSource.loadState.refresh is Paging_commonLoadState.Loading ||
             pagingSource.loadState.prepend is Paging_commonLoadState.Loading) &&
@@ -74,19 +62,12 @@ struct StatusTimeline: View {
             Text("timeline_load_empty", comment: "Timeline is empty")
         } else {
             ForEach(1...pagingSource.itemCount, id: \.self) { index in
-                let data = pagingSource.peek(index: index - 1)
+                let data = pagingSource.peek(index: Int32(index - 1))
                 VStack {
                     if let status = data {
                         StatusItemView(
-                            status: status,
-                            mastodonEvent: mastodonEvent,
-                            misskeyEvent: misskeyEvent,
-                            blueskyEvent: blueskyEvent,
-                            xqtEvent: xqtEvent
+                            data: status
                         )
-                        .onTapGesture {
-                            openURL(URL(string: AppDeepLink.StatusDetail.shared.invoke(accountKey: status.accountKey, statusKey: status.statusKey))!)
-                        }
                     } else {
                         StatusPlaceHolder()
                     }
@@ -103,58 +84,102 @@ struct StatusTimeline: View {
 }
 
 struct StatusItemView: View {
-    let status: UiStatus
-    let mastodonEvent: MastodonStatusEvent
-    let misskeyEvent: MisskeyStatusEvent
-    let blueskyEvent: BlueskyStatusEvent
-    let xqtEvent: XQTStatusEvent
+    @Environment(\.openURL) private var openURL
+    let data: UiTimeline
     var body: some View {
-        switch onEnum(of: status) {
-        case .mastodon(let mastodon):
-            MastodonStatusComponent(mastodon: mastodon, event: mastodonEvent)
-        case .mastodonNotification(let mastodonNotification):
-            MastodonNotificationComponent(data: mastodonNotification, event: mastodonEvent)
-        case .misskey(let misskey):
-            MisskeyStatusComponent(misskey: misskey, event: misskeyEvent)
-        case .misskeyNotification(let misskeyNotification):
-            MisskeyNotificationComponent(data: misskeyNotification, event: misskeyEvent)
-        case .bluesky(let bluesky):
-            BlueskyStatusComponent(bluesky: bluesky, event: blueskyEvent)
-        case .blueskyNotification(let blueskyNotification):
-            BlueskyNotificationComponent(data: blueskyNotification)
-        case .xQT(let xqt):
-            XQTStatusComponent(xqt: xqt, event: xqtEvent)
-        case .xQTNotification(let xqtNotification): EmptyView() // TODO: xqt notification
-        case .vVO(let vvo): EmptyView() // TODO: vvo
-        case .vVONotification(let vvoNotification): EmptyView() // TODO: vvo
-        case .vVOComment(let vvoComment): EmptyView() // TODO: vvo
+        if let topMessage = data.topMessage {
+            let icon = switch topMessage.icon {
+            case .retweet: "arrow.left.arrow.right"
+            case .follow: "person.badge.plus"
+            case .favourite: "star"
+            case .mention: "at"
+            case .poll: "list.bullet"
+            case .edit: "pencil"
+            case .info: "app"
+            case .reply: "arrowshape.turn.up.left"
+            }
+            let text = switch onEnum(of: topMessage.type) {
+            case .bluesky(let data):
+                switch onEnum(of: data) {
+                case .follow: String(localized: "bluesky_notification_follow")
+                case .like: String(localized: "bluesky_notification_like")
+                case .mention: String(localized: "bluesky_notification_mention")
+                case .quote: String(localized: "bluesky_notification_quote")
+                case .reply: String(localized: "bluesky_notification_reply")
+                case .repost: String(localized: "bluesky_notification_repost")
+                }
+            case .mastodon(let data):
+                switch onEnum(of: data) {
+                case .favourite: String(localized: "mastodon_notification_favourite")
+                case .follow: String(localized: "mastodon_notification_follow")
+                case .followRequest: String(localized: "mastodon_notification_follow_request")
+                case .mention: String(localized: "mastodon_notification_mention")
+                case .poll: String(localized: "mastodon_notification_poll")
+                case .reblogged: String(localized: "mastodon_notification_reblog")
+                case .status: String(localized: "mastodon_notification_status")
+                case .update: String(localized: "mastodon_notification_update")
+                }
+            case .misskey(let data):
+                switch onEnum(of: data) {
+                case .achievementEarned:  String(localized: "misskey_notification_achievement_earned")
+                case .app: String(localized: "misskey_notification_app")
+                case .follow: String(localized: "misskey_notification_follow")
+                case .followRequestAccepted: String(localized: "misskey_notification_follow_request_accepted")
+                case .mention: String(localized: "misskey_notification_mention")
+                case .pollEnded: String(localized: "misskey_notification_poll_ended")
+                case .quote: String(localized: "misskey_notification_quote")
+                case .reaction: String(localized: "misskey_notification_reaction")
+                case .receiveFollowRequest: String(localized: "misskey_notification_receive_follow_request")
+                case .renote: String(localized: "misskey_notification_renote")
+                case .reply: String(localized: "misskey_notification_reply")
+                }
+            case .vVO(let data):
+                switch onEnum(of: data) {
+                case .custom(let message): message.message
+                case .like: String(localized: "vvo_notification_like")
+                }
+            case .xQT(let data):
+                switch onEnum(of: data) {
+                case .custom(let message): message.message
+                case .mention: String(localized: "xqt_notification_mention")
+                case .retweet: String(localized: "xqt_notification_retweet")
+                }
+            }
+            StatusRetweetHeaderComponent(iconSystemName: icon, nameMarkdown: topMessage.user?.name.markdown, text: text)
+                .onTapGesture {
+                    topMessage.user?.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                }
         }
+        if let content = data.content {
+            switch onEnum(of: content) {
+            case .status(let data): CommonStatusComponent(
+                data: data,
+                onMediaClick: { _, _ in
+
+                }
+            ).onTapGesture {
+                data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+            }
+            case .user(let data):
+                UserComponent(
+                    user: data.value,
+                    onUserClicked: {
+                        data.value.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                    }
+                )
+            case .userList(let data): EmptyView()
+            }
+        }
+        EmptyView()
     }
 }
 
 struct StatusPlaceHolder: View {
     var body: some View {
-        CommonStatusComponent(
-            content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.",
-            contentWarning: nil,
-            user: UiUser.Bluesky(
-                userKey: MicroBlogKey(id: "", host: ""),
-                displayName: "hahaname",
-                handleInternal: "haha.haha",
-                avatarUrl: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg",
-                bannerUrl: nil,
-                description: nil,
-                matrices: UiUser.BlueskyMatrices(fansCount: 0, followsCount: 0, statusesCount: 0),
-                relation: UiRelationBluesky(isFans: false, following: false, blocking: false, muting: false),
-                accountKey: MicroBlogKey(id: "", host: "")
-            ),
-            medias: [],
-            timestamp: 1696838289,
-            headerTrailing: {EmptyView()},
-            onMediaClick: { _, _ in },
-            sensitive: false,
-            card: nil,
-            onUserClicked: { _ in }
+        StatusItemView(
+            data: createSampleStatus(
+                user: createSampleUser()
+            )
         )
         .redacted(reason: .placeholder)
     }

@@ -47,7 +47,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -159,9 +159,9 @@ internal fun AccountsScreen(
                                 trailingContent = { user ->
                                     state.activeAccount.onSuccess {
                                         RadioButton(
-                                            selected = it.accountKey == user.userKey,
+                                            selected = it.accountKey == user.key,
                                             onClick = {
-                                                state.setActiveAccount(user.userKey)
+                                                state.setActiveAccount(user.key)
                                             },
                                         )
                                     }
@@ -176,16 +176,16 @@ internal fun AccountsScreen(
 }
 
 @Composable
-fun AccountItem(
-    userState: UiState<UiUser>,
+fun <T : UiUserV2> AccountItem(
+    userState: UiState<T>,
     onClick: (MicroBlogKey) -> Unit,
     toLogin: () -> Unit,
     modifier: Modifier = Modifier,
-    trailingContent: @Composable (UiUser) -> Unit = { },
-    headlineContent: @Composable (UiUser) -> Unit = {
-        HtmlText(element = it.nameElement, maxLines = 1)
+    trailingContent: @Composable (UiUserV2) -> Unit = { },
+    headlineContent: @Composable (UiUserV2) -> Unit = {
+        HtmlText(element = it.name.data, maxLines = 1)
     },
-    supportingContent: @Composable (UiUser) -> Unit = {
+    supportingContent: @Composable (UiUserV2) -> Unit = {
         Text(text = it.handle, maxLines = 1)
     },
 ) {
@@ -198,10 +198,10 @@ fun AccountItem(
                 modifier =
                     modifier
                         .clickable {
-                            onClick.invoke(data.userKey)
+                            onClick.invoke(data.key)
                         },
                 leadingContent = {
-                    AvatarComponent(data = data.avatarUrl)
+                    AvatarComponent(data = data.avatar)
                 },
                 trailingContent = {
                     trailingContent.invoke(data)

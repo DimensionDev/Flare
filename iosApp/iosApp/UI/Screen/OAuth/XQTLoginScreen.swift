@@ -10,7 +10,7 @@ struct XQTLoginScreen: View {
         viewModel.clearCookie()
     }
     var body: some View {
-        Observing(viewModel.presenter.models) { state in
+        Observing(viewModel.presenter.models) { _ in
             ZStack {
                 if viewModel.canShowWebView {
                     WebView(url: URL(string: url), configuration: viewModel.configuration) { webView in

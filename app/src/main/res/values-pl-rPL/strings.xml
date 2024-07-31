@@ -162,10 +162,6 @@
   <string name="mastodon_report_description">Czy na pewno chcesz to zgłosić?</string>
   <string name="misskey_item_action_delete">Usuń</string>
   <string name="misskey_item_action_report">Zgłoszenie</string>
-  <string name="xqt_item_unbookmark">Usuń zakładkę</string>
-  <string name="xqt_item_bookmark">Zakładka</string>
-  <string name="xqt_item_delete">Usuń</string>
-  <string name="xqt_item_report">Zgłoszenie</string>
   <string name="user_report">Zgłoś %1$s</string>
   <string name="user_block">Blok %1$s</string>
   <string name="user_unblock">Odblokuj %1$s</string>

@@ -14,6 +14,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -28,14 +29,17 @@ import dev.dimension.flare.ui.presenter.status.action.MastodonReportPresenter
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.Mastodon.ReportStatus.ROUTE,
+        ),
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun MastodonReportRoute(
+internal fun MastodonReportRoute(
     navigator: DestinationsNavigator,
     userKey: MicroBlogKey,
-    statusKey: MicroBlogKey?,
-    accountType: AccountType,
+    statusKey: MicroBlogKey,
+    accountKey: MicroBlogKey,
 ) {
     MastodonReportDialog(
         statusKey = statusKey,
@@ -43,12 +47,12 @@ fun MastodonReportRoute(
         onBack = {
             navigator.navigateUp()
         },
-        accountType = accountType,
+        accountType = AccountType.Specific(accountKey),
     )
 }
 
 @Composable
-fun MastodonReportDialog(
+private fun MastodonReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
     accountType: AccountType,

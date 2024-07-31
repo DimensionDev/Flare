@@ -33,7 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
@@ -58,13 +57,12 @@ import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.component.status.StatusEvent
-import dev.dimension.flare.ui.component.status.mastodon.UserPlaceholder
+import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
@@ -72,7 +70,6 @@ import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
@@ -150,7 +147,6 @@ private fun DiscoverScreen(
                             searchUsers = state.searchState.users,
                             searchStatus = state.searchState.status,
                             toUser = onUserClick,
-                            statusEvent = state.statusEvent,
                         )
                     } else {
                         state.users.onSuccess { users ->
@@ -178,7 +174,7 @@ private fun DiscoverScreen(
                                             .onSuccess {
                                                 items(
                                                     users.itemCount,
-                                                    key = users.itemKey { it.itemKey },
+//                                                    key = users.itemKey { it.key },
                                                 ) {
                                                     val user = users[it]
                                                     Card(
@@ -274,7 +270,10 @@ private fun DiscoverScreen(
                                                             } else {
                                                                 Text(
                                                                     text = "Lorem Ipsum is simply dummy text",
-                                                                    modifier = Modifier.placeholder(true),
+                                                                    modifier =
+                                                                        Modifier.placeholder(
+                                                                            true,
+                                                                        ),
                                                                     maxLines = 1,
                                                                     overflow = TextOverflow.Ellipsis,
                                                                 )
@@ -316,9 +315,7 @@ private fun DiscoverScreen(
                                     )
                                 }
                                 with(state.status) {
-                                    with(state.statusEvent) {
-                                        status()
-                                    }
+                                    status()
                                 }
                             }
                         }
@@ -330,68 +327,65 @@ private fun DiscoverScreen(
 }
 
 @Composable
-private fun discoverPresenter(
-    accountType: AccountType,
-    statusEvent: StatusEvent = koinInject(),
-) = run {
-    val scope = rememberCoroutineScope()
-    val state = remember(accountType) { DiscoverPresenter(accountType = accountType) }.invoke()
-    val searchBarState = searchBarPresenter(accountType = accountType)
-    val searchState =
-        remember {
-            SearchPresenter(accountType = accountType)
-        }.invoke()
+private fun discoverPresenter(accountType: AccountType) =
+    run {
+        val scope = rememberCoroutineScope()
+        val state = remember(accountType) { DiscoverPresenter(accountType = accountType) }.invoke()
+        val searchBarState = searchBarPresenter(accountType = accountType)
+        val searchState =
+            remember {
+                SearchPresenter(accountType = accountType)
+            }.invoke()
 
-    object : DiscoverState by state, SearchBarState by searchBarState {
-        val statusEvent = statusEvent
-        val searchState = searchState
-        val isInSearchMode = query.isNotEmpty()
-        val refreshing =
-            if (!isInSearchMode) {
-                state.users is UiState.Loading ||
-                    state.status is UiState.Loading ||
-                    state.hashtags is UiState.Loading ||
-                    state.users is UiState.Success &&
-                    (state.users as UiState.Success<LazyPagingItems<UiUser>>).data.isRefreshing ||
-                    state.status is UiState.Success &&
-                    (state.status as UiState.Success<LazyPagingItems<UiStatus>>).data.isRefreshing ||
-                    state.hashtags is UiState.Success &&
-                    (state.hashtags as UiState.Success<LazyPagingItems<UiHashtag>>).data.isRefreshing
-            } else {
-                searchState.users is UiState.Loading ||
-                    searchState.status is UiState.Loading ||
-                    searchState.users is UiState.Success &&
-                    (searchState.users as UiState.Success<LazyPagingItems<UiUser>>).data.isRefreshing ||
-                    searchState.status is UiState.Success &&
-                    (searchState.status as UiState.Success<LazyPagingItems<UiStatus>>).data.isRefreshing
-            }
+        object : DiscoverState by state, SearchBarState by searchBarState {
+            val searchState = searchState
+            val isInSearchMode = query.isNotEmpty()
+            val refreshing =
+                if (!isInSearchMode) {
+                    state.users is UiState.Loading ||
+                        state.status is UiState.Loading ||
+                        state.hashtags is UiState.Loading ||
+                        state.users is UiState.Success &&
+                        (state.users as UiState.Success<LazyPagingItems<UiUserV2>>).data.isRefreshing ||
+                        state.status is UiState.Success &&
+                        (state.status as UiState.Success<LazyPagingItems<UiTimeline>>).data.isRefreshing ||
+                        state.hashtags is UiState.Success &&
+                        (state.hashtags as UiState.Success<LazyPagingItems<UiHashtag>>).data.isRefreshing
+                } else {
+                    searchState.users is UiState.Loading ||
+                        searchState.status is UiState.Loading ||
+                        searchState.users is UiState.Success &&
+                        (searchState.users as UiState.Success<LazyPagingItems<UiUserV2>>).data.isRefreshing ||
+                        searchState.status is UiState.Success &&
+                        (searchState.status as UiState.Success<LazyPagingItems<UiTimeline>>).data.isRefreshing
+                }
 
-        fun refresh() {
-            if (isInSearchMode) {
-                searchState.search(query)
-            } else {
-                scope.launch {
-                    state.users.onSuccess {
-                        it.refreshSuspend()
-                    }
-                    state.status.onSuccess {
-                        it.refreshSuspend()
-                    }
-                    state.hashtags.onSuccess {
-                        it.refreshSuspend()
+            fun refresh() {
+                if (isInSearchMode) {
+                    searchState.search(query)
+                } else {
+                    scope.launch {
+                        state.users.onSuccess {
+                            it.refreshSuspend()
+                        }
+                        state.status.onSuccess {
+                            it.refreshSuspend()
+                        }
+                        state.hashtags.onSuccess {
+                            it.refreshSuspend()
+                        }
                     }
                 }
             }
-        }
 
-        fun commitSearch(new: String) {
-            searchBarState.setQuery(new)
-            searchBarState.addSearchHistory(new)
-            searchState.search(new)
-        }
+            fun commitSearch(new: String) {
+                searchBarState.setQuery(new)
+                searchBarState.addSearchHistory(new)
+                searchState.search(new)
+            }
 
-        fun clearSearch() {
-            searchBarState.setQuery("")
+            fun clearSearch() {
+                searchBarState.setQuery("")
+            }
         }
     }
-}

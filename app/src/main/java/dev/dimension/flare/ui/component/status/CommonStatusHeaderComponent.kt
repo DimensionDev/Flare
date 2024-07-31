@@ -21,14 +21,14 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.theme.MediumAlpha
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun CommonStatusHeaderComponent(
-    data: UiUser,
+    data: UiUserV2,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
     trailing: @Composable RowScope.() -> Unit = {},
@@ -38,11 +38,11 @@ internal fun CommonStatusHeaderComponent(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarComponent(
-            data = data.avatarUrl,
+            data = data.avatar,
             modifier =
                 Modifier
                     .clickable {
-                        onUserClick(data.userKey)
+                        onUserClick(data.key)
                     },
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -52,14 +52,14 @@ internal fun CommonStatusHeaderComponent(
                     .weight(1f),
         ) {
             HtmlText(
-                element = data.nameElement,
+                element = data.name.data,
                 modifier =
                     Modifier
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
                         ) {
-                            onUserClick(data.userKey)
+                            onUserClick(data.key)
                         },
                 maxLines = 1,
             )
@@ -73,7 +73,7 @@ internal fun CommonStatusHeaderComponent(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
                         ) {
-                            onUserClick(data.userKey)
+                            onUserClick(data.key)
                         },
             )
         }

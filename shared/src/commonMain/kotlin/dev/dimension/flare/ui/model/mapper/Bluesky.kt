@@ -5,92 +5,121 @@ import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
-import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.notification.ListNotificationsNotification
+import app.bsky.notification.ListNotificationsReason
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.bluesky.jsonElement
+import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.toHtml
+import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.jsonPrimitive
+import moe.tlaster.ktml.dom.Element
+import moe.tlaster.ktml.dom.Text
+import moe.tlaster.twitter.parser.TwitterParser
 
-internal fun FeedViewPostReasonUnion.toUi(
+private val blueskyParser by lazy {
+    TwitterParser(validMarkInUserName = listOf('.'))
+}
+
+internal fun FeedViewPostReasonUnion.render(
     accountKey: MicroBlogKey,
     data: PostView,
-): UiStatus.Bluesky =
-    data.toUi(accountKey).copy(
-        repostBy = (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
+    event: StatusEvent.Bluesky,
+): UiTimeline =
+    UiTimeline(
+        topMessage =
+            (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.let {
+                val user = it.render(accountKey)
+                UiTimeline.TopMessage(
+                    user = user,
+                    icon = UiTimeline.TopMessage.Icon.Retweet,
+                    type = UiTimeline.TopMessage.MessageType.Bluesky.Repost,
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Profile(
+                                accountKey = accountKey,
+                                userKey = user.key,
+                            ),
+                        )
+                    },
+                )
+            },
+        content = data.renderStatus(accountKey, event),
+        platformType = PlatformType.Bluesky,
     )
 
-internal fun FeedViewPost.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky =
-    with(post) {
-        UiStatus.Bluesky(
-            user = author.toUi(accountKey),
-            statusKey =
-                MicroBlogKey(
-                    id = uri.atUri,
-                    host = accountKey.host,
-                ),
-            accountKey = accountKey,
-            content =
-                record
-                    .jsonElement()
-                    .jsonObjectOrNull
-                    ?.get("text")
-                    ?.jsonPrimitive
-                    ?.content
-                    .orEmpty(),
-            indexedAt = indexedAt,
-            repostBy = (reason as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.toUi(accountKey),
-            quote = findQuote(accountKey, this),
-            medias = findMedias(this),
-            card = findCard(this),
-            reaction =
-                UiStatus.Bluesky.Reaction(
-                    repostUri = viewer?.repost?.atUri,
-                    likedUri = viewer?.like?.atUri,
-                ),
-            matrices =
-                UiStatus.Bluesky.Matrices(
-                    replyCount = replyCount ?: 0,
-                    likeCount = likeCount ?: 0,
-                    repostCount = repostCount ?: 0,
-                ),
-            cid = cid.cid,
-            uri = uri.atUri,
+internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiTimeline {
+    val user = author.render(accountKey)
+    return UiTimeline(
+        topMessage =
+            UiTimeline.TopMessage(
+                user = user,
+                icon =
+                    when (reason) {
+                        ListNotificationsReason.LIKE -> UiTimeline.TopMessage.Icon.Favourite
+                        ListNotificationsReason.REPOST -> UiTimeline.TopMessage.Icon.Retweet
+                        ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.Icon.Follow
+                        ListNotificationsReason.MENTION -> UiTimeline.TopMessage.Icon.Mention
+                        ListNotificationsReason.REPLY -> UiTimeline.TopMessage.Icon.Reply
+                        ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.Icon.Reply
+                    },
+                type =
+                    when (reason) {
+                        ListNotificationsReason.LIKE -> UiTimeline.TopMessage.MessageType.Bluesky.Like
+                        ListNotificationsReason.REPOST -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
+                        ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
+                        ListNotificationsReason.MENTION -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
+                        ListNotificationsReason.REPLY -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
+                        ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
+                    },
+                onClicked = {
+                    launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+                },
+            ),
+        content = UiTimeline.ItemContent.User(author.render(accountKey)),
+        platformType = PlatformType.Bluesky,
+    )
+}
+
+internal fun PostView.render(
+    accountKey: MicroBlogKey,
+    event: StatusEvent.Bluesky,
+) = UiTimeline(
+    topMessage = null,
+    content = renderStatus(accountKey, event),
+    platformType = PlatformType.Bluesky,
+)
+
+internal fun PostView.renderStatus(
+    accountKey: MicroBlogKey,
+    event: StatusEvent.Bluesky,
+): UiTimeline.ItemContent.Status {
+    val user = author.render(accountKey)
+    val isFromMe = user.key == accountKey
+    val statusKey =
+        MicroBlogKey(
+            id = uri.atUri,
+            host = accountKey.host,
         )
-    }
-
-internal fun ListNotificationsNotification.toUi(accountKey: MicroBlogKey): UiStatus.BlueskyNotification =
-    UiStatus.BlueskyNotification(
-        user = author.toUi(accountKey),
-        statusKey =
-            MicroBlogKey(
-                id = uri.atUri,
-                host = accountKey.host,
-            ),
-        accountKey = accountKey,
-        reason = reason,
-        indexedAt = indexedAt,
-    )
-
-internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky =
-    UiStatus.Bluesky(
-        user = author.toUi(accountKey),
-        statusKey =
-            MicroBlogKey(
-                id = uri.atUri,
-                host = accountKey.host,
-            ),
-        accountKey = accountKey,
+    return UiTimeline.ItemContent.Status(
+        user = user,
+        images = findMedias(this),
+        card = findCard(this),
+        statusKey = statusKey,
         content =
             record
                 .jsonElement()
@@ -98,26 +127,215 @@ internal fun PostView.toUi(accountKey: MicroBlogKey): UiStatus.Bluesky =
                 ?.get("text")
                 ?.jsonPrimitive
                 ?.content
-                .orEmpty(),
-        indexedAt = indexedAt,
-        repostBy = null,
-        quote = findQuote(accountKey, this),
-        medias = findMedias(this),
-        card = findCard(this),
-        reaction =
-            UiStatus.Bluesky.Reaction(
-                repostUri = viewer?.repost?.atUri,
-                likedUri = viewer?.like?.atUri,
-            ),
-        matrices =
-            UiStatus.Bluesky.Matrices(
-                replyCount = replyCount ?: 0,
-                likeCount = likeCount ?: 0,
-                repostCount = repostCount ?: 0,
-            ),
-        cid = cid.cid,
-        uri = uri.atUri,
+                .orEmpty()
+                .let {
+                    blueskyParser
+                        .parse(it)
+                        .toHtml(accountKey)
+                        .toUi()
+                },
+        poll = null,
+        quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
+        contentWarning = null,
+        actions =
+            listOfNotNull(
+                StatusAction.Item.Reply(
+                    count = replyCount ?: 0,
+                    onClicked = {
+                        launcher.launch(
+                            AppDeepLink.Compose.Reply(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
+                        )
+                    },
+                ),
+                StatusAction.Group(
+                    displayItem =
+                        StatusAction.Item.Retweet(
+                            count = repostCount ?: 0,
+                            retweeted = viewer?.repost?.atUri != null,
+                            onClicked = {
+                            },
+                        ),
+                    actions =
+                        listOfNotNull(
+                            StatusAction.Item.Retweet(
+                                count = repostCount ?: 0,
+                                retweeted = viewer?.repost?.atUri != null,
+                                onClicked = {
+                                    event.reblog(
+                                        statusKey = statusKey,
+                                        cid = cid.cid,
+                                        uri = uri.atUri,
+                                        repostUri = viewer?.repost?.atUri,
+                                    )
+                                },
+                            ),
+                            StatusAction.Item.Quote(
+                                count = 0,
+                                onClicked = {
+                                    launcher.launch(
+                                        AppDeepLink.Compose.Quote(
+                                            accountKey = accountKey,
+                                            statusKey = statusKey,
+                                        ),
+                                    )
+                                },
+                            ),
+                        ).toImmutableList(),
+                ),
+                StatusAction.Item.Like(
+                    count = likeCount ?: 0,
+                    liked = viewer?.like?.atUri != null,
+                    onClicked = {
+                        event.like(
+                            statusKey = statusKey,
+                            cid = cid.cid,
+                            uri = uri.atUri,
+                            likedUri = viewer?.like?.atUri,
+                        )
+                    },
+                ),
+                StatusAction.Group(
+                    displayItem = StatusAction.Item.More,
+                    actions =
+                        listOfNotNull(
+                            if (isFromMe) {
+                                StatusAction.Item.Delete(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.DeleteStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
+                            } else {
+                                StatusAction.Item.Report(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.Bluesky.ReportStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
+                            },
+                        ).toImmutableList(),
+                ),
+            ).toImmutableList(),
+        createdAt = indexedAt.toUi(),
+        sensitive = false,
+        onClicked = {
+            launcher.launch(
+                AppDeepLink.StatusDetail(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                ),
+            )
+        },
+        accountKey = accountKey,
     )
+}
+
+internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
+    val userKey =
+        MicroBlogKey(
+            id = did.did,
+            host = accountKey.host,
+        )
+    return UiProfile(
+        avatar = avatar?.uri.orEmpty(),
+        name =
+            Element("span")
+                .apply {
+                    children.add(Text(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@${handle.handle}",
+        key = userKey,
+        banner = null,
+        description = null,
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
+            ),
+        mark = persistentListOf(),
+        bottomContent = null,
+        platformType = PlatformType.Bluesky,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
+    )
+}
+
+internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
+    val userKey =
+        MicroBlogKey(
+            id = did.did,
+            host = accountKey.host,
+        )
+    return UiProfile(
+        avatar = avatar?.uri.orEmpty(),
+        name =
+            Element("span")
+                .apply {
+                    children.add(Text(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@${handle.handle}",
+        key = userKey,
+        banner = null,
+        description = Element("span").apply { children.add(Text(description.orEmpty())) }.toUi(),
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
+            ),
+        mark = persistentListOf(),
+        bottomContent = null,
+        platformType = PlatformType.Bluesky,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
+    )
+}
+
+internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
+    val userKey =
+        MicroBlogKey(
+            id = did.did,
+            host = accountKey.host,
+        )
+    return UiProfile(
+        avatar = avatar?.uri.orEmpty(),
+        name =
+            Element("span")
+                .apply {
+                    children.add(Text(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@${handle.handle}",
+        key = userKey,
+        banner = banner?.uri,
+        description = Element("span").apply { children.add(Text(description.orEmpty())) }.toUi(),
+        matrices =
+            UiProfile.Matrices(
+                fansCount = followersCount ?: 0,
+                followsCount = followsCount ?: 0,
+                statusesCount = postsCount ?: 0,
+            ),
+        mark = persistentListOf(),
+        bottomContent = null,
+        platformType = PlatformType.Bluesky,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+        },
+    )
+}
 
 private fun findCard(postView: PostView): UiCard? =
     if (postView.embed is PostViewEmbedUnion.ExternalView) {
@@ -162,43 +380,37 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
 private fun findQuote(
     accountKey: MicroBlogKey,
     postView: PostView,
-): UiStatus.Bluesky? =
+    event: StatusEvent.Bluesky,
+): UiTimeline.ItemContent.Status? =
     when (val embed = postView.embed) {
-        is PostViewEmbedUnion.RecordView -> toUi(accountKey, embed.value.record)
+        is PostViewEmbedUnion.RecordView -> render(accountKey, embed.value.record, event)
         is PostViewEmbedUnion.RecordWithMediaView ->
-            toUi(
+            render(
                 accountKey,
                 embed.value.record.record,
+                event = event,
             )
 
         else -> null
     }
 
-private fun toUi(
+private fun render(
     accountKey: MicroBlogKey,
     record: RecordViewRecordUnion,
-): UiStatus.Bluesky? =
+    event: StatusEvent.Bluesky,
+): UiTimeline.ItemContent.Status? =
     when (record) {
-        is RecordViewRecordUnion.ViewRecord ->
-            UiStatus.Bluesky(
-                accountKey = accountKey,
-                statusKey =
-                    MicroBlogKey(
-                        id = record.value.uri.atUri,
-                        host = accountKey.host,
-                    ),
-                content =
-                    record.value.value
-                        .jsonElement()
-                        .jsonObjectOrNull
-                        ?.get("text")
-                        ?.jsonPrimitive
-                        ?.content
-                        .orEmpty(),
-                indexedAt = record.value.indexedAt,
-                repostBy = null,
-                quote = null,
-                medias =
+        is RecordViewRecordUnion.ViewRecord -> {
+            val user = record.value.author.render(accountKey)
+            val isFromMe = user.key == accountKey
+            val statusKey =
+                MicroBlogKey(
+                    id = record.value.uri.atUri,
+                    host = accountKey.host,
+                )
+            UiTimeline.ItemContent.Status(
+                user = user,
+                images =
                     record.value.embeds
                         .mapNotNull {
                             when (it) {
@@ -243,106 +455,127 @@ private fun toUi(
                                 else -> null
                             }
                         }.firstOrNull(),
-                user = record.value.author.toUi(accountKey),
-                // TODO: add reaction
-                reaction =
-                    UiStatus.Bluesky.Reaction(
-                        repostUri = null,
-                        likedUri = null,
-                    ),
-                matrices =
-                    UiStatus.Bluesky.Matrices(
-                        replyCount = 0,
-                        likeCount = 0,
-                        repostCount = 0,
-                    ),
-                cid = record.value.cid.cid,
-                uri = record.value.uri.atUri,
+                statusKey = statusKey,
+                content =
+                    record.value.value
+                        .jsonElement()
+                        .jsonObjectOrNull
+                        ?.get("text")
+                        ?.jsonPrimitive
+                        ?.content
+                        .orEmpty()
+                        .let {
+                            blueskyParser
+                                .parse(it)
+                                .toHtml(accountKey)
+                                .toUi()
+                        },
+                actions =
+                    listOfNotNull(
+                        StatusAction.Item.Reply(
+                            count = record.value.replyCount ?: 0,
+                            onClicked = {
+                                launcher.launch(
+                                    AppDeepLink.Compose.Reply(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ),
+                                )
+                            },
+                        ),
+                        StatusAction.Group(
+                            displayItem =
+                                StatusAction.Item.Retweet(
+                                    count = record.value.repostCount ?: 0,
+                                    retweeted = false,
+                                    onClicked = {
+                                    },
+                                ),
+                            actions =
+                                listOfNotNull(
+                                    StatusAction.Item.Retweet(
+                                        count = record.value.repostCount ?: 0,
+                                        retweeted = false,
+                                        onClicked = {
+                                            event.reblog(
+                                                statusKey = statusKey,
+                                                cid = record.value.cid.cid,
+                                                uri = record.value.uri.atUri,
+                                                repostUri = null,
+                                            )
+                                        },
+                                    ),
+                                    StatusAction.Item.Quote(
+                                        count = 0,
+                                        onClicked = {
+                                            launcher.launch(
+                                                AppDeepLink.Compose.Quote(
+                                                    accountKey = accountKey,
+                                                    statusKey = statusKey,
+                                                ),
+                                            )
+                                        },
+                                    ),
+                                ).toImmutableList(),
+                        ),
+                        StatusAction.Item.Like(
+                            count = record.value.likeCount ?: 0,
+                            liked = false,
+                            onClicked = {
+                                event.like(
+                                    statusKey = statusKey,
+                                    cid = record.value.cid.cid,
+                                    uri = record.value.uri.atUri,
+                                    likedUri = null,
+                                )
+                            },
+                        ),
+                        StatusAction.Group(
+                            displayItem = StatusAction.Item.More,
+                            actions =
+                                listOfNotNull(
+                                    if (isFromMe) {
+                                        StatusAction.Item.Delete(
+                                            onClicked = {
+                                                launcher.launch(
+                                                    AppDeepLink.DeleteStatus(
+                                                        accountKey = accountKey,
+                                                        statusKey = statusKey,
+                                                    ),
+                                                )
+                                            },
+                                        )
+                                    } else {
+                                        StatusAction.Item.Report(
+                                            onClicked = {
+                                                launcher.launch(
+                                                    AppDeepLink.Bluesky.ReportStatus(
+                                                        accountKey = accountKey,
+                                                        statusKey = statusKey,
+                                                    ),
+                                                )
+                                            },
+                                        )
+                                    },
+                                ).toImmutableList(),
+                        ),
+                    ).toImmutableList(),
+                contentWarning = null,
+                poll = null,
+                quote = persistentListOf(),
+                createdAt = record.value.indexedAt.toUi(),
+                sensitive = false,
+                onClicked = {
+                    launcher.launch(
+                        AppDeepLink.StatusDetail(
+                            accountKey = accountKey,
+                            statusKey = statusKey,
+                        ),
+                    )
+                },
+                accountKey = accountKey,
             )
+        }
 
         else -> null
     }
-
-internal fun ProfileViewDetailed.toUi(accountKey: MicroBlogKey): UiUser =
-    UiUser.Bluesky(
-        userKey =
-            MicroBlogKey(
-                id = did.did,
-                host = accountKey.host,
-            ),
-        displayName = displayName.orEmpty(),
-        handleInternal = handle.handle,
-        avatarUrl = avatar?.uri.orEmpty(),
-        bannerUrl = banner?.uri,
-        description = description,
-        matrices =
-            UiUser.Bluesky.Matrices(
-                fansCount = followersCount ?: 0,
-                followsCount = followsCount ?: 0,
-                statusesCount = postsCount ?: 0,
-            ),
-        relation =
-            UiRelation.Bluesky(
-                following = viewer?.following?.atUri != null,
-                isFans = viewer?.followedBy?.atUri != null,
-                blocking = viewer?.blockedBy ?: false,
-                muting = viewer?.muted ?: false,
-            ),
-        accountKey = accountKey,
-    )
-
-internal fun ProfileViewBasic.toUi(accountKey: MicroBlogKey): UiUser.Bluesky =
-    UiUser.Bluesky(
-        userKey =
-            MicroBlogKey(
-                id = did.did,
-                host = accountKey.host,
-            ),
-        displayName = displayName.orEmpty(),
-        handleInternal = handle.handle,
-        avatarUrl = avatar?.uri.orEmpty(),
-        bannerUrl = null,
-        description = null,
-        matrices =
-            UiUser.Bluesky.Matrices(
-                fansCount = 0,
-                followsCount = 0,
-                statusesCount = 0,
-            ),
-        relation =
-            UiRelation.Bluesky(
-                following = viewer?.following?.atUri != null,
-                isFans = viewer?.followedBy?.atUri != null,
-                blocking = viewer?.blockedBy ?: false,
-                muting = viewer?.muted ?: false,
-            ),
-        accountKey = accountKey,
-    )
-
-internal fun ProfileView.toUi(accountKey: MicroBlogKey): UiUser.Bluesky =
-    UiUser.Bluesky(
-        userKey =
-            MicroBlogKey(
-                id = did.did,
-                host = accountKey.host,
-            ),
-        displayName = displayName.orEmpty(),
-        handleInternal = handle.handle,
-        avatarUrl = avatar?.uri.orEmpty(),
-        bannerUrl = null,
-        description = description,
-        matrices =
-            UiUser.Bluesky.Matrices(
-                fansCount = 0,
-                followsCount = 0,
-                statusesCount = 0,
-            ),
-        relation =
-            UiRelation.Bluesky(
-                following = viewer?.following?.atUri != null,
-                isFans = viewer?.followedBy?.atUri != null,
-                blocking = viewer?.blockedBy ?: false,
-                muting = viewer?.muted ?: false,
-            ),
-        accountKey = accountKey,
-    )

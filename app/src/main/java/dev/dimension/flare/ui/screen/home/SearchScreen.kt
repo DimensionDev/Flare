@@ -34,14 +34,12 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.component.status.StatusEvent
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
@@ -153,7 +151,6 @@ private fun SearchScreen(
                         searchUsers = state.searchState.users,
                         searchStatus = state.searchState.status,
                         toUser = onUserClick,
-                        statusEvent = state.statusEvent,
                     )
                 }
             },
@@ -165,7 +162,6 @@ private fun SearchScreen(
 private fun presenter(
     accountType: AccountType,
     initialQuery: String,
-    statusEvent: StatusEvent = koinInject(),
 ) = run {
     val searchBarState = searchBarPresenter(accountType, initialQuery)
     val searchState =
@@ -175,15 +171,14 @@ private fun presenter(
 
     object : SearchBarState by searchBarState {
         val searchState = searchState
-        val statusEvent = statusEvent
 
         val refreshing =
             searchState.users is UiState.Loading ||
                 searchState.status is UiState.Loading ||
                 searchState.users is UiState.Success &&
-                (searchState.users as UiState.Success<LazyPagingItems<UiUser>>).data.isLoading ||
+                (searchState.users as UiState.Success<LazyPagingItems<UiUserV2>>).data.isLoading ||
                 searchState.status is UiState.Success &&
-                (searchState.status as UiState.Success<LazyPagingItems<UiStatus>>).data.isLoading
+                (searchState.status as UiState.Success<LazyPagingItems<UiTimeline>>).data.isLoading
 
         fun refresh() {
             searchState.search(query)

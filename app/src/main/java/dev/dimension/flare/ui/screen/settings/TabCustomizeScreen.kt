@@ -416,7 +416,7 @@ fun TabIcon(
             }
             userState.user
                 .onSuccess {
-                    AvatarComponent(it.avatarUrl, size = 24.dp, modifier = modifier)
+                    AvatarComponent(it.avatar, size = 24.dp, modifier = modifier)
                 }.onLoading {
                     AvatarComponent(null, size = 24.dp, modifier = modifier.placeholder(true))
                 }
@@ -463,7 +463,7 @@ fun TabIcon(
                 ) {
                     userState.user
                         .onSuccess {
-                            AvatarComponent(it.avatarUrl, size = 24.dp)
+                            AvatarComponent(it.avatar, size = 24.dp)
                         }.onLoading {
                             AvatarComponent(null, size = 24.dp, modifier = Modifier.placeholder(true))
                         }

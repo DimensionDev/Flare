@@ -38,6 +38,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
@@ -122,16 +123,19 @@ private fun ProfileMediaScreen(
                                     Modifier
                                         .clipToBounds()
                                         .clickable {
-                                            onItemClicked(
-                                                item.status.statusKey,
-                                                item.index,
-                                                when (media) {
-                                                    is UiMedia.Image -> media.previewUrl
-                                                    is UiMedia.Video -> media.thumbnailUrl
-                                                    is UiMedia.Gif -> media.previewUrl
-                                                    else -> null
-                                                },
-                                            )
+                                            val content = item.status.content
+                                            if (content is UiTimeline.ItemContent.Status) {
+                                                onItemClicked(
+                                                    content.statusKey,
+                                                    item.index,
+                                                    when (media) {
+                                                        is UiMedia.Image -> media.previewUrl
+                                                        is UiMedia.Video -> media.thumbnailUrl
+                                                        is UiMedia.Gif -> media.previewUrl
+                                                        else -> null
+                                                    },
+                                                )
+                                            }
                                         },
                             )
                         } else {

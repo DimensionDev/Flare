@@ -5,16 +5,16 @@ import androidx.paging.PagingState
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiUser
-import dev.dimension.flare.ui.model.mapper.toUi
+import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class TrendsUserPagingSource(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
-) : PagingSource<Int, UiUser>() {
-    override fun getRefreshKey(state: PagingState<Int, UiUser>): Int? = null
+) : PagingSource<Int, UiUserV2>() {
+    override fun getRefreshKey(state: PagingState<Int, UiUserV2>): Int? = null
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiUser> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiUserV2> {
         try {
             service
                 .getUserRecommendations(
@@ -25,7 +25,7 @@ internal class TrendsUserPagingSource(
                         User(
                             legacy = it.user,
                             restId = it.userID,
-                        ).toUi(accountKey = accountKey)
+                        ).render(accountKey = accountKey)
                     } else {
                         null
                     }

@@ -9,7 +9,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
+import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -51,7 +51,18 @@ class MisskeyReactionPresenter(
                 service.onSuccess { dataSource ->
                     status.onSuccess { status ->
                         scope.launch {
-                            dataSource.react(status as UiStatus.Misskey, ":${emoji.shortcode}:")
+                            val content = status.content
+                            if (content is UiTimeline.ItemContent.Status) {
+                                val bottomContent = content.bottomContent
+                                if (bottomContent is UiTimeline.ItemContent.Status.BottomContent.Reaction) {
+                                    dataSource.react(
+                                        statusKey = statusKey,
+                                        hasReacted = bottomContent.myReaction != null,
+                                        reaction = emoji.shortcode,
+                                    )
+                                }
+                            }
+//                            dataSource.react(status as UiStatus.Misskey, ":${emoji.shortcode}:")
                         }
                     }
                 }

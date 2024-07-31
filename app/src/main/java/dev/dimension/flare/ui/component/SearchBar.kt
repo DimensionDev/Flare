@@ -44,12 +44,13 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.status.StatusEvent
+import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
+import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiSearchHistory
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
@@ -57,8 +58,6 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
-import dev.dimension.flare.ui.screen.profile.CommonProfileHeader
-import dev.dimension.flare.ui.screen.profile.ProfileHeaderLoading
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
@@ -103,7 +102,7 @@ context(AnimatedVisibilityScope, SharedTransitionScope)
 )
 @Composable
 private fun SearchContent(
-    user: UiState<UiUser>?,
+    user: UiState<UiUserV2>?,
     historyState: UiState<ImmutableListWrapper<UiSearchHistory>>,
     onDelete: (UiSearchHistory) -> Unit,
     query: String,
@@ -131,7 +130,7 @@ private fun SearchContent(
                         IconButton(onClick = {
                             onAccountClick.invoke()
                         }) {
-                            AvatarComponent(it.avatarUrl, size = 30.dp)
+                            AvatarComponent(it.avatar, size = 30.dp)
                         }
                     }
                 },
@@ -197,9 +196,8 @@ private fun SearchContent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 internal fun LazyStaggeredGridScope.searchContent(
-    searchUsers: UiState<LazyPagingItems<UiUser>>,
-    searchStatus: UiState<LazyPagingItems<UiStatus>>,
-    statusEvent: StatusEvent,
+    searchUsers: UiState<LazyPagingItems<UiUserV2>>,
+    searchStatus: UiState<LazyPagingItems<UiTimeline>>,
     toUser: (MicroBlogKey) -> Unit,
 ) {
     searchUsers.onSuccess { users ->
@@ -224,42 +222,35 @@ internal fun LazyStaggeredGridScope.searchContent(
                 users
                     .onLoading {
                         items(10) {
-                            ProfileHeaderLoading(
-                                modifier = Modifier.width(256.dp),
-                            )
+                            Card(
+                                modifier =
+                                    Modifier
+                                        .width(256.dp),
+                            ) {
+                                UserPlaceholder(
+                                    modifier = Modifier.padding(8.dp),
+                                )
+                            }
                         }
                     }.onSuccess {
                         items(users.itemCount) {
                             val item = users[it]
-                            Card {
+                            Card(
+                                modifier =
+                                    Modifier
+                                        .width(256.dp),
+                            ) {
                                 if (item == null) {
-                                    ProfileHeaderLoading(
-                                        modifier =
-                                            Modifier
-                                                .width(256.dp),
+                                    UserPlaceholder(
+                                        modifier = Modifier.padding(8.dp),
                                     )
                                 } else {
-                                    CommonProfileHeader(
-                                        bannerUrl = item.bannerUrl,
-                                        avatarUrl = item.avatarUrl,
-                                        displayName = item.nameElement,
-                                        handle = item.handle,
-                                        content = {
-                                            item.descriptionElement?.let {
-                                                HtmlText(
-                                                    element = it,
-                                                    maxLines = 2,
-                                                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                                                )
-                                            }
+                                    CommonStatusHeaderComponent(
+                                        modifier = Modifier.padding(8.dp),
+                                        data = item,
+                                        onUserClick = {
+                                            toUser(item.key)
                                         },
-                                        userKey = item.userKey,
-                                        modifier =
-                                            Modifier
-                                                .width(256.dp)
-                                                .clickable {
-                                                    toUser(item.userKey)
-                                                },
                                     )
                                 }
                             }
@@ -280,9 +271,7 @@ internal fun LazyStaggeredGridScope.searchContent(
             )
         }
         with(searchStatus) {
-            with(statusEvent) {
-                status()
-            }
+            status()
         }
     }
 }

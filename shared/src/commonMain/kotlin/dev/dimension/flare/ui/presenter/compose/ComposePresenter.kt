@@ -20,8 +20,8 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
@@ -53,17 +53,55 @@ class ComposePresenter(
                 selectedAccounts.add(it)
             }
         }
-        val replyState =
+        val statusState =
             status?.let { status ->
                 remember(status.statusKey) {
                     StatusPresenter(accountType = accountType, statusKey = status.statusKey)
                 }.body().status
             }
+        val replyState =
+            statusState?.map {
+                if (it.platformType == PlatformType.VVo) {
+                    it.copy(
+                        content = (it.content as? UiTimeline.ItemContent.Status)?.quote?.firstOrNull() ?: it.content,
+                    )
+                } else {
+                    it
+                }
+            }
+        val initialTextState =
+            statusState?.mapNotNull {
+                val content = it.content
+                if (content is UiTimeline.ItemContent.Status) {
+                    when (it.platformType) {
+                        PlatformType.VVo -> {
+                            if (content.quote.any() && status is ComposeStatus.Quote) {
+                                InitialText(
+                                    text = "//@${content.user?.name?.raw}:${content.content.raw}",
+                                    cursorPosition = 0,
+                                )
+                            } else {
+                                null
+                            }
+                        }
+                        PlatformType.Mastodon -> {
+                            val text = "${content.user?.handle} "
+                            InitialText(
+                                text = text,
+                                cursorPosition = text.length,
+                            )
+                        }
+                        else -> null
+                    }
+                } else {
+                    null
+                }
+            }
         val allUsers =
             accounts.flatMap { data ->
                 accountState
                     .flatMap { current ->
-                        replyState?.map {
+                        statusState?.map {
                             current to listOf(it.platformType)
                         } ?: UiState.Success(current to PlatformType.entries.toList())
                     }.map { (current, platforms) ->
@@ -77,7 +115,11 @@ class ComposePresenter(
                                     .flatMap { service ->
                                         remember(account.accountKey) {
                                             service.userById(account.accountKey.id)
-                                        }.collectAsState().toUi()
+                                        }.collectAsState()
+                                            .toUi()
+                                            .map {
+                                                it as UiUserV2
+                                            }
                                     } to account
                             }.toImmutableList()
                             .toImmutableListWrapper()
@@ -107,29 +149,11 @@ class ComposePresenter(
                 it.size > 1 // && status == null
             }
 
-//        val serviceState = accountServiceProvider(accountType = accountType)
         val services =
             selectedAccounts.map {
                 accountServiceProvider(accountType = AccountType.Specific(accountKey = it.accountKey))
             }
         val composeUseCase: ComposeUseCase = koinInject()
-        val visibilityState: UiState<VisibilityState> =
-            selectedAccounts
-                .takeIf {
-                    it.size == 1
-                }?.first()
-                ?.let {
-                    when (it) {
-                        is UiAccount.Mastodon -> UiState.Success(mastodonVisibilityPresenter())
-                        is UiAccount.Misskey -> UiState.Success(misskeyVisibilityPresenter())
-                        is UiAccount.XQT -> UiState.Error(IllegalStateException("XQT not supported"))
-                        is UiAccount.Bluesky -> UiState.Error(IllegalStateException("Bluesky not supported"))
-                        UiAccount.Guest -> UiState.Error(IllegalStateException("Guest not supported"))
-                        // TODO: handle VVo
-                        is UiAccount.VVo -> UiState.Error(IllegalStateException("VVo not supported"))
-                    }
-                } ?: UiState.Error(IllegalStateException("Visibility not supported"))
-
         val composeConfig: UiState<ComposeConfig> =
             remember(services) {
                 services.merge().map {
@@ -149,6 +173,14 @@ class ComposePresenter(
                     it.toImmutableListWrapper()
                 }
 
+        val visibilityState =
+            composeConfig
+                .mapNotNull {
+                    it.visibility
+                }.map {
+                    visibilityPresenter()
+                }
+
         return object : ComposeState(
             account = accountState,
             visibilityState = visibilityState,
@@ -159,6 +191,7 @@ class ComposePresenter(
             selectedAccounts = selectedAccounts.toImmutableList(),
             selectedUsers = selectedUsers,
             otherAccounts = remainingAccounts,
+            initialTextState = initialTextState,
         ) {
             override fun send(data: ComposeData) {
                 composeUseCase.invoke(data) {
@@ -179,46 +212,25 @@ class ComposePresenter(
         }
     }
 
-//    @Composable
-//    private fun emojiPresenter(accountType: AccountType): UiState<ImmutableListWrapper<UiEmoji>> {
-//        return accountServiceProvider(accountType = accountType)
-//            .flatMap {
-//                when (it) {
-//                    is MastodonDataSource -> it.emoji()
-//                    is MisskeyDataSource -> it.emoji()
-//                    else -> null
-//                }?.collectAsState()?.toUi()?.map {
-//                    it.toImmutableListWrapper()
-//                } ?: UiState.Error(IllegalStateException("Emoji not supported"))
-//            }
-//    }
-
     @Composable
-    private fun misskeyVisibilityPresenter(): MisskeyVisibilityState {
-        var localOnly by remember {
-            mutableStateOf(false)
-        }
+    private fun visibilityPresenter(): VisibilityState {
         var showVisibilityMenu by remember {
             mutableStateOf(false)
         }
         var visibility by remember {
-            mutableStateOf(UiStatus.Misskey.Visibility.Public)
+            mutableStateOf(UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public)
         }
-        return object : MisskeyVisibilityState(
-            visibility = visibility,
-            showVisibilityMenu = showVisibilityMenu,
-            allVisibilities =
-                UiStatus.Misskey.Visibility.entries
-                    .toImmutableList(),
-            localOnly = localOnly,
-        ) {
-            override fun setLocalOnly(value: Boolean) {
-                localOnly = value
-            }
+        return object : VisibilityState {
+            override val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type
+                get() = visibility
 
-            override fun setVisibility(value: UiStatus.Misskey.Visibility) {
-                visibility = value
-            }
+            override val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>
+                get() =
+                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.entries
+                        .toImmutableList()
+
+            override val showVisibilityMenu: Boolean
+                get() = showVisibilityMenu
 
             override fun showVisibilityMenu() {
                 showVisibilityMenu = true
@@ -227,68 +239,24 @@ class ComposePresenter(
             override fun hideVisibilityMenu() {
                 showVisibilityMenu = false
             }
-        }
-    }
 
-    @Composable
-    private fun mastodonVisibilityPresenter(): MastodonVisibilityState {
-        var showVisibilityMenu by remember {
-            mutableStateOf(false)
-        }
-        var visibility by remember {
-            mutableStateOf(UiStatus.Mastodon.Visibility.Public)
-        }
-        return object : MastodonVisibilityState(
-            visibility = visibility,
-            showVisibilityMenu = showVisibilityMenu,
-            allVisibilities =
-                UiStatus.Mastodon.Visibility.entries
-                    .toImmutableList(),
-        ) {
-            override fun setVisibility(value: UiStatus.Mastodon.Visibility) {
+            override fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type) {
                 visibility = value
             }
-
-            override fun showVisibilityMenu() {
-                showVisibilityMenu = true
-            }
-
-            override fun hideVisibilityMenu() {
-                showVisibilityMenu = false
-            }
         }
     }
 }
 
-sealed interface VisibilityState
+interface VisibilityState {
+    val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type
+    val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>
+    val showVisibilityMenu: Boolean
 
-@Immutable
-abstract class MastodonVisibilityState(
-    val visibility: UiStatus.Mastodon.Visibility,
-    val showVisibilityMenu: Boolean,
-    val allVisibilities: ImmutableList<UiStatus.Mastodon.Visibility>,
-) : VisibilityState {
-    abstract fun setVisibility(value: UiStatus.Mastodon.Visibility)
+    fun showVisibilityMenu()
 
-    abstract fun showVisibilityMenu()
+    fun hideVisibilityMenu()
 
-    abstract fun hideVisibilityMenu()
-}
-
-@Immutable
-abstract class MisskeyVisibilityState(
-    val visibility: UiStatus.Misskey.Visibility,
-    val showVisibilityMenu: Boolean,
-    val allVisibilities: ImmutableList<UiStatus.Misskey.Visibility>,
-    val localOnly: Boolean,
-) : VisibilityState {
-    abstract fun setLocalOnly(value: Boolean)
-
-    abstract fun setVisibility(value: UiStatus.Misskey.Visibility)
-
-    abstract fun showVisibilityMenu()
-
-    abstract fun hideVisibilityMenu()
+    fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type)
 }
 
 sealed interface ComposeStatus {
@@ -312,15 +280,22 @@ sealed interface ComposeStatus {
 abstract class ComposeState(
     val account: UiState<UiAccount>,
     val visibilityState: UiState<VisibilityState>,
-    val replyState: UiState<UiStatus>?,
+    val replyState: UiState<UiTimeline>?,
+    val initialTextState: UiState<InitialText>?,
     val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
     val composeConfig: UiState<ComposeConfig>,
     val enableCrossPost: UiState<Boolean>,
     val selectedAccounts: ImmutableList<UiAccount>,
-    val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiUser>, UiAccount>>>,
-    val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiUser>, UiAccount>>>,
+    val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
+    val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
 ) {
     abstract fun send(data: ComposeData)
 
     abstract fun selectAccount(account: UiAccount)
 }
+
+@Immutable
+data class InitialText internal constructor(
+    val text: String,
+    val cursorPosition: Int,
+)

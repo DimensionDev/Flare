@@ -24,6 +24,7 @@ import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -36,10 +37,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiStatus
-import dev.dimension.flare.ui.model.UiUser
+import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.toImmutableList
@@ -49,6 +52,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -56,9 +60,11 @@ import org.koin.core.component.inject
 class MastodonDataSource(
     override val account: UiAccount.Mastodon,
 ) : MicroblogDataSource,
-    KoinComponent {
+    KoinComponent,
+    StatusEvent.Mastodon {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
+    private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://${account.credential.instance}/",
@@ -70,7 +76,7 @@ class MastodonDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -91,7 +97,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "local_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -113,7 +119,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "bookmarked_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -134,7 +140,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "favourite_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -155,7 +161,7 @@ class MastodonDataSource(
         pageSize: Int = 20,
         pagingKey: String = "public_${account.accountKey}",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -178,7 +184,7 @@ class MastodonDataSource(
         pageSize: Int,
         pagingKey: String,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -215,7 +221,7 @@ class MastodonDataSource(
                 NotificationFilter.Mention,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiUser> {
+    override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
@@ -237,12 +243,12 @@ class MastodonDataSource(
                     .findByHandleAndHost(name, host, PlatformType.Mastodon)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
 
-    override fun userById(id: String): CacheData<UiUser> {
+    override fun userById(id: String): CacheData<UiProfile> {
         val userKey = MicroBlogKey(id, account.accountKey.host)
         return Cacheable(
             fetchSource = {
@@ -261,7 +267,7 @@ class MastodonDataSource(
                     .findByKey(userKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi(account.accountKey) }
+                    .map { it.render(account.accountKey) }
             },
         )
     }
@@ -279,7 +285,7 @@ class MastodonDataSource(
         pageSize: Int,
         mediaOnly: Boolean,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -303,7 +309,7 @@ class MastodonDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -322,7 +328,7 @@ class MastodonDataSource(
                 ),
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiStatus> {
+    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
         return Cacheable(
             fetchSource = {
@@ -342,7 +348,7 @@ class MastodonDataSource(
                     .get(statusKey, account.accountKey)
                     .asFlow()
                     .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.toUi(account.accountKey) }
+                    .mapNotNull { it.content.render(account.accountKey, this) }
             },
         )
     }
@@ -390,10 +396,10 @@ class MastodonDataSource(
                 status = data.content,
                 visibility =
                     when (data.visibility) {
-                        UiStatus.Mastodon.Visibility.Public -> Visibility.Public
-                        UiStatus.Mastodon.Visibility.Unlisted -> Visibility.Unlisted
-                        UiStatus.Mastodon.Visibility.Private -> Visibility.Private
-                        UiStatus.Mastodon.Visibility.Direct -> Visibility.Direct
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public -> Visibility.Public
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home -> Visibility.Unlisted
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> Visibility.Private
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> Visibility.Direct
                     },
                 inReplyToID = data.inReplyToID,
                 mediaIDS = mediaIds.takeIf { it.isNotEmpty() },
@@ -412,99 +418,131 @@ class MastodonDataSource(
         progress(ComposeProgress(maxProgress, maxProgress))
     }
 
-    suspend fun like(status: UiStatus.Mastodon) {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            favourited = !status.reaction.liked,
-                            favouritesCount =
-                                if (status.reaction.liked) {
-                                    it.data.favouritesCount?.minus(1)
-                                } else {
-                                    it.data.favouritesCount?.plus(1)
-                                },
-                        ),
-                )
-            },
-        )
+    override fun like(
+        statusKey: MicroBlogKey,
+        liked: Boolean,
+    ) {
+        coroutineScope.launch {
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = statusKey,
+                accountKey = account.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                favourited = !liked,
+                                favouritesCount =
+                                    if (liked) {
+                                        it.data.favouritesCount?.minus(1)
+                                    } else {
+                                        it.data.favouritesCount?.plus(1)
+                                    },
+                            ),
+                    )
+                },
+            )
 
-        runCatching {
-            if (status.reaction.liked) {
-                service.unfavourite(status.statusKey.id)
-            } else {
-                service.favourite(status.statusKey.id)
+            runCatching {
+                if (liked) {
+                    service.unfavourite(statusKey.id)
+                } else {
+                    service.favourite(statusKey.id)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    favourited = liked,
+                                    favouritesCount =
+                                        if (!liked) {
+                                            it.data.favouritesCount?.minus(1)
+                                        } else {
+                                            it.data.favouritesCount?.plus(1)
+                                        },
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess { result ->
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(data = result)
+                    },
+                )
             }
-        }.onFailure {
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = status.raw)
-                },
-            )
-        }.onSuccess { result ->
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = result)
-                },
-            )
         }
     }
 
-    suspend fun reblog(status: UiStatus.Mastodon) {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            reblogged = !status.reaction.reblogged,
-                            reblogsCount =
-                                if (status.reaction.reblogged) {
-                                    it.data.reblogsCount?.minus(1)
-                                } else {
-                                    it.data.reblogsCount?.plus(1)
-                                },
-                        ),
-                )
-            },
-        )
+    override fun reblog(
+        statusKey: MicroBlogKey,
+        reblogged: Boolean,
+    ) {
+        coroutineScope.launch {
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = statusKey,
+                accountKey = account.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                reblogged = !reblogged,
+                                reblogsCount =
+                                    if (reblogged) {
+                                        it.data.reblogsCount?.minus(1)
+                                    } else {
+                                        it.data.reblogsCount?.plus(1)
+                                    },
+                            ),
+                    )
+                },
+            )
 
-        runCatching {
-            if (status.reaction.reblogged) {
-                service.unreblog(status.statusKey.id)
-            } else {
-                service.reblog(status.statusKey.id)
+            runCatching {
+                if (reblogged) {
+                    service.unreblog(statusKey.id)
+                } else {
+                    service.reblog(statusKey.id)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    reblogged = reblogged,
+                                    reblogsCount =
+                                        if (!reblogged) {
+                                            it.data.reblogsCount?.minus(1)
+                                        } else {
+                                            it.data.reblogsCount?.plus(1)
+                                        },
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess { result ->
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(data = result)
+                    },
+                )
             }
-        }.onFailure {
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = status.raw)
-                },
-            )
-        }.onSuccess { result ->
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = result)
-                },
-            )
         }
     }
 
@@ -523,45 +561,55 @@ class MastodonDataSource(
         }
     }
 
-    suspend fun bookmark(status: UiStatus.Mastodon) {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = status.statusKey,
-            accountKey = status.accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            bookmarked = !status.reaction.bookmarked,
-                        ),
-                )
-            },
-        )
+    override fun bookmark(
+        statusKey: MicroBlogKey,
+        bookmarked: Boolean,
+    ) {
+        coroutineScope.launch {
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = statusKey,
+                accountKey = account.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                bookmarked = !bookmarked,
+                            ),
+                    )
+                },
+            )
 
-        runCatching {
-            if (status.reaction.bookmarked) {
-                service.unbookmark(status.statusKey.id)
-            } else {
-                service.bookmark(status.statusKey.id)
+            runCatching {
+                if (bookmarked) {
+                    service.unbookmark(statusKey.id)
+                } else {
+                    service.bookmark(statusKey.id)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    bookmarked = bookmarked,
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess { result ->
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(data = result)
+                    },
+                )
             }
-        }.onFailure {
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = status.raw)
-                },
-            )
-        }.onSuccess { result ->
-            updateStatusUseCase<StatusContent.Mastodon>(
-                statusKey = status.statusKey,
-                accountKey = status.accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(data = result)
-                },
-            )
         }
     }
 
@@ -581,7 +629,7 @@ class MastodonDataSource(
 
     suspend fun unfollow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -591,7 +639,7 @@ class MastodonDataSource(
         runCatching {
             service.unfollow(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -603,7 +651,7 @@ class MastodonDataSource(
 
     suspend fun follow(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -613,7 +661,7 @@ class MastodonDataSource(
         runCatching {
             service.follow(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -625,7 +673,7 @@ class MastodonDataSource(
 
     suspend fun block(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -635,7 +683,7 @@ class MastodonDataSource(
         runCatching {
             service.block(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -647,7 +695,7 @@ class MastodonDataSource(
 
     suspend fun unblock(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
@@ -657,7 +705,7 @@ class MastodonDataSource(
         runCatching {
             service.unblock(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
@@ -669,21 +717,21 @@ class MastodonDataSource(
 
     suspend fun mute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = true,
+                muted = true,
             )
         }
         runCatching {
             service.muteUser(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = false,
+                    muted = false,
                 )
             }
         }
@@ -691,33 +739,33 @@ class MastodonDataSource(
 
     suspend fun unmute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation.Mastodon>(
+        MemCacheable.updateWith<UiRelation>(
             key = key,
         ) {
             it.copy(
-                muting = false,
+                muted = false,
             )
         }
         runCatching {
             service.unmuteUser(userKey.id)
         }.onFailure {
-            MemCacheable.updateWith<UiRelation.Mastodon>(
+            MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
                 it.copy(
-                    muting = true,
+                    muted = true,
                 )
             }
         }
     }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUser>> =
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
                 service,
-                account.accountKey.host,
+                account.accountKey,
             )
         }.flow
 
@@ -725,7 +773,7 @@ class MastodonDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -756,7 +804,7 @@ class MastodonDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiStatus>> =
+    ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -778,13 +826,13 @@ class MastodonDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUser>> =
+    ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
                 service,
-                account.accountKey.host,
+                account.accountKey,
                 query,
             )
         }.flow.cachedIn(scope)
@@ -803,41 +851,35 @@ class MastodonDataSource(
         userKey: MicroBlogKey,
         relation: UiRelation,
     ) {
-        require(relation is UiRelation.Mastodon)
         when {
             relation.following -> unfollow(userKey)
             relation.blocking -> unblock(userKey)
-            relation.requested -> Unit // you can't cancel follow request on mastodon
+            relation.hasPendingFollowRequestFromYou -> Unit // you can't cancel follow request on mastodon
             else -> follow(userKey)
         }
     }
 
-    override fun profileActions(): List<ProfileAction> {
-        return listOf(
+    override fun profileActions(): List<ProfileAction> =
+        listOf(
             object : ProfileAction.Mute {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.Mastodon)
-                    if (relation.muting) {
+                    if (relation.muted) {
                         unmute(userKey)
                     } else {
                         mute(userKey)
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.Mastodon)
-                    return relation.muting
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.muted
             },
             object : ProfileAction.Block {
                 override suspend fun invoke(
                     userKey: MicroBlogKey,
                     relation: UiRelation,
                 ) {
-                    require(relation is UiRelation.Mastodon)
                     if (relation.blocking) {
                         unblock(userKey)
                     } else {
@@ -845,11 +887,7 @@ class MastodonDataSource(
                     }
                 }
 
-                override fun relationState(relation: UiRelation): Boolean {
-                    require(relation is UiRelation.Mastodon)
-                    return relation.blocking
-                }
+                override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
-    }
 }

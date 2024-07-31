@@ -140,7 +140,7 @@ struct CommonStatusComponent: View {
                 }
             }
 
-            if (isDetail) {
+            if isDetail {
                 Spacer()
                     .frame(height: 4)
                 HStack {

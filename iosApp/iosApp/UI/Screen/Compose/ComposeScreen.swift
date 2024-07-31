@@ -181,7 +181,7 @@ struct ComposeScreen: View {
                                 })
                             }
                             if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
-                                
+
                             }
 //                            if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
 //                                switch onEnum(of: visibilityState.data) {
@@ -215,7 +215,7 @@ struct ComposeScreen: View {
 //                                    }
 //                                }
 //                            }
-                            
+
                             if case .success(let data) = onEnum(of: viewModel.model.composeConfig),
                                 data.data.contentWarning != nil {
                                 Button(action: {

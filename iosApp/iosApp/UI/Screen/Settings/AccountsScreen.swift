@@ -10,12 +10,12 @@ struct AccountsScreen: View {
                 switch onEnum(of: state.accounts) {
                 case .success(let data):
                     if data.data.size > 0 {
-                        ForEach(1...data.data.size, id: \.self) { index in
-                            let item = data.data.get(index: index - 1)
+                        ForEach(0..<data.data.size, id: \.self) { index in
+                            let item = data.data.get(index: index)
                             switch onEnum(of: item.second) {
                             case .success(let user):
                                 Button {
-                                    state.setActiveAccount(accountKey: user.data.userKey)
+                                    state.setActiveAccount(accountKey: user.data.key)
                                 } label: {
                                     HStack {
                                         UserComponent(user: user.data, onUserClicked: { })
@@ -23,7 +23,7 @@ struct AccountsScreen: View {
                                         switch onEnum(of: state.activeAccount) {
                                         case .success(let activeAccount):
                                             Image(
-                                                systemName: activeAccount.data.accountKey == user.data.userKey ?
+                                                systemName: activeAccount.data.accountKey == user.data.key ?
                                                 "checkmark.circle.fill" :
                                                     "circle"
                                             )
@@ -35,7 +35,7 @@ struct AccountsScreen: View {
                                     }
                                     .swipeActions(edge: .trailing) {
                                         Button(role: .destructive) {
-                                            state.removeAccount(accountKey: user.data.userKey)
+                                            state.removeAccount(accountKey: user.data.key)
                                         } label: {
                                             Label("delete", systemImage: "trash")
                                         }
@@ -45,7 +45,7 @@ struct AccountsScreen: View {
                                 #if os(macOS)
                                 .contextMenu {
                                     Button(role: .destructive) {
-                                        viewModel.model.removeAccount(accountKey: user.data.userKey)
+                                        viewModel.model.removeAccount(accountKey: user.data.key)
                                     } label: {
                                         Label("delete", systemImage: "trash")
                                     }

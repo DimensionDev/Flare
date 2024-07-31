@@ -62,4 +62,3 @@ struct QuotedStatus: View {
         .buttonStyle(.plain)
     }
 }
-

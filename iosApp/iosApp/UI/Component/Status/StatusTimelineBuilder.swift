@@ -101,48 +101,48 @@ struct StatusItemView: View {
             let text = switch onEnum(of: topMessage.type) {
             case .bluesky(let data):
                 switch onEnum(of: data) {
-                case .follow(_): String(localized: "bluesky_notification_follow")
-                case .like(_): String(localized: "bluesky_notification_like")
-                case .mention(_): String(localized: "bluesky_notification_mention")
-                case .quote(_): String(localized: "bluesky_notification_quote")
-                case .reply(_): String(localized: "bluesky_notification_reply")
-                case .repost(_): String(localized: "bluesky_notification_repost")
+                case .follow: String(localized: "bluesky_notification_follow")
+                case .like: String(localized: "bluesky_notification_like")
+                case .mention: String(localized: "bluesky_notification_mention")
+                case .quote: String(localized: "bluesky_notification_quote")
+                case .reply: String(localized: "bluesky_notification_reply")
+                case .repost: String(localized: "bluesky_notification_repost")
                 }
             case .mastodon(let data):
                 switch onEnum(of: data) {
-                case .favourite(_): String(localized: "mastodon_notification_favourite")
-                case .follow(_): String(localized: "mastodon_notification_follow")
-                case .followRequest(_): String(localized: "mastodon_notification_follow_request")
-                case .mention(_): String(localized: "mastodon_notification_mention")
-                case .poll(_): String(localized: "mastodon_notification_poll")
-                case .reblogged(_): String(localized: "mastodon_notification_reblog")
-                case .status(_): String(localized: "mastodon_notification_status")
-                case .update(_): String(localized: "mastodon_notification_update")
+                case .favourite: String(localized: "mastodon_notification_favourite")
+                case .follow: String(localized: "mastodon_notification_follow")
+                case .followRequest: String(localized: "mastodon_notification_follow_request")
+                case .mention: String(localized: "mastodon_notification_mention")
+                case .poll: String(localized: "mastodon_notification_poll")
+                case .reblogged: String(localized: "mastodon_notification_reblog")
+                case .status: String(localized: "mastodon_notification_status")
+                case .update: String(localized: "mastodon_notification_update")
                 }
             case .misskey(let data):
                 switch onEnum(of: data) {
-                case .achievementEarned(_):  String(localized: "misskey_notification_achievement_earned")
-                case .app(_): String(localized: "misskey_notification_app")
-                case .follow(_): String(localized: "misskey_notification_follow")
-                case .followRequestAccepted(_): String(localized: "misskey_notification_follow_request_accepted")
-                case .mention(_): String(localized: "misskey_notification_mention")
-                case .pollEnded(_): String(localized: "misskey_notification_poll_ended")
-                case .quote(_): String(localized: "misskey_notification_quote")
-                case .reaction(_): String(localized: "misskey_notification_reaction")
-                case .receiveFollowRequest(_): String(localized: "misskey_notification_receive_follow_request")
-                case .renote(_): String(localized: "misskey_notification_renote")
-                case .reply(_): String(localized: "misskey_notification_reply")
+                case .achievementEarned:  String(localized: "misskey_notification_achievement_earned")
+                case .app: String(localized: "misskey_notification_app")
+                case .follow: String(localized: "misskey_notification_follow")
+                case .followRequestAccepted: String(localized: "misskey_notification_follow_request_accepted")
+                case .mention: String(localized: "misskey_notification_mention")
+                case .pollEnded: String(localized: "misskey_notification_poll_ended")
+                case .quote: String(localized: "misskey_notification_quote")
+                case .reaction: String(localized: "misskey_notification_reaction")
+                case .receiveFollowRequest: String(localized: "misskey_notification_receive_follow_request")
+                case .renote: String(localized: "misskey_notification_renote")
+                case .reply: String(localized: "misskey_notification_reply")
                 }
             case .vVO(let data):
                 switch onEnum(of: data) {
                 case .custom(let message): message.message
-                case .like(_): String(localized: "vvo_notification_like")
+                case .like: String(localized: "vvo_notification_like")
                 }
             case .xQT(let data):
                 switch onEnum(of: data) {
                 case .custom(let message): message.message
-                case .mention(_): String(localized: "xqt_notification_mention")
-                case .retweet(_): String(localized: "xqt_notification_retweet")
+                case .mention: String(localized: "xqt_notification_mention")
+                case .retweet: String(localized: "xqt_notification_retweet")
                 }
             }
             StatusRetweetHeaderComponent(iconSystemName: icon, nameMarkdown: topMessage.user?.name.markdown, text: text)
@@ -154,8 +154,8 @@ struct StatusItemView: View {
             switch onEnum(of: content) {
             case .status(let data): CommonStatusComponent(
                 data: data,
-                onMediaClick: { index, preview in
-                    
+                onMediaClick: { _, _ in
+
                 }
             ).onTapGesture {
                 data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))

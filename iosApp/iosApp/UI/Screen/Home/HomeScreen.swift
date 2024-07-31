@@ -109,7 +109,6 @@ struct HomeScreen: View {
     }
 }
 
-
 struct TabItem<Content: View>: View {
     let accountType: SwiftAccountType
     @State var showCompose = false
@@ -145,12 +144,12 @@ struct TabItem<Content: View>: View {
 //                        statusEvent.composeStatus = nil
 //                    }, accountType: accountType.toKotlin(), status: status)
 //                }
-//#if os(macOS)
+// #if os(macOS)
 //                .frame(minWidth: 500, minHeight: 400)
-//#endif
+// #endif
 //            }
 //        }
-//#if os(iOS)
+// #if os(iOS)
 //        .fullScreenCover(
 //            isPresented: Binding(get: { statusEvent.mediaClickData != nil }, set: { value in if !value { statusEvent.mediaClickData = nil }}),
 //            onDismiss: { statusEvent.mediaClickData = nil }
@@ -162,7 +161,7 @@ struct TabItem<Content: View>: View {
 //                }
 //            }
 //        }
-//#endif
+// #endif
         .environment(\.openURL, OpenURLAction { url in
             if let event = AppDeepLink.shared.parse(url: url.absoluteString) {
                 switch onEnum(of: event) {

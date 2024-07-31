@@ -1,44 +1,22 @@
 import SwiftUI
 import MarkdownUI
 import NetworkImage
+import shared
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
     static let avatarSize: CGFloat = 96
 }
 
-struct CommonProfileHeader<HeaderTrailing, HandleTrailing, Content>: View
-where HeaderTrailing: View, HandleTrailing: View, Content: View {
-    let bannerUrl: String?
-    let avatarUrl: String?
-    let displayName: String
-    let handle: String
-    let description: String?
-    @ViewBuilder let headerTrailing: () -> HeaderTrailing
-    @ViewBuilder let handleTrailing: () -> HandleTrailing
-    @ViewBuilder let content: () -> Content
-    init(
-        bannerUrl: String?,
-        avatarUrl: String?,
-        displayName: String,
-        handle: String,
-        description: String?,
-        headerTrailing: @escaping () -> HeaderTrailing = { EmptyView() },
-        handleTrailing: @escaping () -> HandleTrailing = { EmptyView() },
-        content: @escaping () -> Content = { EmptyView() }
-    ) {
-        self.bannerUrl = bannerUrl
-        self.avatarUrl = avatarUrl
-        self.displayName = displayName
-        self.handle = handle
-        self.description = description
-        self.headerTrailing = headerTrailing
-        self.handleTrailing = handleTrailing
-        self.content = content
-    }
+struct CommonProfileHeader: View {
+    let user: UiProfile
+    let relation: UiState<UiRelation>
+    let isMe: UiState<KotlinBoolean>
+    let onFollowClick: (UiRelation) -> Void
+
     var body: some View {
         ZStack(alignment: .top) {
-            if let banner = bannerUrl, !banner.isEmpty {
+            if let banner = user.banner, !banner.isEmpty {
                 Color.clear.overlay {
                     NetworkImage(url: URL(string: banner)) { image in
                         image.resizable().scaledToFill()
@@ -61,43 +39,97 @@ where HeaderTrailing: View, HandleTrailing: View, Content: View {
                                 height: CommonProfileHeaderConstants.headerHeight -
                                 CommonProfileHeaderConstants.avatarSize / 2
                             )
-                        if let avatar = avatarUrl {
-                            UserAvatar(data: avatar, size: CommonProfileHeaderConstants.avatarSize)
-                        } else {
-                            Rectangle()
-                                .foregroundColor(.accentColor)
-                                .frame(
-                                    width: CommonProfileHeaderConstants.avatarSize,
-                                    height: CommonProfileHeaderConstants.avatarSize
-                                )
-                                .clipShape(.circle)
-                        }
+                        UserAvatar(data: user.avatar, size: CommonProfileHeaderConstants.avatarSize)
                     }
                     VStack(alignment: .leading) {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
-                        Markdown(displayName)
+                        Markdown(user.name.markdown)
                             .font(.headline)
                             .markdownInlineImageProvider(.emoji)
                         HStack {
-                            Text(handle)
+                            Text(user.handle)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
-                            handleTrailing()
+                            ForEach(0..<user.mark.count, id: \.self) { index in
+                                let mark = user.mark[index]
+                                let icon = switch mark {
+                                case .cat: "cat.circle"
+                                case .verified: "checkmark.circle.fill"
+                                case .locked: "lock.circle"
+                                case .bot: "figure.wave.circle"
+                                }
+                                Image(systemName: icon)
+                                    .font(.caption)
+                                    .opacity(0.6)
+                            }
                         }
                     }
                     Spacer()
                     VStack {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
-                        headerTrailing()
+
+                            if case .success(let data) = onEnum(of: isMe), !data.data.boolValue {
+                                switch onEnum(of: relation) {
+                                case .success(let relationState): Button(action: {
+                                    onFollowClick(relationState.data)
+                                }, label: {
+                                    let text = if relationState.data.blocking {
+                                        String(localized: "relation_blocked")
+                                    } else if relationState.data.following {
+                                        String(localized: "relation_following")
+                                    } else if relationState.data.hasPendingFollowRequestFromYou {
+                                        String(localized: "relation_requested")
+                                    } else {
+                                        String(localized: "relation_follow")
+                                    }
+                                    Text(text)
+                                })
+                                .buttonStyle(.borderless)
+                                case .loading: Button(action: {}, label: {
+                                    Text("Button")
+                                })
+                                .buttonStyle(.borderless)
+                                case .error: EmptyView()
+                                }
+                            }
                     }
                 }
-                if let desc = description {
+                if let desc = user.description_?.markdown {
                     Markdown(desc)
                         .markdownInlineImageProvider(.emoji)
                 }
-                content()
+
+                if let bottomContent = user.bottomContent {
+                    switch onEnum(of: bottomContent) {
+                    case .fields(let data):
+                        FieldsView(fields: data.fields)
+                    case .iconify(let data):
+                        let list = data.items.map { $0.key }
+                        ForEach(0..<list.count, id: \.self) { index in
+                            let key = list[index]
+                            let value = data.items[key]
+                            let icon = switch key {
+                            case .location: "location.circle"
+                            case .url: "network"
+                            case .verify: "checkmark.circle.fill"
+                            }
+                            Label(
+                                title: {
+                                    Markdown(value?.markdown ?? "")
+                                    .font(.body)
+                                    .markdownInlineImageProvider(.emoji)
+                                },
+                                icon: {
+                                    Image(systemName: icon)
+                                }
+                            )
+                        }
+                    }
+                }
+
+                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
             }
             .padding([.horizontal])
         }

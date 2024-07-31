@@ -95,7 +95,7 @@ class ComposeViewModel: MoleculeViewModelProto {
                         replyId: getReplyId(),
                         medias: getMedia()
                     ) as ComposeData_
-                case .guest(_): nil
+                case .guest: nil
                 }
                 if let data = data {
                     model.send(data: data)

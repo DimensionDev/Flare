@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">подписался на вас</string>
   <string name="misskey_notification_item_requested_follow">попросил подписаться на вас</string>
   <string name="misskey_item_reblogged_status">статус был изменен</string>
-  <string name="xqt_item_reblogged_status">ретвит</string>
+  <string name="xqt_item_reblogged_status">ретвитнул твит</string>
+  <string name="xqt_item_mention_status">упоминает вас</string>
   <string name="mastodon_visibility_public">Публичный</string>
   <string name="mastodon_visibility_unlisted">Не занесено</string>
   <string name="mastodon_visibility_private">Приватный</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Конфиденциальные медиа</string>
   <string name="show_media">Показать медиа</string>
   <string name="login_expired_message">Нажмите, чтобы войти снова</string>
+  <string name="login_expired_relogin">Войти снова</string>
   <string name="service_select_welcome_title">Добро пожаловать в Сигнал</string>
   <string name="mastodon_login_title">Войти в Мастодон</string>
   <string name="mastodon_login_message">Пожалуйста, введите адрес экземпляра ниже.</string>
@@ -162,6 +164,18 @@
   <string name="mastodon_report_description">Вы уверены, что хотите сообщить об этом?</string>
   <string name="misskey_item_action_delete">Удалить</string>
   <string name="misskey_item_action_report">Отчет</string>
+  <string name="bookmark_remove">Удалить закладку</string>
+  <string name="bookmark_add">Добавить закладку</string>
+  <string name="like">Лайкнуть</string>
+  <string name="unlike">Не нравится</string>
+  <string name="more">Ещё</string>
+  <string name="quote">Цитата</string>
+  <string name="reaction_add">Добавить реакцию</string>
+  <string name="reaction_remove">Удалить реакцию</string>
+  <string name="reply">Ответ</string>
+  <string name="report">Отчет</string>
+  <string name="retweet">Ретвитнуть</string>
+  <string name="retweet_remove">Удалить ретвит</string>
   <string name="user_block">Блокировать %1$s</string>
   <string name="user_unblock">Разблокировать %1$s</string>
   <string name="user_mute">Выключить звук %1$s</string>
@@ -277,4 +291,11 @@
   <string name="vvo_notification_like">Понравился ваш статус</string>
   <string name="status_detail_comment">Комментарий</string>
   <string name="status_detail_repost">Репост</string>
+  <string name="account_item_error_title">Ошибка</string>
+  <string name="account_item_error_message">Не удалось загрузить аккаунт</string>
+  <string name="edit_tab_title">Изменить вкладку</string>
+  <string name="edit_tab_name">Наименование</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Иконка</string>
+  <string name="edit_tab_with_avatar">С аватаром</string>
 </resources>

@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">关注了你</string>
   <string name="misskey_notification_item_requested_follow">向你发送了关注请求</string>
   <string name="misskey_item_reblogged_status">转了你的帖子</string>
-  <string name="xqt_item_reblogged_status">转推了</string>
+  <string name="xqt_item_reblogged_status">转发了你的推文</string>
+  <string name="xqt_item_mention_status">提及了您</string>
   <string name="mastodon_visibility_public">公开</string>
   <string name="mastodon_visibility_unlisted">不公开</string>
   <string name="mastodon_visibility_private">仅关注可见</string>
@@ -105,6 +106,7 @@
   <string name="show_media">显示媒体内容</string>
   <string name="login_expired">登录会话已过期</string>
   <string name="login_expired_message">点击重新登录</string>
+  <string name="login_expired_relogin">重新登录</string>
   <string name="service_select_welcome_title">欢迎使用 Flare</string>
   <string name="service_select_welcome_message">Flare 是一个 Android 平台社交客户端。\n请先选择一个服务来开始。</string>
   <string name="mastodon_login_title">登录到 Mastodon</string>
@@ -164,6 +166,18 @@
   <string name="mastodon_report_description">您确定要举报此内容吗？</string>
   <string name="misskey_item_action_delete">删除</string>
   <string name="misskey_item_action_report">举报</string>
+  <string name="bookmark_remove">删除书签</string>
+  <string name="bookmark_add">添加书签</string>
+  <string name="like">点赞</string>
+  <string name="unlike">取消点赞</string>
+  <string name="more">更多</string>
+  <string name="quote">引用</string>
+  <string name="reaction_add">添加反应</string>
+  <string name="reaction_remove">移除反应</string>
+  <string name="reply">回复</string>
+  <string name="report">举报</string>
+  <string name="retweet">转推</string>
+  <string name="retweet_remove">移除转推</string>
   <string name="user_report">举报 %1$s</string>
   <string name="user_block">屏蔽 %1$s</string>
   <string name="user_unblock">取消屏蔽 %1$s</string>
@@ -280,4 +294,11 @@
   <string name="vvo_notification_like">喜欢了您的帖子</string>
   <string name="status_detail_comment">评论</string>
   <string name="status_detail_repost">转发</string>
+  <string name="account_item_error_title">错误</string>
+  <string name="account_item_error_message">无法加载账户</string>
+  <string name="edit_tab_title">编辑选项卡</string>
+  <string name="edit_tab_name">名称</string>
+  <string name="edit_tab_name_placeholder">选项卡名称</string>
+  <string name="edit_tab_icon">图标</string>
+  <string name="edit_tab_with_avatar">带有头像</string>
 </resources>

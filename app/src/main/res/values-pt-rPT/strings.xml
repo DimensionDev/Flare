@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">seguiu você</string>
   <string name="misskey_notification_item_requested_follow">solicitado para seguir você</string>
   <string name="misskey_item_reblogged_status">postou novamente um status</string>
-  <string name="xqt_item_reblogged_status">retuitado</string>
+  <string name="xqt_item_reblogged_status">retwittou seu tweet</string>
+  <string name="xqt_item_mention_status">menciona você</string>
   <string name="mastodon_visibility_public">Público</string>
   <string name="mastodon_visibility_unlisted">Não-listado</string>
   <string name="mastodon_visibility_private">Privado</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Mídia sensível</string>
   <string name="show_media">Mostrar mídia</string>
   <string name="login_expired_message">Clique para entrar novamente</string>
+  <string name="login_expired_relogin">Entrar novamente</string>
   <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
   <string name="service_select_welcome_message">Sinalizador é um cliente de rede social para Android.\nPara começar, por favor, selecione um serviço para se conectar.</string>
   <string name="mastodon_login_title">Login para o Mastodon</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Tem certeza de que deseja denunciar isto?</string>
   <string name="misskey_item_action_delete">excluir</string>
   <string name="misskey_item_action_report">Denunciar</string>
+  <string name="bookmark_remove">Remover marcador favorito</string>
+  <string name="bookmark_add">Adicionar marcador</string>
+  <string name="like">Gostei</string>
+  <string name="unlike">Descurtir</string>
+  <string name="more">MAIS</string>
+  <string name="quote">Cotação</string>
+  <string name="reaction_add">Adicionar reação</string>
+  <string name="reaction_remove">Remover reação</string>
+  <string name="reply">Responder</string>
+  <string name="report">Denunciar</string>
+  <string name="retweet">Retweetar</string>
+  <string name="retweet_remove">Remover retweet</string>
   <string name="user_report">Denunciar %1$s</string>
   <string name="user_block">Bloquear %1$s</string>
   <string name="user_unblock">Desbloquear %1$s</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">Curtiu seu status</string>
   <string name="status_detail_comment">Comentar</string>
   <string name="status_detail_repost">Republicar</string>
+  <string name="account_item_error_title">ERRO</string>
+  <string name="account_item_error_message">Falha ao carregar a conta</string>
+  <string name="edit_tab_title">Editar aba</string>
+  <string name="edit_tab_name">Nome:</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Ícone</string>
+  <string name="edit_tab_with_avatar">Com avatar</string>
 </resources>

@@ -71,7 +71,8 @@
   <string name="misskey_notification_item_followed_you">σας ακολούθησε</string>
   <string name="misskey_notification_item_requested_follow">ζήτησε να σε ακολουθήσει</string>
   <string name="misskey_item_reblogged_status">επαναναρτήθηκε μια κατάσταση</string>
-  <string name="xqt_item_reblogged_status">retweeted</string>
+  <string name="xqt_item_reblogged_status">retweet σας tweet</string>
+  <string name="xqt_item_mention_status">σας αναφέρει</string>
   <string name="mastodon_visibility_public">Δημόσιο</string>
   <string name="mastodon_visibility_unlisted">Μη Καταχωρημένο</string>
   <string name="mastodon_visibility_private">Ιδιωτικό</string>
@@ -100,6 +101,7 @@
   <string name="status_sensitive_media">Ευαίσθητα μέσα</string>
   <string name="show_media">Εμφάνιση πολυμέσων</string>
   <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>
+  <string name="login_expired_relogin">Είσοδος ξανά</string>
   <string name="service_select_welcome_title">Καλώς ήλθατε στο Flare</string>
   <string name="service_select_welcome_message">Το Flare είναι ένας πελάτης κοινωνικής δικτύωσης για το Android.\nΓια να ξεκινήσετε, παρακαλώ επιλέξτε μια υπηρεσία με την οποία θα συνδεθείτε.</string>
   <string name="mastodon_login_title">Συνδεθείτε στο Mastodon</string>
@@ -159,6 +161,18 @@
   <string name="mastodon_report_description">Είστε βέβαιοι ότι θέλετε να αναφέρετε αυτό?</string>
   <string name="misskey_item_action_delete">Διαγραφή</string>
   <string name="misskey_item_action_report">Αναφορά</string>
+  <string name="bookmark_remove">Αφαίρεση σελιδοδείκτη</string>
+  <string name="bookmark_add">Προσθήκη σελιδοδείκτη</string>
+  <string name="like">Αρέσει</string>
+  <string name="unlike">Σε αντίθεση</string>
+  <string name="more">Περισσότερα</string>
+  <string name="quote">Παράθεση</string>
+  <string name="reaction_add">Προσθήκη αντίδρασης</string>
+  <string name="reaction_remove">Αφαίρεση αντίδρασης</string>
+  <string name="reply">Απάντηση</string>
+  <string name="report">Αναφορά</string>
+  <string name="retweet">Retweet</string>
+  <string name="retweet_remove">Αφαίρεση retweet</string>
   <string name="user_report">Αναφορά %1$s</string>
   <string name="user_block">Αποκλεισμός %1$s</string>
   <string name="user_unblock">Ξεμπλοκάρισμα %1$s</string>
@@ -274,4 +288,11 @@
   <string name="vvo_notification_like">Μου άρεσε η κατάστασή σας</string>
   <string name="status_detail_comment">Σχόλιο</string>
   <string name="status_detail_repost">Επαναδημοσίευση</string>
+  <string name="account_item_error_title">Σφάλμα</string>
+  <string name="account_item_error_message">Αποτυχία φόρτωσης λογαριασμού</string>
+  <string name="edit_tab_title">Επεξεργασία καρτέλας</string>
+  <string name="edit_tab_name">Όνομα</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Εικονίδιο</string>
+  <string name="edit_tab_with_avatar">Με avatar</string>
 </resources>

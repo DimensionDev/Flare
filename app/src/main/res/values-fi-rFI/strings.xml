@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">seurasi sinua</string>
   <string name="misskey_notification_item_requested_follow">pyysi seuraamaan sinua</string>
   <string name="misskey_item_reblogged_status">uudelleenlähetetty tila</string>
-  <string name="xqt_item_reblogged_status">retweeted</string>
+  <string name="xqt_item_reblogged_status">retweeted sinun tweet</string>
+  <string name="xqt_item_mention_status">mainitsee sinut</string>
   <string name="mastodon_visibility_public">Julkinen</string>
   <string name="mastodon_visibility_unlisted">Listaamaton</string>
   <string name="mastodon_visibility_private">Yksityinen</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Herkkä media</string>
   <string name="show_media">Näytä media</string>
   <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
+  <string name="login_expired_relogin">Kirjaudu uudelleen</string>
   <string name="service_select_welcome_title">Tervetuloa Flareen</string>
   <string name="service_select_welcome_message">Flare on sosiaalisen verkon asiakas Androidille.\nPäästäksesi alkuun, valitse palvelu, johon haluat yhteyden.</string>
   <string name="mastodon_login_title">Kirjaudu sisään Mastodoniin</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Oletko varma, että haluat raportoida tästä?</string>
   <string name="misskey_item_action_delete">Poista</string>
   <string name="misskey_item_action_report">Raportoi</string>
+  <string name="bookmark_remove">Poista kirjanmerkki</string>
+  <string name="bookmark_add">Lisää kirjanmerkki</string>
+  <string name="like">Tykkää</string>
+  <string name="unlike">Toisin</string>
+  <string name="more">Lisää</string>
+  <string name="quote">Tarjous</string>
+  <string name="reaction_add">Lisää reaktio</string>
+  <string name="reaction_remove">Poista reaktio</string>
+  <string name="reply">Vastaa</string>
+  <string name="report">Raportoi</string>
+  <string name="retweet">Yritä Uudelleen</string>
+  <string name="retweet_remove">Poista uudelleentwiittaa</string>
   <string name="user_report">Ilmoita %1$s</string>
   <string name="user_block">Estä %1$s</string>
   <string name="user_unblock">Poista %1$s Esto</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">Tykkään tilastasi</string>
   <string name="status_detail_comment">Kommentti</string>
   <string name="status_detail_repost">Uudelleenlähetys</string>
+  <string name="account_item_error_title">Virhe</string>
+  <string name="account_item_error_message">Tilin lataaminen epäonnistui</string>
+  <string name="edit_tab_title">Muokkaa välilehtiä</string>
+  <string name="edit_tab_name">Nimi</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Kuvake</string>
+  <string name="edit_tab_with_avatar">Avatarin kanssa</string>
 </resources>

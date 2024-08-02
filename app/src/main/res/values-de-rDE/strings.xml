@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">folgte dir</string>
   <string name="misskey_notification_item_requested_follow">gebeten haben, dir zu folgen</string>
   <string name="misskey_item_reblogged_status">repostete einen Status</string>
-  <string name="xqt_item_reblogged_status">reweeted</string>
+  <string name="xqt_item_reblogged_status">retweeted dein Tweet</string>
+  <string name="xqt_item_mention_status">erwähnt dich</string>
   <string name="mastodon_visibility_public">Öffentlich</string>
   <string name="mastodon_visibility_unlisted">Nicht gelistet</string>
   <string name="mastodon_visibility_private">Privat</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Sensitive Medien</string>
   <string name="show_media">Medien anzeigen</string>
   <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
+  <string name="login_expired_relogin">Erneut anmelden</string>
   <string name="service_select_welcome_title">Willkommen bei Leuchtturm</string>
   <string name="service_select_welcome_message">Flare ist ein Social-Network-Client für Android.\nUm loszulegen, wählen Sie bitte einen Dienst zum Verbinden aus.</string>
   <string name="mastodon_login_title">Bei Mastodon anmelden</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Bist du sicher, dass du dies melden möchtest?</string>
   <string name="misskey_item_action_delete">Löschen</string>
   <string name="misskey_item_action_report">Bericht</string>
+  <string name="bookmark_remove">Lesezeichen entfernen</string>
+  <string name="bookmark_add">Lesezeichen hinzufügen</string>
+  <string name="like">Möge</string>
+  <string name="unlike">Anders</string>
+  <string name="more">Mehr</string>
+  <string name="quote">Zitat</string>
+  <string name="reaction_add">Antwort hinzufügen</string>
+  <string name="reaction_remove">Reaktion entfernen</string>
+  <string name="reply">Antwort</string>
+  <string name="report">Bericht</string>
+  <string name="retweet">Retweet</string>
+  <string name="retweet_remove">Retweet entfernen</string>
   <string name="user_report">Bericht %1$s</string>
   <string name="user_block">Blockieren %1$s</string>
   <string name="user_unblock">%1$s entsperren</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">Dein Status gefällt</string>
   <string name="status_detail_comment">Kommentar</string>
   <string name="status_detail_repost">Repost</string>
+  <string name="account_item_error_title">Fehler</string>
+  <string name="account_item_error_message">Fehler beim Laden des Kontos</string>
+  <string name="edit_tab_title">Tab bearbeiten</string>
+  <string name="edit_tab_name">Name</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Symbol</string>
+  <string name="edit_tab_with_avatar">Mit Avatar</string>
 </resources>

@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">vous a suivi</string>
   <string name="misskey_notification_item_requested_follow">a demandé à vous suivre</string>
   <string name="misskey_item_reblogged_status">a reproduit un statut</string>
-  <string name="xqt_item_reblogged_status">retweeté</string>
+  <string name="xqt_item_reblogged_status">a retweeté votre tweet</string>
+  <string name="xqt_item_mention_status">vous mentionne</string>
   <string name="mastodon_visibility_public">Publique</string>
   <string name="mastodon_visibility_unlisted">Non listé</string>
   <string name="mastodon_visibility_private">Privé</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Média sensible</string>
   <string name="show_media">Afficher les médias</string>
   <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>
+  <string name="login_expired_relogin">Reconnectez-vous</string>
   <string name="service_select_welcome_title">Bienvenue dans Flare</string>
   <string name="service_select_welcome_message">Fusée éclairante est un client de réseau social pour Android.\nPour commencer, veuillez sélectionner un service auquel vous connecter.</string>
   <string name="mastodon_login_title">Se connecter à Mastodon</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Êtes-vous sûr de vouloir signaler cela ?</string>
   <string name="misskey_item_action_delete">Supprimez</string>
   <string name="misskey_item_action_report">Rapporter</string>
+  <string name="bookmark_remove">Supprimer le favori</string>
+  <string name="bookmark_add">Ajouter un favori</string>
+  <string name="like">J\'aime</string>
+  <string name="unlike">J\'aime</string>
+  <string name="more">En savoir plus</string>
+  <string name="quote">Devis</string>
+  <string name="reaction_add">Ajouter une réaction</string>
+  <string name="reaction_remove">Supprimer la réaction</string>
+  <string name="reply">Répondre</string>
+  <string name="report">Rapporter</string>
+  <string name="retweet">Retweet</string>
+  <string name="retweet_remove">Supprimer le retweet</string>
   <string name="user_report">Signaler %1$s</string>
   <string name="user_block">Bloquer %1$s</string>
   <string name="user_unblock">Débloquer %1$s</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">Vous avez aimé votre statut</string>
   <string name="status_detail_comment">Commenter</string>
   <string name="status_detail_repost">Republier</string>
+  <string name="account_item_error_title">Erreur</string>
+  <string name="account_item_error_message">Impossible de charger le compte</string>
+  <string name="edit_tab_title">Modifier l\'onglet</string>
+  <string name="edit_tab_name">Nom</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Icône</string>
+  <string name="edit_tab_with_avatar">Avec avatar</string>
 </resources>

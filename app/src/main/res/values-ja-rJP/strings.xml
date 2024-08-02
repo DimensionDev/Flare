@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">あなたをフォローしました</string>
   <string name="misskey_notification_item_requested_follow">フォローをリクエストしました</string>
   <string name="misskey_item_reblogged_status">ステータスを再投稿しました</string>
-  <string name="xqt_item_reblogged_status">リツイート</string>
+  <string name="xqt_item_reblogged_status">ツイートをリツイートし</string>
+  <string name="xqt_item_mention_status">あなたをメンションする</string>
   <string name="mastodon_visibility_public">公開</string>
   <string name="mastodon_visibility_unlisted">リストにありません</string>
   <string name="mastodon_visibility_private">非公開</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">敏感なメディア</string>
   <string name="show_media">メディアを表示</string>
   <string name="login_expired_message">クリックして再度ログインする</string>
+  <string name="login_expired_relogin">再度ログインする</string>
   <string name="service_select_welcome_title">フレアへようこそ</string>
   <string name="service_select_welcome_message">Flare は Android 用のソーシャルネットワーククライアントです。\n開始するには、接続するサービスを選択してください。</string>
   <string name="mastodon_login_title">Mastodonにログイン</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">これを報告してもよろしいですか？</string>
   <string name="misskey_item_action_delete">削除</string>
   <string name="misskey_item_action_report">レポート</string>
+  <string name="bookmark_remove">ブックマークを削除</string>
+  <string name="bookmark_add">ブックマークを追加</string>
+  <string name="like">いいね！</string>
+  <string name="unlike">いいね！を解除</string>
+  <string name="more">もっと見る</string>
+  <string name="quote">引用</string>
+  <string name="reaction_add">リアクションを追加</string>
+  <string name="reaction_remove">リアクションを削除</string>
+  <string name="reply">返信</string>
+  <string name="report">レポート</string>
+  <string name="retweet">リツイート</string>
+  <string name="retweet_remove">リツイートを削除</string>
   <string name="user_report">%1$sを報告</string>
   <string name="user_block">ブロック %1$s</string>
   <string name="user_unblock">%1$s のブロックを解除</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">あなたのステータスがいいね！されました</string>
   <string name="status_detail_comment">コメント</string>
   <string name="status_detail_repost">リポスト</string>
+  <string name="account_item_error_title">エラー</string>
+  <string name="account_item_error_message">アカウントの読み込みに失敗しました</string>
+  <string name="edit_tab_title">タブを編集</string>
+  <string name="edit_tab_name">名前</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">アイコン</string>
+  <string name="edit_tab_with_avatar">アバター付き</string>
 </resources>

@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">volgt jou nu</string>
   <string name="misskey_notification_item_requested_follow">aangevraagd om je te volgen</string>
   <string name="misskey_item_reblogged_status">publiceerde een status</string>
-  <string name="xqt_item_reblogged_status">geretweet</string>
+  <string name="xqt_item_reblogged_status">heeft je tweet aangepast</string>
+  <string name="xqt_item_mention_status">vermeldt je</string>
   <string name="mastodon_visibility_public">Openbaar</string>
   <string name="mastodon_visibility_unlisted">Niet-genoteerd</string>
   <string name="mastodon_visibility_private">Privé</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Gevoelige media</string>
   <string name="show_media">Media tonen</string>
   <string name="login_expired_message">Klik om opnieuw in te loggen</string>
+  <string name="login_expired_relogin">Opnieuw inloggen</string>
   <string name="service_select_welcome_title">Welkom bij Flare</string>
   <string name="service_select_welcome_message">Verlaging is een sociale netwerkclient voor Android.\nSelecteer een service om verbinding te maken met Android.</string>
   <string name="mastodon_login_title">Inloggen op Mastodon</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Weet u zeker dat u dit wilt melden?</string>
   <string name="misskey_item_action_delete">Verwijderen</string>
   <string name="misskey_item_action_report">Rapporteren</string>
+  <string name="bookmark_remove">Bladwijzer verwijderen</string>
+  <string name="bookmark_add">Bladwijzer toevoegen</string>
+  <string name="like">vind-ik-leuk</string>
+  <string name="unlike">Anders dan</string>
+  <string name="more">Meer</string>
+  <string name="quote">Offerte</string>
+  <string name="reaction_add">Reactie toevoegen</string>
+  <string name="reaction_remove">Reactie verwijderen</string>
+  <string name="reply">Beantwoorden</string>
+  <string name="report">Rapporteren</string>
+  <string name="retweet">Retweet</string>
+  <string name="retweet_remove">Verwijder retweet</string>
   <string name="user_report">Rapporteer %1$s</string>
   <string name="user_block">Blokkeren %1$s</string>
   <string name="user_unblock">Deblokkeer %1$s</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">Vind je status leuk</string>
   <string name="status_detail_comment">Opmerking</string>
   <string name="status_detail_repost">Herpost</string>
+  <string name="account_item_error_title">Foutmelding</string>
+  <string name="account_item_error_message">Account laden mislukt</string>
+  <string name="edit_tab_title">Tabblad bewerken</string>
+  <string name="edit_tab_name">naam</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Pictogram</string>
+  <string name="edit_tab_with_avatar">Met avatar</string>
 </resources>

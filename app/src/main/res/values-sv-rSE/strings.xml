@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">följde dig</string>
   <string name="misskey_notification_item_requested_follow">begärde att följa dig</string>
   <string name="misskey_item_reblogged_status">repostat en status</string>
-  <string name="xqt_item_reblogged_status">retweeted</string>
+  <string name="xqt_item_reblogged_status">retweetade din tweet</string>
+  <string name="xqt_item_mention_status">nämner dig</string>
   <string name="mastodon_visibility_public">Publik</string>
   <string name="mastodon_visibility_unlisted">Olistad</string>
   <string name="mastodon_visibility_private">Privat</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Känslig media</string>
   <string name="show_media">Visa media</string>
   <string name="login_expired_message">Klicka för att logga in igen</string>
+  <string name="login_expired_relogin">Logga in igen</string>
   <string name="service_select_welcome_title">Välkommen till Flare</string>
   <string name="service_select_welcome_message">Flare är en social nätverksklient för Android.\nFör att komma igång, välj en tjänst att ansluta till.</string>
   <string name="mastodon_login_title">Logga in till Mastodon</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Är du säker på att du vill rapportera detta?</string>
   <string name="misskey_item_action_delete">Radera</string>
   <string name="misskey_item_action_report">Rapportera</string>
+  <string name="bookmark_remove">Ta bort bokmärke</string>
+  <string name="bookmark_add">Lägg till bokmärke</string>
+  <string name="like">Gilla</string>
+  <string name="unlike">Ogilla</string>
+  <string name="more">Mer</string>
+  <string name="quote">Offert</string>
+  <string name="reaction_add">Lägg till reaktion</string>
+  <string name="reaction_remove">Ta bort reaktion</string>
+  <string name="reply">Svara</string>
+  <string name="report">Rapportera</string>
+  <string name="retweet">Retweet</string>
+  <string name="retweet_remove">Ta bort retweet</string>
   <string name="user_report">Rapportera %1$s</string>
   <string name="user_block">Blockera %1$s</string>
   <string name="user_unblock">Avblockera %1$s</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">Gillade din status</string>
   <string name="status_detail_comment">Kommentar</string>
   <string name="status_detail_repost">Omvänd</string>
+  <string name="account_item_error_title">Fel</string>
+  <string name="account_item_error_message">Det gick inte att ladda kontot</string>
+  <string name="edit_tab_title">Redigera flik</string>
+  <string name="edit_tab_name">Namn</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Ikon</string>
+  <string name="edit_tab_with_avatar">Med avatar</string>
 </resources>

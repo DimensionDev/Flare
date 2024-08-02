@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">fulgte dig</string>
   <string name="misskey_notification_item_requested_follow">anmodede om at følge dig</string>
   <string name="misskey_item_reblogged_status">ompostet en status</string>
-  <string name="xqt_item_reblogged_status">retweeteret</string>
+  <string name="xqt_item_reblogged_status">genweeted din tweet</string>
+  <string name="xqt_item_mention_status">nævner dig</string>
   <string name="mastodon_visibility_public">Offentlig</string>
   <string name="mastodon_visibility_unlisted">Ulistet</string>
   <string name="mastodon_visibility_private">Privat</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Følsomme medier</string>
   <string name="show_media">Vis medier</string>
   <string name="login_expired_message">Klik for at logge ind igen</string>
+  <string name="login_expired_relogin">Log ind igen</string>
   <string name="service_select_welcome_title">Velkommen til Flare</string>
   <string name="service_select_welcome_message">Flare er en social netværk klient til Android.\nFor at komme i gang, skal du vælge en tjeneste at oprette forbindelse til.</string>
   <string name="mastodon_login_title">Log ind på Mastodon</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Er du sikker på, at du vil rapportere dette?</string>
   <string name="misskey_item_action_delete">Slet</string>
   <string name="misskey_item_action_report">Rapport</string>
+  <string name="bookmark_remove">Fjern bogmærke</string>
+  <string name="bookmark_add">Tilføj bogmærke</string>
+  <string name="like">Ligesom</string>
+  <string name="unlike">I modsætning</string>
+  <string name="more">Mere</string>
+  <string name="quote">Tilbud</string>
+  <string name="reaction_add">Tilføj reaktion</string>
+  <string name="reaction_remove">Fjern reaktion</string>
+  <string name="reply">Svar</string>
+  <string name="report">Rapport</string>
+  <string name="retweet">Retweet</string>
+  <string name="retweet_remove">Fjern retweet</string>
   <string name="user_report">Anmeld %1$s</string>
   <string name="user_block">Bloker %1$s</string>
   <string name="user_unblock">Fjern Blok %1$s</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">Syntes om din status</string>
   <string name="status_detail_comment">Kommentar</string>
   <string name="status_detail_repost">Genpost</string>
+  <string name="account_item_error_title">Fejl</string>
+  <string name="account_item_error_message">Kunne ikke indlæse konto</string>
+  <string name="edit_tab_title">Rediger fane</string>
+  <string name="edit_tab_name">Navn</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Ikon</string>
+  <string name="edit_tab_with_avatar">Med avatar</string>
 </resources>

@@ -74,7 +74,8 @@
   <string name="misskey_notification_item_followed_you">تابعك</string>
   <string name="misskey_notification_item_requested_follow">طلب منك متابعتك</string>
   <string name="misskey_item_reblogged_status">إعادة نشر حالة</string>
-  <string name="xqt_item_reblogged_status">معتدلة</string>
+  <string name="xqt_item_reblogged_status">تم إعادة تغريدتك</string>
+  <string name="xqt_item_mention_status">يذكر لك</string>
   <string name="mastodon_visibility_public">عامة</string>
   <string name="mastodon_visibility_unlisted">غير مدرج</string>
   <string name="mastodon_visibility_private">خاص</string>
@@ -103,6 +104,7 @@
   <string name="status_sensitive_media">الوسائط الحساسة</string>
   <string name="show_media">إظهار الوسائط</string>
   <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
+  <string name="login_expired_relogin">تسجيل الدخول مرة أخرى</string>
   <string name="service_select_welcome_title">مرحبا بكم في Felle</string>
   <string name="mastodon_login_title">تسجيل الدخول إلى ماستدون</string>
   <string name="mastodon_login_message">الرجاء إدخال عنوان URL الخاص بك أدناه.</string>
@@ -161,6 +163,18 @@
   <string name="mastodon_report_description">هل أنت متأكد من أنك تريد الإبلاغ عن هذا؟</string>
   <string name="misskey_item_action_delete">حذف</string>
   <string name="misskey_item_action_report">تقرير</string>
+  <string name="bookmark_remove">إزالة الإشارة المرجعية</string>
+  <string name="bookmark_add">إضافة إشارة مرجعية</string>
+  <string name="like">إعجاب</string>
+  <string name="unlike">خلافا</string>
+  <string name="more">المزيد</string>
+  <string name="quote">اقتباس</string>
+  <string name="reaction_add">إضافة رد فعل</string>
+  <string name="reaction_remove">إزالة رد الفعل</string>
+  <string name="reply">الرد</string>
+  <string name="report">تقرير</string>
+  <string name="retweet">تغريدة</string>
+  <string name="retweet_remove">إزالة التغريدة</string>
   <string name="user_report">التقرير %1$s</string>
   <string name="user_block">حظر %1$s</string>
   <string name="user_unblock">إلغاء حظر %1$s</string>
@@ -277,4 +291,11 @@
   <string name="vvo_notification_like">أعجبك حالتك</string>
   <string name="status_detail_comment">تعليق</string>
   <string name="status_detail_repost">إعادة</string>
+  <string name="account_item_error_title">خطأ</string>
+  <string name="account_item_error_message">فشل في تحميل الحساب</string>
+  <string name="edit_tab_title">تحرير علامة التبويب</string>
+  <string name="edit_tab_name">الاسم</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">أيقونة</string>
+  <string name="edit_tab_with_avatar">مع الصورة الرمزية</string>
 </resources>

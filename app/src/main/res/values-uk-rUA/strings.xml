@@ -73,7 +73,8 @@
   <string name="misskey_notification_item_followed_you">підписався на вас</string>
   <string name="misskey_notification_item_requested_follow">запит підписатися на вас</string>
   <string name="misskey_item_reblogged_status">перерозміщувати статус</string>
-  <string name="xqt_item_reblogged_status">ретвітнуто</string>
+  <string name="xqt_item_reblogged_status">ретвітнув ваш твіт</string>
+  <string name="xqt_item_mention_status">згадує вас</string>
   <string name="mastodon_visibility_public">Загальнодоступна</string>
   <string name="mastodon_visibility_unlisted">Поза списком</string>
   <string name="mastodon_visibility_private">Приватний</string>
@@ -102,6 +103,7 @@
   <string name="status_sensitive_media">Дражливе медіа</string>
   <string name="show_media">Показати медіа</string>
   <string name="login_expired_message">Нажміть кнопку для входу знову</string>
+  <string name="login_expired_relogin">Знову увійти в систему</string>
   <string name="service_select_welcome_title">Ласкаво просимо до Flare</string>
   <string name="service_select_welcome_message">Flare є клієнтом соціальної мережі для Android.\nЩоб розпочати роботу, будь ласка, виберіть службу для підключення.</string>
   <string name="mastodon_login_title">Увійти до Mastodon</string>
@@ -161,6 +163,18 @@
   <string name="mastodon_report_description">Ви впевнені, що хочете повідомити про це?</string>
   <string name="misskey_item_action_delete">Видалити</string>
   <string name="misskey_item_action_report">Доповісти</string>
+  <string name="bookmark_remove">Видалити з обраного</string>
+  <string name="bookmark_add">Додати до закладок</string>
+  <string name="like">Подобається</string>
+  <string name="unlike">На відміну від</string>
+  <string name="more">Більше</string>
+  <string name="quote">Цитувати</string>
+  <string name="reaction_add">Додати реакцію</string>
+  <string name="reaction_remove">Видалити реакцію</string>
+  <string name="reply">Відповідь</string>
+  <string name="report">Доповісти</string>
+  <string name="retweet">Ретвіт</string>
+  <string name="retweet_remove">Видалити ретвіт</string>
   <string name="user_block">Блокувати %1$s</string>
   <string name="user_unblock">Розблокувати %1$s</string>
   <string name="user_mute">Вимкнути звук %1$s</string>
@@ -276,4 +290,11 @@
   <string name="vvo_notification_like">Вподобано ваш статус</string>
   <string name="status_detail_comment">Коментар</string>
   <string name="status_detail_repost">Репост</string>
+  <string name="account_item_error_title">Помилка</string>
+  <string name="account_item_error_message">Не вдалося завантажити обліковий запис</string>
+  <string name="edit_tab_title">Редагувати вкладку</string>
+  <string name="edit_tab_name">Ім\'я</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Іконка</string>
+  <string name="edit_tab_with_avatar">З аватаром</string>
 </resources>

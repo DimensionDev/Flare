@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">fulgte deg</string>
   <string name="misskey_notification_item_requested_follow">bedt om å følge deg</string>
   <string name="misskey_item_reblogged_status">repostet en status</string>
-  <string name="xqt_item_reblogged_status">retweeted</string>
+  <string name="xqt_item_reblogged_status">retweeted din tweet</string>
+  <string name="xqt_item_mention_status">nevner deg</string>
   <string name="mastodon_visibility_public">Offentlig</string>
   <string name="mastodon_visibility_unlisted">Unotert</string>
   <string name="mastodon_visibility_private">Privat</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Sensitive medier</string>
   <string name="show_media">Vis media</string>
   <string name="login_expired_message">Trykk for å logge inn igjen</string>
+  <string name="login_expired_relogin">Logg inn på nytt</string>
   <string name="service_select_welcome_title">Velkommen til oppsprett</string>
   <string name="service_select_welcome_message">Oppblussing er en sosial nettverksklient for Android.\nFor å komme i gang, velg en tjeneste du vil koble til.</string>
   <string name="mastodon_login_title">Logg inn på Mastodon</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Er du sikker på at du vil rapportere dette?</string>
   <string name="misskey_item_action_delete">Slett</string>
   <string name="misskey_item_action_report">Rapporter</string>
+  <string name="bookmark_remove">Fjern bokmerke</string>
+  <string name="bookmark_add">Legg til bokmerke</string>
+  <string name="like">Lik</string>
+  <string name="unlike">Ulikt</string>
+  <string name="more">Mer</string>
+  <string name="quote">Sitat</string>
+  <string name="reaction_add">Legg til reaksjon</string>
+  <string name="reaction_remove">Fjern reaksjon</string>
+  <string name="reply">Svar</string>
+  <string name="report">Rapporter</string>
+  <string name="retweet">Prøv igjen</string>
+  <string name="retweet_remove">Fjern retweet</string>
   <string name="user_block">Blokker %1$s</string>
   <string name="user_unblock">Opphev blokkering %1$s</string>
   <string name="user_mute">Demp %1$s</string>
@@ -278,4 +292,11 @@
   <string name="vvo_notification_like">Likte statusen din</string>
   <string name="status_detail_comment">Kommentar</string>
   <string name="status_detail_repost">Gjenkjenn</string>
+  <string name="account_item_error_title">Feil</string>
+  <string name="account_item_error_message">Kunne ikke laste inn konto</string>
+  <string name="edit_tab_title">Rediger fane</string>
+  <string name="edit_tab_name">Navn</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Ikon</string>
+  <string name="edit_tab_with_avatar">Med avatar</string>
 </resources>

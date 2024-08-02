@@ -75,7 +75,8 @@
   <string name="misskey_notification_item_followed_you">te urmărește</string>
   <string name="misskey_notification_item_requested_follow">solicitat să vă urmărească</string>
   <string name="misskey_item_reblogged_status">a repostat un statut</string>
-  <string name="xqt_item_reblogged_status">retușat</string>
+  <string name="xqt_item_reblogged_status">a retweet-ului tău</string>
+  <string name="xqt_item_mention_status">Te menționează</string>
   <string name="mastodon_visibility_public">Publice</string>
   <string name="mastodon_visibility_unlisted">Nelistate</string>
   <string name="mastodon_visibility_private">Privat</string>
@@ -104,6 +105,7 @@
   <string name="status_sensitive_media">Media sensibilă</string>
   <string name="show_media">Arată media</string>
   <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>
+  <string name="login_expired_relogin">Conectează-te din nou</string>
   <string name="service_select_welcome_title">Bun venit la Flare</string>
   <string name="service_select_welcome_message">Flare este un client de rețea socială pentru Android.\nPentru a începe, vă rugăm să selectați un serviciu la care să vă conectați.</string>
   <string name="mastodon_login_title">Autentificare în Mastodon</string>
@@ -163,6 +165,18 @@
   <string name="mastodon_report_description">Ești sigur că vrei să raportezi acest lucru?</string>
   <string name="misskey_item_action_delete">Ștergere</string>
   <string name="misskey_item_action_report">Raport</string>
+  <string name="bookmark_remove">Eliminaţi marcajul</string>
+  <string name="bookmark_add">Adaugă marcaj</string>
+  <string name="like">Apreciere</string>
+  <string name="unlike">Spre deosebire</string>
+  <string name="more">Mai</string>
+  <string name="quote">Ofertă</string>
+  <string name="reaction_add">Adaugă reacţie</string>
+  <string name="reaction_remove">Eliminați reacția</string>
+  <string name="reply">Răspuns</string>
+  <string name="report">Raport</string>
+  <string name="retweet">Retweet</string>
+  <string name="retweet_remove">Elimină retweet</string>
   <string name="user_report">Raportează %1$s</string>
   <string name="user_block">Blochează %1$s</string>
   <string name="user_unblock">Deblochează %1$s</string>
@@ -279,4 +293,11 @@
   <string name="vvo_notification_like">Ți-a plăcut starea</string>
   <string name="status_detail_comment">Comentariu</string>
   <string name="status_detail_repost">Repostează</string>
+  <string name="account_item_error_title">Eroare</string>
+  <string name="account_item_error_message">Încărcarea contului a eșuat</string>
+  <string name="edit_tab_title">Editare filă</string>
+  <string name="edit_tab_name">Nume</string>
+  <string name="edit_tab_name_placeholder">Tab name</string>
+  <string name="edit_tab_icon">Iconiță</string>
+  <string name="edit_tab_with_avatar">Cu avatar</string>
 </resources>

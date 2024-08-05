@@ -31,7 +31,7 @@ struct CommonStatusComponent: View {
                         }
                     }
                     if !isDetail {
-                        dateFormatter(Date(timeIntervalSince1970: .init(integerLiteral: data.createdAt)))
+                        dateFormatter(data.createdAt)
                     }
                 }
                 .foregroundColor(.gray)
@@ -144,8 +144,8 @@ struct CommonStatusComponent: View {
                 Spacer()
                     .frame(height: 4)
                 HStack {
-                    Text(Date(timeIntervalSince1970: .init(data.createdAt)), style: .date)
-                    Text(Date(timeIntervalSince1970: .init(data.createdAt)), style: .time)
+                    Text(data.createdAt, style: .date)
+                    Text(data.createdAt, style: .time)
                 }
             }
             Spacer()
@@ -153,12 +153,12 @@ struct CommonStatusComponent: View {
 
             if appSettings.appearanceSettings.showActions || isDetail {
                 HStack {
-                    ForEach(1...data.actions.count, id: \.self) { actionIndex in
-                        let action = data.actions[actionIndex - 1]
+                    ForEach(0..<data.actions.count, id: \.self) { actionIndex in
+                        let action = data.actions[actionIndex]
                         switch onEnum(of: action) {
                         case .group(let group): Menu {
-                            ForEach(1...group.actions.count, id: \.self) { subActionIndex in
-                                let subAction = group.actions[subActionIndex - 1]
+                            ForEach(0..<group.actions.count, id: \.self) { subActionIndex in
+                                let subAction = group.actions[subActionIndex]
                                 if case .item(let item) = onEnum(of: subAction) {
                                     Button(action: {
                                         if let clickable = item as? StatusActionItemClickable {

@@ -3,16 +3,16 @@ package dev.dimension.flare.ui.presenter.status
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 class StatusContextPresenter(
@@ -23,17 +23,18 @@ class StatusContextPresenter(
     override fun body(): StatusContextState {
         val scope = rememberCoroutineScope()
         val listState =
-            accountServiceProvider(accountType = accountType).map { service ->
-                remember(service, statusKey) {
-                    service.context(statusKey, scope = scope)
-                }.collectAsLazyPagingItems()
-            }
+            accountServiceProvider(accountType = accountType)
+                .map { service ->
+                    remember(service, statusKey) {
+                        service.context(statusKey, scope = scope)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
         return object : StatusContextState(
             listState,
         ) {
             override suspend fun refresh() {
                 listState.onSuccess {
-                    it.refreshSuspend()
+                    refreshSuspend()
                 }
             }
         }
@@ -41,7 +42,7 @@ class StatusContextPresenter(
 }
 
 abstract class StatusContextState(
-    val listState: UiState<LazyPagingItems<UiTimeline>>,
+    val listState: PagingState<UiTimeline>,
 ) {
     abstract suspend fun refresh()
 }

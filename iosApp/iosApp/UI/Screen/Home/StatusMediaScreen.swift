@@ -2,7 +2,8 @@ import SwiftUI
 import shared
 
 struct StatusMediaScreen: View {
-    let presenter: StatusPresenter
+    @State
+    var presenter: StatusPresenter
     let initialIndex: Int
     let dismiss: () -> Void
 

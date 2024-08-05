@@ -5,10 +5,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.map
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -76,29 +77,31 @@ class VVOStatusDetailPresenter(
             }
 
         val repost =
-            service.map {
-                require(it is VVODataSource)
-                remember(statusKey, accountType) {
-                    it.statusRepost(statusKey = statusKey, scope = scope).map {
-                        it.map {
-                            it.copy(
-                                content =
-                                    (it.content as? UiTimeline.ItemContent.Status)?.copy(
-                                        quote = persistentListOf(),
-                                    ) ?: it.content,
-                            )
+            service
+                .map {
+                    require(it is VVODataSource)
+                    remember(statusKey, accountType) {
+                        it.statusRepost(statusKey = statusKey, scope = scope).map {
+                            it.map {
+                                it.copy(
+                                    content =
+                                        (it.content as? UiTimeline.ItemContent.Status)?.copy(
+                                            quote = persistentListOf(),
+                                        ) ?: it.content,
+                                )
+                            }
                         }
-                    }
-                }.collectAsLazyPagingItems()
-            }
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
 
         val comment =
-            service.map {
-                require(it is VVODataSource)
-                remember(statusKey, accountType) {
-                    it.statusComment(statusKey = statusKey, scope = scope)
-                }.collectAsLazyPagingItems()
-            }
+            service
+                .map {
+                    require(it is VVODataSource)
+                    remember(statusKey, accountType) {
+                        it.statusComment(statusKey = statusKey, scope = scope)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
 
         return object : VVOStatusDetailState {
             override val status = actualStatus
@@ -111,6 +114,6 @@ class VVOStatusDetailPresenter(
 @Immutable
 interface VVOStatusDetailState {
     val status: UiState<UiTimeline>
-    val comment: UiState<LazyPagingItems<UiTimeline>>
-    val repost: UiState<LazyPagingItems<UiTimeline>>
+    val comment: PagingState<UiTimeline>
+    val repost: PagingState<UiTimeline>
 }

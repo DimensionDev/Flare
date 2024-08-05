@@ -60,6 +60,7 @@ kotlin {
                 implementation(libs.mfm.multiplatform)
                 implementation(libs.twitter.parser)
                 implementation(libs.molecule.runtime)
+                api(libs.bluesky)
             }
         }
         val commonTest by getting {
@@ -72,7 +73,6 @@ kotlin {
                 implementation(libs.sqldelight.android.driver)
                 implementation(project.dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.foundation)
-                api(libs.bluesky)
             }
         }
         val appleMain by getting {
@@ -85,10 +85,6 @@ kotlin {
                 implementation(libs.sqldelight.native.driver)
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
-                api(libs.bluesky.get().toString()) {
-                    exclude("co.touchlab.skie")
-                }
-                implementation("co.touchlab.skie:runtime-kotlin:${libs.versions.skie.get()}")
             }
         }
     }

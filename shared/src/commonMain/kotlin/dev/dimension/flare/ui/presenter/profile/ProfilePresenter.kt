@@ -3,10 +3,12 @@ package dev.dimension.flare.ui.presenter.profile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -44,14 +46,15 @@ class ProfilePresenter(
             }
 
         val listState =
-            accountServiceState.map { service ->
-                remember(service, userKey) {
-                    service.userTimeline(
-                        userKey ?: service.account.accountKey,
-                        scope = scope,
-                    )
-                }.collectAsLazyPagingItems()
-            }
+            accountServiceState
+                .map { service ->
+                    remember(service, userKey) {
+                        service.userTimeline(
+                            userKey ?: service.account.accountKey,
+                            scope = scope,
+                        )
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
         val mediaState =
             remember {
                 ProfileMediaPresenter(accountType = accountType, userKey = userKey)
@@ -85,7 +88,7 @@ class ProfilePresenter(
                     it.refresh()
                 }
                 listState.onSuccess {
-                    it.refreshSuspend()
+                    refreshSuspend()
                 }
             }
 
@@ -140,8 +143,8 @@ class ProfilePresenter(
 
 abstract class ProfileState(
     val userState: UiState<UiProfile>,
-    val listState: UiState<LazyPagingItems<UiTimeline>>,
-    val mediaState: UiState<LazyPagingItems<ProfileMedia>>,
+    val listState: PagingState<UiTimeline>,
+    val mediaState: PagingState<ProfileMedia>,
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,
     val actions: UiState<ImmutableListWrapper<ProfileAction>>,

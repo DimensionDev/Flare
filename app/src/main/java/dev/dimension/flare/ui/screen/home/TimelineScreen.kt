@@ -47,6 +47,7 @@ import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDesti
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -56,7 +57,6 @@ import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.TimelineState
@@ -237,12 +237,11 @@ private fun timelinePresenter(tabItem: TimelineTabItem) =
                 )
             }.invoke()
         var showNewToots by remember { mutableStateOf(false) }
-        val listState = state.listState
-        if (listState is UiState.Success && listState.data.itemCount > 0) {
+        state.listState.onSuccess {
             LaunchedEffect(Unit) {
                 snapshotFlow {
-                    if (listState.data.itemCount > 0) {
-                        listState.data.peek(0)?.itemKey
+                    if (itemCount > 0) {
+                        peek(0)?.itemKey
                     } else {
                         null
                     }

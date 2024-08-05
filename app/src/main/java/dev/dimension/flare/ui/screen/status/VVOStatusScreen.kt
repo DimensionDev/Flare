@@ -44,7 +44,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import androidx.paging.compose.LazyPagingItems
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -53,6 +52,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -261,8 +261,8 @@ private fun StatusContent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 private fun LazyStaggeredGridScope.reactionContent(
-    comment: UiState<LazyPagingItems<UiTimeline>>,
-    repost: UiState<LazyPagingItems<UiTimeline>>,
+    comment: PagingState<UiTimeline>,
+    repost: PagingState<UiTimeline>,
     detailType: DetailType,
     onDetailTypeChange: (DetailType) -> Unit,
 ) {
@@ -292,12 +292,12 @@ private fun LazyStaggeredGridScope.reactionContent(
     when (detailType) {
         DetailType.Comment ->
             with(comment) {
-                status(showVVOStatus = false)
+                status()
             }
 
         DetailType.Repost ->
             with(repost) {
-                status(showVVOStatus = false)
+                status()
             }
     }
 }

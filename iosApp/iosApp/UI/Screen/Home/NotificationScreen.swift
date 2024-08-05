@@ -3,7 +3,8 @@ import shared
 
 struct NotificationScreen: View {
     @State var notificationType: NotificationFilter = NotificationFilter.all
-    let presenter: NotificationPresenter
+    @State
+    var presenter: NotificationPresenter
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     init(accountType: AccountType) {
         presenter = .init(accountType: accountType)

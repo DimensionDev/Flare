@@ -1,6 +1,7 @@
 package dev.dimension.flare.common
 
 import dev.dimension.flare.model.MicroBlogKey
+import io.ktor.http.Url
 import io.ktor.http.encodeURLPathPart
 
 const val APPSCHEMA = "flare"
@@ -17,7 +18,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             keyword: String,
-        ) = "$APPSCHEMA://Search/$accountKey/${keyword.encodeURLPathPart()}"
+        ) = "$APPSCHEMA://Search/${accountKey.toString().encodeURLPathPart()}/${keyword.encodeURLPathPart()}"
     }
 
     object Profile {
@@ -26,7 +27,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             userKey: MicroBlogKey,
-        ) = "$APPSCHEMA://Profile/$accountKey/$userKey"
+        ) = "$APPSCHEMA://Profile/${accountKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
     }
 
     object ProfileWithNameAndHost {
@@ -36,7 +37,8 @@ object AppDeepLink {
             accountKey: MicroBlogKey,
             userName: String,
             host: String,
-        ) = "$APPSCHEMA://ProfileWithNameAndHost/$accountKey/$userName/$host"
+        ) =
+            "$APPSCHEMA://ProfileWithNameAndHost/${accountKey.toString().encodeURLPathPart()}/${userName.encodeURLPathPart()}/${host.encodeURLPathPart()}"
     }
 
     object StatusDetail {
@@ -45,7 +47,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             statusKey: MicroBlogKey,
-        ) = "$APPSCHEMA://StatusDetail/$accountKey/$statusKey"
+        ) = "$APPSCHEMA://StatusDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
     }
 
     object VVO {
@@ -55,7 +57,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://VVO/StatusDetail/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://VVO/StatusDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
         object CommentDetail {
@@ -64,7 +66,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://VVO/CommentDetail/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://VVO/CommentDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
         object ReplyToComment {
@@ -74,7 +76,8 @@ object AppDeepLink {
                 accountKey: MicroBlogKey,
                 replyTo: MicroBlogKey,
                 rootId: String,
-            ) = "$APPSCHEMA://VVO/ReplyToComment/$accountKey/$replyTo/$rootId"
+            ) =
+                "$APPSCHEMA://VVO/ReplyToComment/${accountKey.toString().encodeURLPathPart()}/${replyTo.toString().encodeURLPathPart()}/${rootId.encodeURLPathPart()}"
         }
     }
 
@@ -85,7 +88,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Compose/Reply/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://Compose/Reply/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
         object Quote {
@@ -94,7 +97,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Compose/Quote/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://Compose/Quote/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 
@@ -104,7 +107,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             statusKey: MicroBlogKey,
-        ) = "$APPSCHEMA://DeleteStatus/$accountKey/$statusKey"
+        ) = "$APPSCHEMA://DeleteStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
     }
 
     object Bluesky {
@@ -114,7 +117,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Bluesky/ReportStatus/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://Bluesky/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 
@@ -126,7 +129,8 @@ object AppDeepLink {
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
                 userKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Mastodon/ReportStatus/$accountKey/$statusKey/$userKey"
+            ) =
+                "$APPSCHEMA://Mastodon/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
         }
     }
 
@@ -138,7 +142,8 @@ object AppDeepLink {
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
                 userKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Misskey/ReportStatus/$accountKey/$statusKey/$userKey"
+            ) =
+                "$APPSCHEMA://Misskey/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
         }
 
         object AddReaction {
@@ -147,7 +152,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Misskey/AddReaction/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://Misskey/AddReaction/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 
@@ -158,45 +163,127 @@ object AppDeepLink {
     }
 
     fun parse(url: String): DeeplinkEvent? {
-        val uri = url.removePrefix("$APPSCHEMA://")
-        return when {
-            uri.startsWith("Search/") -> {
-                val path = uri.substringAfter("Search/")
-                val accountKey = MicroBlogKey.valueOf(path.substringBefore("/"))
-                val keyword = path.substringAfter("/")
+        val data = Url(url)
+        return when (data.pathSegments.getOrNull(0)) {
+            "Callback" ->
+                when (data.pathSegments.getOrNull(1)) {
+                    "SignIn" ->
+                        when (data.pathSegments.getOrNull(2)) {
+                            "Mastodon" -> DeeplinkEvent.Callback.Mastodon
+                            "Misskey" -> DeeplinkEvent.Callback.Misskey
+                            else -> null
+                        }
+                    else -> null
+                }
+
+            "Search" -> {
+                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val keyword = data.pathSegments.getOrNull(2) ?: return null
                 DeeplinkEvent.Search(accountKey, keyword)
             }
 
-            uri.startsWith("Profile/") -> {
-                val path = uri.substringAfter("Profile/")
-                val accountKey = MicroBlogKey.valueOf(path.substringBefore("/"))
-                val userKey = MicroBlogKey.valueOf(path.substringAfter("/"))
+            "Profile" -> {
+                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val userKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                 DeeplinkEvent.Profile(accountKey, userKey)
             }
 
-            uri.startsWith("ProfileWithNameAndHost/") -> {
-                val path = uri.substringAfter("ProfileWithNameAndHost/")
-                val accountKey = MicroBlogKey.valueOf(path.substringBefore("/"))
-                val userName = path.substringAfter("/").substringBefore("/")
-                val host = path.substringAfter("/").substringAfter("/")
+            "ProfileWithNameAndHost" -> {
+                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val userName = data.pathSegments.getOrNull(2) ?: return null
+                val host = data.pathSegments.getOrNull(3) ?: return null
                 DeeplinkEvent.ProfileWithNameAndHost(accountKey, userName, host)
             }
 
-            uri.startsWith("StatusDetail/") -> {
-                val path = uri.substringAfter("StatusDetail/")
-                val accountKey = MicroBlogKey.valueOf(path.substringBefore("/"))
-                val statusKey = MicroBlogKey.valueOf(path.substringAfter("/"))
+            "StatusDetail" -> {
+                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                 DeeplinkEvent.StatusDetail(accountKey, statusKey)
             }
 
-            uri.startsWith("Compose") -> {
-                DeeplinkEvent.Compose
-            }
+            "Compose" ->
+                when (data.pathSegments.getOrNull(1)) {
+                    "Reply" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        DeeplinkEvent.Compose.Reply(accountKey, statusKey)
+                    }
+                    "Quote" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        DeeplinkEvent.Compose.Quote(accountKey, statusKey)
+                    }
+                    else -> null
+                }
 
-            uri.startsWith("RawImage/") -> {
-                val rawImage = uri.substringAfter("RawImage/")
+            "RawImage" -> {
+                val rawImage = data.pathSegments.getOrNull(1) ?: return null
                 DeeplinkEvent.RawImage(rawImage)
             }
+
+            "VVO" ->
+                when (data.pathSegments.getOrNull(1)) {
+                    "StatusDetail" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        DeeplinkEvent.VVO.StatusDetail(accountKey, statusKey)
+                    }
+                    "CommentDetail" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        DeeplinkEvent.VVO.CommentDetail(accountKey, statusKey)
+                    }
+                    "ReplyToComment" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val replyTo = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        val rootId = data.pathSegments.getOrNull(4) ?: return null
+                        DeeplinkEvent.VVO.ReplyToComment(accountKey, replyTo, rootId)
+                    }
+                    else -> null
+                }
+
+            "DeleteStatus" -> {
+                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                DeeplinkEvent.DeleteStatus(accountKey, statusKey)
+            }
+
+            "Bluesky" ->
+                when (data.pathSegments.getOrNull(1)) {
+                    "ReportStatus" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        DeeplinkEvent.Bluesky.ReportStatus(accountKey, statusKey)
+                    }
+                    else -> null
+                }
+
+            "Mastodon" ->
+                when (data.pathSegments.getOrNull(1)) {
+                    "ReportStatus" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        val userKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(4) ?: return null)
+                        DeeplinkEvent.Mastodon.ReportStatus(accountKey, statusKey, userKey)
+                    }
+                    else -> null
+                }
+
+            "Misskey" ->
+                when (data.pathSegments.getOrNull(1)) {
+                    "ReportStatus" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        val userKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(4) ?: return null)
+                        DeeplinkEvent.Misskey.ReportStatus(accountKey, statusKey, userKey)
+                    }
+                    "AddReaction" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
+                        DeeplinkEvent.Misskey.AddReaction(accountKey, statusKey)
+                    }
+                    else -> null
+                }
 
             else -> null
         }
@@ -204,6 +291,12 @@ object AppDeepLink {
 }
 
 sealed interface DeeplinkEvent {
+    interface Callback : DeeplinkEvent {
+        data object Mastodon : Callback
+
+        data object Misskey : Callback
+    }
+
     data class Search(
         val accountKey: MicroBlogKey,
         val keyword: String,
@@ -225,9 +318,70 @@ sealed interface DeeplinkEvent {
         val statusKey: MicroBlogKey,
     ) : DeeplinkEvent
 
-    data object Compose : DeeplinkEvent
+    interface Compose : DeeplinkEvent {
+        data class Reply(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+        ) : Compose
+
+        data class Quote(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+        ) : Compose
+    }
 
     data class RawImage(
         val url: String,
     ) : DeeplinkEvent
+
+    interface VVO : DeeplinkEvent {
+        data class StatusDetail(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+        ) : VVO
+
+        data class CommentDetail(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+        ) : VVO
+
+        data class ReplyToComment(
+            val accountKey: MicroBlogKey,
+            val replyTo: MicroBlogKey,
+            val rootId: String,
+        ) : VVO
+    }
+
+    data class DeleteStatus(
+        val accountKey: MicroBlogKey,
+        val statusKey: MicroBlogKey,
+    ) : DeeplinkEvent
+
+    interface Bluesky : DeeplinkEvent {
+        data class ReportStatus(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+        ) : Bluesky
+    }
+
+    interface Mastodon : DeeplinkEvent {
+        data class ReportStatus(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+            val userKey: MicroBlogKey,
+        ) : Mastodon
+    }
+
+    interface Misskey : DeeplinkEvent {
+        data class ReportStatus(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+            val userKey: MicroBlogKey,
+        ) : Misskey
+
+        data class AddReaction(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+        ) : Misskey
+    }
 }

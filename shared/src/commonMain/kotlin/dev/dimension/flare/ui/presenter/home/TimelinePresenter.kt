@@ -2,11 +2,9 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.paging.compose.LazyPagingItems
-import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 abstract class TimelinePresenter : PresenterBase<TimelineState>() {
@@ -19,19 +17,19 @@ abstract class TimelinePresenter : PresenterBase<TimelineState>() {
 
             override suspend fun refresh() {
                 listState.onSuccess {
-                    it.refreshSuspend()
+                    refreshSuspend()
                 }
             }
         }
     }
 
     @Composable
-    abstract fun listState(): UiState<LazyPagingItems<UiTimeline>>
+    abstract fun listState(): PagingState<UiTimeline>
 }
 
 @Immutable
 interface TimelineState {
-    val listState: UiState<LazyPagingItems<UiTimeline>>
+    val listState: PagingState<UiTimeline>
 
     suspend fun refresh()
 }

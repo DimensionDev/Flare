@@ -27,7 +27,7 @@ struct QuotedStatus: View {
                             .font(.subheadline)
                             .foregroundColor(.gray)
                         Spacer()
-                        dateFormatter(Date(timeIntervalSince1970: .init(integerLiteral: data.createdAt)))
+                        dateFormatter(data.createdAt)
                             .font(.caption)
                             .foregroundColor(.gray)
                     }

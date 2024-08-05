@@ -4,8 +4,10 @@ import Combine
 
 struct DiscoverScreen: View {
     private let onUserClicked: (UiUserV2) -> Void
-    let searchPresenter: SearchPresenter
-    let presenter: DiscoverPresenter
+    @State
+    var searchPresenter: SearchPresenter
+    @State
+    var presenter: DiscoverPresenter
     @State var searchText = ""
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     init(accountType: AccountType, onUserClicked: @escaping (UiUserV2) -> Void) {
@@ -22,8 +24,8 @@ struct DiscoverScreen: View {
                         Section("discover_users_title") {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 LazyHStack {
-                                    ForEach(0..<data.data.itemCount, id: \.self) { index in
-                                        if let item = data.data.peek(index: index) {
+                                    ForEach(0..<data.itemCount, id: \.self) { index in
+                                        if let item = data.peek(index: index) {
                                             UserComponent(
                                                 user: item,
                                                 onUserClicked: {
@@ -32,7 +34,7 @@ struct DiscoverScreen: View {
                                             )
                                                 .frame(width: 200, alignment: .leading)
                                                 .onAppear {
-                                                    data.data.get(index: index)
+                                                    data.get(index: index)
                                                 }
                                         }
                                     }
@@ -54,12 +56,11 @@ struct DiscoverScreen: View {
                 } else {
                     switch onEnum(of: state.users) {
                     case .success(let data):
-                        if data.data.isNotEmptyOrLoading {
                             Section("discover_users_title") {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     LazyHGrid(rows: [.init(), .init()]) {
-                                        ForEach(0..<data.data.itemCount, id: \.self) { index in
-                                            if let item = data.data.peek(index: index) {
+                                        ForEach(0..<data.itemCount, id: \.self) { index in
+                                            if let item = data.peek(index: index) {
                                                 UserComponent(
                                                     user: item,
                                                     onUserClicked: {
@@ -68,7 +69,7 @@ struct DiscoverScreen: View {
                                                 )
                                                     .frame(width: 200, alignment: .leading)
                                                     .onAppear {
-                                                        data.data.get(index: index)
+                                                        data.get(index: index)
                                                     }
                                             }
                                         }
@@ -79,22 +80,17 @@ struct DiscoverScreen: View {
                                 }
                             }
                             .listRowSeparator(.hidden)
-                        } else {
-                            EmptyView()
-                                .listRowSeparator(.hidden)
-                        }
                     default:
                         EmptyView()
                             .listRowSeparator(.hidden)
                     }
                     switch onEnum(of: state.hashtags) {
                     case .success(let data):
-                        if data.data.isNotEmptyOrLoading {
                             Section("discover_hashtags_title") {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     LazyHStack {
-                                        ForEach(0..<data.data.itemCount, id: \.self) { index in
-                                            if let item = data.data.peek(index: index) {
+                                        ForEach(0..<data.itemCount, id: \.self) { index in
+                                            if let item = data.peek(index: index) {
                                                 Text(item.hashtag)
                                                     .padding()
                                             #if os(iOS)
@@ -107,6 +103,9 @@ struct DiscoverScreen: View {
                                                         searchText = "#" + item.hashtag
                                                         searchState.search(new: "#" + item.hashtag)
                                                     }
+                                                    .onAppear {
+                                                        data.get(index: index)
+                                                    }
                                             }
                                         }
                                     }
@@ -116,15 +115,11 @@ struct DiscoverScreen: View {
                                 }
                             }
                             .listRowSeparator(.hidden)
-                        } else {
-                            EmptyView()
-                                .listRowSeparator(.hidden)
-                        }
                     default:
                         EmptyView()
                             .listRowSeparator(.hidden)
                     }
-                    if case .success(let data) = onEnum(of: state.status), data.data.isNotEmptyOrLoading {
+                    if case .success(let data) = onEnum(of: state.status) {
                         Section("discover_status_title") {
                             StatusTimelineComponent(
                                 data: state.status

@@ -81,43 +81,43 @@ extension View {
     func withTabRouter(router: Router<TabDestination>) -> some View {
         navigationDestination(
             for: TabDestination.self
-        ) { destination in
-            switch destination {
-            case let .profile(accountType, userKey):
-                ProfileScreen(
-                    accountType: accountType.toKotlin(),
-                    userKey: MicroBlogKey.companion.valueOf(str: userKey),
-                    toProfileMedia: { userKey in
-                        router.navigate(to: .profileMedia(accountType: accountType, userKey: userKey.description()))
-                    }
-                )
-            case let .statusDetail(accountType, statusKey):
-                StatusDetailScreen(
-                    accountType: accountType.toKotlin(),
-                    statusKey: MicroBlogKey.companion.valueOf(str: statusKey)
-                )
-            case let .profileWithUserNameAndHost(accountType, userName, host):
-                ProfileWithUserNameScreen(
-                    accountType: accountType.toKotlin(),
-                    userName: userName,
-                    host: host
-                ) { userKey in
-                    router.navigate(to: .profileMedia(accountType: accountType, userKey: userKey.description()))
-                }
-            case let .search(accountType, data):
-                SearchScreen(
-                    accountType: accountType.toKotlin(),
-                    initialQuery: data,
-                    onUserClicked: { user in
-                        router.navigate(to: .profileMedia(accountType: accountType, userKey: user.key.description()))
-                    }
-                )
-            case let .profileMedia(accountType, userKey):
-                ProfileMediaListScreen(
-                    accountType: accountType.toKotlin(),
-                    userKey: MicroBlogKey.companion.valueOf(str: userKey)
-                )
-            }
+        ) { _ in
+//            switch destination {
+//            case let .profile(accountType, userKey):
+//                ProfileScreen(
+//                    accountType: accountType.toKotlin(),
+//                    userKey: MicroBlogKey.companion.valueOf(str: userKey),
+//                    toProfileMedia: { userKey in
+//                        router.navigate(to: .profileMedia(accountType: accountType, userKey: userKey.description()))
+//                    }
+//                )
+//            case let .statusDetail(accountType, statusKey):
+//                StatusDetailScreen(
+//                    accountType: accountType.toKotlin(),
+//                    statusKey: MicroBlogKey.companion.valueOf(str: statusKey)
+//                )
+//            case let .profileWithUserNameAndHost(accountType, userName, host):
+//                ProfileWithUserNameScreen(
+//                    accountType: accountType.toKotlin(),
+//                    userName: userName,
+//                    host: host
+//                ) { userKey in
+//                    router.navigate(to: .profileMedia(accountType: accountType, userKey: userKey.description()))
+//                }
+//            case let .search(accountType, data):
+//                SearchScreen(
+//                    accountType: accountType.toKotlin(),
+//                    initialQuery: data,
+//                    onUserClicked: { user in
+//                        router.navigate(to: .profileMedia(accountType: accountType, userKey: user.key.description()))
+//                    }
+//                )
+//            case let .profileMedia(accountType, userKey):
+//                ProfileMediaListScreen(
+//                    accountType: accountType.toKotlin(),
+//                    userKey: MicroBlogKey.companion.valueOf(str: userKey)
+//                )
+//            }
         }
     }
 }

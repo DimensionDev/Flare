@@ -4,7 +4,8 @@ import shared
 struct SettingsScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var selectedDetail: SettingsDestination?
-    let presenter = ActiveAccountPresenter()
+    @State
+    var presenter = ActiveAccountPresenter()
     var body: some View {
         FlareTheme {
             NavigationSplitView {

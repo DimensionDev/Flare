@@ -37,293 +37,183 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import dev.dimension.flare.R
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.deeplink
+import dev.dimension.flare.common.onEmpty
+import dev.dimension.flare.common.onEndOfList
+import dev.dimension.flare.common.onError
+import dev.dimension.flare.common.onLoading
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-context(LazyStaggeredGridScope, UiState<LazyPagingItems<UiTimeline>>, AnimatedVisibilityScope, SharedTransitionScope)
+context(LazyStaggeredGridScope, PagingState<UiTimeline>, AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
-internal fun status(
-    detailStatusKey: MicroBlogKey? = null,
-    showVVOStatus: Boolean = true,
-) {
-    onSuccess { lazyPagingItems ->
-        if (lazyPagingItems.itemCount > 0) {
-            when (val refresh = lazyPagingItems.loadState.refresh) {
-                is LoadState.Error ->
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        when (refresh.error) {
-                            is LoginExpiredException -> {
-                                LoginExpiredError()
-                            }
-
-                            else -> Unit
-                        }
-                    }
-                else -> Unit
-            }
-            with(lazyPagingItems) {
-                items(
-                    itemCount,
-                    key =
-                        itemKey {
-                            it.itemKey
-                        },
-                    contentType =
-                        itemContentType {
-                            it.itemType
-                        },
-                ) {
-                    Column {
-                        val item = get(it)
-                        StatusItem(
-                            item,
-//                            this@StatusEvent,
-                            detailStatusKey = detailStatusKey,
-//                            isDetail = item?.statusKey == detailStatusKey,
-                            showVVOStatus = showVVOStatus,
-                            modifier =
-                                Modifier
-                                    .let {
-                                        if (item != null) {
-                                            it.sharedBounds(
-                                                rememberSharedContentState(key = item.itemKey),
-                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                                // ANY transition will lead to the entire screen being animated to
-                                                // exit state after list -> detail -> go back -> scroll a little bit,
-                                                // I have no idea why, so just use None here
-                                                enter = EnterTransition.None,
-                                                exit = ExitTransition.None,
-                                                renderInOverlayDuringTransition = false,
-                                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                                            )
-                                        } else {
-                                            it
-                                        }
-                                    }.background(MaterialTheme.colorScheme.background),
-                        )
-                        if (it != itemCount - 1) {
-                            HorizontalDivider(
-                                modifier = Modifier.alpha(DisabledAlpha),
-                            )
-                        }
-                    }
-                }
-            }
-            when (val state = lazyPagingItems.loadState.append) {
-                is LoadState.Error -> {
-                    when (state.error) {
-                        is LoginExpiredException -> {
-                            item(
-                                span = StaggeredGridItemSpan.FullLine,
-                            ) {
-                                LoginExpiredError()
-                            }
-                        }
-                        else -> {
-                            item(
-                                span = StaggeredGridItemSpan.FullLine,
-                            ) {
-                                Column(
-                                    modifier =
-                                        Modifier
-                                            .clickable {
-                                                lazyPagingItems.retry()
-                                            }.fillMaxWidth()
-                                            .padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoodBad,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(48.dp),
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.status_loadmore_error),
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                LoadState.Loading ->
-                    items(10) {
-                        Column {
-                            StatusPlaceholder(
-                                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            HorizontalDivider(
-                                modifier = Modifier.alpha(DisabledAlpha),
-                            )
-                        }
-                    }
-
-                is LoadState.NotLoading ->
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Column(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            HorizontalDivider()
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = stringResource(R.string.status_loadmore_end),
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-            }
-        } else if (
-            lazyPagingItems.loadState.refresh == LoadState.Loading ||
-            lazyPagingItems.loadState.prepend == LoadState.Loading ||
-            lazyPagingItems.loadState.append == LoadState.Loading
+internal fun status(detailStatusKey: MicroBlogKey? = null) {
+    onSuccess {
+        items(
+            itemCount,
+            key =
+                itemKey {
+                    it.itemKey
+                },
+            contentType =
+                itemContentType {
+                    it.itemType
+                },
         ) {
-            items(10) {
-                Column {
-                    StatusPlaceholder(
-                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+            Column {
+                val item = get(it)
+                StatusItem(
+                    item,
+                    detailStatusKey = detailStatusKey,
+                    modifier =
+                        Modifier
+                            .let {
+                                if (item != null) {
+                                    it.sharedBounds(
+                                        rememberSharedContentState(key = item.itemKey),
+                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                        // ANY transition will lead to the entire screen being animated to
+                                        // exit state after list -> detail -> go back -> scroll a little bit,
+                                        // I have no idea why, so just use None here
+                                        enter = EnterTransition.None,
+                                        exit = ExitTransition.None,
+                                        renderInOverlayDuringTransition = false,
+                                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                                    )
+                                } else {
+                                    it
+                                }
+                            }.background(MaterialTheme.colorScheme.background),
+                )
+                if (it != itemCount - 1) {
                     HorizontalDivider(
                         modifier = Modifier.alpha(DisabledAlpha),
                     )
                 }
             }
-        } else if (
-            lazyPagingItems.loadState.refresh is LoadState.Error ||
-            lazyPagingItems.loadState.prepend is LoadState.Error
-        ) {
-            val error =
-                lazyPagingItems.loadState.refresh as? LoadState.Error
-                    ?: lazyPagingItems.loadState.prepend as? LoadState.Error
-            when (error?.error) {
-                is LoginExpiredException -> {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LoginExpiredError()
-                    }
-                }
-                else -> {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Column(
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        lazyPagingItems.retry()
-                                    }.fillMaxWidth()
-                                    .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MoodBad,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp),
-                            )
-                            Text(text = stringResource(R.string.status_loadmore_error))
-                        }
-                    }
-                }
-            }
-        } else {
-            item(
-                span = StaggeredGridItemSpan.FullLine,
-            ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .clickable {
-                                lazyPagingItems.refresh()
-                            },
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.EmojiEmotions,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                    )
-                    Text(
-                        text = stringResource(id = R.string.status_empty),
-                        modifier = Modifier.padding(16.dp),
-                    )
-                }
-            }
         }
-    }
-    onLoading {
-        items(10) {
-            Column {
-                StatusPlaceholder(
-                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                HorizontalDivider(
-                    modifier = Modifier.alpha(DisabledAlpha),
-                )
-            }
-        }
-    }
-    onError {
-        when (it) {
-            is LoginExpiredException -> {
+        appendState
+            .onError {
                 item(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
-                    LoginExpiredError()
+                    OnError(error = it, onRetry = { retry() })
                 }
-            }
-
-            else -> {
+            }.onLoading {
+                items(10) {
+                    OnLoading()
+                }
+            }.onEndOfList {
                 item(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
                     Column(
                         modifier =
                             Modifier
-                                .clickable {
-                                },
-                        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                                .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.MoodBad,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                        )
+                        HorizontalDivider()
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = stringResource(id = R.string.status_loadmore_error_retry),
-                            modifier = Modifier.padding(16.dp),
+                            text = stringResource(R.string.status_loadmore_end),
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
+            }
+    }
+    onError {
+        item(
+            span = StaggeredGridItemSpan.FullLine,
+        ) {
+            OnError(error = it, onRetry = { })
+        }
+    }
+    onLoading {
+        items(10) {
+            OnLoading()
+        }
+    }
+    onEmpty {
+        item(
+            span = StaggeredGridItemSpan.FullLine,
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .clickable {
+                            refresh()
+                        },
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.EmojiEmotions,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(
+                    text = stringResource(id = R.string.status_empty),
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OnLoading(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+    ) {
+        StatusPlaceholder(
+            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        HorizontalDivider(
+            modifier = Modifier.alpha(DisabledAlpha),
+        )
+    }
+}
+
+@Composable
+private fun OnError(
+    error: Throwable,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when (error) {
+        is LoginExpiredException -> {
+            LoginExpiredError(modifier)
+        }
+
+        else -> {
+            Column(
+                modifier =
+                    modifier
+                        .clickable {
+                            onRetry.invoke()
+                        }.fillMaxWidth()
+                        .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MoodBad,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(text = stringResource(R.string.status_loadmore_error))
             }
         }
     }
@@ -364,7 +254,6 @@ internal fun StatusItem(
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
     horizontalPadding: Dp = screenHorizontalPadding,
-    showVVOStatus: Boolean = true,
 ) {
     if (item == null) {
         Column(

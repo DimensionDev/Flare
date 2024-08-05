@@ -2,7 +2,8 @@ import SwiftUI
 import shared
 
 struct HomeScreen: View {
-    let presenter = ActiveAccountPresenter()
+    @State
+    var presenter = ActiveAccountPresenter()
     @State var showSettings = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var body: some View {
@@ -164,19 +165,19 @@ struct TabItem<Content: View>: View {
 // #endif
         .environment(\.openURL, OpenURLAction { url in
             if let event = AppDeepLink.shared.parse(url: url.absoluteString) {
-                switch onEnum(of: event) {
-                case .profile(let data):
-                    router.navigate(to: .profile(accountType: accountType, userKey: data.userKey.description()))
-                case .profileWithNameAndHost(let data):
-                    router.navigate(to: .profileWithUserNameAndHost(accountType: accountType, userName: data.userName, host: data.host))
-                case .search(let data):
-                    router.navigate(to: .search(accountType: accountType, query: data.keyword))
-                case .statusDetail(let data):
-                    router.navigate(to: .statusDetail(accountType: accountType, statusKey: data.statusKey.description()))
-                case .compose:
-                    showCompose = true
-                case .rawImage(let data): break
-                }
+//                switch onEnum(of: event) {
+//                case .profile(let data):
+//                    router.navigate(to: .profile(accountType: accountType, userKey: data.userKey.description()))
+//                case .profileWithNameAndHost(let data):
+//                    router.navigate(to: .profileWithUserNameAndHost(accountType: accountType, userName: data.userName, host: data.host))
+//                case .search(let data):
+//                    router.navigate(to: .search(accountType: accountType, query: data.keyword))
+//                case .statusDetail(let data):
+//                    router.navigate(to: .statusDetail(accountType: accountType, statusKey: data.statusKey.description()))
+//                case .compose:
+//                    showCompose = true
+//                case .rawImage(let data): break
+//                }
                 return .handled
             } else {
                 return .systemAction

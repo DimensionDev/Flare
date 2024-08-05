@@ -377,9 +377,9 @@ fun ServiceSelectScreen(
                     state.instances
                         .onSuccess {
                             items(
-                                count = state.instances.itemCount,
+                                count = itemCount,
                             ) {
-                                val instance = state.instances.peek(it)
+                                val instance = get(it)
                                 ServiceSelectItem(
                                     instance = instance,
                                     modifier =

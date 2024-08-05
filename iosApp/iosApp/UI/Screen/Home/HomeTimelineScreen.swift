@@ -3,7 +3,8 @@ import shared
 
 struct HomeTimelineScreen: View {
     @Environment(\.openURL) private var openURL
-    let presenter: HomeTimelinePresenter
+    @State
+    var presenter: HomeTimelinePresenter
 
     init(accountType: AccountType) {
         presenter = .init(accountType: accountType)

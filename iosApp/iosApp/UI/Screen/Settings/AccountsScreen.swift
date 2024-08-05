@@ -2,7 +2,8 @@ import SwiftUI
 import shared
 
 struct AccountsScreen: View {
-    let presenter = AccountsPresenter()
+    @State
+    var presenter = AccountsPresenter()
     @State var showServiceSelectSheet = false
     var body: some View {
         Observing(presenter.models) { state in

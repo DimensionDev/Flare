@@ -29,6 +29,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -181,7 +182,7 @@ private fun presenter(
             scope.launch {
                 isRefreshing = true
                 state.list.onSuccess {
-                    it.refreshSuspend()
+                    refreshSuspend()
                 }
                 isRefreshing = false
             }

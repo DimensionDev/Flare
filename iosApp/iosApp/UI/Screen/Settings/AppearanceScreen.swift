@@ -3,7 +3,8 @@ import shared
 
 struct AppearanceScreen: View {
     @Environment(\.appSettings) private var appSettings
-    let presenter = AppearancePresenter()
+    @State
+    var presenter = AppearancePresenter()
     var body: some View {
         Observing(presenter.models) { state in
             List {

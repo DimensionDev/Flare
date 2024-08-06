@@ -19,7 +19,7 @@ struct HomeTimelineScreen: View {
             }
             .listStyle(.plain)
             .refreshable {
-                try? await state.refresh()
+                try? await presenter.models.value.refresh()
             }
             .navigationTitle("home_timeline_title")
     #if os(iOS)

@@ -291,13 +291,17 @@ struct FieldsView: View {
     var body: some View {
         if fields.count > 0 {
             VStack(alignment: .leading) {
-                ForEach(fields.map { $0.key }, id: \.self) { key in
+                let keys = fields.map { $0.key }
+                ForEach(0..<keys.count, id: \.self) { index in
+                    let key = keys[index]
                     Text(key)
                         .font(.caption)
                     Markdown(fields[key]?.markdown ?? "")
                         .font(.body)
                         .markdownInlineImageProvider(.emoji)
-                    Divider()
+                    if index != keys.count - 1 {
+                        Divider()
+                    }
                 }
                 .padding(.horizontal)
             }

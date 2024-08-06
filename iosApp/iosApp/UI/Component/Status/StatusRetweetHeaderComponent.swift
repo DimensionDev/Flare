@@ -10,9 +10,11 @@ struct StatusRetweetHeaderComponent: View {
         HStack(alignment: .center) {
             Image(systemName: iconSystemName)
                 .font(.system(size: 10))
+                .frame(alignment: .center)
             Markdown {
                 (nameMarkdown ?? "") + (nameMarkdown == nil ? "" : " ") + text
             }
+            .frame(alignment: .center)
             .lineLimit(1)
             .markdownTextStyle(\.text) {
                 FontSize(12)

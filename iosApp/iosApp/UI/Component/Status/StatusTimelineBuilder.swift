@@ -9,12 +9,12 @@ struct StatusTimelineComponent: View {
         case .empty: Text("timeline_load_empty", comment: "Timeline is empty")
         case .error(let error): Text("timeline_load_error", comment: "Timeline loading error")
         case .loading:
-                        ForEach(0...10, id: \.self) { _ in
-                            StatusPlaceHolder()
-                                .if(horizontalSizeClass != .compact) { view in
-                                    view.padding([.horizontal])
-                                }
-                        }
+            ForEach(0...10, id: \.self) { _ in
+                StatusPlaceHolder()
+                    .if(horizontalSizeClass != .compact) { view in
+                        view.padding([.horizontal])
+                    }
+            }
         case .success(let success):
             ForEach(0..<success.itemCount, id: \.self) { index in
                 let data = success.peek(index: index)
@@ -116,12 +116,15 @@ struct StatusItemView: View {
                 data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
             }
             case .user(let data):
-                UserComponent(
-                    user: data.value,
-                    onUserClicked: {
-                        data.value.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                    }
-                )
+                HStack {
+                    UserComponent(
+                        user: data.value,
+                        onUserClicked: {
+                            data.value.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                        }
+                    )
+                    Spacer()
+                }
             case .userList(let data): EmptyView()
             }
         }

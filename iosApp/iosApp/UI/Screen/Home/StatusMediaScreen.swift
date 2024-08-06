@@ -4,10 +4,10 @@ import shared
 struct StatusMediaScreen: View {
     @State
     var presenter: StatusPresenter
-    let initialIndex: Int
+    let initialIndex: Int32
     let dismiss: () -> Void
 
-    init(accountType: AccountType, statusKey: MicroBlogKey, index: Int, dismiss: @escaping () -> Void) {
+    init(accountType: AccountType, statusKey: MicroBlogKey, index: Int32, dismiss: @escaping () -> Void) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
         self.initialIndex = index
         self.dismiss = dismiss

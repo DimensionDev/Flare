@@ -11,7 +11,6 @@ struct CommonStatusComponent: View {
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, String?) -> Void
     let isDetail: Bool = false
-
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -99,7 +98,6 @@ struct CommonStatusComponent: View {
             if let card = data.card, appSettings.appearanceSettings.showLinkPreview {
                 LinkPreview(card: card)
             }
-
             if !data.quote.isEmpty {
                 VStack {
                     ForEach(0...data.quote.count - 1, id: \.self) { index in
@@ -110,14 +108,13 @@ struct CommonStatusComponent: View {
                         }
                     }
                 }
-                #if os(iOS)
+#if os(iOS)
                 .background(Color(UIColor.secondarySystemBackground))
-                #else
+#else
                 .background(Color(NSColor.windowBackgroundColor))
-                #endif
+#endif
                 .cornerRadius(8)
             }
-
             if let bottomContent = data.bottomContent {
                 switch onEnum(of: bottomContent) {
                 case .reaction(let data):
@@ -139,7 +136,6 @@ struct CommonStatusComponent: View {
                     }
                 }
             }
-
             if isDetail {
                 Spacer()
                     .frame(height: 4)
@@ -150,7 +146,6 @@ struct CommonStatusComponent: View {
             }
             Spacer()
                 .frame(height: 8)
-
             if appSettings.appearanceSettings.showActions || isDetail {
                 HStack {
                     ForEach(0..<data.actions.count, id: \.self) { actionIndex in
@@ -160,67 +155,59 @@ struct CommonStatusComponent: View {
                             ForEach(0..<group.actions.count, id: \.self) { subActionIndex in
                                 let subAction = group.actions[subActionIndex]
                                 if case .item(let item) = onEnum(of: subAction) {
-                                    Button(action: {
+                                    let role: ButtonRole? = if let colorData = item as? StatusActionItemColorized {
+                                        switch colorData.color {
+                                        case .red: .destructive
+                                        case .primaryColor: nil
+                                        case .contentColor: nil
+                                        case .error: .destructive
+                                        }
+                                    } else {
+                                        nil
+                                    }
+                                    Button(role: role, action: {
                                         if let clickable = item as? StatusActionItemClickable {
                                             clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                                         }
                                     }, label: {
-                                        let text = switch onEnum(of: item) {
-                                        case .bookmark(let data): data.bookmarked ? "status_action_unbookmark" : "status_action_bookmark"
-                                        case .delete: "status_action_delete"
-                                        case .like(let data): data.liked ? "status_action_unlike" : "status_action_like"
-                                        case .quote: "status_action_quote"
-                                        case .reaction: "status_action_add_reaction"
-                                        case .reply: "status_action_reply"
-                                        case .report: "status_action_report"
-                                        case .retweet(let data): data.retweeted ? "status_action_unretweet": "status_action_retweet"
-                                        default: ""
+                                        let text: LocalizedStringKey = switch onEnum(of: item) {
+                                        case .bookmark(let data): data.bookmarked ? LocalizedStringKey("status_action_unbookmark") : LocalizedStringKey("status_action_bookmark")
+                                        case .delete: LocalizedStringKey("status_action_delete")
+                                        case .like(let data): data.liked ? LocalizedStringKey("status_action_unlike") : LocalizedStringKey("status_action_like")
+                                        case .quote: LocalizedStringKey("status_action_quote")
+                                        case .reaction: LocalizedStringKey("status_action_add_reaction")
+                                        case .reply: LocalizedStringKey("status_action_reply")
+                                        case .report: LocalizedStringKey("status_action_report")
+                                        case .retweet(let data): data.retweeted ? LocalizedStringKey("status_action_unretweet") : LocalizedStringKey("status_action_retweet")
+                                        case .more: LocalizedStringKey("status_action_more")
                                         }
-                                        let icon = switch onEnum(of: item) {
-                                        case .bookmark(let data): data.bookmarked ? "bookmark.slash" : "bookmark"
-                                        case .delete: "trash"
-                                        case .like: "star"
-                                        case .quote: "quote.bubble.fill"
-                                        case .reaction(let data): data.reacted ? "" : ""
-                                        case .reply: "arrowshape.turn.up.left"
-                                        case .report: "exclamationmark.shield"
-                                        case .retweet: "arrow.left.arrow.right"
-                                        default: ""
-                                        }
-                                        let color: Color? = if case .colorized(let colorData) = onEnum(of: item) {
-                                            switch colorData.color {
-                                            case .red: Color.red
-                                            case .primaryColor: Color.primary
-                                            case .contentColor: Color(UIColor.label)
-                                            case .error: Color.red
-                                            }
-                                        } else {
-                                            nil
-                                        }
+                                        let icon = item.getIcon()
                                         Label(text, systemImage: icon)
-                                            .tint(color)
                                     })
                                 }
                             }
                         } label: {
                             StatusActionLabel(item: group.displayItem)
-                        }
-
+                        }.frame(alignment: .center)
                         case .item(let item): Button(action: {
                             if let clickable = item as? StatusActionItemClickable {
                                 clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                             }
                         }, label: {
                             StatusActionLabel(item: item)
-                        })
+                        }).frame(alignment: .center)
+                        }
+                        if actionIndex != data.actions.count - 1 {
+                            Spacer()
                         }
                     }
                 }
+                .labelStyle(CenteredLabelStyle())
+                .buttonStyle(.borderless)
+                .font(.caption)
                 .if(!isDetail) { view in
                     view.opacity(0.6)
                 }
-                Spacer()
-                    .frame(height: 4)
             }
         }.frame(alignment: .leading)
     }
@@ -238,6 +225,22 @@ func dateFormatter(_ date: Date) -> some View {
     }
 }
 
+extension StatusActionItem {
+    func getIcon() -> String {
+        return switch onEnum(of: self) {
+        case .bookmark(let data): data.bookmarked ? "bookmark.slash" : "bookmark"
+        case .delete: "trash"
+        case .like: "star"
+        case .quote: "quote.bubble.fill"
+        case .reaction(let data): data.reacted ? "minus" : "plus"
+        case .reply: "arrowshape.turn.up.left"
+        case .report: "exclamationmark.shield"
+        case .retweet: "arrow.left.arrow.right"
+        case .more: "ellipsis"
+        }
+    }
+}
+
 struct StatusActionLabel: View {
     let item: StatusActionItem
     var body: some View {
@@ -249,18 +252,8 @@ struct StatusActionLabel: View {
         case .bookmark(let data): data.humanizedCount
         default: ""
         }
-        let icon = switch onEnum(of: item) {
-        case .bookmark(let data): data.bookmarked ? "bookmark.slash" : "bookmark"
-        case .delete: "trash"
-        case .like: "star"
-        case .quote: "quote.bubble.fill"
-        case .reaction(let data): data.reacted ? "" : ""
-        case .reply: "arrowshape.turn.up.left"
-        case .report: "exclamationmark.shield"
-        case .retweet: "arrow.left.arrow.right"
-        default: ""
-        }
-        let color: Color? = if case .colorized(let colorData) = onEnum(of: item) {
+        let icon = item.getIcon()
+        let color = if let colorData = item as? StatusActionItemColorized {
             switch colorData.color {
             case .red: Color.red
             case .primaryColor: Color.primary
@@ -268,10 +261,10 @@ struct StatusActionLabel: View {
             case .error: Color.red
             }
         } else {
-            nil
+            Color(UIColor.label)
         }
         Label(text, systemImage: icon)
-            .tint(color)
+            .foregroundStyle(color, color)
     }
 }
 
@@ -287,6 +280,15 @@ struct StatusVisibilityComponent: View {
             Image(systemName: "lock")
         case .specified:
             Image(systemName: "at")
+        }
+    }
+}
+
+struct CenteredLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.icon.frame(alignment: .center)
+            configuration.title.frame(alignment: .center)
         }
     }
 }

@@ -56,7 +56,7 @@ kotlin {
                 implementation(libs.uuid)
                 implementation(libs.napier)
                 implementation(libs.kotlin.codepoints.deluxe)
-                implementation(libs.ktml)
+                implementation(libs.ksoup)
                 implementation(libs.mfm.multiplatform)
                 implementation(libs.twitter.parser)
                 implementation(libs.molecule.runtime)

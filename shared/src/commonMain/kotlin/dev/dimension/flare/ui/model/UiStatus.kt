@@ -1,13 +1,13 @@
 package dev.dimension.flare.ui.model
 
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.Node
+import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Clock
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Node
-import moe.tlaster.ktml.dom.Text
 import moe.tlaster.twitter.parser.CashTagToken
 import moe.tlaster.twitter.parser.EmojiToken
 import moe.tlaster.twitter.parser.HashTagToken
@@ -19,7 +19,7 @@ import moe.tlaster.twitter.parser.UserNameToken
 internal fun List<Token>.toHtml(accountKey: MicroBlogKey): Element {
     val body = Element("body")
     forEach {
-        body.children.add(it.toHtml(accountKey))
+        body.appendChild(it.toHtml(accountKey))
     }
     return body
 }
@@ -28,29 +28,33 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
     when (this) {
         is CashTagToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search(accountKey, value)
-                children.add(Text(value))
+//                attributes["href"] = AppDeepLink.Search(accountKey, value)
+                attribute("href")?.setValue(AppDeepLink.Search(accountKey, value))
+                addChildren(TextNode(value))
             }
         // not supported
-        is EmojiToken -> Text(value)
+        is EmojiToken -> TextNode(value)
         is HashTagToken ->
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search(accountKey, value)
-                children.add(Text(value))
+//                attributes["href"] = AppDeepLink.Search(accountKey, value)
+                attribute("href")?.setValue(AppDeepLink.Search(accountKey, value))
+                addChildren(TextNode(value))
             }
 
-        is StringToken -> Text(value)
+        is StringToken -> TextNode(value)
         is UrlToken ->
             Element("a").apply {
-                attributes["href"] = value
-                children.add(Text(value.trimUrl()))
+//                attributes["href"] = value
+                attribute("href")?.setValue(value)
+                addChildren(TextNode(value.trimUrl()))
             }
 
         is UserNameToken ->
             Element("a").apply {
-                attributes["href"] =
-                    AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host)
-                children.add(Text(value))
+//                attributes["href"] =
+//                    AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host)
+                attribute("href")?.setValue(AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host))
+                addChildren(TextNode(value))
             }
     }
 
@@ -81,8 +85,8 @@ fun createSampleStatus(user: UiUserV2) =
                 content =
                     Element("body")
                         .apply {
-                            children.add(
-                                Text(
+                            appendChild(
+                                TextNode(
                                     "Sample content for ${user.name.raw} on ${user.key.host}",
                                 ),
                             )

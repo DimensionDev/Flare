@@ -32,12 +32,10 @@ import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.Node
+import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.ui.theme.isLight
-import moe.tlaster.ktml.dom.Comment
-import moe.tlaster.ktml.dom.Doctype
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Node
-import moe.tlaster.ktml.dom.Text
 
 private const val ID_IMAGE = "image"
 private val lightLinkColor = Color(0xff0066cc)
@@ -174,7 +172,7 @@ fun buildContentAnnotatedString(
             linkStyle = linkStyle,
         )
     return buildAnnotatedString {
-        element.children.forEach {
+        element.childNodes().forEach {
             renderNode(it, styleData)
         }
     }
@@ -194,12 +192,10 @@ private fun AnnotatedString.Builder.renderNode(
             this.renderElement(node, styleData = styleData)
         }
 
-        is Text -> {
-            renderText(node.text, styleData.textStyle)
+        is TextNode -> {
+            renderText(node.text(), styleData.textStyle)
         }
-
-        is Comment -> Unit
-        is Doctype -> Unit
+        else -> Unit
     }
 }
 
@@ -218,7 +214,7 @@ private fun AnnotatedString.Builder.renderElement(
     element: Element,
     styleData: StyleData,
 ) {
-    when (element.name.lowercase()) {
+    when (element.tagName().lowercase()) {
         "a" -> {
             renderLink(element, styleData)
         }
@@ -228,20 +224,22 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "span", "p" -> {
-            element.children.forEach {
+            element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }
         }
 
         "emoji" -> {
-            val target = element.attributes["target"]
+//            val target = element.attributes["target"]
+            val target = element.attribute("target")?.value
             if (!target.isNullOrEmpty()) {
                 appendInlineContent(ID_IMAGE, target)
             }
         }
 
         "img" -> {
-            val src = element.attributes["src"]
+//            val src = element.attributes["src"]
+            val src = element.attribute("src")?.value
 //            val alt = element.attributes["alt"]
             if (!src.isNullOrEmpty()) {
                 appendInlineContent(ID_IMAGE, src)
@@ -252,7 +250,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(fontWeight = FontWeight.Bold).toSpanStyle(),
             )
-            element.children.forEach {
+            element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }
             pop()
@@ -262,7 +260,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(fontStyle = FontStyle.Italic).toSpanStyle(),
             )
-            element.children.forEach {
+            element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }
             pop()
@@ -272,7 +270,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(textDecoration = TextDecoration.LineThrough).toSpanStyle(),
             )
-            element.children.forEach {
+            element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }
             pop()
@@ -282,7 +280,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(textDecoration = TextDecoration.Underline).toSpanStyle(),
             )
-            element.children.forEach {
+            element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }
             pop()
@@ -292,14 +290,14 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(fontSize = styleData.textStyle.fontSize * 0.8).toSpanStyle(),
             )
-            element.children.forEach {
+            element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }
             pop()
         }
 
         else -> {
-            element.children.forEach {
+            element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }
         }
@@ -310,10 +308,11 @@ private fun AnnotatedString.Builder.renderLink(
     element: Element,
     styleData: StyleData,
 ) {
-    val href = element.attributes["href"]
+//    val href = element.attributes["href"]
+    val href = element.attribute("href")?.value
     if (!href.isNullOrEmpty()) {
         withLink(LinkAnnotation.Url(href)) {
-            element.children.forEach {
+            element.childNodes().forEach {
                 renderNode(
                     node = it,
                     styleData = styleData.copy(textStyle = styleData.linkStyle),

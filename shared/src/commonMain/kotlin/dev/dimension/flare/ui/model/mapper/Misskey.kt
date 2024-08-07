@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
@@ -24,8 +26,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Text
 import moe.tlaster.mfm.parser.MFMParser
 import moe.tlaster.mfm.parser.tree.BoldNode
 import moe.tlaster.mfm.parser.tree.CashNode
@@ -479,17 +479,20 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is CenterNode -> {
             Element("center").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey))
                 }
             }
         }
 
         is CodeBlockNode -> {
             Element("pre").apply {
-                children.add(
+                appendChild(
                     Element("code").apply {
-                        language?.let { attributes["lang"] = it }
-                        children.add(Text(code))
+                        language?.let {
+//                            attributes["lang"] = it
+                            attribute("lang")?.setValue(it)
+                        }
+                        appendChild(TextNode(code))
                     },
                 )
             }
@@ -497,10 +500,11 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
 
         is MathBlockNode -> {
             Element("pre").apply {
-                children.add(
+                appendChild(
                     Element("code").apply {
-                        attributes["lang"] = "math"
-                        children.add(Text(formula))
+//                        attributes["lang"] = "math"
+                        attribute("lang")?.setValue("math")
+                        appendChild(TextNode(formula))
                     },
                 )
             }
@@ -509,30 +513,31 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is QuoteNode -> {
             Element("blockquote").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey))
                 }
             }
         }
 
         is SearchNode -> {
             Element("search").apply {
-                children.add(Text(query))
+                appendChild(TextNode(query))
             }
         }
 
         is BoldNode -> {
             Element("strong").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey))
                 }
             }
         }
 
         is FnNode -> {
             Element("fn").apply {
-                attributes["name"] = name
+//                attributes["name"] = name
+                attribute("name")?.setValue(name)
                 content.forEach {
-                    children.add(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey))
                 }
             }
         }
@@ -540,7 +545,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is ItalicNode -> {
             Element("em").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey))
                 }
             }
         }
@@ -548,7 +553,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is RootNode -> {
             Element("body").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey))
                 }
             }
         }
@@ -556,7 +561,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is SmallNode -> {
             Element("small").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey))
                 }
             }
         }
@@ -564,49 +569,55 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is StrikeNode -> {
             Element("s").apply {
                 content.forEach {
-                    children.add(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey))
                 }
             }
         }
 
         is CashNode -> {
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
-                children.add(Text("$$content"))
+//                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
+                attribute("href")?.setValue(AppDeepLink.Search(accountKey, "$$content"))
+                appendChild(TextNode("$$content"))
             }
         }
 
         is EmojiCodeNode -> {
             Element("img").apply {
-                attributes["src"] = resolveMisskeyEmoji(emoji, accountKey.host)
-                attributes["alt"] = emoji
+//                attributes["src"] = resolveMisskeyEmoji(emoji, accountKey.host)
+//                attributes["alt"] = emoji
+                attribute("src")?.setValue(resolveMisskeyEmoji(emoji, accountKey.host))
+                attribute("alt")?.setValue(emoji)
             }
         }
 
         is HashtagNode -> {
             Element("a").apply {
-                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
-                children.add(Text("#$tag"))
+//                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
+                attribute("href")?.setValue(AppDeepLink.Search(accountKey, "#$tag"))
+                appendChild(TextNode("#$tag"))
             }
         }
 
         is InlineCodeNode -> {
             Element("code").apply {
-                children.add(Text(code))
+                appendChild(TextNode(code))
             }
         }
 
         is LinkNode -> {
             Element("a").apply {
-                attributes["href"] = url
-                children.add(Text(content))
+//                attributes["href"] = url
+                attribute("href")?.setValue(url)
+                appendChild(TextNode(content))
             }
         }
 
         is MathInlineNode -> {
             Element("code").apply {
-                attributes["lang"] = "math"
-                children.add(Text(formula))
+//                attributes["lang"] = "math"
+                attribute("lang")?.setValue("math")
+                appendChild(TextNode(formula))
             }
         }
 
@@ -616,9 +627,10 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
                     host?.let {
                         AppDeepLink.ProfileWithNameAndHost(accountKey, userName, it)
                     } ?: AppDeepLink.ProfileWithNameAndHost(accountKey, userName, accountKey.host)
-                attributes["href"] = deeplink
-                children.add(
-                    Text(
+//                attributes["href"] = deeplink
+                attribute("href")?.setValue(deeplink)
+                appendChild(
+                    TextNode(
                         buildString {
                             append("@")
                             append(userName)
@@ -634,14 +646,15 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
 
         is moe.tlaster.mfm.parser.tree.TextNode -> {
             Element("span").apply {
-                children.add(Text(content))
+                appendChild(TextNode(content))
             }
         }
 
         is UrlNode -> {
             Element("a").apply {
-                attributes["href"] = url
-                children.add(Text(url))
+//                attributes["href"] = url
+                attribute("href")?.setValue(url)
+                appendChild(TextNode(url))
             }
         }
     }

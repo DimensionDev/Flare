@@ -4,20 +4,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import com.fleeksoft.ksoup.nodes.Element
 import com.google.mlkit.nl.languageid.LanguageIdentification
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
-import moe.tlaster.ktml.dom.Element
 
 @Composable
 fun statusTranslatePresenter(
     contentWarning: String?,
     content: Element,
 ): TranslateResult {
-    val text = content.innerText
+    val text = content.text()
     val contentWarningState =
         contentWarning?.let {
             translateText(it)

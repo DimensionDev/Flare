@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalPagingApi::class)
 internal fun StatusEvent.timelinePager(
@@ -57,7 +58,9 @@ internal fun StatusEvent.timelinePager(
     return combine(pagerFlow, filterFlow) { pagingData, filters ->
         pagingData
             .map {
-                it.render(this)
+                withContext(Dispatchers.IO) {
+                    it.render(this@timelinePager)
+                }
             }.filter {
                 !it.contains(filters)
             }
@@ -65,9 +68,16 @@ internal fun StatusEvent.timelinePager(
 }
 
 private fun UiTimeline.contains(keywords: List<String>): Boolean {
-    return false
-//    val text = textToFilter
-//    return keywords.any { keyword ->
-//        text.any { it.contains(keyword, ignoreCase = true) }
-//    }
+    val text =
+        if (content is UiTimeline.ItemContent.Status) {
+            listOfNotNull(
+                content.content.raw,
+                content.contentWarning,
+            )
+        } else {
+            emptyList()
+        }
+    return keywords.any { keyword ->
+        text.any { it.contains(keyword, ignoreCase = true) }
+    }
 }

@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
@@ -35,8 +37,6 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Text
 import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
 
@@ -546,7 +546,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         name =
             Element("span")
                 .apply {
-                    children.add(Text(legacy.name))
+                    addChildren(TextNode(legacy.name))
                 }.toUi(),
         handle = "@${legacy.screenName}@$xqtHost",
         banner = legacy.profileBannerUrl,
@@ -600,7 +600,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                 UiProfile.BottomContent.Iconify.Icon.Location to
                                     Element("span")
                                         .apply {
-                                            children.add(Text(legacy.location))
+                                            addChildren(TextNode(legacy.location))
                                         }.toUi()
                             } else {
                                 null
@@ -612,8 +612,9 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                 UiProfile.BottomContent.Iconify.Icon.Url to
                                     Element("a")
                                         .apply {
-                                            children.add(Text(displayUrl))
-                                            attributes["href"] = url
+                                            addChildren(TextNode(displayUrl))
+//                                            attributes["href"] = url
+                                            attribute("href")?.setValue(url)
                                         }.toUi()
                             } else {
                                 null

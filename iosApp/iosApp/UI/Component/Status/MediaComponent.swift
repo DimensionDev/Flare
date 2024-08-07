@@ -12,46 +12,46 @@ struct MediaComponent: View {
             media is UiMediaImage
         }
         let columns = if medias.count == 1 {
-            [GridItem(.flexible())]
+            1
         } else if medias.count < 5 {
-            [GridItem(.flexible()), GridItem(.flexible())]
+            2
         } else {
-            [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
+            3
         }
         ZStack(alignment: .topLeading) {
-            LazyVGrid(columns: columns) {
-                if medias.count == 1 {
-                    switch onEnum(of: medias[0]) {
-                    case .image(let image):
-                        MediaItemComponent(media: medias[0])
-                            .aspectRatio(.init(image.aspectRatio), contentMode: .fill)
-                            .onTapGesture {
-                                onMediaClick(0, image.previewUrl)
-                            }
-                    case .video(let video):
-                        MediaItemComponent(media: medias[0])
-                            .aspectRatio(.init(video.aspectRatio), contentMode: .fill)
-                            .onTapGesture {
-                                onMediaClick(0, video.thumbnailUrl)
-                            }
-                    case .gif(let gif):
-                        MediaItemComponent(media: medias[0])
-                            .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
-                            .onTapGesture {
-                                onMediaClick(0, gif.previewUrl)
-                            }
-                    case .audio:
-                        MediaItemComponent(media: medias[0])
-                            .frame(minHeight: 48)
-                            .onTapGesture {
-                                onMediaClick(0, nil)
-                            }
-                    }
-                } else {
-                    ForEach(1...medias.count, id: \.self) { index in
-                        let item = medias[index - 1]
+            CustomGrid(items: medias, columns: columns) { item in
+//                if medias.count == 1 {
+//                    switch onEnum(of: medias[0]) {
+//                    case .image(let image):
+//                        MediaItemComponent(media: medias[0])
+//                            .aspectRatio(.init(image.aspectRatio), contentMode: .fill)
+//                            .onTapGesture {
+//                                onMediaClick(0, image.previewUrl)
+//                            }
+//                    case .video(let video):
+//                        MediaItemComponent(media: medias[0])
+//                            .aspectRatio(.init(video.aspectRatio), contentMode: .fill)
+//                            .onTapGesture {
+//                                onMediaClick(0, video.thumbnailUrl)
+//                            }
+//                    case .gif(let gif):
+//                        MediaItemComponent(media: medias[0])
+//                            .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
+//                            .onTapGesture {
+//                                onMediaClick(0, gif.previewUrl)
+//                            }
+//                    case .audio:
+//                        MediaItemComponent(media: medias[0])
+//                            .frame(minHeight: 48)
+//                            .onTapGesture {
+//                                onMediaClick(0, nil)
+//                            }
+//                    }
+//                } else {
+//                    ForEach(1...medias.count, id: \.self) { index in
+//                        let item = medias[index - 1]
                         MediaItemComponent(media: item)
-                            .aspectRatio(1, contentMode: .fill)
+//                            .aspectRatio(1, contentMode: .fill)
                             .onTapGesture {
 //                                let preview: String? = switch onEnum(of: item) {
 //                                case .audio:
@@ -63,10 +63,10 @@ struct MediaComponent: View {
 //                                case .video(let video):
 //                                    video.thumbnailUrl
 //                                }
-                                onMediaClick(index - 1, nil)
+//                                onMediaClick(index - 1, nil)
                             }
-                    }
-                }
+//                    }
+//                }
             }
             .if(hideSensitive, transform: { view in
                 view.blur(radius: 32)

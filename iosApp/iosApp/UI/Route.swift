@@ -67,34 +67,72 @@ final class Router: ObservableObject {
     func hideFullScreenCover() {
         fullScreenCover = nil
     }
-    func navigateBack() {
-
-    }
 }
 
-struct RouteView: View {
-    let route: AppleRoute
-    let onBack: () -> Void
-    let onNavigate: (_ route: AppleRoute) -> Void
+extension AppleRoute: Identifiable {
+}
+
+struct TabItem<Content: View>: View {
+    @State var router = Router()
+    let content: (Router) -> Content
     var body: some View {
+        NavigationStack(path: $router.navPath) {
+            content(router)
+                .navigationDestination(for: AppleRoute.self) { route in
+                    getView(route: route, onBack: {}, onNavigate: {route in router.navigate(to: route)})
+                }
+        }
+        .sheet(item: $router.sheet) { route in
+            NavigationStack {
+                getView(route: route, onBack: {router.hideSheet()}, onNavigate: {route in router.navigate(to: route)})
+#if os(macOS)
+                    .frame(minWidth: 500, minHeight: 400)
+#endif
+            }
+        }
+        .fullScreenCover(item: $router.fullScreenCover) { route in
+            NavigationStack {
+                getView(route: route, onBack: {router.hideFullScreenCover()}, onNavigate: {route in router.navigate(to: route)})
+            }
+        }
+        .environment(\.openURL, OpenURLAction { url in
+            if let event = AppDeepLinkHelper.shared.parse(url: url.absoluteString) {
+                router.navigate(to: event)
+                return .handled
+            } else {
+                return .systemAction
+            }
+        })
+    }
+    @ViewBuilder
+    func getView(route: AppleRoute, onBack: @escaping () -> Void, onNavigate: @escaping (_ route: AppleRoute) -> Void) -> some View {
         switch onEnum(of: route) {
-        case .bluesky:
-            EmptyView()
+        case .bluesky(let data):
+            switch onEnum(of: data) {
+            case .reportStatus(let data): EmptyView()
+            }
         case .callback:
             EmptyView()
         case .compose(let data):
             switch onEnum(of: data) {
             case .new(let data):
                 ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: nil)
-            case .quote(let data): EmptyView()
-            case .reply(let data): EmptyView()
+            case .quote(let data):
+                ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: ComposeStatusQuote(statusKey: data.statusKey))
+            case .reply(let data):
+                ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: ComposeStatusReply(statusKey: data.statusKey))
             }
         case .deleteStatus:
             EmptyView()
-        case .mastodon:
-            EmptyView()
-        case .misskey:
-            EmptyView()
+        case .mastodon(let data):
+            switch onEnum(of: data) {
+            case .reportStatus(let data): EmptyView()
+            }
+        case .misskey(let data):
+            switch onEnum(of: data) {
+            case .addReaction(let data): EmptyView()
+            case .reportStatus(let data): EmptyView()
+            }
         case .profile(let data):
             ProfileScreen(
                 accountType: AccountTypeSpecific(accountKey: data.accountKey),
@@ -133,42 +171,13 @@ struct RouteView: View {
             )
         case .statusMedia(let data):
             StatusMediaScreen(accountType: AccountTypeSpecific(accountKey: data.accountKey), statusKey: data.statusKey, index: data.index, dismiss: onBack)
-        case .vVO:
-            EmptyView()
-        }
-    }
-}
-
-extension AppleRoute: Identifiable {
-}
-
-struct TabItem<Content: View>: View {
-    @State var router = Router()
-    let content: (Router) -> Content
-    var body: some View {
-        NavigationStack(path: $router.navPath) {
-            content(router)
-                .navigationDestination(for: AppleRoute.self) { route in
-                    RouteView(route: route, onBack: {}, onNavigate: {route in router.navigate(to: route)})
-                }
-                .sheet(item: $router.sheet) { route in
-                    RouteView(route: route, onBack: {router.hideSheet()}, onNavigate: {route in router.navigate(to: route)})
-#if os(macOS)
-                        .frame(minWidth: 500, minHeight: 400)
-#endif
-                }
-                .fullScreenCover(item: $router.fullScreenCover) { route in
-                    RouteView(route: route, onBack: {router.hideFullScreenCover()}, onNavigate: {route in router.navigate(to: route)})
-                }
-
-        }
-        .environment(\.openURL, OpenURLAction { url in
-            if let event = AppDeepLinkHelper.shared.parse(url: url.absoluteString) {
-                router.navigate(to: event)
-                return .handled
-            } else {
-                return .systemAction
+        case .vVO(let data):
+            switch onEnum(of: data) {
+            case .commentDetail(let data): EmptyView()
+            case .replyToComment(let data): 
+                ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: ComposeStatusVVOComment(statusKey: data.replyTo, rootId: data.rootId))
+            case .statusDetail(let data): EmptyView()
             }
-        })
+        }
     }
 }

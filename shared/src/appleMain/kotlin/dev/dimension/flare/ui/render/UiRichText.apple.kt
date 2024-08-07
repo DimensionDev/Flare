@@ -19,6 +19,7 @@ internal fun Node.toMarkdown(): String =
     when (this) {
         is Element -> toMarkdown()
         is TextNode -> text()
+            .replace("#", "\\#")
         else -> ""
     }
 
@@ -32,7 +33,7 @@ internal fun Element.toMarkdown(): String =
                 "$content\n\n"
             }
         }
-        "br" -> "\n"
+        "br" -> "  "
         "a" -> {
             val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {

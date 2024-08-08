@@ -60,15 +60,15 @@ internal fun Status.renderStatus(
                     UiMedia.Video(
                         url = it.videoSrc,
                         thumbnailUrl = it.url ?: url,
-                        width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
-                        height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
+                        width = it.large?.geo?.widthValue ?: it.geoValue?.widthValue ?: 0f,
+                        height = it.large?.geo?.heightValue ?: it.geoValue?.heightValue ?: 0f,
                         description = null,
                     )
                 } else {
                     UiMedia.Image(
                         url = url,
-                        width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
-                        height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
+                        width = it.large?.geo?.widthValue ?: it.geoValue?.widthValue ?: 0f,
+                        height = it.large?.geo?.heightValue ?: it.geoValue?.heightValue ?: 0f,
                         previewUrl = it.url ?: url,
                         description = null,
                         sensitive = false,
@@ -355,8 +355,8 @@ internal fun Comment.renderStatus(
                     if (!url.isNullOrEmpty() && !previewUrl.isNullOrEmpty()) {
                         UiMedia.Image(
                             url = url,
-                            width = it.large?.geo?.widthValue ?: it.geo?.widthValue ?: 0f,
-                            height = it.large?.geo?.heightValue ?: it.geo?.heightValue ?: 0f,
+                            width = it.large?.geo?.widthValue ?: it.geoValue?.widthValue ?: 0f,
+                            height = it.large?.geo?.heightValue ?: it.geoValue?.heightValue ?: 0f,
                             previewUrl = previewUrl,
                             description = null,
                             sensitive = false,

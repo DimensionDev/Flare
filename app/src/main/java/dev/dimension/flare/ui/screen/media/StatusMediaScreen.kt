@@ -5,7 +5,10 @@ import android.content.Context
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -52,6 +55,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import coil.annotation.ExperimentalCoilApi
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -66,6 +70,7 @@ import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -94,6 +99,27 @@ import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import okhttp3.internal.toImmutableList
 import org.koin.compose.koinInject
+import soup.compose.material.motion.animation.materialFadeThroughIn
+import soup.compose.material.motion.animation.materialFadeThroughOut
+
+internal object StatusMediaTransitions : DestinationStyle.Animated() {
+    override val enterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)?
+        get() = {
+            materialFadeThroughIn()
+        }
+    override val exitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)?
+        get() = {
+            materialFadeThroughOut()
+        }
+    override val popEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)?
+        get() = {
+            materialFadeThroughIn()
+        }
+    override val popExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)?
+        get() = {
+            materialFadeThroughOut()
+        }
+}
 
 @Composable
 @Destination<RootGraph>(
@@ -103,6 +129,7 @@ import org.koin.compose.koinInject
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
     ],
+    style = StatusMediaTransitions::class,
 )
 internal fun StatusMediaRoute(
     statusKey: MicroBlogKey,
@@ -191,15 +218,28 @@ private fun StatusMediaScreen(
                         },
                     )
                 state.medias.onSuccess { media ->
+                    var lastPage by remember {
+                        mutableIntStateOf(pagerState.currentPage)
+                    }
                     LaunchedEffect(pagerState.currentPage) {
                         state.setWithVideoPadding(media[pagerState.currentPage] is UiMedia.Video)
                         state.setCurrentPage(pagerState.currentPage)
-                    }
-                    DisposableEffect(pagerState.currentPage) {
-                        val player = playerPool.peek(media[pagerState.currentPage].url)
-                        player?.play()
-                        onDispose {
-                            player?.pause()
+                        if (lastPage != pagerState.currentPage) {
+                            val player = playerPool.peek(media[pagerState.currentPage].url)
+                            player?.play()
+                            val lastPlayer = playerPool.peek(media[lastPage].url)
+                            lastPlayer?.pause()
+
+                            // handle pages around without lastPage
+                            if (lastPage == pagerState.currentPage - 1 && pagerState.currentPage + 1 < pagerState.pageCount) {
+                                val nextPlayer = playerPool.peek(media[pagerState.currentPage + 1].url)
+                                nextPlayer?.pause()
+                            } else if (lastPage == pagerState.currentPage + 1 && pagerState.currentPage - 1 >= 0) {
+                                val prevPlayer = playerPool.peek(media[pagerState.currentPage - 1].url)
+                                prevPlayer?.pause()
+                            }
+
+                            lastPage = pagerState.currentPage
                         }
                     }
                 }

@@ -779,9 +779,7 @@ private val LocalTabState =
     }
 
 @Composable
-internal fun RegisterTabCallback(
-    lazyListState: LazyStaggeredGridState,
-) {
+internal fun RegisterTabCallback(lazyListState: LazyStaggeredGridState) {
     val tabState = LocalTabState.current
     val scope = rememberCoroutineScope()
     val callback: () -> Unit =

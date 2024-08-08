@@ -1,8 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,8 +30,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimeline
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun UiTimelineComponent(
     item: UiTimeline,
@@ -55,8 +50,6 @@ internal fun UiTimelineComponent(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ItemContentComponent(
     item: UiTimeline.ItemContent,
@@ -99,8 +92,6 @@ private fun ItemContentComponent(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun UserListContent(
     data: UiTimeline.ItemContent.UserList,
@@ -125,8 +116,6 @@ private fun UserListContent(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun StatusContent(
     data: UiTimeline.ItemContent.Status,

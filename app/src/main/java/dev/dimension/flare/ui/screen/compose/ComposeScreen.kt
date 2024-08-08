@@ -6,8 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -253,7 +251,6 @@ fun Quote(
 
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 private fun ComposeScreen(
@@ -666,18 +663,14 @@ private fun ComposeScreen(
                 replyState.onSuccess { state ->
                     val content = state.content
                     if (content is UiTimeline.ItemContent.Status) {
-                        AnimatedVisibility(true) {
-                            SharedTransitionLayout {
-                                Card {
-                                    QuotedStatus(
-                                        data = content,
-                                        modifier =
-                                            Modifier
-                                                .padding(horizontal = screenHorizontalPadding)
-                                                .fillMaxWidth(),
-                                    )
-                                }
-                            }
+                        Card {
+                            QuotedStatus(
+                                data = content,
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = screenHorizontalPadding)
+                                        .fillMaxWidth(),
+                            )
                         }
                     }
                 }
@@ -1287,10 +1280,13 @@ internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localNa
         when (this) {
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
                 R.string.misskey_visibility_public
+
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
                 R.string.misskey_visibility_home
+
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
                 R.string.misskey_visibility_followers
+
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
                 R.string.misskey_visibility_specified
         }
@@ -1300,10 +1296,13 @@ internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localDe
         when (this) {
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
                 R.string.misskey_visibility_public_description
+
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
                 R.string.misskey_visibility_home_description
+
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
                 R.string.misskey_visibility_followers_description
+
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
                 R.string.misskey_visibility_specified_description
         }

@@ -1,8 +1,6 @@
 package dev.dimension.flare.ui.screen.status
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.icons.Icons
@@ -41,7 +39,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -54,12 +51,11 @@ import kotlinx.coroutines.launch
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun AnimatedVisibilityScope.StatusDeeplinkRoute(
+fun StatusDeeplinkRoute(
     statusKey: MicroBlogKey,
     accountKey: MicroBlogKey,
     navigator: DestinationsNavigator,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     StatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
@@ -67,7 +63,6 @@ fun AnimatedVisibilityScope.StatusDeeplinkRoute(
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -77,12 +72,11 @@ fun AnimatedVisibilityScope.StatusDeeplinkRoute(
     ],
     wrappers = [ThemeWrapper::class],
 )
-fun AnimatedVisibilityScope.StatusRoute(
+fun StatusRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
     accountType: AccountType,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     StatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
@@ -90,7 +84,6 @@ fun AnimatedVisibilityScope.StatusRoute(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun StatusScreen(

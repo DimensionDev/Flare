@@ -1,8 +1,5 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -51,17 +48,15 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun AnimatedVisibilityScope.NotificationRoute(
+internal fun NotificationRoute(
     accountType: AccountType,
     tabState: TabState,
     drawerState: DrawerState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     val scope = rememberCoroutineScope()
     NotificationScreen(
         accountType = accountType,
@@ -74,10 +69,8 @@ internal fun AnimatedVisibilityScope.NotificationRoute(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 private fun NotificationScreen(

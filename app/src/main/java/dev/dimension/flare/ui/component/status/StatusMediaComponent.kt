@@ -7,9 +7,6 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -57,8 +54,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlin.time.Duration.Companion.milliseconds
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun StatusMediaComponent(
     data: ImmutableList<UiMedia>,

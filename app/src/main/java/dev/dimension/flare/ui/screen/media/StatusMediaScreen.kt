@@ -6,9 +6,6 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -98,7 +95,6 @@ import me.saket.telephoto.zoomable.rememberZoomableState
 import okhttp3.internal.toImmutableList
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
 //    style = FullScreenDialogStyle::class,
@@ -108,15 +104,14 @@ import org.koin.compose.koinInject
         ),
     ],
 )
-internal fun AnimatedVisibilityScope.StatusMediaRoute(
+internal fun StatusMediaRoute(
     statusKey: MicroBlogKey,
     index: Int,
     preview: String?,
     navigator: DestinationsNavigator,
     accountType: AccountType,
-    sharedTransitionScope: SharedTransitionScope,
     navigationState: NavigationState,
-) = with(sharedTransitionScope) {
+) {
 //    SetDialogDestinationToEdgeToEdge()
 //    AnimatedVisibility(true) {
 //        SharedTransitionScope {
@@ -141,11 +136,9 @@ internal fun AnimatedVisibilityScope.StatusMediaRoute(
 //    }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
-    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 private fun StatusMediaScreen(

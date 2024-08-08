@@ -1,9 +1,6 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -59,8 +56,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun SearchBar(
     state: SearchBarState,
@@ -94,10 +89,8 @@ internal fun SearchBar(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 private fun SearchContent(
@@ -192,8 +185,6 @@ private fun SearchContent(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 internal fun LazyStaggeredGridScope.searchContent(
     searchUsers: PagingState<UiUserV2>,
     searchStatus: PagingState<UiTimeline>,

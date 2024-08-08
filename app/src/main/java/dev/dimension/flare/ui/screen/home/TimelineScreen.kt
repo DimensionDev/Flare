@@ -1,9 +1,7 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
@@ -69,19 +67,17 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 // @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun AnimatedVisibilityScope.TimelineRoute(
+internal fun TimelineRoute(
     navigator: DestinationsNavigator,
     tabItem: TimelineTabItem,
     tabState: TabState,
     drawerState: DrawerState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     val scope = rememberCoroutineScope()
     TimelineScreen(
         tabItem = tabItem,
@@ -100,7 +96,6 @@ internal fun AnimatedVisibilityScope.TimelineRoute(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun TimelineScreen(

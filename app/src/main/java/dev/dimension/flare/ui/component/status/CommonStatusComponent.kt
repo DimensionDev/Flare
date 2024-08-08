@@ -1,9 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -100,8 +97,6 @@ import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CommonStatusComponent(
     item: UiTimeline.ItemContent.Status,
@@ -258,8 +253,6 @@ fun CommonStatusComponent(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun StatusMediasComponent(
     appearanceSettings: AppearanceSettings,
@@ -318,8 +311,6 @@ private fun StatusMediasComponent(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun StatusQuoteComponent(
     quotes: ImmutableList<UiTimeline.ItemContent.Status>,

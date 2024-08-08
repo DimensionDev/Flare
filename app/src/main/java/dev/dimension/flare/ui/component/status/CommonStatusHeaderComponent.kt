@@ -1,8 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -24,8 +21,6 @@ import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.theme.MediumAlpha
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun CommonStatusHeaderComponent(
     data: UiUserV2,

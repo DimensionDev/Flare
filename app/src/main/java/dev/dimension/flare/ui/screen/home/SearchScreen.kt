@@ -1,8 +1,5 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +34,6 @@ import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
     deepLinks = [
@@ -50,25 +46,22 @@ import kotlinx.coroutines.launch
     ],
 )
 @Composable
-internal fun AnimatedVisibilityScope.SearchDeepLink(
+internal fun SearchDeepLink(
     accountKey: MicroBlogKey,
     keyword: String,
     navigator: DestinationsNavigator,
     drawerState: DrawerState,
     tabState: TabState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     SearchRoute(
         keyword = keyword,
         navigator = navigator,
         accountType = AccountType.Specific(accountKey),
         drawerState = drawerState,
-        sharedTransitionScope = sharedTransitionScope,
         tabState = tabState,
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
     deepLinks = [
@@ -78,14 +71,13 @@ internal fun AnimatedVisibilityScope.SearchDeepLink(
     ],
 )
 @Composable
-internal fun AnimatedVisibilityScope.SearchRoute(
+internal fun SearchRoute(
     keyword: String,
     navigator: DestinationsNavigator,
     accountType: AccountType,
     drawerState: DrawerState,
     tabState: TabState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     val scope = rememberCoroutineScope()
     SearchScreen(
         initialQuery = keyword,
@@ -100,8 +92,6 @@ internal fun AnimatedVisibilityScope.SearchRoute(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun SearchScreen(
     initialQuery: String,

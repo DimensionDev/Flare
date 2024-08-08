@@ -2,11 +2,6 @@ package dev.dimension.flare.ui.screen.profile
 
 import android.os.Build
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -82,7 +77,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -145,7 +139,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.reflect.KFunction1
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -158,14 +151,13 @@ import kotlin.reflect.KFunction1
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostDeeplinkRoute(
+internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     userName: String,
     host: String,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
     tabState: TabState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
@@ -213,7 +205,6 @@ internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostDeeplinkRoute(
         }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -223,14 +214,13 @@ internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostDeeplinkRoute(
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostRoute(
+internal fun ProfileWithUserNameAndHostRoute(
     userName: String,
     host: String,
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
@@ -278,23 +268,20 @@ internal fun AnimatedVisibilityScope.ProfileWithUserNameAndHostRoute(
         }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
-internal fun AnimatedVisibilityScope.MeRoute(
+internal fun MeRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     ProfileRoute(
         null,
         navigator,
         accountType,
         tabState,
-        sharedTransitionScope,
     )
 }
 
@@ -384,7 +371,6 @@ private fun profileWithUserNameAndHostPresenter(
     }.invoke().user
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -397,13 +383,12 @@ private fun profileWithUserNameAndHostPresenter(
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun AnimatedVisibilityScope.ProfileDeeplinkRoute(
+internal fun ProfileDeeplinkRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
     tabState: TabState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     ProfileScreen(
         userKey = userKey,
         onBack = {
@@ -429,7 +414,6 @@ internal fun AnimatedVisibilityScope.ProfileDeeplinkRoute(
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -439,13 +423,12 @@ internal fun AnimatedVisibilityScope.ProfileDeeplinkRoute(
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun AnimatedVisibilityScope.ProfileRoute(
+internal fun ProfileRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
     accountType: AccountType,
     tabState: TabState,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     ProfileScreen(
         userKey = userKey,
         onBack = {
@@ -471,10 +454,8 @@ internal fun AnimatedVisibilityScope.ProfileRoute(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 private fun ProfileScreen(
@@ -824,8 +805,6 @@ private fun ProfileMenu(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ProfileHeader(
     userState: UiState<UiProfile>,
@@ -838,7 +817,6 @@ private fun ProfileHeader(
     expandMatrices: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val animatedVisibilityScope = this@AnimatedVisibilityScope
     AnimatedContent(
         targetState = userState,
         modifier = modifier.animateContentSize(),
@@ -847,35 +825,31 @@ private fun ProfileHeader(
             fadeIn() togetherWith fadeOut()
         },
     ) { state ->
-        with(animatedVisibilityScope) {
-            when (state) {
-                is UiState.Loading -> {
-                    ProfileHeaderLoading()
-                }
+        when (state) {
+            is UiState.Loading -> {
+                ProfileHeaderLoading()
+            }
 
-                is UiState.Error -> {
-                    ProfileHeaderError()
-                }
+            is UiState.Error -> {
+                ProfileHeaderError()
+            }
 
-                is UiState.Success -> {
-                    ProfileHeaderSuccess(
-                        user = state.data,
-                        relationState = relationState,
-                        onFollowClick = onFollowClick,
-                        isMe = isMe,
-                        menu = menu,
-                        expandMatrices = expandMatrices,
-                        onAvatarClick = onAvatarClick,
-                        onBannerClick = onBannerClick,
-                    )
-                }
+            is UiState.Success -> {
+                ProfileHeaderSuccess(
+                    user = state.data,
+                    relationState = relationState,
+                    onFollowClick = onFollowClick,
+                    isMe = isMe,
+                    menu = menu,
+                    expandMatrices = expandMatrices,
+                    onAvatarClick = onAvatarClick,
+                    onBannerClick = onBannerClick,
+                )
             }
         }
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ProfileHeaderSuccess(
     user: UiProfile,
@@ -1049,8 +1023,6 @@ private fun ProfileHeaderSuccess(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun CommonProfileHeader(
     bannerUrl: String?,
@@ -1076,19 +1048,20 @@ internal fun CommonProfileHeader(
     Box(
         modifier =
             modifier
-                .sharedBounds(
-                    rememberSharedContentState(key = "header-$userKey"),
-                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                    renderInOverlayDuringTransition = false,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    resizeMode =
-                        SharedTransitionScope.ResizeMode.ScaleToBounds(
-                            contentScale = ContentScale.FillWidth,
-                            alignment = Alignment.TopStart,
-                        ),
-                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                ).background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+//                .sharedBounds(
+//                    rememberSharedContentState(key = "header-$userKey"),
+//                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                    renderInOverlayDuringTransition = false,
+//                    enter = EnterTransition.None,
+//                    exit = ExitTransition.None,
+//                    resizeMode =
+//                        SharedTransitionScope.ResizeMode.ScaleToBounds(
+//                            contentScale = ContentScale.FillWidth,
+//                            alignment = Alignment.TopStart,
+//                        ),
+//                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+//                )
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
                 .padding(bottom = 8.dp),
     ) {
         bannerUrl?.let {
@@ -1097,10 +1070,11 @@ internal fun CommonProfileHeader(
                 contentDescription = null,
                 modifier =
                     Modifier
-                        .sharedElement(
-                            rememberSharedContentState(key = "profile-banner-$userKey"),
-                            animatedVisibilityScope = this@AnimatedVisibilityScope,
-                        ).clipToBounds()
+//                        .sharedElement(
+//                            rememberSharedContentState(key = "profile-banner-$userKey"),
+//                            animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                        )
+                        .clipToBounds()
                         .fillMaxWidth()
                         .height(actualBannerHeight)
                         .let {
@@ -1144,12 +1118,12 @@ internal fun CommonProfileHeader(
                     AvatarComponent(
                         data = avatarUrl,
                         size = ProfileHeaderConstants.AVATAR_SIZE.dp,
-                        beforeModifier =
-                            Modifier
-                                .sharedElement(
-                                    rememberSharedContentState(key = "profile-avatar-$userKey"),
-                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                ),
+//                        beforeModifier =
+//                            Modifier
+//                                .sharedElement(
+//                                    rememberSharedContentState(key = "profile-avatar-$userKey"),
+//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                                ),
                         modifier =
                             Modifier
                                 .let {
@@ -1172,12 +1146,12 @@ internal fun CommonProfileHeader(
                     HtmlText(
                         element = displayName,
                         textStyle = MaterialTheme.typography.titleMedium,
-                        modifier =
-                            Modifier
-                                .sharedElement(
-                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
-                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                ),
+//                        modifier =
+//                            Modifier
+//                                .sharedElement(
+//                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
+//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                                ),
                     )
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1186,12 +1160,12 @@ internal fun CommonProfileHeader(
                         Text(
                             text = handle,
                             style = MaterialTheme.typography.bodySmall,
-                            modifier =
-                                Modifier
-                                    .sharedElement(
-                                        rememberSharedContentState(key = "profile-handle-$userKey"),
-                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                    ),
+//                            modifier =
+//                                Modifier
+//                                    .sharedElement(
+//                                        rememberSharedContentState(key = "profile-handle-$userKey"),
+//                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                                    ),
                         )
                         handleTrailing.invoke(this)
                     }

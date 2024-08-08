@@ -1,10 +1,5 @@
 package dev.dimension.flare.ui.screen.status
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -72,7 +67,6 @@ import dev.dimension.flare.ui.presenter.status.VVOStatusDetailPresenter
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -85,12 +79,11 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun AnimatedVisibilityScope.VVOStatusDeeplinkRoute(
+internal fun VVOStatusDeeplinkRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     VVOStatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
@@ -98,7 +91,6 @@ internal fun AnimatedVisibilityScope.VVOStatusDeeplinkRoute(
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Destination<RootGraph>(
     deepLinks = [
@@ -108,12 +100,11 @@ internal fun AnimatedVisibilityScope.VVOStatusDeeplinkRoute(
     ],
     wrappers = [ThemeWrapper::class],
 )
-internal fun AnimatedVisibilityScope.VVOStatusRoute(
+internal fun VVOStatusRoute(
     statusKey: MicroBlogKey,
     navigator: DestinationsNavigator,
     accountType: AccountType,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     VVOStatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
@@ -121,8 +112,7 @@ internal fun AnimatedVisibilityScope.VVOStatusRoute(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun VVOStatusScreen(
     statusKey: MicroBlogKey,
@@ -206,8 +196,6 @@ private fun VVOStatusScreen(
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun StatusContent(
     statusState: UiState<UiTimeline>,
@@ -220,18 +208,18 @@ private fun StatusContent(
                 StatusItem(
                     item = status,
                     detailStatusKey = detailStatusKey,
-                    modifier =
-                        modifier.sharedBounds(
-                            rememberSharedContentState(key = status.itemKey),
-                            animatedVisibilityScope = this@AnimatedVisibilityScope,
-                            // ANY transition will lead to the entire screen being animated to
-                            // exit state after list -> detail -> go back -> scroll a little bit,
-                            // I have no idea why, so just use None here
-                            enter = EnterTransition.None,
-                            exit = ExitTransition.None,
-                            renderInOverlayDuringTransition = false,
-                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                        ),
+//                    modifier =
+//                        modifier.sharedBounds(
+//                            rememberSharedContentState(key = status.itemKey),
+//                            animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                            // ANY transition will lead to the entire screen being animated to
+//                            // exit state after list -> detail -> go back -> scroll a little bit,
+//                            // I have no idea why, so just use None here
+//                            enter = EnterTransition.None,
+//                            exit = ExitTransition.None,
+//                            renderInOverlayDuringTransition = false,
+//                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+//                        ),
                 )
             }
         }.onLoading {
@@ -258,8 +246,6 @@ private fun StatusContent(
         }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 private fun LazyStaggeredGridScope.reactionContent(
     comment: PagingState<UiTimeline>,
     repost: PagingState<UiTimeline>,

@@ -164,6 +164,7 @@ mlkit-translate = { group = "com.google.mlkit", name = "translate", version = "1
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }
+material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version = "1.2.1" }
 
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout", "material-icons-extended"]

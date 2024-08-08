@@ -1,8 +1,6 @@
 package dev.dimension.flare.ui.screen.status
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.icons.Icons
@@ -46,7 +44,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOCommentPresenter
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     deepLinks = [
         DeepLink(
@@ -59,12 +56,11 @@ import kotlinx.coroutines.launch
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun AnimatedVisibilityScope.VVOCommentDeeplinkRoute(
+internal fun VVOCommentDeeplinkRoute(
     navigator: DestinationsNavigator,
     statusKey: MicroBlogKey,
     accountKey: MicroBlogKey,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     VVOCommentScreen(
         commentKey = statusKey,
         onBack = navigator::navigateUp,
@@ -72,7 +68,6 @@ internal fun AnimatedVisibilityScope.VVOCommentDeeplinkRoute(
     )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Destination<RootGraph>(
     deepLinks = [
         DeepLink(
@@ -82,12 +77,11 @@ internal fun AnimatedVisibilityScope.VVOCommentDeeplinkRoute(
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun AnimatedVisibilityScope.VVOCommentRoute(
+internal fun VVOCommentRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
     commentKey: MicroBlogKey,
-    sharedTransitionScope: SharedTransitionScope,
-) = with(sharedTransitionScope) {
+) {
     VVOCommentScreen(
         commentKey = commentKey,
         onBack = navigator::navigateUp,
@@ -95,7 +89,6 @@ internal fun AnimatedVisibilityScope.VVOCommentRoute(
     )
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun VVOCommentScreen(

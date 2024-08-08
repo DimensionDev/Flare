@@ -142,6 +142,7 @@ dependencies {
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
     implementation(libs.colorpicker.compose)
+    implementation(libs.material.motion.compose)
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

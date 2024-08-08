@@ -1,10 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,8 +49,7 @@ import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-context(LazyStaggeredGridScope, PagingState<UiTimeline>, AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
+context(LazyStaggeredGridScope, PagingState<UiTimeline>)
 internal fun status(detailStatusKey: MicroBlogKey? = null) {
     onSuccess {
         items(
@@ -76,23 +70,24 @@ internal fun status(detailStatusKey: MicroBlogKey? = null) {
                     detailStatusKey = detailStatusKey,
                     modifier =
                         Modifier
-                            .let {
-                                if (item != null) {
-                                    it.sharedBounds(
-                                        rememberSharedContentState(key = item.itemKey),
-                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                        // ANY transition will lead to the entire screen being animated to
-                                        // exit state after list -> detail -> go back -> scroll a little bit,
-                                        // I have no idea why, so just use None here
-                                        enter = EnterTransition.None,
-                                        exit = ExitTransition.None,
-                                        renderInOverlayDuringTransition = false,
-                                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-                                    )
-                                } else {
-                                    it
-                                }
-                            }.background(MaterialTheme.colorScheme.background),
+//                            .let {
+//                                if (item != null) {
+//                                    it.sharedBounds(
+//                                        rememberSharedContentState(key = item.itemKey),
+//                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                                        // ANY transition will lead to the entire screen being animated to
+//                                        // exit state after list -> detail -> go back -> scroll a little bit,
+//                                        // I have no idea why, so just use None here
+//                                        enter = EnterTransition.None,
+//                                        exit = ExitTransition.None,
+//                                        renderInOverlayDuringTransition = false,
+//                                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+//                                    )
+//                                } else {
+//                                    it
+//                                }
+//                            }
+                            .background(MaterialTheme.colorScheme.background),
                 )
                 if (it != itemCount - 1) {
                     HorizontalDivider(
@@ -245,8 +240,6 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
     }
 }
 
-context(AnimatedVisibilityScope, SharedTransitionScope)
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun StatusItem(
     item: UiTimeline?,

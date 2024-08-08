@@ -5,13 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -116,6 +109,11 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import soup.compose.material.motion.animation.materialSharedAxisXIn
+import soup.compose.material.motion.animation.materialSharedAxisXOut
+import soup.compose.material.motion.animation.materialSharedAxisYIn
+import soup.compose.material.motion.animation.materialSharedAxisYOut
+import soup.compose.material.motion.animation.rememberSlideDistance
 
 data class RootNavController(
     val navController: NavController,
@@ -123,7 +121,6 @@ data class RootNavController(
 
 @OptIn(
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
-    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 internal fun HomeScreen(
@@ -418,6 +415,7 @@ internal fun HomeScreen(
                             }
                         },
                     ) {
+                        val slideDistance = rememberSlideDistance()
                         NavHost(
                             navController = navController,
                             startDestination =
@@ -425,43 +423,37 @@ internal fun HomeScreen(
                                     .first()
                                     .tabItem.key,
                             enterTransition = {
-                                slideInVertically(tween(durationMillis = 700)) { 80 } +
-                                    fadeIn(
-                                        tween(durationMillis = 700),
-                                        0.8f,
-                                    )
+                                materialSharedAxisYIn(true, slideDistance)
                             },
                             exitTransition = {
-                                slideOutVertically(tween(durationMillis = 700)) { 80 } +
-                                    fadeOut(
-                                        tween(
-                                            durationMillis = 700,
-                                        ),
-                                    )
+                                materialSharedAxisYOut(true, slideDistance)
+                            },
+                            popEnterTransition = {
+                                materialSharedAxisYIn(true, slideDistance)
+                            },
+                            popExitTransition = {
+                                materialSharedAxisYOut(true, slideDistance)
                             },
                         ) {
                             tabs.all.forEach { (tab, tabState) ->
                                 composable(tab.key) {
-                                    SharedTransitionLayout {
-                                        Router(
-                                            modifier = Modifier.fillMaxSize(),
-                                            navGraph = NavGraphs.root,
-                                            direction = TabSplashScreenDestination,
-                                        ) {
-                                            dependency(rootNavController)
-                                            dependency(
-                                                SplashScreenArgs(
-                                                    getDirection(
-                                                        tab,
-                                                        tab.account,
-                                                    ),
+                                    Router(
+                                        modifier = Modifier.fillMaxSize(),
+                                        navGraph = NavGraphs.root,
+                                        direction = TabSplashScreenDestination,
+                                    ) {
+                                        dependency(rootNavController)
+                                        dependency(
+                                            SplashScreenArgs(
+                                                getDirection(
+                                                    tab,
+                                                    tab.account,
                                                 ),
-                                            )
-                                            dependency(tabState)
-                                            dependency(drawerState)
-                                            dependency(this@SharedTransitionLayout)
-                                            dependency(state.navigationState)
-                                        }
+                                            ),
+                                        )
+                                        dependency(tabState)
+                                        dependency(drawerState)
+                                        dependency(state.navigationState)
                                     }
                                 }
                             }
@@ -598,35 +590,32 @@ internal fun Router(
             modifier = modifier,
             navController = innerNavController,
             navGraph = navGraph,
-            defaultTransitions = DefaultFadingTransitions,
+            defaultTransitions = rememberNavAnimX(),
             start = direction,
             dependenciesContainerBuilder = dependenciesContainerBuilder,
         )
     }
 }
 
-private object DefaultFadingTransitions : NavHostAnimatedDestinationStyle() {
-    override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
-        {
-            fadeIn(animationSpec = tween())
-//            slideInHorizontally(tween()) { it / 3 } + fadeIn()
+@Composable
+private fun rememberNavAnimX(): NavHostAnimatedDestinationStyle {
+    val slideDistance = rememberSlideDistance()
+    return remember(slideDistance) {
+        object : NavHostAnimatedDestinationStyle() {
+            override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+                materialSharedAxisXIn(true, slideDistance)
+            }
+            override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+                materialSharedAxisXOut(true, slideDistance)
+            }
+            override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+                materialSharedAxisXIn(false, slideDistance)
+            }
+            override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+                materialSharedAxisXOut(false, slideDistance)
+            }
         }
-
-    override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
-        {
-            fadeOut(animationSpec = tween())
-//            slideOutHorizontally(tween()) { -it / 3 } + fadeOut()
-        }
-
-//    override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
-//        {
-//            slideInHorizontally(tween()) { -it / 3 } + fadeIn()
-//        }
-//
-//    override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
-//        {
-//            slideOutHorizontally(tween()) { it / 3 } + fadeOut()
-//        }
+    }
 }
 
 private class ProxyUriHandler(

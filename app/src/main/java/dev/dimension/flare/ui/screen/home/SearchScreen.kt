@@ -51,14 +51,12 @@ internal fun SearchDeepLink(
     keyword: String,
     navigator: DestinationsNavigator,
     drawerState: DrawerState,
-    tabState: TabState,
 ) {
     SearchRoute(
         keyword = keyword,
         navigator = navigator,
         accountType = AccountType.Specific(accountKey),
         drawerState = drawerState,
-        tabState = tabState,
     )
 }
 
@@ -76,13 +74,11 @@ internal fun SearchRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
     drawerState: DrawerState,
-    tabState: TabState,
 ) {
     val scope = rememberCoroutineScope()
     SearchScreen(
         initialQuery = keyword,
         accountType = accountType,
-        tabState = tabState,
         onAccountClick = {
             scope.launch {
                 drawerState.open()
@@ -96,13 +92,12 @@ internal fun SearchRoute(
 private fun SearchScreen(
     initialQuery: String,
     accountType: AccountType,
-    tabState: TabState,
     onAccountClick: () -> Unit,
     onUserClick: (MicroBlogKey) -> Unit,
 ) {
     val state by producePresenter("search_$accountType") { presenter(accountType, initialQuery) }
     val lazyListState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
+    RegisterTabCallback(lazyListState = lazyListState)
     FlareScaffold(
         topBar = {
             Box(

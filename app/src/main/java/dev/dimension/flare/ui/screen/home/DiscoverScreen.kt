@@ -67,13 +67,11 @@ import kotlinx.coroutines.launch
 internal fun DiscoverRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
-    tabState: TabState,
     drawerState: DrawerState,
 ) {
     val scope = rememberCoroutineScope()
     DiscoverScreen(
         accountType = accountType,
-        tabState = tabState,
         onUserClick = { navigator.navigate(ProfileRouteDestination(it, accountType)) },
         onAccountClick = {
             scope.launch {
@@ -87,14 +85,13 @@ internal fun DiscoverRoute(
 @Composable
 private fun DiscoverScreen(
     accountType: AccountType,
-    tabState: TabState,
     onUserClick: (MicroBlogKey) -> Unit,
     onAccountClick: () -> Unit,
 ) {
     val windowInfo = currentWindowAdaptiveInfo()
     val state by producePresenter("discover_$accountType") { discoverPresenter(accountType) }
     val lazyListState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
+    RegisterTabCallback(lazyListState = lazyListState)
     BackHandler(enabled = state.isInSearchMode) {
         state.clearSearch()
     }

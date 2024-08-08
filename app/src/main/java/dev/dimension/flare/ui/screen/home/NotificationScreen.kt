@@ -54,13 +54,11 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun NotificationRoute(
     accountType: AccountType,
-    tabState: TabState,
     drawerState: DrawerState,
 ) {
     val scope = rememberCoroutineScope()
     NotificationScreen(
         accountType = accountType,
-        tabState = tabState,
         toQuickMenu = {
             scope.launch {
                 drawerState.open()
@@ -75,14 +73,13 @@ internal fun NotificationRoute(
 @Composable
 private fun NotificationScreen(
     accountType: AccountType,
-    tabState: TabState,
     toQuickMenu: () -> Unit,
 ) {
     val state by producePresenter(key = "notification_$accountType") {
         notificationPresenter(accountType = accountType)
     }
     val lazyListState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
+    RegisterTabCallback(lazyListState = lazyListState)
     val windowInfo = currentWindowAdaptiveInfo()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(

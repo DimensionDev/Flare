@@ -131,7 +131,6 @@ import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
-import dev.dimension.flare.ui.screen.home.TabState
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentMapOf
@@ -156,7 +155,6 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     host: String,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
-    tabState: TabState,
 ) {
     val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
@@ -188,7 +186,6 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                     )
                 },
                 accountType = AccountType.Specific(accountKey),
-                tabState = tabState,
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -219,7 +216,6 @@ internal fun ProfileWithUserNameAndHostRoute(
     host: String,
     navigator: DestinationsNavigator,
     accountType: AccountType,
-    tabState: TabState,
 ) {
     val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
@@ -251,7 +247,6 @@ internal fun ProfileWithUserNameAndHostRoute(
                     )
                 },
                 accountType = accountType,
-                tabState = tabState,
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -275,13 +270,11 @@ internal fun ProfileWithUserNameAndHostRoute(
 internal fun MeRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
-    tabState: TabState,
 ) {
     ProfileRoute(
         null,
         navigator,
         accountType,
-        tabState,
     )
 }
 
@@ -387,7 +380,6 @@ internal fun ProfileDeeplinkRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
     accountKey: MicroBlogKey,
-    tabState: TabState,
 ) {
     ProfileScreen(
         userKey = userKey,
@@ -410,7 +402,6 @@ internal fun ProfileDeeplinkRoute(
             )
         },
         accountType = AccountType.Specific(accountKey),
-        tabState = tabState,
     )
 }
 
@@ -427,7 +418,6 @@ internal fun ProfileRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
     accountType: AccountType,
-    tabState: TabState,
 ) {
     ProfileScreen(
         userKey = userKey,
@@ -450,7 +440,6 @@ internal fun ProfileRoute(
             )
         },
         accountType = accountType,
-        tabState = tabState,
     )
 }
 
@@ -461,7 +450,6 @@ internal fun ProfileRoute(
 private fun ProfileScreen(
     // null means current user
     accountType: AccountType,
-    tabState: TabState,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     onProfileMediaClick: () -> Unit = {},
@@ -472,7 +460,7 @@ private fun ProfileScreen(
         profilePresenter(userKey = userKey, accountType = accountType)
     }
     val listState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(tabState = tabState, lazyListState = listState)
+    RegisterTabCallback(lazyListState = listState)
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val windowInfo = currentWindowAdaptiveInfo()
     val windowSize =

@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.settings
 
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -75,7 +74,7 @@ internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppearanceScreen(
     onBack: () -> Unit,

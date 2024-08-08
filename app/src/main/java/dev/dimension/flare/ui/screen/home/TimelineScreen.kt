@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
@@ -75,13 +74,11 @@ import kotlinx.coroutines.launch
 internal fun TimelineRoute(
     navigator: DestinationsNavigator,
     tabItem: TimelineTabItem,
-    tabState: TabState,
     drawerState: DrawerState,
 ) {
     val scope = rememberCoroutineScope()
     TimelineScreen(
         tabItem = tabItem,
-        tabState = tabState,
         toCompose = {
             navigator.navigate(ComposeRouteDestination(accountType = tabItem.account))
         },
@@ -96,11 +93,10 @@ internal fun TimelineRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TimelineScreen(
     tabItem: TimelineTabItem,
-    tabState: TabState,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
@@ -110,7 +106,7 @@ internal fun TimelineScreen(
     }
     val scope = rememberCoroutineScope()
     val lazyListState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(tabState = tabState, lazyListState = lazyListState)
+    RegisterTabCallback(lazyListState = lazyListState)
     val isAtTheTop by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0

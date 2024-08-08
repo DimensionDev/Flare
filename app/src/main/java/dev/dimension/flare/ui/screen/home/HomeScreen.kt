@@ -437,23 +437,27 @@ internal fun HomeScreen(
                         ) {
                             tabs.all.forEach { (tab, tabState) ->
                                 composable(tab.key) {
-                                    Router(
-                                        modifier = Modifier.fillMaxSize(),
-                                        navGraph = NavGraphs.root,
-                                        direction = TabSplashScreenDestination,
+                                    CompositionLocalProvider(
+                                        LocalTabState provides tabState,
                                     ) {
-                                        dependency(rootNavController)
-                                        dependency(
-                                            SplashScreenArgs(
-                                                getDirection(
-                                                    tab,
-                                                    tab.account,
+                                        Router(
+                                            modifier = Modifier.fillMaxSize(),
+                                            navGraph = NavGraphs.root,
+                                            direction = TabSplashScreenDestination,
+                                        ) {
+                                            dependency(rootNavController)
+                                            dependency(
+                                                SplashScreenArgs(
+                                                    getDirection(
+                                                        tab,
+                                                        tab.account,
+                                                    ),
                                                 ),
-                                            ),
-                                        )
-                                        dependency(tabState)
-                                        dependency(drawerState)
-                                        dependency(state.navigationState)
+                                            )
+//                                        dependency(tabState)
+                                            dependency(drawerState)
+                                            dependency(state.navigationState)
+                                        }
                                     }
                                 }
                             }
@@ -727,7 +731,7 @@ private data class HomeTabState(
         get() = (primary + secondary).toImmutableList()
 }
 
-internal class TabState {
+private class TabState {
     private val callbacks = mutableListOf<() -> Unit>()
 
     fun registerCallback(callback: () -> Unit) {
@@ -769,14 +773,17 @@ internal class NavigationState {
     }
 }
 
+private val LocalTabState =
+    androidx.compose.runtime.staticCompositionLocalOf<TabState> {
+        error("No TabState provided")
+    }
+
 @Composable
-internal fun RegisterTabCallback(
-    tabState: TabState,
-    lazyListState: LazyStaggeredGridState,
-) {
+internal fun RegisterTabCallback(lazyListState: LazyStaggeredGridState) {
+    val tabState = LocalTabState.current
     val scope = rememberCoroutineScope()
     val callback: () -> Unit =
-        remember {
+        remember(lazyListState, scope) {
             {
                 scope.launch {
                     if (lazyListState.firstVisibleItemIndex > 20) {
@@ -787,7 +794,7 @@ internal fun RegisterTabCallback(
                 }
             }
         }
-    DisposableEffect(Unit) {
+    DisposableEffect(tabState, callback) {
         tabState.registerCallback(callback)
         onDispose {
             tabState.unregisterCallback(callback)

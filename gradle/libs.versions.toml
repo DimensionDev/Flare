@@ -160,7 +160,7 @@ firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-cra
 
 mlkit-language-id-debug = { group = "com.google.mlkit", name = "language-id", version = "17.0.5" }
 mlkit-language-id = { group = "com.google.android.gms", name = "play-services-mlkit-language-id", version = "17.0.0" }
-mlkit-translate = { group = "com.google.mlkit", name = "translate", version = "17.0.2" }
+mlkit-translate = { group = "com.google.mlkit", name = "translate", version = "17.0.3" }
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }

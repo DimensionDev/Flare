@@ -1,5 +1,5 @@
 [versions]
-compileSdk = "34"
+compileSdk = "35"
 minSdk = "23"
 java = "17"
 agp = "8.5.1"

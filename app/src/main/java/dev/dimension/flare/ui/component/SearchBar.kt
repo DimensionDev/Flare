@@ -37,9 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import dev.dimension.flare.R
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
@@ -196,12 +195,12 @@ private fun SearchContent(
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)
 internal fun LazyStaggeredGridScope.searchContent(
-    searchUsers: UiState<LazyPagingItems<UiUserV2>>,
-    searchStatus: UiState<LazyPagingItems<UiTimeline>>,
+    searchUsers: PagingState<UiUserV2>,
+    searchStatus: PagingState<UiTimeline>,
     toUser: (MicroBlogKey) -> Unit,
 ) {
-    searchUsers.onSuccess { users ->
-        if (users.loadState.refresh is LoadState.Loading || users.itemCount > 0) {
+    searchUsers
+        .onSuccess {
             item(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
@@ -211,54 +210,59 @@ internal fun LazyStaggeredGridScope.searchContent(
                     },
                 )
             }
-        }
-        item(
-            span = StaggeredGridItemSpan.FullLine,
-        ) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+            item(
+                span = StaggeredGridItemSpan.FullLine,
             ) {
-                users
-                    .onLoading {
-                        items(10) {
-                            Card(
-                                modifier =
-                                    Modifier
-                                        .width(256.dp),
-                            ) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                ) {
+                    items(itemCount) {
+                        val item = get(it)
+                        Card(
+                            modifier =
+                                Modifier
+                                    .width(256.dp),
+                        ) {
+                            if (item == null) {
                                 UserPlaceholder(
                                     modifier = Modifier.padding(8.dp),
                                 )
-                            }
-                        }
-                    }.onSuccess {
-                        items(users.itemCount) {
-                            val item = users[it]
-                            Card(
-                                modifier =
-                                    Modifier
-                                        .width(256.dp),
-                            ) {
-                                if (item == null) {
-                                    UserPlaceholder(
-                                        modifier = Modifier.padding(8.dp),
-                                    )
-                                } else {
-                                    CommonStatusHeaderComponent(
-                                        modifier = Modifier.padding(8.dp),
-                                        data = item,
-                                        onUserClick = {
-                                            toUser(item.key)
-                                        },
-                                    )
-                                }
+                            } else {
+                                CommonStatusHeaderComponent(
+                                    modifier = Modifier.padding(8.dp),
+                                    data = item,
+                                    onUserClick = {
+                                        toUser(item.key)
+                                    },
+                                )
                             }
                         }
                     }
+                }
+            }
+        }.onLoading {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(R.string.search_users))
+                    },
+                )
+            }
+            items(10) {
+                Card(
+                    modifier =
+                        Modifier
+                            .width(256.dp),
+                ) {
+                    UserPlaceholder(
+                        modifier = Modifier.padding(8.dp),
+                    )
+                }
             }
         }
-    }
 
     searchStatus.onSuccess {
         item(

@@ -24,7 +24,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -66,7 +65,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import com.ramcosta.composedestinations.generated.NavGraphs
@@ -100,7 +98,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.isSuccess
-import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
@@ -296,26 +293,16 @@ internal fun HomeScreen(
                             DrawerHeader(accountTypeState, currentTab, navController)
                         },
                         railHeader = {
-                            IconButton(
-                                onClick = {
-                                    scope.launch {
-                                        drawerState.open()
-                                    }
-                                },
-                            ) {
-                                accountTypeState.user
-                                    .onSuccess {
-                                        AvatarComponent(it.avatar)
-                                    }.onLoading {
-                                        AvatarComponent(null, modifier = Modifier.placeholder(true))
-                                    }.onError {
-                                        Icon(
-                                            imageVector = Icons.Default.Menu,
-                                            contentDescription = null,
-                                        )
-                                    }
-                            }
                             accountTypeState.user.onSuccess {
+                                IconButton(
+                                    onClick = {
+                                        scope.launch {
+                                            drawerState.open()
+                                        }
+                                    },
+                                ) {
+                                    AvatarComponent(it.avatar)
+                                }
                                 FloatingActionButton(
                                     onClick = {
                                         currentTab?.let {

@@ -12,61 +12,32 @@ struct MediaComponent: View {
             media is UiMediaImage
         }
         let columns = if medias.count == 1 {
-            [GridItem(.flexible())]
+            1
         } else if medias.count < 5 {
-            [GridItem(.flexible()), GridItem(.flexible())]
+            2
         } else {
-            [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
+            3
         }
         ZStack(alignment: .topLeading) {
-            LazyVGrid(columns: columns) {
-                if medias.count == 1 {
-                    switch onEnum(of: medias[0]) {
-                    case .image(let image):
-                        MediaItemComponent(media: medias[0])
-                            .aspectRatio(.init(image.aspectRatio), contentMode: .fill)
-                            .onTapGesture {
-                                onMediaClick(0, image.previewUrl)
-                            }
-                    case .video(let video):
-                        MediaItemComponent(media: medias[0])
-                            .aspectRatio(.init(video.aspectRatio), contentMode: .fill)
-                            .onTapGesture {
-                                onMediaClick(0, video.thumbnailUrl)
-                            }
-                    case .gif(let gif):
-                        MediaItemComponent(media: medias[0])
-                            .aspectRatio(.init(gif.aspectRatio), contentMode: .fill)
-                            .onTapGesture {
-                                onMediaClick(0, gif.previewUrl)
-                            }
-                    case .audio:
-                        MediaItemComponent(media: medias[0])
-                            .frame(minHeight: 48)
-                            .onTapGesture {
-                                onMediaClick(0, nil)
-                            }
+            CustomGrid(items: medias, columns: columns) { item in
+                MediaItemComponent(media: item)
+                    .onTapGesture {
+                        let preview: String? = switch onEnum(of: item) {
+                        case .audio:
+                            nil
+                        case .gif(let gif):
+                            gif.previewUrl
+                        case .image(let image):
+                            image.previewUrl
+                        case .video(let video):
+                            video.thumbnailUrl
+                        }
+                        if let index = medias.firstIndex(where: { it in
+                            it === item
+                        }) {
+                            onMediaClick(index - 1, nil)
+                        }
                     }
-                } else {
-                    ForEach(1...medias.count, id: \.self) { index in
-                        let item = medias[index - 1]
-                        MediaItemComponent(media: item)
-                            .aspectRatio(1, contentMode: .fill)
-                            .onTapGesture {
-//                                let preview: String? = switch onEnum(of: item) {
-//                                case .audio:
-//                                    nil
-//                                case .gif(let gif):
-//                                    gif.previewUrl
-//                                case .image(let image):
-//                                    image.previewUrl
-//                                case .video(let video):
-//                                    video.thumbnailUrl
-//                                }
-                                onMediaClick(index - 1, nil)
-                            }
-                    }
-                }
             }
             .if(hideSensitive, transform: { view in
                 view.blur(radius: 32)
@@ -106,17 +77,21 @@ struct MediaComponent: View {
                 }
             }
         }
+        .if(medias.count < 7) { view in
+            view.aspectRatio(16/9, contentMode: .fit)
+        }
+        //        .aspectRatio(16/9, contentMode: .fit)
         .frame(maxWidth: 600)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
 struct MediaItemComponent: View {
-#if os(iOS)
-    @State var showCover = false
-#else
-    @Environment(\.openWindow) var openWindow
-#endif
+    //#if os(iOS)
+    //    @State var showCover = false
+    //#else
+    //    @Environment(\.openWindow) var openWindow
+    //#endif
     let media: UiMedia
     var body: some View {
         ZStack {
@@ -142,30 +117,30 @@ struct MediaItemComponent: View {
             }
         }
         .clipped()
-#if os(macOS)
-        .onTapGesture {
-            switch onEnum(of: media) {
-            case .image(let data):
-                openWindow(id: "image-view", value: data.url)
-            case .video(let video):
-                openWindow(id: "video-view", value: video.url)
-            case .audio(let audio):
-                openWindow(id: "video-view", value: audio.url)
-            case .gif(let gif):
-                openWindow(id: "video-view", value: gif.url)
-            }
-        }
-// #else
-//        .onTapGesture {
-//            showCover = true
-//        }
-//        .fullScreenCover(
-//            isPresented: $showCover,
-//            onDismiss: { showCover = false }
-//        ) {
-//            FullScreenImageViewer(media: media, dismiss: { showCover = false })
-//        }
-#endif
+        //#if os(macOS)
+        //        .onTapGesture {
+        //            switch onEnum(of: media) {
+        //            case .image(let data):
+        //                openWindow(id: "image-view", value: data.url)
+        //            case .video(let video):
+        //                openWindow(id: "video-view", value: video.url)
+        //            case .audio(let audio):
+        //                openWindow(id: "video-view", value: audio.url)
+        //            case .gif(let gif):
+        //                openWindow(id: "video-view", value: gif.url)
+        //            }
+        //        }
+        //#else
+        //        .onTapGesture {
+        //            showCover = true
+        //        }
+        //        .sheet(
+        //            isPresented: $showCover,
+        //            onDismiss: { showCover = false }
+        //        ) {
+        //            FullScreenImageViewer(media: media)
+        //        }
+        //#endif
     }
 }
 

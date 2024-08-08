@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.cache.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
@@ -23,15 +25,14 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
+import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
-import moe.tlaster.ktml.Ktml
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Node
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,
@@ -391,7 +392,7 @@ internal fun Account.render(accountKey: MicroBlogKey): UiProfile {
                                 .mapNotNull { (name, value) ->
                                     name?.let {
                                         value?.let {
-                                            name to Ktml.parse(value).toUi()
+                                            name to parseHtml(value).toUi()
                                         }
                                     }
                                 }.toMap()
@@ -415,7 +416,7 @@ private fun parseNote(account: Account): Element {
                 "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
             )
     }
-    return Ktml.parse(content)
+    return parseHtml(content)
 }
 
 internal fun RelationshipResponse.toUi(): UiRelation =
@@ -458,7 +459,7 @@ private fun parseName(status: Account): Element {
                 "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
             )
     }
-    return Ktml.parse(content) as? Element ?: Element("body")
+    return parseHtml(content) as? Element ?: Element("body")
 }
 
 private fun parseContent(
@@ -476,8 +477,8 @@ private fun parseContent(
                 "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
             )
     }
-    val body = Ktml.parse(content)
-    body.children.forEach {
+    val body = parseHtml(content)
+    body.childNodes().forEach {
         replaceMentionAndHashtag(mentions, it, accountKey)
     }
     return body
@@ -489,20 +490,35 @@ private fun replaceMentionAndHashtag(
     accountKey: MicroBlogKey,
 ) {
     if (node is Element) {
-        val href = node.attributes["href"]
+        val href = node.attribute("href")?.value
+        val c = node.attribute("class")?.value
         val mention = mentions.firstOrNull { it.url == href }
         if (mention != null) {
             val id = mention.id
             if (id != null) {
-                node.attributes["href"] =
+                node.attribute("href")?.setValue(
                     AppDeepLink.Profile(
-                        accountKey,
+                        accountKey = accountKey,
                         userKey = MicroBlogKey(id, accountKey.host),
-                    )
+                    ),
+                )
             }
-        } else if (node.innerText.startsWith("#")) {
-            node.attributes["href"] = AppDeepLink.Search(accountKey, node.innerText)
+        } else if (node.text().startsWith("#")) {
+            node.attribute("href")?.setValue(AppDeepLink.Search(accountKey, node.text()))
+        } else if (!href.isNullOrEmpty() && c != null && c.contains("mention")) {
+            val url = Url(href)
+            val host = url.host
+            val name = url.pathSegments.getOrNull(1)?.removePrefix("@")
+            if (!name.isNullOrEmpty() && host.isNotEmpty()) {
+                node.attribute("href")?.setValue(
+                    AppDeepLink.ProfileWithNameAndHost(
+                        accountKey = accountKey,
+                        userName = name,
+                        host = host,
+                    ),
+                )
+            }
         }
-        node.children.forEach { replaceMentionAndHashtag(mentions, it, accountKey) }
+        node.childNodes().forEach { replaceMentionAndHashtag(mentions, it, accountKey) }
     }
 }

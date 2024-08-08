@@ -17,7 +17,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             keyword: String,
-        ) = "$APPSCHEMA://Search/$accountKey/${keyword.encodeURLPathPart()}"
+        ) = "$APPSCHEMA://Search/${accountKey.toString().encodeURLPathPart()}/${keyword.encodeURLPathPart()}"
     }
 
     object Profile {
@@ -26,7 +26,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             userKey: MicroBlogKey,
-        ) = "$APPSCHEMA://Profile/$accountKey/$userKey"
+        ) = "$APPSCHEMA://Profile/${accountKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
     }
 
     object ProfileWithNameAndHost {
@@ -36,7 +36,8 @@ object AppDeepLink {
             accountKey: MicroBlogKey,
             userName: String,
             host: String,
-        ) = "$APPSCHEMA://ProfileWithNameAndHost/$accountKey/$userName/$host"
+        ) =
+            "$APPSCHEMA://ProfileWithNameAndHost/${accountKey.toString().encodeURLPathPart()}/${userName.encodeURLPathPart()}/${host.encodeURLPathPart()}"
     }
 
     object StatusDetail {
@@ -45,7 +46,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             statusKey: MicroBlogKey,
-        ) = "$APPSCHEMA://StatusDetail/$accountKey/$statusKey"
+        ) = "$APPSCHEMA://StatusDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
     }
 
     object VVO {
@@ -55,7 +56,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://VVO/StatusDetail/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://VVO/StatusDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
         object CommentDetail {
@@ -64,7 +65,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://VVO/CommentDetail/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://VVO/CommentDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
         object ReplyToComment {
@@ -74,7 +75,8 @@ object AppDeepLink {
                 accountKey: MicroBlogKey,
                 replyTo: MicroBlogKey,
                 rootId: String,
-            ) = "$APPSCHEMA://VVO/ReplyToComment/$accountKey/$replyTo/$rootId"
+            ) =
+                "$APPSCHEMA://VVO/ReplyToComment/${accountKey.toString().encodeURLPathPart()}/${replyTo.toString().encodeURLPathPart()}/${rootId.encodeURLPathPart()}"
         }
     }
 
@@ -85,7 +87,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Compose/Reply/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://Compose/Reply/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
         object Quote {
@@ -94,7 +96,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Compose/Quote/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://Compose/Quote/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 
@@ -104,7 +106,7 @@ object AppDeepLink {
         operator fun invoke(
             accountKey: MicroBlogKey,
             statusKey: MicroBlogKey,
-        ) = "$APPSCHEMA://DeleteStatus/$accountKey/$statusKey"
+        ) = "$APPSCHEMA://DeleteStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
     }
 
     object Bluesky {
@@ -114,7 +116,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Bluesky/ReportStatus/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://Bluesky/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 
@@ -126,7 +128,8 @@ object AppDeepLink {
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
                 userKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Mastodon/ReportStatus/$accountKey/$statusKey/$userKey"
+            ) =
+                "$APPSCHEMA://Mastodon/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
         }
     }
 
@@ -138,7 +141,8 @@ object AppDeepLink {
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
                 userKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Misskey/ReportStatus/$accountKey/$statusKey/$userKey"
+            ) =
+                "$APPSCHEMA://Misskey/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
         }
 
         object AddReaction {
@@ -147,7 +151,7 @@ object AppDeepLink {
             operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Misskey/AddReaction/$accountKey/$statusKey"
+            ) = "$APPSCHEMA://Misskey/AddReaction/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 
@@ -157,77 +161,13 @@ object AppDeepLink {
         operator fun invoke(url: String) = "$APPSCHEMA://RawImage/${url.encodeURLPathPart()}"
     }
 
-    fun parse(url: String): DeeplinkEvent? {
-        val uri = url.removePrefix("$APPSCHEMA://")
-        return when {
-            uri.startsWith("Search/") -> {
-                val path = uri.substringAfter("Search/")
-                val accountKey = MicroBlogKey.valueOf(path.substringBefore("/"))
-                val keyword = path.substringAfter("/")
-                DeeplinkEvent.Search(accountKey, keyword)
-            }
+    object StatusMedia {
+        const val ROUTE = "$APPSCHEMA://StatusMedia/{accountKey}/{statusKey}/{mediaIndex}"
 
-            uri.startsWith("Profile/") -> {
-                val path = uri.substringAfter("Profile/")
-                val accountKey = MicroBlogKey.valueOf(path.substringBefore("/"))
-                val userKey = MicroBlogKey.valueOf(path.substringAfter("/"))
-                DeeplinkEvent.Profile(accountKey, userKey)
-            }
-
-            uri.startsWith("ProfileWithNameAndHost/") -> {
-                val path = uri.substringAfter("ProfileWithNameAndHost/")
-                val accountKey = MicroBlogKey.valueOf(path.substringBefore("/"))
-                val userName = path.substringAfter("/").substringBefore("/")
-                val host = path.substringAfter("/").substringAfter("/")
-                DeeplinkEvent.ProfileWithNameAndHost(accountKey, userName, host)
-            }
-
-            uri.startsWith("StatusDetail/") -> {
-                val path = uri.substringAfter("StatusDetail/")
-                val accountKey = MicroBlogKey.valueOf(path.substringBefore("/"))
-                val statusKey = MicroBlogKey.valueOf(path.substringAfter("/"))
-                DeeplinkEvent.StatusDetail(accountKey, statusKey)
-            }
-
-            uri.startsWith("Compose") -> {
-                DeeplinkEvent.Compose
-            }
-
-            uri.startsWith("RawImage/") -> {
-                val rawImage = uri.substringAfter("RawImage/")
-                DeeplinkEvent.RawImage(rawImage)
-            }
-
-            else -> null
-        }
+        operator fun invoke(
+            accountKey: MicroBlogKey,
+            statusKey: MicroBlogKey,
+            mediaIndex: Int,
+        ) = "$APPSCHEMA://StatusMedia/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/$mediaIndex"
     }
-}
-
-sealed interface DeeplinkEvent {
-    data class Search(
-        val accountKey: MicroBlogKey,
-        val keyword: String,
-    ) : DeeplinkEvent
-
-    data class Profile(
-        val accountKey: MicroBlogKey,
-        val userKey: MicroBlogKey,
-    ) : DeeplinkEvent
-
-    data class ProfileWithNameAndHost(
-        val accountKey: MicroBlogKey,
-        val userName: String,
-        val host: String,
-    ) : DeeplinkEvent
-
-    data class StatusDetail(
-        val accountKey: MicroBlogKey,
-        val statusKey: MicroBlogKey,
-    ) : DeeplinkEvent
-
-    data object Compose : DeeplinkEvent
-
-    data class RawImage(
-        val url: String,
-    ) : DeeplinkEvent
 }

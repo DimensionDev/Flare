@@ -11,9 +11,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.RecommendInstancePagingSource
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.model.PlatformType
@@ -73,7 +74,7 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
         }
 
         return object : NodeInfoState {
-            override val instances = instances
+            override val instances = instances.toPagingState()
             override val detectedPlatformType = detectedPlatformType
             override val canNext = canNext
 
@@ -87,7 +88,7 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
 }
 
 interface NodeInfoState {
-    val instances: LazyPagingItems<UiInstance>
+    val instances: PagingState<UiInstance>
     val detectedPlatformType: UiState<PlatformType>
     val canNext: Boolean
 

@@ -91,6 +91,7 @@ struct CommonProfileHeader: View {
                                     Text("Button")
                                 })
                                 .buttonStyle(.borderless)
+                                .redacted(reason: .placeholder)
                                 case .error: EmptyView()
                                 }
                             }

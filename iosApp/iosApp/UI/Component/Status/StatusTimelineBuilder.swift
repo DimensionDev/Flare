@@ -3,32 +3,11 @@ import shared
 
 struct StatusTimelineComponent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    let data: UiState<LazyPagingItems<UiTimeline>>
+    let data: PagingState<UiTimeline>
     var body: some View {
         switch onEnum(of: data) {
-        case .success(let success):
-            if (success.data.loadState.refresh is Paging_commonLoadState.Loading ||
-                success.data.loadState.prepend is Paging_commonLoadState.Loading) &&
-                success.data.itemCount == 0 {
-                ForEach(0...10, id: \.self) { _ in
-                    StatusPlaceHolder()
-                        .if(horizontalSizeClass != .compact) { view in
-                            view.padding([.horizontal])
-                        }
-                }
-            } else if (success.data.loadState.refresh is Paging_commonLoadState.Error ||
-                       success.data.loadState.prepend is Paging_commonLoadState.Error) &&
-                        success.data.itemCount == 0 {
-                Text("timeline_load_error", comment: "Timeline loading error")
-            } else if success.data.itemCount == 0 {
-                Text("timeline_load_empty", comment: "Timeline is empty")
-            } else {
-                StatusTimeline(
-                    pagingSource: success.data
-                )
-            }
-        case .error(let error):
-            Text("timeline_load_error", comment: "Timeline loading error")
+        case .empty: Text("timeline_load_empty", comment: "Timeline is empty")
+        case .error(let error): Text("timeline_load_error", comment: "Timeline loading error")
         case .loading:
             ForEach(0...10, id: \.self) { _ in
                 StatusPlaceHolder()
@@ -36,33 +15,9 @@ struct StatusTimelineComponent: View {
                         view.padding([.horizontal])
                     }
             }
-        }
-    }
-}
-
-struct StatusTimeline: View {
-    @Environment(\.openURL) private var openURL
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    let pagingSource: LazyPagingItems<UiTimeline>
-    var body: some View {
-        if (pagingSource.loadState.refresh is Paging_commonLoadState.Loading ||
-            pagingSource.loadState.prepend is Paging_commonLoadState.Loading) &&
-            pagingSource.itemCount == 0 {
-            ForEach(0...10, id: \.self) { _ in
-                StatusPlaceHolder()
-                    .if(horizontalSizeClass != .compact) { view in
-                        view.padding([.horizontal])
-                    }
-            }
-        } else if (pagingSource.loadState.refresh is Paging_commonLoadState.Error ||
-                   pagingSource.loadState.prepend is Paging_commonLoadState.Error) &&
-                    pagingSource.itemCount == 0 {
-            Text("timeline_load_error", comment: "Timeline loading error")
-        } else if pagingSource.itemCount == 0 {
-            Text("timeline_load_empty", comment: "Timeline is empty")
-        } else {
-            ForEach(1...pagingSource.itemCount, id: \.self) { index in
-                let data = pagingSource.peek(index: Int32(index - 1))
+        case .success(let success):
+            ForEach(0..<success.itemCount, id: \.self) { index in
+                let data = success.peek(index: index)
                 VStack {
                     if let status = data {
                         StatusItemView(
@@ -73,7 +28,7 @@ struct StatusTimeline: View {
                     }
                 }
                 .onAppear {
-                    pagingSource.get(index: index - 1)
+                    success.get(index: index)
                 }
                 .if(horizontalSizeClass != .compact) { view in
                     view.padding([.horizontal])
@@ -154,23 +109,25 @@ struct StatusItemView: View {
             switch onEnum(of: content) {
             case .status(let data): CommonStatusComponent(
                 data: data,
-                onMediaClick: { _, _ in
-
+                onMediaClick: { index, preview in
+                    openURL(URL(string: AppDeepLink.StatusMedia.shared.invoke(accountKey: data.accountKey, statusKey: data.statusKey, mediaIndex: Int32(index)))!)
                 }
             ).onTapGesture {
                 data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
             }
             case .user(let data):
-                UserComponent(
-                    user: data.value,
-                    onUserClicked: {
-                        data.value.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                    }
-                )
+                HStack {
+                    UserComponent(
+                        user: data.value,
+                        onUserClicked: {
+                            data.value.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                        }
+                    )
+                    Spacer()
+                }
             case .userList(let data): EmptyView()
             }
         }
-        EmptyView()
     }
 }
 

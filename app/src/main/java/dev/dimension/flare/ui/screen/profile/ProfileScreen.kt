@@ -89,9 +89,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import androidx.paging.compose.LazyPagingItems
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
+import com.fleeksoft.ksoup.nodes.Element
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
@@ -104,7 +104,8 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Cat
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.common.onNotEmptyOrLoading
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
@@ -141,7 +142,6 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.launch
-import moe.tlaster.ktml.dom.Element
 import kotlin.math.max
 import kotlin.reflect.KFunction1
 
@@ -719,10 +719,8 @@ private fun ProfileScreen(
                                 )
                             }
                             state.state.mediaState.onSuccess {
-                                it.onNotEmptyOrLoading {
-                                    item {
-                                        HorizontalDivider()
-                                    }
+                                item {
+                                    HorizontalDivider()
                                 }
                             }
                         }
@@ -1304,14 +1302,14 @@ internal fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ProfileMeidasPreview(
-    mediaState: UiState<LazyPagingItems<ProfileMedia>>,
+    mediaState: PagingState<ProfileMedia>,
     maxLines: Int,
     itemSize: Dp,
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
-    mediaState.onSuccess { media ->
-        if (media.itemCount > 0) {
+    mediaState.onSuccess {
+        if (itemCount > 0) {
             ContextualFlowRow(
                 modifier =
                     modifier
@@ -1341,10 +1339,10 @@ private fun ProfileMeidasPreview(
                             )
                         }
                     },
-                itemCount = media.itemCount,
+                itemCount = itemCount,
                 maxLines = maxLines,
             ) {
-                val item = media[it]
+                val item = get(it)
                 if (item == null) {
                     Box(
                         modifier =

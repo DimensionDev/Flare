@@ -2,7 +2,8 @@ import SwiftUI
 import shared
 
 struct StorageScreen: View {
-    let presenter = StoragePresenter()
+    @State
+    var presenter = StoragePresenter()
     var body: some View {
         Observing(presenter.models) { state in
             List {

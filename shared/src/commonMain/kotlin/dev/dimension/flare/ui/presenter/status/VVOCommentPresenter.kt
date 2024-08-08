@@ -3,9 +3,10 @@ package dev.dimension.flare.ui.presenter.status
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -34,12 +35,13 @@ class VVOCommentPresenter(
                     }.collectAsState().toUi()
                 }
         val list =
-            serviceState.map { service ->
-                remember(service) {
-                    require(service is VVODataSource)
-                    service.commentChild(scope = scope, commentKey = commentKey)
-                }.collectAsLazyPagingItems()
-            }
+            serviceState
+                .map { service ->
+                    remember(service) {
+                        require(service is VVODataSource)
+                        service.commentChild(scope = scope, commentKey = commentKey)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
         return object : VVOCommentState {
             override val root = root
             override val list = list
@@ -49,5 +51,5 @@ class VVOCommentPresenter(
 
 interface VVOCommentState {
     val root: UiState<UiTimeline>
-    val list: UiState<LazyPagingItems<UiTimeline>>
+    val list: PagingState<UiTimeline>
 }

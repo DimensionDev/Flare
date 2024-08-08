@@ -11,11 +11,11 @@ sealed interface StatusAction {
     ) : StatusAction
 
     sealed interface Item : StatusAction {
-        sealed interface Clickable : Item {
+        sealed interface Clickable {
             val onClicked: ClickContext.() -> Unit
         }
 
-        sealed interface Colorized : Item {
+        sealed interface Colorized {
             val color: Color
 
             enum class Color {
@@ -36,7 +36,11 @@ sealed interface StatusAction {
             Clickable,
             Colorized {
             val humanizedCount by lazy {
-                count.humanize()
+                count
+                    .takeIf {
+                        it > 0
+                    }?.humanize()
+                    .orEmpty()
             }
 
             override val color: Colorized.Color
@@ -51,7 +55,11 @@ sealed interface StatusAction {
             Clickable,
             Colorized {
             val humanizedCount by lazy {
-                count.humanize()
+                count
+                    .takeIf {
+                        it > 0
+                    }?.humanize()
+                    .orEmpty()
             }
 
             override val color: Colorized.Color
@@ -64,7 +72,11 @@ sealed interface StatusAction {
         ) : Item,
             Clickable {
             val humanizedCount by lazy {
-                count.humanize()
+                count
+                    .takeIf {
+                        it > 0
+                    }?.humanize()
+                    .orEmpty()
             }
         }
 
@@ -74,7 +86,11 @@ sealed interface StatusAction {
         ) : Item,
             Clickable {
             val humanizedCount by lazy {
-                count.humanize()
+                count
+                    .takeIf {
+                        it > 0
+                    }?.humanize()
+                    .orEmpty()
             }
         }
 
@@ -85,7 +101,11 @@ sealed interface StatusAction {
         ) : Item,
             Clickable {
             val humanizedCount by lazy {
-                count.humanize()
+                count
+                    .takeIf {
+                        it > 0
+                    }?.humanize()
+                    .orEmpty()
             }
         }
 

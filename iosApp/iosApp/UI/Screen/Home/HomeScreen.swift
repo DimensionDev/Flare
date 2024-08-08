@@ -2,7 +2,8 @@ import SwiftUI
 import shared
 
 struct HomeScreen: View {
-    let presenter = ActiveAccountPresenter()
+    @State
+    var presenter = ActiveAccountPresenter()
     @State var showSettings = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var body: some View {
@@ -13,7 +14,7 @@ struct HomeScreen: View {
                         TabModel(
                             title: String(localized: "home_timeline_title"),
                             image: "house",
-                            destination: TabItem(accountType: .active) { _ in
+                            destination: TabItem { _ in
                                 HomeTimelineScreen(accountType: AccountTypeActive())
                                     .toolbar {
     #if os(iOS)
@@ -35,7 +36,7 @@ struct HomeScreen: View {
                         TabModel(
                             title: String(localized: "home_notification_title"),
                             image: "bell",
-                            destination: TabItem(accountType: .active) { _ in
+                            destination: TabItem { _ in
                                 NotificationScreen(accountType: AccountTypeActive())
                                     .toolbar {
     #if os(iOS)
@@ -57,11 +58,11 @@ struct HomeScreen: View {
                         TabModel(
                             title: String(localized: "home_discover_title"),
                             image: "magnifyingglass",
-                            destination: TabItem(accountType: .active) { router in
+                            destination: TabItem { _ in
                                 DiscoverScreen(
                                     accountType: AccountTypeActive(),
-                                    onUserClicked: { user in
-                                        router.navigate(to: .profileMedia(accountType: .active, userKey: user.key.description()))
+                                    onUserClicked: { _ in
+//                                        router.navigate(to: .profileMedia(accountType: .active, userKey: user.key.description()))
                                     }
                                 )
                             }
@@ -69,12 +70,12 @@ struct HomeScreen: View {
                         TabModel(
                             title: String(localized: "home_profile_title"),
                             image: "person.circle",
-                            destination: TabItem(accountType: .active) { router in
+                            destination: TabItem { _ in
                                 ProfileScreen(
                                     accountType: AccountTypeActive(),
                                     userKey: nil,
-                                    toProfileMedia: { userKey in
-                                        router.navigate(to: .profileMedia(accountType: .active, userKey: userKey.description()))
+                                    toProfileMedia: { _ in
+//                                        router.navigate(to: .profileMedia(accountType: .active, userKey: userKey.description()))
                                     }
                                 )
                             }
@@ -109,81 +110,6 @@ struct HomeScreen: View {
     }
 }
 
-struct TabItem<Content: View>: View {
-    let accountType: SwiftAccountType
-    @State var showCompose = false
-    @State var router = Router<TabDestination>()
-    let content: (Router<TabDestination>) -> Content
-    var body: some View {
-        NavigationStack(path: $router.navPath) {
-            content(router)
-                .withTabRouter(router: router)
-        }
-        .sheet(isPresented: $showCompose, content: {
-            NavigationStack {
-                ComposeScreen(onBack: {
-                    showCompose = false
-                }, accountType: accountType.toKotlin())
-            }
-#if os(macOS)
-            .frame(minWidth: 600, minHeight: 400)
-#endif
-        })
-//        .sheet(isPresented: Binding(
-//            get: {statusEvent.composeStatus != nil},
-//            set: { value in
-//                if !value {
-//                    statusEvent.composeStatus = nil
-//                }
-//            }
-//        )
-//        ) {
-//            if let status = statusEvent.composeStatus {
-//                NavigationStack {
-//                    ComposeScreen(onBack: {
-//                        statusEvent.composeStatus = nil
-//                    }, accountType: accountType.toKotlin(), status: status)
-//                }
-// #if os(macOS)
-//                .frame(minWidth: 500, minHeight: 400)
-// #endif
-//            }
-//        }
-// #if os(iOS)
-//        .fullScreenCover(
-//            isPresented: Binding(get: { statusEvent.mediaClickData != nil }, set: { value in if !value { statusEvent.mediaClickData = nil }}),
-//            onDismiss: { statusEvent.mediaClickData = nil }
-//        ) {
-//            ZStack {
-//                Color.black.ignoresSafeArea()
-//                if let data = statusEvent.mediaClickData {
-//                    StatusMediaScreen(accountType: accountType.toKotlin(), statusKey: data.statusKey, index: data.index, dismiss: { statusEvent.mediaClickData = nil })
-//                }
-//            }
-//        }
-// #endif
-        .environment(\.openURL, OpenURLAction { url in
-            if let event = AppDeepLink.shared.parse(url: url.absoluteString) {
-                switch onEnum(of: event) {
-                case .profile(let data):
-                    router.navigate(to: .profile(accountType: accountType, userKey: data.userKey.description()))
-                case .profileWithNameAndHost(let data):
-                    router.navigate(to: .profileWithUserNameAndHost(accountType: accountType, userName: data.userName, host: data.host))
-                case .search(let data):
-                    router.navigate(to: .search(accountType: accountType, query: data.keyword))
-                case .statusDetail(let data):
-                    router.navigate(to: .statusDetail(accountType: accountType, statusKey: data.statusKey.description()))
-                case .compose:
-                    showCompose = true
-                case .rawImage(let data): break
-                }
-                return .handled
-            } else {
-                return .systemAction
-            }
-        })
-    }
-}
 struct MediaClickData {
     let statusKey: MicroBlogKey
     let index: Int

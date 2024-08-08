@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.LazyPagingItems
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
@@ -42,9 +41,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onLoading
-import dev.dimension.flare.common.onNotEmptyOrLoading
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -59,11 +56,6 @@ import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiHashtag
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
@@ -149,8 +141,8 @@ private fun DiscoverScreen(
                             toUser = onUserClick,
                         )
                     } else {
-                        state.users.onSuccess { users ->
-                            users.onNotEmptyOrLoading {
+                        state.users
+                            .onSuccess {
                                 item(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
@@ -170,141 +162,154 @@ private fun DiscoverScreen(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                                     ) {
-                                        users
-                                            .onSuccess {
-                                                items(
-                                                    users.itemCount,
+                                        items(
+                                            itemCount,
 //                                                    key = users.itemKey { it.key },
-                                                ) {
-                                                    val user = users[it]
-                                                    Card(
-                                                        modifier =
-                                                            Modifier
-                                                                .width(256.dp),
-                                                    ) {
-                                                        if (user != null) {
-                                                            CommonStatusHeaderComponent(
-                                                                data = user,
-                                                                onUserClick = onUserClick,
-                                                                modifier = Modifier.padding(8.dp),
-                                                            )
-                                                        } else {
-                                                            UserPlaceholder(
-                                                                modifier = Modifier.padding(8.dp),
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }.onLoading {
-                                                items(10) {
-                                                    Card(
-                                                        modifier =
-                                                            Modifier
-                                                                .width(256.dp),
-                                                    ) {
-                                                        UserPlaceholder(
-                                                            modifier = Modifier.padding(8.dp),
-                                                        )
-                                                    }
+                                        ) {
+                                            val user = get(it)
+                                            Card(
+                                                modifier =
+                                                    Modifier
+                                                        .width(256.dp),
+                                            ) {
+                                                if (user != null) {
+                                                    CommonStatusHeaderComponent(
+                                                        data = user,
+                                                        onUserClick = onUserClick,
+                                                        modifier = Modifier.padding(8.dp),
+                                                    )
+                                                } else {
+                                                    UserPlaceholder(
+                                                        modifier = Modifier.padding(8.dp),
+                                                    )
                                                 }
                                             }
+                                        }
                                     }
                                 }
-                            }
-                        }
-                        state.hashtags.onSuccess { hashtags ->
-                            hashtags.onNotEmptyOrLoading {
+                            }.onLoading {
                                 item(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
                                     ListItem(
                                         headlineContent = {
-                                            Text(text = stringResource(R.string.discover_hashtags))
+                                            Text(text = stringResource(R.string.discover_users))
                                         },
                                     )
                                 }
+
                                 item(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
-                                    val maxItemsInEachRow =
-                                        if (windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {
+                                    LazyHorizontalGrid(
+                                        modifier = Modifier.height(128.dp),
+                                        rows = GridCells.Fixed(2),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                                    ) {
+                                        items(10) {
+                                            Card(
+                                                modifier =
+                                                    Modifier
+                                                        .width(256.dp),
+                                            ) {
+                                                UserPlaceholder(
+                                                    modifier = Modifier.padding(8.dp),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        state.hashtags.onSuccess {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(text = stringResource(R.string.discover_hashtags))
+                                    },
+                                )
+                            }
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                val maxItemsInEachRow =
+                                    when (windowInfo.windowSizeClass.windowWidthSizeClass) {
+                                        WindowWidthSizeClass.COMPACT -> {
                                             2
-                                        } else if (windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.MEDIUM) {
+                                        }
+                                        WindowWidthSizeClass.MEDIUM -> {
                                             4
-                                        } else {
+                                        }
+                                        else -> {
                                             8
                                         }
-                                    FlowRow(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
-                                        maxItemsInEachRow = maxItemsInEachRow,
+                                    }
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                                    maxItemsInEachRow = maxItemsInEachRow,
+                                ) {
+                                    repeat(
+                                        itemCount,
                                     ) {
-                                        hashtags
-                                            .onSuccess {
-                                                repeat(
-                                                    hashtags.itemCount,
-                                                ) {
-                                                    val hashtag = hashtags[it]
-                                                    Card(
-                                                        modifier = Modifier.weight(1f),
-                                                        onClick = {
-                                                            hashtag?.searchContent?.let { it1 ->
-                                                                state.commitSearch(
-                                                                    it1,
-                                                                )
-                                                            }
-                                                        },
-                                                    ) {
-                                                        Box(
-                                                            modifier =
-                                                                Modifier
-                                                                    .padding(8.dp),
-                                                        ) {
-                                                            if (hashtag != null) {
-                                                                Text(
-                                                                    text = hashtag.hashtag,
-                                                                    maxLines = 1,
-                                                                    overflow = TextOverflow.Ellipsis,
-                                                                )
-                                                            } else {
-                                                                Text(
-                                                                    text = "Lorem Ipsum is simply dummy text",
-                                                                    modifier =
-                                                                        Modifier.placeholder(
-                                                                            true,
-                                                                        ),
-                                                                    maxLines = 1,
-                                                                    overflow = TextOverflow.Ellipsis,
-                                                                )
-                                                            }
-                                                        }
-                                                    }
+                                        val hashtag = get(it)
+                                        Card(
+                                            modifier = Modifier.weight(1f),
+                                            onClick = {
+                                                hashtag?.searchContent?.let { it1 ->
+                                                    state.commitSearch(
+                                                        it1,
+                                                    )
                                                 }
-                                            }.onLoading {
-                                                repeat(10) {
-                                                    Card(
-                                                        modifier = Modifier.weight(1f),
-                                                    ) {
-                                                        Box(
-                                                            modifier = Modifier.padding(8.dp),
-                                                        ) {
-                                                            Text(
-                                                                text = "Lorem Ipsum is simply dummy text",
-                                                                modifier = Modifier.placeholder(true),
-                                                                maxLines = 1,
-                                                                overflow = TextOverflow.Ellipsis,
-                                                            )
-                                                        }
-                                                    }
+                                            },
+                                        ) {
+                                            Box(
+                                                modifier =
+                                                    Modifier
+                                                        .padding(8.dp),
+                                            ) {
+                                                if (hashtag != null) {
+                                                    Text(
+                                                        text = hashtag.hashtag,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                    )
+                                                } else {
+                                                    Text(
+                                                        text = "Lorem Ipsum is simply dummy text",
+                                                        modifier =
+                                                            Modifier.placeholder(
+                                                                true,
+                                                            ),
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                    )
                                                 }
                                             }
+                                        }
                                     }
                                 }
                             }
                         }
-                        state.status.onSuccess {
-                            it.onNotEmptyOrLoading {
+                        state.status
+                            .onSuccess {
+                                item(
+                                    span = StaggeredGridItemSpan.FullLine,
+                                ) {
+                                    ListItem(
+                                        headlineContent = {
+                                            Text(text = stringResource(R.string.discover_status))
+                                        },
+                                    )
+                                }
+                                with(state.status) {
+                                    status()
+                                }
+                            }.onLoading {
                                 item(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
@@ -318,7 +323,6 @@ private fun DiscoverScreen(
                                     status()
                                 }
                             }
-                        }
                     }
                 }
             },
@@ -342,22 +346,12 @@ private fun discoverPresenter(accountType: AccountType) =
             val isInSearchMode = query.isNotEmpty()
             val refreshing =
                 if (!isInSearchMode) {
-                    state.users is UiState.Loading ||
-                        state.status is UiState.Loading ||
-                        state.hashtags is UiState.Loading ||
-                        state.users is UiState.Success &&
-                        (state.users as UiState.Success<LazyPagingItems<UiUserV2>>).data.isRefreshing ||
-                        state.status is UiState.Success &&
-                        (state.status as UiState.Success<LazyPagingItems<UiTimeline>>).data.isRefreshing ||
-                        state.hashtags is UiState.Success &&
-                        (state.hashtags as UiState.Success<LazyPagingItems<UiHashtag>>).data.isRefreshing
+                    state.users.isRefreshing ||
+                        state.status.isRefreshing ||
+                        state.hashtags.isRefreshing
                 } else {
-                    searchState.users is UiState.Loading ||
-                        searchState.status is UiState.Loading ||
-                        searchState.users is UiState.Success &&
-                        (searchState.users as UiState.Success<LazyPagingItems<UiUserV2>>).data.isRefreshing ||
-                        searchState.status is UiState.Success &&
-                        (searchState.status as UiState.Success<LazyPagingItems<UiTimeline>>).data.isRefreshing
+                    searchState.users.isRefreshing ||
+                        searchState.status.isRefreshing
                 }
 
             fun refresh() {
@@ -366,13 +360,13 @@ private fun discoverPresenter(accountType: AccountType) =
                 } else {
                     scope.launch {
                         state.users.onSuccess {
-                            it.refreshSuspend()
+                            refreshSuspend()
                         }
                         state.status.onSuccess {
-                            it.refreshSuspend()
+                            refreshSuspend()
                         }
                         state.hashtags.onSuccess {
-                            it.refreshSuspend()
+                            refreshSuspend()
                         }
                     }
                 }

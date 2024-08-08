@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.model.mapper
 
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.Node
+import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
@@ -13,15 +16,12 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import io.ktor.http.decodeURLPart
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.datetime.Clock
-import moe.tlaster.ktml.Ktml
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Node
-import moe.tlaster.ktml.dom.Text
 
 internal fun Status.render(
     accountKey: MicroBlogKey,
@@ -248,9 +248,15 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         name =
             Element("span")
                 .apply {
-                    children.add(Text(screenName))
+                    appendChild(TextNode(screenName))
                 }.toUi(),
-        description = description?.let { Element("span").apply { children.add(Text(it)) }.toUi() },
+        description =
+            description?.let {
+                Element("span")
+                    .apply {
+                        appendChild(TextNode(it))
+                    }.toUi()
+            },
         banner = coverImagePhone,
         matrices =
             UiProfile.Matrices(
@@ -278,7 +284,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                 UiProfile.BottomContent.Iconify.Icon.Verify to
                                     Element("span")
                                         .apply {
-                                            children.add(Text(it))
+                                            appendChild(TextNode(it))
                                         }.toUi(),
                             ).toImmutableMap(),
                     )
@@ -455,8 +461,9 @@ internal fun renderVVOText(
     text: String,
     accountKey: MicroBlogKey,
 ): Element {
-    val element = Ktml.parse(text)
-    element.children.forEach {
+    val element = parseHtml(text)
+
+    element.childNodes().forEach {
         replaceMentionAndHashtag(element, it, accountKey)
     }
     return element
@@ -468,28 +475,35 @@ private fun replaceMentionAndHashtag(
     accountKey: MicroBlogKey,
 ) {
     if (node is Element) {
-        val href = node.attributes["href"]
+        val href = node.attribute("href")?.value
         if (href != null) {
             if (href.startsWith("/n/")) {
                 val id = href.removePrefix("/n/")
                 if (id.isNotEmpty()) {
-                    node.attributes["href"] =
+                    node.attribute("href")?.setValue(
                         AppDeepLink.ProfileWithNameAndHost(
                             accountKey = accountKey,
                             userName = id,
                             host = accountKey.host,
-                        )
+                        ),
+                    )
                 }
             } else if (href.startsWith("https://$vvoHost/search")) {
-                node.attributes["href"] = AppDeepLink.Search(accountKey, node.innerText)
+                node.attribute("href")?.setValue(
+                    AppDeepLink.Search(accountKey, node.text()),
+                )
             } else if (href.startsWith("https://weibo.cn/sinaurl?u=")) {
                 val url =
                     href.removePrefix("https://weibo.cn/sinaurl?u=").decodeURLPart()
                 if (url.contains("sinaimg.cn/")) {
-                    node.attributes["href"] = AppDeepLink.RawImage(url)
+                    node.attribute("href")?.setValue(
+                        AppDeepLink.RawImage(url),
+                    )
                 }
             }
         }
-        node.children.forEach { replaceMentionAndHashtag(element, it, accountKey) }
+        node.childNodes().forEach {
+            replaceMentionAndHashtag(element, it, accountKey)
+        }
     }
 }

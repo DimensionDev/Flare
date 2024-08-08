@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.paging.compose.LazyPagingItems
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
@@ -22,7 +21,7 @@ import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHO
 import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.common.isLoading
+import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -34,9 +33,6 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import kotlinx.coroutines.launch
@@ -173,12 +169,8 @@ private fun presenter(
         val searchState = searchState
 
         val refreshing =
-            searchState.users is UiState.Loading ||
-                searchState.status is UiState.Loading ||
-                searchState.users is UiState.Success &&
-                (searchState.users as UiState.Success<LazyPagingItems<UiUserV2>>).data.isLoading ||
-                searchState.status is UiState.Success &&
-                (searchState.status as UiState.Success<LazyPagingItems<UiTimeline>>).data.isLoading
+            searchState.users.isRefreshing ||
+                searchState.status.isRefreshing
 
         fun refresh() {
             searchState.search(query)

@@ -3,8 +3,9 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiHashtag
@@ -22,47 +23,50 @@ class DiscoverPresenter(
         val scope = rememberCoroutineScope()
         val accountState = accountServiceProvider(accountType = accountType)
         val users =
-            accountState.flatMap { dataSource ->
-                remember(dataSource) {
-                    runCatching {
-                        dataSource.discoverUsers()
-                    }.getOrNull()
-                }?.collectAsLazyPagingItems().let {
-                    if (it == null) {
-                        UiState.Error(Throwable("No data"))
-                    } else {
-                        UiState.Success(it)
+            accountState
+                .flatMap { dataSource ->
+                    remember(dataSource) {
+                        runCatching {
+                            dataSource.discoverUsers()
+                        }.getOrNull()
+                    }?.collectAsLazyPagingItems().let {
+                        if (it == null) {
+                            UiState.Error(Throwable("No data"))
+                        } else {
+                            UiState.Success(it)
+                        }
                     }
-                }
-            }
+                }.toPagingState()
         val status =
-            accountState.flatMap { dataSource ->
-                remember(dataSource) {
-                    runCatching {
-                        dataSource.discoverStatuses(scope = scope)
-                    }.getOrNull()
-                }?.collectAsLazyPagingItems().let {
-                    if (it == null) {
-                        UiState.Error(Throwable("No data"))
-                    } else {
-                        UiState.Success(it)
+            accountState
+                .flatMap { dataSource ->
+                    remember(dataSource) {
+                        runCatching {
+                            dataSource.discoverStatuses(scope = scope)
+                        }.getOrNull()
+                    }?.collectAsLazyPagingItems().let {
+                        if (it == null) {
+                            UiState.Error(Throwable("No data"))
+                        } else {
+                            UiState.Success(it)
+                        }
                     }
-                }
-            }
+                }.toPagingState()
         val hashtags =
-            accountState.flatMap { dataSource ->
-                remember(dataSource) {
-                    runCatching {
-                        dataSource.discoverHashtags()
-                    }.getOrNull()
-                }?.collectAsLazyPagingItems().let {
-                    if (it == null) {
-                        UiState.Error(Throwable("No data"))
-                    } else {
-                        UiState.Success(it)
+            accountState
+                .flatMap { dataSource ->
+                    remember(dataSource) {
+                        runCatching {
+                            dataSource.discoverHashtags()
+                        }.getOrNull()
+                    }?.collectAsLazyPagingItems().let {
+                        if (it == null) {
+                            UiState.Error(Throwable("No data"))
+                        } else {
+                            UiState.Success(it)
+                        }
                     }
-                }
-            }
+                }.toPagingState()
 
         return object : DiscoverState {
             override val users = users
@@ -73,7 +77,7 @@ class DiscoverPresenter(
 }
 
 interface DiscoverState {
-    val users: UiState<LazyPagingItems<UiUserV2>>
-    val status: UiState<LazyPagingItems<UiTimeline>>
-    val hashtags: UiState<LazyPagingItems<UiHashtag>>
+    val users: PagingState<UiUserV2>
+    val status: PagingState<UiTimeline>
+    val hashtags: PagingState<UiHashtag>
 }

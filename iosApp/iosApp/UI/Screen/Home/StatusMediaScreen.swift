@@ -2,11 +2,12 @@ import SwiftUI
 import shared
 
 struct StatusMediaScreen: View {
-    let presenter: StatusPresenter
-    let initialIndex: Int
+    @State
+    var presenter: StatusPresenter
+    let initialIndex: Int32
     let dismiss: () -> Void
 
-    init(accountType: AccountType, statusKey: MicroBlogKey, index: Int, dismiss: @escaping () -> Void) {
+    init(accountType: AccountType, statusKey: MicroBlogKey, index: Int32, dismiss: @escaping () -> Void) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
         self.initialIndex = index
         self.dismiss = dismiss
@@ -16,6 +17,7 @@ struct StatusMediaScreen: View {
         Observing(presenter.models) { state in
             GeometryReader { geometry in
                 ZStack {
+                    Color.black.ignoresSafeArea()
                     switch onEnum(of: state.status) {
                     case .error:
                         Text("error")

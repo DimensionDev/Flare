@@ -30,6 +30,8 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.common.onLoading
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -39,8 +41,6 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.onLoading
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMediaPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -111,9 +111,9 @@ private fun ProfileMediaScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             state.mediaState
-                .onSuccess { items ->
-                    items(items.itemCount) { index ->
-                        val item = items[index]
+                .onSuccess {
+                    items(itemCount) { index ->
+                        val item = get(index)
                         if (item != null) {
                             val media = item.media
                             MediaItem(

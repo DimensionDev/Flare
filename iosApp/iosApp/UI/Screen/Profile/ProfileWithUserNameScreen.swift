@@ -2,7 +2,8 @@ import SwiftUI
 import shared
 
 struct ProfileWithUserNameScreen: View {
-    let presenter: ProfileWithUserNameAndHostPresenter
+    @State
+    var presenter: ProfileWithUserNameAndHostPresenter
     private let accountType: AccountType
     let toProfileMedia: (MicroBlogKey) -> Void
 

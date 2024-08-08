@@ -8,9 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -41,24 +43,25 @@ class NotificationPresenter(
             }
         }
         val listState =
-            serviceState.flatMap { service ->
-                val currentType = type
-                if (service.supportedNotificationFilter.isEmpty() ||
-                    currentType == null ||
-                    currentType !in service.supportedNotificationFilter
-                ) {
-                    UiState.Error(IllegalStateException("No supported notification filter"))
-                } else {
-                    UiState.Success(
-                        remember(service, currentType) {
-                            service.notification(
-                                type = currentType,
-                                scope = scope,
-                            )
-                        }.collectAsLazyPagingItems(),
-                    )
-                }
-            }
+            serviceState
+                .flatMap { service ->
+                    val currentType = type
+                    if (service.supportedNotificationFilter.isEmpty() ||
+                        currentType == null ||
+                        currentType !in service.supportedNotificationFilter
+                    ) {
+                        UiState.Error(IllegalStateException("No supported notification filter"))
+                    } else {
+                        UiState.Success(
+                            remember(service, currentType) {
+                                service.notification(
+                                    type = currentType,
+                                    scope = scope,
+                                )
+                            }.collectAsLazyPagingItems(),
+                        )
+                    }
+                }.toPagingState()
 //        val refreshing =
 //            listState is UiState.Loading ||
 //                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
@@ -70,7 +73,7 @@ class NotificationPresenter(
         ) {
             override suspend fun refresh() {
                 listState.onSuccess {
-                    it.refreshSuspend()
+                    refreshSuspend()
                 }
             }
 
@@ -83,7 +86,7 @@ class NotificationPresenter(
 
 @Immutable
 abstract class NotificationState(
-    val listState: UiState<LazyPagingItems<UiTimeline>>,
+    val listState: PagingState<UiTimeline>,
     val notificationType: NotificationFilter?,
     val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {

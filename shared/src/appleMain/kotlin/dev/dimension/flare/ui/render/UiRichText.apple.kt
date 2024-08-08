@@ -1,10 +1,8 @@
 package dev.dimension.flare.ui.render
 
-import moe.tlaster.ktml.dom.Comment
-import moe.tlaster.ktml.dom.Doctype
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Node
-import moe.tlaster.ktml.dom.Text
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.Node
+import com.fleeksoft.ksoup.nodes.TextNode
 
 actual data class UiRichText(
     val markdown: String,
@@ -14,38 +12,44 @@ actual data class UiRichText(
 actual fun Element.toUi(): UiRichText =
     UiRichText(
         markdown = toMarkdown(),
-        raw = innerText,
+        raw = text(),
     )
 
 internal fun Node.toMarkdown(): String =
     when (this) {
-        is Comment -> ""
-        is Doctype -> ""
         is Element -> toMarkdown()
-        is Text -> text
+        is TextNode ->
+            text()
+                .replace("#", "\\#")
+        else -> ""
     }
 
 internal fun Element.toMarkdown(): String =
-    when (name) {
+    when (tagName().lowercase()) {
         "p" -> {
-            val content = children.joinToString("") { it.toMarkdown() }
+            val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
                 ""
             } else {
                 "$content\n\n"
             }
         }
-        "br" -> "\n"
+        "br" -> "  "
         "a" -> {
-            val content = children.joinToString("") { it.toMarkdown() }
+            val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
                 ""
             } else {
-                "[$content](${attributes["href"]})\n"
+                val href = attribute("href")?.value
+                if (href.isNullOrBlank()) {
+                    content
+                } else {
+                    "[$content]($href)\n"
+                }
             }
         }
         "strong" -> {
-            val content = children.joinToString("") { it.toMarkdown() }
+            val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
                 ""
             } else {
@@ -53,7 +57,7 @@ internal fun Element.toMarkdown(): String =
             }
         }
         "em" -> {
-            val content = children.joinToString("") { it.toMarkdown() }
+            val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
                 ""
             } else {
@@ -61,7 +65,7 @@ internal fun Element.toMarkdown(): String =
             }
         }
         "code" -> {
-            val content = children.joinToString("") { it.toMarkdown() }
+            val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
                 ""
             } else {
@@ -69,7 +73,7 @@ internal fun Element.toMarkdown(): String =
             }
         }
         "pre" -> {
-            val content = children.joinToString("") { it.toMarkdown() }
+            val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
                 ""
             } else {
@@ -77,7 +81,7 @@ internal fun Element.toMarkdown(): String =
             }
         }
         "blockquote" -> {
-            val content = children.joinToString("") { it.toMarkdown() }
+            val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
                 ""
             } else {
@@ -85,10 +89,15 @@ internal fun Element.toMarkdown(): String =
             }
         }
         "img" -> {
-            "![](${attributes["src"]})\n"
+            val src = attribute("src")?.value
+            if (src.isNullOrBlank()) {
+                ""
+            } else {
+                "![]($src)\n"
+            }
         }
         "span" -> {
-            val content = children.joinToString("") { it.toMarkdown() }
+            val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {
                 ""
             } else {
@@ -96,6 +105,6 @@ internal fun Element.toMarkdown(): String =
             }
         }
         else -> {
-            children.joinToString("") { it.toMarkdown() }
+            childNodes().joinToString("") { it.toMarkdown() }
         }
     }

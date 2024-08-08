@@ -70,6 +70,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
+import com.fleeksoft.ksoup.nodes.Element
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -98,7 +99,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
-import moe.tlaster.ktml.dom.Element
 
 context(AnimatedVisibilityScope, SharedTransitionScope)
 @OptIn(ExperimentalSharedTransitionApi::class)

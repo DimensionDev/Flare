@@ -2,7 +2,8 @@ import SwiftUI
 import shared
 
 struct StatusDetailScreen: View {
-    let presenter: StatusContextPresenter
+    @State
+    var presenter: StatusContextPresenter
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
     }

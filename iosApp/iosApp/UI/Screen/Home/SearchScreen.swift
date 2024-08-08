@@ -4,7 +4,8 @@ import shared
 struct SearchScreen: View {
     var searchText: String = ""
     private let onUserClicked: (UiUserV2) -> Void
-    let presenter: SearchPresenter
+    @State
+    var presenter: SearchPresenter
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     init(accountType: AccountType, initialQuery: String, onUserClicked: @escaping (UiUserV2) -> Void) {
         self.onUserClicked = onUserClicked
@@ -18,8 +19,8 @@ struct SearchScreen: View {
                     Section("search_users_title") {
                         ScrollView(.horizontal, showsIndicators: false) {
                             LazyHStack {
-                                ForEach(0..<data.data.itemCount, id: \.self) { index in
-                                    if let item = data.data.peek(index: index) {
+                                ForEach(0..<data.itemCount, id: \.self) { index in
+                                    if let item = data.peek(index: index) {
                                         UserComponent(
                                             user: item,
                                             onUserClicked: {
@@ -28,7 +29,7 @@ struct SearchScreen: View {
                                         )
                                             .frame(width: 200, alignment: .leading)
                                             .onAppear {
-                                                data.data.get(index: index)
+                                                data.get(index: index)
                                             }
                                     }
                                 }

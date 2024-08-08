@@ -10,6 +10,8 @@ import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsReason
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.bluesky.jsonElement
@@ -27,8 +29,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.jsonPrimitive
-import moe.tlaster.ktml.dom.Element
-import moe.tlaster.ktml.dom.Text
 import moe.tlaster.twitter.parser.TwitterParser
 
 private val blueskyParser by lazy {
@@ -252,7 +252,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         name =
             Element("span")
                 .apply {
-                    children.add(Text(displayName.orEmpty()))
+                    addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
         handle = "@${handle.handle}",
         key = userKey,
@@ -284,12 +284,12 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         name =
             Element("span")
                 .apply {
-                    children.add(Text(displayName.orEmpty()))
+                    addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
         handle = "@${handle.handle}",
         key = userKey,
         banner = null,
-        description = Element("span").apply { children.add(Text(description.orEmpty())) }.toUi(),
+        description = Element("span").apply { addChildren(TextNode(description.orEmpty())) }.toUi(),
         matrices =
             UiProfile.Matrices(
                 fansCount = 0,
@@ -316,12 +316,12 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         name =
             Element("span")
                 .apply {
-                    children.add(Text(displayName.orEmpty()))
+                    addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
         handle = "@${handle.handle}",
         key = userKey,
         banner = banner?.uri,
-        description = Element("span").apply { children.add(Text(description.orEmpty())) }.toUi(),
+        description = Element("span").apply { addChildren(TextNode(description.orEmpty())) }.toUi(),
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount ?: 0,

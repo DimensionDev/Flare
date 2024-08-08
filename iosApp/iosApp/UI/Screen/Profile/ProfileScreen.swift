@@ -5,7 +5,8 @@ import MarkdownUI
 
 struct ProfileScreen: View {
     let toProfileMedia: (MicroBlogKey) -> Void
-    let presenter: ProfilePresenter
+    @State
+    var presenter: ProfilePresenter
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.toProfileMedia = toProfileMedia
@@ -164,18 +165,18 @@ struct ProfileScreen: View {
 }
 
 struct LargeProfileImagePreviews: View {
-    let state: UiState<LazyPagingItems<ProfileMedia>>
+    let state: PagingState<ProfileMedia>
     var body: some View {
         switch onEnum(of: state) {
         case .error:
             EmptyView()
         case .loading:
             EmptyView()
+        case .empty: EmptyView()
         case .success(let success):
-            if success.data.isSuccess {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                    ForEach(0..<min(success.data.itemCount, 6), id: \.self) { index in
-                        let item = success.data.peek(index: index)
+                    ForEach(0..<min(success.itemCount, 6), id: \.self) { index in
+                        let item = success.peek(index: index)
                         if let media = item?.media {
                             let image = media as? UiMediaImage
                             let shouldBlur = image?.sensitive ?? false
@@ -184,7 +185,7 @@ struct LargeProfileImagePreviews: View {
                                     view.blur(radius: 32)
                                 })
                                 .onAppear(perform: {
-                                    success.data.get(index: index)
+                                    success.get(index: index)
                                 })
                                 .aspectRatio(1, contentMode: .fill)
                                 .clipped()
@@ -193,13 +194,12 @@ struct LargeProfileImagePreviews: View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .padding(.horizontal)
-            }
         }
     }
 }
 
 struct SmallProfileMediaPreviews: View {
-    let state: UiState<LazyPagingItems<ProfileMedia>>
+    let state: PagingState<ProfileMedia>
     var body: some View {
         switch onEnum(of: state) {
         case .error:
@@ -207,11 +207,10 @@ struct SmallProfileMediaPreviews: View {
         case .loading:
             EmptyView()
         case .success(let success):
-            if success.data.isSuccess {
                 ScrollView(.horizontal) {
                     LazyHStack(content: {
-                        ForEach(0..<min(success.data.itemCount, 6), id: \.self) { index in
-                            let item = success.data.peek(index: index)
+                        ForEach(0..<min(success.itemCount, 6), id: \.self) { index in
+                            let item = success.peek(index: index)
                             if let media = item?.media {
                                 let image = media as? UiMediaImage
                                 let shouldBlur = image?.sensitive ?? false
@@ -220,7 +219,7 @@ struct SmallProfileMediaPreviews: View {
                                         view.blur(radius: 32)
                                     })
                                     .onAppear(perform: {
-                                        success.data.get(index: index)
+                                        success.get(index: index)
                                     })
                                     .aspectRatio(1, contentMode: .fill)
                                     .clipped()
@@ -229,7 +228,7 @@ struct SmallProfileMediaPreviews: View {
                         }
                     })
                 }
-            }
+        case .empty: EmptyView()
         }
     }
 }
@@ -292,13 +291,17 @@ struct FieldsView: View {
     var body: some View {
         if fields.count > 0 {
             VStack(alignment: .leading) {
-                ForEach(fields.map { $0.key }, id: \.self) { key in
+                let keys = fields.map { $0.key }
+                ForEach(0..<keys.count, id: \.self) { index in
+                    let key = keys[index]
                     Text(key)
                         .font(.caption)
                     Markdown(fields[key]?.markdown ?? "")
                         .font(.body)
                         .markdownInlineImageProvider(.emoji)
-                    Divider()
+                    if index != keys.count - 1 {
+                        Divider()
+                    }
                 }
                 .padding(.horizontal)
             }

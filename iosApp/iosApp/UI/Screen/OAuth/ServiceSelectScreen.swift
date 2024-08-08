@@ -152,9 +152,9 @@ struct ServiceSelectScreen: View {
                             .frame(maxWidth: .infinity, alignment: Alignment.center)
                             .disabled(state.loading)
                         }
-                    } else if state.instances.isSuccess {
-                        ForEach(1...state.instances.itemCount, id: \.self) { index in
-                            let item = state.instances.peek(index: index - 1)
+                    } else if case .success(let success) = onEnum(of: state.instances) {
+                        ForEach(0..<success.itemCount, id: \.self) { index in
+                            let item = success.peek(index: index)
                             ZStack {
                                 switch item {
                                 case .some(let instance):
@@ -195,7 +195,7 @@ struct ServiceSelectScreen: View {
                                 }
                             }
                             .onAppear {
-                                state.instances.get(index: index - 1)
+                                success.get(index: index)
                             }
                             .frame( maxWidth: .infinity)
                             .listRowSeparator(.hidden)

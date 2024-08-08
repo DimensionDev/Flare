@@ -3,7 +3,8 @@ import shared
 
 struct HomeTimelineScreen: View {
     @Environment(\.openURL) private var openURL
-    let presenter: HomeTimelinePresenter
+    @State
+    var presenter: HomeTimelinePresenter
 
     init(accountType: AccountType) {
         presenter = .init(accountType: accountType)
@@ -18,7 +19,7 @@ struct HomeTimelineScreen: View {
             }
             .listStyle(.plain)
             .refreshable {
-                try? await state.refresh()
+                try? await presenter.models.value.refresh()
             }
             .navigationTitle("home_timeline_title")
     #if os(iOS)

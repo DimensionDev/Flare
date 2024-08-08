@@ -160,4 +160,14 @@ object AppDeepLink {
 
         operator fun invoke(url: String) = "$APPSCHEMA://RawImage/${url.encodeURLPathPart()}"
     }
+
+    object StatusMedia {
+        const val ROUTE = "$APPSCHEMA://StatusMedia/{accountKey}/{statusKey}/{mediaIndex}"
+
+        operator fun invoke(
+            accountKey: MicroBlogKey,
+            statusKey: MicroBlogKey,
+            mediaIndex: Int,
+        ) = "$APPSCHEMA://StatusMedia/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/$mediaIndex"
+    }
 }

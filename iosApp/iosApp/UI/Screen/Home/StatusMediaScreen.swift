@@ -17,6 +17,7 @@ struct StatusMediaScreen: View {
         Observing(presenter.models) { state in
             GeometryReader { geometry in
                 ZStack {
+                    Color.black.ignoresSafeArea()
                     switch onEnum(of: state.status) {
                     case .error:
                         Text("error")

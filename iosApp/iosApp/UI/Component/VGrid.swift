@@ -15,8 +15,8 @@ struct CustomGrid<Item, ItemView>: View where ItemView: View {
                             itemBuilder(item)
                                 .frame(maxWidth: .infinity)
                         } else {
-                            Spacer()
-                                .frame(maxWidth: .infinity)
+//                            Spacer()
+//                                .frame(maxWidth: .infinity)
                         }
                     }
                 }

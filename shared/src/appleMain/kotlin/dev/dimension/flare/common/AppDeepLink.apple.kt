@@ -127,6 +127,13 @@ object AppDeepLinkHelper {
                     else -> null
                 }
 
+            "StatusMedia" -> {
+                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                val index = data.pathSegments.getOrNull(3)?.toIntOrNull() ?: return null
+                AppleRoute.StatusMedia(accountKey, statusKey, index)
+            }
+
             else -> null
         }
     }

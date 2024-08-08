@@ -109,8 +109,8 @@ struct StatusItemView: View {
             switch onEnum(of: content) {
             case .status(let data): CommonStatusComponent(
                 data: data,
-                onMediaClick: { _, _ in
-
+                onMediaClick: { index, preview in
+                    openURL(URL(string: AppDeepLink.StatusMedia.shared.invoke(accountKey: data.accountKey, statusKey: data.statusKey, mediaIndex: Int32(index)))!)
                 }
             ).onTapGesture {
                 data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))

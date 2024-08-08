@@ -18,8 +18,9 @@ actual fun Element.toUi(): UiRichText =
 internal fun Node.toMarkdown(): String =
     when (this) {
         is Element -> toMarkdown()
-        is TextNode -> text()
-            .replace("#", "\\#")
+        is TextNode ->
+            text()
+                .replace("#", "\\#")
         else -> ""
     }
 

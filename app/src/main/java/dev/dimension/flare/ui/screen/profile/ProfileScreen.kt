@@ -1,11 +1,6 @@
 package dev.dimension.flare.ui.screen.profile
 
 import android.os.Build
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -310,32 +305,15 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileLoadingScreen(onBack: () -> Unit) {
-    FlareScaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = "Loading...")
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.navigate_back),
-                        )
-                    }
-                },
-            )
-        },
-    ) {
+    FlareScaffold {
         LazyColumn(
             contentPadding = it,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             item {
-                ProfileHeaderLoading()
+                ProfileHeaderLoading(withStatusBarHeight = false)
             }
             items(5) {
                 StatusPlaceholder(
@@ -805,35 +783,42 @@ private fun ProfileHeader(
     expandMatrices: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    AnimatedContent(
-        targetState = userState,
-        modifier = modifier.animateContentSize(),
-        label = "ProfileHeader",
-        transitionSpec = {
-            fadeIn() togetherWith fadeOut()
-        },
-    ) { state ->
-        when (state) {
-            is UiState.Loading -> {
-                ProfileHeaderLoading()
-            }
+//    AnimatedContent(
+//        targetState = userState,
+//        modifier = modifier.animateContentSize(),
+//        label = "ProfileHeader",
+//        transitionSpec = {
+//            fadeIn() togetherWith fadeOut()
+//        },
+//        contentKey = {
+//            when (it) {
+//                is UiState.Success -> it.data.key
+//                else -> it
+//            }
+//        }
+//    ) { state ->
+//    }
+    when (userState) {
+        is UiState.Loading -> {
+            ProfileHeaderLoading(modifier = modifier, withStatusBarHeight = true)
+        }
 
-            is UiState.Error -> {
-                ProfileHeaderError()
-            }
+        is UiState.Error -> {
+            ProfileHeaderError()
+        }
 
-            is UiState.Success -> {
-                ProfileHeaderSuccess(
-                    user = state.data,
-                    relationState = relationState,
-                    onFollowClick = onFollowClick,
-                    isMe = isMe,
-                    menu = menu,
-                    expandMatrices = expandMatrices,
-                    onAvatarClick = onAvatarClick,
-                    onBannerClick = onBannerClick,
-                )
-            }
+        is UiState.Success -> {
+            ProfileHeaderSuccess(
+                modifier = modifier,
+                user = userState.data,
+                relationState = relationState,
+                onFollowClick = onFollowClick,
+                isMe = isMe,
+                menu = menu,
+                expandMatrices = expandMatrices,
+                onAvatarClick = onAvatarClick,
+                onBannerClick = onBannerClick,
+            )
         }
     }
 }
@@ -1184,14 +1169,20 @@ private fun ProfileHeaderError() {
 }
 
 @Composable
-internal fun ProfileHeaderLoading(modifier: Modifier = Modifier) {
+internal fun ProfileHeaderLoading(
+    withStatusBarHeight: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val statusBarHeight =
         with(LocalDensity.current) {
             WindowInsets.statusBars.getTop(this).toDp()
         }
     val actualBannerHeight =
-        remember(statusBarHeight) {
-            ProfileHeaderConstants.BANNER_HEIGHT.dp + statusBarHeight
+        remember(
+            statusBarHeight,
+            withStatusBarHeight,
+        ) {
+            ProfileHeaderConstants.BANNER_HEIGHT.dp + if (withStatusBarHeight) statusBarHeight else 0.dp
         }
     Box(
         modifier =

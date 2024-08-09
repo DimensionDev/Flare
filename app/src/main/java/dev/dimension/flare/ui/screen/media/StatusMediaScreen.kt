@@ -242,6 +242,13 @@ private fun StatusMediaScreen(
                             lastPage = pagerState.currentPage
                         }
                     }
+                    // TODO: workaround: some video url might change after StatusPresenter load the status
+                    DisposableEffect(pagerState.currentPage) {
+                        val player = playerPool.peek(media[pagerState.currentPage].url)
+                        onDispose {
+                            player?.volume = 0f
+                        }
+                    }
                 }
                 HorizontalPager(
                     state = pagerState,

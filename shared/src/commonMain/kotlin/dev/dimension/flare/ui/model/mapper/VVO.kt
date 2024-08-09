@@ -480,7 +480,8 @@ private fun replaceMentionAndHashtag(
             if (href.startsWith("/n/")) {
                 val id = href.removePrefix("/n/")
                 if (id.isNotEmpty()) {
-                    node.attribute("href")?.setValue(
+                    node.attributes().put(
+                        "href",
                         AppDeepLink.ProfileWithNameAndHost(
                             accountKey = accountKey,
                             userName = id,
@@ -489,14 +490,16 @@ private fun replaceMentionAndHashtag(
                     )
                 }
             } else if (href.startsWith("https://$vvoHost/search")) {
-                node.attribute("href")?.setValue(
+                node.attributes().put(
+                    "href",
                     AppDeepLink.Search(accountKey, node.text()),
                 )
             } else if (href.startsWith("https://weibo.cn/sinaurl?u=")) {
                 val url =
                     href.removePrefix("https://weibo.cn/sinaurl?u=").decodeURLPart()
                 if (url.contains("sinaimg.cn/")) {
-                    node.attribute("href")?.setValue(
+                    node.attributes().put(
+                        "href",
                         AppDeepLink.RawImage(url),
                     )
                 }

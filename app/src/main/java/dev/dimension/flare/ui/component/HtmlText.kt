@@ -172,9 +172,7 @@ fun buildContentAnnotatedString(
             linkStyle = linkStyle,
         )
     return buildAnnotatedString {
-        element.childNodes().forEach {
-            renderNode(it, styleData)
-        }
+        renderElement(element, styleData)
     }
 }
 

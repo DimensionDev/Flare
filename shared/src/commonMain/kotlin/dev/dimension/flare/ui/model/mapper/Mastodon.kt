@@ -496,7 +496,8 @@ private fun replaceMentionAndHashtag(
         if (mention != null) {
             val id = mention.id
             if (id != null) {
-                node.attribute("href")?.setValue(
+                node.attributes().put(
+                    "href",
                     AppDeepLink.Profile(
                         accountKey = accountKey,
                         userKey = MicroBlogKey(id, accountKey.host),
@@ -504,13 +505,14 @@ private fun replaceMentionAndHashtag(
                 )
             }
         } else if (node.text().startsWith("#")) {
-            node.attribute("href")?.setValue(AppDeepLink.Search(accountKey, node.text()))
+            node.attributes().put("href", AppDeepLink.Search(accountKey, node.text()))
         } else if (!href.isNullOrEmpty() && c != null && c.contains("mention")) {
             val url = Url(href)
             val host = url.host
             val name = url.pathSegments.getOrNull(1)?.removePrefix("@")
             if (!name.isNullOrEmpty() && host.isNotEmpty()) {
-                node.attribute("href")?.setValue(
+                node.attributes().put(
+                    "href",
                     AppDeepLink.ProfileWithNameAndHost(
                         accountKey = accountKey,
                         userName = name,

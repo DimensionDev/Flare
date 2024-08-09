@@ -63,11 +63,13 @@ internal fun QuotedStatus(
                     )
                 }
             }
-            HtmlText(
-                element = data.content.data,
-                layoutDirection = data.content.direction,
-                maxLines = maxLines,
-            )
+            if (data.content.innerText.isNotEmpty()) {
+                HtmlText(
+                    element = data.content.data,
+                    layoutDirection = data.content.direction,
+                    maxLines = maxLines,
+                )
+            }
         }
         if (!data.images.isEmpty() && LocalAppearanceSettings.current.showMedia) {
             StatusMediaComponent(

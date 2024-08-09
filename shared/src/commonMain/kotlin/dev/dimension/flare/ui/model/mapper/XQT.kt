@@ -596,7 +596,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 UiProfile.BottomContent.Iconify(
                     items =
                         listOfNotNull(
-                            if (legacy.location != null) {
+                            if (!legacy.location.isNullOrEmpty()) {
                                 UiProfile.BottomContent.Iconify.Icon.Location to
                                     Element("span")
                                         .apply {
@@ -605,8 +605,11 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                             } else {
                                 null
                             },
-                            if (legacy.url != null) {
-                                val actualUrl = legacy.entities.urls?.firstOrNull { it.url == legacy.url }
+                            if (!legacy.url.isNullOrEmpty()) {
+                                val actualUrl =
+                                    legacy.entities.url
+                                        ?.urls
+                                        ?.firstOrNull { it.url == legacy.url }
                                 val displayUrl = actualUrl?.displayUrl ?: legacy.url
                                 val url = actualUrl?.expandedUrl ?: legacy.url
                                 UiProfile.BottomContent.Iconify.Icon.Url to
@@ -614,7 +617,8 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                         .apply {
                                             addChildren(TextNode(displayUrl))
 //                                            attributes["href"] = url
-                                            attribute("href")?.setValue(url)
+                                            attributes().put("href", url)
+//                                            attributes().put("href", url)
                                         }.toUi()
                             } else {
                                 null

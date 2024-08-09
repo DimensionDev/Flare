@@ -29,7 +29,7 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
         is CashTagToken ->
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, value)
-                attribute("href")?.setValue(AppDeepLink.Search(accountKey, value))
+                attributes().put("href", AppDeepLink.Search(accountKey, value))
                 addChildren(TextNode(value))
             }
         // not supported
@@ -37,7 +37,7 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
         is HashTagToken ->
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, value)
-                attribute("href")?.setValue(AppDeepLink.Search(accountKey, value))
+                attributes().put("href", AppDeepLink.Search(accountKey, value))
                 addChildren(TextNode(value))
             }
 
@@ -45,7 +45,7 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
         is UrlToken ->
             Element("a").apply {
 //                attributes["href"] = value
-                attribute("href")?.setValue(value)
+                attributes().put("href", value)
                 addChildren(TextNode(value.trimUrl()))
             }
 
@@ -53,7 +53,7 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
             Element("a").apply {
 //                attributes["href"] =
 //                    AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host)
-                attribute("href")?.setValue(AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host))
+                attributes().put("href", AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host))
                 addChildren(TextNode(value))
             }
     }

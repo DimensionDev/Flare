@@ -490,7 +490,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
                     Element("code").apply {
                         language?.let {
 //                            attributes["lang"] = it
-                            attribute("lang")?.setValue(it)
+                            attributes().put("lang", it)
                         }
                         appendChild(TextNode(code))
                     },
@@ -503,7 +503,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
                 appendChild(
                     Element("code").apply {
 //                        attributes["lang"] = "math"
-                        attribute("lang")?.setValue("math")
+                        attributes().put("lang", "math")
                         appendChild(TextNode(formula))
                     },
                 )
@@ -535,7 +535,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is FnNode -> {
             Element("fn").apply {
 //                attributes["name"] = name
-                attribute("name")?.setValue(name)
+                attributes().put("name", name)
                 content.forEach {
                     appendChild(it.toHtml(accountKey))
                 }
@@ -577,7 +577,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is CashNode -> {
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
-                attribute("href")?.setValue(AppDeepLink.Search(accountKey, "$$content"))
+                attributes().put("href", AppDeepLink.Search(accountKey, "$$content"))
                 appendChild(TextNode("$$content"))
             }
         }
@@ -586,15 +586,15 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
             Element("img").apply {
 //                attributes["src"] = resolveMisskeyEmoji(emoji, accountKey.host)
 //                attributes["alt"] = emoji
-                attribute("src")?.setValue(resolveMisskeyEmoji(emoji, accountKey.host))
-                attribute("alt")?.setValue(emoji)
+                attributes().put("src", resolveMisskeyEmoji(emoji, accountKey.host))
+                attributes().put("alt", emoji)
             }
         }
 
         is HashtagNode -> {
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
-                attribute("href")?.setValue(AppDeepLink.Search(accountKey, "#$tag"))
+                attributes().put("href", AppDeepLink.Search(accountKey, "#$tag"))
                 appendChild(TextNode("#$tag"))
             }
         }
@@ -608,7 +608,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is LinkNode -> {
             Element("a").apply {
 //                attributes["href"] = url
-                attribute("href")?.setValue(url)
+                attributes().put("href", url)
                 appendChild(TextNode(content))
             }
         }
@@ -616,7 +616,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is MathInlineNode -> {
             Element("code").apply {
 //                attributes["lang"] = "math"
-                attribute("lang")?.setValue("math")
+                attributes().put("lang", "math")
                 appendChild(TextNode(formula))
             }
         }
@@ -628,7 +628,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
                         AppDeepLink.ProfileWithNameAndHost(accountKey, userName, it)
                     } ?: AppDeepLink.ProfileWithNameAndHost(accountKey, userName, accountKey.host)
 //                attributes["href"] = deeplink
-                attribute("href")?.setValue(deeplink)
+                attributes().put("href", deeplink)
                 appendChild(
                     TextNode(
                         buildString {
@@ -653,7 +653,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is UrlNode -> {
             Element("a").apply {
 //                attributes["href"] = url
-                attribute("href")?.setValue(url)
+                attributes().put("href", url)
                 appendChild(TextNode(url))
             }
         }

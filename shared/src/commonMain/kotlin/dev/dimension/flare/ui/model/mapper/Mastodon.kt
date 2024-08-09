@@ -5,6 +5,7 @@ import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.cache.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
+import dev.dimension.flare.data.datasource.guest.GuestDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
@@ -191,12 +192,14 @@ private fun Status.renderStatus(
                 StatusAction.Item.Reply(
                     count = repliesCount ?: 0,
                     onClicked = {
-                        launcher.launch(
-                            AppDeepLink.Compose.Reply(
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                            ),
-                        )
+                        if (dataSource !is GuestDataSource) {
+                            launcher.launch(
+                                AppDeepLink.Compose.Reply(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ),
+                            )
+                        }
                     },
                 ),
                 if (canReblog) {

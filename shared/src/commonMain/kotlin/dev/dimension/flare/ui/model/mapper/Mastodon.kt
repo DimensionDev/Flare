@@ -132,6 +132,7 @@ internal fun Status.render(
                         ),
                     )
                 },
+                statusKey = currentStatus.statusKey,
             ),
         platformType = PlatformType.Mastodon,
     )

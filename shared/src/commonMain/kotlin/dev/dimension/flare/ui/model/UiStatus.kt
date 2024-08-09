@@ -17,7 +17,7 @@ import moe.tlaster.twitter.parser.UrlToken
 import moe.tlaster.twitter.parser.UserNameToken
 
 internal fun List<Token>.toHtml(accountKey: MicroBlogKey): Element {
-    val body = Element("body")
+    val body = Element("p")
     forEach {
         body.appendChild(it.toHtml(accountKey))
     }
@@ -41,7 +41,17 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
                 addChildren(TextNode(value))
             }
 
-        is StringToken -> TextNode(value)
+        is StringToken ->
+            Element("span").apply {
+                // split \n
+                val strings = value.split("\n")
+                strings.forEachIndexed { index, s ->
+                    appendChild(TextNode(s))
+                    if (index != strings.size - 1) {
+                        appendChild(Element("br"))
+                    }
+                }
+            }
         is UrlToken ->
             Element("a").apply {
 //                attributes["href"] = value

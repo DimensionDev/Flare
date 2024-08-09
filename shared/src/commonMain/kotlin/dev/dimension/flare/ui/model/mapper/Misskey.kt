@@ -134,6 +134,7 @@ internal fun Note.render(
                         ),
                     )
                 },
+                statusKey = currentStatus.statusKey,
             ),
         platformType = PlatformType.Misskey,
     )

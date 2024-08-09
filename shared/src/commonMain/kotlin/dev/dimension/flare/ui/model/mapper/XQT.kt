@@ -240,6 +240,7 @@ internal fun Tweet.render(
                         ),
                     )
                 },
+                statusKey = currentTweet.statusKey,
             ),
         topMessage = topMessage,
         platformType = PlatformType.xQt,

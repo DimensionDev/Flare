@@ -124,6 +124,10 @@ android {
     }
 }
 
+composeCompiler {
+    enableStrongSkippingMode = true
+}
+
 ktlint {
     version.set(libs.versions.ktlint)
     filter {

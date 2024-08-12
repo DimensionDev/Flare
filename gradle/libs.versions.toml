@@ -2,7 +2,7 @@
 compileSdk = "35"
 minSdk = "23"
 java = "17"
-agp = "8.5.1"
+agp = "8.5.2"
 kotlin = "2.0.10"
 core-ktx = "1.13.1"
 junit = "4.13.2"

@@ -108,14 +108,20 @@ fun CommonStatusComponent(
     Column(
         modifier =
             modifier
-                .clickable {
-                    item.onClicked.invoke(
-                        ClickContext(
-                            launcher = {
-                                uriHandler.openUri(it)
-                            },
-                        ),
-                    )
+                .let {
+                    if (isDetail) {
+                        it
+                    } else {
+                        it.clickable {
+                            item.onClicked.invoke(
+                                ClickContext(
+                                    launcher = { url ->
+                                        uriHandler.openUri(url)
+                                    },
+                                ),
+                            )
+                        }
+                    }
                 },
     ) {
         item.user?.let { user ->

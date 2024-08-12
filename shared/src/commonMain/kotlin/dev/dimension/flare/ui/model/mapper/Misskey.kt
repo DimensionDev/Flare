@@ -51,8 +51,7 @@ internal fun Notification.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
 ): UiTimeline {
-    requireNotNull(user) { "account is null" }
-    val user = user.render(accountKey)
+    val user = user?.render(accountKey)
     val status = note?.renderStatus(accountKey, event)
     val topMessageType =
         when (this.type) {
@@ -74,7 +73,9 @@ internal fun Notification.render(
             icon = UiTimeline.TopMessage.Icon.Retweet,
             type = topMessageType,
             onClicked = {
-                launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+                if (user != null) {
+                    launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+                }
             },
         )
     return UiTimeline(
@@ -86,12 +87,13 @@ internal fun Notification.render(
                         NotificationType.Follow,
                         NotificationType.FollowRequestAccepted,
                         NotificationType.ReceiveFollowRequest,
-                    )
+                    ) &&
+                    user != null
                 ->
                     UiTimeline.ItemContent.User(user)
 
                 else ->
-                    status ?: UiTimeline.ItemContent.User(user)
+                    status ?: user?.let { UiTimeline.ItemContent.User(it) }
             },
         platformType = PlatformType.Misskey,
     )

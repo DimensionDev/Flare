@@ -325,8 +325,20 @@ internal data class StatusPic(
 internal data class Large(
     val size: String? = null,
     val url: String? = null,
-    val geo: StatusPicGeo? = null,
-)
+//    val geo: StatusPicGeo? = null,
+    val geo: JsonElement? = null,
+) {
+    val geoValue: StatusPicGeo?
+        get() =
+            when (geo) {
+                is JsonObject -> {
+                    JSON.decodeFromJsonElement(geo)
+                }
+                else -> {
+                    null
+                }
+            }
+}
 
 @Serializable
 internal data class StatusPicGeo(

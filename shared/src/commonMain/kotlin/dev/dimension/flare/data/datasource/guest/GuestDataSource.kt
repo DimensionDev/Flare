@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.guest
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
@@ -52,7 +53,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestTimelinePagingSource(event = this)
-        }.flow
+        }.flow.cachedIn(scope)
 
     override fun notification(
         type: NotificationFilter,
@@ -138,7 +139,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestStatusDetailPagingSource(statusKey, event = this, statusOnly = false)
-        }.flow
+        }.flow.cachedIn(scope)
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
@@ -170,7 +171,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestSearchStatusPagingSource(query, event = this)
-        }.flow
+        }.flow.cachedIn(scope)
 
     override fun searchUser(
         query: String,
@@ -185,7 +186,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
                 GuestMastodonService.GuestKey,
                 query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(
@@ -204,7 +205,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestDiscoverStatusPagingSource(event = this)
-        }.flow
+        }.flow.cachedIn(scope)
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(

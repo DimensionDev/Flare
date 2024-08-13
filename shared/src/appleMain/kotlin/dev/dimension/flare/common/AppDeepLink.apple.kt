@@ -55,6 +55,10 @@ object AppDeepLinkHelper {
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
                         AppleRoute.Compose.Quote(accountKey, statusKey)
                     }
+                    "New" -> {
+                        val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
+                        AppleRoute.Compose.New(accountKey)
+                    }
                     else -> null
                 }
 

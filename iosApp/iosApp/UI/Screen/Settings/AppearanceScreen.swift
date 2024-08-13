@@ -10,7 +10,8 @@ struct AppearanceScreen: View {
             List {
                 if case .success(let success) = onEnum(of: state.sampleStatus) {
                     StatusItemView(
-                        data: success.data
+                        data: success.data,
+                        detailKey: nil
                     )
                 }
                 Section("appearance_settings_generic") {

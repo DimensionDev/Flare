@@ -6,37 +6,8 @@ struct RouterView: View {
     let presenter = SplashPresenter(toHome: {}, toLogin: {})
     @State var appSettings = AppSettings()
     var body: some View {
-        Observing(presenter.models) { state in
-            ZStack {
-                switch state.toSwiftEnum() {
-                case .home:
-                    HomeScreen()
-                case .login:
-                    SplashScreen()
-                case .splash:
-                    SplashScreen()
-                }
-            }.sheet(isPresented: Binding(get: {
-                if case .login = state.toSwiftEnum() {
-                    true
-                } else {
-                    false
-                }
-            }, set: { _ in
-            }), content: {
-                if case .login = state.toSwiftEnum() {
-                    ServiceSelectScreen(
-                        toHome: {
-                        }
-                    )
-#if os(macOS)
-                    .frame(minWidth: 600, minHeight: 400)
-#endif
-                    .interactiveDismissDisabled()
-                }
-            })
+        HomeScreen()
             .environment(\.appSettings, appSettings)
-        }
     }
 }
 
@@ -174,7 +145,7 @@ struct TabItem<Content: View>: View {
         case .vVO(let data):
             switch onEnum(of: data) {
             case .commentDetail(let data): EmptyView()
-            case .replyToComment(let data): 
+            case .replyToComment(let data):
                 ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: ComposeStatusVVOComment(statusKey: data.replyTo, rootId: data.rootId))
             case .statusDetail(let data): EmptyView()
             }

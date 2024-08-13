@@ -4,12 +4,15 @@ import shared
 struct StatusTimelineComponent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let data: PagingState<UiTimeline>
+    let detailKey: MicroBlogKey?
     var body: some View {
         switch onEnum(of: data) {
         case .empty: Text("timeline_load_empty", comment: "Timeline is empty")
-        case .error(let error): Text("timeline_load_error", comment: "Timeline loading error")
+        case .error(let error):
+            Text("timeline_load_error", comment: "Timeline loading error")
+            Text(error.error.message ?? "")
         case .loading:
-            ForEach(0...10, id: \.self) { _ in
+            ForEach((-10)...(-1), id: \.self) { _ in
                 StatusPlaceHolder()
                     .if(horizontalSizeClass != .compact) { view in
                         view.padding([.horizontal])
@@ -21,7 +24,8 @@ struct StatusTimelineComponent: View {
                 VStack {
                     if let status = data {
                         StatusItemView(
-                            data: status
+                            data: status,
+                            detailKey: detailKey
                         )
                     } else {
                         StatusPlaceHolder()
@@ -41,6 +45,7 @@ struct StatusTimelineComponent: View {
 struct StatusItemView: View {
     @Environment(\.openURL) private var openURL
     let data: UiTimeline
+    let detailKey: MicroBlogKey?
     var body: some View {
         if let topMessage = data.topMessage {
             let icon = switch topMessage.icon {
@@ -109,11 +114,14 @@ struct StatusItemView: View {
             switch onEnum(of: content) {
             case .status(let data): CommonStatusComponent(
                 data: data,
-                onMediaClick: { index, preview in
+                onMediaClick: { index, _ in
                     openURL(URL(string: AppDeepLink.StatusMedia.shared.invoke(accountKey: data.accountKey, statusKey: data.statusKey, mediaIndex: Int32(index)))!)
-                }
+                },
+                isDetail: detailKey == data.statusKey
             ).onTapGesture {
-                data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                if detailKey != data.statusKey {
+                    data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                }
             }
             case .user(let data):
                 HStack {
@@ -136,7 +144,8 @@ struct StatusPlaceHolder: View {
         StatusItemView(
             data: createSampleStatus(
                 user: createSampleUser()
-            )
+            ),
+            detailKey: nil
         )
         .redacted(reason: .placeholder)
     }

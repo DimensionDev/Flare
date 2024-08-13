@@ -1,46 +1,36 @@
 import SwiftUI
 import shared
 
-struct HomeTimelineScreen: View {
-    @Environment(\.openURL) private var openURL
+struct TimelineScreen: View {
     @State
-    var presenter: HomeTimelinePresenter
-
-    init(accountType: AccountType) {
-        presenter = .init(accountType: accountType)
-    }
-
+    var presenter: TimelinePresenter
     var body: some View {
         Observing(presenter.models) { state in
             List {
                 StatusTimelineComponent(
-                    data: state.listState
+                    data: state.listState,
+                    detailKey: nil
                 )
             }
             .listStyle(.plain)
             .refreshable {
                 try? await presenter.models.value.refresh()
             }
-            .navigationTitle("home_timeline_title")
-    #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-    #endif
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(action: {
-//                        openURL(URL(string: AppDeepLink.Compose.shared.invoke())!)
-                    }, label: {
-                        Image(systemName: "square.and.pencil")
-                    })
-                    Button(action: {
-                        Task {
-                            try? await state.refresh()
-                        }
-                    }, label: {
-                        Image(systemName: "arrow.clockwise.circle")
-                    })
-                }
-            }
         }
+    }
+}
+
+struct HomeTimelineScreen: View {
+    @Environment(\.openURL) private var openURL
+    private let presenter: HomeTimelinePresenter
+    init(accountType: AccountType) {
+        presenter = .init(accountType: accountType)
+    }
+    var body: some View {
+        TimelineScreen(presenter: presenter)
+            .navigationTitle("home_timeline_title")
+#if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+#endif
     }
 }

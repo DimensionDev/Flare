@@ -189,76 +189,78 @@ private fun Status.renderStatus(
                 )
             },
         actions =
-            listOfNotNull(
-                StatusAction.Item.Reply(
-                    count = repliesCount ?: 0,
-                    onClicked = {
-                        if (dataSource !is GuestDataSource) {
+            if (dataSource !is GuestDataSource) {
+                listOfNotNull(
+                    StatusAction.Item.Reply(
+                        count = repliesCount ?: 0,
+                        onClicked = {
                             launcher.launch(
                                 AppDeepLink.Compose.Reply(
                                     accountKey = accountKey,
                                     statusKey = statusKey,
                                 ),
                             )
-                        }
-                    },
-                ),
-                if (canReblog) {
-                    StatusAction.Item.Retweet(
-                        count = reblogsCount ?: 0,
-                        retweeted = reblogged ?: false,
-                        onClicked = {
-                            dataSource.reblog(statusKey, reblogged ?: false)
                         },
-                    )
-                } else {
-                    null
-                },
-                StatusAction.Item.Like(
-                    count = favouritesCount ?: 0,
-                    liked = favourited ?: false,
-                    onClicked = {
-                        dataSource.like(statusKey, favourited ?: false)
-                    },
-                ),
-                StatusAction.Group(
-                    displayItem = StatusAction.Item.More,
-                    actions =
-                        listOfNotNull(
-                            StatusAction.Item.Bookmark(
-                                count = 0,
-                                bookmarked = bookmarked ?: false,
-                                onClicked = {
-                                    dataSource.bookmark(statusKey, bookmarked ?: false)
-                                },
-                            ),
-                            if (isFromMe) {
-                                StatusAction.Item.Delete(
-                                    onClicked = {
-                                        launcher.launch(
-                                            AppDeepLink.DeleteStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
-                                        )
-                                    },
-                                )
-                            } else {
-                                StatusAction.Item.Report(
-                                    onClicked = {
-                                        launcher.launch(
-                                            AppDeepLink.Mastodon.ReportStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                                userKey = actualUser.key,
-                                            ),
-                                        )
-                                    },
-                                )
+                    ),
+                    if (canReblog) {
+                        StatusAction.Item.Retweet(
+                            count = reblogsCount ?: 0,
+                            retweeted = reblogged ?: false,
+                            onClicked = {
+                                dataSource.reblog(statusKey, reblogged ?: false)
                             },
-                        ).toImmutableList(),
-                ),
-            ).toImmutableList(),
+                        )
+                    } else {
+                        null
+                    },
+                    StatusAction.Item.Like(
+                        count = favouritesCount ?: 0,
+                        liked = favourited ?: false,
+                        onClicked = {
+                            dataSource.like(statusKey, favourited ?: false)
+                        },
+                    ),
+                    StatusAction.Group(
+                        displayItem = StatusAction.Item.More,
+                        actions =
+                            listOfNotNull(
+                                StatusAction.Item.Bookmark(
+                                    count = 0,
+                                    bookmarked = bookmarked ?: false,
+                                    onClicked = {
+                                        dataSource.bookmark(statusKey, bookmarked ?: false)
+                                    },
+                                ),
+                                if (isFromMe) {
+                                    StatusAction.Item.Delete(
+                                        onClicked = {
+                                            launcher.launch(
+                                                AppDeepLink.DeleteStatus(
+                                                    accountKey = accountKey,
+                                                    statusKey = statusKey,
+                                                ),
+                                            )
+                                        },
+                                    )
+                                } else {
+                                    StatusAction.Item.Report(
+                                        onClicked = {
+                                            launcher.launch(
+                                                AppDeepLink.Mastodon.ReportStatus(
+                                                    accountKey = accountKey,
+                                                    statusKey = statusKey,
+                                                    userKey = actualUser.key,
+                                                ),
+                                            )
+                                        },
+                                    )
+                                },
+                            ).toImmutableList(),
+                    ),
+                )
+            } else {
+                emptyList()
+            }.toImmutableList(),
         poll =
             poll?.let {
                 UiPoll(

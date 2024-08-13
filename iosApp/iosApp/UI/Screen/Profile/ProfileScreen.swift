@@ -64,7 +64,8 @@ struct ProfileScreen: View {
                     }
                 }
                 StatusTimelineComponent(
-                    data: state.listState
+                    data: state.listState,
+                    detailKey: nil
                 )
             }
             .refreshable {

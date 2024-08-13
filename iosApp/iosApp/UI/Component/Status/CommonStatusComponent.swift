@@ -5,12 +5,12 @@ import NetworkImage
 
 struct CommonStatusComponent: View {
     @State private var showMedia: Bool = false
-    @State private var expanded: Bool = true
+    @State private var expanded: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, String?) -> Void
-    let isDetail: Bool = false
+    let isDetail: Bool
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -60,14 +60,14 @@ struct CommonStatusComponent: View {
                         Image(systemName: "arrowtriangle.left.circle.fill")
                     }
                 })
-                .opacity(0.5)
+                .opacity(0.6)
                 .buttonStyle(.plain)
                 if expanded {
                     Spacer()
                         .frame(height: 8)
                 }
             }
-            if expanded {
+            if expanded || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
                 Markdown(data.content.markdown)
                     .font(.body)
                     .markdownInlineImageProvider(.emoji)
@@ -143,10 +143,11 @@ struct CommonStatusComponent: View {
                     Text(data.createdAt, style: .date)
                     Text(data.createdAt, style: .time)
                 }
+                .opacity(0.6)
             }
             Spacer()
                 .frame(height: 8)
-            if appSettings.appearanceSettings.showActions || isDetail {
+            if appSettings.appearanceSettings.showActions || isDetail, !data.actions.isEmpty {
                 HStack {
                     ForEach(0..<data.actions.count, id: \.self) { actionIndex in
                         let action = data.actions[actionIndex]
@@ -204,9 +205,10 @@ struct CommonStatusComponent: View {
                 }
                 .labelStyle(CenteredLabelStyle())
                 .buttonStyle(.borderless)
-                .font(.caption)
+                .opacity(0.6)
                 .if(!isDetail) { view in
-                    view.opacity(0.6)
+                    view
+                        .font(.caption)
                 }
             }
         }.frame(alignment: .leading)

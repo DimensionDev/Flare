@@ -45,7 +45,8 @@ struct SearchScreen: View {
                 }
                 Section("search_status_title") {
                     StatusTimelineComponent(
-                        data: state.status
+                        data: state.status,
+                        detailKey: nil
                     )
                 }
             }

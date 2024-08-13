@@ -27,7 +27,8 @@ struct NotificationScreen: View {
                     .listRowSeparator(.hidden)
                 }
                 StatusTimelineComponent(
-                    data: state.listState
+                    data: state.listState,
+                    detailKey: nil
                 )
             }
             .onChange(of: notificationType) {

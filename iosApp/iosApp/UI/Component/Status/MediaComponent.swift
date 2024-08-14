@@ -40,23 +40,6 @@ struct MediaComponent: View {
                     MediaItemComponent(media: item)
                 })
                 .buttonStyle(.borderless)
-                //                    .onTapGesture {
-                //                        let preview: String? = switch onEnum(of: item) {
-                //                        case .audio:
-                //                            nil
-                //                        case .gif(let gif):
-                //                            gif.previewUrl
-                //                        case .image(let image):
-                //                            image.previewUrl
-                //                        case .video(let video):
-                //                            video.thumbnailUrl
-                //                        }
-                //                        if let index = medias.firstIndex(where: { it in
-                //                            it === item
-                //                        }) {
-                //                            onMediaClick(index - 1, nil)
-                //                        }
-                //                    }
             }
             .if(hideSensitive, transform: { view in
                 view.blur(radius: 32)

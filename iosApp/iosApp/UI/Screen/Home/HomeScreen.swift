@@ -5,7 +5,6 @@ struct HomeScreen: View {
     @State var presenter = ActiveAccountPresenter()
     @State var showSettings = false
     @State var showLogin = false
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var body: some View {
         Observing(presenter.models) { userState in
             let accountType: AccountType? = switch onEnum(of: userState.user) {
@@ -20,11 +19,15 @@ struct HomeScreen: View {
                             TabModel(
                                 title: String(localized: "home_timeline_title"),
                                 image: "house",
-                                destination: TabItem { _ in
-                                    HomeTimelineScreen(accountType: actualAccountType)
+                                destination: TabItem { router in
+                                    HomeTimelineScreen(
+                                        accountType: actualAccountType,
+                                        toCompose: {
+                                            router.navigate(to: AppleRoute.ComposeNew(accountType: actualAccountType))
+                                        }
+                                    )
                                         .toolbar {
 #if os(iOS)
-                                            
                                             ToolbarItem(placement: accountType is AccountTypeGuest ? .primaryAction : .navigation) {
                                                 Button {
                                                     if accountType is AccountTypeGuest {
@@ -72,11 +75,11 @@ struct HomeScreen: View {
                             TabModel(
                                 title: String(localized: "home_discover_title"),
                                 image: "magnifyingglass",
-                                destination: TabItem { _ in
+                                destination: TabItem { router in
                                     DiscoverScreen(
                                         accountType: actualAccountType,
-                                        onUserClicked: { _ in
-                                            //                                        router.navigate(to: .profileMedia(accountType: .active, userKey: user.key.description()))
+                                        onUserClicked: { user in
+                                            router.navigate(to: AppleRoute.Profile(accountType: actualAccountType, userKey: user.key))
                                         }
                                     )
                                 }
@@ -84,12 +87,12 @@ struct HomeScreen: View {
                             !(accountType is AccountTypeGuest) ? TabModel(
                                 title: String(localized: "home_profile_title"),
                                 image: "person.circle",
-                                destination: TabItem { _ in
+                                destination: TabItem { router in
                                     ProfileScreen(
                                         accountType: actualAccountType,
                                         userKey: nil,
-                                        toProfileMedia: { _ in
-                                            //                                        router.navigate(to: .profileMedia(accountType: .active, userKey: userKey.description()))
+                                        toProfileMedia: { key in
+                                            router.navigate(to: AppleRoute.Profile(accountType: actualAccountType, userKey: key))
                                         }
                                     )
                                 }

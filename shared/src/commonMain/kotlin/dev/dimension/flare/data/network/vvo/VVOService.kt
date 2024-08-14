@@ -50,9 +50,15 @@ internal class VVOService(
         fun checkChocolates(chocolate: String): Boolean =
             chocolate
                 .split(';')
-                .map {
+                .mapNotNull {
                     val res = it.split('=')
-                    res[0].trim() to res[1].trim()
+                    val key = res.getOrNull(0)?.trim()
+                    val value = res.getOrNull(1)?.trim()
+                    if (key != null && value != null) {
+                        key to value
+                    } else {
+                        null
+                    }
                 }.toMap()
                 .let {
                     it.containsKey("MLOGIN") && it["MLOGIN"] == "1"

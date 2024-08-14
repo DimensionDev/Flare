@@ -18091,6 +18091,15 @@
         }
       }
     },
+    "status_detail" : {
+
+    },
+    "status_detail_comment" : {
+
+    },
+    "status_detail_repost" : {
+
+    },
     "status_display_media" : {
       "localizations" : {
         "ar" : {

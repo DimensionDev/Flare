@@ -15,8 +15,9 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
+import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -35,7 +36,9 @@ class MisskeyReactionPresenter(
             service.flatMap {
                 remember(it) {
                     it.emoji()
-                }.collectAsState().toUi()
+                }.collectAsState().toUi().map {
+                    it.toImmutableListWrapper()
+                }
             }
 
         val status =
@@ -72,7 +75,7 @@ class MisskeyReactionPresenter(
 }
 
 interface MisskeyReactionState {
-    val emojis: UiState<ImmutableList<UiEmoji>>
+    val emojis: UiState<ImmutableListWrapper<UiEmoji>>
 
     fun select(emoji: UiEmoji)
 }

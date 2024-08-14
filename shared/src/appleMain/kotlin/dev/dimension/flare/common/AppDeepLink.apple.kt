@@ -1,5 +1,6 @@
 package dev.dimension.flare.common
 
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.Url
 
@@ -21,26 +22,26 @@ object AppDeepLinkHelper {
             "Search" -> {
                 val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
                 val keyword = data.pathSegments.getOrNull(2) ?: return null
-                AppleRoute.Search(accountKey, keyword)
+                AppleRoute.Search(AccountType.Specific(accountKey), keyword)
             }
 
             "Profile" -> {
                 val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
                 val userKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
-                AppleRoute.Profile(accountKey, userKey)
+                AppleRoute.Profile(AccountType.Specific(accountKey), userKey)
             }
 
             "ProfileWithNameAndHost" -> {
                 val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
                 val userName = data.pathSegments.getOrNull(2) ?: return null
                 val host = data.pathSegments.getOrNull(3) ?: return null
-                AppleRoute.ProfileWithNameAndHost(accountKey, userName, host)
+                AppleRoute.ProfileWithNameAndHost(AccountType.Specific(accountKey), userName, host)
             }
 
             "StatusDetail" -> {
                 val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
                 val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
-                AppleRoute.StatusDetail(accountKey, statusKey)
+                AppleRoute.StatusDetail(AccountType.Specific(accountKey), statusKey)
             }
 
             "Compose" ->
@@ -48,16 +49,16 @@ object AppDeepLinkHelper {
                     "Reply" -> {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
-                        AppleRoute.Compose.Reply(accountKey, statusKey)
+                        AppleRoute.Compose.Reply(AccountType.Specific(accountKey), statusKey)
                     }
                     "Quote" -> {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
-                        AppleRoute.Compose.Quote(accountKey, statusKey)
+                        AppleRoute.Compose.Quote(AccountType.Specific(accountKey), statusKey)
                     }
                     "New" -> {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
-                        AppleRoute.Compose.New(accountKey)
+                        AppleRoute.Compose.New(AccountType.Specific(accountKey))
                     }
                     else -> null
                 }
@@ -72,18 +73,18 @@ object AppDeepLinkHelper {
                     "StatusDetail" -> {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
-                        AppleRoute.VVO.StatusDetail(accountKey, statusKey)
+                        AppleRoute.VVO.StatusDetail(AccountType.Specific(accountKey), statusKey)
                     }
                     "CommentDetail" -> {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
-                        AppleRoute.VVO.CommentDetail(accountKey, statusKey)
+                        AppleRoute.VVO.CommentDetail(AccountType.Specific(accountKey), statusKey)
                     }
                     "ReplyToComment" -> {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val replyTo = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
                         val rootId = data.pathSegments.getOrNull(4) ?: return null
-                        AppleRoute.VVO.ReplyToComment(accountKey, replyTo, rootId)
+                        AppleRoute.VVO.ReplyToComment(AccountType.Specific(accountKey), replyTo, rootId)
                     }
                     else -> null
                 }
@@ -91,7 +92,7 @@ object AppDeepLinkHelper {
             "DeleteStatus" -> {
                 val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
                 val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
-                AppleRoute.DeleteStatus(accountKey, statusKey)
+                AppleRoute.DeleteStatus(AccountType.Specific(accountKey), statusKey)
             }
 
             "Bluesky" ->
@@ -99,7 +100,7 @@ object AppDeepLinkHelper {
                     "ReportStatus" -> {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
-                        AppleRoute.Bluesky.ReportStatus(accountKey, statusKey)
+                        AppleRoute.Bluesky.ReportStatus(AccountType.Specific(accountKey), statusKey)
                     }
                     else -> null
                 }
@@ -110,7 +111,7 @@ object AppDeepLinkHelper {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
                         val userKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(4) ?: return null)
-                        AppleRoute.Mastodon.ReportStatus(accountKey, statusKey, userKey)
+                        AppleRoute.Mastodon.ReportStatus(AccountType.Specific(accountKey), statusKey, userKey)
                     }
                     else -> null
                 }
@@ -121,12 +122,12 @@ object AppDeepLinkHelper {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
                         val userKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(4) ?: return null)
-                        AppleRoute.Misskey.ReportStatus(accountKey, statusKey, userKey)
+                        AppleRoute.Misskey.ReportStatus(AccountType.Specific(accountKey), statusKey, userKey)
                     }
                     "AddReaction" -> {
                         val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                         val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(3) ?: return null)
-                        AppleRoute.Misskey.AddReaction(accountKey, statusKey)
+                        AppleRoute.Misskey.AddReaction(AccountType.Specific(accountKey), statusKey)
                     }
                     else -> null
                 }
@@ -135,7 +136,7 @@ object AppDeepLinkHelper {
                 val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
                 val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                 val index = data.pathSegments.getOrNull(3)?.toIntOrNull() ?: return null
-                AppleRoute.StatusMedia(accountKey, statusKey, index)
+                AppleRoute.StatusMedia(AccountType.Specific(accountKey), statusKey, index)
             }
 
             else -> null
@@ -166,7 +167,7 @@ sealed class AppleRoute {
     }
 
     data class Search(
-        val accountKey: MicroBlogKey,
+        val accountType: AccountType,
         val keyword: String,
     ) : AppleRoute() {
         override val routeType: RouteType
@@ -174,7 +175,7 @@ sealed class AppleRoute {
     }
 
     data class Profile(
-        val accountKey: MicroBlogKey,
+        val accountType: AccountType,
         val userKey: MicroBlogKey,
     ) : AppleRoute() {
         override val routeType: RouteType
@@ -182,7 +183,7 @@ sealed class AppleRoute {
     }
 
     data class ProfileWithNameAndHost(
-        val accountKey: MicroBlogKey,
+        val accountType: AccountType,
         val userName: String,
         val host: String,
     ) : AppleRoute() {
@@ -191,7 +192,7 @@ sealed class AppleRoute {
     }
 
     data class StatusDetail(
-        val accountKey: MicroBlogKey,
+        val accountType: AccountType,
         val statusKey: MicroBlogKey,
     ) : AppleRoute() {
         override val routeType: RouteType
@@ -200,14 +201,14 @@ sealed class AppleRoute {
 
     sealed class Compose : AppleRoute() {
         data class New(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
         ) : Compose() {
             override val routeType: RouteType
                 get() = RouteType.Sheet
         }
 
         data class Reply(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Compose() {
             override val routeType: RouteType
@@ -215,7 +216,7 @@ sealed class AppleRoute {
         }
 
         data class Quote(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Compose() {
             override val routeType: RouteType
@@ -232,7 +233,7 @@ sealed class AppleRoute {
 
     sealed class VVO : AppleRoute() {
         data class StatusDetail(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : VVO() {
             override val routeType: RouteType
@@ -240,7 +241,7 @@ sealed class AppleRoute {
         }
 
         data class CommentDetail(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : VVO() {
             override val routeType: RouteType
@@ -248,7 +249,7 @@ sealed class AppleRoute {
         }
 
         data class ReplyToComment(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val replyTo: MicroBlogKey,
             val rootId: String,
         ) : VVO() {
@@ -258,7 +259,7 @@ sealed class AppleRoute {
     }
 
     data class DeleteStatus(
-        val accountKey: MicroBlogKey,
+        val accountType: AccountType,
         val statusKey: MicroBlogKey,
     ) : AppleRoute() {
         override val routeType: RouteType
@@ -267,7 +268,7 @@ sealed class AppleRoute {
 
     sealed class Bluesky : AppleRoute() {
         data class ReportStatus(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Bluesky() {
             override val routeType: RouteType
@@ -277,7 +278,7 @@ sealed class AppleRoute {
 
     sealed class Mastodon : AppleRoute() {
         data class ReportStatus(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val statusKey: MicroBlogKey,
             val userKey: MicroBlogKey,
         ) : Mastodon() {
@@ -288,7 +289,7 @@ sealed class AppleRoute {
 
     sealed class Misskey : AppleRoute() {
         data class ReportStatus(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val statusKey: MicroBlogKey,
             val userKey: MicroBlogKey,
         ) : Misskey() {
@@ -297,7 +298,7 @@ sealed class AppleRoute {
         }
 
         data class AddReaction(
-            val accountKey: MicroBlogKey,
+            val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Misskey() {
             override val routeType: RouteType
@@ -306,7 +307,7 @@ sealed class AppleRoute {
     }
 
     data class ProfileMedia(
-        val accountKey: MicroBlogKey,
+        val accountType: AccountType,
         val userKey: MicroBlogKey,
     ) : AppleRoute() {
         override val routeType: RouteType
@@ -314,7 +315,7 @@ sealed class AppleRoute {
     }
 
     data class StatusMedia(
-        val accountKey: MicroBlogKey,
+        val accountType: AccountType,
         val statusKey: MicroBlogKey,
         val index: Int,
     ) : AppleRoute() {

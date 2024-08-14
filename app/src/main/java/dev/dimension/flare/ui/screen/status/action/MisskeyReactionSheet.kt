@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -80,7 +79,8 @@ private fun MisskeyReactionSheet(
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         state.emojis.onSuccess {
-            items(it) { emoji ->
+            items(it.size) { index ->
+                val emoji = it[index]
                 NetworkImage(
                     model = emoji.url,
                     contentDescription = emoji.shortcode,

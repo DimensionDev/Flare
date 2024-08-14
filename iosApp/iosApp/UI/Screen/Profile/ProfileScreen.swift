@@ -116,8 +116,9 @@ struct ProfileScreen: View {
                     if case .success(let user) = onEnum(of: state.userState) {
                         if case .success(let isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
                             if case .success(let relation) = onEnum(of: state.relationState),
-                               case .success(let actions) = onEnum(of: state.actions) {
-                                ForEach(0...actions.data.size - 1, id: \.self) { index in
+                               case .success(let actions) = onEnum(of: state.actions),
+                               actions.data.size > 0 {
+                                ForEach(0..<actions.data.size, id: \.self) { index in
                                     let item = actions.data.get(index: index)
                                     Button(action: {
                                         Task {

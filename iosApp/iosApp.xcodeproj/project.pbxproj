@@ -27,6 +27,10 @@
 		061C2D002B4E8B0600249514 /* StatusDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061C2CFF2B4E8B0600249514 /* StatusDetailScreen.swift */; };
 		0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */; };
 		06244DED2B75F21E00884683 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06244DEC2B75F21E00884683 /* AVKit.framework */; };
+		062A3C832C6C8EBD00A45E44 /* MisskeyReactionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A3C822C6C8EBD00A45E44 /* MisskeyReactionSheet.swift */; };
+		062A3C852C6C982E00A45E44 /* VVOStatusDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A3C842C6C982E00A45E44 /* VVOStatusDetailScreen.swift */; };
+		062A3C872C6C9CF800A45E44 /* VVOCommentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A3C862C6C9CF800A45E44 /* VVOCommentScreen.swift */; };
+		062A3C892C6C9ECD00A45E44 /* VVOLoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A3C882C6C9ECD00A45E44 /* VVOLoginScreen.swift */; };
 		063476792B4FBB9E006B21F1 /* DiscoverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */; };
 		0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */; };
 		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
@@ -66,7 +70,6 @@
 		B62B24E9F9BC4D31DFCE7FD8 /* AppleUriLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B202755C8B39C8CF77626 /* AppleUriLauncher.swift */; };
 		B62B27AA5CE37383A67B419B /* CommonProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2F07CE6BD47C8E26897A /* CommonProfileHeader.swift */; };
 		B62B2D085825C9FFC6B5910D /* QuotedStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2A7A1854BBDB3B808C73 /* QuotedStatus.swift */; };
-		B62B2FB8330CDE6C38F8AB30 /* XQTLoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B2B505AB9064071079DE6 /* XQTLoginScreen.swift */; };
 		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +94,10 @@
 		061C2CFF2B4E8B0600249514 /* StatusDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusDetailScreen.swift; sourceTree = "<group>"; };
 		0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTimelineScreen.swift; sourceTree = "<group>"; };
 		06244DEC2B75F21E00884683 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
+		062A3C822C6C8EBD00A45E44 /* MisskeyReactionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyReactionSheet.swift; sourceTree = "<group>"; };
+		062A3C842C6C982E00A45E44 /* VVOStatusDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOStatusDetailScreen.swift; sourceTree = "<group>"; };
+		062A3C862C6C9CF800A45E44 /* VVOCommentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOCommentScreen.swift; sourceTree = "<group>"; };
+		062A3C882C6C9ECD00A45E44 /* VVOLoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOLoginScreen.swift; sourceTree = "<group>"; };
 		063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverScreen.swift; sourceTree = "<group>"; };
 		0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
 		066151202AC540B700CCB945 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
@@ -126,7 +133,6 @@
 		B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoleculeViewModelBase.swift; sourceTree = "<group>"; };
 		B62B2851F576CA14E4CE93E0 /* ProfileScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileScreen.swift; sourceTree = "<group>"; };
 		B62B2A7A1854BBDB3B808C73 /* QuotedStatus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuotedStatus.swift; sourceTree = "<group>"; };
-		B62B2B505AB9064071079DE6 /* XQTLoginScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XQTLoginScreen.swift; sourceTree = "<group>"; };
 		B62B2C781FB805F77406C1C6 /* KotlinByteArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KotlinByteArray.swift; path = Common/KotlinByteArray.swift; sourceTree = "<group>"; };
 		B62B2CF30DB9A3370D1BB87E /* ViewExt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ViewExt.swift; path = Common/ViewExt.swift; sourceTree = "<group>"; };
 		B62B2F07CE6BD47C8E26897A /* CommonProfileHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonProfileHeader.swift; sourceTree = "<group>"; };
@@ -214,6 +220,17 @@
 			path = Home;
 			sourceTree = "<group>";
 		};
+		062A3C812C6C8EAC00A45E44 /* Status */ = {
+			isa = PBXGroup;
+			children = (
+				061C2CFF2B4E8B0600249514 /* StatusDetailScreen.swift */,
+				062A3C822C6C8EBD00A45E44 /* MisskeyReactionSheet.swift */,
+				062A3C842C6C982E00A45E44 /* VVOStatusDetailScreen.swift */,
+				062A3C862C6C9CF800A45E44 /* VVOCommentScreen.swift */,
+			);
+			path = Status;
+			sourceTree = "<group>";
+		};
 		066151222AC54A8200CCB945 /* Component */ = {
 			isa = PBXGroup;
 			children = (
@@ -250,7 +267,7 @@
 			children = (
 				06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */,
 				0690CF8C2B5F51A200824A21 /* XQTLoginScreen.swift */,
-				B62B2B505AB9064071079DE6 /* XQTLoginScreen.swift */,
+				062A3C882C6C9ECD00A45E44 /* VVOLoginScreen.swift */,
 			);
 			path = OAuth;
 			sourceTree = "<group>";
@@ -277,13 +294,13 @@
 		06D5C9162AC3BB35007439D5 /* Screen */ = {
 			isa = PBXGroup;
 			children = (
+				062A3C812C6C8EAC00A45E44 /* Status */,
 				066F23032B43BD45004A4A8D /* Profile */,
 				060881BF2AE10C51001AAD2F /* Compose */,
 				060881B82ADE5520001AAD2F /* Settings */,
 				0620DD9C2AC44224009BD1BE /* Home */,
 				06AD156C2AC40067000DC865 /* OAuth */,
 				060501BF2ACAC8AF00DBCCEB /* SplashScreen.swift */,
-				061C2CFF2B4E8B0600249514 /* StatusDetailScreen.swift */,
 			);
 			path = Screen;
 			sourceTree = "<group>";
@@ -543,11 +560,13 @@
 				061C2D002B4E8B0600249514 /* StatusDetailScreen.swift in Sources */,
 				06DF79D12B4699E200CF21FE /* AppearanceScreen.swift in Sources */,
 				067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */,
+				062A3C872C6C9CF800A45E44 /* VVOCommentScreen.swift in Sources */,
 				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
 				06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */,
 				066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */,
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
 				066151212AC540B700CCB945 /* HomeScreen.swift in Sources */,
+				062A3C892C6C9ECD00A45E44 /* VVOLoginScreen.swift in Sources */,
 				060881C12AE10D35001AAD2F /* ComposeViewModel.swift in Sources */,
 				0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */,
 				061C2CFC2B4E77D700249514 /* FullScreenImageViewer.swift in Sources */,
@@ -559,10 +578,12 @@
 				060501BE2ACAC4ED00DBCCEB /* NotificationScreen.swift in Sources */,
 				06AD156B2AC3F454000DC865 /* Route.swift in Sources */,
 				060881B52AD9260B001AAD2F /* UserComponent.swift in Sources */,
+				062A3C832C6C8EBD00A45E44 /* MisskeyReactionSheet.swift in Sources */,
 				060881BC2ADE5C68001AAD2F /* AccountsScreen.swift in Sources */,
 				067D89792AD25DB000F8F932 /* MarkdownTheme.swift in Sources */,
 				060881B32AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift in Sources */,
 				063476792B4FBB9E006B21F1 /* DiscoverScreen.swift in Sources */,
+				062A3C852C6C982E00A45E44 /* VVOStatusDetailScreen.swift in Sources */,
 				060501C82ACD09B800DBCCEB /* UserAvatar.swift in Sources */,
 				060881BA2ADE555D001AAD2F /* SettingsScreen.swift in Sources */,
 				06C862732B4D2A14008C902C /* UserInterfaceSizeClass.swift in Sources */,
@@ -575,7 +596,6 @@
 				B62B27AA5CE37383A67B419B /* CommonProfileHeader.swift in Sources */,
 				B62B206B672982F032F669C3 /* ProfileScreen.swift in Sources */,
 				061C2CFA2B4E6E0100249514 /* ProfileWithUserNameScreen.swift in Sources */,
-				B62B2FB8330CDE6C38F8AB30 /* XQTLoginScreen.swift in Sources */,
 				B62B21AA368B7AC14846EE0A /* WebView.swift in Sources */,
 				B62B24E9F9BC4D31DFCE7FD8 /* AppleUriLauncher.swift in Sources */,
 			);

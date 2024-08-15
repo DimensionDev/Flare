@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -125,7 +124,7 @@ fun ServiceSelectScreen(
 ) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter {
-        serviceSelectPresenter(uriHandler::openUri, onBack)
+        serviceSelectPresenter(onBack)
     }
     FlareTheme {
         FlareScaffold(
@@ -286,6 +285,7 @@ fun ServiceSelectScreen(
                                         onClick = {
                                             state.misskeyLoginState.login(
                                                 state.instanceInputState.text.toString(),
+                                                launchUrl = uriHandler::openUri,
                                             )
                                         },
                                         modifier = Modifier.width(300.dp),
@@ -318,6 +318,7 @@ fun ServiceSelectScreen(
                                         onClick = {
                                             state.mastodonLoginState.login(
                                                 state.instanceInputState.text.toString(),
+                                                launchUrl = uriHandler::openUri,
                                             )
                                         },
                                         modifier = Modifier.width(300.dp),
@@ -472,54 +473,51 @@ private fun ServiceSelectItem(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, FlowPreview::class)
+@OptIn(FlowPreview::class)
 @Composable
-private fun serviceSelectPresenter(
-    launchUrl: (String) -> Unit,
-    onBack: (() -> Unit)?,
-) = run {
-    val instanceInputState = rememberTextFieldState()
-    val state =
-        remember {
-            ServiceSelectPresenter(
-                toHome = {
-                    instanceInputState.edit {
-                        replace(0, instanceInputState.text.length, "")
-                    }
-                    onBack?.invoke()
-                },
-                launchUrl = launchUrl,
-            )
-        }.invoke()
-    LaunchedEffect(Unit) {
-        snapshotFlow {
-            instanceInputState.text
-        }.distinctUntilChanged()
-            .debounce(666L)
-            .collect {
-                state.setFilter(it.toString())
-            }
-    }
-    val blueskyLoginState = blueskyLoginPresenter()
-    object : ServiceSelectState by state {
-        val instanceInputState = instanceInputState
-        val blueskyInputState = blueskyLoginState
-
-        fun selectInstance(instance: UiInstance) {
-            instanceInputState.edit {
-                replace(0, instanceInputState.text.length, instance.domain)
-            }
-            setFilter(instance.domain)
+private fun serviceSelectPresenter(onBack: (() -> Unit)?) =
+    run {
+        val instanceInputState = rememberTextFieldState()
+        val state =
+            remember {
+                ServiceSelectPresenter(
+                    toHome = {
+                        instanceInputState.edit {
+                            replace(0, instanceInputState.text.length, "")
+                        }
+                        onBack?.invoke()
+                    },
+                )
+            }.invoke()
+        LaunchedEffect(Unit) {
+            snapshotFlow {
+                instanceInputState.text
+            }.distinctUntilChanged()
+                .debounce(666L)
+                .collect {
+                    state.setFilter(it.toString())
+                }
         }
+        val blueskyLoginState = blueskyLoginPresenter()
+        object : ServiceSelectState by state {
+            val instanceInputState = instanceInputState
+            val blueskyInputState = blueskyLoginState
 
-        fun clearInstance() {
-            instanceInputState.edit {
-                replace(0, instanceInputState.text.length, "")
+            fun selectInstance(instance: UiInstance) {
+                instanceInputState.edit {
+                    replace(0, instanceInputState.text.length, instance.domain)
+                }
+                setFilter(instance.domain)
             }
-            setFilter("")
+
+            fun clearInstance() {
+                instanceInputState.edit {
+                    replace(0, instanceInputState.text.length, "")
+                }
+                setFilter("")
+            }
         }
     }
-}
 
 @Composable
 private fun blueskyLoginPresenter() =

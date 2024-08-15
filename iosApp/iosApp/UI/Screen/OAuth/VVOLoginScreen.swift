@@ -7,7 +7,7 @@ struct VVOLoginScreen: View {
     let url = "https://\(UiApplicationVVo.shared.host)/login?backURL=https://\(UiApplicationVVo.shared.host)/"
     init(toHome: @escaping () -> Void) {
         viewModel = .init(toHome: toHome)
-//        viewModel.clearCookie()
+        viewModel.clearCookie()
     }
     var body: some View {
         Observing(viewModel.presenter.models) { _ in
@@ -26,7 +26,7 @@ struct VVOLoginScreen: View {
 @Observable
 class VVOLoginViewModel {
     let presenter: VVOLoginPresenter
-    var canShowWebView = true
+    var canShowWebView = false
     private var observers = [NSKeyValueObservation]()
     init(toHome: @escaping () -> Void) {
         presenter = .init(toHome: toHome)
@@ -41,7 +41,7 @@ class VVOLoginViewModel {
         dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             dataStore.removeData(
                 ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-                for: records.filter { $0.displayName.contains(vvoHost) },
+                for: records,
                 completionHandler: {
                     self.canShowWebView = true
                 }

@@ -77,7 +77,6 @@ import dev.dimension.flare.ui.presenter.login.ServiceSelectState
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
@@ -493,7 +492,6 @@ private fun serviceSelectPresenter(onBack: (() -> Unit)?) =
             snapshotFlow {
                 instanceInputState.text
             }.distinctUntilChanged()
-                .debounce(666L)
                 .collect {
                     state.setFilter(it.toString())
                 }

@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -133,7 +132,6 @@ class ServiceSelectPresenter(
             }
 
             override fun resume(url: String) {
-                Napier.d("Mastodon login callback: $url")
                 code = url.substringAfter("code=")
             }
         }

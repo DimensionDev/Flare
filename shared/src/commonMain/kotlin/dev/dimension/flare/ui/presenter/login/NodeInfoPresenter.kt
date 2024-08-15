@@ -22,10 +22,13 @@ import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.map
 
 class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
+    @OptIn(FlowPreview::class)
     @Composable
     override fun body(): NodeInfoState {
         val scope = rememberCoroutineScope()
@@ -33,6 +36,7 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
         val filterFlow =
             remember {
                 snapshotFlow { filter }
+                    .debounce(666L)
             }
         val instances =
             remember {
@@ -60,9 +64,9 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 }
             }
         } else {
-            remember(filter) {
-                flow {
-                    emit(NodeInfoService.detectPlatformType(filter))
+            remember(filterFlow) {
+                filterFlow.map {
+                    NodeInfoService.detectPlatformType(it)
                 }
             }.collectAsUiState()
         }

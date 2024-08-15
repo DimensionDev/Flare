@@ -25,7 +25,6 @@ struct XQTLoginScreen: View {
 
 @Observable
 class XQTViewModel {
-    typealias Presenter = XQTLoginPresenter
     let presenter: XQTLoginPresenter
     var canShowWebView = false
     private var observers = [NSKeyValueObservation]()
@@ -42,7 +41,7 @@ class XQTViewModel {
         dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             dataStore.removeData(
                 ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
-                for: records.filter { $0.displayName.contains(xqtHost) },
+                for: records,
                 completionHandler: {
                     self.canShowWebView = true
                 }
@@ -58,9 +57,7 @@ class XQTViewModel {
         webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies) in
             var cookieString = ""
             for cookie in cookies {
-                if cookie.domain.contains(xqtHost) {
-                    cookieString += "\(cookie.name)=\(cookie.value); "
-                }
+                cookieString += "\(cookie.name)=\(cookie.value); "
             }
             if self.presenter.models.value.checkChocolate(cookie: cookieString), !self.presenter.models.value.loading {
                 self.presenter.models.value.login(chocolate: cookieString)

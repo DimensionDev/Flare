@@ -99,7 +99,7 @@ struct HomeScreen: View {
                                 }
                             ) : nil,
                             accountType is AccountTypeGuest ? TabModel(
-                                title: String(localized: "home_settings_title"),
+                                title: String(localized: "settings_title"),
                                 image: "gear",
                                 destination: TabItem { _ in
                                     SettingsScreen()

@@ -9,19 +9,20 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 class ServiceSelectPresenter(
     private val toHome: () -> Unit,
-    private val launchUrl: (String) -> Unit,
+//    private val launchUrl: (String) -> Unit,
 ) : PresenterBase<ServiceSelectState>() {
     @Composable
     override fun body(): ServiceSelectState {
         val nodeInfoState = remember { NodeInfoPresenter() }.body()
         val blueskyLoginState = remember { BlueskyLoginPresenter(toHome) }.body()
-        val mastodonLoginState = mastodonLoginPresenter(launchUrl, toHome)
-        val misskeyLoginState = misskeyLoginPresenter(launchUrl, toHome)
+        val mastodonLoginState = mastodonLoginPresenter(toHome)
+        val misskeyLoginState = misskeyLoginPresenter(toHome)
         val loading =
             blueskyLoginState.loading ||
                 mastodonLoginState.loading ||
@@ -38,10 +39,7 @@ class ServiceSelectPresenter(
     }
 
     @Composable
-    private fun misskeyLoginPresenter(
-        launchUrl: (String) -> Unit,
-        onBack: (() -> Unit)?,
-    ): MisskeyLoginState {
+    private fun misskeyLoginPresenter(onBack: (() -> Unit)?): MisskeyLoginState {
         val applicationRepository: ApplicationRepository = koinInject()
         var loading by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
@@ -66,7 +64,10 @@ class ServiceSelectPresenter(
             override val error = error
             override val resumedState = resumedState
 
-            override fun login(host: String) {
+            override fun login(
+                host: String,
+                launchUrl: (String) -> Unit,
+            ) {
                 scope.launch {
                     loading = true
                     error = null
@@ -88,10 +89,7 @@ class ServiceSelectPresenter(
     }
 
     @Composable
-    private fun mastodonLoginPresenter(
-        launchUrl: (String) -> Unit,
-        onBack: (() -> Unit)?,
-    ): MastodonLoginState {
+    private fun mastodonLoginPresenter(onBack: (() -> Unit)?): MastodonLoginState {
         val applicationRepository: ApplicationRepository = koinInject()
         var loading by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
@@ -116,7 +114,10 @@ class ServiceSelectPresenter(
             override val error = error
             override val resumedState = resumedState
 
-            override fun login(host: String) {
+            override fun login(
+                host: String,
+                launchUrl: (String) -> Unit,
+            ) {
                 scope.launch {
                     loading = true
                     error = null
@@ -132,6 +133,7 @@ class ServiceSelectPresenter(
             }
 
             override fun resume(url: String) {
+                Napier.d("Mastodon login callback: $url")
                 code = url.substringAfter("code=")
             }
         }
@@ -150,7 +152,10 @@ interface MastodonLoginState {
     val error: String?
     val resumedState: UiState<Nothing>?
 
-    fun login(host: String)
+    fun login(
+        host: String,
+        launchUrl: (String) -> Unit,
+    )
 
     fun resume(url: String)
 }
@@ -160,7 +165,10 @@ interface MisskeyLoginState {
     val error: String?
     val resumedState: UiState<Nothing>?
 
-    fun login(host: String)
+    fun login(
+        host: String,
+        launchUrl: (String) -> Unit,
+    )
 
     fun resume(url: String)
 }

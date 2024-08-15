@@ -8,9 +8,10 @@ struct ServiceSelectScreen: View {
     @State var viewModel: ServiceSelectViewModel
     @State var showXQT: Bool = false
     @State var showVVo: Bool = false
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     let toHome: () -> Void
     init(toHome: @escaping () -> Void) {
-        viewModel = ServiceSelectViewModel(toHome: toHome)
+        viewModel = .init(toHome: toHome)
         self.toHome = toHome
     }
     var body: some View {
@@ -35,10 +36,10 @@ struct ServiceSelectScreen: View {
                 Section(header: HStack {
                     TextField("service_select_instance_url_placeholder", text: $viewModel.instanceURL)
                         .disableAutocorrection(true)
-    #if os(iOS)
+#if os(iOS)
                         .textInputAutocapitalization(.never)
                         .keyboardType(.URL)
-    #endif
+#endif
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .disabled(state.loading)
                     switch onEnum(of: state.detectedPlatformType) {
@@ -73,25 +74,25 @@ struct ServiceSelectScreen: View {
                                     text: $viewModel.blueskyInputViewModel.baseUrl
                                 )
                                 .disableAutocorrection(true)
-    #if os(iOS)
+#if os(iOS)
                                 .textInputAutocapitalization(.never)
                                 .keyboardType(.URL)
-    #endif
+#endif
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(state.loading)
                                 TextField("username", text: $viewModel.blueskyInputViewModel.username)
                                     .disableAutocorrection(true)
-    #if os(iOS)
+#if os(iOS)
                                     .textInputAutocapitalization(.never)
-    #endif
+#endif
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .disabled(state.loading)
                                 SecureField("password", text: $viewModel.blueskyInputViewModel.password)
                                     .disableAutocorrection(true)
-    #if os(iOS)
+#if os(iOS)
                                     .textInputAutocapitalization(.never)
                                     .keyboardType(.URL)
-    #endif
+#endif
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .disabled(state.loading)
                                 Button(action: {
@@ -110,7 +111,7 @@ struct ServiceSelectScreen: View {
                             .disabled(state.loading)
                         case .mastodon:
                             Button {
-                                state.mastodonLoginState.login(host: viewModel.instanceURL)
+                                state.mastodonLoginState.login(host: viewModel.instanceURL, launchUrl: { url in handleUrl(url: url)})
                             } label: {
                                 Text("next")
                                     .frame(width: 200)
@@ -121,7 +122,7 @@ struct ServiceSelectScreen: View {
                             .disabled(state.loading)
                         case .misskey:
                             Button {
-                                state.misskeyLoginState.login(host: viewModel.instanceURL)
+                                state.misskeyLoginState.login(host: viewModel.instanceURL, launchUrl: { url in handleUrl(url: url)})
                             } label: {
                                 Text("next")
                                     .frame(width: 200)
@@ -214,21 +215,14 @@ struct ServiceSelectScreen: View {
             }
             .listStyle(.plain)
             .frame(maxHeight: .infinity, alignment: .top)
-            .onOpenURL { url in
-                if url.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON) {
-                    state.mastodonLoginState.resume(url: url.absoluteString)
-                } else if url.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY) {
-                    state.misskeyLoginState.resume(url: url.absoluteString)
-                }
-            }
             .sheet(isPresented: $showXQT) {
                 XQTLoginScreen(toHome: {
                     showXQT = false
                     toHome()
                 })
-    #if os(macOS)
+#if os(macOS)
                 .frame(minWidth: 600, minHeight: 400)
-    #endif
+#endif
             }
             .sheet(isPresented: $showVVo, content: {
                 VVOLoginScreen(toHome: {
@@ -236,6 +230,25 @@ struct ServiceSelectScreen: View {
                     toHome()
                 })
             })
+        }
+    }
+    private func handleUrl(url: String) {
+        Task {
+            guard let url = URL(string: url) else {
+                return
+            }
+            do {
+                let urlWithToken = try await webAuthenticationSession.authenticate(
+                    using: url,
+                    callbackURLScheme: APPSCHEMA
+                )
+                if urlWithToken.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON) {
+                    viewModel.presenter.models.value.mastodonLoginState.resume(url: urlWithToken.absoluteString)
+                } else if urlWithToken.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY) {
+                    viewModel.presenter.models.value.misskeyLoginState.resume(url: urlWithToken.absoluteString)
+                }
+            } catch {
+            }
         }
     }
 }
@@ -267,18 +280,7 @@ class ServiceSelectViewModel {
     var blueskyInputViewModel = BlueskyInputViewModel()
     private var subscriptions = Set<AnyCancellable>()
     init(toHome: @escaping () -> Void) {
-        self.presenter = ServiceSelectPresenter(toHome: toHome, launchUrl: { url in
-            guard let url = URL(string: url) else {
-                return
-            }
-            DispatchQueue.main.async {
-#if os(macOS)
-                NSWorkspace.shared.open(url)
-#else
-                UIApplication.shared.open(url)
-#endif
-            }
-        })
+        self.presenter = .init(toHome: toHome)
         instanceURLPublisher
             .debounce(for: .milliseconds(666), scheduler: DispatchQueue.main)
             .sink { [weak self] value in

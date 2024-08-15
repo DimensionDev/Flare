@@ -6,37 +6,8 @@ struct RouterView: View {
     let presenter = SplashPresenter(toHome: {}, toLogin: {})
     @State var appSettings = AppSettings()
     var body: some View {
-        Observing(presenter.models) { state in
-            ZStack {
-                switch state.toSwiftEnum() {
-                case .home:
-                    HomeScreen()
-                case .login:
-                    SplashScreen()
-                case .splash:
-                    SplashScreen()
-                }
-            }.sheet(isPresented: Binding(get: {
-                if case .login = state.toSwiftEnum() {
-                    true
-                } else {
-                    false
-                }
-            }, set: { _ in
-            }), content: {
-                if case .login = state.toSwiftEnum() {
-                    ServiceSelectScreen(
-                        toHome: {
-                        }
-                    )
-#if os(macOS)
-                    .frame(minWidth: 600, minHeight: 400)
-#endif
-                    .interactiveDismissDisabled()
-                }
-            })
+        HomeScreen()
             .environment(\.appSettings, appSettings)
-        }
     }
 }
 
@@ -54,7 +25,8 @@ final class Router: ObservableObject {
             fullScreenCover = nil
             navPath.append(route)
         case .dialog:
-            dialog = route
+            break
+//            dialog = route
         case .sheet:
             sheet = route
         case .fullScreen:
@@ -116,11 +88,11 @@ struct TabItem<Content: View>: View {
         case .compose(let data):
             switch onEnum(of: data) {
             case .new(let data):
-                ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: nil)
+                ComposeScreen(onBack: onBack, accountType: data.accountType, status: nil)
             case .quote(let data):
-                ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: ComposeStatusQuote(statusKey: data.statusKey))
+                ComposeScreen(onBack: onBack, accountType: data.accountType, status: ComposeStatusQuote(statusKey: data.statusKey))
             case .reply(let data):
-                ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: ComposeStatusReply(statusKey: data.statusKey))
+                ComposeScreen(onBack: onBack, accountType: data.accountType, status: ComposeStatusReply(statusKey: data.statusKey))
             }
         case .deleteStatus:
             EmptyView()
@@ -130,53 +102,53 @@ struct TabItem<Content: View>: View {
             }
         case .misskey(let data):
             switch onEnum(of: data) {
-            case .addReaction(let data): EmptyView()
+            case .addReaction(let data): MisskeyReactionSheet(accountType: data.accountType, statusKey: data.statusKey, onBack: { router.hideSheet() })
             case .reportStatus(let data): EmptyView()
             }
         case .profile(let data):
             ProfileScreen(
-                accountType: AccountTypeSpecific(accountKey: data.accountKey),
+                accountType: data.accountType,
                 userKey: data.userKey,
                 toProfileMedia: { userKey in
-                    onNavigate(AppleRoute.ProfileMedia(accountKey: data.accountKey, userKey: userKey))
+                    onNavigate(AppleRoute.ProfileMedia(accountType: data.accountType, userKey: userKey))
                 }
             )
         case .profileMedia(let data):
             ProfileMediaListScreen(
-                accountType: AccountTypeSpecific(accountKey: data.accountKey),
+                accountType: data.accountType,
                 userKey: data.userKey
             )
         case .profileWithNameAndHost(let data):
             ProfileWithUserNameScreen(
-                accountType: AccountTypeSpecific(accountKey: data.accountKey),
+                accountType: data.accountType,
                 userName: data.userName,
                 host: data.host
             ) { userKey in
-                onNavigate(AppleRoute.ProfileMedia(accountKey: data.accountKey, userKey: userKey))
+                onNavigate(AppleRoute.ProfileMedia(accountType: data.accountType, userKey: userKey))
             }
         case .rawImage:
             EmptyView()
         case .search(let data):
             SearchScreen(
-                accountType: AccountTypeSpecific(accountKey: data.accountKey),
+                accountType: data.accountType,
                 initialQuery: data.keyword,
                 onUserClicked: { user in
-                    onNavigate(AppleRoute.Profile(accountKey: data.accountKey, userKey: user.key))
+                    onNavigate(AppleRoute.Profile(accountType: data.accountType, userKey: user.key))
                 }
             )
         case .statusDetail(let data):
             StatusDetailScreen(
-                accountType: AccountTypeSpecific(accountKey: data.accountKey),
+                accountType: data.accountType,
                 statusKey: data.statusKey
             )
         case .statusMedia(let data):
-            StatusMediaScreen(accountType: AccountTypeSpecific(accountKey: data.accountKey), statusKey: data.statusKey, index: data.index, dismiss: onBack)
+            StatusMediaScreen(accountType: data.accountType, statusKey: data.statusKey, index: data.index, dismiss: onBack)
         case .vVO(let data):
             switch onEnum(of: data) {
-            case .commentDetail(let data): EmptyView()
-            case .replyToComment(let data): 
-                ComposeScreen(onBack: onBack, accountType: AccountTypeSpecific(accountKey: data.accountKey), status: ComposeStatusVVOComment(statusKey: data.replyTo, rootId: data.rootId))
-            case .statusDetail(let data): EmptyView()
+            case .commentDetail(let data): VVOCommentScreen(accountType: data.accountType, commentKey: data.statusKey)
+            case .replyToComment(let data):
+                ComposeScreen(onBack: onBack, accountType: data.accountType, status: ComposeStatusVVOComment(statusKey: data.replyTo, rootId: data.rootId))
+            case .statusDetail(let data): VVOStatusDetailScreen(accountType: data.accountType, statusKey: data.statusKey)
             }
         }
     }

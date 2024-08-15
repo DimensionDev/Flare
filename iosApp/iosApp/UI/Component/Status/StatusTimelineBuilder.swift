@@ -4,12 +4,15 @@ import shared
 struct StatusTimelineComponent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let data: PagingState<UiTimeline>
+    let detailKey: MicroBlogKey?
     var body: some View {
         switch onEnum(of: data) {
         case .empty: Text("timeline_load_empty", comment: "Timeline is empty")
-        case .error(let error): Text("timeline_load_error", comment: "Timeline loading error")
+        case .error(let error):
+            Text("timeline_load_error", comment: "Timeline loading error")
+            Text(error.error.message ?? "")
         case .loading:
-            ForEach(0...10, id: \.self) { _ in
+            ForEach((-10)...(-1), id: \.self) { _ in
                 StatusPlaceHolder()
                     .if(horizontalSizeClass != .compact) { view in
                         view.padding([.horizontal])
@@ -21,7 +24,8 @@ struct StatusTimelineComponent: View {
                 VStack {
                     if let status = data {
                         StatusItemView(
-                            data: status
+                            data: status,
+                            detailKey: detailKey
                         )
                     } else {
                         StatusPlaceHolder()
@@ -41,6 +45,7 @@ struct StatusTimelineComponent: View {
 struct StatusItemView: View {
     @Environment(\.openURL) private var openURL
     let data: UiTimeline
+    let detailKey: MicroBlogKey?
     var body: some View {
         if let topMessage = data.topMessage {
             let icon = switch topMessage.icon {
@@ -100,21 +105,29 @@ struct StatusItemView: View {
                 case .retweet: String(localized: "xqt_notification_retweet")
                 }
             }
-            StatusRetweetHeaderComponent(iconSystemName: icon, nameMarkdown: topMessage.user?.name.markdown, text: text)
-                .onTapGesture {
-                    topMessage.user?.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                }
+            Button(action: {
+                topMessage.user?.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+            }, label: {
+                StatusRetweetHeaderComponent(iconSystemName: icon, nameMarkdown: topMessage.user?.name.markdown, text: text)
+            })
+            .buttonStyle(.plain)
         }
         if let content = data.content {
             switch onEnum(of: content) {
-            case .status(let data): CommonStatusComponent(
-                data: data,
-                onMediaClick: { index, preview in
-                    openURL(URL(string: AppDeepLink.StatusMedia.shared.invoke(accountKey: data.accountKey, statusKey: data.statusKey, mediaIndex: Int32(index)))!)
+            case .status(let data): Button(action: {
+                if detailKey != data.statusKey {
+                    data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                 }
-            ).onTapGesture {
-                data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-            }
+            }, label: {
+                CommonStatusComponent(
+                    data: data,
+                    onMediaClick: { index, _ in
+                        openURL(URL(string: AppDeepLink.StatusMedia.shared.invoke(accountKey: data.accountKey, statusKey: data.statusKey, mediaIndex: Int32(index)))!)
+                    },
+                    isDetail: detailKey == data.statusKey
+                )
+            })
+            .buttonStyle(.plain)
             case .user(let data):
                 HStack {
                     UserComponent(
@@ -125,7 +138,12 @@ struct StatusItemView: View {
                     )
                     Spacer()
                 }
-            case .userList(let data): EmptyView()
+            case .userList(let data):
+                HStack {
+                    ForEach(data.users, id: \.key) { user in
+                        UserAvatar(data: user.avatar, size: 48)
+                    }
+                }
             }
         }
     }
@@ -136,7 +154,8 @@ struct StatusPlaceHolder: View {
         StatusItemView(
             data: createSampleStatus(
                 user: createSampleUser()
-            )
+            ),
+            detailKey: nil
         )
         .redacted(reason: .placeholder)
     }

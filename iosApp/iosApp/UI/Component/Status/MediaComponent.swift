@@ -20,24 +20,26 @@ struct MediaComponent: View {
         }
         ZStack(alignment: .topLeading) {
             CustomGrid(items: medias, columns: columns) { item in
-                MediaItemComponent(media: item)
-                    .onTapGesture {
-                        let preview: String? = switch onEnum(of: item) {
-                        case .audio:
-                            nil
-                        case .gif(let gif):
-                            gif.previewUrl
-                        case .image(let image):
-                            image.previewUrl
-                        case .video(let video):
-                            video.thumbnailUrl
-                        }
-                        if let index = medias.firstIndex(where: { it in
-                            it === item
-                        }) {
-                            onMediaClick(index - 1, nil)
-                        }
+                Button(action: {
+                    let preview: String? = switch onEnum(of: item) {
+                    case .audio:
+                        nil
+                    case .gif(let gif):
+                        gif.previewUrl
+                    case .image(let image):
+                        image.previewUrl
+                    case .video(let video):
+                        video.thumbnailUrl
                     }
+                    if let index = medias.firstIndex(where: { it in
+                        it === item
+                    }) {
+                        onMediaClick(index - 1, nil)
+                    }
+                }, label: {
+                    MediaItemComponent(media: item)
+                })
+                .buttonStyle(.borderless)
             }
             .if(hideSensitive, transform: { view in
                 view.blur(radius: 32)
@@ -87,11 +89,11 @@ struct MediaComponent: View {
 }
 
 struct MediaItemComponent: View {
-    //#if os(iOS)
+    // #if os(iOS)
     //    @State var showCover = false
-    //#else
+    // #else
     //    @Environment(\.openWindow) var openWindow
-    //#endif
+    // #endif
     let media: UiMedia
     var body: some View {
         ZStack {
@@ -117,7 +119,7 @@ struct MediaItemComponent: View {
             }
         }
         .clipped()
-        //#if os(macOS)
+        // #if os(macOS)
         //        .onTapGesture {
         //            switch onEnum(of: media) {
         //            case .image(let data):
@@ -130,7 +132,7 @@ struct MediaItemComponent: View {
         //                openWindow(id: "video-view", value: gif.url)
         //            }
         //        }
-        //#else
+        // #else
         //        .onTapGesture {
         //            showCover = true
         //        }
@@ -140,7 +142,7 @@ struct MediaItemComponent: View {
         //        ) {
         //            FullScreenImageViewer(media: media)
         //        }
-        //#endif
+        // #endif
     }
 }
 

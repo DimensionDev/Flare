@@ -181,41 +181,19 @@ struct ComposeScreen: View {
                                 })
                             }
                             if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
+                                Menu {
+                                    ForEach(visibilityState.data.allVisibilities, id: \.self) { visibility in
+                                        Button {
+                                            visibilityState.data.setVisibility(value: visibility)
+                                        } label: {
+                                            Text(visibility.name)
+                                        }
 
+                                    }
+                                } label: {
+                                    StatusVisibilityComponent(visibility: visibilityState.data.visibility)
+                                }
                             }
-//                            if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
-//                                switch onEnum(of: visibilityState.data) {
-//                                case .misskeyVisibilityState(let misskeyVisibility):
-//                                    Menu {
-//                                        ForEach(misskeyVisibility.allVisibilities, id: \.self) { visibility in
-//                                            Button {
-//                                                misskeyVisibility.setVisibility(value: visibility)
-//                                            } label: {
-//                                                MisskeyVisibilityIcon(visibility: visibility)
-//                                                Text(visibility.name)
-//                                            }
-//                                        }
-//                                    } label: {
-//                                        MisskeyVisibilityIcon(visibility: misskeyVisibility.visibility)
-//                                            .frame(width: iconSize, height: iconSize)
-//                                    }
-//                                case .mastodonVisibilityState(let mastodonVisibility):
-//                                    Menu {
-//                                        ForEach(mastodonVisibility.allVisibilities, id: \.self) { visibility in
-//                                            Button {
-//                                                mastodonVisibility.setVisibility(value: visibility)
-//                                            } label: {
-//                                                MastodonVisibilityIcon(visibility: visibility)
-//                                                Text(visibility.name)
-//                                            }
-//                                        }
-//                                    } label: {
-//                                        MastodonVisibilityIcon(visibility: mastodonVisibility.visibility)
-//                                            .frame(width: iconSize, height: iconSize)
-//                                    }
-//                                }
-//                            }
-
                             if case .success(let data) = onEnum(of: viewModel.model.composeConfig),
                                 data.data.contentWarning != nil {
                                 Button(action: {

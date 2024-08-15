@@ -50,7 +50,8 @@ struct DiscoverScreen: View {
                     }
                     Section("discover_status_title") {
                         StatusTimelineComponent(
-                            data: searchState.status
+                            data: searchState.status,
+                            detailKey: nil
                         )
                     }
                 } else {
@@ -122,7 +123,8 @@ struct DiscoverScreen: View {
                     if case .success(let data) = onEnum(of: state.status) {
                         Section("discover_status_title") {
                             StatusTimelineComponent(
-                                data: state.status
+                                data: state.status,
+                                detailKey: nil
                             )
                         }
                     }

@@ -98,6 +98,12 @@ object AppDeepLink {
                 statusKey: MicroBlogKey,
             ) = "$APPSCHEMA://Compose/Quote/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
+
+        object New {
+            const val ROUTE = "$APPSCHEMA://Compose/New/{accountKey}"
+
+            operator fun invoke(accountKey: MicroBlogKey) = "$APPSCHEMA://Compose/New/${accountKey.toString().encodeURLPathPart()}"
+        }
     }
 
     object DeleteStatus {

@@ -6,6 +6,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -45,6 +46,12 @@ class VVOCommentPresenter(
         return object : VVOCommentState {
             override val root = root
             override val list = list
+
+            override suspend fun refresh() {
+                list.onSuccess {
+                    refreshSuspend()
+                }
+            }
         }
     }
 }
@@ -52,4 +59,6 @@ class VVOCommentPresenter(
 interface VVOCommentState {
     val root: UiState<UiTimeline>
     val list: PagingState<UiTimeline>
+
+    suspend fun refresh()
 }

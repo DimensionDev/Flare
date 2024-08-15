@@ -9381,6 +9381,9 @@
         }
       }
     },
+    "home_settings_title" : {
+
+    },
     "home_timeline_title" : {
       "localizations" : {
         "ar" : {
@@ -9643,6 +9646,9 @@
           }
         }
       }
+    },
+    "Login" : {
+
     },
     "Lorem ipsum dolor sit amet" : {
 
@@ -18084,6 +18090,15 @@
           }
         }
       }
+    },
+    "status_detail" : {
+
+    },
+    "status_detail_comment" : {
+
+    },
+    "status_detail_repost" : {
+
     },
     "status_display_media" : {
       "localizations" : {

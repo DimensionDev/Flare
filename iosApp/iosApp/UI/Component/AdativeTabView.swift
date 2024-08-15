@@ -1,19 +1,19 @@
 import SwiftUI
 
-struct AdativeTabView: View {
+struct AdativeTabView<V>: View where V: View {
     let items: [TabModel]
     let secondaryItems: [TabModel]
-    let leading: AnyView
+    let leading: V?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedTabItem: TabModel
-    init<V>(
+    init(
         items: [TabModel],
         secondaryItems: [TabModel],
-        leading: V
-    ) where V: View {
+        leading: V?
+    ) {
         self.items = items
         self.secondaryItems = secondaryItems
-        self.leading = AnyView(leading)
+        self.leading = leading
         _selectedTabItem = State(initialValue: items.first!)
     }
     var list: some View {
@@ -24,7 +24,9 @@ struct AdativeTabView: View {
                 self.selectedTabItem = value
             }
         })) {
-            leading
+            if let leading = leading {
+                leading
+            }
             Section {
                 ForEach(items) { item in
                     HStack {
@@ -71,29 +73,34 @@ struct AdativeTabView: View {
                     .frame(width: 256)
             }
             TabView(selection: $selectedTabItem) {
-                ForEach(items, id: \.title) { item in
+                ForEach(items, id: \.id) { item in
                     item.destination
                         .tabItem {
                             Image(systemName: item.image)
                             Text(item.title)
                         }
                         .tag(item)
-                        .if(horizontalSizeClass != .compact) { view in
-                            view
-                                .toolbar(.hidden, for: .tabBar)
-                        }
+//                        .if(horizontalSizeClass != .compact) { view in
+//                            view
+//                                .toolbar(.hidden, for: .tabBar)
+//                        }
                 }
-                ForEach(secondaryItems, id: \.title) { item in
+                ForEach(secondaryItems, id: \.id) { item in
                     item.destination
                         .tabItem {
                             Image(systemName: item.image)
                             Text(item.title)
                         }
                         .tag(item)
-                        .toolbar(.hidden, for: .tabBar)
+//                        .toolbar(.hidden, for: .tabBar)
                 }
             }
         }
+        .onAppear(perform: {
+            if horizontalSizeClass != .compact {
+                UITabBar.appearance().isHidden = true
+            }
+        })
 #endif
     }
 }

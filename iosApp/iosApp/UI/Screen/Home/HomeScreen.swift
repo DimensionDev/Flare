@@ -5,6 +5,7 @@ struct HomeScreen: View {
     @State var presenter = ActiveAccountPresenter()
     @State var showSettings = false
     @State var showLogin = false
+    @State var showCompose = false
     var body: some View {
         Observing(presenter.models) { userState in
             let accountType: AccountType? = switch onEnum(of: userState.user) {
@@ -26,28 +27,28 @@ struct HomeScreen: View {
                                             router.navigate(to: AppleRoute.ComposeNew(accountType: actualAccountType))
                                         }
                                     )
-                                        .toolbar {
+                                    .toolbar {
 #if os(iOS)
-                                            ToolbarItem(placement: accountType is AccountTypeGuest ? .primaryAction : .navigation) {
-                                                Button {
-                                                    if accountType is AccountTypeGuest {
-                                                        showLogin = true
-                                                    } else {
-                                                        showSettings = true
-                                                    }
-                                                } label: {
-                                                    switch onEnum(of: userState.user) {
-                                                    case .success(let data):
-                                                        UserAvatar(data: data.data.avatar, size: 36)
-                                                    case .loading:
-                                                        userAvatarPlaceholder(size: 36)
-                                                    case .error:
-                                                        Text("Login")
-                                                    }
+                                        ToolbarItem(placement: accountType is AccountTypeGuest ? .primaryAction : .navigation) {
+                                            Button {
+                                                if accountType is AccountTypeGuest {
+                                                    showLogin = true
+                                                } else {
+                                                    showSettings = true
+                                                }
+                                            } label: {
+                                                switch onEnum(of: userState.user) {
+                                                case .success(let data):
+                                                    UserAvatar(data: data.data.avatar, size: 36)
+                                                case .loading:
+                                                    userAvatarPlaceholder(size: 36)
+                                                case .error:
+                                                    Text("Login")
                                                 }
                                             }
-#endif
                                         }
+#endif
+                                    }
                                 }
                             ),
                             !(accountType is AccountTypeGuest) ? TabModel(
@@ -107,7 +108,7 @@ struct HomeScreen: View {
                         ].compactMap { $0 },
                         secondaryItems: [
                         ],
-                        leading: VStack {
+                        leading: !(accountType is AccountTypeGuest) ? VStack {
                             Button {
                                 showSettings = true
                             } label: {
@@ -120,8 +121,22 @@ struct HomeScreen: View {
                             .padding([.horizontal, .top])
 #endif
                             .buttonStyle(.plain)
+                            Button {
+                                showCompose = true
+                            } label: {
+                                Label("compose_title", systemImage: "pencil")
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .buttonStyle(.borderedProminent)
+                            .sheet(isPresented: $showCompose, content: {
+                                NavigationStack {
+                                    ComposeScreen(onBack: {showCompose = false}, accountType: actualAccountType, status: nil)
+                                }
+                            })
                         }
-                            .listRowInsets(EdgeInsets())
+                            .listRowInsets(EdgeInsets()) : nil
                     )
                 }
             }
@@ -137,6 +152,7 @@ struct HomeScreen: View {
                 .frame(minWidth: 600, minHeight: 400)
 #endif
         })
+        
     }
 }
 

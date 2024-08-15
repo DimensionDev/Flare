@@ -258,7 +258,7 @@ struct StatusActionLabel: View {
         let color = if let colorData = item as? StatusActionItemColorized {
             switch colorData.color {
             case .red: Color.red
-            case .primaryColor: Color.primary
+            case .primaryColor: Color.accentColor
             case .contentColor: Color(UIColor.label)
             case .error: Color.red
             }

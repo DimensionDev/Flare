@@ -105,24 +105,29 @@ struct StatusItemView: View {
                 case .retweet: String(localized: "xqt_notification_retweet")
                 }
             }
-            StatusRetweetHeaderComponent(iconSystemName: icon, nameMarkdown: topMessage.user?.name.markdown, text: text)
-                .onTapGesture {
-                    topMessage.user?.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                }
+            Button(action: {
+                topMessage.user?.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+            }, label: {
+                StatusRetweetHeaderComponent(iconSystemName: icon, nameMarkdown: topMessage.user?.name.markdown, text: text)
+            })
+            .buttonStyle(.plain)
         }
         if let content = data.content {
             switch onEnum(of: content) {
-            case .status(let data): CommonStatusComponent(
-                data: data,
-                onMediaClick: { index, _ in
-                    openURL(URL(string: AppDeepLink.StatusMedia.shared.invoke(accountKey: data.accountKey, statusKey: data.statusKey, mediaIndex: Int32(index)))!)
-                },
-                isDetail: detailKey == data.statusKey
-            ).onTapGesture {
+            case .status(let data): Button(action: {
                 if detailKey != data.statusKey {
                     data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                 }
-            }
+            }, label: {
+                CommonStatusComponent(
+                    data: data,
+                    onMediaClick: { index, _ in
+                        openURL(URL(string: AppDeepLink.StatusMedia.shared.invoke(accountKey: data.accountKey, statusKey: data.statusKey, mediaIndex: Int32(index)))!)
+                    },
+                    isDetail: detailKey == data.statusKey
+                )
+            })
+            .buttonStyle(.plain)
             case .user(let data):
                 HStack {
                     UserComponent(
@@ -133,7 +138,12 @@ struct StatusItemView: View {
                     )
                     Spacer()
                 }
-            case .userList(let data): EmptyView()
+            case .userList(let data):
+                HStack {
+                    ForEach(data.users, id: \.key) { user in
+                        UserAvatar(data: user.avatar, size: 48)
+                    }
+                }
             }
         }
     }

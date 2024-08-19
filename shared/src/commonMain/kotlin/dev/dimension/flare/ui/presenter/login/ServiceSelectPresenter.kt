@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.login
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,7 +15,6 @@ import org.koin.compose.koinInject
 
 class ServiceSelectPresenter(
     private val toHome: () -> Unit,
-//    private val launchUrl: (String) -> Unit,
 ) : PresenterBase<ServiceSelectState>() {
     @Composable
     override fun body(): ServiceSelectState {
@@ -138,6 +138,7 @@ class ServiceSelectPresenter(
     }
 }
 
+@Immutable
 interface ServiceSelectState : NodeInfoState {
     val blueskyLoginState: BlueskyLoginState
     val mastodonLoginState: MastodonLoginState
@@ -145,6 +146,7 @@ interface ServiceSelectState : NodeInfoState {
     val loading: Boolean
 }
 
+@Immutable
 interface MastodonLoginState {
     val loading: Boolean
     val error: String?
@@ -158,6 +160,7 @@ interface MastodonLoginState {
     fun resume(url: String)
 }
 
+@Immutable
 interface MisskeyLoginState {
     val loading: Boolean
     val error: String?

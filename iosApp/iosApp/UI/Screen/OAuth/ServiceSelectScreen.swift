@@ -165,6 +165,7 @@ struct ServiceSelectScreen: View {
                                 case .some(let instance):
                                     Button(action: {
                                         instanceURL = instance.domain
+                                        state.setFilter(value: instance.domain)
                                     }, label: {
                                         VStack {
                                             HStack {

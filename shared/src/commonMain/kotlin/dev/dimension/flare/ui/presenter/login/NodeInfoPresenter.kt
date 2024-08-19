@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.presenter.login
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,11 +21,12 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
     @OptIn(FlowPreview::class)
@@ -55,32 +56,25 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 }
             }.collectAsLazyPagingItems()
 
-        val detectedPlatformType by if (instances.itemCount == 1) {
-            remember {
-                derivedStateOf {
-                    instances.takeIf { instances.itemCount > 0 }?.peek(0)?.let {
-                        UiState.Success(it.type)
-                    } ?: UiState.Error(Throwable("No instance found"))
-                }
-            }
-        } else {
+        val detectedPlatformType =
             remember(filterFlow) {
-                filterFlow.map {
-                    NodeInfoService.detectPlatformType(it)
+                filterFlow.mapNotNull {
+                    runCatching {
+                        NodeInfoService.detectPlatformType(it)
+                    }
                 }
-            }.collectAsUiState()
-        }
-
-        val canNext by remember(detectedPlatformType) {
-            derivedStateOf {
-                detectedPlatformType is UiState.Success<PlatformType>
+            }.collectAsUiState().value.flatMap {
+                it.getOrNull()?.let {
+                    UiState.Success(it)
+                } ?: run {
+                    it.exceptionOrNull()?.let { it1 -> UiState.Error(it1) }
+                } ?: UiState.Loading()
             }
-        }
 
         return object : NodeInfoState {
             override val instances = instances.toPagingState()
             override val detectedPlatformType = detectedPlatformType
-            override val canNext = canNext
+            override val canNext = detectedPlatformType is UiState.Success<PlatformType>
 
             override fun setFilter(value: String) {
                 if (filter != value) {
@@ -91,6 +85,7 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
     }
 }
 
+@Immutable
 interface NodeInfoState {
     val instances: PagingState<UiInstance>
     val detectedPlatformType: UiState<PlatformType>

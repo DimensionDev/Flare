@@ -34,7 +34,7 @@ internal fun Element.toMarkdown(): String =
                 "$content\n\n"
             }
         }
-        "br" -> "  "
+        "br" -> "<br />" // MarkdownUI support this tag
         "a" -> {
             val content = childNodes().joinToString("") { it.toMarkdown() }
             if (content.isBlank()) {

@@ -5,65 +5,68 @@ import NetworkImage
 import Combine
 
 struct ServiceSelectScreen: View {
-    @State var viewModel: ServiceSelectViewModel
-    @State var showXQT: Bool = false
-    @State var showVVo: Bool = false
+    @State private var presenter: ServiceSelectPresenter
+    @State private var showXQT: Bool = false
+    @State private var showVVo: Bool = false
+    @State private var instanceURL = ""
+    @State private var blueskyInputViewModel = BlueskyInputViewModel()
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     let toHome: () -> Void
+
     init(toHome: @escaping () -> Void) {
-        viewModel = .init(toHome: toHome)
+        presenter = .init(toHome: toHome)
         self.toHome = toHome
     }
+
     var body: some View {
-        Observing(viewModel.presenter.models) { state in
-            List {
-                Spacer()
-                    .padding()
-                    .listRowSeparator(.hidden)
-                Text("service_select_title")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .listRowSeparator(.hidden)
-                    .multilineTextAlignment(.center)
-                    .frame(alignment: .center)
-                Text("service_select_description")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .listRowSeparator(.hidden)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                Section(header: HStack {
-                    TextField("service_select_instance_url_placeholder", text: $viewModel.instanceURL)
-                        .disableAutocorrection(true)
-#if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.URL)
-#endif
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .disabled(state.loading)
-                    switch onEnum(of: state.detectedPlatformType) {
-                    case .success(let success):
-                        NetworkImage(
-                            url: .init(string: success.data.logoUrl),
-                            content: { image in
-                                image.resizable().frame(width: 24, height: 24)
-                            }
-                        )
-                        .frame(width: 24, height: 24)
-                    case .error:
-                        Image(systemName: "questionmark")
+        ObservePresenter(presenter: presenter) { state in
+            VStack {
+                VStack {
+                    Text("service_select_title")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.center)
+                        .frame(alignment: .center)
+                        .padding(.top)
+                    Text("service_select_description")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    HStack {
+                        TextField("service_select_instance_url_placeholder", text: $instanceURL)
+                            .disableAutocorrection(true)
+                            #if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.URL)
+                            #endif
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .disabled(state.loading)
+                        switch onEnum(of: state.detectedPlatformType) {
+                        case .success(let success):
+                            NetworkImage(
+                                url: .init(string: success.data.logoUrl),
+                                content: { image in
+                                    image.resizable().frame(width: 24, height: 24)
+                                }
+                            )
                             .frame(width: 24, height: 24)
-                    case .loading:
-                        Image(systemName: "questionmark")
-                            .frame(width: 24, height: 24)
-                            .redacted(reason: .placeholder)
+                        case .error:
+                            Image(systemName: "questionmark")
+                                .frame(width: 24, height: 24)
+                        case .loading:
+                            Image(systemName: "questionmark")
+                                .frame(width: 24, height: 24)
+                                .redacted(reason: .placeholder)
+                        }
+                    }
+                    .onChange(of: instanceURL) {
+                        state.setFilter(value: instanceURL)
                     }
                 }
-                    .padding()
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                ) {
+                .padding()
+                List {
                     if state.canNext,
                        case .success(let success) = onEnum(of: state.detectedPlatformType) {
                         switch success.data.toSwiftEnum() {
@@ -71,35 +74,35 @@ struct ServiceSelectScreen: View {
                             VStack {
                                 TextField(
                                     "service_select_bluesky_base_url_placeholder",
-                                    text: $viewModel.blueskyInputViewModel.baseUrl
+                                    text: $blueskyInputViewModel.baseUrl
                                 )
-                                .disableAutocorrection(true)
-#if os(iOS)
-                                .textInputAutocapitalization(.never)
-                                .keyboardType(.URL)
-#endif
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .disabled(state.loading)
-                                TextField("username", text: $viewModel.blueskyInputViewModel.username)
                                     .disableAutocorrection(true)
-#if os(iOS)
-                                    .textInputAutocapitalization(.never)
-#endif
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .disabled(state.loading)
-                                SecureField("password", text: $viewModel.blueskyInputViewModel.password)
-                                    .disableAutocorrection(true)
-#if os(iOS)
+                                    #if os(iOS)
                                     .textInputAutocapitalization(.never)
                                     .keyboardType(.URL)
-#endif
+                                    #endif
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .disabled(state.loading)
+                                TextField("username", text: $blueskyInputViewModel.username)
+                                    .disableAutocorrection(true)
+                                    #if os(iOS)
+                                    .textInputAutocapitalization(.never)
+                                    #endif
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .disabled(state.loading)
+                                SecureField("password", text: $blueskyInputViewModel.password)
+                                    .disableAutocorrection(true)
+                                    #if os(iOS)
+                                    .textInputAutocapitalization(.never)
+                                    .keyboardType(.URL)
+                                    #endif
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .disabled(state.loading)
                                 Button(action: {
                                     state.blueskyLoginState.login(
-                                        baseUrl: viewModel.blueskyInputViewModel.baseUrl,
-                                        username: viewModel.blueskyInputViewModel.username,
-                                        password: viewModel.blueskyInputViewModel.password
+                                        baseUrl: blueskyInputViewModel.baseUrl,
+                                        username: blueskyInputViewModel.username,
+                                        password: blueskyInputViewModel.password
                                     )
                                 }, label: {
                                     Text("confirm")
@@ -111,7 +114,7 @@ struct ServiceSelectScreen: View {
                             .disabled(state.loading)
                         case .mastodon:
                             Button {
-                                state.mastodonLoginState.login(host: viewModel.instanceURL, launchUrl: { url in handleUrl(url: url)})
+                                state.mastodonLoginState.login(host: instanceURL, launchUrl: { url in handleUrl(url: url) })
                             } label: {
                                 Text("next")
                                     .frame(width: 200)
@@ -122,7 +125,7 @@ struct ServiceSelectScreen: View {
                             .disabled(state.loading)
                         case .misskey:
                             Button {
-                                state.misskeyLoginState.login(host: viewModel.instanceURL, launchUrl: { url in handleUrl(url: url)})
+                                state.misskeyLoginState.login(host: instanceURL, launchUrl: { url in handleUrl(url: url) })
                             } label: {
                                 Text("next")
                                     .frame(width: 200)
@@ -161,14 +164,16 @@ struct ServiceSelectScreen: View {
                                 switch item {
                                 case .some(let instance):
                                     Button(action: {
-                                        viewModel.instanceURL = instance.domain
+                                        instanceURL = instance.domain
+                                        state.setFilter(value: instance.domain)
                                     }, label: {
                                         VStack {
                                             HStack {
                                                 if instance.iconUrl != nil {
                                                     NetworkImage(url: URL(string: instance.iconUrl!)) { image in
                                                         image.resizable().frame(width: 24, height: 24)
-                                                    }.frame(width: 24, height: 24)
+                                                    }
+                                                    .frame(width: 24, height: 24)
                                                 }
                                                 Text(instance.name)
                                                     .font(.title)
@@ -178,7 +183,8 @@ struct ServiceSelectScreen: View {
                                             Text(instance.description_ ?? "")
                                                 .lineLimit(3)
                                                 .frame(maxWidth: .infinity)
-                                        }.background {
+                                        }
+                                        .background {
                                             if instance.bannerUrl != nil {
                                                 NetworkImage(url: URL(string: instance.bannerUrl!)) { image in
                                                     image.resizable().scaledToFill()
@@ -199,7 +205,7 @@ struct ServiceSelectScreen: View {
                             .onAppear {
                                 success.get(index: index)
                             }
-                            .frame( maxWidth: .infinity)
+                            .frame(maxWidth: .infinity)
                             .listRowSeparator(.hidden)
                         }
                     } else if state.instances.isLoading {
@@ -220,9 +226,9 @@ struct ServiceSelectScreen: View {
                     showXQT = false
                     toHome()
                 })
-#if os(macOS)
+                #if os(macOS)
                 .frame(minWidth: 600, minHeight: 400)
-#endif
+                #endif
             }
             .sheet(isPresented: $showVVo, content: {
                 VVOLoginScreen(toHome: {
@@ -232,6 +238,7 @@ struct ServiceSelectScreen: View {
             })
         }
     }
+
     private func handleUrl(url: String) {
         Task {
             guard let url = URL(string: url) else {
@@ -243,9 +250,9 @@ struct ServiceSelectScreen: View {
                     callbackURLScheme: APPSCHEMA
                 )
                 if urlWithToken.absoluteString.starts(with: AppDeepLink.Callback.shared.MASTODON) {
-                    viewModel.presenter.models.value.mastodonLoginState.resume(url: urlWithToken.absoluteString)
+                    presenter.models.value.mastodonLoginState.resume(url: urlWithToken.absoluteString)
                 } else if urlWithToken.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY) {
-                    viewModel.presenter.models.value.misskeyLoginState.resume(url: urlWithToken.absoluteString)
+                    presenter.models.value.misskeyLoginState.resume(url: urlWithToken.absoluteString)
                 }
             } catch {
             }
@@ -265,34 +272,6 @@ struct InstancePlaceHolder: View {
             Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl quis aliqua")
                 .redacted(reason: .placeholder)
         }
-    }
-}
-
-@Observable
-class ServiceSelectViewModel {
-    let presenter: ServiceSelectPresenter
-    let instanceURLPublisher = PassthroughSubject<String, Never>()
-    var instanceURL = "" {
-        didSet {
-            instanceURLPublisher.send(instanceURL)
-        }
-    }
-    var blueskyInputViewModel = BlueskyInputViewModel()
-    private var subscriptions = Set<AnyCancellable>()
-    init(toHome: @escaping () -> Void) {
-        self.presenter = .init(toHome: toHome)
-        instanceURLPublisher
-            .debounce(for: .milliseconds(666), scheduler: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.presenter.models.value.setFilter(value: value)
-            }
-            .store(in: &subscriptions)
-    }
-    deinit {
-        subscriptions.forEach { cancelable in
-            cancelable.cancel()
-        }
-        subscriptions.removeAll()
     }
 }
 

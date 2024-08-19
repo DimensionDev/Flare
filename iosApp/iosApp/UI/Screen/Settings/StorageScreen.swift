@@ -2,10 +2,10 @@ import SwiftUI
 import shared
 
 struct StorageScreen: View {
-    @State
-    var presenter = StoragePresenter()
+    @State private var presenter = StoragePresenter()
+
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             List {
                 Button(role: .destructive) {
                     state.clearCache()
@@ -20,14 +20,14 @@ struct StorageScreen: View {
                             Text(
                                 "\(state.userCount) users, \(state.statusCount) statuses will be deleted"
                             )
-                            .font(.caption)
+                                .font(.caption)
                         }
                     }
                 }
                 .buttonStyle(.borderless)
             }
+            .navigationTitle("storage_title")
         }
-        .navigationTitle("storage_title")
     }
 }
 

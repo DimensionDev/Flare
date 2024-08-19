@@ -2,10 +2,9 @@ import SwiftUI
 import shared
 
 struct StatusMediaScreen: View {
-    @State
-    var presenter: StatusPresenter
-    let initialIndex: Int32
-    let dismiss: () -> Void
+    @State private var presenter: StatusPresenter
+    private let initialIndex: Int32
+    private let dismiss: () -> Void
 
     init(accountType: AccountType, statusKey: MicroBlogKey, index: Int32, dismiss: @escaping () -> Void) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
@@ -14,7 +13,7 @@ struct StatusMediaScreen: View {
     }
 
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             GeometryReader { geometry in
                 ZStack {
                     Color.black.ignoresSafeArea()

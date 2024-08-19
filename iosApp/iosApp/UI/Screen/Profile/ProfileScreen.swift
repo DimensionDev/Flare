@@ -5,15 +5,16 @@ import MarkdownUI
 
 struct ProfileScreen: View {
     let toProfileMedia: (MicroBlogKey) -> Void
-    @State
-    var presenter: ProfilePresenter
+    @State private var presenter: ProfilePresenter
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.toProfileMedia = toProfileMedia
         presenter = .init(accountType: accountType, userKey: userKey)
     }
+
     var sideProfileHeader: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             ScrollView {
                 VStack {
                     ProfileHeader(
@@ -35,12 +36,12 @@ struct ProfileScreen: View {
                 }
             }
         }
-#if os(iOS)
+        #if os(iOS)
         .frame(width: 384)
-#endif
+        #endif
     }
     var profileListContent: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             List {
                 if horizontalSizeClass == .compact {
                     ProfileHeader(
@@ -75,40 +76,40 @@ struct ProfileScreen: View {
         }
     }
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             let title: LocalizedStringKey = if case .success(let user) = onEnum(of: state.userState) {
                 LocalizedStringKey(user.data.name.markdown)
             } else {
                 LocalizedStringKey("loading")
             }
             ZStack {
-    #if os(macOS)
+                #if os(macOS)
                 HSplitView {
                     if horizontalSizeClass != .compact {
                         sideProfileHeader
                     }
                     profileListContent
                 }
-    #else
+                #else
                 HStack {
                     if horizontalSizeClass != .compact {
                         sideProfileHeader
                     }
                     profileListContent
                 }
-    #endif
+                #endif
             }
-    #if os(iOS)
+            #if os(iOS)
             .if(horizontalSizeClass == .compact, transform: { view in
                 view
                     .ignoresSafeArea(edges: .top)
             })
-    #endif
+            #endif
             .if(horizontalSizeClass != .compact, transform: { view in
                 view
-    #if os(iOS)
+                    #if os(iOS)
                     .navigationBarTitleDisplayMode(.inline)
-    #endif
+                    #endif
                     .navigationTitle(title)
             })
             .toolbar {
@@ -149,8 +150,8 @@ struct ProfileScreen: View {
                                             "speaker.slash"
                                         }
                                         }
-                                            Label(text, systemImage: icon)
-                                        })
+                                        Label(text, systemImage: icon)
+                                    })
                                 }
                             }
                             Button(action: { state.report(userKey: user.data.key) }, label: {
@@ -176,26 +177,26 @@ struct LargeProfileImagePreviews: View {
             EmptyView()
         case .empty: EmptyView()
         case .success(let success):
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                    ForEach(0..<min(success.itemCount, 6), id: \.self) { index in
-                        let item = success.peek(index: index)
-                        if let media = item?.media {
-                            let image = media as? UiMediaImage
-                            let shouldBlur = image?.sensitive ?? false
-                            MediaItemComponent(media: media)
-                                .if(shouldBlur, transform: { view in
-                                    view.blur(radius: 32)
-                                })
-                                .onAppear(perform: {
-                                    success.get(index: index)
-                                })
-                                .aspectRatio(1, contentMode: .fill)
-                                .clipped()
-                        }
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                ForEach(0..<min(success.itemCount, 6), id: \.self) { index in
+                    let item = success.peek(index: index)
+                    if let media = item?.media {
+                        let image = media as? UiMediaImage
+                        let shouldBlur = image?.sensitive ?? false
+                        MediaItemComponent(media: media)
+                        .if(shouldBlur, transform: { view in
+                            view.blur(radius: 32)
+                        })
+                        .onAppear(perform: {
+                            success.get(index: index)
+                        })
+                        .aspectRatio(1, contentMode: .fill)
+                        .clipped()
                     }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .padding(.horizontal)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .padding(.horizontal)
         }
     }
 }
@@ -209,27 +210,27 @@ struct SmallProfileMediaPreviews: View {
         case .loading:
             EmptyView()
         case .success(let success):
-                ScrollView(.horizontal) {
-                    LazyHStack(content: {
-                        ForEach(0..<min(success.itemCount, 6), id: \.self) { index in
-                            let item = success.peek(index: index)
-                            if let media = item?.media {
-                                let image = media as? UiMediaImage
-                                let shouldBlur = image?.sensitive ?? false
-                                MediaItemComponent(media: media)
-                                    .if(shouldBlur, transform: { view in
-                                        view.blur(radius: 32)
-                                    })
-                                    .onAppear(perform: {
-                                        success.get(index: index)
-                                    })
-                                    .aspectRatio(1, contentMode: .fill)
-                                    .clipped()
-                                    .frame(width: 48, height: 48)
-                            }
+            ScrollView(.horizontal) {
+                LazyHStack(content: {
+                    ForEach(0..<min(success.itemCount, 6), id: \.self) { index in
+                        let item = success.peek(index: index)
+                        if let media = item?.media {
+                            let image = media as? UiMediaImage
+                            let shouldBlur = image?.sensitive ?? false
+                            MediaItemComponent(media: media)
+                            .if(shouldBlur, transform: { view in
+                                view.blur(radius: 32)
+                            })
+                            .onAppear(perform: {
+                                success.get(index: index)
+                            })
+                            .aspectRatio(1, contentMode: .fill)
+                            .clipped()
+                            .frame(width: 48, height: 48)
                         }
-                    })
-                }
+                    }
+                })
+            }
         case .empty: EmptyView()
         }
     }
@@ -251,7 +252,7 @@ struct ProfileHeader: View {
                 isMe: isMe,
                 onFollowClick: { _ in }
             )
-            .redacted(reason: .placeholder)
+                .redacted(reason: .placeholder)
         case .success(let data):
             ProfileHeaderSuccess(
                 user: data.data,
@@ -293,7 +294,9 @@ struct FieldsView: View {
     var body: some View {
         if fields.count > 0 {
             VStack(alignment: .leading) {
-                let keys = fields.map { $0.key }
+                let keys = fields.map {
+                    $0.key
+                }
                 ForEach(0..<keys.count, id: \.self) { index in
                     let key = keys[index]
                     Text(key)
@@ -308,11 +311,11 @@ struct FieldsView: View {
                 .padding(.horizontal)
             }
             .padding(.vertical)
-#if os(iOS)
+            #if os(iOS)
             .background(Color(UIColor.secondarySystemBackground))
-#else
+            #else
             .background(Color(NSColor.windowBackgroundColor))
-#endif
+            #endif
             .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
             EmptyView()

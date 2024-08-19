@@ -2,8 +2,7 @@ import SwiftUI
 import shared
 
 struct ProfileWithUserNameScreen: View {
-    @State
-    var presenter: ProfileWithUserNameAndHostPresenter
+    @State private var presenter: ProfileWithUserNameAndHostPresenter
     private let accountType: AccountType
     let toProfileMedia: (MicroBlogKey) -> Void
 
@@ -12,18 +11,19 @@ struct ProfileWithUserNameScreen: View {
         presenter = .init(userName: userName, host: host, accountType: accountType)
         self.toProfileMedia = toProfileMedia
     }
+
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             ZStack {
                 switch onEnum(of: state.user) {
                 case .error:
                     Text("error")
                 case .loading:
                     List {
-                        CommonProfileHeader(user: createSampleUser(), relation: UiStateLoading(), isMe: UiStateLoading(), onFollowClick: {_ in })
-                        .redacted(reason: .placeholder)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets())
+                        CommonProfileHeader(user: createSampleUser(), relation: UiStateLoading(), isMe: UiStateLoading(), onFollowClick: { _ in })
+                            .redacted(reason: .placeholder)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets())
                     }
                 case .success(let data):
                     ProfileScreen(accountType: accountType, userKey: data.data.key, toProfileMedia: toProfileMedia)

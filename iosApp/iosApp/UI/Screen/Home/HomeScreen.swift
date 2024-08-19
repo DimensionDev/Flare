@@ -2,12 +2,13 @@ import SwiftUI
 import shared
 
 struct HomeScreen: View {
-    @State var presenter = ActiveAccountPresenter()
+    @State private var presenter = ActiveAccountPresenter()
     @State var showSettings = false
     @State var showLogin = false
     @State var showCompose = false
+
     var body: some View {
-        Observing(presenter.models) { userState in
+        ObservePresenter(presenter: presenter) { userState in
             let accountType: AccountType? = switch onEnum(of: userState.user) {
             case .success(let data): AccountTypeSpecific(accountKey: data.data.key)
             case .loading: nil
@@ -28,7 +29,7 @@ struct HomeScreen: View {
                                         }
                                     )
                                     .toolbar {
-#if os(iOS)
+                                        #if os(iOS)
                                         ToolbarItem(placement: accountType is AccountTypeGuest ? .primaryAction : .navigation) {
                                             Button {
                                                 if accountType is AccountTypeGuest {
@@ -47,7 +48,7 @@ struct HomeScreen: View {
                                                 }
                                             }
                                         }
-#endif
+                                        #endif
                                     }
                                 }
                             ),
@@ -57,7 +58,7 @@ struct HomeScreen: View {
                                 destination: TabItem { _ in
                                     NotificationScreen(accountType: actualAccountType)
                                         .toolbar {
-#if os(iOS)
+                                            #if os(iOS)
                                             ToolbarItem(placement: .navigation) {
                                                 Button {
                                                     showSettings = true
@@ -69,7 +70,7 @@ struct HomeScreen: View {
                                                     }
                                                 }
                                             }
-#endif
+                                            #endif
                                         }
                                 }
                             ) : nil,
@@ -99,13 +100,16 @@ struct HomeScreen: View {
                                 }
                             ) : nil,
                             accountType is AccountTypeGuest ? TabModel(
-                                title: String(localized: "home_settings_title"),
+                                title: String(localized: "settings_title"),
                                 image: "gear",
                                 destination: TabItem { _ in
                                     SettingsScreen()
                                 }
                             ) : nil
-                        ].compactMap { $0 },
+                        ]
+                        .compactMap {
+                            $0
+                        },
                         secondaryItems: [
                         ],
                         leading: !(accountType is AccountTypeGuest) ? VStack {
@@ -117,9 +121,9 @@ struct HomeScreen: View {
                                 Image(systemName: "gear")
                                     .opacity(0.5)
                             }
-#if os(iOS)
+                            #if os(iOS)
                             .padding([.horizontal, .top])
-#endif
+                            #endif
                             .buttonStyle(.plain)
                             Button {
                                 showCompose = true
@@ -132,11 +136,11 @@ struct HomeScreen: View {
                             .buttonStyle(.borderedProminent)
                             .sheet(isPresented: $showCompose, content: {
                                 NavigationStack {
-                                    ComposeScreen(onBack: {showCompose = false}, accountType: actualAccountType, status: nil)
+                                    ComposeScreen(onBack: { showCompose = false }, accountType: actualAccountType, status: nil)
                                 }
                             })
                         }
-                            .listRowInsets(EdgeInsets()) : nil
+                        .listRowInsets(EdgeInsets()) : nil
                     )
                 }
             }
@@ -148,11 +152,11 @@ struct HomeScreen: View {
         })
         .sheet(isPresented: $showSettings, content: {
             SettingsScreen()
-#if os(macOS)
+                #if os(macOS)
                 .frame(minWidth: 600, minHeight: 400)
-#endif
+                #endif
         })
-        
+
     }
 }
 

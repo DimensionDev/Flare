@@ -31,6 +31,7 @@
 		062A3C852C6C982E00A45E44 /* VVOStatusDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A3C842C6C982E00A45E44 /* VVOStatusDetailScreen.swift */; };
 		062A3C872C6C9CF800A45E44 /* VVOCommentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A3C862C6C9CF800A45E44 /* VVOCommentScreen.swift */; };
 		062A3C892C6C9ECD00A45E44 /* VVOLoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A3C882C6C9ECD00A45E44 /* VVOLoginScreen.swift */; };
+		0630F3402C732ED2009631AA /* ObservePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0630F33F2C732ED2009631AA /* ObservePresenter.swift */; };
 		063476792B4FBB9E006B21F1 /* DiscoverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */; };
 		0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */; };
 		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
@@ -98,6 +99,7 @@
 		062A3C842C6C982E00A45E44 /* VVOStatusDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOStatusDetailScreen.swift; sourceTree = "<group>"; };
 		062A3C862C6C9CF800A45E44 /* VVOCommentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOCommentScreen.swift; sourceTree = "<group>"; };
 		062A3C882C6C9ECD00A45E44 /* VVOLoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOLoginScreen.swift; sourceTree = "<group>"; };
+		0630F33F2C732ED2009631AA /* ObservePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservePresenter.swift; sourceTree = "<group>"; };
 		063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverScreen.swift; sourceTree = "<group>"; };
 		0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
 		066151202AC540B700CCB945 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
@@ -248,6 +250,7 @@
 				06BD66402C2425F2006BDE91 /* AuthSessionView.swift */,
 				B62B202755C8B39C8CF77626 /* AppleUriLauncher.swift */,
 				06F4B4C82C6369390005317F /* VGrid.swift */,
+				0630F33F2C732ED2009631AA /* ObservePresenter.swift */,
 			);
 			path = Component;
 			sourceTree = "<group>";
@@ -592,6 +595,7 @@
 				B62B2D085825C9FFC6B5910D /* QuotedStatus.swift in Sources */,
 				06B8515B2B73930100DFA075 /* Zoomable.swift in Sources */,
 				B62B238878D4BA843A1BB66F /* ViewExt.swift in Sources */,
+				0630F3402C732ED2009631AA /* ObservePresenter.swift in Sources */,
 				06C9C5612B34241400AE5284 /* AdativeTabView.swift in Sources */,
 				B62B27AA5CE37383A67B419B /* CommonProfileHeader.swift in Sources */,
 				B62B206B672982F032F669C3 /* ProfileScreen.swift in Sources */,

@@ -7,10 +7,11 @@ struct MediaComponent: View {
     @State var hideSensitive: Bool
     let medias: [UiMedia]
     let onMediaClick: (Int, String?) -> Void
+    let sensitive: Bool
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
             media is UiMediaImage
-        }
+        } && sensitive
         let columns = if medias.count == 1 {
             1
         } else if medias.count < 5 {

@@ -3,8 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.CacheableState
@@ -32,11 +31,6 @@ sealed class UiState<T : Any> {
     @Immutable
     class Loading<T : Any> : UiState<T>()
 }
-
-fun <T : Any> Flow<T>.toUiState(): Flow<UiState<T>> =
-    map<T, UiState<T>> { UiState.Success(it) }
-        .onStart { emit(UiState.Loading()) }
-        .catch { emit(UiState.Error(it)) }
 
 inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
     when (this) {
@@ -114,7 +108,15 @@ val <T : Any> UiState<T>.isLoading: Boolean get() = this is UiState.Loading
 @Composable
 @HiddenFromObjC
 fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
-    remember(this) { toUiState() }.collectAsState(initial)
+    produceState(initial, this) {
+        onStart {
+            value = UiState.Loading()
+        }.catch {
+            value = UiState.Error(it)
+        }.collect {
+            value = UiState.Success(it)
+        }
+    }
 
 fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
     data?.let {

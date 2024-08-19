@@ -2,11 +2,11 @@ import SwiftUI
 import shared
 
 struct AccountsScreen: View {
-    @State
-    var presenter = AccountsPresenter()
+    @State private var presenter = AccountsPresenter()
     @State var showServiceSelectSheet = false
+
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             List {
                 switch onEnum(of: state.accounts) {
                 case .success(let data):
@@ -19,16 +19,16 @@ struct AccountsScreen: View {
                                     state.setActiveAccount(accountKey: user.data.key)
                                 } label: {
                                     HStack {
-                                        UserComponent(user: user.data, onUserClicked: { })
+                                        UserComponent(user: user.data, onUserClicked: {})
                                         Spacer()
                                         switch onEnum(of: state.activeAccount) {
                                         case .success(let activeAccount):
                                             Image(
                                                 systemName: activeAccount.data.accountKey == user.data.key ?
-                                                "checkmark.circle.fill" :
+                                                    "checkmark.circle.fill" :
                                                     "circle"
                                             )
-                                            .foregroundStyle(.blue)
+                                                .foregroundStyle(.blue)
                                         default:
                                             Image(systemName: "circle")
                                                 .foregroundStyle(.blue)
@@ -69,22 +69,22 @@ struct AccountsScreen: View {
                     Text("loading")
                 }
             }
-        }
-        .navigationTitle("accounts_management_title")
-        .toolbar {
-            Button(action: {
-                showServiceSelectSheet = true
-            }, label: {
-                Image(systemName: "plus")
+            .navigationTitle("accounts_management_title")
+            .toolbar {
+                Button(action: {
+                    showServiceSelectSheet = true
+                }, label: {
+                    Image(systemName: "plus")
+                })
+            }
+            .sheet(isPresented: $showServiceSelectSheet, content: {
+                ServiceSelectScreen {
+                    showServiceSelectSheet = false
+                }
+                #if os(macOS)
+                .frame(minWidth: 600, minHeight: 400)
+                #endif
             })
         }
-        .sheet(isPresented: $showServiceSelectSheet, content: {
-            ServiceSelectScreen {
-                showServiceSelectSheet = false
-            }
-#if os(macOS)
-            .frame(minWidth: 600, minHeight: 400)
-#endif
-        })
     }
 }

@@ -90,7 +90,9 @@ internal class XQTService(
         chocolate = chocolate,
     ).createMediaApi() {
     companion object {
-        fun checkChocolate(value: String) = value.contains("gt=") && value.contains("ct0=") && value.contains("auth_token=")
+        fun checkChocolate(value: String) =
+//            value.contains("gt=") &&
+                value.contains("ct0=") && value.contains("auth_token=")
     }
 }
 
@@ -150,13 +152,15 @@ internal class XQTHeaderPlugin(
                             .split("; ")
                             .firstOrNull { it.startsWith("ct0=") }
                             ?.removePrefix("ct0=")
-                    if (guestToken != null && csrfToken != null) {
+                    if (guestToken != null) {
                         append("x-guest-token", guestToken)
-                        append("Cookie", chocolate)
+                    }
+                    if (csrfToken != null) {
                         append("x-twitter-active-user", "yes")
                         append("x-twitter-auth-type", "OAuth2Session")
                         append("x-csrf-token", csrfToken)
                     }
+                    append("Cookie", chocolate)
                 }
             }
         }

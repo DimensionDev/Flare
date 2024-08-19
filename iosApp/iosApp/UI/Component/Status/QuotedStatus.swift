@@ -13,9 +13,9 @@ struct QuotedStatus: View {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
         }, label: {
             VStack(alignment: .leading) {
-                Spacer()
-                    .frame(height: 8)
                 if let user = data.user {
+                    Spacer()
+                        .frame(height: 8)
                     HStack {
                         UserAvatar(data: user.avatar, size: 20)
                         Markdown(user.name.markdown)
@@ -31,11 +31,12 @@ struct QuotedStatus: View {
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
+                    .padding(.horizontal, 8)
                 }
                 Markdown(data.content.markdown)
                     .font(.body)
                     .markdownInlineImageProvider(.emoji)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 8)
                 Spacer()
                     .frame(height: 8)
                 if !data.images.isEmpty {
@@ -43,7 +44,8 @@ struct QuotedStatus: View {
                         MediaComponent(
                             hideSensitive: data.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
                             medias: data.images,
-                            onMediaClick: onMediaClick
+                            onMediaClick: onMediaClick,
+                            sensitive: data.sensitive
                         )
                     } else {
                         Button {

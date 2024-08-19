@@ -2,15 +2,16 @@ import SwiftUI
 import shared
 
 struct NotificationScreen: View {
-    @State var notificationType: NotificationFilter = NotificationFilter.all
-    @State
-    var presenter: NotificationPresenter
+    @State private var presenter: NotificationPresenter
+    @State private var notificationType: NotificationFilter = .all
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     init(accountType: AccountType) {
         presenter = .init(accountType: accountType)
     }
+
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             List {
                 if horizontalSizeClass == .compact,
                    case .success(let data) = onEnum(of: state.allTypes),

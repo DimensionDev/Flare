@@ -3,10 +3,10 @@ import shared
 
 struct AppearanceScreen: View {
     @Environment(\.appSettings) private var appSettings
-    @State
-    var presenter = AppearancePresenter()
+    @State private var presenter = AppearancePresenter()
+
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             List {
                 if case .success(let success) = onEnum(of: state.sampleStatus) {
                     StatusItemView(
@@ -91,10 +91,10 @@ struct AppearanceScreen: View {
                 .buttonStyle(.plain)
                 .navigationTitle("appearance_title")
             }
+            #if os(macOS)
+            .toggleStyle(.switch)
+            .pickerStyle(.segmented)
+            #endif
         }
-        #if os(macOS)
-        .toggleStyle(.switch)
-        .pickerStyle(.segmented)
-        #endif
     }
 }

@@ -2,15 +2,16 @@ import SwiftUI
 import shared
 
 struct StatusDetailScreen: View {
-    @State
-    var presenter: StatusContextPresenter
-    let statusKey: MicroBlogKey
+    @State private var presenter: StatusContextPresenter
+    private let statusKey: MicroBlogKey
+
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
         self.statusKey = statusKey
     }
+
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             List {
                 StatusTimelineComponent(
                     data: state.listState,

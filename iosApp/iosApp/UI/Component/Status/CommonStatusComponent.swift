@@ -79,7 +79,8 @@ struct CommonStatusComponent: View {
                     MediaComponent(
                         hideSensitive: data.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
                         medias: data.images,
-                        onMediaClick: onMediaClick
+                        onMediaClick: onMediaClick,
+                        sensitive: data.sensitive
                     )
                 } else {
                     Button {
@@ -99,11 +100,13 @@ struct CommonStatusComponent: View {
                 LinkPreview(card: card)
             }
             if !data.quote.isEmpty {
+                Spacer()
+                    .frame(height: 4)
                 VStack {
-                    ForEach(0...data.quote.count - 1, id: \.self) { index in
+                    ForEach(0..<data.quote.count, id: \.self) { index in
                         let quote = data.quote[index]
                         QuotedStatus(data: quote, onMediaClick: onMediaClick)
-                        if index != data.quote.endIndex {
+                        if index != data.quote.count - 1 {
                             Divider()
                         }
                     }

@@ -4,15 +4,16 @@ import shared
 struct SearchScreen: View {
     var searchText: String = ""
     private let onUserClicked: (UiUserV2) -> Void
-    @State
-    var presenter: SearchPresenter
+    @State private var presenter: SearchPresenter
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+
     init(accountType: AccountType, initialQuery: String, onUserClicked: @escaping (UiUserV2) -> Void) {
         self.onUserClicked = onUserClicked
         presenter = .init(accountType: accountType, initialQuery: initialQuery)
     }
+
     var body: some View {
-        Observing(presenter.models) { state in
+        ObservePresenter(presenter: presenter) { state in
             List {
                 switch onEnum(of: state.users) {
                 case .success(let data):
@@ -27,10 +28,10 @@ struct SearchScreen: View {
                                                 onUserClicked(item)
                                             }
                                         )
-                                            .frame(width: 200, alignment: .leading)
-                                            .onAppear {
-                                                data.get(index: index)
-                                            }
+                                        .frame(width: 200, alignment: .leading)
+                                        .onAppear {
+                                            data.get(index: index)
+                                        }
                                     }
                                 }
                             }

@@ -14,7 +14,7 @@ struct UserComponent: View {
 //                    openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
                 },
                 label: {
-                    UserAvatar(data: user.avatar, size: 48)
+                    UserAvatar(data: user.avatar, size: 44)
                 }
             )
             .buttonStyle(.borderless)

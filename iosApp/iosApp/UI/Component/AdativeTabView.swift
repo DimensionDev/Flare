@@ -67,9 +67,6 @@ struct AdativeTabView<V>: View where V: View {
             if horizontalSizeClass != .compact {
                 list
                     .listStyle(.sidebar)
-//                    .scrollContentBackground(.hidden)
-//                    .listStyle(.plain)
-//                    .background(Color(UIColor.secondarySystemBackground))
                     .frame(width: 256)
             }
             TabView(selection: $selectedTabItem) {
@@ -80,10 +77,6 @@ struct AdativeTabView<V>: View where V: View {
                             Text(item.title)
                         }
                         .tag(item)
-//                        .if(horizontalSizeClass != .compact) { view in
-//                            view
-//                                .toolbar(.hidden, for: .tabBar)
-//                        }
                 }
                 ForEach(secondaryItems, id: \.id) { item in
                     item.destination
@@ -92,7 +85,6 @@ struct AdativeTabView<V>: View where V: View {
                             Text(item.title)
                         }
                         .tag(item)
-//                        .toolbar(.hidden, for: .tabBar)
                 }
             }
         }

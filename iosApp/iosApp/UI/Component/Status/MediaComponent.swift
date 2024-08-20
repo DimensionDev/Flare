@@ -84,8 +84,8 @@ struct MediaComponent: View {
         .if(medias.count < 7) { view in
             view.aspectRatio(16/9, contentMode: .fit)
         }
-        //        .aspectRatio(16/9, contentMode: .fit)
         .frame(maxWidth: 600)
+        //        .aspectRatio(16/9, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

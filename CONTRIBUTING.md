@@ -44,3 +44,9 @@ The project is split into 3 parts:
 
 Most of the business logic is in `shared`, and the platform specific code and UI is in `app` and `iosApp`.  
 Flare uses [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) to share code between platforms, [Jetpack Compose](https://developer.android.com/jetpack/compose) for the UI on Android, [SwiftUI](https://developer.apple.com/xcode/swiftui/) for the UI on iOS/macOS.
+
+### Business logic
+Flare leverages [Molecule](https://github.com/cashapp/molecule) to implement business logic, with most presenters extending from `PresenterBase`. Additionally, Flare employs the concept of a "single source of truth" to ensure consistency in its business logic implementation.
+
+### UI
+Since Flare uses Jetpack Compose and SwiftUI, both of which are declarative UI frameworks, ensure that the UI contains no business logic and is solely responsible for rendering the state provided by the presenter.

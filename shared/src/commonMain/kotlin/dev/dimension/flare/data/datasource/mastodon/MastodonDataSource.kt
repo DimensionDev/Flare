@@ -4,6 +4,8 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
@@ -37,6 +39,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -150,6 +153,29 @@ class MastodonDataSource(
             scope = scope,
             mediator =
                 FavouriteTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
+
+    fun listTimeline(
+        listId: String,
+        pageSize: Int = 20,
+        pagingKey: String = "list_${account.accountKey}_$listId",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                ListTimelineRemoteMediator(
+                    listId,
                     service,
                     database,
                     account.accountKey,
@@ -890,4 +916,33 @@ class MastodonDataSource(
                 override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
+
+    fun allLists(scope: CoroutineScope): Flow<PagingData<UiList>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+        ) {
+            object : PagingSource<Int, UiList>() {
+                override fun getRefreshKey(state: PagingState<Int, UiList>): Int? = null
+
+                override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiList> =
+                    try {
+                        val response = service.lists()
+                        LoadResult.Page(
+                            data =
+                                response.mapNotNull {
+                                    it.id?.let { it1 ->
+                                        UiList(
+                                            id = it1,
+                                            title = it.title.orEmpty(),
+                                        )
+                                    }
+                                },
+                            prevKey = null,
+                            nextKey = null,
+                        )
+                    } catch (e: Exception) {
+                        LoadResult.Error(e)
+                    }
+            }
+        }.flow.cachedIn(scope)
 }

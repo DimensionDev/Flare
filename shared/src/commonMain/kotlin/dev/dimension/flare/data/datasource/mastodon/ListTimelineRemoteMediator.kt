@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.datasource.vvo
+package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
@@ -6,45 +6,36 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.VVO
-import dev.dimension.flare.data.network.vvo.VVOService
-import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
-internal class MentionRemoteMediator(
-    private val service: VVOService,
+internal class ListTimelineRemoteMediator(
+    private val listId: String,
+    private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
-    var page = 1
-
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatusView>,
     ): MediatorResult {
         return try {
-            val config = service.config()
-            if (config.data?.login != true) {
-                return MediatorResult.Error(
-                    LoginExpiredException,
-                )
-            }
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        page = 0
                         service
-                            .getMentionsAt(
-                                page = page,
+                            .listTimeline(
+                                listId = listId,
+                                limit = state.config.pageSize,
                             ).also {
                                 database.transaction {
                                     database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
                                 }
                             }
                     }
-
                     LoadType.PREPEND -> {
                         return MediatorResult.Success(
                             endOfPaginationReached = true,
@@ -52,22 +43,27 @@ internal class MentionRemoteMediator(
                     }
 
                     LoadType.APPEND -> {
-                        page++
-                        service.getMentionsAt(
-                            page = page,
+                        val lastItem =
+                            state.lastItemOrNull()
+                                ?: return MediatorResult.Success(
+                                    endOfPaginationReached = true,
+                                )
+                        service.listTimeline(
+                            listId = listId,
+                            limit = state.config.pageSize,
+                            max_id = lastItem.timeline_status_key.id,
                         )
                     }
                 }
-
-            VVO.saveStatus(
+            Mastodon.save(
+                database = database,
                 accountKey = accountKey,
                 pagingKey = pagingKey,
-                database = database,
-                statuses = response.data.orEmpty(),
+                data = response,
             )
 
             MediatorResult.Success(
-                endOfPaginationReached = response.data.isNullOrEmpty(),
+                endOfPaginationReached = response.isEmpty(),
             )
         } catch (e: Throwable) {
             MediatorResult.Error(e)

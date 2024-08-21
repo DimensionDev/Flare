@@ -96,6 +96,12 @@ val <T : Any> PagingState<T>.isRefreshing: Boolean
             isLoading
         }
 
+suspend fun <T : Any> PagingState<T>.refreshSuspend() {
+    if (this is PagingState.Success) {
+        refreshSuspend()
+    }
+}
+
 inline fun <T : Any> PagingState<T>.onLoading(block: () -> Unit): PagingState<T> {
     if (this is PagingState.Loading) {
         block()

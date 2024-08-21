@@ -348,6 +348,7 @@
     <string name="home_tab_featured_title">Featured</string>
     <string name="home_tab_bookmarks_title">Bookmarks</string>
     <string name="home_tab_favorite_title">Favorite</string>
+    <string name="home_tab_list_title">List</string>
 
     <string name="tab_settings_primary">Primary tab</string>
     <string name="tab_settings_secondary">Secondary tab</string>
@@ -368,4 +369,8 @@
     <string name="edit_tab_name_placeholder">Tab name</string>
     <string name="edit_tab_icon">Icon</string>
     <string name="edit_tab_with_avatar">With avatar</string>
+
+    <string name="list_add">Add list</string>
+    <string name="list_empty">No lists</string>
+    <string name="list_error">Failed to load lists</string>
 </resources>

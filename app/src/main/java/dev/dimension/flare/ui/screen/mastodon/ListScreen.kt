@@ -30,11 +30,6 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.isRefreshing
-import dev.dimension.flare.common.onEmpty
-import dev.dimension.flare.common.onError
-import dev.dimension.flare.common.onLoading
-import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.TabMetaData
@@ -45,6 +40,9 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.mastodon.AllListPresenter
 import dev.dimension.flare.ui.presenter.invoke
 
@@ -117,7 +115,7 @@ private fun ListScreen(
                 Modifier
                     .fillMaxSize(),
             indicatorPadding = contentPadding,
-            isRefreshing = state.items.isRefreshing,
+            isRefreshing = state.isRefreshing,
             onRefresh = state::refresh,
             content = {
                 LazyColumn(
@@ -125,11 +123,9 @@ private fun ListScreen(
                 ) {
                     state.items
                         .onSuccess {
-                            items(count = itemCount) { index ->
-                                val item = get(index)
-                                if (item == null) {
-                                    ItemPlaceHolder()
-                                } else {
+                            if (it.size > 0) {
+                                items(count = it.size) { index ->
+                                    val item = it[index]
                                     ListItem(
                                         headlineContent = {
                                             Text(text = item.title)
@@ -140,27 +136,27 @@ private fun ListScreen(
                                             },
                                     )
                                 }
+                            } else {
+                                item {
+                                    Box(
+                                        modifier = Modifier.fillParentMaxSize(),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ListAlt,
+                                            contentDescription = stringResource(id = R.string.list_empty),
+                                            modifier = Modifier.size(48.dp),
+                                        )
+                                        Text(
+                                            text = stringResource(id = R.string.list_empty),
+                                            style = MaterialTheme.typography.headlineMedium,
+                                        )
+                                    }
+                                }
                             }
                         }.onLoading {
                             items(count = 10) {
                                 ItemPlaceHolder()
-                            }
-                        }.onEmpty {
-                            item {
-                                Box(
-                                    modifier = Modifier.fillParentMaxSize(),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                                        contentDescription = stringResource(id = R.string.list_empty),
-                                        modifier = Modifier.size(48.dp),
-                                    )
-                                    Text(
-                                        text = stringResource(id = R.string.list_empty),
-                                        style = MaterialTheme.typography.headlineMedium,
-                                    )
-                                }
                             }
                         }.onError {
                             item {

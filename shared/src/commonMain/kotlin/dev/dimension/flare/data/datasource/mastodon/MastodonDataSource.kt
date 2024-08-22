@@ -4,8 +4,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
@@ -917,32 +915,19 @@ class MastodonDataSource(
             },
         )
 
-    fun allLists(scope: CoroutineScope): Flow<PagingData<UiList>> =
-        Pager(
-            config = PagingConfig(pageSize = 20),
+    fun allLists(): MemCacheable<List<UiList>> =
+        MemCacheable(
+            key = "allLists_${account.accountKey}",
         ) {
-            object : PagingSource<Int, UiList>() {
-                override fun getRefreshKey(state: PagingState<Int, UiList>): Int? = null
-
-                override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiList> =
-                    try {
-                        val response = service.lists()
-                        LoadResult.Page(
-                            data =
-                                response.mapNotNull {
-                                    it.id?.let { it1 ->
-                                        UiList(
-                                            id = it1,
-                                            title = it.title.orEmpty(),
-                                        )
-                                    }
-                                },
-                            prevKey = null,
-                            nextKey = null,
+            service
+                .lists()
+                .mapNotNull {
+                    it.id?.let { it1 ->
+                        UiList(
+                            id = it1,
+                            title = it.title.orEmpty(),
                         )
-                    } catch (e: Exception) {
-                        LoadResult.Error(e)
                     }
-            }
-        }.flow.cachedIn(scope)
+                }
+        }
 }

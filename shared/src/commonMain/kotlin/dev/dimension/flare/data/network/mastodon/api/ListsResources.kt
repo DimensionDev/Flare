@@ -5,6 +5,7 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.HTTP
+import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.PUT
 import de.jensklingenberg.ktorfit.http.Path
@@ -21,12 +22,19 @@ internal interface ListsResources {
     @POST("api/v1/lists")
     suspend fun createList(
         @Body postList: PostList,
+        @Header("Content-Type") contentType: String = "application/json",
+    ): MastodonList
+
+    @GET("api/v1/lists/{id}")
+    suspend fun getList(
+        @Path("id") id: String,
     ): MastodonList
 
     @PUT("api/v1/lists/{id}")
     suspend fun updateList(
         @Path("id") id: String,
         @Body postList: PostList,
+        @Header("Content-Type") contentType: String = "application/json",
     ): MastodonList
 
     @DELETE("api/v1/lists/{id}")
@@ -46,11 +54,13 @@ internal interface ListsResources {
     suspend fun addMember(
         @Path("id") listId: String,
         @Body accounts: PostAccounts,
+        @Header("Content-Type") contentType: String = "application/json",
     ): Response<String>
 
     @HTTP(method = "DELETE", path = "/api/v1/lists/{id}/accounts", hasBody = true)
     suspend fun removeMember(
         @Path("id") listId: String,
         @Body accounts: PostAccounts,
+        @Header("Content-Type") contentType: String = "application/json",
     ): Response<String>
 }

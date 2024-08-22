@@ -371,6 +371,12 @@
     <string name="edit_tab_with_avatar">With avatar</string>
 
     <string name="list_add">Add list</string>
+    <string name="list_edit">Edit list</string>
+    <string name="list_delete">Delete list</string>
+    <string name="list_delete_confirm">Are you sure you want to delete this list %1$s?</string>
     <string name="list_empty">No lists</string>
     <string name="list_error">Failed to load lists</string>
+    <string name="list_create">Create list</string>
+    <string name="list_create_name">List name</string>
+    <string name="list_create_name_hint">List name</string>
 </resources>

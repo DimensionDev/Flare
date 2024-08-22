@@ -28,6 +28,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.data.network.mastodon.api.model.PostList
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
@@ -915,9 +916,12 @@ class MastodonDataSource(
             },
         )
 
+    private val listKey: String
+        get() = "allLists_${account.accountKey}"
+
     fun allLists(): MemCacheable<List<UiList>> =
         MemCacheable(
-            key = "allLists_${account.accountKey}",
+            key = listKey,
         ) {
             service
                 .lists()
@@ -930,4 +934,55 @@ class MastodonDataSource(
                     }
                 }
         }
+
+    suspend fun createList(title: String) {
+        runCatching {
+            service.createList(PostList(title = title))
+        }.onSuccess { response ->
+            if (response.id != null) {
+                MemCacheable.updateWith<List<UiList>>(
+                    key = listKey,
+                ) {
+                    it +
+                        UiList(
+                            id = response.id,
+                            title = title,
+                        )
+                }
+            }
+        }
+    }
+
+    suspend fun deleteList(listId: String) {
+        runCatching {
+            service.deleteList(listId)
+        }.onSuccess {
+            MemCacheable.updateWith<List<UiList>>(
+                key = listKey,
+            ) {
+                it.filter { list -> list.id != listId }
+            }
+        }
+    }
+
+    suspend fun updateList(
+        listId: String,
+        title: String,
+    ) {
+        runCatching {
+            service.updateList(listId, PostList(title = title))
+        }.onSuccess {
+            MemCacheable.updateWith<List<UiList>>(
+                key = listKey,
+            ) {
+                it.map { list ->
+                    if (list.id == listId) {
+                        list.copy(title = title)
+                    } else {
+                        list
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,9 +1,12 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.PagingState
+import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
@@ -21,13 +24,16 @@ import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
+import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
 import dev.dimension.flare.data.network.mastodon.api.model.PostList
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
@@ -862,6 +868,22 @@ class MastodonDataSource(
             )
         }.flow.cachedIn(scope)
 
+    fun searchFollowing(
+        query: String,
+        scope: CoroutineScope,
+        pageSize: Int,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            SearchUserPagingSource(
+                service,
+                account.accountKey,
+                query,
+                following = true,
+            )
+        }.flow.cachedIn(scope)
+
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(500),
@@ -982,6 +1004,111 @@ class MastodonDataSource(
                         list
                     }
                 }
+            }
+        }
+    }
+
+    fun listInfo(listId: String): CacheData<UiList> =
+        MemCacheable(
+            key = "listInfo_$listId",
+            fetchSource = {
+                service.getList(listId).let {
+                    UiList(
+                        id = it.id ?: "",
+                        title = it.title.orEmpty(),
+                    )
+                }
+            },
+        )
+
+    private fun listMemberKey(listId: String) = "listMembers_$listId"
+
+    fun listMembers(
+        listId: String,
+        pageSize: Int = 20,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiUserV2>> =
+        memoryPager(
+            pageSize = pageSize,
+            pagingKey = listMemberKey(listId),
+            scope = scope,
+            mediator =
+                object : RemoteMediator<Int, UiUserV2>() {
+                    override suspend fun load(
+                        loadType: LoadType,
+                        state: PagingState<Int, UiUserV2>,
+                    ): MediatorResult {
+                        try {
+                            if (loadType == LoadType.PREPEND) {
+                                return MediatorResult.Success(endOfPaginationReached = true)
+                            }
+                            val key = state.lastItemOrNull()?.key?.id
+                            val result =
+                                service
+                                    .listMembers(listId, limit = pageSize, max_id = key)
+                                    .body()
+                                    ?.map {
+                                        it.toDbUser(account.accountKey.host).render(account.accountKey)
+                                    } ?: emptyList()
+
+                            if (loadType == LoadType.REFRESH) {
+                                MemoryPagingSource.update(
+                                    key = listMemberKey(listId),
+                                    value = result.toImmutableList(),
+                                )
+                            } else if (loadType == LoadType.APPEND) {
+                                MemoryPagingSource.append(
+                                    key = listMemberKey(listId),
+                                    value = result.toImmutableList(),
+                                )
+                            }
+
+                            return MediatorResult.Success(
+                                endOfPaginationReached = result.isEmpty(),
+                            )
+                        } catch (e: Exception) {
+                            return MediatorResult.Error(e)
+                        }
+                    }
+                },
+        )
+
+    suspend fun addMember(
+        listId: String,
+        userId: String,
+    ) {
+        runCatching {
+            service.addMember(
+                listId,
+                PostAccounts(listOf(userId)),
+            )
+            val user = service.lookupUser(userId).toDbUser(account.accountKey.host).render(account.accountKey)
+            MemoryPagingSource.updateWith(
+                key = listMemberKey(listId),
+            ) {
+                (it + user)
+                    .distinctBy {
+                        it.key
+                    }.toImmutableList()
+            }
+        }
+    }
+
+    suspend fun removeMember(
+        listId: String,
+        userId: String,
+    ) {
+        runCatching {
+            service.removeMember(
+                listId,
+                PostAccounts(listOf(userId)),
+            )
+            MemoryPagingSource.updateWith<UiUserV2>(
+                key = listMemberKey(listId),
+            ) {
+                it
+                    .filter { user -> user.key.id != userId }
+                    .toImmutableList()
             }
         }
     }

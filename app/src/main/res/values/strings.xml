@@ -379,4 +379,8 @@
     <string name="list_create">Create list</string>
     <string name="list_create_name">List name</string>
     <string name="list_create_name_hint">List name</string>
+    <string name="list_edit_members">Members</string>
+    <string name="list_edit_add_members">Add members</string>
+    <string name="list_edit_no_members">No members</string>
+    <string name="list_edit_members_error">Failed to load members</string>
 </resources>

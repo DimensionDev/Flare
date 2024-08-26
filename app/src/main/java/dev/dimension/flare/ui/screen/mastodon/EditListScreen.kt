@@ -6,22 +6,31 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.EditListMemberRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onEmpty
@@ -39,6 +48,7 @@ import dev.dimension.flare.ui.presenter.home.mastodon.EditListPresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.EditListState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AccountItem
+import kotlinx.coroutines.launch
 
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
@@ -49,7 +59,14 @@ internal fun EditListRoute(
     accountType: AccountType,
     listId: String,
 ) {
-    EditListScreen(accountType, listId, onBack = navigator::navigateUp)
+    EditListScreen(
+        accountType,
+        listId,
+        onBack = navigator::navigateUp,
+        toEditUser = {
+            navigator.navigate(EditListMemberRouteDestination(accountType, listId))
+        },
+    )
 }
 
 @OptIn(
@@ -61,9 +78,10 @@ private fun EditListScreen(
     accountType: AccountType,
     listId: String,
     onBack: () -> Unit,
+    toEditUser: () -> Unit,
 ) {
     val state by producePresenter {
-        presenter(accountType, listId)
+        presenter(accountType, listId, onBack)
     }
     FlareScaffold(
         topBar = {
@@ -72,7 +90,9 @@ private fun EditListScreen(
                     Text(text = stringResource(id = R.string.list_edit))
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                    ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.navigate_back),
@@ -80,7 +100,10 @@ private fun EditListScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = state::confirm) {
+                    IconButton(
+                        onClick = state::confirm,
+                        enabled = state.listInfo is UiState.Success && !state.isLoading,
+                    ) {
                         Icon(
                             Icons.Default.Done,
                             contentDescription = stringResource(id = android.R.string.ok),
@@ -101,6 +124,7 @@ private fun EditListScreen(
                             label = { Text(text = stringResource(id = R.string.list_create_name)) },
                             placeholder = { Text(text = stringResource(id = R.string.list_create_name_hint)) },
                             modifier = Modifier.fillMaxWidth(),
+                            enabled = !state.isLoading && state.listInfo is UiState.Success,
                         )
                     },
                 )
@@ -112,10 +136,11 @@ private fun EditListScreen(
                     },
                     trailingContent = {
                         IconButton(onClick = {
+                            toEditUser.invoke()
                         }) {
                             Icon(
-                                Icons.Default.Add,
-                                contentDescription = stringResource(id = R.string.list_edit_add_members),
+                                Icons.Default.Edit,
+                                contentDescription = stringResource(id = R.string.list_edit_edit_members),
                             )
                         }
                     },
@@ -129,7 +154,52 @@ private fun EditListScreen(
                             item?.let {
                                 UiState.Success(item)
                             } ?: UiState.Loading()
-                        AccountItem(userState = userState, onClick = {}, toLogin = { })
+                        AccountItem(
+                            userState = userState,
+                            onClick = {},
+                            toLogin = { },
+                            trailingContent = {
+                                var showMenu by remember {
+                                    mutableStateOf(false)
+                                }
+                                IconButton(onClick = {
+                                    showMenu = true
+                                }) {
+                                    Icon(
+                                        Icons.Default.MoreVert,
+                                        contentDescription = stringResource(id = R.string.more),
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = showMenu,
+                                    onDismissRequest = {
+                                        showMenu = false
+                                    },
+                                ) {
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            showMenu = false
+                                            if (item != null) {
+                                                state.removeMember(item.key.id)
+                                            }
+                                        },
+                                        text = {
+                                            Text(
+                                                text = stringResource(id = R.string.delete),
+                                                color = MaterialTheme.colorScheme.error,
+                                            )
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = stringResource(id = R.string.delete),
+                                                tint = MaterialTheme.colorScheme.error,
+                                            )
+                                        },
+                                    )
+                                }
+                            },
+                        )
                     }
                 }.onLoading {
                     items(10) {
@@ -152,7 +222,9 @@ private fun EditListScreen(
 private fun presenter(
     accountType: AccountType,
     listId: String,
+    onBack: () -> Unit,
 ) = run {
+    val scope = rememberCoroutineScope()
     val state =
         remember(accountType, listId) {
             EditListPresenter(accountType, listId)
@@ -165,11 +237,21 @@ private fun presenter(
             }
         }
     }
+    var isLoading by remember {
+        mutableStateOf(false)
+    }
 
     object : EditListState by state {
         val text = text
+        val isLoading = isLoading
 
         fun confirm() {
+            scope.launch {
+                isLoading = true
+                state.updateTitle(text.text.toString())
+                isLoading = false
+                onBack.invoke()
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ internal class SearchUserPagingSource(
     private val accountKey: MicroBlogKey,
     private val query: String,
     private val following: Boolean = false,
+    private val resolve: Boolean? = null,
 ) : PagingSource<String, UiUserV2>() {
     override fun getRefreshKey(state: PagingState<String, UiUserV2>): String? = null
 
@@ -24,6 +25,7 @@ internal class SearchUserPagingSource(
                     max_id = params.key,
                     type = "accounts",
                     following = following,
+                    resolve = resolve,
                 ).accounts
                 ?.let {
                     return LoadResult.Page(

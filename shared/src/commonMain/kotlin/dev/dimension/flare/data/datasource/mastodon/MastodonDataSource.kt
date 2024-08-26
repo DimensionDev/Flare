@@ -871,7 +871,7 @@ class MastodonDataSource(
     fun searchFollowing(
         query: String,
         scope: CoroutineScope,
-        pageSize: Int,
+        pageSize: Int = 20,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -881,6 +881,7 @@ class MastodonDataSource(
                 account.accountKey,
                 query,
                 following = true,
+                resolve = false,
             )
         }.flow.cachedIn(scope)
 
@@ -1042,7 +1043,16 @@ class MastodonDataSource(
                             if (loadType == LoadType.PREPEND) {
                                 return MediatorResult.Success(endOfPaginationReached = true)
                             }
-                            val key = state.lastItemOrNull()?.key?.id
+                            val key =
+                                if (loadType == LoadType.REFRESH) {
+                                    null
+                                } else {
+                                    MemoryPagingSource
+                                        .get<UiUserV2>(key = listMemberKey(listId))
+                                        ?.lastOrNull()
+                                        ?.key
+                                        ?.id
+                                }
                             val result =
                                 service
                                     .listMembers(listId, limit = pageSize, max_id = key)
@@ -1086,7 +1096,7 @@ class MastodonDataSource(
             MemoryPagingSource.updateWith(
                 key = listMemberKey(listId),
             ) {
-                (it + user)
+                (listOf(user) + it)
                     .distinctBy {
                         it.key
                     }.toImmutableList()
@@ -1112,4 +1122,6 @@ class MastodonDataSource(
             }
         }
     }
+
+    fun listMemberCache(listId: String) = MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
 }

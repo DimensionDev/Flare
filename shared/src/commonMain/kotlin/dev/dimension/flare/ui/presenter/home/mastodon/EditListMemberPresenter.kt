@@ -1,59 +1,61 @@
 package dev.dimension.flare.ui.presenter.home.mastodon
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.map
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
-class EditListPresenter(
+class EditListMemberPresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : PresenterBase<EditListState>() {
+) : PresenterBase<EditListMemberState>() {
     @Composable
-    override fun body(): EditListState {
+    override fun body(): EditListMemberState {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType)
-        val listInfo =
-            serviceState.flatMap {
-                remember(it) {
-                    require(it is MastodonDataSource)
-                    it.listInfo(listId)
-                }.collectAsState().toUi()
-            }
-
-        val memberInfo =
+        var filter by remember { mutableStateOf("") }
+        val userState =
             serviceState
-                .map {
-                    remember(it) {
-                        require(it is MastodonDataSource)
-                        it.listMembers(listId, scope = scope)
-                    }.collectAsLazyPagingItems()
+                .flatMap { service ->
+                    if (filter.isEmpty()) {
+                        UiState.Error(EmptyQueryException)
+                    } else {
+                        remember(service, filter) {
+                            require(service is MastodonDataSource)
+                            combine(
+                                service.searchFollowing(query = filter, scope = scope),
+                                service.listMemberCache(listId),
+                            ) { pagingData, cache ->
+                                pagingData.map { user ->
+                                    user to cache.any { it.key == user.key }
+                                }
+                            }
+                        }.collectAsLazyPagingItems().let {
+                            UiState.Success(it)
+                        }
+                    }
                 }.toPagingState()
+        return object : EditListMemberState {
+            override val users = userState
 
-        return object : EditListState {
-            override val listInfo = listInfo
-            override val memberInfo = memberInfo
-
-            override fun refresh() {
-                scope.launch {
-                    memberInfo.refreshSuspend()
-                }
+            override fun setFilter(value: String) {
+                filter = value
             }
 
             override fun addMember(userId: String) {
@@ -73,26 +75,18 @@ class EditListPresenter(
                     }
                 }
             }
-
-            override suspend fun updateTitle(title: String) {
-                serviceState.onSuccess {
-                    require(it is MastodonDataSource)
-                    it.updateList(listId, title)
-                }
-            }
         }
     }
 }
 
-interface EditListState {
-    val listInfo: UiState<UiList>
-    val memberInfo: PagingState<UiUserV2>
+interface EditListMemberState {
+    val users: PagingState<Pair<UiUserV2, Boolean>>
 
-    fun refresh()
+    fun setFilter(value: String)
 
     fun addMember(userId: String)
 
     fun removeMember(userId: String)
-
-    suspend fun updateTitle(title: String)
 }
+
+data object EmptyQueryException : Exception("Query is empty")

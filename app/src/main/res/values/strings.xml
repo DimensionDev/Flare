@@ -380,7 +380,15 @@
     <string name="list_create_name">List name</string>
     <string name="list_create_name_hint">List name</string>
     <string name="list_edit_members">Members</string>
-    <string name="list_edit_add_members">Add members</string>
+    <string name="list_edit_edit_members">Edit members</string>
     <string name="list_edit_no_members">No members</string>
     <string name="list_edit_members_error">Failed to load members</string>
+    <string name="edit_list_member_title">Edit list members</string>
+    <string name="edit_list_member_placeholder">Search your following</string>
+    <string name="edit_list_member_label">Search</string>
+    <string name="edit_list_member_search">Search</string>
+    <string name="edit_list_member_search_empty">No users found</string>
+    <string name="edit_list_member_search_error">Failed to search users</string>
+    <string name="edit_list_member_add">Add</string>
+    <string name="edit_list_member_remove">Remove</string>
 </resources>

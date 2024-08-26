@@ -121,7 +121,24 @@ internal class MemoryPagingSource<T : Any>(
             val value = caches[key]?.value as? ImmutableList<T> ?: persistentListOf()
             caches[key]?.value = update(value)
         }
+
+        @Suppress("UNCHECKED_CAST")
+        fun <T : Any> get(key: String): ImmutableList<T>? = caches[key]?.value as? ImmutableList<T>
+
+        fun clear(key: String) {
+            caches.remove(key)
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        fun <T : Any> getFlow(key: String): Flow<ImmutableList<T>> =
+            caches
+                .getOrPut(key) {
+                    MutableStateFlow(persistentListOf<T>())
+                } as Flow<ImmutableList<T>>
     }
+
+    // TODO: workaround for skip first invalidation to avoid loading infinite loop
+    private var skiped = false
 
     private val job =
         caches
@@ -129,8 +146,11 @@ internal class MemoryPagingSource<T : Any>(
                 MutableStateFlow(persistentListOf<T>())
             }.let {
                 CoroutineScope(context).launch {
-                    // TODO: collectLatest will cause infinite loop
                     it.collectLatest {
+                        if (!skiped) {
+                            skiped = true
+                            return@collectLatest
+                        }
                         invalidate()
                     }
                 }
@@ -153,8 +173,8 @@ internal class MemoryPagingSource<T : Any>(
         @Suppress("UNCHECKED_CAST")
         val list = caches[key]?.value as? ImmutableList<T> ?: return LoadResult.Error(Exception("No data"))
         val data = list.subList(page, (page + params.loadSize).coerceIn(0, list.size))
-        val prevKey = (page - params.loadSize).coerceIn(0, list.size).takeIf { it != 0 }
-        val nextKey = (page + params.loadSize).coerceIn(0, list.size).takeIf { it != 0 }
+        val prevKey = (page - params.loadSize).takeIf { it in list.indices }
+        val nextKey = (page + params.loadSize).takeIf { it in list.indices }
         return LoadResult.Page(
             data = data,
             prevKey = prevKey,

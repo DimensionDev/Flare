@@ -85,6 +85,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.generated.destinations.EditAccountListRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -99,6 +100,7 @@ import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -131,7 +133,6 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.launch
 import kotlin.math.max
-import kotlin.reflect.KFunction1
 
 @Composable
 @Destination<RootGraph>(
@@ -181,6 +182,9 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                     )
                 },
                 accountType = AccountType.Specific(accountKey),
+                toEditAccountList = {
+                    navigator.navigate(EditAccountListRouteDestination(AccountType.Specific(accountKey), it.key))
+                },
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -242,6 +246,9 @@ internal fun ProfileWithUserNameAndHostRoute(
                     )
                 },
                 accountType = accountType,
+                toEditAccountList = {
+                    navigator.navigate(EditAccountListRouteDestination(accountType, it.key))
+                },
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -380,6 +387,11 @@ internal fun ProfileDeeplinkRoute(
             )
         },
         accountType = AccountType.Specific(accountKey),
+        toEditAccountList = {
+            if (userKey != null) {
+                navigator.navigate(EditAccountListRouteDestination(AccountType.Specific(accountKey), userKey))
+            }
+        },
     )
 }
 
@@ -418,6 +430,11 @@ internal fun ProfileRoute(
             )
         },
         accountType = accountType,
+        toEditAccountList = {
+            if (userKey != null) {
+                navigator.navigate(EditAccountListRouteDestination(accountType, userKey))
+            }
+        },
     )
 }
 
@@ -428,6 +445,7 @@ internal fun ProfileRoute(
 private fun ProfileScreen(
     // null means current user
     accountType: AccountType,
+    toEditAccountList: () -> Unit,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     onProfileMediaClick: () -> Unit = {},
@@ -552,6 +570,7 @@ private fun ProfileScreen(
                                 profileState = state.state,
                                 setShowMoreMenus = state::setShowMoreMenus,
                                 showMoreMenus = state.showMoreMenus,
+                                toEditAccountList = toEditAccountList,
                             )
                         }
                     },
@@ -585,6 +604,7 @@ private fun ProfileScreen(
                                     profileState = state.state,
                                     setShowMoreMenus = state::setShowMoreMenus,
                                     showMoreMenus = state.showMoreMenus,
+                                    toEditAccountList = toEditAccountList,
                                 )
                             },
                             expandMatrices = true,
@@ -684,8 +704,9 @@ private fun ProfileScreen(
 @Composable
 private fun ProfileMenu(
     profileState: ProfileState,
-    setShowMoreMenus: KFunction1<Boolean, Unit>,
+    setShowMoreMenus: (Boolean) -> Unit,
     showMoreMenus: Boolean,
+    toEditAccountList: () -> Unit,
 ) {
     profileState.userState.onSuccess { user ->
         IconButton(onClick = {
@@ -703,6 +724,26 @@ private fun ProfileMenu(
             profileState.isMe.onSuccess { isMe ->
                 if (!isMe) {
                     profileState.relationState.onSuccess { relation ->
+                        if (!profileState.isGuestMode && relation.following) {
+                            profileState.userState.onSuccess { user ->
+                                if (user.platformType == PlatformType.Mastodon) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text =
+                                                    stringResource(
+                                                        id = R.string.user_follow_edit_list,
+                                                    ),
+                                            )
+                                        },
+                                        onClick = {
+                                            setShowMoreMenus(false)
+                                            toEditAccountList.invoke()
+                                        },
+                                    )
+                                }
+                            }
+                        }
                         profileState.actions.onSuccess { actions ->
                             for (i in 0..<actions.size) {
                                 val action = actions[i]

@@ -391,4 +391,9 @@
     <string name="edit_list_member_search_error">Failed to search users</string>
     <string name="edit_list_member_add">Add</string>
     <string name="edit_list_member_remove">Remove</string>
+
+    <string name="user_follow_edit_list">Add/Remove from list</string>
+    <string name="edit_account_list_title">Edit account list</string>
+    <string name="edit_account_list_error">Failed to load lists</string>
+    <string name="edit_account_list_empty">No lists</string>
 </resources>

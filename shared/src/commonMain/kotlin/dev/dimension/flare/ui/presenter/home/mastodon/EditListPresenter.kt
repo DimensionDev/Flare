@@ -11,6 +11,7 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
@@ -56,20 +57,20 @@ class EditListPresenter(
                 }
             }
 
-            override fun addMember(userId: String) {
+            override fun addMember(userKey: MicroBlogKey) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is MastodonDataSource)
-                        it.addMember(listId, userId)
+                        it.addMember(listId, userKey)
                     }
                 }
             }
 
-            override fun removeMember(userId: String) {
+            override fun removeMember(userKey: MicroBlogKey) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is MastodonDataSource)
-                        it.removeMember(listId, userId)
+                        it.removeMember(listId, userKey)
                     }
                 }
             }
@@ -90,9 +91,9 @@ interface EditListState {
 
     fun refresh()
 
-    fun addMember(userId: String)
+    fun addMember(userKey: MicroBlogKey)
 
-    fun removeMember(userId: String)
+    fun removeMember(userKey: MicroBlogKey)
 
     suspend fun updateTitle(title: String)
 }

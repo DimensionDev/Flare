@@ -180,7 +180,7 @@ private fun EditListScreen(
                                         onClick = {
                                             showMenu = false
                                             if (item != null) {
-                                                state.removeMember(item.key.id)
+                                                state.removeMember(item.key)
                                             }
                                         },
                                         text = {

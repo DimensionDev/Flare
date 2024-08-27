@@ -146,9 +146,9 @@ private fun EditListMemberScreen(
                                     if (isMember != null) {
                                         IconButton(onClick = {
                                             if (isMember) {
-                                                state.removeMember(item.first.key.id)
+                                                state.removeMember(item.first.key)
                                             } else {
-                                                state.addMember(item.first.key.id)
+                                                state.addMember(item.first.key)
                                             }
                                         }) {
                                             if (isMember) {

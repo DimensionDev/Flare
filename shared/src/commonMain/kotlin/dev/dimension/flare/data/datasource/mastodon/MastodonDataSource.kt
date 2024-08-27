@@ -1085,14 +1085,18 @@ class MastodonDataSource(
 
     suspend fun addMember(
         listId: String,
-        userId: String,
+        userKey: MicroBlogKey,
     ) {
         runCatching {
             service.addMember(
                 listId,
-                PostAccounts(listOf(userId)),
+                PostAccounts(listOf(userKey.id)),
             )
-            val user = service.lookupUser(userId).toDbUser(account.accountKey.host).render(account.accountKey)
+            val user =
+                service
+                    .lookupUser(userKey.id)
+                    .toDbUser(account.accountKey.host)
+                    .render(account.accountKey)
             MemoryPagingSource.updateWith(
                 key = listMemberKey(listId),
             ) {
@@ -1101,27 +1105,64 @@ class MastodonDataSource(
                         it.key
                     }.toImmutableList()
             }
+            val list = service.getList(listId)
+            if (list.id != null) {
+                MemCacheable.updateWith<List<UiList>>(
+                    key = userListsKey(userKey),
+                ) {
+                    it +
+                        UiList(
+                            id = list.id,
+                            title = list.title.orEmpty(),
+                        )
+                }
+            }
         }
     }
 
     suspend fun removeMember(
         listId: String,
-        userId: String,
+        userKey: MicroBlogKey,
     ) {
         runCatching {
             service.removeMember(
                 listId,
-                PostAccounts(listOf(userId)),
+                PostAccounts(listOf(userKey.id)),
             )
             MemoryPagingSource.updateWith<UiUserV2>(
                 key = listMemberKey(listId),
             ) {
                 it
-                    .filter { user -> user.key.id != userId }
+                    .filter { user -> user.key.id != userKey.id }
                     .toImmutableList()
+            }
+            MemCacheable.updateWith<List<UiList>>(
+                key = userListsKey(userKey),
+            ) {
+                it
+                    .filter { list -> list.id != listId }
             }
         }
     }
 
     fun listMemberCache(listId: String) = MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
+
+    private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
+
+    fun userLists(userKey: MicroBlogKey): MemCacheable<List<UiList>> =
+        MemCacheable(
+            key = userListsKey(userKey),
+        ) {
+            service
+                .accountLists(userKey.id)
+                .body()
+                ?.mapNotNull {
+                    it.id?.let { it1 ->
+                        UiList(
+                            id = it1,
+                            title = it.title.orEmpty(),
+                        )
+                    }
+                }.orEmpty()
+        }
 }

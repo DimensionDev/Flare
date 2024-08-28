@@ -82,6 +82,7 @@ class ProfilePresenter(
             relationState = relationState,
             isMe = isMe,
             actions = actions,
+            isGuestMode = accountType == AccountType.Guest,
         ) {
             override suspend fun refresh() {
                 userState.onSuccess {
@@ -148,6 +149,7 @@ abstract class ProfileState(
     val relationState: UiState<UiRelation>,
     val isMe: UiState<Boolean>,
     val actions: UiState<ImmutableListWrapper<ProfileAction>>,
+    val isGuestMode: Boolean,
 ) {
     abstract suspend fun refresh()
 

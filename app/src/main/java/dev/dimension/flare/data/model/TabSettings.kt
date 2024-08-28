@@ -3,6 +3,7 @@ package dev.dimension.flare.data.model
 import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FeaturedPlayList
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Favorite
@@ -88,7 +89,8 @@ sealed interface TitleType {
             MastodonPublic,
             Featured,
             Bookmark,
-            Favourite, ;
+            Favourite,
+            List, ;
 
             fun toId(): Int =
                 when (this) {
@@ -102,6 +104,7 @@ sealed interface TitleType {
                     Featured -> R.string.home_tab_featured_title
                     Bookmark -> R.string.home_tab_bookmarks_title
                     Favourite -> R.string.home_tab_favorite_title
+                    List -> R.string.home_tab_list_title
                 }
         }
     }
@@ -133,7 +136,8 @@ sealed interface IconType {
             Twitter,
             Mastodon,
             Misskey,
-            Bluesky, ;
+            Bluesky,
+            List, ;
 
             fun toIcon(): ImageVector =
                 when (this) {
@@ -151,6 +155,7 @@ sealed interface IconType {
                     Mastodon -> FontAwesomeIcons.Brands.Mastodon
                     Misskey -> FontAwesomeIcons.Brands.Misskey
                     Bluesky -> FontAwesomeIcons.Brands.Bluesky
+                    List -> Icons.AutoMirrored.Default.List
                 }
         }
     }
@@ -324,7 +329,15 @@ sealed interface TimelineTabItem : TabItem {
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Favourite),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
+                        ),
+                ),
+                Mastodon.AllListTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
                         ),
                 ),
             )
@@ -607,6 +620,31 @@ object Mastodon {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
                 .FavouriteTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    data class ListTimelineTabItem(
+        override val account: AccountType,
+        val listId: String,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "list_${account}_$listId"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.mastodon
+                .ListTimelinePresenter(account, listId)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    data class AllListTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TabItem {
+        override val key: String = "list_$account"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

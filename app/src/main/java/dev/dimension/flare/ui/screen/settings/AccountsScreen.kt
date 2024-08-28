@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -112,7 +113,7 @@ internal fun AccountsScreen(
                 is UiState.Error -> Unit
                 is UiState.Loading -> {
                     items(3) {
-                        AccountItemLoadingPlaceholder()
+                        AccountItem(userState = UiState.Loading(), onClick = {}, toLogin = {})
                     }
                 }
 
@@ -188,6 +189,7 @@ fun <T : UiUserV2> AccountItem(
     supportingContent: @Composable (UiUserV2) -> Unit = {
         Text(text = it.handle, maxLines = 1)
     },
+    colors: ListItemColors = ListItemDefaults.colors(containerColor = Color.Transparent),
 ) {
     userState
         .onSuccess { data ->
@@ -209,71 +211,62 @@ fun <T : UiUserV2> AccountItem(
                 supportingContent = {
                     supportingContent.invoke(data)
                 },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                colors = colors,
             )
         }.onLoading {
-            AccountItemLoadingPlaceholder(modifier)
-        }.onError {
-            AccountItemError(it, toLogin, modifier)
-        }
-}
-
-@Composable
-private fun AccountItemError(
-    throwable: Throwable,
-    toLogin: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    ListItem(
-        headlineContent = {
-            if (throwable is LoginExpiredException) {
-                Text(text = stringResource(id = R.string.login_expired))
-            } else {
-                Text(text = stringResource(id = R.string.account_item_error_title))
-            }
-        },
-        modifier = modifier,
-        leadingContent = {
-            Icon(
-                Icons.Default.MoodBad,
-                contentDescription = stringResource(id = R.string.account_item_error_title),
-                modifier = Modifier.size(AvatarComponentDefaults.size),
+            ListItem(
+                headlineContent = {
+                    Text(text = "Loading...", modifier = Modifier.placeholder(true))
+                },
+                modifier = modifier,
+                leadingContent = {
+                    AvatarComponent(
+                        data = null,
+                        modifier = Modifier.placeholder(true, shape = CircleShape),
+                    )
+                },
+                supportingContent = {
+                    Text(text = "Loading...", modifier = Modifier.placeholder(true))
+                },
+                colors = colors,
             )
-        },
-        supportingContent = {
-            if (throwable is LoginExpiredException) {
-                Text(text = stringResource(id = R.string.login_expired_message))
-            } else {
-                Text(text = stringResource(id = R.string.account_item_error_message))
-            }
-        },
-        trailingContent =
-            if (throwable is LoginExpiredException) {
-                {
-                    TextButton(onClick = toLogin) {
-                        Text(text = stringResource(id = R.string.login_expired_relogin))
+        }.onError { throwable ->
+            ListItem(
+                headlineContent = {
+                    if (throwable is LoginExpiredException) {
+                        Text(text = stringResource(id = R.string.login_expired))
+                    } else {
+                        Text(text = stringResource(id = R.string.account_item_error_title))
                     }
-                }
-            } else {
-                null
-            },
-    )
-}
-
-@Composable
-private fun AccountItemLoadingPlaceholder(modifier: Modifier = Modifier) {
-    ListItem(
-        headlineContent = {
-            Text(text = "Loading...", modifier = Modifier.placeholder(true))
-        },
-        modifier = modifier,
-        leadingContent = {
-            AvatarComponent(data = null, modifier = Modifier.placeholder(true, shape = CircleShape))
-        },
-        supportingContent = {
-            Text(text = "Loading...", modifier = Modifier.placeholder(true))
-        },
-    )
+                },
+                modifier = modifier,
+                leadingContent = {
+                    Icon(
+                        Icons.Default.MoodBad,
+                        contentDescription = stringResource(id = R.string.account_item_error_title),
+                        modifier = Modifier.size(AvatarComponentDefaults.size),
+                    )
+                },
+                supportingContent = {
+                    if (throwable is LoginExpiredException) {
+                        Text(text = stringResource(id = R.string.login_expired_message))
+                    } else {
+                        Text(text = stringResource(id = R.string.account_item_error_message))
+                    }
+                },
+                trailingContent =
+                    if (throwable is LoginExpiredException) {
+                        {
+                            TextButton(onClick = toLogin) {
+                                Text(text = stringResource(id = R.string.login_expired_relogin))
+                            }
+                        }
+                    } else {
+                        null
+                    },
+                colors = colors,
+            )
+        }
 }
 
 @Composable

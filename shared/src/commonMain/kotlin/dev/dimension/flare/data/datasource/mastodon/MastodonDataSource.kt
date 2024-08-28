@@ -1,9 +1,12 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.PagingState
+import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
@@ -21,13 +24,17 @@ import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
+import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
+import dev.dimension.flare.data.network.mastodon.api.model.PostList
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
@@ -37,6 +44,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -150,6 +158,29 @@ class MastodonDataSource(
             scope = scope,
             mediator =
                 FavouriteTimelineRemoteMediator(
+                    service,
+                    database,
+                    account.accountKey,
+                    pagingKey,
+                ),
+        )
+
+    fun listTimeline(
+        listId: String,
+        pageSize: Int = 20,
+        pagingKey: String = "list_${account.accountKey}_$listId",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                ListTimelineRemoteMediator(
+                    listId,
                     service,
                     database,
                     account.accountKey,
@@ -837,6 +868,23 @@ class MastodonDataSource(
             )
         }.flow.cachedIn(scope)
 
+    fun searchFollowing(
+        query: String,
+        scope: CoroutineScope,
+        pageSize: Int = 20,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            SearchUserPagingSource(
+                service,
+                account.accountKey,
+                query,
+                following = true,
+                resolve = false,
+            )
+        }.flow.cachedIn(scope)
+
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(500),
@@ -890,4 +938,231 @@ class MastodonDataSource(
                 override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
+
+    private val listKey: String
+        get() = "allLists_${account.accountKey}"
+
+    fun allLists(): MemCacheable<List<UiList>> =
+        MemCacheable(
+            key = listKey,
+        ) {
+            service
+                .lists()
+                .mapNotNull {
+                    it.id?.let { it1 ->
+                        UiList(
+                            id = it1,
+                            title = it.title.orEmpty(),
+                        )
+                    }
+                }
+        }
+
+    suspend fun createList(title: String) {
+        runCatching {
+            service.createList(PostList(title = title))
+        }.onSuccess { response ->
+            if (response.id != null) {
+                MemCacheable.updateWith<List<UiList>>(
+                    key = listKey,
+                ) {
+                    it +
+                        UiList(
+                            id = response.id,
+                            title = title,
+                        )
+                }
+            }
+        }
+    }
+
+    suspend fun deleteList(listId: String) {
+        runCatching {
+            service.deleteList(listId)
+        }.onSuccess {
+            MemCacheable.updateWith<List<UiList>>(
+                key = listKey,
+            ) {
+                it.filter { list -> list.id != listId }
+            }
+        }
+    }
+
+    suspend fun updateList(
+        listId: String,
+        title: String,
+    ) {
+        runCatching {
+            service.updateList(listId, PostList(title = title))
+        }.onSuccess {
+            MemCacheable.updateWith<List<UiList>>(
+                key = listKey,
+            ) {
+                it.map { list ->
+                    if (list.id == listId) {
+                        list.copy(title = title)
+                    } else {
+                        list
+                    }
+                }
+            }
+        }
+    }
+
+    fun listInfo(listId: String): CacheData<UiList> =
+        MemCacheable(
+            key = "listInfo_$listId",
+            fetchSource = {
+                service.getList(listId).let {
+                    UiList(
+                        id = it.id ?: "",
+                        title = it.title.orEmpty(),
+                    )
+                }
+            },
+        )
+
+    private fun listMemberKey(listId: String) = "listMembers_$listId"
+
+    fun listMembers(
+        listId: String,
+        pageSize: Int = 20,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiUserV2>> =
+        memoryPager(
+            pageSize = pageSize,
+            pagingKey = listMemberKey(listId),
+            scope = scope,
+            mediator =
+                object : RemoteMediator<Int, UiUserV2>() {
+                    override suspend fun load(
+                        loadType: LoadType,
+                        state: PagingState<Int, UiUserV2>,
+                    ): MediatorResult {
+                        try {
+                            if (loadType == LoadType.PREPEND) {
+                                return MediatorResult.Success(endOfPaginationReached = true)
+                            }
+                            val key =
+                                if (loadType == LoadType.REFRESH) {
+                                    null
+                                } else {
+                                    MemoryPagingSource
+                                        .get<UiUserV2>(key = listMemberKey(listId))
+                                        ?.lastOrNull()
+                                        ?.key
+                                        ?.id
+                                }
+                            val result =
+                                service
+                                    .listMembers(listId, limit = pageSize, max_id = key)
+                                    .body()
+                                    ?.map {
+                                        it.toDbUser(account.accountKey.host).render(account.accountKey)
+                                    } ?: emptyList()
+
+                            if (loadType == LoadType.REFRESH) {
+                                MemoryPagingSource.update(
+                                    key = listMemberKey(listId),
+                                    value = result.toImmutableList(),
+                                )
+                            } else if (loadType == LoadType.APPEND) {
+                                MemoryPagingSource.append(
+                                    key = listMemberKey(listId),
+                                    value = result.toImmutableList(),
+                                )
+                            }
+
+                            return MediatorResult.Success(
+                                endOfPaginationReached = result.isEmpty(),
+                            )
+                        } catch (e: Exception) {
+                            return MediatorResult.Error(e)
+                        }
+                    }
+                },
+        )
+
+    suspend fun addMember(
+        listId: String,
+        userKey: MicroBlogKey,
+    ) {
+        runCatching {
+            service.addMember(
+                listId,
+                PostAccounts(listOf(userKey.id)),
+            )
+            val user =
+                service
+                    .lookupUser(userKey.id)
+                    .toDbUser(account.accountKey.host)
+                    .render(account.accountKey)
+            MemoryPagingSource.updateWith(
+                key = listMemberKey(listId),
+            ) {
+                (listOf(user) + it)
+                    .distinctBy {
+                        it.key
+                    }.toImmutableList()
+            }
+            val list = service.getList(listId)
+            if (list.id != null) {
+                MemCacheable.updateWith<List<UiList>>(
+                    key = userListsKey(userKey),
+                ) {
+                    it +
+                        UiList(
+                            id = list.id,
+                            title = list.title.orEmpty(),
+                        )
+                }
+            }
+        }
+    }
+
+    suspend fun removeMember(
+        listId: String,
+        userKey: MicroBlogKey,
+    ) {
+        runCatching {
+            service.removeMember(
+                listId,
+                PostAccounts(listOf(userKey.id)),
+            )
+            MemoryPagingSource.updateWith<UiUserV2>(
+                key = listMemberKey(listId),
+            ) {
+                it
+                    .filter { user -> user.key.id != userKey.id }
+                    .toImmutableList()
+            }
+            MemCacheable.updateWith<List<UiList>>(
+                key = userListsKey(userKey),
+            ) {
+                it
+                    .filter { list -> list.id != listId }
+            }
+        }
+    }
+
+    fun listMemberCache(listId: String) = MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
+
+    private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
+
+    fun userLists(userKey: MicroBlogKey): MemCacheable<List<UiList>> =
+        MemCacheable(
+            key = userListsKey(userKey),
+        ) {
+            service
+                .accountLists(userKey.id)
+                .body()
+                ?.mapNotNull {
+                    it.id?.let { it1 ->
+                        UiList(
+                            id = it1,
+                            title = it.title.orEmpty(),
+                        )
+                    }
+                }.orEmpty()
+        }
 }

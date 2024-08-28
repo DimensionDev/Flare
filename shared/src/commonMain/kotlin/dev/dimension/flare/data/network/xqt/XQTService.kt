@@ -92,7 +92,7 @@ internal class XQTService(
     companion object {
         fun checkChocolate(value: String) =
 //            value.contains("gt=") &&
-                value.contains("ct0=") && value.contains("auth_token=")
+            value.contains("ct0=") && value.contains("auth_token=")
     }
 }
 

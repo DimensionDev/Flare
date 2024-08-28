@@ -60,24 +60,33 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.TabItem
+import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.AllListPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
@@ -173,6 +182,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                             canSwipeToDelete = state.canSwipeToDelete,
                         )
                     }
+
                     PrimaryTabItemState -> {
                         stickyHeader {
                             ListItem(
@@ -182,6 +192,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                             )
                         }
                     }
+
                     SecondaryTabItemState -> {
                         stickyHeader(key = SecondaryTabItemState.key) {
                             ReorderableItem(
@@ -228,7 +239,15 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                 state.allTabs.accountTabs.onSuccess {
                     it.forEach { (userState, tabState) ->
                         stickyHeader {
-                            AccountItem(userState = userState.second, onClick = {}, toLogin = {})
+                            AccountItem(
+                                userState = userState,
+                                onClick = {},
+                                toLogin = {},
+                                colors =
+                                    ListItemDefaults.colors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                    ),
+                            )
                         }
                         tabState.onSuccess {
                             items(it) { tab ->
@@ -465,7 +484,11 @@ fun TabIcon(
                         .onSuccess {
                             AvatarComponent(it.avatar, size = 24.dp)
                         }.onLoading {
-                            AvatarComponent(null, size = 24.dp, modifier = Modifier.placeholder(true))
+                            AvatarComponent(
+                                null,
+                                size = 24.dp,
+                                modifier = Modifier.placeholder(true),
+                            )
                         }
                     Icon(
                         imageVector = icon.icon.toIcon(),
@@ -518,7 +541,10 @@ private fun presenter(
                 cacheTabs.add(SecondaryTabItemState)
             }
         }
-    val allTabs = allTabsPresenter()
+//    val except = remember(cacheTabs) {
+//        cacheTabs.map { it.key }.toImmutableList()
+//    }
+    val allTabs = allTabsPresenter(except = cacheTabs.map { it.key }.toImmutableList())
 
     object {
         val tabs = cacheTabs
@@ -609,22 +635,81 @@ private data class ActualTabItem(
 }
 
 @Composable
-private fun allTabsPresenter() =
+private fun allTabsPresenter(except: ImmutableList<String>) =
     run {
         val accountState = remember { AccountsPresenter() }.invoke()
         val accountTabs =
             accountState.accounts.map {
                 it
                     .toImmutableList()
-                    .associateWith { (_, userState) ->
-                        userState.map { user ->
-                            TimelineTabItem.defaultPrimary(user) + TimelineTabItem.defaultSecondary(user)
-                        }
+                    .associate { (_, userState) ->
+                        userState to
+                            userState
+                                .map { user ->
+                                    TimelineTabItem.defaultPrimary(user) +
+                                        TimelineTabItem.defaultSecondary(
+                                            user,
+                                        )
+                                }.map { items ->
+                                    items
+                                        .filter {
+                                            it.key !in except
+                                        }.toImmutableList()
+                                }.flatMap { items ->
+                                    userState.flatMap { user ->
+                                        dynamicTabPresenter(profile = user)
+                                            .items
+                                            .map { dynTabs ->
+                                                items + dynTabs
+                                            }.map {
+                                                it.toImmutableList()
+                                            }
+                                    }
+                                }
                     }.toImmutableMap()
             }
 
         object {
-            val defaultTabs = TimelineTabItem.default.toImmutableList()
+            val defaultTabs = TimelineTabItem.default.filter { it.key !in except }.toImmutableList()
             val accountTabs = accountTabs
+        }
+    }
+
+@Composable
+private fun dynamicTabPresenter(profile: UiProfile) =
+    run {
+        val items =
+            when (profile.platformType) {
+                PlatformType.Mastodon ->
+                    remember {
+                        AllListPresenter(accountType = AccountType.Specific(profile.key))
+                    }.invoke().items.map {
+                        it.toImmutableList().map {
+                            Mastodon.ListTimelineTabItem(
+                                account = AccountType.Specific(profile.key),
+                                listId = it.id,
+                                metaData =
+                                    TabMetaData(
+                                        title = TitleType.Text(it.title),
+                                        icon =
+                                            IconType.Mixed(
+                                                icon = IconType.Material.MaterialIcon.List,
+                                                userKey = profile.key,
+                                            ),
+                                    ),
+                            )
+                        }
+                    }
+                PlatformType.Misskey -> null
+                PlatformType.Bluesky -> null
+                PlatformType.xQt -> null
+                PlatformType.VVo -> null
+            }
+
+        object {
+            val items =
+                items?.map {
+                    it.toImmutableList()
+                } ?: UiState.Success(persistentListOf())
         }
     }

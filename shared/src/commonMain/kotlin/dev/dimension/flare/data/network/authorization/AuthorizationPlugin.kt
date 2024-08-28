@@ -5,7 +5,7 @@ import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.client.request.header
 import io.ktor.util.AttributeKey
-import io.ktor.util.KtorDsl
+import io.ktor.utils.io.KtorDsl
 
 internal class AuthorizationPlugin private constructor(
     private val authorization: Authorization,

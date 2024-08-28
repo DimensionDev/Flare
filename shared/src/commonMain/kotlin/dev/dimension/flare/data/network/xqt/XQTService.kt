@@ -32,7 +32,7 @@ import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.client.request.headers
 import io.ktor.util.AttributeKey
-import io.ktor.util.KtorDsl
+import io.ktor.utils.io.KtorDsl
 
 private val baseUrl = "https://$xqtHost/i/api/"
 private val guestApiUrl = "https://api.$xqtHost/"

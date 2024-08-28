@@ -20,7 +20,7 @@ kotlinx-serialization = "1.7.1"
 coil = "2.7.0"
 ktorfit = "2.0.1"
 ktorfit-converter = "2.0.1"
-ktor = "2.3.12"
+ktor = "3.0.0-beta-2"
 reorderable = "2.3.1"
 stately = "2.0.7"
 twitter-parser = "0.5.1"
@@ -111,11 +111,11 @@ awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", ver
 vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.2.0" }
 zoomable-image = { group = "me.saket.telephoto", name = "zoomable-image-coil", version = "0.13.0" }
 
-ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
+ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib-ktor-3.0.0-beta-2", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
-ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfit-converter" }
-ktorfit-converters-call = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-call", version.ref = "ktorfit-converter" }
-ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow", version.ref = "ktorfit-converter" }
+ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response-ktor-3.0.0-beta-2", version.ref = "ktorfit-converter" }
+ktorfit-converters-call = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-call-ktor-3.0.0-beta-2", version.ref = "ktorfit-converter" }
+ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow-ktor-3.0.0-beta-2", version.ref = "ktorfit-converter" }
 
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }

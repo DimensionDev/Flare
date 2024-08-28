@@ -25,7 +25,7 @@ import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.util.AttributeKey
-import io.ktor.util.KtorDsl
+import io.ktor.utils.io.KtorDsl
 import io.ktor.utils.io.core.writeFully
 import kotlin.time.Duration.Companion.minutes
 

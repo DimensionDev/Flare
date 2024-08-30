@@ -11,6 +11,7 @@ import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun statusTranslatePresenter(
@@ -33,19 +34,24 @@ fun statusTranslatePresenter(
 private fun translateText(text: String) =
     run {
         val language by produceState<UiState<String>>(initialValue = UiState.Loading(), key1 = text) {
-            LanguageIdentification
-                .getClient()
-                .identifyLanguage(text)
-                .addOnSuccessListener {
-                    value =
+            value =
+                runCatching {
+                    LanguageIdentification
+                        .getClient()
+                        .identifyLanguage(text)
+                        .await()
+                }.fold(
+                    onSuccess = {
                         if (it == "und") {
                             UiState.Error(Exception("Language not supported"))
                         } else {
                             UiState.Success(it)
                         }
-                }.addOnFailureListener {
-                    value = UiState.Error(it)
-                }
+                    },
+                    onFailure = {
+                        UiState.Error(it)
+                    },
+                )
         }
         language.flatMap {
             val source =

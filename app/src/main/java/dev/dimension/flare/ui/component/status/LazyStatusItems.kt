@@ -49,8 +49,10 @@ import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-context(LazyStaggeredGridScope, PagingState<UiTimeline>)
-internal fun status(detailStatusKey: MicroBlogKey? = null) {
+internal fun LazyStaggeredGridScope.status(
+    pagingState: PagingState<UiTimeline>,
+    detailStatusKey: MicroBlogKey? = null,
+) = with(pagingState) {
     onSuccess {
         items(
             itemCount,

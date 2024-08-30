@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,6 +73,7 @@ import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestin
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
@@ -88,7 +90,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.FlareTheme
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -443,9 +444,13 @@ private fun StatusMediaScreen(
                                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                                 ),
                         ) {
-                            QuotedStatus(
-                                data = content,
-                            )
+                            CompositionLocalProvider(
+                                LocalAppearanceSettings provides LocalAppearanceSettings.current.copy(showMedia = false),
+                            ) {
+                                QuotedStatus(
+                                    data = content,
+                                )
+                            }
                         }
                     }
                 }
@@ -605,15 +610,7 @@ private fun statusMediaPresenter(
         mutableIntStateOf(initialIndex)
     }
     object {
-        val status =
-            state.status.map {
-                it.copy(
-                    content =
-                        (it.content as? UiTimeline.ItemContent.Status)?.copy(
-                            images = persistentListOf(),
-                        ),
-                )
-            }
+        val status = state.status
         val medias = medias
         val showUi = showUi
         val withVideoPadding = withVideoPadding

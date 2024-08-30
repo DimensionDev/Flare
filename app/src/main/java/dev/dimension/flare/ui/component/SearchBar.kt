@@ -265,9 +265,7 @@ internal fun LazyStaggeredGridScope.searchContent(
                 },
             )
         }
-        with(searchStatus) {
-            status()
-        }
+        status(searchStatus)
     }
 }
 

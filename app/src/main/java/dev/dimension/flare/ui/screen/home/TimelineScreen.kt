@@ -177,9 +177,7 @@ internal fun TimelineScreen(
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    with(state.listState) {
-                        status()
-                    }
+                    status(state.listState)
                 }
                 state.listState.onSuccess {
                     AnimatedVisibility(

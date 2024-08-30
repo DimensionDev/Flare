@@ -123,11 +123,10 @@ internal fun StatusScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = it,
                 ) {
-                    with(state.state.listState) {
-                        status(
-                            detailStatusKey = statusKey,
-                        )
-                    }
+                    status(
+                        state.state.listState,
+                        detailStatusKey = statusKey,
+                    )
                 }
             },
         )

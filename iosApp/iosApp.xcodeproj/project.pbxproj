@@ -52,7 +52,6 @@
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
 		06B851592B73881E00DFA075 /* StatusMediaScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851582B73881E00DFA075 /* StatusMediaScreen.swift */; };
 		06B8515B2B73930100DFA075 /* Zoomable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B8515A2B73930100DFA075 /* Zoomable.swift */; };
-		06BD66412C2425F2006BDE91 /* AuthSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BD66402C2425F2006BDE91 /* AuthSessionView.swift */; };
 		06C862712B4D0C7A008C902C /* FlareTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862702B4D0C7A008C902C /* FlareTheme.swift */; };
 		06C862732B4D2A14008C902C /* UserInterfaceSizeClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862722B4D2A14008C902C /* UserInterfaceSizeClass.swift */; };
 		06C862762B4D2A55008C902C /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862752B4D2A55008C902C /* UIImage.swift */; };
@@ -114,7 +113,6 @@
 		06B851542B6B926D00DFA075 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		06B851582B73881E00DFA075 /* StatusMediaScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMediaScreen.swift; sourceTree = "<group>"; };
 		06B8515A2B73930100DFA075 /* Zoomable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zoomable.swift; sourceTree = "<group>"; };
-		06BD66402C2425F2006BDE91 /* AuthSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSessionView.swift; sourceTree = "<group>"; };
 		06BE4D632B3181B0000C6D7D /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
 		06C862702B4D0C7A008C902C /* FlareTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareTheme.swift; sourceTree = "<group>"; };
 		06C862722B4D2A14008C902C /* UserInterfaceSizeClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceSizeClass.swift; sourceTree = "<group>"; };
@@ -247,7 +245,6 @@
 				061C2CFD2B4E82C900249514 /* ImageViewWindow.swift */,
 				B62B20B8FBDDC1477802F015 /* WebView.swift */,
 				06B8515A2B73930100DFA075 /* Zoomable.swift */,
-				06BD66402C2425F2006BDE91 /* AuthSessionView.swift */,
 				B62B202755C8B39C8CF77626 /* AppleUriLauncher.swift */,
 				06F4B4C82C6369390005317F /* VGrid.swift */,
 				0630F33F2C732ED2009631AA /* ObservePresenter.swift */,
@@ -553,7 +550,6 @@
 				060881AF2AD908FA001AAD2F /* LinkPreview.swift in Sources */,
 				066F23052B43BD59004A4A8D /* ProfileMediaListScreen.swift in Sources */,
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
-				06BD66412C2425F2006BDE91 /* AuthSessionView.swift in Sources */,
 				06C862712B4D0C7A008C902C /* FlareTheme.swift in Sources */,
 				06C862762B4D2A55008C902C /* UIImage.swift in Sources */,
 				0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */,
@@ -774,7 +770,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = dev.dimension.flare;
 				PRODUCT_NAME = "${APP_NAME}";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
@@ -820,7 +816,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = dev.dimension.flare;
 				PRODUCT_NAME = "${APP_NAME}";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;

@@ -53,10 +53,22 @@ struct HomeTimelineScreen: View {
                     .padding()
                 }
             }
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #else
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(action: {
+                        Task {
+                            try? await state.refresh()
+                        }
+                    }, label: {
+                        Image(systemName: "arrow.clockwise.circle")
+                    })
+                }
+            }
+            #endif
         }
         .navigationTitle("home_timeline_title")
-#if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-#endif
     }
 }

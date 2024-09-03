@@ -262,11 +262,20 @@ struct StatusActionLabel: View {
             switch colorData.color {
             case .red: Color.red
             case .primaryColor: Color.accentColor
-            case .contentColor: Color(UIColor.label)
+            case .contentColor:
+#if os(iOS)
+            Color(UIColor.label)
+#elseif os(macOS)
+            Color(NSColor.labelColor)
+#endif
             case .error: Color.red
             }
         } else {
+#if os(iOS)
             Color(UIColor.label)
+#elseif os(macOS)
+            Color(NSColor.labelColor)
+#endif
         }
         Label(text, systemImage: icon)
             .foregroundStyle(color, color)

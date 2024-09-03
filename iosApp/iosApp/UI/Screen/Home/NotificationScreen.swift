@@ -47,7 +47,7 @@ struct NotificationScreen: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {
                         Task {
-                            try? await viewModel.model.refresh()
+                            try? await state.refresh()
                         }
                     }, label: {
                         Image(systemName: "arrow.clockwise.circle")

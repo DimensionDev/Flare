@@ -226,6 +226,10 @@ data class UiTimeline internal constructor(
                 data object Reply : Bluesky
 
                 data object Quote : Bluesky
+
+                data object UnKnown : Bluesky
+
+                data object StarterpackJoined : Bluesky
             }
 
             sealed interface XQT : MessageType {

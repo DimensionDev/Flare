@@ -76,6 +76,8 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiT
                         ListNotificationsReason.MENTION -> UiTimeline.TopMessage.Icon.Mention
                         ListNotificationsReason.REPLY -> UiTimeline.TopMessage.Icon.Reply
                         ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.Icon.Reply
+                        ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.Icon.Info
+                        ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.Icon.Info
                     },
                 type =
                     when (reason) {
@@ -85,6 +87,8 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiT
                         ListNotificationsReason.MENTION -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
                         ListNotificationsReason.REPLY -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
                         ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
+                        ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+                        ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
                     },
                 onClicked = {
                     launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))

@@ -73,6 +73,8 @@
     <string name="bluesky_item_reblogged_status">boosted a status</string>
     <string name="bluesky_notification_item_replied_to_you">replied to you</string>
     <string name="bluesky_notification_item_quoted_your_status">quoted your status</string>
+    <string name="bluesky_notification_item_starterpack_joined">Starterpack Joined</string>
+    <string name="bluesky_notification_item_unKnown">UnKnown</string>
 
     <string name="misskey_notification_item_mentioned_you">mentioned you</string>
     <string name="misskey_notification_item_replied_to_you">replied to you</string>

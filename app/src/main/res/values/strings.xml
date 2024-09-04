@@ -351,6 +351,7 @@
     <string name="home_tab_bookmarks_title">Bookmarks</string>
     <string name="home_tab_favorite_title">Favorite</string>
     <string name="home_tab_list_title">List</string>
+    <string name="home_tab_feeds_title">Feeds</string>
 
     <string name="tab_settings_primary">Primary tab</string>
     <string name="tab_settings_secondary">Secondary tab</string>
@@ -398,4 +399,7 @@
     <string name="edit_account_list_title">Edit account list</string>
     <string name="edit_account_list_error">Failed to load lists</string>
     <string name="edit_account_list_empty">No lists</string>
+
+    <string name="feeds_my_feeds_title">My feeds</string>
+    <string name="feeds_discover_feeds_title">Discover feeds</string>
 </resources>

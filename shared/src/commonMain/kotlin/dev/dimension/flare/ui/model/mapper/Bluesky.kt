@@ -6,6 +6,7 @@ import app.bsky.actor.ProfileViewDetailed
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.feed.FeedViewPostReasonUnion
+import app.bsky.feed.GeneratorView
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.notification.ListNotificationsNotification
@@ -20,6 +21,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
@@ -583,3 +585,13 @@ private fun render(
 
         else -> null
     }
+
+internal fun GeneratorView.render(
+    accountKey: MicroBlogKey,
+) = UiList(
+    id = uri.atUri,
+    title = displayName,
+    description = description,
+    avatar = avatar?.uri,
+    creator = creator.render(accountKey),
+)

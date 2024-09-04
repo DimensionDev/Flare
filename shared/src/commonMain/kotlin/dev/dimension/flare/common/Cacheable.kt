@@ -6,6 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.paging.LoadState
+import dev.dimension.flare.ui.model.UiState
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -23,21 +26,30 @@ class Cacheable<T>(
     )
 
 @Suppress("UNCHECKED_CAST")
-class MemCacheable<T>(
-    private val key: String,
-    fetchSource: suspend () -> T,
+class MemCacheable<T> private constructor(
+    private val cacheKey: String,
+    fetchSource: suspend () -> Unit,
+    cacheSource: () -> Flow<T>,
 ) : CacheData<T>(
+        fetchSource = fetchSource,
+        cacheSource = cacheSource,
+    ) {
+
+    constructor(
+        key: String,
+        fetchSource: suspend () -> T,
+    ) : this(
+        cacheKey = key,
         fetchSource = {
-            val value = fetchSource.invoke()
-            update(key, value)
+            update(key, fetchSource.invoke())
         },
         cacheSource = {
-            caches
-                .getOrPut(key) {
-                    MutableStateFlow(null)
-                }.filterNotNull() as Flow<T>
+            subscribe(key)
         },
-    ) {
+    )
+
+
+
     companion object {
         private val caches = mutableMapOf<String, MutableStateFlow<Any?>>()
 
@@ -55,6 +67,15 @@ class MemCacheable<T>(
             if (caches.containsKey(key)) {
                 caches[key]?.value = update(caches[key]?.value as T)
             }
+        }
+
+        fun <T> subscribe(
+            key: String,
+        ): Flow<T> {
+            return caches
+                .getOrPut(key) {
+                    MutableStateFlow(null)
+                }.filterNotNull() as Flow<T>
         }
     }
 }
@@ -74,7 +95,7 @@ sealed class CacheData<T>(
                 emit(
                     try {
                         fetchSource.invoke()
-                        LoadState.Success
+                        LoadState.NotLoading(true)
                     } catch (e: Throwable) {
                         e.printStackTrace()
                         LoadState.Error(e)
@@ -101,16 +122,6 @@ sealed class CacheState<T> {
     data class Success<T>(
         val data: T,
     ) : CacheState<T>()
-}
-
-sealed interface LoadState {
-    data object Loading : LoadState
-
-    data object Success : LoadState
-
-    data class Error(
-        val error: Throwable,
-    ) : LoadState
 }
 
 @Composable
@@ -156,5 +167,31 @@ class CacheableState<T>(
                     is CacheState.Success -> it.data
                 }
         }
+    }
+}
+
+@Composable
+internal fun <T : Any> UiState<CacheableState<ImmutableList<T>>>.toPagingState(): PagingState<T> =
+    when (this) {
+        is UiState.Loading -> PagingState.Loading()
+        is UiState.Error -> PagingState.Error(throwable)
+        is UiState.Success -> data.toPagingState()
+    }
+
+@Composable
+internal fun <T : Any> CacheableState<ImmutableList<T>>.toPagingState(): PagingState<T> {
+    val data = data
+    return if (data != null) {
+        if (data.isNotEmpty()) {
+            PagingState.Success.SingleSuccess(this)
+        } else {
+            PagingState.Empty(this::refresh)
+        }
+    } else if (refreshState is LoadState.Loading) {
+        PagingState.Loading()
+    } else if (refreshState is LoadState.Error) {
+        PagingState.Error((refreshState as LoadState.Error).error)
+    } else {
+        PagingState.Empty(this::refresh)
     }
 }

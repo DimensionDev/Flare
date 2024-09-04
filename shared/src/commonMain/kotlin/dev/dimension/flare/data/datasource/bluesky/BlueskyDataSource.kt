@@ -4,11 +4,16 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import app.bsky.actor.GetProfileQueryParams
+import app.bsky.actor.PreferencesUnion
+import app.bsky.actor.Type
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
+import app.bsky.feed.GetFeedGeneratorsQueryParams
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
@@ -16,6 +21,7 @@ import app.bsky.feed.PostReplyRef
 import app.bsky.feed.ViewerState
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
+import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.moderation.CreateReportRequest
@@ -51,15 +57,16 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -109,12 +116,12 @@ class BlueskyDataSource(
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
-                HomeTimelineRemoteMediator(
-                    account.getService(appDatabase),
-                    account.accountKey,
-                    database,
-                    pagingKey,
-                ),
+            HomeTimelineRemoteMediator(
+                account.getService(appDatabase),
+                account.accountKey,
+                database,
+                pagingKey,
+            ),
         )
 
     override fun notification(
@@ -131,17 +138,17 @@ class BlueskyDataSource(
             filterFlow = localFilterRepository.getFlow(forNotification = true),
             scope = scope,
             mediator =
-                when (type) {
-                    NotificationFilter.All ->
-                        NotificationRemoteMediator(
-                            account.getService(appDatabase),
-                            account.accountKey,
-                            database,
-                            pagingKey,
-                        )
+            when (type) {
+                NotificationFilter.All ->
+                    NotificationRemoteMediator(
+                        account.getService(appDatabase),
+                        account.accountKey,
+                        database,
+                        pagingKey,
+                    )
 
-                    else -> throw IllegalArgumentException("Unsupported notification filter")
-                },
+                else -> throw IllegalArgumentException("Unsupported notification filter")
+            },
         )
 
     override val supportedNotificationFilter: List<NotificationFilter>
@@ -235,14 +242,14 @@ class BlueskyDataSource(
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
-                UserTimelineRemoteMediator(
-                    account.getService(appDatabase),
-                    account.accountKey,
-                    database,
-                    userKey,
-                    pagingKey,
-                    onlyMedia = mediaOnly,
-                ),
+            UserTimelineRemoteMediator(
+                account.getService(appDatabase),
+                account.accountKey,
+                database,
+                userKey,
+                pagingKey,
+                onlyMedia = mediaOnly,
+            ),
         )
 
     override fun context(
@@ -259,14 +266,14 @@ class BlueskyDataSource(
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    account.getService(appDatabase),
-                    account.accountKey,
-                    database,
-                    pagingKey,
-                    statusOnly = false,
-                ),
+            StatusDetailRemoteMediator(
+                statusKey,
+                account.getService(appDatabase),
+                account.accountKey,
+                database,
+                pagingKey,
+                statusOnly = false,
+            ),
         )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
@@ -326,73 +333,73 @@ class BlueskyDataSource(
                 text = data.content,
                 createdAt = Clock.System.now(),
                 embed =
-                    data.quoteId
-                        ?.let { quoteId ->
-                            service
-                                .getPosts(GetPostsQueryParams(persistentListOf(AtUri(quoteId))))
-                                .maybeResponse()
-                                ?.posts
-                                ?.firstOrNull()
-                        }?.let { item ->
-                            PostEmbedUnion.Record(
-                                Record(
-                                    StrongRef(
-                                        uri = item.uri,
-                                        cid = item.cid,
-                                    ),
-                                ),
-                            )
-                        } ?: mediaBlob.takeIf { it.any() }?.let { blobs ->
-                        PostEmbedUnion.Images(
-                            Images(
-                                blobs
-                                    .map { blob ->
-                                        ImagesImage(image = blob, alt = "")
-                                    }.toImmutableList(),
-                            ),
-                        )
-                    },
-                reply =
-                    data.inReplyToID
-                        ?.let { inReplyToID ->
-                            service
-                                .getPosts(GetPostsQueryParams(persistentListOf(AtUri(inReplyToID))))
-                                .maybeResponse()
-                                ?.posts
-                                ?.firstOrNull()
-                        }?.let { item ->
-                            val root =
-                                item.record
-                                    .jsonElement()
-                                    .jsonObjectOrNull
-                                    ?.get("reply")
-                                    ?.jsonObjectOrNull
-                                    ?.get("root")
-                                    ?.jsonObjectOrNull
-                                    ?.let { root ->
-                                        StrongRef(
-                                            uri =
-                                                AtUri(
-                                                    root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri,
-                                                ),
-                                            cid =
-                                                Cid(
-                                                    root["cid"]?.jsonPrimitive?.content ?: item.cid.cid,
-                                                ),
-                                        )
-                                    } ?: StrongRef(
+                data.quoteId
+                    ?.let { quoteId ->
+                        service
+                            .getPosts(GetPostsQueryParams(persistentListOf(AtUri(quoteId))))
+                            .maybeResponse()
+                            ?.posts
+                            ?.firstOrNull()
+                    }?.let { item ->
+                        PostEmbedUnion.Record(
+                            Record(
+                                StrongRef(
                                     uri = item.uri,
                                     cid = item.cid,
-                                )
-                            PostReplyRef(
-                                parent =
+                                ),
+                            ),
+                        )
+                    } ?: mediaBlob.takeIf { it.any() }?.let { blobs ->
+                    PostEmbedUnion.Images(
+                        Images(
+                            blobs
+                                .map { blob ->
+                                    ImagesImage(image = blob, alt = "")
+                                }.toImmutableList(),
+                        ),
+                    )
+                },
+                reply =
+                data.inReplyToID
+                    ?.let { inReplyToID ->
+                        service
+                            .getPosts(GetPostsQueryParams(persistentListOf(AtUri(inReplyToID))))
+                            .maybeResponse()
+                            ?.posts
+                            ?.firstOrNull()
+                    }?.let { item ->
+                        val root =
+                            item.record
+                                .jsonElement()
+                                .jsonObjectOrNull
+                                ?.get("reply")
+                                ?.jsonObjectOrNull
+                                ?.get("root")
+                                ?.jsonObjectOrNull
+                                ?.let { root ->
                                     StrongRef(
-                                        uri = item.uri,
-                                        cid = item.cid,
-                                    ),
-                                root = root,
+                                        uri =
+                                        AtUri(
+                                            root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri,
+                                        ),
+                                        cid =
+                                        Cid(
+                                            root["cid"]?.jsonPrimitive?.content ?: item.cid.cid,
+                                        ),
+                                    )
+                                } ?: StrongRef(
+                                uri = item.uri,
+                                cid = item.cid,
                             )
-                        },
+                        PostReplyRef(
+                            parent =
+                            StrongRef(
+                                uri = item.uri,
+                                cid = item.cid,
+                            ),
+                            root = root,
+                        )
+                    },
             )
         val json =
             Json {
@@ -424,22 +431,22 @@ class BlueskyDataSource(
                 service.createReport(
                     CreateReportRequest(
                         reasonType =
-                            when (reason) {
-                                BlueskyReportStatusState.ReportReason.Spam -> Token.REASON_SPAM
-                                BlueskyReportStatusState.ReportReason.Violation -> Token.REASON_VIOLATION
-                                BlueskyReportStatusState.ReportReason.Misleading -> Token.REASON_MISLEADING
-                                BlueskyReportStatusState.ReportReason.Sexual -> Token.REASON_SEXUAL
-                                BlueskyReportStatusState.ReportReason.Rude -> Token.REASON_RUDE
-                                BlueskyReportStatusState.ReportReason.Other -> Token.REASON_OTHER
-                            },
+                        when (reason) {
+                            BlueskyReportStatusState.ReportReason.Spam -> Token.REASON_SPAM
+                            BlueskyReportStatusState.ReportReason.Violation -> Token.REASON_VIOLATION
+                            BlueskyReportStatusState.ReportReason.Misleading -> Token.REASON_MISLEADING
+                            BlueskyReportStatusState.ReportReason.Sexual -> Token.REASON_SEXUAL
+                            BlueskyReportStatusState.ReportReason.Rude -> Token.REASON_RUDE
+                            BlueskyReportStatusState.ReportReason.Other -> Token.REASON_OTHER
+                        },
                         subject =
-                            CreateReportRequestSubjectUnion.RepoStrongRef(
-                                value =
-                                    StrongRef(
-                                        uri = post.uri,
-                                        cid = post.cid,
-                                    ),
+                        CreateReportRequestSubjectUnion.RepoStrongRef(
+                            value =
+                            StrongRef(
+                                uri = post.uri,
+                                cid = post.cid,
                             ),
+                        ),
                     ),
                 )
             }
@@ -472,15 +479,15 @@ class BlueskyDataSource(
                     }.coerceAtLeast(0)
                 content.copy(
                     data =
-                        content.data.copy(
-                            viewer =
-                                content.data.viewer?.copy(
-                                    repost = newUri,
-                                ) ?: ViewerState(
-                                    repost = newUri,
-                                ),
-                            repostCount = count,
+                    content.data.copy(
+                        viewer =
+                        content.data.viewer?.copy(
+                            repost = newUri,
+                        ) ?: ViewerState(
+                            repost = newUri,
                         ),
+                        repostCount = count,
+                    ),
                 )
             }
             runCatching {
@@ -501,17 +508,17 @@ class BlueskyDataSource(
                                     repo = Did(did = account.accountKey.id),
                                     collection = Nsid("app.bsky.feed.repost"),
                                     record =
-                                        buildJsonObject {
-                                            put("\$type", "app.bsky.feed.repost")
-                                            put("createdAt", Clock.System.now().toString())
-                                            put(
-                                                "subject",
-                                                buildJsonObject {
-                                                    put("cid", cid)
-                                                    put("uri", uri)
-                                                },
-                                            )
-                                        }.jsonContent(),
+                                    buildJsonObject {
+                                        put("\$type", "app.bsky.feed.repost")
+                                        put("createdAt", Clock.System.now().toString())
+                                        put(
+                                            "subject",
+                                            buildJsonObject {
+                                                put("cid", cid)
+                                                put("uri", uri)
+                                            },
+                                        )
+                                    }.jsonContent(),
                                 ),
                             ).requireResponse()
                     updateStatusUseCase<StatusContent.Bluesky>(
@@ -521,14 +528,14 @@ class BlueskyDataSource(
                     ) { content ->
                         content.copy(
                             data =
-                                content.data.copy(
-                                    viewer =
-                                        content.data.viewer?.copy(
-                                            repost = AtUri(result.uri.atUri),
-                                        ) ?: ViewerState(
-                                            repost = AtUri(result.uri.atUri),
-                                        ),
+                            content.data.copy(
+                                viewer =
+                                content.data.viewer?.copy(
+                                    repost = AtUri(result.uri.atUri),
+                                ) ?: ViewerState(
+                                    repost = AtUri(result.uri.atUri),
                                 ),
+                            ),
                         )
                     }
                 }
@@ -546,15 +553,15 @@ class BlueskyDataSource(
                         }.coerceAtLeast(0)
                     content.copy(
                         data =
-                            content.data.copy(
-                                viewer =
-                                    content.data.viewer?.copy(
-                                        repost = repostUri?.let { it1 -> AtUri(it1) },
-                                    ) ?: ViewerState(
-                                        repost = repostUri?.let { it1 -> AtUri(it1) },
-                                    ),
-                                repostCount = count,
+                        content.data.copy(
+                            viewer =
+                            content.data.viewer?.copy(
+                                repost = repostUri?.let { it1 -> AtUri(it1) },
+                            ) ?: ViewerState(
+                                repost = repostUri?.let { it1 -> AtUri(it1) },
                             ),
+                            repostCount = count,
+                        ),
                     )
                 }
             }
@@ -587,15 +594,15 @@ class BlueskyDataSource(
                     }.coerceAtLeast(0)
                 content.copy(
                     data =
-                        content.data.copy(
-                            viewer =
-                                content.data.viewer?.copy(
-                                    like = newUri,
-                                ) ?: ViewerState(
-                                    like = newUri,
-                                ),
-                            likeCount = count,
+                    content.data.copy(
+                        viewer =
+                        content.data.viewer?.copy(
+                            like = newUri,
+                        ) ?: ViewerState(
+                            like = newUri,
                         ),
+                        likeCount = count,
+                    ),
                 )
             }
             runCatching {
@@ -616,17 +623,17 @@ class BlueskyDataSource(
                                     repo = Did(did = account.accountKey.id),
                                     collection = Nsid("app.bsky.feed.like"),
                                     record =
-                                        buildJsonObject {
-                                            put("\$type", "app.bsky.feed.like")
-                                            put("createdAt", Clock.System.now().toString())
-                                            put(
-                                                "subject",
-                                                buildJsonObject {
-                                                    put("cid", cid)
-                                                    put("uri", uri)
-                                                },
-                                            )
-                                        }.jsonContent(),
+                                    buildJsonObject {
+                                        put("\$type", "app.bsky.feed.like")
+                                        put("createdAt", Clock.System.now().toString())
+                                        put(
+                                            "subject",
+                                            buildJsonObject {
+                                                put("cid", cid)
+                                                put("uri", uri)
+                                            },
+                                        )
+                                    }.jsonContent(),
                                 ),
                             ).requireResponse()
                     updateStatusUseCase<StatusContent.Bluesky>(
@@ -636,14 +643,14 @@ class BlueskyDataSource(
                     ) { content ->
                         content.copy(
                             data =
-                                content.data.copy(
-                                    viewer =
-                                        content.data.viewer?.copy(
-                                            like = AtUri(result.uri.atUri),
-                                        ) ?: ViewerState(
-                                            like = AtUri(result.uri.atUri),
-                                        ),
+                            content.data.copy(
+                                viewer =
+                                content.data.viewer?.copy(
+                                    like = AtUri(result.uri.atUri),
+                                ) ?: ViewerState(
+                                    like = AtUri(result.uri.atUri),
                                 ),
+                            ),
                         )
                     }
                 }
@@ -661,15 +668,15 @@ class BlueskyDataSource(
                         }.coerceAtLeast(0)
                     content.copy(
                         data =
-                            content.data.copy(
-                                viewer =
-                                    content.data.viewer?.copy(
-                                        like = likedUri?.let { it1 -> AtUri(it1) },
-                                    ) ?: ViewerState(
-                                        like = likedUri?.let { it1 -> AtUri(it1) },
-                                    ),
-                                likeCount = count,
+                        content.data.copy(
+                            viewer =
+                            content.data.viewer?.copy(
+                                like = likedUri?.let { it1 -> AtUri(it1) },
+                            ) ?: ViewerState(
+                                like = likedUri?.let { it1 -> AtUri(it1) },
                             ),
+                            likeCount = count,
+                        ),
                     )
                 }
             }
@@ -751,11 +758,11 @@ class BlueskyDataSource(
                     repo = Did(did = account.accountKey.id),
                     collection = Nsid("app.bsky.graph.follow"),
                     record =
-                        buildJsonObject {
-                            put("\$type", "app.bsky.graph.follow")
-                            put("createdAt", Clock.System.now().toString())
-                            put("subject", userKey.id)
-                        }.jsonContent(),
+                    buildJsonObject {
+                        put("\$type", "app.bsky.graph.follow")
+                        put("createdAt", Clock.System.now().toString())
+                        put("subject", userKey.id)
+                    }.jsonContent(),
                 ),
             )
         }.onFailure {
@@ -785,11 +792,11 @@ class BlueskyDataSource(
                     repo = Did(did = account.accountKey.id),
                     collection = Nsid("app.bsky.graph.block"),
                     record =
-                        buildJsonObject {
-                            put("\$type", "app.bsky.graph.block")
-                            put("createdAt", Clock.System.now().toString())
-                            put("subject", userKey.id)
-                        }.jsonContent(),
+                    buildJsonObject {
+                        put("\$type", "app.bsky.graph.block")
+                        put("createdAt", Clock.System.now().toString())
+                        put("subject", userKey.id)
+                    }.jsonContent(),
                 ),
             )
         }.onFailure {
@@ -901,13 +908,13 @@ class BlueskyDataSource(
             filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
             mediator =
-                SearchStatusRemoteMediator(
-                    service,
-                    database,
-                    account.accountKey,
-                    pagingKey,
-                    query,
-                ),
+            SearchStatusRemoteMediator(
+                service,
+                database,
+                account.accountKey,
+                pagingKey,
+                query,
+            ),
         )
     }
 
@@ -947,7 +954,8 @@ class BlueskyDataSource(
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
+    ): Flow<PagingData<UiTimeline>> =
+        throw UnsupportedOperationException("Bluesky does not support discover statuses")
 
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(
@@ -997,6 +1005,93 @@ class BlueskyDataSource(
                 override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
+
+    private val preferences: MemCacheable<List<PreferencesUnion>> by lazy {
+        MemCacheable(
+            key = "preferences_${account.accountKey}",
+        ) {
+            val service = account.getService(appDatabase)
+            service
+                .getPreferences()
+                .maybeResponse()
+                ?.preferences
+                .orEmpty()
+        }
+    }
+
+    val myFeeds: MemCacheable<ImmutableList<UiList>> by lazy {
+        MemCacheable(
+            key = "my_feeds_${account.accountKey}",
+        ) {
+            val service = account.getService(appDatabase)
+            val preferences = service
+                .getPreferences()
+                .maybeResponse()
+                ?.preferences
+                .orEmpty()
+            val items =
+                preferences
+                    .filterIsInstance<PreferencesUnion.SavedFeedsPrefV2>()
+                    .firstOrNull()
+                    ?.value
+                    ?.items
+                    ?.filter {
+                        it.type == Type.FEED
+                    }
+                    .orEmpty()
+            service
+                .getFeedGenerators(
+                    GetFeedGeneratorsQueryParams(
+                        feeds = items.map { AtUri(it.value) }
+                            .toImmutableList()
+                    ),
+                )
+                .maybeResponse()
+                ?.feeds
+                ?.map {
+                    it.render(account.accountKey)
+                }
+                .orEmpty()
+                .toImmutableList()
+        }
+    }
+
+    fun popularFeeds(
+        query: String?
+    ): Flow<PagingData<UiList>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+        ) {
+            object : PagingSource<String, UiList>() {
+                override fun getRefreshKey(state: PagingState<String, UiList>): String? {
+                    return null
+                }
+
+                override suspend fun load(params: LoadParams<String>): LoadResult<String, UiList> {
+                    val service = account.getService(appDatabase)
+                    val result =
+                        service
+                            .getPopularFeedGenerators(
+                                GetPopularFeedGeneratorsQueryParams(
+                                    limit = params.loadSize.toLong(),
+                                    cursor = params.key,
+                                    query = query,
+                                )
+                            )
+                            .maybeResponse()
+                    return LoadResult.Page(
+                        data = result
+                            ?.feeds
+                            ?.map {
+                                it.render(account.accountKey)
+                            }
+                            .orEmpty(),
+                        prevKey = null,
+                        nextKey = result?.cursor,
+                    )
+                }
+            }
+        }.flow
 }
 
 fun JsonElement.jsonContent(): JsonContent = JSON.decodeFromJsonElement(this)

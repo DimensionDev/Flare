@@ -34,7 +34,6 @@ class MemCacheable<T> private constructor(
         fetchSource = fetchSource,
         cacheSource = cacheSource,
     ) {
-
     constructor(
         key: String,
         fetchSource: suspend () -> T,
@@ -47,8 +46,6 @@ class MemCacheable<T> private constructor(
             subscribe(key)
         },
     )
-
-
 
     companion object {
         private val caches = mutableMapOf<String, MutableStateFlow<Any?>>()
@@ -69,14 +66,11 @@ class MemCacheable<T> private constructor(
             }
         }
 
-        fun <T> subscribe(
-            key: String,
-        ): Flow<T> {
-            return caches
+        fun <T> subscribe(key: String): Flow<T> =
+            caches
                 .getOrPut(key) {
                     MutableStateFlow(null)
                 }.filterNotNull() as Flow<T>
-        }
     }
 }
 

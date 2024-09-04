@@ -586,12 +586,11 @@ private fun render(
         else -> null
     }
 
-internal fun GeneratorView.render(
-    accountKey: MicroBlogKey,
-) = UiList(
-    id = uri.atUri,
-    title = displayName,
-    description = description,
-    avatar = avatar?.uri,
-    creator = creator.render(accountKey),
-)
+internal fun GeneratorView.render(accountKey: MicroBlogKey) =
+    UiList(
+        id = uri.atUri,
+        title = displayName,
+        description = description,
+        avatar = avatar?.uri,
+        creator = creator.render(accountKey),
+    )

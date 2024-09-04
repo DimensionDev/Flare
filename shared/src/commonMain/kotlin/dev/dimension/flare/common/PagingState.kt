@@ -31,19 +31,25 @@ sealed class PagingState<T> {
     }
 
     @Immutable
-    sealed class Success<T: Any> : PagingState<T>() {
+    sealed class Success<T : Any> : PagingState<T>() {
         abstract val itemCount: Int
         abstract val isRefreshing: Boolean
         abstract val appendState: LoadState
+
         abstract operator fun get(index: Int): T?
+
         abstract fun peek(index: Int): T?
+
         abstract suspend fun refreshSuspend()
+
         abstract fun retry()
+
         abstract fun itemKey(key: ((item: T) -> Any)? = null): (index: Int) -> Any
+
         abstract fun itemContentType(contentType: ((item: T) -> Any?)? = null): (index: Int) -> Any?
 
         @Immutable
-        internal data class SingleSuccess<T: Any>(
+        internal data class SingleSuccess<T : Any>(
             private val data: CacheableState<ImmutableList<T>>,
         ) : Success<T>() {
             override val itemCount: Int
@@ -51,13 +57,9 @@ sealed class PagingState<T> {
             override val isRefreshing: Boolean
                 get() = data.refreshState is LoadState.Loading
 
-            override fun get(index: Int): T? {
-                return data.data?.getOrNull(index)
-            }
+            override fun get(index: Int): T? = data.data?.getOrNull(index)
 
-            override fun peek(index: Int): T? {
-                return data.data?.getOrNull(index)
-            }
+            override fun peek(index: Int): T? = data.data?.getOrNull(index)
 
             override suspend fun refreshSuspend() {
                 data.refresh()
@@ -70,15 +72,10 @@ sealed class PagingState<T> {
             override val appendState: LoadState
                 get() = LoadState.NotLoading(true)
 
-            override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? {
-                return { null }
-            }
+            override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? = { null }
 
-            override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any {
-                return { it }
-            }
+            override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any = { it }
         }
-
 
         @Immutable
         internal data class PagingSuccess<T : Any>(
@@ -107,7 +104,6 @@ sealed class PagingState<T> {
             override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? = data.itemContentType(contentType)
         }
     }
-
 }
 
 val <T : Any> PagingState<T>.isLoading: Boolean

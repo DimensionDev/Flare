@@ -141,7 +141,8 @@ sealed interface IconType {
             Misskey,
             Bluesky,
             List,
-            Feeds ;
+            Feeds,
+            ;
 
             fun toIcon(): ImageVector =
                 when (this) {
@@ -449,18 +450,17 @@ sealed interface TimelineTabItem : TabItem {
                 ),
             )
 
-        private fun defaultBlueskySecondaryItems(
-            accountKey: MicroBlogKey,
-        ) = persistentListOf(
-            Bluesky.FeedsTabItem(
-                account = AccountType.Active,
-                metaData =
-                    TabMetaData(
-                        title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),
-                        icon = IconType.Mixed(IconType.Material.MaterialIcon.Feeds, accountKey),
-                    ),
-            ),
-        )
+        private fun defaultBlueskySecondaryItems(accountKey: MicroBlogKey) =
+            persistentListOf(
+                Bluesky.FeedsTabItem(
+                    account = AccountType.Active,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Feeds, accountKey),
+                        ),
+                ),
+            )
 
         private fun xqt(accountKey: MicroBlogKey) =
             listOf(
@@ -733,7 +733,6 @@ object Bluesky {
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
-
 }
 
 @Serializable

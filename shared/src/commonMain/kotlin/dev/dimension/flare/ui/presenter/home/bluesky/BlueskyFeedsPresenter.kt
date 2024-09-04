@@ -23,22 +23,27 @@ class BlueskyFeedsPresenter(
     override fun body(): BlueskyFeedsState {
         var query by remember { mutableStateOf<String?>(null) }
         val serviceState = accountServiceProvider(accountType = accountType)
-        val myFeeds = serviceState.map { service ->
-            require(service is BlueskyDataSource)
-            remember(service) {
-                service.myFeeds
-            }.collectAsState()
-        }.toPagingState()
-        val popularFeeds = serviceState.map { service ->
-            require(service is BlueskyDataSource)
-            remember(service, query) {
-                service.popularFeeds(query = query)
-            }.collectAsLazyPagingItems()
-        }.toPagingState()
+        val myFeeds =
+            serviceState
+                .map { service ->
+                    require(service is BlueskyDataSource)
+                    remember(service) {
+                        service.myFeeds
+                    }.collectAsState()
+                }.toPagingState()
+        val popularFeeds =
+            serviceState
+                .map { service ->
+                    require(service is BlueskyDataSource)
+                    remember(service, query) {
+                        service.popularFeeds(query = query)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
 
         return object : BlueskyFeedsState {
             override val myFeeds = myFeeds
             override val popularFeeds = popularFeeds
+
             override fun search(value: String) {
                 query = value
             }
@@ -49,5 +54,6 @@ class BlueskyFeedsPresenter(
 interface BlueskyFeedsState {
     val myFeeds: PagingState<UiList>
     val popularFeeds: PagingState<UiList>
+
     fun search(value: String)
 }

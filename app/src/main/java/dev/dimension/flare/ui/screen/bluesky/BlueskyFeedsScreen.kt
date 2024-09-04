@@ -52,9 +52,7 @@ internal fun BlueskyFeedsRoute(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun BlueskyFeedsScreen(
-    accountType: AccountType,
-) {
+private fun BlueskyFeedsScreen(accountType: AccountType) {
     val state by producePresenter {
         presenter(accountType = accountType)
     }
@@ -72,48 +70,79 @@ private fun BlueskyFeedsScreen(
         LazyColumn(
             contentPadding = contentPadding,
         ) {
-            state.myFeeds.onSuccess {
-                stickyHeader {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.feeds_my_feeds_title))
-                        }
-                    )
-                }
-                items(itemCount) { index ->
-                    val item = get(index)
-                    if (item != null) {
+            state.myFeeds
+                .onSuccess {
+                    stickyHeader {
                         ListItem(
                             headlineContent = {
-                                Text(text = item.title)
+                                Text(text = stringResource(id = R.string.feeds_my_feeds_title))
                             },
-                            leadingContent = {
-                                if (item.avatar != null) {
-                                    NetworkImage(
-                                        model = item.avatar,
-                                        contentDescription = item.title,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .clip(MaterialTheme.shapes.small),
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.RssFeed,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .background(
-                                                color = MaterialTheme.colorScheme.primaryContainer,
-                                                shape = MaterialTheme.shapes.small,
-                                            ),
-                                    )
-                                }
-                            },
-                            modifier = Modifier.clickable {
-
-                            }
                         )
-                    } else {
+                    }
+                    items(itemCount) { index ->
+                        val item = get(index)
+                        if (item != null) {
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = item.title)
+                                },
+                                leadingContent = {
+                                    if (item.avatar != null) {
+                                        NetworkImage(
+                                            model = item.avatar,
+                                            contentDescription = item.title,
+                                            modifier =
+                                                Modifier
+                                                    .size(24.dp)
+                                                    .clip(MaterialTheme.shapes.small),
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.RssFeed,
+                                            contentDescription = null,
+                                            modifier =
+                                                Modifier
+                                                    .size(24.dp)
+                                                    .background(
+                                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                                        shape = MaterialTheme.shapes.small,
+                                                    ),
+                                        )
+                                    }
+                                },
+                                modifier =
+                                    Modifier.clickable {
+                                    },
+                            )
+                        } else {
+                            ListItem(
+                                headlineContent = {
+                                    Text(
+                                        text = "Lorem ipsum dolor sit amet",
+                                        modifier = Modifier.placeholder(true),
+                                    )
+                                },
+                                leadingContent = {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .placeholder(true)
+                                                .size(24.dp)
+                                                .clip(MaterialTheme.shapes.small),
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }.onLoading {
+                    stickyHeader {
+                        ListItem(
+                            headlineContent = {
+                                Text(text = stringResource(id = R.string.feeds_my_feeds_title))
+                            },
+                        )
+                    }
+                    items(5) { index ->
                         ListItem(
                             headlineContent = {
                                 Text(
@@ -123,48 +152,22 @@ private fun BlueskyFeedsScreen(
                             },
                             leadingContent = {
                                 Box(
-                                    modifier = Modifier
-                                        .placeholder(true)
-                                        .size(24.dp)
-                                        .clip(MaterialTheme.shapes.small),
+                                    modifier =
+                                        Modifier
+                                            .placeholder(true)
+                                            .size(24.dp)
+                                            .clip(MaterialTheme.shapes.medium),
                                 )
                             },
                         )
                     }
                 }
-            }.onLoading {
-                stickyHeader {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.feeds_my_feeds_title))
-                        }
-                    )
-                }
-                items(5) { index ->
-                    ListItem(
-                        headlineContent = {
-                            Text(
-                                text = "Lorem ipsum dolor sit amet",
-                                modifier = Modifier.placeholder(true),
-                            )
-                        },
-                        leadingContent = {
-                            Box(
-                                modifier = Modifier
-                                    .placeholder(true)
-                                    .size(24.dp)
-                                    .clip(MaterialTheme.shapes.medium),
-                            )
-                        },
-                    )
-                }
-            }
 
             stickyHeader {
                 ListItem(
                     headlineContent = {
                         Text(text = stringResource(id = R.string.feeds_discover_feeds_title))
-                    }
+                    },
                 )
             }
 //            state.popularFeeds.onSuccess {
@@ -177,10 +180,9 @@ private fun BlueskyFeedsScreen(
 }
 
 @Composable
-private fun presenter(
-    accountType: AccountType,
-) = run {
-    remember(accountType) {
-        BlueskyFeedsPresenter(accountType = accountType)
-    }.invoke()
-}
+private fun presenter(accountType: AccountType) =
+    run {
+        remember(accountType) {
+            BlueskyFeedsPresenter(accountType = accountType)
+        }.invoke()
+    }

@@ -593,4 +593,6 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
         description = description,
         avatar = avatar?.uri,
         creator = creator.render(accountKey),
+        likedCount = likeCount ?: 0,
+        liked = viewer?.like?.atUri != null,
     )

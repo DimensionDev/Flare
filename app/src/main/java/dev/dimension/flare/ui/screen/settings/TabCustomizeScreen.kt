@@ -59,6 +59,8 @@ import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import dev.dimension.flare.R
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.TabItem
@@ -82,6 +84,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedsPresenter
 import dev.dimension.flare.ui.presenter.home.mastodon.AllListPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
@@ -678,7 +681,7 @@ private fun allTabsPresenter(except: ImmutableList<String>) =
 @Composable
 private fun dynamicTabPresenter(profile: UiProfile) =
     run {
-        val items =
+        val items: UiState<List<TimelineTabItem>>? =
             when (profile.platformType) {
                 PlatformType.Mastodon ->
                     remember {
@@ -701,7 +704,38 @@ private fun dynamicTabPresenter(profile: UiProfile) =
                         }
                     }
                 PlatformType.Misskey -> null
-                PlatformType.Bluesky -> null
+                PlatformType.Bluesky ->
+                    remember {
+                        BlueskyFeedsPresenter(accountType = AccountType.Specific(profile.key))
+                    }.invoke().myFeeds.let { state ->
+                        when (state) {
+                            is PagingState.Empty -> null
+                            is PagingState.Error -> null
+                            is PagingState.Loading -> UiState.Loading()
+                            is PagingState.Success -> {
+                                (0 until state.itemCount)
+                                    .mapNotNull { index ->
+                                        state[index]
+                                    }.map {
+                                        Bluesky.FeedTabItem(
+                                            account = AccountType.Specific(profile.key),
+                                            uri = it.id,
+                                            metaData =
+                                                TabMetaData(
+                                                    title = TitleType.Text(it.title),
+                                                    icon =
+                                                        IconType.Mixed(
+                                                            icon = IconType.Material.MaterialIcon.Feeds,
+                                                            userKey = profile.key,
+                                                        ),
+                                                ),
+                                        )
+                                    }.let {
+                                        UiState.Success(it)
+                                    }
+                            }
+                        }
+                    }
                 PlatformType.xQt -> null
                 PlatformType.VVo -> null
             }

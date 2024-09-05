@@ -26,27 +26,17 @@ class Cacheable<T>(
     )
 
 @Suppress("UNCHECKED_CAST")
-class MemCacheable<T> private constructor(
-    private val cacheKey: String,
-    fetchSource: suspend () -> Unit,
-    cacheSource: () -> Flow<T>,
+class MemCacheable<T>(
+    private val key: String,
+    fetchSource: suspend () -> T,
 ) : CacheData<T>(
-        fetchSource = fetchSource,
-        cacheSource = cacheSource,
-    ) {
-    constructor(
-        key: String,
-        fetchSource: suspend () -> T,
-    ) : this(
-        cacheKey = key,
         fetchSource = {
             update(key, fetchSource.invoke())
         },
         cacheSource = {
             subscribe(key)
         },
-    )
-
+    ) {
     companion object {
         private val caches = mutableMapOf<String, MutableStateFlow<Any?>>()
 

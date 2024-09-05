@@ -4,10 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -21,6 +23,7 @@ class BlueskyFeedsPresenter(
 ) : PresenterBase<BlueskyFeedsState>() {
     @Composable
     override fun body(): BlueskyFeedsState {
+        val scope = rememberCoroutineScope()
         var query by remember { mutableStateOf<String?>(null) }
         val serviceState = accountServiceProvider(accountType = accountType)
         val myFeeds =
@@ -36,7 +39,7 @@ class BlueskyFeedsPresenter(
                 .map { service ->
                     require(service is BlueskyDataSource)
                     remember(service, query) {
-                        service.popularFeeds(query = query)
+                        service.popularFeeds(query = query, scope = scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 
@@ -47,13 +50,20 @@ class BlueskyFeedsPresenter(
             override fun search(value: String) {
                 query = value
             }
+
+            override suspend fun refreshSuspend() {
+                myFeeds.refreshSuspend()
+                popularFeeds.refreshSuspend()
+            }
         }
     }
 }
 
 interface BlueskyFeedsState {
     val myFeeds: PagingState<UiList>
-    val popularFeeds: PagingState<UiList>
+    val popularFeeds: PagingState<Pair<UiList, Boolean>>
 
     fun search(value: String)
+
+    suspend fun refreshSuspend()
 }

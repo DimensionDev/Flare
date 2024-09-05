@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component.status
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -28,24 +29,18 @@ internal fun CommonStatusHeaderComponent(
     modifier: Modifier = Modifier,
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AvatarComponent(
-            data = data.avatar,
-            modifier =
-                Modifier
-                    .clickable {
-                        onUserClick(data.key)
-                    },
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column(
-            modifier =
-                Modifier
-                    .weight(1f),
-        ) {
+    ListComponent(
+        leadingContent = {
+            AvatarComponent(
+                data = data.avatar,
+                modifier =
+                    Modifier
+                        .clickable {
+                            onUserClick(data.key)
+                        },
+            )
+        },
+        headlineContent = {
             HtmlText(
                 element = data.name.data,
                 modifier =
@@ -58,6 +53,8 @@ internal fun CommonStatusHeaderComponent(
                         },
                 maxLines = 1,
             )
+        },
+        supportingContent = {
             Text(
                 text = data.handle,
                 style = MaterialTheme.typography.bodySmall,
@@ -71,7 +68,34 @@ internal fun CommonStatusHeaderComponent(
                             onUserClick(data.key)
                         },
             )
+        },
+        trailingContent = trailing,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun ListComponent(
+    headlineContent: @Composable ColumnScope.() -> Unit,
+    modifier: Modifier = Modifier,
+    leadingContent: @Composable RowScope.() -> Unit = {},
+    supportingContent: @Composable ColumnScope.() -> Unit = {},
+    trailingContent: @Composable RowScope.() -> Unit = {},
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        leadingContent.invoke(this)
+        Spacer(modifier = Modifier.width(8.dp))
+        Column(
+            modifier =
+                Modifier
+                    .weight(1f),
+        ) {
+            headlineContent.invoke(this)
+            supportingContent.invoke(this)
         }
-        trailing.invoke(this)
+        trailingContent.invoke(this)
     }
 }

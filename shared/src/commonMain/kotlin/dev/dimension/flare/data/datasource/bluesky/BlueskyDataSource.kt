@@ -7,12 +7,14 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
+import androidx.paging.map
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.actor.PreferencesUnion
 import app.bsky.actor.Type
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
+import app.bsky.feed.GetFeedGeneratorQueryParams
 import app.bsky.feed.GetFeedGeneratorsQueryParams
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
@@ -73,6 +75,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -1018,9 +1021,11 @@ class BlueskyDataSource(
         }
     }
 
+    private val myFeedsKey = "my_feeds_${account.accountKey}"
+
     val myFeeds: MemCacheable<ImmutableList<UiList>> by lazy {
         MemCacheable(
-            key = "my_feeds_${account.accountKey}",
+            key = myFeedsKey,
         ) {
             val service = account.getService(appDatabase)
             val preferences =
@@ -1055,7 +1060,10 @@ class BlueskyDataSource(
         }
     }
 
-    fun popularFeeds(query: String?): Flow<PagingData<UiList>> =
+    fun popularFeeds(
+        query: String?,
+        scope: CoroutineScope,
+    ): Flow<PagingData<Pair<UiList, Boolean>>> =
         Pager(
             config = PagingConfig(pageSize = 20),
         ) {
@@ -1086,6 +1094,56 @@ class BlueskyDataSource(
                 }
             }
         }.flow
+            .cachedIn(scope)
+            .let { feeds ->
+                combine(
+                    feeds,
+                    MemCacheable.subscribe<ImmutableList<UiList>>(myFeedsKey),
+                ) { popular, my ->
+                    popular.map { item ->
+                        item to my.any { it.id == item.id }
+                    }
+                }
+            }.cachedIn(scope)
+
+    fun feedInfo(uri: String): MemCacheable<UiList> =
+        MemCacheable(
+            key = "feed_info_$uri",
+        ) {
+            val service = account.getService(appDatabase)
+            service
+                .getFeedGenerator(
+                    GetFeedGeneratorQueryParams(
+                        feed = AtUri(uri),
+                    ),
+                ).requireResponse()
+                .view
+                .render(account.accountKey)
+        }
+
+    fun feedTimeline(
+        uri: String,
+        pageSize: Int = 20,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiTimeline>> {
+        val pagingKey = "feed_timeline_$uri"
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                FeedTimelineRemoteMediator(
+                    service = account.getService(appDatabase),
+                    accountKey = account.accountKey,
+                    database = database,
+                    uri = uri,
+                    pagingKey = pagingKey,
+                ),
+        )
+    }
 }
 
 fun JsonElement.jsonContent(): JsonContent = JSON.decodeFromJsonElement(this)

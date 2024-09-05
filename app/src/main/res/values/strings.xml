@@ -402,4 +402,5 @@
 
     <string name="feeds_my_feeds_title">My feeds</string>
     <string name="feeds_discover_feeds_title">Discover feeds</string>
+    <string name="feeds_discover_feeds_created_by">Created by %1$s</string>
 </resources>

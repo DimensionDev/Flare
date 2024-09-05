@@ -733,6 +733,21 @@ object Bluesky {
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
+
+    @Serializable
+    data class FeedTabItem(
+        override val account: AccountType,
+        val uri: String,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.bluesky
+                .BlueskyFeedTimelinePresenter(account, uri)
+
+        override val key: String = "feed_${account}_$uri"
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
 }
 
 @Serializable

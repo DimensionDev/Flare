@@ -301,4 +301,8 @@
   <string name="edit_tab_name_placeholder">选项卡名称</string>
   <string name="edit_tab_icon">图标</string>
   <string name="edit_tab_with_avatar">带有头像</string>
+  <string name="edit_list_member_label">搜索</string>
+  <string name="edit_list_member_search">搜索</string>
+  <string name="edit_list_member_add">添加</string>
+  <string name="edit_list_member_remove">删除账户</string>
 </resources>

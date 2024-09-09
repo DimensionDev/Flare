@@ -63,6 +63,8 @@
   <string name="bluesky_item_reblogged_status">boostet en status</string>
   <string name="bluesky_notification_item_replied_to_you">svarede dig</string>
   <string name="bluesky_notification_item_quoted_your_status">citerede din status</string>
+  <string name="bluesky_notification_item_starterpack_joined">Starterpack Tilsluttet</string>
+  <string name="bluesky_notification_item_unKnown">Ukendt</string>
   <string name="misskey_notification_item_mentioned_you">nævnte dig</string>
   <string name="misskey_notification_item_replied_to_you">svarede dig</string>
   <string name="misskey_notification_item_reposted_your_status">genindsendte din status</string>
@@ -285,6 +287,8 @@
   <string name="home_tab_featured_title">Fremhævet</string>
   <string name="home_tab_bookmarks_title">Bogmærker</string>
   <string name="home_tab_favorite_title">Favorit</string>
+  <string name="home_tab_list_title">Liste</string>
+  <string name="home_tab_feeds_title">Feeds</string>
   <string name="tab_settings_primary">Primær fane</string>
   <string name="tab_settings_secondary">Sekundær fane</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -300,4 +304,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Ikon</string>
   <string name="edit_tab_with_avatar">Med avatar</string>
+  <string name="list_add">Tilføj liste</string>
+  <string name="list_edit">Rediger liste</string>
+  <string name="list_delete_confirm">Er du sikker på, at du vil slette denne liste %1$s?</string>
+  <string name="list_create">Opret liste</string>
+  <string name="edit_list_member_label">Søg</string>
+  <string name="edit_list_member_search">Søg</string>
+  <string name="edit_list_member_add">Tilføj</string>
+  <string name="edit_list_member_remove">Fjern</string>
 </resources>

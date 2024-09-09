@@ -59,6 +59,8 @@
   <string name="bluesky_item_reblogged_status">ενίσχυσε μια κατάσταση</string>
   <string name="bluesky_notification_item_replied_to_you">σας απάντησε</string>
   <string name="bluesky_notification_item_quoted_your_status">παρέθεσε την κατάστασή σας</string>
+  <string name="bluesky_notification_item_starterpack_joined">Συνδεδεμένο Starterpack</string>
+  <string name="bluesky_notification_item_unKnown">Άγνωστος</string>
   <string name="misskey_notification_item_mentioned_you">σας ανέφερε</string>
   <string name="misskey_notification_item_replied_to_you">σας απάντησε</string>
   <string name="misskey_notification_item_reposted_your_status">αναρτήθηκε ξανά η κατάστασή σας</string>
@@ -280,6 +282,8 @@
   <string name="home_tab_featured_title">Προτεινόμενα</string>
   <string name="home_tab_bookmarks_title">Σελιδοδείκτες</string>
   <string name="home_tab_favorite_title">Αγαπημένο</string>
+  <string name="home_tab_list_title">Λίστα</string>
+  <string name="home_tab_feeds_title">Ροές</string>
   <string name="tab_settings_primary">Κύρια καρτέλα</string>
   <string name="tab_settings_secondary">Δευτερεύουσα καρτέλα</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -295,4 +299,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Εικονίδιο</string>
   <string name="edit_tab_with_avatar">Με avatar</string>
+  <string name="list_add">Προσθήκη λίστας</string>
+  <string name="list_edit">Επεξεργασία λίστας</string>
+  <string name="list_delete_confirm">Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτή τη λίστα %1$s?</string>
+  <string name="list_create">Δημιουργία λίστας</string>
+  <string name="edit_list_member_label">Αναζήτηση</string>
+  <string name="edit_list_member_search">Αναζήτηση</string>
+  <string name="edit_list_member_add">Προσθήκη</string>
+  <string name="edit_list_member_remove">Αφαίρεση</string>
 </resources>

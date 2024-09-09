@@ -63,6 +63,8 @@
   <string name="bluesky_item_reblogged_status">potenziato uno stato</string>
   <string name="bluesky_notification_item_replied_to_you">ti ha risposto</string>
   <string name="bluesky_notification_item_quoted_your_status">quotato il tuo stato</string>
+  <string name="bluesky_notification_item_starterpack_joined">Starterpack Iscritto</string>
+  <string name="bluesky_notification_item_unKnown">Sconosciuto</string>
   <string name="misskey_notification_item_mentioned_you">ti ha menzionato</string>
   <string name="misskey_notification_item_replied_to_you">ti ha risposto</string>
   <string name="misskey_notification_item_reposted_your_status">ha ripostato il tuo stato</string>
@@ -285,6 +287,8 @@
   <string name="home_tab_featured_title">Vetrina</string>
   <string name="home_tab_bookmarks_title">Segnalibri</string>
   <string name="home_tab_favorite_title">Preferito</string>
+  <string name="home_tab_list_title">Elenco</string>
+  <string name="home_tab_feeds_title">Feed</string>
   <string name="tab_settings_primary">Scheda principale</string>
   <string name="tab_settings_secondary">Scheda secondaria</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -300,4 +304,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Icona</string>
   <string name="edit_tab_with_avatar">Con avatar</string>
+  <string name="list_add">Aggiungi elenco</string>
+  <string name="list_edit">Modifica elenco</string>
+  <string name="list_delete_confirm">Sei sicuro di voler eliminare questo elenco %1$s?</string>
+  <string name="list_create">Crea lista</string>
+  <string name="edit_list_member_label">Cerca</string>
+  <string name="edit_list_member_search">Cerca</string>
+  <string name="edit_list_member_add">Aggiungi</string>
+  <string name="edit_list_member_remove">Rimuovi</string>
 </resources>

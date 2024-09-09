@@ -63,6 +63,8 @@
   <string name="bluesky_item_reblogged_status">compartilhou um status</string>
   <string name="bluesky_notification_item_replied_to_you">respondeu a você</string>
   <string name="bluesky_notification_item_quoted_your_status">citou seu status</string>
+  <string name="bluesky_notification_item_starterpack_joined">Starterpack unido</string>
+  <string name="bluesky_notification_item_unKnown">Desconhecido</string>
   <string name="misskey_notification_item_mentioned_you">mencionou você</string>
   <string name="misskey_notification_item_replied_to_you">respondeu a você</string>
   <string name="misskey_notification_item_reposted_your_status">postou novamente seu status</string>
@@ -285,6 +287,8 @@
   <string name="home_tab_featured_title">Destaques</string>
   <string name="home_tab_bookmarks_title">Favoritos</string>
   <string name="home_tab_favorite_title">Favorito</string>
+  <string name="home_tab_list_title">Lista</string>
+  <string name="home_tab_feeds_title">Conteúdos</string>
   <string name="tab_settings_primary">Aba principal</string>
   <string name="tab_settings_secondary">Aba Secundária</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -300,4 +304,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Ícone</string>
   <string name="edit_tab_with_avatar">Com avatar</string>
+  <string name="list_add">Adicionar lista</string>
+  <string name="list_edit">Editar lista</string>
+  <string name="list_delete_confirm">Tem certeza que deseja excluir esta lista %1$s?</string>
+  <string name="list_create">Criar lista</string>
+  <string name="edit_list_member_label">Pesquisa</string>
+  <string name="edit_list_member_search">Pesquisa</string>
+  <string name="edit_list_member_add">Adicionar</string>
+  <string name="edit_list_member_remove">Excluir</string>
 </resources>

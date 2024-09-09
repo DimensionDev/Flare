@@ -244,9 +244,7 @@ private fun BlueskyFeedScreen(
                     ) {
                         HorizontalDivider()
                     }
-                    with(state.timeline) {
-                        status()
-                    }
+                    status(state.timeline)
                 }
             },
         )

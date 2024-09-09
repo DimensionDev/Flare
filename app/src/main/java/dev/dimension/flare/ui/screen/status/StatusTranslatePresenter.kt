@@ -1,8 +1,8 @@
 package dev.dimension.flare.ui.screen.status
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import com.fleeksoft.ksoup.nodes.Element
 import com.google.mlkit.nl.languageid.LanguageIdentification
@@ -11,6 +11,8 @@ import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun statusTranslatePresenter(
@@ -32,21 +34,19 @@ fun statusTranslatePresenter(
 @Composable
 private fun translateText(text: String) =
     run {
-        val language by produceState<UiState<String>>(initialValue = UiState.Loading(), key1 = text) {
-            LanguageIdentification
-                .getClient()
-                .identifyLanguage(text)
-                .addOnSuccessListener {
-                    value =
-                        if (it == "und") {
-                            UiState.Error(Exception("Language not supported"))
-                        } else {
-                            UiState.Success(it)
-                        }
-                }.addOnFailureListener {
-                    value = UiState.Error(it)
-                }
-        }
+        val language by remember(text) {
+            flow<UiState<String>> {
+                runCatching {
+                    LanguageIdentification
+                        .getClient()
+                        .identifyLanguage(text)
+                        .await()
+                }.fold(
+                    onSuccess = { emit(UiState.Success(it)) },
+                    onFailure = { emit(UiState.Error(it)) },
+                )
+            }
+        }.collectAsState(UiState.Loading())
         language.flatMap {
             val source =
                 remember(it) {
@@ -70,27 +70,19 @@ private fun translateText(text: String) =
                                 .build()
                         Translation.getClient(options)
                     }
-                val state by produceState<UiState<String>>(
-                    initialValue = UiState.Loading(),
-                    key1 = text,
-                    key2 = source,
-                    key3 = target,
-                ) {
-                    client
-                        .downloadModelIfNeeded()
-                        .addOnSuccessListener {
-                            client
-                                .translate(text)
-                                .addOnSuccessListener {
-                                    value = UiState.Success(it)
-                                }.addOnFailureListener {
-                                    value = UiState.Error(it)
-                                }
-                        }.addOnFailureListener {
-                            value = UiState.Error(it)
-                        }
-                }
-                state
+                flow<UiState<String>> {
+                    runCatching {
+                        client
+                            .downloadModelIfNeeded()
+                            .await()
+                        client
+                            .translate(text)
+                            .await()
+                    }.fold(
+                        onSuccess = { emit(UiState.Success(it)) },
+                        onFailure = { emit(UiState.Error(it)) },
+                    )
+                }.collectAsState(UiState.Loading()).value
             }
         }
     }

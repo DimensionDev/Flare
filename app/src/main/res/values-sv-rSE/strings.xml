@@ -63,6 +63,8 @@
   <string name="bluesky_item_reblogged_status">förstärkte en status</string>
   <string name="bluesky_notification_item_replied_to_you">svarade dig</string>
   <string name="bluesky_notification_item_quoted_your_status">citerade din status</string>
+  <string name="bluesky_notification_item_starterpack_joined">Startpaket anslutet</string>
+  <string name="bluesky_notification_item_unKnown">Okänd</string>
   <string name="misskey_notification_item_mentioned_you">nämnde dig</string>
   <string name="misskey_notification_item_replied_to_you">svarade dig</string>
   <string name="misskey_notification_item_reposted_your_status">repostade din status</string>
@@ -285,6 +287,8 @@
   <string name="home_tab_featured_title">Utvalda</string>
   <string name="home_tab_bookmarks_title">Bokmärken</string>
   <string name="home_tab_favorite_title">Favorit</string>
+  <string name="home_tab_list_title">Lista</string>
+  <string name="home_tab_feeds_title">Flöden</string>
   <string name="tab_settings_primary">Primär flik</string>
   <string name="tab_settings_secondary">Sekundär flik</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -300,4 +304,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Ikon</string>
   <string name="edit_tab_with_avatar">Med avatar</string>
+  <string name="list_add">Lägg till lista</string>
+  <string name="list_edit">Redigera lista</string>
+  <string name="list_delete_confirm">Är du säker på att du vill ta bort denna lista %1$s?</string>
+  <string name="list_create">Skapa lista</string>
+  <string name="edit_list_member_label">Sök</string>
+  <string name="edit_list_member_search">Sök</string>
+  <string name="edit_list_member_add">Lägg till</string>
+  <string name="edit_list_member_remove">Radera</string>
 </resources>

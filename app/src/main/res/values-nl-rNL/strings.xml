@@ -63,6 +63,8 @@
   <string name="bluesky_item_reblogged_status">boostte een status</string>
   <string name="bluesky_notification_item_replied_to_you">heeft u geantwoord</string>
   <string name="bluesky_notification_item_quoted_your_status">geciteerd van jouw status</string>
+  <string name="bluesky_notification_item_starterpack_joined">Starterpack toegetreden</string>
+  <string name="bluesky_notification_item_unKnown">Onbekend</string>
   <string name="misskey_notification_item_mentioned_you">noemde je</string>
   <string name="misskey_notification_item_replied_to_you">heeft u geantwoord</string>
   <string name="misskey_notification_item_reposted_your_status">heeft je status herpost</string>
@@ -285,6 +287,8 @@
   <string name="home_tab_featured_title">Aanbevolen</string>
   <string name="home_tab_bookmarks_title">Bladwijzers</string>
   <string name="home_tab_favorite_title">Favoriete</string>
+  <string name="home_tab_list_title">Klantenlijst</string>
+  <string name="home_tab_feeds_title">Feeds</string>
   <string name="tab_settings_primary">Primaire tab</string>
   <string name="tab_settings_secondary">Secundaire tab</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -300,4 +304,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Pictogram</string>
   <string name="edit_tab_with_avatar">Met avatar</string>
+  <string name="list_add">Lijst toevoegen</string>
+  <string name="list_edit">Lijst bewerken</string>
+  <string name="list_delete_confirm">Weet u zeker dat u deze lijst %1$s wilt verwijderen?</string>
+  <string name="list_create">Lijst aanmaken</string>
+  <string name="edit_list_member_label">Zoeken</string>
+  <string name="edit_list_member_search">Zoeken</string>
+  <string name="edit_list_member_add">Toevoegen</string>
+  <string name="edit_list_member_remove">Verwijderen</string>
 </resources>

@@ -63,6 +63,8 @@
   <string name="bluesky_item_reblogged_status">ステータスをブーストしました</string>
   <string name="bluesky_notification_item_replied_to_you">あなたに返信しました</string>
   <string name="bluesky_notification_item_quoted_your_status">あなたのステータスを引用しました</string>
+  <string name="bluesky_notification_item_starterpack_joined">Starterpackが参加しました</string>
+  <string name="bluesky_notification_item_unKnown">Unknown</string>
   <string name="misskey_notification_item_mentioned_you">メンションされました</string>
   <string name="misskey_notification_item_replied_to_you">あなたに返信しました</string>
   <string name="misskey_notification_item_reposted_your_status">あなたのステータスを再投稿しました</string>
@@ -285,6 +287,8 @@
   <string name="home_tab_featured_title">注目の商品</string>
   <string name="home_tab_bookmarks_title">ブックマーク</string>
   <string name="home_tab_favorite_title">お気に入り</string>
+  <string name="home_tab_list_title">リスト</string>
+  <string name="home_tab_feeds_title">フィード</string>
   <string name="tab_settings_primary">プライマリタブ</string>
   <string name="tab_settings_secondary">セカンダリタブ</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -300,4 +304,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">アイコン</string>
   <string name="edit_tab_with_avatar">アバター付き</string>
+  <string name="list_add">リストを追加</string>
+  <string name="list_edit">リストを編集</string>
+  <string name="list_delete_confirm">このリスト %1$sを削除してもよろしいですか？</string>
+  <string name="list_create">リストを作成</string>
+  <string name="edit_list_member_label">検索</string>
+  <string name="edit_list_member_search">検索</string>
+  <string name="edit_list_member_add">追加</string>
+  <string name="edit_list_member_remove">削除</string>
 </resources>

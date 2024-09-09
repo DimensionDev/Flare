@@ -139,9 +139,7 @@ private fun VVOCommentScreen(
                                 StatusItem(item = null)
                             }
                     }
-                    with(state.state.list) {
-                        status()
-                    }
+                    status(state.state.list)
                 }
             },
         )

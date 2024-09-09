@@ -183,7 +183,14 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                 },
                 accountType = AccountType.Specific(accountKey),
                 toEditAccountList = {
-                    navigator.navigate(EditAccountListRouteDestination(AccountType.Specific(accountKey), it.key))
+                    navigator.navigate(
+                        EditAccountListRouteDestination(
+                            AccountType.Specific(
+                                accountKey,
+                            ),
+                            it.key,
+                        ),
+                    )
                 },
             )
         }.onLoading {
@@ -389,7 +396,12 @@ internal fun ProfileDeeplinkRoute(
         accountType = AccountType.Specific(accountKey),
         toEditAccountList = {
             if (userKey != null) {
-                navigator.navigate(EditAccountListRouteDestination(AccountType.Specific(accountKey), userKey))
+                navigator.navigate(
+                    EditAccountListRouteDestination(
+                        AccountType.Specific(accountKey),
+                        userKey,
+                    ),
+                )
             }
         },
     )
@@ -691,9 +703,7 @@ private fun ProfileScreen(
                                 }
                             }
                         }
-                        with(state.state.listState) {
-                            status()
-                        }
+                        status(state.state.listState)
                     }
                 },
             )

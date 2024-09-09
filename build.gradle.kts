@@ -21,8 +21,8 @@ allprojects {
             jvmTarget.set(JvmTarget.JVM_17)
             allWarningsAsErrors.set(true)
             freeCompilerArgs.set(listOf(
-                "-Xcontext-receivers",
-                "-Xexpect-actual-classes"
+                "-Xexpect-actual-classes",
+                "-Xconsistent-data-class-copy-visibility",
             ))
         }
     }

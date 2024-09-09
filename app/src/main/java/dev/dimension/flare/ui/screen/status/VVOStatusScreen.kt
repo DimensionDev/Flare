@@ -277,14 +277,10 @@ private fun LazyStaggeredGridScope.reactionContent(
     }
     when (detailType) {
         DetailType.Comment ->
-            with(comment) {
-                status()
-            }
+            status(comment)
 
         DetailType.Repost ->
-            with(repost) {
-                status()
-            }
+            status(repost)
     }
 }
 

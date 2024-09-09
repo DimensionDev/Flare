@@ -231,9 +231,11 @@ private fun DiscoverScreen(
                                         WindowWidthSizeClass.COMPACT -> {
                                             2
                                         }
+
                                         WindowWidthSizeClass.MEDIUM -> {
                                             4
                                         }
+
                                         else -> {
                                             8
                                         }
@@ -297,9 +299,7 @@ private fun DiscoverScreen(
                                         },
                                     )
                                 }
-                                with(state.status) {
-                                    status()
-                                }
+                                status(state.status)
                             }.onLoading {
                                 item(
                                     span = StaggeredGridItemSpan.FullLine,
@@ -310,9 +310,7 @@ private fun DiscoverScreen(
                                         },
                                     )
                                 }
-                                with(state.status) {
-                                    status()
-                                }
+                                status(state.status)
                             }
                     }
                 }

@@ -140,9 +140,7 @@ private fun NotificationScreen(
                             }
                         }
                     }
-                    with(state.state.listState) {
-                        status()
-                    }
+                    status(state.state.listState)
                 }
             },
         )

@@ -16,14 +16,26 @@ val LocalizedShortTime.localizedShortTime: String
     get() =
         when (val type = this) {
             is LocalizedShortTime.MonthDay ->
-                DateTimeFormatter
-                    .ofPattern(stringResource(id = R.string.date_format_month_day))
-                    .format(type.localDateTime)
+                runCatching {
+                    DateTimeFormatter
+                        .ofPattern(stringResource(id = R.string.date_format_month_day))
+                        .format(type.localDateTime)
+                }.getOrElse {
+                    DateTimeFormatter
+                        .ofPattern("dd MMM")
+                        .format(type.localDateTime)
+                }
             is LocalizedShortTime.String -> type.value
             is LocalizedShortTime.YearMonthDay ->
-                DateTimeFormatter
-                    .ofPattern(stringResource(id = R.string.date_format_year_month_day))
-                    .format(type.localDateTime)
+                runCatching {
+                    DateTimeFormatter
+                        .ofPattern(stringResource(id = R.string.date_format_year_month_day))
+                        .format(type.localDateTime)
+                }.getOrElse {
+                    DateTimeFormatter
+                        .ofPattern("dd MMM yy")
+                        .format(type.localDateTime)
+                }
         }
 
 val Instant.localizedFullTime: String
@@ -33,6 +45,10 @@ val Instant.localizedFullTime: String
         return remember(this) {
             val timeZone = TimeZone.currentSystemDefault()
             val time = toLocalDateTime(timeZone)
-            DateTimeFormatter.ofPattern(format).format(time.toJavaLocalDateTime())
+            runCatching {
+                DateTimeFormatter.ofPattern(format).format(time.toJavaLocalDateTime())
+            }.getOrElse {
+                DateTimeFormatter.ofPattern("dd MMM yy HH:mm").format(time.toJavaLocalDateTime())
+            }
         }
     }

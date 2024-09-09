@@ -4,14 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
+import androidx.paging.LoadState
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.CacheableState
-import dev.dimension.flare.common.LoadState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
@@ -125,7 +124,7 @@ fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
         when (val state = refreshState) {
             is LoadState.Error -> UiState.Error(state.error)
             LoadState.Loading -> UiState.Loading()
-            LoadState.Success -> UiState.Error(IllegalStateException("Data is null"))
+            is LoadState.NotLoading -> UiState.Error(IllegalStateException("Data is null"))
         }
     }
 
@@ -137,7 +136,7 @@ internal fun <T : Any> CacheData<T>.toUi(): Flow<UiState<T>> =
             when (refresh) {
                 is LoadState.Error -> UiState.Error(refresh.error)
                 LoadState.Loading -> UiState.Loading()
-                LoadState.Success -> UiState.Error(IllegalStateException("Data is null"))
+                is LoadState.NotLoading -> UiState.Error(IllegalStateException("Data is null"))
             }
         }
     }

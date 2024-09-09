@@ -6,33 +6,128 @@ import app.bsky.actor.ProfileViewDetailed
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.feed.FeedViewPostReasonUnion
+import app.bsky.feed.GeneratorView
+import app.bsky.feed.Post
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsReason
+import app.bsky.richtext.FacetFeatureUnion
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.datasource.bluesky.jsonElement
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.toHtml
+import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
+import io.ktor.utils.io.charsets.Charsets
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.serialization.json.jsonPrimitive
-import moe.tlaster.twitter.parser.TwitterParser
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
 
-private val blueskyParser by lazy {
-    TwitterParser(validMarkInUserName = listOf('.'))
+private val bskyJson by lazy {
+    Json {
+        ignoreUnknownKeys = true
+        classDiscriminator = "${'$'}type"
+    }
+}
+
+private fun List<Byte>.stringify(): String = this.toByteArray().decodeToString()
+
+private fun Element.appendTextWithBr(text: String) {
+    val parts = text.split("\n")
+    for (i in parts.indices) {
+        addChildren(TextNode(parts[i]))
+        if (i < parts.size - 1) {
+            addChildren(Element("br"))
+        }
+    }
+}
+
+private fun parseBluesky(
+    post: Post,
+    accountKey: MicroBlogKey,
+): UiRichText {
+    val element = Element("p")
+
+    val codePoints = post.text.toByteArray(charset = Charsets.UTF_8)
+    val facets = post.facets
+    var codePointIndex = 0
+    for (facet in facets) {
+        val start = facet.index.byteStart.toInt()
+        val end = facet.index.byteEnd.toInt()
+        val beforeFacetText = codePoints.drop(codePointIndex).take(start - codePointIndex).stringify()
+        element.appendTextWithBr(beforeFacetText)
+        val facetText = codePoints.drop(start).take(end - start).stringify()
+        // TODO: multiple features
+        val feature = facet.features.firstOrNull()
+        if (feature != null) {
+            when (feature) {
+                is FacetFeatureUnion.Link -> {
+                    element.addChildren(
+                        Element("a")
+                            .apply {
+                                appendTextWithBr(facetText)
+                                attributes().put("href", feature.value.uri.uri)
+                            },
+                    )
+                }
+
+                is FacetFeatureUnion.Mention -> {
+                    element.addChildren(
+                        Element("a")
+                            .apply {
+                                appendTextWithBr(facetText)
+                                attributes().put(
+                                    "href",
+                                    AppDeepLink.Profile.invoke(
+                                        accountKey = accountKey,
+                                        userKey =
+                                            MicroBlogKey(
+                                                id = feature.value.did.did,
+                                                host = accountKey.host,
+                                            ),
+                                    ),
+                                )
+                            },
+                    )
+                }
+
+                is FacetFeatureUnion.Tag -> {
+                    element.addChildren(
+                        Element("a")
+                            .apply {
+                                appendTextWithBr(facetText)
+                                attributes().put(
+                                    "href",
+                                    AppDeepLink.Search(
+                                        accountKey = accountKey,
+                                        keyword = facetText,
+                                    ),
+                                )
+                            },
+                    )
+                }
+            }
+        } else {
+            element.appendTextWithBr(facetText)
+        }
+        codePointIndex = end
+    }
+    val afterFacetText = codePoints.drop(codePointIndex).stringify()
+    element.appendTextWithBr(afterFacetText)
+    return element.toUi()
 }
 
 internal fun FeedViewPostReasonUnion.render(
@@ -76,6 +171,8 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiT
                         ListNotificationsReason.MENTION -> UiTimeline.TopMessage.Icon.Mention
                         ListNotificationsReason.REPLY -> UiTimeline.TopMessage.Icon.Reply
                         ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.Icon.Reply
+                        ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.Icon.Info
+                        ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.Icon.Info
                     },
                 type =
                     when (reason) {
@@ -85,6 +182,8 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiT
                         ListNotificationsReason.MENTION -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
                         ListNotificationsReason.REPLY -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
                         ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
+                        ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+                        ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
                     },
                 onClicked = {
                     launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
@@ -123,16 +222,10 @@ internal fun PostView.renderStatus(
         content =
             record
                 .jsonElement()
-                .jsonObjectOrNull
-                ?.get("text")
-                ?.jsonPrimitive
-                ?.content
-                .orEmpty()
                 .let {
-                    blueskyParser
-                        .parse(it)
-                        .toHtml(accountKey)
-                        .toUi()
+                    bskyJson.decodeFromJsonElement<Post>(it)
+                }.let {
+                    parseBluesky(it, accountKey)
                 },
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
@@ -459,16 +552,10 @@ private fun render(
                 content =
                     record.value.value
                         .jsonElement()
-                        .jsonObjectOrNull
-                        ?.get("text")
-                        ?.jsonPrimitive
-                        ?.content
-                        .orEmpty()
                         .let {
-                            blueskyParser
-                                .parse(it)
-                                .toHtml(accountKey)
-                                .toUi()
+                            bskyJson.decodeFromJsonElement<Post>(it)
+                        }.let {
+                            parseBluesky(it, accountKey)
                         },
                 actions =
                     listOfNotNull(
@@ -579,3 +666,14 @@ private fun render(
 
         else -> null
     }
+
+internal fun GeneratorView.render(accountKey: MicroBlogKey) =
+    UiList(
+        id = uri.atUri,
+        title = displayName,
+        description = description,
+        avatar = avatar?.uri,
+        creator = creator.render(accountKey),
+        likedCount = likeCount ?: 0,
+        liked = viewer?.like?.atUri != null,
+    )

@@ -46,7 +46,7 @@ struct AccountsScreen: View {
                                 #if os(macOS)
                                 .contextMenu {
                                     Button(role: .destructive) {
-                                        viewModel.model.removeAccount(accountKey: user.data.key)
+                                        state.removeAccount(accountKey: user.data.key)
                                     } label: {
                                         Label("delete", systemImage: "trash")
                                     }

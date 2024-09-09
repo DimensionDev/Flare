@@ -61,6 +61,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import com.ramcosta.composedestinations.generated.NavGraphs
+import com.ramcosta.composedestinations.generated.destinations.BlueskyFeedsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MastodonListScreenRouteDestination
@@ -77,6 +78,7 @@ import com.ramcosta.composedestinations.utils.composable
 import com.ramcosta.composedestinations.utils.dialogComposable
 import com.ramcosta.composedestinations.utils.toDestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.NotificationTabItem
@@ -574,6 +576,7 @@ private fun getDirection(
         }
 
         is Mastodon.AllListTabItem -> MastodonListScreenRouteDestination(accountType)
+        is Bluesky.FeedsTabItem -> BlueskyFeedsRouteDestination(accountType)
     }
 
 @Composable

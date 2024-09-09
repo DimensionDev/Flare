@@ -67,6 +67,8 @@ struct StatusItemView: View {
                 case .quote: String(localized: "bluesky_notification_quote")
                 case .reply: String(localized: "bluesky_notification_reply")
                 case .repost: String(localized: "bluesky_notification_repost")
+                case .unKnown: String(localized: "bluesky_notification_unKnown")
+                case .starterpackJoined: String(localized: "bluesky_notification_starterpackJoined")
                 }
             case .mastodon(let data):
                 switch onEnum(of: data) {

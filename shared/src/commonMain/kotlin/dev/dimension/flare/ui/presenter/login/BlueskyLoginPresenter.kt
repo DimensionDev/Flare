@@ -62,9 +62,9 @@ class BlueskyLoginPresenter(
         accountRepository: AccountRepository,
     ) {
         val service = BlueskyService(baseUrl)
-        // check if username is email
         val response =
-            if (username.contains("@")) {
+            // check if username is email or custom domain
+            if (username.contains("@") || username.contains(".")) {
                 service.createSession(CreateSessionRequest(username, password))
             } else {
                 val server = service.describeServer()

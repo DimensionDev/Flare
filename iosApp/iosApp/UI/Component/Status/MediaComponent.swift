@@ -72,7 +72,11 @@ struct MediaComponent: View {
                         }
                     }, label: {
                         Image(systemName: "eye.slash")
+                        #if os(iOS)
                             .foregroundColor(Color(uiColor: UIColor.systemBackground))
+                        #elseif os(macOS)
+                            .foregroundColor(Color(nsColor: NSColor.textBackgroundColor))
+                        #endif
                     })
                     .padding()
                     .buttonStyle(.borderedProminent)

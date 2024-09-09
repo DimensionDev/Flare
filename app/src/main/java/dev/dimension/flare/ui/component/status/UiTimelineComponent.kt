@@ -177,6 +177,15 @@ private fun TopMessageComponent(
                         stringResource(
                             id = R.string.bluesky_notification_item_reblogged_your_status,
                         )
+
+                    UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined ->
+                        stringResource(
+                            id = R.string.bluesky_notification_item_starterpack_joined,
+                        )
+                    UiTimeline.TopMessage.MessageType.Bluesky.UnKnown ->
+                        stringResource(
+                            id = R.string.bluesky_notification_item_unKnown,
+                        )
                 }
 
             is UiTimeline.TopMessage.MessageType.Mastodon ->

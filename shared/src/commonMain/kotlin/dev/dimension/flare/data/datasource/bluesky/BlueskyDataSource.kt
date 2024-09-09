@@ -4,11 +4,20 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import androidx.paging.cachedIn
+import androidx.paging.map
 import app.bsky.actor.GetProfileQueryParams
+import app.bsky.actor.PreferencesUnion
+import app.bsky.actor.PutPreferencesRequest
+import app.bsky.actor.SavedFeed
+import app.bsky.actor.Type
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
+import app.bsky.feed.GetFeedGeneratorQueryParams
+import app.bsky.feed.GetFeedGeneratorsQueryParams
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
@@ -16,14 +25,17 @@ import app.bsky.feed.PostReplyRef
 import app.bsky.feed.ViewerState
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
+import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
 import com.atproto.repo.CreateRecordRequest
+import com.atproto.repo.CreateRecordResponse
 import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.StrongRef
+import com.benasher44.uuid.uuid4
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.JSON
@@ -51,21 +63,23 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -84,6 +98,7 @@ import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.model.JsonContent
+import sh.christian.ozone.api.response.AtpResponse
 
 @OptIn(ExperimentalPagingApi::class)
 class BlueskyDataSource(
@@ -599,36 +614,11 @@ class BlueskyDataSource(
                 )
             }
             runCatching {
-                val service = account.getService(appDatabase)
                 if (likedUri != null) {
-                    service.deleteRecord(
-                        DeleteRecordRequest(
-                            repo = Did(did = account.accountKey.id),
-                            collection = Nsid("app.bsky.feed.like"),
-                            rkey = likedUri.substringAfterLast('/'),
-                        ),
-                    )
+                    deleteLikeRecord(likedUri)
                 } else {
                     val result =
-                        service
-                            .createRecord(
-                                CreateRecordRequest(
-                                    repo = Did(did = account.accountKey.id),
-                                    collection = Nsid("app.bsky.feed.like"),
-                                    record =
-                                        buildJsonObject {
-                                            put("\$type", "app.bsky.feed.like")
-                                            put("createdAt", Clock.System.now().toString())
-                                            put(
-                                                "subject",
-                                                buildJsonObject {
-                                                    put("cid", cid)
-                                                    put("uri", uri)
-                                                },
-                                            )
-                                        }.jsonContent(),
-                                ),
-                            ).requireResponse()
+                        createLikeRecord(cid, uri)
                     updateStatusUseCase<StatusContent.Bluesky>(
                         statusKey = statusKey,
                         accountKey = account.accountKey,
@@ -674,6 +664,45 @@ class BlueskyDataSource(
                 }
             }
         }
+    }
+
+    private suspend fun createLikeRecord(
+        cid: String,
+        uri: String,
+    ): CreateRecordResponse {
+        val service = account.getService(appDatabase)
+        val result =
+            service
+                .createRecord(
+                    CreateRecordRequest(
+                        repo = Did(did = account.accountKey.id),
+                        collection = Nsid("app.bsky.feed.like"),
+                        record =
+                            buildJsonObject {
+                                put("\$type", "app.bsky.feed.like")
+                                put("createdAt", Clock.System.now().toString())
+                                put(
+                                    "subject",
+                                    buildJsonObject {
+                                        put("cid", cid)
+                                        put("uri", uri)
+                                    },
+                                )
+                            }.jsonContent(),
+                    ),
+                ).requireResponse()
+        return result
+    }
+
+    private suspend fun deleteLikeRecord(likedUri: String): AtpResponse<Unit> {
+        val service = account.getService(appDatabase)
+        return service.deleteRecord(
+            DeleteRecordRequest(
+                repo = Did(did = account.accountKey.id),
+                collection = Nsid("app.bsky.feed.like"),
+                rkey = likedUri.substringAfterLast('/'),
+            ),
+        )
     }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
@@ -997,6 +1026,298 @@ class BlueskyDataSource(
                 override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
+
+    private val preferences: MemCacheable<List<PreferencesUnion>> by lazy {
+        MemCacheable(
+            key = "preferences_${account.accountKey}",
+        ) {
+            val service = account.getService(appDatabase)
+            service
+                .getPreferences()
+                .maybeResponse()
+                ?.preferences
+                .orEmpty()
+        }
+    }
+
+    private val myFeedsKey = "my_feeds_${account.accountKey}"
+
+    val myFeeds: MemCacheable<ImmutableList<UiList>> by lazy {
+        MemCacheable(
+            key = myFeedsKey,
+        ) {
+            val service = account.getService(appDatabase)
+            val preferences =
+                service
+                    .getPreferences()
+                    .maybeResponse()
+                    ?.preferences
+                    .orEmpty()
+            val items =
+                preferences
+                    .filterIsInstance<PreferencesUnion.SavedFeedsPrefV2>()
+                    .firstOrNull()
+                    ?.value
+                    ?.items
+                    ?.filter {
+                        it.type == Type.FEED
+                    }.orEmpty()
+            service
+                .getFeedGenerators(
+                    GetFeedGeneratorsQueryParams(
+                        feeds =
+                            items
+                                .map { AtUri(it.value) }
+                                .toImmutableList(),
+                    ),
+                ).maybeResponse()
+                ?.feeds
+                ?.map {
+                    it.render(account.accountKey)
+                }.orEmpty()
+                .toImmutableList()
+        }
+    }
+
+    fun popularFeeds(
+        query: String?,
+        scope: CoroutineScope,
+    ): Flow<PagingData<Pair<UiList, Boolean>>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+        ) {
+            object : PagingSource<String, UiList>() {
+                override fun getRefreshKey(state: PagingState<String, UiList>): String? = null
+
+                override suspend fun load(params: LoadParams<String>): LoadResult<String, UiList> {
+                    val service = account.getService(appDatabase)
+                    val result =
+                        service
+                            .getPopularFeedGenerators(
+                                GetPopularFeedGeneratorsQueryParams(
+                                    limit = params.loadSize.toLong(),
+                                    cursor = params.key,
+                                    query = query,
+                                ),
+                            ).maybeResponse()
+                    return LoadResult.Page(
+                        data =
+                            result
+                                ?.feeds
+                                ?.map {
+                                    it.render(account.accountKey)
+                                }.orEmpty(),
+                        prevKey = null,
+                        nextKey = result?.cursor,
+                    )
+                }
+            }
+        }.flow
+            .cachedIn(scope)
+            .let { feeds ->
+                combine(
+                    feeds,
+                    MemCacheable.subscribe<ImmutableList<UiList>>(myFeedsKey),
+                ) { popular, my ->
+                    popular.map { item ->
+                        item to my.any { it.id == item.id }
+                    }
+                }
+            }.cachedIn(scope)
+
+    private fun feedInfoKey(uri: String) = "feed_info_$uri"
+
+    fun feedInfo(uri: String): MemCacheable<UiList> =
+        MemCacheable(
+            key = feedInfoKey(uri),
+        ) {
+            val service = account.getService(appDatabase)
+            service
+                .getFeedGenerator(
+                    GetFeedGeneratorQueryParams(
+                        feed = AtUri(uri),
+                    ),
+                ).requireResponse()
+                .view
+                .render(account.accountKey)
+        }
+
+    fun feedTimeline(
+        uri: String,
+        pageSize: Int = 20,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiTimeline>> {
+        val pagingKey = "feed_timeline_$uri"
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                FeedTimelineRemoteMediator(
+                    service = account.getService(appDatabase),
+                    accountKey = account.accountKey,
+                    database = database,
+                    uri = uri,
+                    pagingKey = pagingKey,
+                ),
+        )
+    }
+
+    suspend fun subscribeFeed(data: UiList) {
+        MemCacheable.updateWith<ImmutableList<UiList>>(
+            key = myFeedsKey,
+        ) {
+            (it + data).toImmutableList()
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            val currentPreferences = service.getPreferences().requireResponse()
+            val feedInfo =
+                service
+                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
+                    .requireResponse()
+            val newPreferences = currentPreferences.preferences.toMutableList()
+            val prefIndex = newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPref }
+            if (prefIndex != -1) {
+                val pref = newPreferences[prefIndex] as PreferencesUnion.SavedFeedsPref
+                val newPref =
+                    pref.value.copy(
+                        saved = (pref.value.saved + feedInfo.view.uri).toImmutableList(),
+                        pinned = (pref.value.pinned + feedInfo.view.uri).toImmutableList(),
+                    )
+                newPreferences[prefIndex] = PreferencesUnion.SavedFeedsPref(newPref)
+            }
+            val prefV2Index =
+                newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPrefV2 }
+            if (prefV2Index != -1) {
+                val pref = newPreferences[prefV2Index] as PreferencesUnion.SavedFeedsPrefV2
+                val newPref =
+                    pref.value.copy(
+                        items =
+                            (
+                                pref.value.items +
+                                    SavedFeed(
+                                        type = Type.FEED,
+                                        value = feedInfo.view.uri.atUri,
+                                        pinned = true,
+                                        id = uuid4().toString(),
+                                    )
+                            ).toImmutableList(),
+                    )
+                newPreferences[prefV2Index] = PreferencesUnion.SavedFeedsPrefV2(newPref)
+            }
+
+            service.putPreferences(
+                request =
+                    PutPreferencesRequest(
+                        preferences = newPreferences.toImmutableList(),
+                    ),
+            )
+            myFeeds.refresh()
+        }.onFailure {
+            MemCacheable.updateWith<ImmutableList<UiList>>(
+                key = myFeedsKey,
+            ) {
+                it.filterNot { item -> item.id == data.id }.toImmutableList()
+            }
+        }
+    }
+
+    suspend fun unsubscribeFeed(data: UiList) {
+        MemCacheable.updateWith<ImmutableList<UiList>>(
+            key = myFeedsKey,
+        ) {
+            it.filterNot { item -> item.id == data.id }.toImmutableList()
+        }
+        runCatching {
+            val service = account.getService(appDatabase)
+            val currentPreferences = service.getPreferences().requireResponse()
+            val feedInfo =
+                service
+                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
+                    .requireResponse()
+            val newPreferences = currentPreferences.preferences.toMutableList()
+            val prefIndex = newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPref }
+            if (prefIndex != -1) {
+                val pref = newPreferences[prefIndex] as PreferencesUnion.SavedFeedsPref
+                val newPref =
+                    pref.value.copy(
+                        saved =
+                            pref.value.saved
+                                .filterNot { it == feedInfo.view.uri }
+                                .toImmutableList(),
+                        pinned =
+                            pref.value.pinned
+                                .filterNot { it == feedInfo.view.uri }
+                                .toImmutableList(),
+                    )
+                newPreferences[prefIndex] = PreferencesUnion.SavedFeedsPref(newPref)
+            }
+            val prefV2Index =
+                newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPrefV2 }
+            if (prefV2Index != -1) {
+                val pref = newPreferences[prefV2Index] as PreferencesUnion.SavedFeedsPrefV2
+                val newPref =
+                    pref.value.copy(
+                        items =
+                            pref.value.items
+                                .filterNot { it.value == feedInfo.view.uri.atUri }
+                                .toImmutableList(),
+                    )
+                newPreferences[prefV2Index] = PreferencesUnion.SavedFeedsPrefV2(newPref)
+            }
+            service.putPreferences(
+                request =
+                    PutPreferencesRequest(
+                        preferences = newPreferences.toImmutableList(),
+                    ),
+            )
+            myFeeds.refresh()
+        }.onFailure {
+            MemCacheable.updateWith<ImmutableList<UiList>>(
+                key = myFeedsKey,
+            ) {
+                (it + data).toImmutableList()
+            }
+        }
+    }
+
+    suspend fun favouriteFeed(data: UiList) {
+        MemCacheable.update(
+            key = feedInfoKey(data.id),
+            value =
+                data.copy(
+                    liked = !data.liked,
+                ),
+        )
+        val service = account.getService(appDatabase)
+        runCatching {
+            val feedInfo =
+                service
+                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
+                    .requireResponse()
+            val likedUri =
+                feedInfo.view.viewer
+                    ?.like
+                    ?.atUri
+            if (likedUri != null) {
+                deleteLikeRecord(likedUri)
+            } else {
+                createLikeRecord(cid = feedInfo.view.cid.cid, uri = feedInfo.view.uri.atUri)
+            }
+        }.onFailure {
+            MemCacheable.update(
+                key = feedInfoKey(data.id),
+                value =
+                    data.copy(
+                        liked = data.liked,
+                    ),
+            )
+        }
+    }
 }
 
 fun JsonElement.jsonContent(): JsonContent = JSON.decodeFromJsonElement(this)

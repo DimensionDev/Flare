@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -90,7 +91,8 @@ sealed interface TitleType {
             Featured,
             Bookmark,
             Favourite,
-            List, ;
+            List,
+            Feeds, ;
 
             fun toId(): Int =
                 when (this) {
@@ -105,6 +107,7 @@ sealed interface TitleType {
                     Bookmark -> R.string.home_tab_bookmarks_title
                     Favourite -> R.string.home_tab_favorite_title
                     List -> R.string.home_tab_list_title
+                    Feeds -> R.string.home_tab_feeds_title
                 }
         }
     }
@@ -137,7 +140,9 @@ sealed interface IconType {
             Mastodon,
             Misskey,
             Bluesky,
-            List, ;
+            List,
+            Feeds,
+            ;
 
             fun toIcon(): ImageVector =
                 when (this) {
@@ -156,6 +161,7 @@ sealed interface IconType {
                     Misskey -> FontAwesomeIcons.Brands.Misskey
                     Bluesky -> FontAwesomeIcons.Brands.Bluesky
                     List -> Icons.AutoMirrored.Default.List
+                    Feeds -> Icons.Default.RssFeed
                 }
         }
     }
@@ -444,10 +450,17 @@ sealed interface TimelineTabItem : TabItem {
                 ),
             )
 
-        private fun defaultBlueskySecondaryItems(
-            @Suppress("UNUSED_PARAMETER")
-            accountKey: MicroBlogKey,
-        ) = persistentListOf<TabItem>()
+        private fun defaultBlueskySecondaryItems(accountKey: MicroBlogKey) =
+            persistentListOf(
+                Bluesky.FeedsTabItem(
+                    account = AccountType.Active,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Feeds, accountKey),
+                        ),
+                ),
+            )
 
         private fun xqt(accountKey: MicroBlogKey) =
             listOf(
@@ -705,6 +718,33 @@ object XQT {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.xqt
                 .BookmarkTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+}
+
+object Bluesky {
+    @Serializable
+    data class FeedsTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TabItem {
+        override val key: String = "feeds_$account"
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    data class FeedTabItem(
+        override val account: AccountType,
+        val uri: String,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.bluesky
+                .BlueskyFeedTimelinePresenter(account, uri)
+
+        override val key: String = "feed_${account}_$uri"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

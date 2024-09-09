@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter.home.mastodon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
-import dev.dimension.flare.common.LoadState
+import androidx.paging.LoadState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider

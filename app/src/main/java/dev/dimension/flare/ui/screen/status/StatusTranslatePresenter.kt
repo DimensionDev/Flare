@@ -60,28 +60,28 @@ private fun translateText(text: String) =
             if (source == target || source == null || target == null) {
                 UiState.Success(text)
             } else {
-                val client =
-                    remember(source, target) {
-                        val options =
-                            TranslatorOptions
-                                .Builder()
-                                .setSourceLanguage(source)
-                                .setTargetLanguage(target)
-                                .build()
+                remember(source, target) {
+                    val options =
+                        TranslatorOptions
+                            .Builder()
+                            .setSourceLanguage(source)
+                            .setTargetLanguage(target)
+                            .build()
+                    val client =
                         Translation.getClient(options)
+                    flow<UiState<String>> {
+                        runCatching {
+                            client
+                                .downloadModelIfNeeded()
+                                .await()
+                            client
+                                .translate(text)
+                                .await()
+                        }.fold(
+                            onSuccess = { emit(UiState.Success(it)) },
+                            onFailure = { emit(UiState.Error(it)) },
+                        )
                     }
-                flow<UiState<String>> {
-                    runCatching {
-                        client
-                            .downloadModelIfNeeded()
-                            .await()
-                        client
-                            .translate(text)
-                            .await()
-                    }.fold(
-                        onSuccess = { emit(UiState.Success(it)) },
-                        onFailure = { emit(UiState.Error(it)) },
-                    )
                 }.collectAsState(UiState.Loading()).value
             }
         }

@@ -63,6 +63,8 @@
   <string name="bluesky_item_reblogged_status">ускорил статус</string>
   <string name="bluesky_notification_item_replied_to_you">ответил вам</string>
   <string name="bluesky_notification_item_quoted_your_status">процитировал ваш статус</string>
+  <string name="bluesky_notification_item_starterpack_joined">Стартерпак присоединился</string>
+  <string name="bluesky_notification_item_unKnown">Неизвестный</string>
   <string name="misskey_notification_item_mentioned_you">упомянул вас</string>
   <string name="misskey_notification_item_replied_to_you">ответил вам</string>
   <string name="misskey_notification_item_reposted_your_status">отредактировал ваш статус</string>
@@ -283,6 +285,8 @@
   <string name="home_tab_featured_title">Избранные</string>
   <string name="home_tab_bookmarks_title">Закладки</string>
   <string name="home_tab_favorite_title">Избранное</string>
+  <string name="home_tab_list_title">Список</string>
+  <string name="home_tab_feeds_title">Ленты</string>
   <string name="tab_settings_primary">Основная вкладка</string>
   <string name="tab_settings_secondary">Вторичная вкладка</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -298,4 +302,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Иконка</string>
   <string name="edit_tab_with_avatar">С аватаром</string>
+  <string name="list_add">Добавить список</string>
+  <string name="list_edit">Изменить список</string>
+  <string name="list_delete_confirm">Вы уверены, что хотите удалить этот список %1$s?</string>
+  <string name="list_create">Создать список</string>
+  <string name="edit_list_member_label">Искать</string>
+  <string name="edit_list_member_search">Искать</string>
+  <string name="edit_list_member_add">Добавить</string>
+  <string name="edit_list_member_remove">Удалить</string>
 </resources>

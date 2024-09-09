@@ -62,6 +62,8 @@
   <string name="bluesky_item_reblogged_status">wzmocniono status</string>
   <string name="bluesky_notification_item_replied_to_you">odpowiedział(-a) do Ciebie</string>
   <string name="bluesky_notification_item_quoted_your_status">zacytował(-a) Twój status</string>
+  <string name="bluesky_notification_item_starterpack_joined">Starterpack dołączył</string>
+  <string name="bluesky_notification_item_unKnown">Odznana</string>
   <string name="misskey_notification_item_mentioned_you">wspomniał o tobie</string>
   <string name="misskey_notification_item_replied_to_you">odpowiedział(-a) do Ciebie</string>
   <string name="misskey_notification_item_reposted_your_status">ponownie opublikowano Twój status</string>
@@ -284,6 +286,8 @@
   <string name="home_tab_featured_title">Polecane</string>
   <string name="home_tab_bookmarks_title">Zakładki</string>
   <string name="home_tab_favorite_title">Ulubione</string>
+  <string name="home_tab_list_title">Lista</string>
+  <string name="home_tab_feeds_title">Kanały</string>
   <string name="tab_settings_primary">Karta podstawowa</string>
   <string name="tab_settings_secondary">Karta drugorzędna</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -299,4 +303,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Ikona</string>
   <string name="edit_tab_with_avatar">Z awatarem</string>
+  <string name="list_add">Dodaj listę</string>
+  <string name="list_edit">Edytuj listę</string>
+  <string name="list_delete_confirm">Czy na pewno chcesz usunąć tę listę %1$s?</string>
+  <string name="list_create">Utwórz listę</string>
+  <string name="edit_list_member_label">Szukaj</string>
+  <string name="edit_list_member_search">Szukaj</string>
+  <string name="edit_list_member_add">Dodaj</string>
+  <string name="edit_list_member_remove">Usuń</string>
 </resources>

@@ -61,6 +61,8 @@
   <string name="bluesky_item_reblogged_status">передмухнув статус</string>
   <string name="bluesky_notification_item_replied_to_you">відповів вам</string>
   <string name="bluesky_notification_item_quoted_your_status">процитував ваш статус</string>
+  <string name="bluesky_notification_item_starterpack_joined">Початковий пакунок приєднаний</string>
+  <string name="bluesky_notification_item_unKnown">Унґновн</string>
   <string name="misskey_notification_item_mentioned_you">згадав вас</string>
   <string name="misskey_notification_item_replied_to_you">відповів вам</string>
   <string name="misskey_notification_item_reposted_your_status">перерозміщувати ваш статус</string>
@@ -282,6 +284,8 @@
   <string name="home_tab_featured_title">Рекомендовані</string>
   <string name="home_tab_bookmarks_title">Закладки</string>
   <string name="home_tab_favorite_title">Фаворит</string>
+  <string name="home_tab_list_title">Список</string>
+  <string name="home_tab_feeds_title">Стрічки новин</string>
   <string name="tab_settings_primary">Основна вкладка</string>
   <string name="tab_settings_secondary">Додаткова вкладка</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -297,4 +301,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Іконка</string>
   <string name="edit_tab_with_avatar">З аватаром</string>
+  <string name="list_add">Додати список</string>
+  <string name="list_edit">Редагувати список</string>
+  <string name="list_delete_confirm">Ви дійсно бажаєте видалити цей список %1$s?</string>
+  <string name="list_create">Створити список</string>
+  <string name="edit_list_member_label">Пошук</string>
+  <string name="edit_list_member_search">Пошук</string>
+  <string name="edit_list_member_add">Додати</string>
+  <string name="edit_list_member_remove">Видалити</string>
 </resources>

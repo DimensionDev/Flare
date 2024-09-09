@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.bluesky
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -186,13 +189,53 @@ private fun BlueskyFeedScreen(
                                         text = it,
                                     )
                                 }
-                                StatusActionButton(
-                                    icon = if (item.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                    text = item.likedCountHumanized,
-                                    color = if (item.liked) Color.Red else LocalContentColor.current,
-                                    onClicked = {
-                                    },
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    state.subscribed
+                                        .onSuccess { subscribed ->
+                                            FilledTonalButton(
+                                                onClick = {
+                                                    if (subscribed) {
+                                                        state.unsubscribe(item)
+                                                    } else {
+                                                        state.subscribe(item)
+                                                    }
+                                                },
+                                            ) {
+                                                Text(
+                                                    if (subscribed) {
+                                                        stringResource(R.string.feeds_unsubscribe)
+                                                    } else {
+                                                        stringResource(R.string.feeds_subscribe)
+                                                    },
+                                                )
+                                            }
+                                        }.onLoading {
+                                            FilledTonalButton(
+                                                onClick = { },
+                                                modifier = Modifier.placeholder(true),
+                                            ) {
+                                                Text(
+                                                    "Loading...",
+                                                    modifier = Modifier.placeholder(true),
+                                                )
+                                            }
+                                        }
+
+                                    StatusActionButton(
+                                        icon = if (item.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        text = item.likedCountHumanized,
+                                        color = if (item.liked) Color.Red else LocalContentColor.current,
+                                        onClicked = {
+                                            if (item.liked) {
+                                                state.unfavorite(item)
+                                            } else {
+                                                state.favorite(item)
+                                            }
+                                        },
+                                    )
+                                }
                             }
                         }
                     }

@@ -16,7 +16,9 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.launch
 
 class BlueskyFeedsPresenter(
     private val accountType: AccountType,
@@ -55,6 +57,24 @@ class BlueskyFeedsPresenter(
                 myFeeds.refreshSuspend()
                 popularFeeds.refreshSuspend()
             }
+
+            override fun subscribe(list: UiList) {
+                serviceState.onSuccess {
+                    scope.launch {
+                        require(it is BlueskyDataSource)
+                        it.subscribeFeed(list)
+                    }
+                }
+            }
+
+            override fun unsubscribe(list: UiList) {
+                serviceState.onSuccess {
+                    scope.launch {
+                        require(it is BlueskyDataSource)
+                        it.unsubscribeFeed(list)
+                    }
+                }
+            }
         }
     }
 }
@@ -66,4 +86,8 @@ interface BlueskyFeedsState {
     fun search(value: String)
 
     suspend fun refreshSuspend()
+
+    fun subscribe(list: UiList)
+
+    fun unsubscribe(list: UiList)
 }

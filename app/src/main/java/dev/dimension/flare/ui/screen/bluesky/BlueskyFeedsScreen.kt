@@ -254,6 +254,11 @@ private fun BlueskyFeedsScreen(
                                 trailingContent = {
                                     IconButton(
                                         onClick = {
+                                            if (subscribed) {
+                                                state.unsubscribe(item)
+                                            } else {
+                                                state.subscribe(item)
+                                            }
                                         },
                                     ) {
                                         if (subscribed) {

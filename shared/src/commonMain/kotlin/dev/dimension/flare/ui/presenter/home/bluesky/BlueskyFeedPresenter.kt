@@ -19,6 +19,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.launch
 
 class BlueskyFeedPresenter(
     private val accountType: AccountType,
@@ -43,18 +44,65 @@ class BlueskyFeedPresenter(
                     it.feedInfo(uri = uri)
                 }.collectAsState()
             }
+        val subscribed =
+            serviceState
+                .flatMap {
+                    require(it is BlueskyDataSource)
+                    remember(it) {
+                        it.myFeeds
+                    }.collectAsState().toUi()
+                }.map {
+                    it.any { it.id == uri }
+                }
         return object : BlueskyFeedState {
             override val info =
                 info.flatMap {
                     it.toUi()
                 }
             override val timeline = timeline
+            override val subscribed = subscribed
 
             override suspend fun refreshSuspend() {
                 info.onSuccess {
                     it.refresh()
                 }
                 timeline.refreshSuspend()
+            }
+
+            override fun subscribe(list: UiList) {
+                serviceState.onSuccess {
+                    scope.launch {
+                        require(it is BlueskyDataSource)
+                        it.subscribeFeed(list)
+                    }
+                }
+            }
+
+            override fun unsubscribe(list: UiList) {
+                serviceState.onSuccess {
+                    scope.launch {
+                        require(it is BlueskyDataSource)
+                        it.unsubscribeFeed(list)
+                    }
+                }
+            }
+
+            override fun favorite(list: UiList) {
+                serviceState.onSuccess {
+                    scope.launch {
+                        require(it is BlueskyDataSource)
+                        it.favouriteFeed(list)
+                    }
+                }
+            }
+
+            override fun unfavorite(list: UiList) {
+                serviceState.onSuccess {
+                    scope.launch {
+                        require(it is BlueskyDataSource)
+                        it.favouriteFeed(list)
+                    }
+                }
             }
         }
     }
@@ -63,6 +111,15 @@ class BlueskyFeedPresenter(
 interface BlueskyFeedState {
     val info: UiState<UiList>
     val timeline: PagingState<UiTimeline>
+    val subscribed: UiState<Boolean>
 
     suspend fun refreshSuspend()
+
+    fun subscribe(list: UiList)
+
+    fun unsubscribe(list: UiList)
+
+    fun favorite(list: UiList)
+
+    fun unfavorite(list: UiList)
 }

@@ -62,6 +62,8 @@
   <string name="bluesky_item_reblogged_status">تم ترقية الحالة</string>
   <string name="bluesky_notification_item_replied_to_you">رد عليك</string>
   <string name="bluesky_notification_item_quoted_your_status">مقتبسة من حالتك</string>
+  <string name="bluesky_notification_item_starterpack_joined">انضم إلى حزمة البداية</string>
+  <string name="bluesky_notification_item_unKnown">غير معروف</string>
   <string name="misskey_notification_item_mentioned_you">ذكرك</string>
   <string name="misskey_notification_item_replied_to_you">رد عليك</string>
   <string name="misskey_notification_item_reposted_your_status">إعادة نشر حالتك</string>
@@ -283,6 +285,8 @@
   <string name="home_tab_featured_title">مميز</string>
   <string name="home_tab_bookmarks_title">المفضلة</string>
   <string name="home_tab_favorite_title">المفضلة</string>
+  <string name="home_tab_list_title">قائمة</string>
+  <string name="home_tab_feeds_title">التحديثات</string>
   <string name="tab_settings_primary">التبويب الأساسي</string>
   <string name="tab_settings_secondary">علامة التبويب الثانوية</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -298,4 +302,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">أيقونة</string>
   <string name="edit_tab_with_avatar">مع الصورة الرمزية</string>
+  <string name="list_add">إضافة قائمة</string>
+  <string name="list_edit">تحرير القائمة</string>
+  <string name="list_delete_confirm">هل أنت متأكد من أنك تريد حذف هذه القائمة %1$s؟</string>
+  <string name="list_create">إنشاء قائمة</string>
+  <string name="edit_list_member_label">البحث</string>
+  <string name="edit_list_member_search">البحث</string>
+  <string name="edit_list_member_add">إضافة</string>
+  <string name="edit_list_member_remove">إزالة</string>
 </resources>

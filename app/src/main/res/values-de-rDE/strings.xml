@@ -63,6 +63,8 @@
   <string name="bluesky_item_reblogged_status">geboosteter Status</string>
   <string name="bluesky_notification_item_replied_to_you">geantwortet</string>
   <string name="bluesky_notification_item_quoted_your_status">zitierte deinen Status</string>
+  <string name="bluesky_notification_item_starterpack_joined">Starterpack beigetreten</string>
+  <string name="bluesky_notification_item_unKnown">Unbekannt</string>
   <string name="misskey_notification_item_mentioned_you">erwähnte dich</string>
   <string name="misskey_notification_item_replied_to_you">geantwortet</string>
   <string name="misskey_notification_item_reposted_your_status">deinen Status neu geschrieben</string>
@@ -285,6 +287,8 @@
   <string name="home_tab_featured_title">Empfohlen</string>
   <string name="home_tab_bookmarks_title">Lesezeichen</string>
   <string name="home_tab_favorite_title">Favorit</string>
+  <string name="home_tab_list_title">Liste</string>
+  <string name="home_tab_feeds_title">Feeds</string>
   <string name="tab_settings_primary">Primärer Tab</string>
   <string name="tab_settings_secondary">Sekundärer Tab</string>
   <string name="date_format_year_month_day">dd MMM yy</string>
@@ -300,4 +304,12 @@
   <string name="edit_tab_name_placeholder">Tab name</string>
   <string name="edit_tab_icon">Symbol</string>
   <string name="edit_tab_with_avatar">Mit Avatar</string>
+  <string name="list_add">Neue Liste</string>
+  <string name="list_edit">Liste bearbeiten</string>
+  <string name="list_delete_confirm">Sind Sie sicher, dass Sie diese Liste %1$s löschen möchten?</string>
+  <string name="list_create">Liste erstellen</string>
+  <string name="edit_list_member_label">Suchen</string>
+  <string name="edit_list_member_search">Suchen</string>
+  <string name="edit_list_member_add">Neu</string>
+  <string name="edit_list_member_remove">Entfernen</string>
 </resources>

@@ -1,11 +1,13 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import androidx.paging.map
 import app.bsky.actor.GetProfileQueryParams
@@ -23,6 +25,8 @@ import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
 import app.bsky.feed.PostReplyRef
 import app.bsky.feed.ViewerState
+import app.bsky.graph.GetListQueryParams
+import app.bsky.graph.GetListsQueryParams
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
@@ -31,16 +35,21 @@ import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
+import com.atproto.repo.ApplyWritesDelete
+import com.atproto.repo.ApplyWritesRequest
+import com.atproto.repo.ApplyWritesRequestWriteUnion
 import com.atproto.repo.CreateRecordRequest
 import com.atproto.repo.CreateRecordResponse
 import com.atproto.repo.DeleteRecordRequest
+import com.atproto.repo.ListRecordsQueryParams
+import com.atproto.repo.ListRecordsRecord
+import com.atproto.repo.PutRecordRequest
 import com.atproto.repo.StrongRef
 import com.benasher44.uuid.uuid4
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.common.JSON
+import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MemCacheable
-import dev.dimension.flare.common.jsonObjectOrNull
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
@@ -51,10 +60,12 @@ import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.getService
@@ -69,6 +80,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.mapper.bskyJson
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
@@ -83,13 +95,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import sh.christian.ozone.api.AtUri
@@ -97,7 +104,6 @@ import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
-import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.response.AtpResponse
 
 @OptIn(ExperimentalPagingApi::class)
@@ -376,26 +382,14 @@ class BlueskyDataSource(
                                 ?.posts
                                 ?.firstOrNull()
                         }?.let { item ->
+                            val post: Post = item.record.bskyJson()
                             val root =
-                                item.record
-                                    .jsonElement()
-                                    .jsonObjectOrNull
-                                    ?.get("reply")
-                                    ?.jsonObjectOrNull
-                                    ?.get("root")
-                                    ?.jsonObjectOrNull
-                                    ?.let { root ->
-                                        StrongRef(
-                                            uri =
-                                                AtUri(
-                                                    root["uri"]?.jsonPrimitive?.content ?: item.uri.atUri,
-                                                ),
-                                            cid =
-                                                Cid(
-                                                    root["cid"]?.jsonPrimitive?.content ?: item.cid.cid,
-                                                ),
-                                        )
-                                    } ?: StrongRef(
+                                post.reply?.root?.let { root ->
+                                    StrongRef(
+                                        uri = root.uri,
+                                        cid = root.cid,
+                                    )
+                                } ?: StrongRef(
                                     uri = item.uri,
                                     cid = item.cid,
                                 )
@@ -409,16 +403,11 @@ class BlueskyDataSource(
                             )
                         },
             )
-        val json =
-            Json {
-                ignoreUnknownKeys = true
-                classDiscriminator = "${'$'}type"
-            }
         service.createRecord(
             CreateRecordRequest(
                 repo = Did(did = data.account.accountKey.id),
                 collection = Nsid("app.bsky.feed.post"),
-                record = json.encodeToJsonElement(post).jsonContent(),
+                record = post.bskyJson(),
             ),
         )
     }
@@ -516,17 +505,15 @@ class BlueskyDataSource(
                                     repo = Did(did = account.accountKey.id),
                                     collection = Nsid("app.bsky.feed.repost"),
                                     record =
-                                        buildJsonObject {
-                                            put("\$type", "app.bsky.feed.repost")
-                                            put("createdAt", Clock.System.now().toString())
-                                            put(
-                                                "subject",
-                                                buildJsonObject {
-                                                    put("cid", cid)
-                                                    put("uri", uri)
-                                                },
-                                            )
-                                        }.jsonContent(),
+                                        app.bsky.feed
+                                            .Repost(
+                                                subject =
+                                                    StrongRef(
+                                                        uri = AtUri(uri),
+                                                        cid = Cid(cid),
+                                                    ),
+                                                createdAt = Clock.System.now(),
+                                            ).bskyJson(),
                                 ),
                             ).requireResponse()
                     updateStatusUseCase<StatusContent.Bluesky>(
@@ -678,17 +665,15 @@ class BlueskyDataSource(
                         repo = Did(did = account.accountKey.id),
                         collection = Nsid("app.bsky.feed.like"),
                         record =
-                            buildJsonObject {
-                                put("\$type", "app.bsky.feed.like")
-                                put("createdAt", Clock.System.now().toString())
-                                put(
-                                    "subject",
-                                    buildJsonObject {
-                                        put("cid", cid)
-                                        put("uri", uri)
-                                    },
-                                )
-                            }.jsonContent(),
+                            app.bsky.feed
+                                .Like(
+                                    subject =
+                                        StrongRef(
+                                            uri = AtUri(uri),
+                                            cid = Cid(cid),
+                                        ),
+                                    createdAt = Clock.System.now(),
+                                ).bskyJson(),
                     ),
                 ).requireResponse()
         return result
@@ -780,11 +765,11 @@ class BlueskyDataSource(
                     repo = Did(did = account.accountKey.id),
                     collection = Nsid("app.bsky.graph.follow"),
                     record =
-                        buildJsonObject {
-                            put("\$type", "app.bsky.graph.follow")
-                            put("createdAt", Clock.System.now().toString())
-                            put("subject", userKey.id)
-                        }.jsonContent(),
+                        app.bsky.graph
+                            .Follow(
+                                subject = Did(userKey.id),
+                                createdAt = Clock.System.now(),
+                            ).bskyJson(),
                 ),
             )
         }.onFailure {
@@ -814,11 +799,11 @@ class BlueskyDataSource(
                     repo = Did(did = account.accountKey.id),
                     collection = Nsid("app.bsky.graph.block"),
                     record =
-                        buildJsonObject {
-                            put("\$type", "app.bsky.graph.block")
-                            put("createdAt", Clock.System.now().toString())
-                            put("subject", userKey.id)
-                        }.jsonContent(),
+                        app.bsky.graph
+                            .Block(
+                                subject = Did(userKey.id),
+                                createdAt = Clock.System.now(),
+                            ).bskyJson(),
                 ),
             )
         }.onFailure {
@@ -1318,8 +1303,328 @@ class BlueskyDataSource(
             )
         }
     }
+
+    private val myListKey = "my_list_${account.accountKey}"
+
+    val myList: MemCacheable<ImmutableList<UiList>> by lazy {
+        MemCacheable(
+            key = myListKey,
+        ) {
+            val service = account.getService(appDatabase)
+            service
+                .getLists(
+                    params = GetListsQueryParams(actor = Did(did = account.accountKey.id)),
+                ).requireResponse()
+                .lists
+                .map {
+                    it.render(account.accountKey)
+                }.toImmutableList()
+        }
+    }
+
+    private fun listInfoKey(uri: String) = "list_info_$uri"
+
+    fun listInfo(uri: String): MemCacheable<UiList> =
+        MemCacheable(
+            key = listInfoKey(uri),
+        ) {
+            val service = account.getService(appDatabase)
+            service
+                .getList(
+                    GetListQueryParams(
+                        list = AtUri(uri),
+                    ),
+                ).requireResponse()
+                .list
+                .render(account.accountKey)
+        }
+
+    fun listTimeline(
+        uri: String,
+        pageSize: Int = 20,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiTimeline>> {
+        val pagingKey = "list_timeline_$uri"
+        return timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = account.accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                ListTimelineRemoteMediator(
+                    service = account.getService(appDatabase),
+                    accountKey = account.accountKey,
+                    database = database,
+                    uri = uri,
+                    pagingKey = pagingKey,
+                ),
+        )
+    }
+
+    suspend fun createList(
+        title: String,
+        description: String?,
+        icon: FileItem?,
+    ) {
+        runCatching {
+            val service = account.getService(appDatabase)
+            val iconInfo =
+                if (icon != null) {
+                    service.uploadBlob(icon.readBytes()).maybeResponse()
+                } else {
+                    null
+                }
+            val record =
+                app.bsky.graph.List(
+                    purpose = app.bsky.graph.Token.CURATELIST,
+                    name = title,
+                    description = description,
+                    avatar = iconInfo?.blob,
+                    createdAt = Clock.System.now(),
+                )
+            service.createRecord(
+                request =
+                    CreateRecordRequest(
+                        repo = Did(did = account.accountKey.id),
+                        collection = Nsid("app.bsky.graph.list"),
+                        record = record.bskyJson(),
+                    ),
+            )
+            myList.refresh()
+        }
+    }
+
+    suspend fun deleteList(uri: String) {
+        runCatching {
+            val service = account.getService(appDatabase)
+            val id = uri.substringAfterLast('/')
+            service.applyWrites(
+                request =
+                    ApplyWritesRequest(
+                        repo = Did(did = account.accountKey.id),
+                        writes =
+                            persistentListOf(
+                                ApplyWritesRequestWriteUnion.Delete(
+                                    value =
+                                        ApplyWritesDelete(
+                                            collection = Nsid("app.bsky.graph.list"),
+                                            rkey = id,
+                                        ),
+                                ),
+                            ),
+                    ),
+            )
+            myList.refresh()
+        }
+    }
+
+    suspend fun updateList(
+        uri: String,
+        title: String,
+        description: String?,
+        icon: FileItem?,
+    ) {
+        runCatching {
+            val service = account.getService(appDatabase)
+            val currentInfo: app.bsky.graph.List =
+                service
+                    .getRecord(
+                        params =
+                            com.atproto.repo.GetRecordQueryParams(
+                                collection = Nsid("app.bsky.graph.list"),
+                                repo = Did(did = account.accountKey.id),
+                                rkey = uri.substringAfterLast('/'),
+                            ),
+                    ).requireResponse()
+                    .bskyJson()
+
+            val iconInfo =
+                if (icon != null) {
+                    service.uploadBlob(icon.readBytes()).maybeResponse()
+                } else {
+                    null
+                }
+            val newRecord =
+                currentInfo
+                    .copy(
+                        name = title,
+                        description = description,
+                    ).let {
+                        if (iconInfo != null) {
+                            it.copy(avatar = iconInfo.blob)
+                        } else {
+                            it
+                        }
+                    }
+            service.putRecord(
+                request =
+                    PutRecordRequest(
+                        repo = Did(did = account.accountKey.id),
+                        collection = Nsid("app.bsky.graph.list"),
+                        rkey = uri.substringAfterLast('/'),
+                        record = newRecord.bskyJson(),
+                    ),
+            )
+            myList.refresh()
+        }
+    }
+
+    private fun listMemberKey(listId: String) = "listMembers_$listId"
+
+    fun listMembers(
+        listUri: String,
+        pageSize: Int = 20,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiUserV2>> =
+        memoryPager(
+            pageSize = pageSize,
+            pagingKey = listMemberKey(listUri),
+            scope = scope,
+            mediator =
+                object : RemoteMediator<Int, UiUserV2>() {
+                    override suspend fun load(
+                        loadType: LoadType,
+                        state: PagingState<Int, UiUserV2>,
+                    ): MediatorResult {
+                        val service = account.getService(appDatabase)
+                        try {
+                            if (loadType == LoadType.PREPEND) {
+                                return MediatorResult.Success(endOfPaginationReached = true)
+                            }
+                            val key =
+                                if (loadType == LoadType.REFRESH) {
+                                    null
+                                } else {
+                                    MemoryPagingSource
+                                        .get<UiUserV2>(key = listMemberKey(listUri))
+                                        ?.lastOrNull()
+                                        ?.key
+                                        ?.id
+                                }
+                            val result =
+                                service
+                                    .getList(
+                                        params =
+                                            GetListQueryParams(
+                                                list = AtUri(listUri),
+                                                cursor = key,
+                                                limit = state.config.pageSize.toLong(),
+                                            ),
+                                    ).maybeResponse()
+                                    ?.items
+                                    ?.map {
+                                        it.subject.render(account.accountKey)
+                                    } ?: emptyList()
+
+                            if (loadType == LoadType.REFRESH) {
+                                MemoryPagingSource.update(
+                                    key = listMemberKey(listUri),
+                                    value = result.toImmutableList(),
+                                )
+                            } else if (loadType == LoadType.APPEND) {
+                                MemoryPagingSource.append(
+                                    key = listMemberKey(listUri),
+                                    value = result.toImmutableList(),
+                                )
+                            }
+
+                            return MediatorResult.Success(
+                                endOfPaginationReached = result.isEmpty(),
+                            )
+                        } catch (e: Exception) {
+                            return MediatorResult.Error(e)
+                        }
+                    }
+                },
+        )
+
+    suspend fun addMember(
+        listUri: String,
+        userKey: MicroBlogKey,
+    ) {
+        runCatching {
+            val service = account.getService(appDatabase)
+            val user =
+                service
+                    .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
+                    .requireResponse()
+                    .render(account.accountKey)
+
+            MemoryPagingSource.updateWith(
+                key = listMemberKey(listUri),
+            ) {
+                (listOf(user) + it)
+                    .distinctBy {
+                        it.key
+                    }.toImmutableList()
+            }
+            service.createRecord(
+                CreateRecordRequest(
+                    repo = Did(did = account.accountKey.id),
+                    collection = Nsid("app.bsky.graph.listitem"),
+                    record =
+                        app.bsky.graph
+                            .Listitem(
+                                list = AtUri(listUri),
+                                subject = Did(userKey.id),
+                                createdAt = Clock.System.now(),
+                            ).bskyJson(),
+                ),
+            )
+        }
+    }
+
+    suspend fun removeMember(
+        listUri: String,
+        userKey: MicroBlogKey,
+    ) {
+        runCatching {
+            val service = account.getService(appDatabase)
+            MemoryPagingSource.updateWith<UiUserV2>(
+                key = listMemberKey(listUri),
+            ) {
+                it
+                    .filter { user -> user.key.id != userKey.id }
+                    .toImmutableList()
+            }
+            var record: ListRecordsRecord? = null
+            var cursor: String? = null
+            while (record == null) {
+                val response =
+                    service
+                        .listRecords(
+                            params =
+                                ListRecordsQueryParams(
+                                    repo = Did(did = account.accountKey.id),
+                                    collection = Nsid("app.bsky.graph.listitem"),
+                                    limit = 100,
+                                    cursor = cursor,
+                                ),
+                        ).requireResponse()
+                if (response.cursor == null || response.records.isEmpty()) {
+                    break
+                }
+                cursor = response.cursor
+                record =
+                    response.records
+                        .firstOrNull {
+                            val item: app.bsky.graph.Listitem = it.value.bskyJson()
+                            item.list.atUri == listUri && item.subject.did == userKey.id
+                        }
+            }
+            if (record != null) {
+                service.deleteRecord(
+                    DeleteRecordRequest(
+                        repo = Did(did = account.accountKey.id),
+                        collection = Nsid("app.bsky.graph.listitem"),
+                        rkey = record.uri.atUri.substringAfterLast('/'),
+                    ),
+                )
+            }
+        }
+    }
 }
 
-fun JsonElement.jsonContent(): JsonContent = JSON.decodeFromJsonElement(this)
-
-fun JsonContent.jsonElement(): JsonElement = JSON.encodeToJsonElement(this)
+internal inline fun <reified T, reified R> T.bskyJson(): R = bskyJson.decodeFromJsonElement(bskyJson.encodeToJsonElement(this))

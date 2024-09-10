@@ -8,7 +8,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
@@ -34,7 +33,7 @@ class BlueskyFeedsPresenter(
                     require(service is BlueskyDataSource)
                     remember(service) {
                         service.myFeeds
-                    }.collectAsState()
+                    }
                 }.toPagingState()
         val popularFeeds =
             serviceState

@@ -155,6 +155,14 @@ class CacheableState<T>(
 }
 
 @Composable
+internal fun <T : Any> UiState<MemCacheable<ImmutableList<T>>>.toPagingState(): PagingState<T> =
+    when (this) {
+        is UiState.Loading -> PagingState.Loading()
+        is UiState.Error -> PagingState.Error(throwable)
+        is UiState.Success -> data.collectAsState().toPagingState()
+    }
+
+@Composable
 internal fun <T : Any> UiState<CacheableState<ImmutableList<T>>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()

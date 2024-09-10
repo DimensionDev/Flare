@@ -40,14 +40,15 @@ Here're some features we're planning to implement in the future, you can check t
 ### Mastodon
  - [ ] Support for polls
  - [x] Support global/local timelines
- - [ ] Support for lists
+ - [x] Support for lists
  - [x] Support for bookmarks/faovrites timelines
 
 ### Misskey
  - [ ] Support for polls
 
 ### Bluesky
- - [ ] Support for lists/feeds
+ - [ ] Support for lists
+ - [x] Support for feeds
 
 ### X
  - [ ] Support for polls

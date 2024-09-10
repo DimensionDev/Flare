@@ -49,6 +49,7 @@ Here're some features we're planning to implement in the future, you can check t
 ### Bluesky
  - [ ] Support for lists
  - [x] Support for feeds
+ - [ ] Support DM
 
 ### X
  - [ ] Support for polls

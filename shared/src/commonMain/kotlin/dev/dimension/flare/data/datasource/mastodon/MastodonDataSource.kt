@@ -23,6 +23,9 @@ import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
 import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
@@ -53,6 +56,8 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -69,7 +74,8 @@ class MastodonDataSource(
     override val account: UiAccount.Mastodon,
 ) : MicroblogDataSource,
     KoinComponent,
-    StatusEvent.Mastodon {
+    StatusEvent.Mastodon,
+    ListDataSource {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -165,15 +171,14 @@ class MastodonDataSource(
                 ),
         )
 
-    fun listTimeline(
+    override fun listTimeline(
         listId: String,
-        pageSize: Int = 20,
-        pagingKey: String = "list_${account.accountKey}_$listId",
         scope: CoroutineScope,
+        pageSize: Int,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
+            pagingKey = "list_${account.accountKey}_$listId",
             accountKey = account.accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -184,7 +189,7 @@ class MastodonDataSource(
                     service,
                     database,
                     account.accountKey,
-                    pagingKey,
+                    "list_${account.accountKey}_$listId",
                 ),
         )
 
@@ -942,21 +947,23 @@ class MastodonDataSource(
     private val listKey: String
         get() = "allLists_${account.accountKey}"
 
-    fun allLists(): MemCacheable<List<UiList>> =
+    override val myList: CacheData<ImmutableList<UiList>> =
         MemCacheable(
             key = listKey,
-        ) {
-            service
-                .lists()
-                .mapNotNull {
-                    it.id?.let { it1 ->
-                        UiList(
-                            id = it1,
-                            title = it.title.orEmpty(),
-                        )
-                    }
-                }
-        }
+            fetchSource = {
+                service
+                    .lists()
+                    .mapNotNull {
+                        it.id?.let { it1 ->
+                            UiList(
+                                id = it1,
+                                title = it.title.orEmpty(),
+                                platformType = PlatformType.Mastodon,
+                            )
+                        }
+                    }.toImmutableList()
+            },
+        )
 
     suspend fun createList(title: String) {
         runCatching {
@@ -970,13 +977,14 @@ class MastodonDataSource(
                         UiList(
                             id = response.id,
                             title = title,
+                            platformType = PlatformType.Mastodon,
                         )
                 }
             }
         }
     }
 
-    suspend fun deleteList(listId: String) {
+    override suspend fun deleteList(listId: String) {
         runCatching {
             service.deleteList(listId)
         }.onSuccess {
@@ -1009,7 +1017,7 @@ class MastodonDataSource(
         }
     }
 
-    fun listInfo(listId: String): CacheData<UiList> =
+    override fun listInfo(listId: String): CacheData<UiList> =
         MemCacheable(
             key = "listInfo_$listId",
             fetchSource = {
@@ -1017,6 +1025,7 @@ class MastodonDataSource(
                     UiList(
                         id = it.id ?: "",
                         title = it.title.orEmpty(),
+                        platformType = PlatformType.Mastodon,
                     )
                 }
             },
@@ -1024,10 +1033,10 @@ class MastodonDataSource(
 
     private fun listMemberKey(listId: String) = "listMembers_$listId"
 
-    fun listMembers(
+    override fun listMembers(
         listId: String,
-        pageSize: Int = 20,
         scope: CoroutineScope,
+        pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         memoryPager(
             pageSize = pageSize,
@@ -1083,7 +1092,7 @@ class MastodonDataSource(
                 },
         )
 
-    suspend fun addMember(
+    override suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
     ) {
@@ -1114,13 +1123,14 @@ class MastodonDataSource(
                         UiList(
                             id = list.id,
                             title = list.title.orEmpty(),
+                            platformType = PlatformType.Mastodon,
                         )
                 }
             }
         }
     }
 
-    suspend fun removeMember(
+    override suspend fun removeMember(
         listId: String,
         userKey: MicroBlogKey,
     ) {
@@ -1161,8 +1171,23 @@ class MastodonDataSource(
                         UiList(
                             id = it1,
                             title = it.title.orEmpty(),
+                            platformType = PlatformType.Mastodon,
                         )
                     }
                 }.orEmpty()
         }
+
+    override val supportedMetaData: ImmutableList<ListMetaDataType>
+        get() = persistentListOf(ListMetaDataType.TITLE)
+
+    override suspend fun createList(metaData: ListMetaData) {
+        createList(metaData.title)
+    }
+
+    override suspend fun updateList(
+        listId: String,
+        metaData: ListMetaData,
+    ) {
+        updateList(listId, metaData.title)
+    }
 }

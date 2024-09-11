@@ -64,7 +64,7 @@ import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.BlueskyFeedsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.MastodonListScreenRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.ListScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
@@ -78,9 +78,9 @@ import com.ramcosta.composedestinations.utils.composable
 import com.ramcosta.composedestinations.utils.dialogComposable
 import com.ramcosta.composedestinations.utils.toDestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DiscoverTabItem
-import dev.dimension.flare.data.model.Mastodon
 import dev.dimension.flare.data.model.NotificationTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.SettingsTabItem
@@ -575,7 +575,7 @@ private fun getDirection(
             SettingsRouteDestination
         }
 
-        is Mastodon.AllListTabItem -> MastodonListScreenRouteDestination(accountType)
+        is AllListTabItem -> ListScreenRouteDestination(accountType)
         is Bluesky.FeedsTabItem -> BlueskyFeedsRouteDestination(accountType)
     }
 

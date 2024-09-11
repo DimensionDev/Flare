@@ -60,6 +60,9 @@ import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
 import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -111,7 +114,8 @@ class BlueskyDataSource(
     override val account: UiAccount.Bluesky,
 ) : MicroblogDataSource,
     KoinComponent,
-    StatusEvent.Bluesky {
+    StatusEvent.Bluesky,
+    ListDataSource {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
@@ -1027,7 +1031,7 @@ class BlueskyDataSource(
 
     private val myFeedsKey = "my_feeds_${account.accountKey}"
 
-    val myFeeds: MemCacheable<ImmutableList<UiList>> by lazy {
+    val myFeeds: CacheData<ImmutableList<UiList>> by lazy {
         MemCacheable(
             key = myFeedsKey,
         ) {
@@ -1306,7 +1310,7 @@ class BlueskyDataSource(
 
     private val myListKey = "my_list_${account.accountKey}"
 
-    val myList: MemCacheable<ImmutableList<UiList>> by lazy {
+    override val myList: CacheData<ImmutableList<UiList>> by lazy {
         MemCacheable(
             key = myListKey,
         ) {
@@ -1324,27 +1328,27 @@ class BlueskyDataSource(
 
     private fun listInfoKey(uri: String) = "list_info_$uri"
 
-    fun listInfo(uri: String): MemCacheable<UiList> =
+    override fun listInfo(listId: String): MemCacheable<UiList> =
         MemCacheable(
-            key = listInfoKey(uri),
+            key = listInfoKey(listId),
         ) {
             val service = account.getService(appDatabase)
             service
                 .getList(
                     GetListQueryParams(
-                        list = AtUri(uri),
+                        list = AtUri(listId),
                     ),
                 ).requireResponse()
                 .list
                 .render(account.accountKey)
         }
 
-    fun listTimeline(
-        uri: String,
-        pageSize: Int = 20,
+    override fun listTimeline(
+        listId: String,
         scope: CoroutineScope,
+        pageSize: Int,
     ): Flow<PagingData<UiTimeline>> {
-        val pagingKey = "list_timeline_$uri"
+        val pagingKey = "list_timeline_$listId"
         return timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
@@ -1357,7 +1361,7 @@ class BlueskyDataSource(
                     service = account.getService(appDatabase),
                     accountKey = account.accountKey,
                     database = database,
-                    uri = uri,
+                    uri = listId,
                     pagingKey = pagingKey,
                 ),
         )
@@ -1396,10 +1400,10 @@ class BlueskyDataSource(
         }
     }
 
-    suspend fun deleteList(uri: String) {
+    override suspend fun deleteList(listId: String) {
         runCatching {
             val service = account.getService(appDatabase)
-            val id = uri.substringAfterLast('/')
+            val id = listId.substringAfterLast('/')
             service.applyWrites(
                 request =
                     ApplyWritesRequest(
@@ -1473,17 +1477,19 @@ class BlueskyDataSource(
 
     private fun listMemberKey(listId: String) = "listMembers_$listId"
 
-    fun listMembers(
-        listUri: String,
-        pageSize: Int = 20,
+    override fun listMembers(
+        listId: String,
         scope: CoroutineScope,
+        pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         memoryPager(
             pageSize = pageSize,
-            pagingKey = listMemberKey(listUri),
+            pagingKey = listMemberKey(listId),
             scope = scope,
             mediator =
                 object : RemoteMediator<Int, UiUserV2>() {
+                    private var cursor: String? = null
+
                     override suspend fun load(
                         loadType: LoadType,
                         state: PagingState<Int, UiUserV2>,
@@ -1493,26 +1499,22 @@ class BlueskyDataSource(
                             if (loadType == LoadType.PREPEND) {
                                 return MediatorResult.Success(endOfPaginationReached = true)
                             }
-                            val key =
-                                if (loadType == LoadType.REFRESH) {
-                                    null
-                                } else {
-                                    MemoryPagingSource
-                                        .get<UiUserV2>(key = listMemberKey(listUri))
-                                        ?.lastOrNull()
-                                        ?.key
-                                        ?.id
-                                }
-                            val result =
+                            if (loadType == LoadType.REFRESH) {
+                                cursor = null
+                            }
+                            val response =
                                 service
                                     .getList(
                                         params =
                                             GetListQueryParams(
-                                                list = AtUri(listUri),
-                                                cursor = key,
+                                                list = AtUri(listId),
+                                                cursor = cursor,
                                                 limit = state.config.pageSize.toLong(),
                                             ),
                                     ).maybeResponse()
+                            cursor = response?.cursor
+                            val result =
+                                response
                                     ?.items
                                     ?.map {
                                         it.subject.render(account.accountKey)
@@ -1520,18 +1522,18 @@ class BlueskyDataSource(
 
                             if (loadType == LoadType.REFRESH) {
                                 MemoryPagingSource.update(
-                                    key = listMemberKey(listUri),
+                                    key = listMemberKey(listId),
                                     value = result.toImmutableList(),
                                 )
                             } else if (loadType == LoadType.APPEND) {
                                 MemoryPagingSource.append(
-                                    key = listMemberKey(listUri),
+                                    key = listMemberKey(listId),
                                     value = result.toImmutableList(),
                                 )
                             }
 
                             return MediatorResult.Success(
-                                endOfPaginationReached = result.isEmpty(),
+                                endOfPaginationReached = cursor == null,
                             )
                         } catch (e: Exception) {
                             return MediatorResult.Error(e)
@@ -1540,8 +1542,8 @@ class BlueskyDataSource(
                 },
         )
 
-    suspend fun addMember(
-        listUri: String,
+    override suspend fun addMember(
+        listId: String,
         userKey: MicroBlogKey,
     ) {
         runCatching {
@@ -1553,7 +1555,7 @@ class BlueskyDataSource(
                     .render(account.accountKey)
 
             MemoryPagingSource.updateWith(
-                key = listMemberKey(listUri),
+                key = listMemberKey(listId),
             ) {
                 (listOf(user) + it)
                     .distinctBy {
@@ -1567,7 +1569,7 @@ class BlueskyDataSource(
                     record =
                         app.bsky.graph
                             .Listitem(
-                                list = AtUri(listUri),
+                                list = AtUri(listId),
                                 subject = Did(userKey.id),
                                 createdAt = Clock.System.now(),
                             ).bskyJson(),
@@ -1576,14 +1578,14 @@ class BlueskyDataSource(
         }
     }
 
-    suspend fun removeMember(
-        listUri: String,
+    override suspend fun removeMember(
+        listId: String,
         userKey: MicroBlogKey,
     ) {
         runCatching {
             val service = account.getService(appDatabase)
             MemoryPagingSource.updateWith<UiUserV2>(
-                key = listMemberKey(listUri),
+                key = listMemberKey(listId),
             ) {
                 it
                     .filter { user -> user.key.id != userKey.id }
@@ -1611,7 +1613,7 @@ class BlueskyDataSource(
                     response.records
                         .firstOrNull {
                             val item: app.bsky.graph.Listitem = it.value.bskyJson()
-                            item.list.atUri == listUri && item.subject.did == userKey.id
+                            item.list.atUri == listId && item.subject.did == userKey.id
                         }
             }
             if (record != null) {
@@ -1624,6 +1626,34 @@ class BlueskyDataSource(
                 )
             }
         }
+    }
+
+    override val supportedMetaData: ImmutableList<ListMetaDataType>
+        get() =
+            persistentListOf(
+                ListMetaDataType.TITLE,
+                ListMetaDataType.DESCRIPTION,
+                ListMetaDataType.AVATAR,
+            )
+
+    override suspend fun updateList(
+        listId: String,
+        metaData: ListMetaData,
+    ) {
+        updateList(
+            uri = listId,
+            title = metaData.title,
+            description = metaData.description,
+            icon = metaData.avatar,
+        )
+    }
+
+    override suspend fun createList(metaData: ListMetaData) {
+        createList(
+            title = metaData.title,
+            description = metaData.description,
+            icon = metaData.avatar,
+        )
     }
 }
 

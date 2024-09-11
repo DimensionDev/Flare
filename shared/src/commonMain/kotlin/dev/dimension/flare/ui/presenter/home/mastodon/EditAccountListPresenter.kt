@@ -32,7 +32,7 @@ class EditAccountListPresenter(
             serviceState.flatMap { service ->
                 require(service is MastodonDataSource)
                 remember(service) {
-                    service.allLists()
+                    service.myList
                 }.collectAsState().toUi()
             }
         val userLists =

@@ -1,8 +1,13 @@
-package dev.dimension.flare.ui.screen.mastodon
+package dev.dimension.flare.ui.screen.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -26,8 +31,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.EditListMemberRouteDestination
@@ -37,6 +44,8 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.data.datasource.microblog.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -44,10 +53,11 @@ import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.mastodon.EditListPresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.EditListState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.list.EditListState
+import dev.dimension.flare.ui.presenter.list.ListEditPresenter
 import dev.dimension.flare.ui.screen.settings.AccountItem
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 
 @Destination<RootGraph>(
@@ -117,17 +127,44 @@ private fun EditListScreen(
             contentPadding = contentPadding,
         ) {
             item {
-                ListItem(
-                    headlineContent = {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        state.supportedMetaData.onSuccess {
+                            if (it.contains(ListMetaDataType.AVATAR)) {
+                            }
+                        }
+
                         OutlinedTextField2(
                             state = state.text,
                             label = { Text(text = stringResource(id = R.string.list_create_name)) },
                             placeholder = { Text(text = stringResource(id = R.string.list_create_name_hint)) },
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !state.isLoading && state.listInfo is UiState.Success,
+                            lineLimits = TextFieldLineLimits.SingleLine,
                         )
-                    },
-                )
+                    }
+
+                    state.supportedMetaData.onSuccess {
+                        if (it.contains(ListMetaDataType.DESCRIPTION)) {
+                            OutlinedTextField2(
+                                state = state.description,
+                                label = { Text(text = stringResource(id = R.string.list_create_description)) },
+                                placeholder = { Text(text = stringResource(id = R.string.list_create_description_hint)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !state.isLoading && state.listInfo is UiState.Success,
+                            )
+                        }
+                    }
+                }
             }
             stickyHeader {
                 ListItem(
@@ -227,9 +264,10 @@ private fun presenter(
     val scope = rememberCoroutineScope()
     val state =
         remember(accountType, listId) {
-            EditListPresenter(accountType, listId)
+            ListEditPresenter(accountType, listId)
         }.invoke()
     val text = rememberTextFieldState()
+    val description = rememberTextFieldState()
     state.listInfo.onSuccess {
         LaunchedEffect(Unit) {
             text.edit {
@@ -243,12 +281,19 @@ private fun presenter(
 
     object : EditListState by state {
         val text = text
+        val description = description
         val isLoading = isLoading
 
         fun confirm() {
             scope.launch {
                 isLoading = true
-                state.updateTitle(text.text.toString())
+                state.updateList(
+                    listMetaData =
+                        ListMetaData(
+                            title = text.text.toString(),
+                            description = description.text.toString(),
+                        ),
+                )
                 isLoading = false
                 onBack.invoke()
             }

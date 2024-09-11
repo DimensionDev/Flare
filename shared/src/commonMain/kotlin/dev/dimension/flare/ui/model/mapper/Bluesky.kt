@@ -663,6 +663,7 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
         creator = creator.render(accountKey),
         likedCount = likeCount ?: 0,
         liked = viewer?.like?.atUri != null,
+        platformType = PlatformType.Bluesky,
     )
 
 internal fun ListView.render(accountKey: MicroBlogKey) =
@@ -672,4 +673,5 @@ internal fun ListView.render(accountKey: MicroBlogKey) =
         description = description,
         avatar = avatar?.uri,
         creator = creator.render(accountKey),
+        platformType = PlatformType.Bluesky,
     )

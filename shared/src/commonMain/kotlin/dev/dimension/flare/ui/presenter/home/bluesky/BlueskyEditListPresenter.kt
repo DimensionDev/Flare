@@ -3,23 +3,14 @@ package dev.dimension.flare.ui.presenter.home.bluesky
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.list.EditListState
+import dev.dimension.flare.ui.presenter.list.ListEditPresenter
 
 class BlueskyEditListPresenter(
     private val accountType: AccountType,
@@ -27,27 +18,16 @@ class BlueskyEditListPresenter(
 ) : PresenterBase<BlueskyEditListState>() {
     @Composable
     override fun body(): BlueskyEditListState {
-        val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType)
-        val listInfo =
-            serviceState.flatMap {
-                require(it is BlueskyDataSource)
-                remember(it) {
-                    it.listInfo(listUri)
-                }.collectAsState().toUi()
-            }
-        val memberInfo =
-            serviceState
-                .map {
-                    require(it is BlueskyDataSource)
-                    remember(it) {
-                        it.listMembers(listUri, scope = scope)
-                    }.collectAsLazyPagingItems()
-                }.toPagingState()
-        return object : BlueskyEditListState {
-            override val info = listInfo
-            override val memberInfo = memberInfo
+        val state =
+            remember(
+                accountType,
+                listUri,
+            ) {
+                ListEditPresenter(accountType, listUri)
+            }.body()
 
+        return object : BlueskyEditListState, EditListState by state {
             override suspend fun editList(
                 name: String,
                 description: String?,
@@ -63,10 +43,7 @@ class BlueskyEditListPresenter(
 }
 
 @Immutable
-interface BlueskyEditListState {
-    val info: UiState<UiList>
-    val memberInfo: PagingState<UiUserV2>
-
+interface BlueskyEditListState : EditListState {
     suspend fun editList(
         name: String,
         description: String?,

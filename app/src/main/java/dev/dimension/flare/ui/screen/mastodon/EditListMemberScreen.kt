@@ -39,9 +39,9 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.presenter.home.mastodon.EditListMemberPresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.EditListMemberState
 import dev.dimension.flare.ui.presenter.home.mastodon.EmptyQueryException
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonEditListMemberPresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonEditListMemberState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AccountItem
 
@@ -213,10 +213,10 @@ private fun presenter(
 
     val state =
         remember(accountType, listId) {
-            EditListMemberPresenter(accountType, listId)
+            MastodonEditListMemberPresenter(accountType, listId)
         }.invoke()
 
-    object : EditListMemberState by state {
+    object : MastodonEditListMemberState by state {
         val text = text
     }
 }

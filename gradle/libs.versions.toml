@@ -10,7 +10,7 @@ androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
 lifecycle-runtime-ktx = "2.8.5"
 activity-compose = "1.9.2"
-compose-bom = "2024.09.00"
+compose-bom = "2024.09.01"
 ksp = "2.0.20-1.0.25"
 paging = "3.3.2"
 navigation = "2.8.0"
@@ -88,6 +88,7 @@ androidx-splash = { group = "androidx.core", name = "core-splashscreen", version
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+media3-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3" }
 
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
@@ -176,7 +177,7 @@ coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
 compose-destinations = ["compose-destinations"]
 sqldelight = ["sqldelight-coroutines-extensions", "sqldelight-androidx-paging3-extensions"]
-media3 = ["media3-exoplayer", "media3-ui"]
+media3 = ["media3-exoplayer", "media3-ui", "media3-hls"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]
 

@@ -26,22 +26,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.common.util.Util
-import androidx.media3.database.StandaloneDatabaseProvider
-import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.DefaultHttpDataSource
-import androidx.media3.datasource.FileDataSource
-import androidx.media3.datasource.cache.CacheDataSink
-import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
-import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 import androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
 import androidx.media3.ui.PlayerView
-import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +37,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import org.xmlpull.v1.XmlPullParser
-import java.io.File
 import kotlin.concurrent.timer
 import kotlin.time.Duration.Companion.minutes
 
@@ -180,67 +166,8 @@ fun VideoPlayer(
 }
 
 @OptIn(UnstableApi::class)
-class CacheDataSourceFactory(
-    private val context: Context,
-    private val maxFileSize: Long,
-) : DataSource.Factory {
-    private val simpleCache: SimpleCache by lazy {
-        VideoCache.getInstance(context)
-    }
-
-    private val defaultDatasourceFactory: DefaultDataSource.Factory
-
-    override fun createDataSource(): DataSource =
-        CacheDataSource(
-            simpleCache,
-            defaultDatasourceFactory.createDataSource(),
-            FileDataSource(),
-            CacheDataSink(simpleCache, maxFileSize),
-            CacheDataSource.FLAG_BLOCK_ON_CACHE or CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR,
-            null,
-        )
-
-    init {
-        val userAgent =
-            Util.getUserAgent(
-                context,
-                BuildConfig.APPLICATION_ID,
-            )
-        val bandwidthMeter = DefaultBandwidthMeter.Builder(context).build()
-        defaultDatasourceFactory =
-            DefaultDataSource
-                .Factory(
-                    this.context,
-                    DefaultHttpDataSource
-                        .Factory()
-                        .setUserAgent(userAgent)
-                        .setTransferListener(bandwidthMeter),
-                ).setTransferListener(bandwidthMeter)
-    }
-}
-
-@OptIn(UnstableApi::class)
-object VideoCache {
-    private var cache: SimpleCache? = null
-
-    fun getInstance(context: Context): SimpleCache {
-        val evictor = LeastRecentlyUsedCacheEvictor(100 * 1024 * 1024L)
-        if (cache == null) {
-            cache =
-                SimpleCache(
-                    File(context.cacheDir, "media"),
-                    evictor,
-                    StandaloneDatabaseProvider(context),
-                )
-        }
-        return cache as SimpleCache
-    }
-}
-
-@OptIn(UnstableApi::class)
 class VideoPlayerPool(
     private val context: Context,
-    private val factory: ProgressiveMediaSource.Factory,
     private val scope: CoroutineScope,
 ) {
     private val positionPool = mutableMapOf<String, Long>()
@@ -253,7 +180,7 @@ class VideoPlayerPool(
                     .Builder(context)
                     .build()
                     .apply {
-                        setMediaSource(factory.createMediaSource(MediaItem.fromUri(uri)))
+                        setMediaItem(MediaItem.fromUri(uri))
                         prepare()
                         playWhenReady = true
                         repeatMode = Player.REPEAT_MODE_ALL

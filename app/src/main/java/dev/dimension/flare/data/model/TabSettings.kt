@@ -453,20 +453,20 @@ sealed interface TimelineTabItem : TabItem {
 
         private fun defaultBlueskySecondaryItems(accountKey: MicroBlogKey) =
             persistentListOf(
-                Bluesky.FeedsTabItem(
-                    account = AccountType.Active,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Feeds, accountKey),
-                        ),
-                ),
                 AllListTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
+                        ),
+                ),
+                Bluesky.FeedsTabItem(
+                    account = AccountType.Active,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Feeds, accountKey),
                         ),
                 ),
             )

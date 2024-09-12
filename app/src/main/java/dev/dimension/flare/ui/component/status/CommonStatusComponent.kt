@@ -233,7 +233,7 @@ fun CommonStatusComponent(
         }
 
         if (isDetail) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = item.createdAt.value.localizedFullTime,
                 style = MaterialTheme.typography.bodySmall,
@@ -243,7 +243,12 @@ fun CommonStatusComponent(
         if (appearanceSettings.showActions || isDetail) {
             Spacer(modifier = Modifier.height(8.dp))
             if (isDetail) {
-                StatusActions(item.actions)
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {
+                    StatusActions(item.actions)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
             } else {
                 CompositionLocalProvider(
                     LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
@@ -495,18 +500,19 @@ private fun StatusActions(
             modifier
                 .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        items.forEach { action ->
+        items.forEachIndexed { index, action ->
+            if (index == items.lastIndex) {
+                Spacer(modifier = Modifier.weight(1f))
+            }
             when (action) {
                 is StatusAction.Group -> {
-                    if (action.displayItem is StatusAction.Item.More) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
                     StatusActionGroup(
                         icon = action.displayItem.icon,
                         text = action.displayItem.iconText,
                         color = statusActionItemColor(item = action.displayItem),
+                        withTextMinWidth = index != items.lastIndex,
                     ) {
                         action.actions.forEach { subActions ->
                             if (subActions is StatusAction.Item) {
@@ -550,6 +556,7 @@ private fun StatusActions(
                         icon = action.icon,
                         text = action.iconText,
                         color = statusActionItemColor(item = action),
+                        withTextMinWidth = index != items.lastIndex,
                         onClicked = {
                             if (action is StatusAction.Item.Clickable) {
                                 action.onClicked.invoke(

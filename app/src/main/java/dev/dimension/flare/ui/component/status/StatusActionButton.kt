@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component.status
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -37,10 +38,17 @@ internal fun StatusActionButton(
     color: Color = LocalContentColor.current,
     contentDescription: String? = null,
     enabled: Boolean = true,
+    withTextMinWidth: Boolean = false,
     content: @Composable RowScope.() -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val appearanceSettings = LocalAppearanceSettings.current
+    val textMinWidth =
+        if (withTextMinWidth) {
+            with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() * 3 }
+        } else {
+            0.dp
+        }
     Row(
         modifier =
             modifier
@@ -71,6 +79,14 @@ internal fun StatusActionButton(
                 text = text,
 //                style = MaterialTheme.typography.bodySmall,
                 color = color,
+                modifier = Modifier.width(textMinWidth),
+            )
+        } else {
+            if (withTextMinWidth) {
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            Box(
+                modifier = Modifier.width(textMinWidth),
             )
         }
         content.invoke(this)
@@ -85,6 +101,7 @@ internal fun StatusActionGroup(
     color: Color = LocalContentColor.current,
     contentDescription: String? = null,
     enabled: Boolean = true,
+    withTextMinWidth: Boolean = false,
     subMenus: @Composable ColumnScope.(closeMenu: () -> Unit) -> Unit = {},
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -98,6 +115,7 @@ internal fun StatusActionGroup(
         },
         color = color,
         enabled = enabled,
+        withTextMinWidth = withTextMinWidth,
         content = {
             DropdownMenu(
                 expanded = showMenu,

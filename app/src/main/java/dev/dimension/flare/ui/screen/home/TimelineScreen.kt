@@ -41,9 +41,10 @@ import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRout
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.CaretUp
+import compose.icons.fontawesomeicons.solid.AnglesUp
 import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
+import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.molecule.producePresenter
@@ -159,7 +160,6 @@ internal fun TimelineScreen(
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Pen,
                             contentDescription = stringResource(id = R.string.compose_title),
-                            modifier = Modifier.size(24.dp),
                         )
                     }
                 }
@@ -200,7 +200,7 @@ internal fun TimelineScreen(
                             },
                         ) {
                             FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.CaretUp,
+                                imageVector = FontAwesomeIcons.Solid.AnglesUp,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
                             )
@@ -218,7 +218,6 @@ internal fun TimelineScreen(
 private fun timelinePresenter(tabItem: TimelineTabItem) =
     run {
         val scope = rememberCoroutineScope()
-        var isRefreshing by remember { mutableStateOf(false) }
         val state = remember(tabItem.account) { tabItem.createPresenter() }.invoke()
         val accountState =
             remember(tabItem.account) {
@@ -246,7 +245,7 @@ private fun timelinePresenter(tabItem: TimelineTabItem) =
         }
         object : UserState by accountState, TimelineState by state {
             val showNewToots = showNewToots
-            val isRefreshing = isRefreshing
+            val isRefreshing = state.listState.isRefreshing
 
             fun onNewTootsShown() {
                 showNewToots = false
@@ -254,9 +253,7 @@ private fun timelinePresenter(tabItem: TimelineTabItem) =
 
             fun refreshSync() {
                 scope.launch {
-                    isRefreshing = true
                     state.refresh()
-                    isRefreshing = false
                 }
             }
         }

@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
@@ -101,7 +102,24 @@ fun createSampleStatus(user: UiUserV2) =
                                 ),
                             )
                         }.toUi(),
-                actions = persistentListOf(),
+                actions =
+                    persistentListOf(
+                        StatusAction.Item.Reply(
+                            count = 10,
+                            onClicked = {},
+                        ),
+                        StatusAction.Item.Retweet(
+                            count = 20,
+                            onClicked = {},
+                            retweeted = false,
+                        ),
+                        StatusAction.Item.Like(
+                            count = 30,
+                            onClicked = {},
+                            liked = false,
+                        ),
+                        StatusAction.Item.More,
+                    ),
                 poll = null,
                 statusKey = MicroBlogKey(id = "123", host = user.key.host),
                 card = null,

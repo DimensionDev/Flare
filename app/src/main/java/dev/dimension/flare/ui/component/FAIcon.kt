@@ -21,7 +21,7 @@ fun FAIcon(
         contentDescription = contentDescription,
         modifier =
             modifier
-                .size(24.dp),
+                .size(20.dp),
         tint = tint,
     )
 }

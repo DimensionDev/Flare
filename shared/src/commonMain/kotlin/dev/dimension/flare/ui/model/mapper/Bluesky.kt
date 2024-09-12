@@ -10,13 +10,14 @@ import app.bsky.feed.GeneratorView
 import app.bsky.feed.Post
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
+import app.bsky.graph.ListView
 import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsReason
 import app.bsky.richtext.FacetFeatureUnion
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.datasource.bluesky.jsonElement
+import dev.dimension.flare.data.datasource.bluesky.bskyJson
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
@@ -34,9 +35,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
+import sh.christian.ozone.api.model.JsonContent
 
-private val bskyJson by lazy {
+internal val bskyJson by lazy {
     Json {
         ignoreUnknownKeys = true
         classDiscriminator = "${'$'}type"
@@ -219,14 +220,7 @@ internal fun PostView.renderStatus(
         images = findMedias(this),
         card = findCard(this),
         statusKey = statusKey,
-        content =
-            record
-                .jsonElement()
-                .let {
-                    bskyJson.decodeFromJsonElement<Post>(it)
-                }.let {
-                    parseBluesky(it, accountKey)
-                },
+        content = parseBluesky(record.bskyJson<JsonContent, Post>(), accountKey),
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
         contentWarning = null,
@@ -549,14 +543,7 @@ private fun render(
                             }
                         }.firstOrNull(),
                 statusKey = statusKey,
-                content =
-                    record.value.value
-                        .jsonElement()
-                        .let {
-                            bskyJson.decodeFromJsonElement<Post>(it)
-                        }.let {
-                            parseBluesky(it, accountKey)
-                        },
+                content = parseBluesky(record.value.value.bskyJson<JsonContent, Post>(), accountKey),
                 actions =
                     listOfNotNull(
                         StatusAction.Item.Reply(
@@ -676,4 +663,15 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
         creator = creator.render(accountKey),
         likedCount = likeCount ?: 0,
         liked = viewer?.like?.atUri != null,
+        platformType = PlatformType.Bluesky,
+    )
+
+internal fun ListView.render(accountKey: MicroBlogKey) =
+    UiList(
+        id = uri.atUri,
+        title = name,
+        description = description,
+        avatar = avatar?.uri,
+        creator = creator.render(accountKey),
+        platformType = PlatformType.Bluesky,
     )

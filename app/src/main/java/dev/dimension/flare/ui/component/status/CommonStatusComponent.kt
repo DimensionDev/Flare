@@ -60,6 +60,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -514,6 +515,9 @@ private fun StatusActions(
                                             imageVector = subActions.icon,
                                             contentDescription = subActions.iconText,
                                             tint = color,
+                                            modifier =
+                                                Modifier
+                                                    .size(with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() + 4.dp }),
                                         )
                                     },
                                     text = {

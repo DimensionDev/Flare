@@ -1,11 +1,13 @@
-package dev.dimension.flare.ui.presenter.home.mastodon
+package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -16,8 +18,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
 class EditAccountListPresenter(
@@ -29,36 +30,28 @@ class EditAccountListPresenter(
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType)
         val allList =
-            serviceState.flatMap { service ->
-                require(service is MastodonDataSource)
-                remember(service) {
-                    service.allLists()
-                }.collectAsState().toUi()
-            }
+            serviceState
+                .map { service ->
+                    require(service is ListDataSource)
+                    remember(service) {
+                        service.myList
+                    }
+                }.toPagingState()
         val userLists =
             serviceState.flatMap { service ->
-                require(service is MastodonDataSource)
+                require(service is ListDataSource)
                 remember(service) {
                     service.userLists(userKey)
                 }.collectAsState().toUi()
             }
 
-        val result =
-            allList.flatMap { alist ->
-                userLists.map { userLists ->
-                    alist
-                        .associateWith { list ->
-                            userLists.any { it.id == list.id }
-                        }.toImmutableMap()
-                }
-            }
-
         return object : EditAccountListState {
-            override val lists = result
+            override val lists = allList
+            override val userLists = userLists
 
             override fun addList(list: UiList) {
                 serviceState.onSuccess {
-                    require(it is MastodonDataSource)
+                    require(it is ListDataSource)
                     scope.launch {
                         it.addMember(listId = list.id, userKey = userKey)
                     }
@@ -67,7 +60,7 @@ class EditAccountListPresenter(
 
             override fun removeList(list: UiList) {
                 serviceState.onSuccess {
-                    require(it is MastodonDataSource)
+                    require(it is ListDataSource)
                     scope.launch {
                         it.removeMember(listId = list.id, userKey = userKey)
                     }
@@ -79,7 +72,8 @@ class EditAccountListPresenter(
 
 @Immutable
 interface EditAccountListState {
-    val lists: UiState<ImmutableMap<UiList, Boolean>>
+    val lists: PagingState<UiList>
+    val userLists: UiState<ImmutableList<UiList>>
 
     fun addList(list: UiList)
 

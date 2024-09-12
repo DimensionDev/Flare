@@ -62,7 +62,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.Mastodon
+import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -85,8 +85,8 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedsPresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.AllListPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.list.AllListPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -686,28 +686,7 @@ private fun dynamicTabPresenter(profile: UiProfile) =
                 PlatformType.Mastodon ->
                     remember {
                         AllListPresenter(accountType = AccountType.Specific(profile.key))
-                    }.invoke().items.map {
-                        it.toImmutableList().map {
-                            Mastodon.ListTimelineTabItem(
-                                account = AccountType.Specific(profile.key),
-                                listId = it.id,
-                                metaData =
-                                    TabMetaData(
-                                        title = TitleType.Text(it.title),
-                                        icon =
-                                            IconType.Mixed(
-                                                icon = IconType.Material.MaterialIcon.List,
-                                                userKey = profile.key,
-                                            ),
-                                    ),
-                            )
-                        }
-                    }
-                PlatformType.Misskey -> null
-                PlatformType.Bluesky ->
-                    remember {
-                        BlueskyFeedsPresenter(accountType = AccountType.Specific(profile.key))
-                    }.invoke().myFeeds.let { state ->
+                    }.invoke().items.let { state ->
                         when (state) {
                             is PagingState.Empty -> null
                             is PagingState.Error -> null
@@ -717,15 +696,15 @@ private fun dynamicTabPresenter(profile: UiProfile) =
                                     .mapNotNull { index ->
                                         state[index]
                                     }.map {
-                                        Bluesky.FeedTabItem(
+                                        ListTimelineTabItem(
                                             account = AccountType.Specific(profile.key),
-                                            uri = it.id,
+                                            listId = it.id,
                                             metaData =
                                                 TabMetaData(
                                                     title = TitleType.Text(it.title),
                                                     icon =
                                                         IconType.Mixed(
-                                                            icon = IconType.Material.MaterialIcon.Feeds,
+                                                            icon = IconType.Material.MaterialIcon.List,
                                                             userKey = profile.key,
                                                         ),
                                                 ),
@@ -736,6 +715,81 @@ private fun dynamicTabPresenter(profile: UiProfile) =
                             }
                         }
                     }
+                PlatformType.Misskey -> null
+                PlatformType.Bluesky -> {
+                    val feeds =
+                        remember {
+                            BlueskyFeedsPresenter(accountType = AccountType.Specific(profile.key))
+                        }.invoke().myFeeds.let { state ->
+                            when (state) {
+                                is PagingState.Empty -> null
+                                is PagingState.Error -> null
+                                is PagingState.Loading -> UiState.Loading()
+                                is PagingState.Success -> {
+                                    (0 until state.itemCount)
+                                        .mapNotNull { index ->
+                                            state[index]
+                                        }.map {
+                                            Bluesky.FeedTabItem(
+                                                account = AccountType.Specific(profile.key),
+                                                uri = it.id,
+                                                metaData =
+                                                    TabMetaData(
+                                                        title = TitleType.Text(it.title),
+                                                        icon =
+                                                            IconType.Mixed(
+                                                                icon = IconType.Material.MaterialIcon.Feeds,
+                                                                userKey = profile.key,
+                                                            ),
+                                                    ),
+                                            )
+                                        }.let {
+                                            UiState.Success(it)
+                                        }
+                                }
+                            }
+                        } ?: UiState.Success(persistentListOf())
+                    val list =
+                        remember {
+                            AllListPresenter(accountType = AccountType.Specific(profile.key))
+                        }.invoke().items.let { state ->
+                            when (state) {
+                                is PagingState.Empty -> null
+                                is PagingState.Error -> null
+                                is PagingState.Loading -> UiState.Loading()
+                                is PagingState.Success -> {
+                                    (0 until state.itemCount)
+                                        .mapNotNull { index ->
+                                            state[index]
+                                        }.map {
+                                            ListTimelineTabItem(
+                                                account = AccountType.Specific(profile.key),
+                                                listId = it.id,
+                                                metaData =
+                                                    TabMetaData(
+                                                        title = TitleType.Text(it.title),
+                                                        icon =
+                                                            IconType.Mixed(
+                                                                icon = IconType.Material.MaterialIcon.List,
+                                                                userKey = profile.key,
+                                                            ),
+                                                    ),
+                                            )
+                                        }.let {
+                                            UiState.Success(it)
+                                        }
+                                }
+                            }
+                        } ?: UiState.Success(persistentListOf())
+                    if (feeds is UiState.Success || list is UiState.Success) {
+                        UiState.Success(
+                            (feeds as? UiState.Success)?.data.orEmpty() +
+                                (list as? UiState.Success)?.data.orEmpty(),
+                        )
+                    } else {
+                        null
+                    }
+                }
                 PlatformType.xQt -> null
                 PlatformType.VVo -> null
             }

@@ -1,4 +1,4 @@
-package dev.dimension.flare.ui.presenter.home.mastodon
+package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,7 +10,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -38,9 +38,9 @@ class EditListMemberPresenter(
                         UiState.Error(EmptyQueryException)
                     } else {
                         remember(service, filter) {
-                            require(service is MastodonDataSource)
+                            require(service is ListDataSource)
                             combine(
-                                service.searchFollowing(query = filter, scope = scope),
+                                service.searchUser(query = filter, scope = scope),
                                 service.listMemberCache(listId),
                             ) { pagingData, cache ->
                                 pagingData.map { user ->
@@ -62,7 +62,7 @@ class EditListMemberPresenter(
             override fun addMember(userKey: MicroBlogKey) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MastodonDataSource)
+                        require(it is ListDataSource)
                         it.addMember(listId, userKey)
                     }
                 }
@@ -71,7 +71,7 @@ class EditListMemberPresenter(
             override fun removeMember(userKey: MicroBlogKey) {
                 serviceState.onSuccess {
                     scope.launch {
-                        require(it is MastodonDataSource)
+                        require(it is ListDataSource)
                         it.removeMember(listId, userKey)
                     }
                 }
@@ -90,4 +90,4 @@ interface EditListMemberState {
     fun removeMember(userKey: MicroBlogKey)
 }
 
-data object EmptyQueryException : Exception("Query is empty")
+data object EmptyQueryException : Exception("Empty query")

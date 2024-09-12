@@ -1,4 +1,4 @@
-package dev.dimension.flare.ui.screen.mastodon
+package dev.dimension.flare.ui.screen.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,7 +9,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -39,10 +39,10 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.presenter.home.mastodon.EditListMemberPresenter
-import dev.dimension.flare.ui.presenter.home.mastodon.EditListMemberState
-import dev.dimension.flare.ui.presenter.home.mastodon.EmptyQueryException
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.list.EditListMemberPresenter
+import dev.dimension.flare.ui.presenter.list.EditListMemberState
+import dev.dimension.flare.ui.presenter.list.EmptyQueryException
 import dev.dimension.flare.ui.screen.settings.AccountItem
 
 @Destination<RootGraph>(
@@ -153,7 +153,7 @@ private fun EditListMemberScreen(
                                         }) {
                                             if (isMember) {
                                                 Icon(
-                                                    Icons.Default.Remove,
+                                                    Icons.Default.Delete,
                                                     contentDescription = stringResource(id = R.string.edit_list_member_remove),
                                                     tint = MaterialTheme.colorScheme.error,
                                                 )

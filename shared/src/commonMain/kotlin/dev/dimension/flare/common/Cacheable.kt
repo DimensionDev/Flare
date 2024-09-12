@@ -155,15 +155,15 @@ class CacheableState<T>(
 }
 
 @Composable
-internal fun <T : Any> UiState<CacheableState<ImmutableList<T>>>.toPagingState(): PagingState<T> =
+internal fun <T : Any> UiState<CacheData<ImmutableList<T>>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()
         is UiState.Error -> PagingState.Error(throwable)
-        is UiState.Success -> data.toPagingState()
+        is UiState.Success -> data.collectAsState().toPagingState()
     }
 
 @Composable
-internal fun <T : Any> CacheableState<ImmutableList<T>>.toPagingState(): PagingState<T> {
+private fun <T : Any> CacheableState<ImmutableList<T>>.toPagingState(): PagingState<T> {
     val data = data
     return if (data != null) {
         if (data.isNotEmpty()) {

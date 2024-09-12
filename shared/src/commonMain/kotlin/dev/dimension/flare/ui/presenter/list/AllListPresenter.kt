@@ -1,11 +1,12 @@
-package dev.dimension.flare.ui.presenter.home.mastodon
+package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.paging.LoadState
-import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
@@ -14,11 +15,7 @@ import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
-import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
-import kotlinx.collections.immutable.toImmutableList
 
 class AllListPresenter(
     private val accountType: AccountType,
@@ -30,8 +27,8 @@ class AllListPresenter(
             serviceState
                 .map { service ->
                     remember(service) {
-                        require(service is MastodonDataSource)
-                        service.allLists()
+                        require(service is ListDataSource)
+                        service.myList
                     }
                 }
         val refreshState =
@@ -44,12 +41,7 @@ class AllListPresenter(
         val isRefreshing = refreshState is UiState.Loading || refreshState is UiState.Success && refreshState.data
         return object : AllListState {
             override val items =
-                items
-                    .flatMap {
-                        it.collectAsState().toUi()
-                    }.map {
-                        it.toImmutableList().toImmutableListWrapper()
-                    }
+                items.toPagingState()
 
             override val isRefreshing = isRefreshing
 
@@ -64,7 +56,7 @@ class AllListPresenter(
 
 @Immutable
 interface AllListState {
-    val items: UiState<ImmutableListWrapper<UiList>>
+    val items: PagingState<UiList>
     val isRefreshing: Boolean
 
     fun refresh()

@@ -32,6 +32,7 @@ import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
+import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -338,7 +339,7 @@ sealed interface TimelineTabItem : TabItem {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
                         ),
                 ),
-                Mastodon.AllListTabItem(
+                AllListTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
@@ -452,6 +453,14 @@ sealed interface TimelineTabItem : TabItem {
 
         private fun defaultBlueskySecondaryItems(accountKey: MicroBlogKey) =
             persistentListOf(
+                AllListTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
+                        ),
+                ),
                 Bluesky.FeedsTabItem(
                     account = AccountType.Active,
                     metaData =
@@ -580,6 +589,29 @@ data class HomeTimelineTabItem(
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
+@Serializable
+data class ListTimelineTabItem(
+    override val account: AccountType,
+    val listId: String,
+    override val metaData: TabMetaData,
+) : TimelineTabItem {
+    override val key: String = "list_${account}_$listId"
+
+    override fun createPresenter(): TimelinePresenter = ListTimelinePresenter(account, listId)
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+}
+
+@Serializable
+data class AllListTabItem(
+    override val account: AccountType,
+    override val metaData: TabMetaData,
+) : TabItem {
+    override val key: String = "list_$account"
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+}
+
 object Mastodon {
     @Serializable
     data class LocalTimelineTabItem(
@@ -633,31 +665,6 @@ object Mastodon {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
                 .FavouriteTimelinePresenter(account)
-
-        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
-    }
-
-    @Serializable
-    data class ListTimelineTabItem(
-        override val account: AccountType,
-        val listId: String,
-        override val metaData: TabMetaData,
-    ) : TimelineTabItem {
-        override val key: String = "list_${account}_$listId"
-
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.mastodon
-                .ListTimelinePresenter(account, listId)
-
-        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
-    }
-
-    @Serializable
-    data class AllListTabItem(
-        override val account: AccountType,
-        override val metaData: TabMetaData,
-    ) : TabItem {
-        override val key: String = "list_$account"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

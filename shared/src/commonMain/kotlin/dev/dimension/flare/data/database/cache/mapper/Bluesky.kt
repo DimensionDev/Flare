@@ -22,7 +22,14 @@ object Bluesky {
         pagingKey: String,
         database: CacheDatabase,
         data: List<FeedViewPost>,
-        sortIdProvider: (FeedViewPost) -> Long = { it.post.indexedAt.toEpochMilliseconds() },
+        sortIdProvider: (FeedViewPost) -> Long = {
+            val reason = it.reason
+            if (reason is FeedViewPostReasonUnion.ReasonRepost) {
+                reason.value.indexedAt.toEpochMilliseconds()
+            } else {
+                it.post.indexedAt.toEpochMilliseconds()
+            }
+        },
     ) {
         val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
         val status = data.map { it.toDbStatus(accountKey) }
@@ -173,7 +180,14 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
 fun FeedViewPost.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (FeedViewPost) -> Long = { it.post.indexedAt.toEpochMilliseconds() },
+    sortIdProvider: (FeedViewPost) -> Long = {
+        val data = it.reason
+        if (data is FeedViewPostReasonUnion.ReasonRepost) {
+            data.value.indexedAt.toEpochMilliseconds()
+        } else {
+            it.post.indexedAt.toEpochMilliseconds()
+        }
+    },
 ): DbPagingTimeline {
     val sortId = sortIdProvider(this)
     val status = this.toDbStatus(accountKey)

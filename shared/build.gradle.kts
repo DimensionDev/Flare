@@ -53,7 +53,6 @@ kotlin {
                 implementation(libs.bundles.ktorfit)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
-                implementation(libs.uuid)
                 implementation(libs.napier)
                 implementation(libs.kotlin.codepoints.deluxe)
                 implementation(libs.ksoup)

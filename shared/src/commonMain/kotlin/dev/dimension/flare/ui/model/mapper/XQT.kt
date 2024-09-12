@@ -139,7 +139,7 @@ internal fun TopLevel.renderNotifications(
                             icon = icon,
                             type =
                                 UiTimeline.TopMessage.MessageType.XQT
-                                    .Custom(message = message.orEmpty(), id = notification.id ?: Uuid.random().toHexString()),
+                                    .Custom(message = message.orEmpty(), id = notification.id ?: Uuid.random().toString()),
                             onClicked = {
                                 if (itemContent == null && url != null) {
                                     launcher.launch(url)

@@ -10,7 +10,6 @@ import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneNotNull
-import com.benasher44.uuid.uuid4
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
@@ -68,6 +67,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 class MastodonDataSource(
@@ -407,6 +408,7 @@ class MastodonDataSource(
             },
         )
 
+    @OptIn(ExperimentalUuidApi::class)
     override suspend fun compose(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
@@ -427,7 +429,7 @@ class MastodonDataSource(
                     it.id
                 }
         service.post(
-            uuid4().toString(),
+            Uuid.random().toString(),
             PostStatus(
                 status = data.content,
                 visibility =

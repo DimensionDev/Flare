@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.benasher44.uuid.uuid4
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.repository.AccountRepository
@@ -20,6 +19,8 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class MisskeyCallbackPresenter(
     private val session: String?,
@@ -90,13 +91,14 @@ class MisskeyCallbackPresenter(
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 fun misskeyLoginUseCase(
     host: String,
     applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,
 ): Result<Unit> =
     runCatching {
-        val session = uuid4().toString()
+        val session = Uuid.random().toString()
         val service =
             MisskeyOauthService(
                 host = host,

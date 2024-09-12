@@ -46,7 +46,6 @@ import com.atproto.repo.ListRecordsQueryParams
 import com.atproto.repo.ListRecordsRecord
 import com.atproto.repo.PutRecordRequest
 import com.atproto.repo.StrongRef
-import com.benasher44.uuid.uuid4
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
@@ -109,6 +108,8 @@ import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.response.AtpResponse
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 class BlueskyDataSource(
@@ -1156,6 +1157,7 @@ class BlueskyDataSource(
         )
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     suspend fun subscribeFeed(data: UiList) {
         MemCacheable.updateWith<ImmutableList<UiList>>(
             key = myFeedsKey,
@@ -1193,7 +1195,7 @@ class BlueskyDataSource(
                                         type = Type.FEED,
                                         value = feedInfo.view.uri.atUri,
                                         pinned = true,
-                                        id = uuid4().toString(),
+                                        id = Uuid.random().toString(),
                                     )
                             ).toImmutableList(),
                     )

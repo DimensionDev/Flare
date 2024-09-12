@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey
 
-import com.benasher44.uuid.uuid4
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.misskey.api.AuthResources
 import dev.dimension.flare.data.network.misskey.api.createAuthResources
@@ -8,6 +7,8 @@ import dev.dimension.flare.data.network.misskey.api.model.response.MiAuthCheckRe
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.appendPathSegments
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val defaultPermission =
     listOf(
@@ -38,13 +39,14 @@ private val defaultPermission =
         "read:gallery-likes",
     )
 
+@OptIn(ExperimentalUuidApi::class)
 internal class MisskeyOauthService(
     private val host: String,
     private val name: String? = null,
     private val icon: String? = null,
     private val callback: String? = null,
     private val permission: List<String> = defaultPermission,
-    private val session: String = uuid4().toString(),
+    private val session: String = Uuid.random().toString(),
 ) : AuthResources by ktorfit("https://$host/").createAuthResources() {
     fun getAuthorizeUrl(): String {
         val url =

@@ -171,7 +171,7 @@ material-motion-compose = { module = "io.github.fornewid:material-motion-compose
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout", "material-icons-extended"]
 navigation = ["navigation-compose"]
-kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-coroutines-core", "kotlinx-coroutines-play-services"]
+kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-coroutines-core"]
 koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
 coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated", "zoomable-image"]

@@ -142,6 +142,7 @@ dependencies {
     implementation(libs.mlkit.translate)
     releaseImplementation(libs.mlkit.language.id)
     debugImplementation(libs.mlkit.language.id.debug)
+    implementation(libs.kotlinx.coroutines.play.services)
     implementation(projects.shared)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)

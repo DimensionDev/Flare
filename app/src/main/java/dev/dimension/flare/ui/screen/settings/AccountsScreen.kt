@@ -8,12 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoodBad
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
@@ -38,12 +33,18 @@ import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowLeft
+import compose.icons.fontawesomeicons.solid.FileCircleExclamation
+import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -87,8 +88,8 @@ internal fun AccountsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                        FAIcon(
+                            FontAwesomeIcons.Solid.ArrowLeft,
                             contentDescription = stringResource(id = R.string.navigate_back),
                         )
                     }
@@ -99,7 +100,7 @@ internal fun AccountsScreen(
                             toLogin.invoke()
                         },
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
+                        FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
                     }
                 },
             )
@@ -241,8 +242,8 @@ fun <T : UiUserV2> AccountItem(
                 },
                 modifier = modifier,
                 leadingContent = {
-                    Icon(
-                        Icons.Default.MoodBad,
+                    FAIcon(
+                        FontAwesomeIcons.Solid.FileCircleExclamation,
                         contentDescription = stringResource(id = R.string.account_item_error_title),
                         modifier = Modifier.size(AvatarComponentDefaults.size),
                     )

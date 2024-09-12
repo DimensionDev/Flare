@@ -6,12 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -29,8 +24,14 @@ import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowLeft
+import compose.icons.fontawesomeicons.solid.Check
+import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -84,8 +85,8 @@ private fun LocalFilterEditDialog(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                        FAIcon(
+                            FontAwesomeIcons.Solid.ArrowLeft,
                             contentDescription = stringResource(id = R.string.navigate_back),
                         )
                     }
@@ -95,8 +96,8 @@ private fun LocalFilterEditDialog(
                         state.save()
                         onBack()
                     }) {
-                        Icon(
-                            Icons.Default.Check,
+                        FAIcon(
+                            FontAwesomeIcons.Solid.Check,
                             contentDescription = stringResource(id = android.R.string.ok),
                         )
                     }
@@ -177,8 +178,8 @@ private fun LocalFilterEditDialog(
                         )
                     },
                     trailingContent = {
-                        Icon(
-                            Icons.Default.Delete,
+                        FAIcon(
+                            FontAwesomeIcons.Solid.Trash,
                             contentDescription = stringResource(id = R.string.delete),
                             tint = MaterialTheme.colorScheme.error,
                         )

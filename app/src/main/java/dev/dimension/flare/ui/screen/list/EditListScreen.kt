@@ -18,17 +18,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +44,14 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.EditListMemberRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowLeft
+import compose.icons.fontawesomeicons.solid.Check
+import compose.icons.fontawesomeicons.solid.EllipsisVertical
+import compose.icons.fontawesomeicons.solid.Rss
+import compose.icons.fontawesomeicons.solid.Trash
+import compose.icons.fontawesomeicons.solid.UserPen
 import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.onEmpty
@@ -63,6 +63,7 @@ import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
@@ -128,8 +129,8 @@ private fun EditListScreen(
                     IconButton(
                         onClick = onBack,
                     ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                        FAIcon(
+                            FontAwesomeIcons.Solid.ArrowLeft,
                             contentDescription = stringResource(id = R.string.navigate_back),
                         )
                     }
@@ -139,8 +140,8 @@ private fun EditListScreen(
                         onClick = state::confirm,
                         enabled = state.listInfo is UiState.Success && !state.isLoading,
                     ) {
-                        Icon(
-                            Icons.Default.Done,
+                        FAIcon(
+                            FontAwesomeIcons.Solid.Check,
                             contentDescription = stringResource(id = android.R.string.ok),
                         )
                     }
@@ -199,8 +200,8 @@ private fun EditListScreen(
                                                                 .clip(MaterialTheme.shapes.medium),
                                                     )
                                                 } else {
-                                                    Icon(
-                                                        imageVector = Icons.Default.RssFeed,
+                                                    FAIcon(
+                                                        imageVector = FontAwesomeIcons.Solid.Rss,
                                                         contentDescription = null,
                                                         modifier =
                                                             Modifier
@@ -257,8 +258,8 @@ private fun EditListScreen(
                         IconButton(onClick = {
                             toEditUser.invoke()
                         }) {
-                            Icon(
-                                Icons.Default.Edit,
+                            FAIcon(
+                                FontAwesomeIcons.Solid.UserPen,
                                 contentDescription = stringResource(id = R.string.list_edit_edit_members),
                             )
                         }
@@ -284,8 +285,8 @@ private fun EditListScreen(
                                 IconButton(onClick = {
                                     showMenu = true
                                 }) {
-                                    Icon(
-                                        Icons.Default.MoreVert,
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.EllipsisVertical,
                                         contentDescription = stringResource(id = R.string.more),
                                     )
                                 }
@@ -309,8 +310,8 @@ private fun EditListScreen(
                                             )
                                         },
                                         leadingIcon = {
-                                            Icon(
-                                                Icons.Default.Delete,
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.Trash,
                                                 contentDescription = stringResource(id = R.string.delete),
                                                 tint = MaterialTheme.colorScheme.error,
                                             )

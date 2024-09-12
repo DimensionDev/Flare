@@ -15,12 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.MoodBad
-import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +29,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleExclamation
+import compose.icons.fontawesomeicons.solid.File
+import compose.icons.fontawesomeicons.solid.FileCircleExclamation
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.deeplink
@@ -44,6 +44,7 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.MediumAlpha
@@ -154,8 +155,8 @@ internal fun LazyStaggeredGridScope.status(
                 verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.EmojiEmotions,
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.File,
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
                 )
@@ -205,8 +206,8 @@ private fun OnError(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Icon(
-                    imageVector = Icons.Default.MoodBad,
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.FileCircleExclamation,
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
                 )
@@ -228,8 +229,8 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            imageVector = Icons.Default.ErrorOutline,
+        FAIcon(
+            imageVector = FontAwesomeIcons.Solid.CircleExclamation,
             contentDescription = null,
             modifier = Modifier.size(48.dp),
         )

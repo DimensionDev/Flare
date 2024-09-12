@@ -15,15 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalDrawerSheet
@@ -77,6 +73,10 @@ import com.ramcosta.composedestinations.spec.NavHostGraphSpec
 import com.ramcosta.composedestinations.utils.composable
 import com.ramcosta.composedestinations.utils.dialogComposable
 import com.ramcosta.composedestinations.utils.toDestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Gear
+import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
@@ -90,6 +90,7 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -273,8 +274,8 @@ internal fun HomeScreen(
                                         }
                                     },
                                     icon = {
-                                        Icon(
-                                            Icons.Default.Settings,
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Gear,
                                             contentDescription = stringResource(R.string.settings_title),
                                         )
                                     },
@@ -320,8 +321,8 @@ internal fun HomeScreen(
                                             defaultElevation = 0.dp,
                                         ),
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Pen,
                                         contentDescription = stringResource(id = R.string.compose_title),
                                     )
                                 }
@@ -407,8 +408,8 @@ internal fun HomeScreen(
                                             }
                                     },
                                     icon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Settings,
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Gear,
                                             contentDescription = stringResource(id = R.string.settings_title),
                                         )
                                     },
@@ -534,8 +535,8 @@ private fun ColumnScope.DrawerHeader(
                     }
                 },
                 icon = {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Pen,
                         contentDescription = stringResource(id = R.string.compose_title),
                     )
                 },

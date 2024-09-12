@@ -7,15 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +33,18 @@ import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Regular
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.regular.Heart
+import compose.icons.fontawesomeicons.solid.ArrowLeft
+import compose.icons.fontawesomeicons.solid.Heart
+import compose.icons.fontawesomeicons.solid.Rss
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -109,8 +111,8 @@ private fun BlueskyFeedScreen(
                     IconButton(
                         onClick = onBack,
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.ArrowLeft,
                             contentDescription = stringResource(id = R.string.navigate_back),
                         )
                     }
@@ -157,8 +159,8 @@ private fun BlueskyFeedScreen(
                                                         .clip(MaterialTheme.shapes.medium),
                                             )
                                         } else {
-                                            Icon(
-                                                imageVector = Icons.Default.RssFeed,
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Rss,
                                                 contentDescription = null,
                                                 modifier =
                                                     Modifier
@@ -224,7 +226,7 @@ private fun BlueskyFeedScreen(
                                         }
 
                                     StatusActionButton(
-                                        icon = if (item.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        icon = if (item.liked) FontAwesomeIcons.Solid.Heart else FontAwesomeIcons.Regular.Heart,
                                         text = item.likedCountHumanized,
                                         color = if (item.liked) Color.Red else LocalContentColor.current,
                                         onClicked = {

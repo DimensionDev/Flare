@@ -15,17 +15,10 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.QuestionMark
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Web
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -53,6 +46,13 @@ import com.ramcosta.composedestinations.generated.destinations.XQTLoginRouteDest
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowLeft
+import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.solid.MagnifyingGlass
+import compose.icons.fontawesomeicons.solid.Question
+import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onLoading
@@ -62,6 +62,7 @@ import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
@@ -137,8 +138,8 @@ fun ServiceSelectScreen(
                             IconButton(
                                 onClick = onBack,
                             ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.ArrowLeft,
                                     contentDescription = stringResource(id = R.string.navigate_back),
                                 )
                             }
@@ -179,13 +180,13 @@ fun ServiceSelectScreen(
                             }
                         }) {
                             if (state.instanceInputState.text.any()) {
-                                Icon(
-                                    imageVector = Icons.Filled.Close,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Xmark,
                                     contentDescription = null,
                                 )
                             } else {
-                                Icon(
-                                    imageVector = Icons.Filled.Search,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.MagnifyingGlass,
                                     contentDescription = null,
                                 )
                             }
@@ -201,13 +202,13 @@ fun ServiceSelectScreen(
                                     modifier = Modifier.size(24.dp),
                                 )
                             }.onError {
-                                Icon(
-                                    imageVector = Icons.Filled.QuestionMark,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Question,
                                     contentDescription = null,
                                 )
                             }.onLoading {
-                                Icon(
-                                    imageVector = Icons.Filled.Web,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Globe,
                                     contentDescription = null,
                                     modifier = Modifier.placeholder(true),
                                 )

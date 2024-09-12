@@ -1,19 +1,6 @@
 package dev.dimension.flare.data.model
 
 import android.content.Context
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.FeaturedPlayList
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Bookmarks
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.RssFeed
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
@@ -21,9 +8,22 @@ import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStore
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
+import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Bluesky
 import compose.icons.fontawesomeicons.brands.Mastodon
 import compose.icons.fontawesomeicons.brands.Twitter
+import compose.icons.fontawesomeicons.solid.Bell
+import compose.icons.fontawesomeicons.solid.BookBookmark
+import compose.icons.fontawesomeicons.solid.CircleUser
+import compose.icons.fontawesomeicons.solid.Gear
+import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.solid.House
+import compose.icons.fontawesomeicons.solid.List
+import compose.icons.fontawesomeicons.solid.MagnifyingGlass
+import compose.icons.fontawesomeicons.solid.RectangleList
+import compose.icons.fontawesomeicons.solid.Rss
+import compose.icons.fontawesomeicons.solid.Star
+import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -147,22 +147,22 @@ sealed interface IconType {
 
             fun toIcon(): ImageVector =
                 when (this) {
-                    Home -> Icons.Default.Home
-                    Notification -> Icons.Default.Notifications
-                    Search -> Icons.Default.Search
-                    Profile -> Icons.Default.AccountCircle
-                    Settings -> Icons.Default.Settings
-                    Local -> Icons.Default.Groups
-                    World -> Icons.Default.Public
-                    Featured -> Icons.AutoMirrored.Filled.FeaturedPlayList
-                    Bookmark -> Icons.Default.Bookmarks
-                    Heart -> Icons.Default.Favorite
+                    Home -> FontAwesomeIcons.Solid.House
+                    Notification -> FontAwesomeIcons.Solid.Bell
+                    Search -> FontAwesomeIcons.Solid.MagnifyingGlass
+                    Profile -> FontAwesomeIcons.Solid.CircleUser
+                    Settings -> FontAwesomeIcons.Solid.Gear
+                    Local -> FontAwesomeIcons.Solid.Users
+                    World -> FontAwesomeIcons.Solid.Globe
+                    Featured -> FontAwesomeIcons.Solid.RectangleList
+                    Bookmark -> FontAwesomeIcons.Solid.BookBookmark
+                    Heart -> FontAwesomeIcons.Solid.Star
                     Twitter -> FontAwesomeIcons.Brands.Twitter
                     Mastodon -> FontAwesomeIcons.Brands.Mastodon
                     Misskey -> FontAwesomeIcons.Brands.Misskey
                     Bluesky -> FontAwesomeIcons.Brands.Bluesky
-                    List -> Icons.AutoMirrored.Default.List
-                    Feeds -> Icons.Default.RssFeed
+                    List -> FontAwesomeIcons.Solid.List
+                    Feeds -> FontAwesomeIcons.Solid.Rss
                 }
         }
     }

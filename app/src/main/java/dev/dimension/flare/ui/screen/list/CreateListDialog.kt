@@ -15,10 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,6 +35,9 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Rss
 import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
@@ -45,6 +45,7 @@ import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -137,8 +138,8 @@ private fun CreateListDialog(
                                                 .clip(MaterialTheme.shapes.medium),
                                     )
                                 } else {
-                                    Icon(
-                                        imageVector = Icons.Default.RssFeed,
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Rss,
                                         contentDescription = null,
                                         modifier =
                                             Modifier

@@ -13,13 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -43,11 +38,17 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.BlueskyFeedRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Rss
+import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -160,8 +161,8 @@ private fun BlueskyFeedsScreen(
                                             .clip(MaterialTheme.shapes.small),
                                 )
                             } else {
-                                Icon(
-                                    imageVector = Icons.Default.RssFeed,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Rss,
                                     contentDescription = null,
                                     modifier =
                                         Modifier
@@ -225,8 +226,8 @@ private fun BlueskyFeedsScreen(
                                                     .clip(MaterialTheme.shapes.medium),
                                         )
                                     } else {
-                                        Icon(
-                                            imageVector = Icons.Default.RssFeed,
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Rss,
                                             contentDescription = null,
                                             modifier =
                                                 Modifier
@@ -262,13 +263,13 @@ private fun BlueskyFeedsScreen(
                                         },
                                     ) {
                                         if (subscribed) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Trash,
                                                 contentDescription = null,
                                             )
                                         } else {
-                                            Icon(
-                                                imageVector = Icons.Default.Add,
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Plus,
                                                 contentDescription = null,
                                             )
                                         }

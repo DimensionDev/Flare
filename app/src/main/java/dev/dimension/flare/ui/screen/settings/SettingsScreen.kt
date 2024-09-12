@@ -6,16 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Tab
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -45,8 +37,17 @@ import com.ramcosta.composedestinations.generated.destinations.TabCustomizeRoute
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleInfo
+import compose.icons.fontawesomeicons.solid.CircleUser
+import compose.icons.fontawesomeicons.solid.Database
+import compose.icons.fontawesomeicons.solid.Filter
+import compose.icons.fontawesomeicons.solid.Palette
+import compose.icons.fontawesomeicons.solid.Table
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onError
@@ -219,8 +220,8 @@ internal fun SettingsScreen(
                                     toAccounts.invoke()
                                 },
                         leadingContent = {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.CircleUser,
                                 contentDescription = null,
                             )
                         },
@@ -235,8 +236,8 @@ internal fun SettingsScreen(
                     Text(text = stringResource(id = R.string.settings_appearance_title))
                 },
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Palette,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Palette,
                         contentDescription = null,
                     )
                 },
@@ -254,8 +255,8 @@ internal fun SettingsScreen(
                         Text(text = stringResource(id = R.string.settings_tab_customization))
                     },
                     leadingContent = {
-                        Icon(
-                            imageVector = Icons.Default.Tab,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Table,
                             contentDescription = null,
                         )
                     },
@@ -272,8 +273,8 @@ internal fun SettingsScreen(
                         Text(text = stringResource(id = R.string.settings_local_filter_title))
                     },
                     leadingContent = {
-                        Icon(
-                            imageVector = Icons.Default.FilterAlt,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Filter,
                             contentDescription = null,
                         )
                     },
@@ -291,7 +292,7 @@ internal fun SettingsScreen(
 //                    Text(text = stringResource(id = R.string.settings_notifications_title))
 //                },
 //                leadingContent = {
-//                    Icon(
+//                    FAIcon(
 //                        imageVector = Icons.Default.Notifications,
 //                        contentDescription = null,
 //                    )
@@ -309,8 +310,8 @@ internal fun SettingsScreen(
                     Text(text = stringResource(id = R.string.settings_storage_title))
                 },
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Storage,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Database,
                         contentDescription = null,
                     )
                 },
@@ -327,8 +328,8 @@ internal fun SettingsScreen(
                     Text(text = stringResource(id = R.string.settings_about_title))
                 },
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Info,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.CircleInfo,
                         contentDescription = null,
                     )
                 },

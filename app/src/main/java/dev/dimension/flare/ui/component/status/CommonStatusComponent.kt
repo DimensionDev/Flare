@@ -17,29 +17,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.BookmarkRemove
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Report
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -71,8 +52,25 @@ import com.eygraber.compose.placeholder.material3.placeholder
 import com.fleeksoft.ksoup.nodes.Element
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.regular.Bookmark
+import compose.icons.fontawesomeicons.regular.Heart
+import compose.icons.fontawesomeicons.solid.At
+import compose.icons.fontawesomeicons.solid.Bookmark
+import compose.icons.fontawesomeicons.solid.CircleInfo
+import compose.icons.fontawesomeicons.solid.Ellipsis
+import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.solid.Heart
+import compose.icons.fontawesomeicons.solid.Image
+import compose.icons.fontawesomeicons.solid.Lock
+import compose.icons.fontawesomeicons.solid.LockOpen
+import compose.icons.fontawesomeicons.solid.Minus
+import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.QuoteLeft
+import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
+import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
@@ -83,6 +81,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.EmojiImage
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
@@ -298,8 +297,8 @@ private fun StatusMediasComponent(
                     },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = Icons.Default.Image,
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Image,
                 contentDescription = stringResource(id = R.string.show_media),
                 modifier =
                     Modifier
@@ -456,29 +455,29 @@ internal fun StatusVisibilityComponent(
 ) {
     when (visibility) {
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
-            Icon(
-                imageVector = Icons.Default.Public,
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Globe,
                 contentDescription = stringResource(id = R.string.mastodon_visibility_public),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
-            Icon(
-                imageVector = Icons.Default.LockOpen,
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.LockOpen,
                 contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
-            Icon(
-                imageVector = Icons.Default.Lock,
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Lock,
                 contentDescription = stringResource(id = R.string.mastodon_visibility_private),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
-            Icon(
-                imageVector = Icons.Default.MailOutline,
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.At,
                 contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
                 modifier = modifier,
             )
@@ -496,11 +495,14 @@ private fun StatusActions(
             modifier
                 .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items.forEach { action ->
             when (action) {
                 is StatusAction.Group -> {
+                    if (action.displayItem is StatusAction.Item.More) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                     StatusActionGroup(
                         icon = action.displayItem.icon,
                         text = action.displayItem.iconText,
@@ -511,7 +513,7 @@ private fun StatusActions(
                                 val color = statusActionItemColor(subActions)
                                 DropdownMenuItem(
                                     leadingIcon = {
-                                        Icon(
+                                        FAIcon(
                                             imageVector = subActions.icon,
                                             contentDescription = subActions.iconText,
                                             tint = color,
@@ -571,33 +573,33 @@ private val StatusAction.Item.icon: ImageVector
         when (this) {
             is StatusAction.Item.Bookmark -> {
                 if (bookmarked) {
-                    Icons.Default.BookmarkRemove
+                    FontAwesomeIcons.Solid.Bookmark
                 } else {
-                    Icons.Default.BookmarkAdd
+                    FontAwesomeIcons.Regular.Bookmark
                 }
             }
 
-            is StatusAction.Item.Delete -> Icons.Default.Delete
+            is StatusAction.Item.Delete -> FontAwesomeIcons.Solid.Trash
             is StatusAction.Item.Like -> {
                 if (liked) {
-                    Icons.Default.Favorite
+                    FontAwesomeIcons.Solid.Heart
                 } else {
-                    Icons.Default.FavoriteBorder
+                    FontAwesomeIcons.Regular.Heart
                 }
             }
 
-            StatusAction.Item.More -> Icons.Default.MoreHoriz
-            is StatusAction.Item.Quote -> Icons.Default.FormatQuote
+            StatusAction.Item.More -> FontAwesomeIcons.Solid.Ellipsis
+            is StatusAction.Item.Quote -> FontAwesomeIcons.Solid.QuoteLeft
             is StatusAction.Item.Reaction -> {
                 if (reacted) {
-                    Icons.Default.Remove
+                    FontAwesomeIcons.Solid.Minus
                 } else {
-                    Icons.Default.Add
+                    FontAwesomeIcons.Solid.Plus
                 }
             }
 
-            is StatusAction.Item.Reply -> Icons.AutoMirrored.Filled.Reply
-            is StatusAction.Item.Report -> Icons.Default.Report
+            is StatusAction.Item.Reply -> FontAwesomeIcons.Solid.Reply
+            is StatusAction.Item.Report -> FontAwesomeIcons.Solid.CircleInfo
             is StatusAction.Item.Retweet -> FontAwesomeIcons.Solid.Retweet
         }
 
@@ -681,8 +683,8 @@ private fun StatusReplyComponent(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Default.Reply,
+        FAIcon(
+            imageVector = FontAwesomeIcons.Solid.Reply,
             contentDescription = stringResource(id = R.string.reply_to),
             modifier =
                 Modifier
@@ -725,8 +727,8 @@ private fun StatusContentComponent(
                             },
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Lock,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Lock,
                         contentDescription = stringResource(id = R.string.mastodon_item_content_warning),
                     )
                     Text(

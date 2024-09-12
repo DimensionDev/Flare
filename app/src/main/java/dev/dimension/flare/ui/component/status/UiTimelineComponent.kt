@@ -8,14 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.filled.AlternateEmail
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Poll
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,7 +16,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.At
+import compose.icons.fontawesomeicons.solid.CircleInfo
+import compose.icons.fontawesomeicons.solid.Heart
+import compose.icons.fontawesomeicons.solid.Pen
+import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
+import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
+import compose.icons.fontawesomeicons.solid.UserPlus
 import dev.dimension.flare.R
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickContext
@@ -138,13 +137,13 @@ private fun TopMessageComponent(
     val icon =
         when (data.icon) {
             UiTimeline.TopMessage.Icon.Retweet -> FontAwesomeIcons.Solid.Retweet
-            UiTimeline.TopMessage.Icon.Follow -> Icons.Default.PersonAdd
-            UiTimeline.TopMessage.Icon.Favourite -> Icons.Default.Favorite
-            UiTimeline.TopMessage.Icon.Mention -> Icons.Default.AlternateEmail
-            UiTimeline.TopMessage.Icon.Poll -> Icons.Default.Poll
-            UiTimeline.TopMessage.Icon.Edit -> Icons.Default.Edit
-            UiTimeline.TopMessage.Icon.Info -> Icons.Default.Info
-            UiTimeline.TopMessage.Icon.Reply -> Icons.AutoMirrored.Filled.Reply
+            UiTimeline.TopMessage.Icon.Follow -> FontAwesomeIcons.Solid.UserPlus
+            UiTimeline.TopMessage.Icon.Favourite -> FontAwesomeIcons.Solid.Heart
+            UiTimeline.TopMessage.Icon.Mention -> FontAwesomeIcons.Solid.At
+            UiTimeline.TopMessage.Icon.Poll -> FontAwesomeIcons.Solid.SquarePollHorizontal
+            UiTimeline.TopMessage.Icon.Edit -> FontAwesomeIcons.Solid.Pen
+            UiTimeline.TopMessage.Icon.Info -> FontAwesomeIcons.Solid.CircleInfo
+            UiTimeline.TopMessage.Icon.Reply -> FontAwesomeIcons.Solid.Reply
         }
     val text: String =
         when (val type = data.type) {

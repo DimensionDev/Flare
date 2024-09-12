@@ -5,11 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PauseCircle
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
@@ -24,6 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CirclePause
+import compose.icons.fontawesomeicons.solid.CirclePlay
 import dev.dimension.flare.common.observeState
 import kotlin.math.roundToLong
 
@@ -85,11 +85,11 @@ fun AudioPlayer(
                         }
                     },
                 ) {
-                    Icon(
+                    FAIcon(
                         if (state.playing) {
-                            Icons.Default.PauseCircle
+                            FontAwesomeIcons.Solid.CirclePause
                         } else {
-                            Icons.Default.PlayCircle
+                            FontAwesomeIcons.Solid.CirclePlay
                         },
                         contentDescription = null,
                     )

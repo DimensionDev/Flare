@@ -7,10 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -32,9 +29,11 @@ import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Github
 import compose.icons.fontawesomeicons.brands.Telegram
+import compose.icons.fontawesomeicons.solid.ArrowLeft
 import compose.icons.fontawesomeicons.solid.Language
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.theme.MediumAlpha
@@ -61,8 +60,8 @@ private fun AboutScreen(onBack: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                        FAIcon(
+                            FontAwesomeIcons.Solid.ArrowLeft,
                             contentDescription = stringResource(id = R.string.navigate_back),
                         )
                     }
@@ -114,7 +113,7 @@ private fun AboutScreen(onBack: () -> Unit) {
                         uriHandler.openUri("https://github.com/DimensionDev/Flare")
                     },
                 leadingContent = {
-                    Icon(
+                    FAIcon(
                         imageVector = FontAwesomeIcons.Brands.Github,
                         contentDescription = "GitHub",
                         modifier = Modifier.size(24.dp),
@@ -136,7 +135,7 @@ private fun AboutScreen(onBack: () -> Unit) {
                         uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
                     },
                 leadingContent = {
-                    Icon(
+                    FAIcon(
                         imageVector = FontAwesomeIcons.Brands.Telegram,
                         contentDescription = stringResource(id = R.string.settings_about_telegram),
                         modifier = Modifier.size(24.dp),
@@ -158,7 +157,7 @@ private fun AboutScreen(onBack: () -> Unit) {
                         uriHandler.openUri("https://crowdin.com/project/flareapp")
                     },
                 leadingContent = {
-                    Icon(
+                    FAIcon(
                         imageVector = FontAwesomeIcons.Solid.Language,
                         contentDescription = stringResource(id = R.string.settings_about_localization),
                         modifier = Modifier.size(24.dp),

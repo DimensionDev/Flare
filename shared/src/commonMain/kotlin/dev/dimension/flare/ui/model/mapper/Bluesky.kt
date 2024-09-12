@@ -448,21 +448,43 @@ private fun findCard(postView: PostView): UiCard? =
     }
 
 private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
-    if (postView.embed is PostViewEmbedUnion.ImagesView) {
-        val embed = postView.embed as PostViewEmbedUnion.ImagesView
-        embed.value.images.map {
-            UiMedia.Image(
-                url = it.fullsize.uri,
-                previewUrl = it.thumb.uri,
-                description = it.alt,
-                width = it.aspectRatio?.width?.toFloat() ?: 0f,
-                height = it.aspectRatio?.height?.toFloat() ?: 0f,
-                sensitive = false,
+    when (postView.embed) {
+        is PostViewEmbedUnion.ImagesView -> {
+            val embed = postView.embed as PostViewEmbedUnion.ImagesView
+            embed.value.images
+                .map {
+                    UiMedia.Image(
+                        url = it.fullsize.uri,
+                        previewUrl = it.thumb.uri,
+                        description = it.alt,
+                        width = it.aspectRatio?.width?.toFloat() ?: 0f,
+                        height = it.aspectRatio?.height?.toFloat() ?: 0f,
+                        sensitive = false,
+                    )
+                }.toImmutableList()
+        }
+
+        is PostViewEmbedUnion.VideoView -> {
+            val embed = postView.embed as PostViewEmbedUnion.VideoView
+            persistentListOf(
+                UiMedia.Video(
+                    url = embed.value.playlist.uri,
+                    thumbnailUrl = embed.value.thumbnail?.uri ?: "",
+                    description = embed.value.alt,
+                    width =
+                        embed.value.aspectRatio
+                            ?.width
+                            ?.toFloat() ?: 0f,
+                    height =
+                        embed.value.aspectRatio
+                            ?.height
+                            ?.toFloat() ?: 0f,
+                ),
             )
         }
-    } else {
-        emptyList()
-    }.toImmutableList()
+
+        else -> persistentListOf()
+    }
 
 private fun findQuote(
     accountKey: MicroBlogKey,

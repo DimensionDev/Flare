@@ -39,11 +39,14 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private val twitterParser by lazy {
     TwitterParser(enableNonAsciiInUrl = false)
 }
 
+@OptIn(ExperimentalUuidApi::class)
 internal fun TopLevel.renderNotifications(
     accountKey: MicroBlogKey,
     event: StatusEvent.XQT,
@@ -136,7 +139,7 @@ internal fun TopLevel.renderNotifications(
                             icon = icon,
                             type =
                                 UiTimeline.TopMessage.MessageType.XQT
-                                    .Custom(message = message.orEmpty()),
+                                    .Custom(message = message.orEmpty(), id = notification.id ?: Uuid.random().toHexString()),
                             onClicked = {
                                 if (itemContent == null && url != null) {
                                     launcher.launch(url)

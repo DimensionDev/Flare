@@ -237,7 +237,10 @@ data class UiTimeline internal constructor(
 
                 data class Custom(
                     val message: String,
-                ) : XQT
+                    val id: String,
+                ) : XQT {
+                    override fun toString(): String = "Custom$id"
+                }
 
                 data object Mention : XQT
             }

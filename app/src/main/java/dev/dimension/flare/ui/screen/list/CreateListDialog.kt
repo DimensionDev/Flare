@@ -122,9 +122,7 @@ private fun CreateListDialog(
                                             photoPickerLauncher.launch(
                                                 PickVisualMediaRequest(
                                                     mediaType =
-                                                        ActivityResultContracts.PickVisualMedia.SingleMimeType(
-                                                            mimeType = "image/png",
-                                                        ),
+                                                        ActivityResultContracts.PickVisualMedia.ImageOnly,
                                                 ),
                                             )
                                         },

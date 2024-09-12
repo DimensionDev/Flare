@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Add
@@ -24,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -49,6 +50,7 @@ import com.ramcosta.composedestinations.generated.destinations.EditListRouteDest
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
+import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
@@ -163,170 +165,215 @@ private fun ListScreen(
                 LazyColumn(
                     contentPadding = contentPadding,
                 ) {
-                    items(
+                    listItemComponent(
                         state.items,
-                        emptyContent = {
-                            Box(
-                                modifier = Modifier.fillParentMaxSize(),
-                                contentAlignment = Alignment.Center,
-                            ) {
+                        toList,
+                        trailingContent = { item ->
+                            var showDropdown by remember {
+                                mutableStateOf(false)
+                            }
+                            IconButton(onClick = { showDropdown = true }) {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                                    contentDescription = stringResource(id = R.string.list_empty),
-                                    modifier = Modifier.size(48.dp),
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = stringResource(id = R.string.more),
                                 )
-                                Text(
-                                    text = stringResource(id = R.string.list_empty),
-                                    style = MaterialTheme.typography.headlineMedium,
-                                )
-                            }
-                        },
-                        loadingContent = {
-                            ItemPlaceHolder()
-                        },
-                        errorContent = {
-                            Box(
-                                modifier = Modifier.fillParentMaxSize(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ErrorOutline,
-                                    contentDescription = stringResource(id = R.string.list_error),
-                                    modifier = Modifier.size(48.dp),
-                                )
-                                Text(
-                                    text = stringResource(id = R.string.list_error),
-                                    style = MaterialTheme.typography.headlineMedium,
-                                )
-                            }
-                        },
-                    ) { item ->
-                        Column(
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        toList(item)
-                                    }.padding(horizontal = screenHorizontalPadding),
-                        ) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            ListComponent(
-                                headlineContent = {
-                                    Text(text = item.title)
-                                },
-                                leadingContent = {
-                                    if (item.avatar != null) {
-                                        NetworkImage(
-                                            model = item.avatar,
-                                            contentDescription = item.title,
-                                            modifier =
-                                                Modifier
-                                                    .size(AvatarComponentDefaults.size)
-                                                    .clip(MaterialTheme.shapes.medium),
-                                        )
-                                    } else {
-                                        Icon(
-                                            imageVector = Icons.Default.RssFeed,
-                                            contentDescription = null,
-                                            modifier =
-                                                Modifier
-                                                    .size(AvatarComponentDefaults.size)
-                                                    .background(
-                                                        color = MaterialTheme.colorScheme.primaryContainer,
-                                                        shape = MaterialTheme.shapes.medium,
-                                                    ),
-                                        )
-                                    }
-                                },
-                                supportingContent = {
-                                    if (item.creator != null) {
-                                        Text(
-                                            text =
-                                                stringResource(
-                                                    R.string.feeds_discover_feeds_created_by,
-                                                    item.creator?.handle ?: "Unknown",
-                                                ),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            modifier =
-                                                Modifier
-                                                    .alpha(MediumAlpha),
-                                        )
-                                    }
-                                },
-                                trailingContent = {
-                                    var showDropdown by remember {
-                                        mutableStateOf(false)
-                                    }
-                                    IconButton(onClick = { showDropdown = true }) {
-                                        Icon(
-                                            imageVector = Icons.Default.MoreVert,
-                                            contentDescription = stringResource(id = R.string.more),
-                                        )
-                                        DropdownMenu(
-                                            expanded = showDropdown,
-                                            onDismissRequest = { showDropdown = false },
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(
-                                                        text = stringResource(id = R.string.list_edit),
-                                                    )
-                                                },
-                                                onClick = {
-                                                    editList(item)
-                                                    showDropdown = false
-                                                },
-                                                leadingIcon = {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Edit,
-                                                        contentDescription = stringResource(id = R.string.list_edit),
-                                                    )
-                                                },
+                                DropdownMenu(
+                                    expanded = showDropdown,
+                                    onDismissRequest = { showDropdown = false },
+                                ) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = stringResource(id = R.string.list_edit),
                                             )
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(
-                                                        text = stringResource(id = R.string.list_delete),
-                                                        color = MaterialTheme.colorScheme.error,
-                                                    )
-                                                },
-                                                onClick = {
-                                                    deleteList(item)
-                                                    showDropdown = false
-                                                },
-                                                leadingIcon = {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Delete,
-                                                        contentDescription = stringResource(id = R.string.list_delete),
-                                                        tint = MaterialTheme.colorScheme.error,
-                                                    )
-                                                },
+                                        },
+                                        onClick = {
+                                            editList(item)
+                                            showDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = stringResource(id = R.string.list_edit),
                                             )
-                                        }
-                                    }
-                                },
-                            )
-                            item.description?.takeIf { it.isNotEmpty() }?.let {
-                                Text(
-                                    text = it,
-                                )
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = stringResource(id = R.string.list_delete),
+                                                color = MaterialTheme.colorScheme.error,
+                                            )
+                                        },
+                                        onClick = {
+                                            deleteList(item)
+                                            showDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = stringResource(id = R.string.list_delete),
+                                                tint = MaterialTheme.colorScheme.error,
+                                            )
+                                        },
+                                    )
+                                }
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            HorizontalDivider()
-                        }
-                    }
+                        },
+                    )
                 }
             },
         )
     }
 }
 
+internal fun LazyListScope.listItemComponent(
+    items: PagingState<UiList>,
+    onClicked: ((UiList) -> Unit)? = null,
+    trailingContent: @Composable (UiList) -> Unit,
+) {
+    items(
+        items,
+        emptyContent = {
+            Box(
+                modifier = Modifier.fillParentMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ListAlt,
+                    contentDescription = stringResource(id = R.string.list_empty),
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(
+                    text = stringResource(id = R.string.list_empty),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+            }
+        },
+        loadingContent = {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ItemPlaceHolder()
+                HorizontalDivider()
+            }
+        },
+        errorContent = {
+            Box(
+                modifier = Modifier.fillParentMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ErrorOutline,
+                    contentDescription = stringResource(id = R.string.list_error),
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(
+                    text = stringResource(id = R.string.list_error),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+            }
+        },
+    ) { item ->
+        Column(
+            modifier =
+                Modifier
+                    .let {
+                        if (onClicked == null) {
+                            it
+                        } else {
+                            it
+                                .clickable {
+                                    onClicked(item)
+                                }
+                        }
+                    }.padding(horizontal = screenHorizontalPadding),
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            ListComponent(
+                headlineContent = {
+                    Text(text = item.title)
+                },
+                leadingContent = {
+                    if (item.avatar != null) {
+                        NetworkImage(
+                            model = item.avatar,
+                            contentDescription = item.title,
+                            modifier =
+                                Modifier
+                                    .size(AvatarComponentDefaults.size)
+                                    .clip(MaterialTheme.shapes.medium),
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.RssFeed,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(AvatarComponentDefaults.size)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        shape = MaterialTheme.shapes.medium,
+                                    ),
+                        )
+                    }
+                },
+                supportingContent = {
+                    if (item.creator != null) {
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.feeds_discover_feeds_created_by,
+                                    item.creator?.handle ?: "Unknown",
+                                ),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier
+                                    .alpha(MediumAlpha),
+                        )
+                    }
+                },
+                trailingContent = {
+                    trailingContent.invoke(item)
+                },
+            )
+            item.description?.takeIf { it.isNotEmpty() }?.let {
+                Text(
+                    text = it,
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider()
+        }
+    }
+}
+
 @Composable
 private fun ItemPlaceHolder(modifier: Modifier = Modifier) {
-    ListItem(
+    ListComponent(
         modifier = modifier,
         headlineContent = {
             Text(
                 text = "lore ipsum dolor sit amet",
+                modifier = Modifier.placeholder(true),
+            )
+        },
+        leadingContent = {
+            Box(
+                modifier =
+                    Modifier
+                        .size(AvatarComponentDefaults.size)
+                        .clip(MaterialTheme.shapes.medium)
+                        .placeholder(true),
+            )
+        },
+        supportingContent = {
+            Text(
+                text = "lore ipsum",
                 modifier = Modifier.placeholder(true),
             )
         },

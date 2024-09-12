@@ -996,7 +996,7 @@ class MastodonDataSource(
         }
     }
 
-    suspend fun updateList(
+    private suspend fun updateList(
         listId: String,
         title: String,
     ) {
@@ -1155,11 +1155,12 @@ class MastodonDataSource(
         }
     }
 
-    fun listMemberCache(listId: String) = MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
+    override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
+        MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
 
     private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
 
-    fun userLists(userKey: MicroBlogKey): MemCacheable<List<UiList>> =
+    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>> =
         MemCacheable(
             key = userListsKey(userKey),
         ) {
@@ -1175,6 +1176,7 @@ class MastodonDataSource(
                         )
                     }
                 }.orEmpty()
+                .toImmutableList()
         }
 
     override val supportedMetaData: ImmutableList<ListMetaDataType>

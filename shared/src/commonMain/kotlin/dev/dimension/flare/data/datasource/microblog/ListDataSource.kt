@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog
 import androidx.paging.PagingData
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiTimeline
@@ -48,6 +49,10 @@ internal interface ListDataSource {
     )
 
     suspend fun createList(metaData: ListMetaData)
+
+    fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>>
+
+    fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>>
 }
 
 data class ListMetaData(

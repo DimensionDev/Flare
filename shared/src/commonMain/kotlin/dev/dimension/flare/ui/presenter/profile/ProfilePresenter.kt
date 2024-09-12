@@ -7,8 +7,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -83,6 +83,10 @@ class ProfilePresenter(
             isMe = isMe,
             actions = actions,
             isGuestMode = accountType == AccountType.Guest,
+            isListDataSource =
+                accountServiceState.map {
+                    it is ListDataSource
+                },
         ) {
             override suspend fun refresh() {
                 userState.onSuccess {
@@ -150,6 +154,7 @@ abstract class ProfileState(
     val isMe: UiState<Boolean>,
     val actions: UiState<ImmutableListWrapper<ProfileAction>>,
     val isGuestMode: Boolean,
+    val isListDataSource: UiState<Boolean>,
 ) {
     abstract suspend fun refresh()
 

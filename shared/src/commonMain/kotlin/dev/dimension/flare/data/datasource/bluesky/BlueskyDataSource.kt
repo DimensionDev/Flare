@@ -27,6 +27,7 @@ import app.bsky.feed.PostReplyRef
 import app.bsky.feed.ViewerState
 import app.bsky.graph.GetListQueryParams
 import app.bsky.graph.GetListsQueryParams
+import app.bsky.graph.Listitem
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
@@ -1367,7 +1368,7 @@ class BlueskyDataSource(
         )
     }
 
-    suspend fun createList(
+    private suspend fun createList(
         title: String,
         description: String?,
         icon: FileItem?,
@@ -1424,7 +1425,7 @@ class BlueskyDataSource(
         }
     }
 
-    suspend fun updateList(
+    private suspend fun updateList(
         uri: String,
         title: String,
         description: String?,
@@ -1562,6 +1563,19 @@ class BlueskyDataSource(
                         it.key
                     }.toImmutableList()
             }
+            val list =
+                service
+                    .getList(
+                        params =
+                            GetListQueryParams(
+                                list = AtUri(listId),
+                            ),
+                    ).requireResponse()
+                    .list
+                    .render(account.accountKey)
+            MemCacheable.updateWith<ImmutableList<UiList>>(userListsKey(userKey)) {
+                (it + list).toImmutableList()
+            }
             service.createRecord(
                 CreateRecordRequest(
                     repo = Did(did = account.accountKey.id),
@@ -1589,6 +1603,11 @@ class BlueskyDataSource(
             ) {
                 it
                     .filter { user -> user.key.id != userKey.id }
+                    .toImmutableList()
+            }
+            MemCacheable.updateWith<ImmutableList<UiList>>(userListsKey(userKey)) {
+                it
+                    .filter { list -> list.id != listId }
                     .toImmutableList()
             }
             var record: ListRecordsRecord? = null
@@ -1655,6 +1674,61 @@ class BlueskyDataSource(
             icon = metaData.avatar,
         )
     }
+
+    override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
+        MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
+
+    private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
+
+    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>> =
+        MemCacheable(
+            key = userListsKey(userKey),
+        ) {
+            val service = account.getService(appDatabase)
+            var cursor: String? = null
+            val lists = mutableListOf<UiList>()
+            val allLists =
+                service
+                    .getLists(
+                        params =
+                            GetListsQueryParams(
+                                actor = Did(did = account.accountKey.id),
+                                limit = 100,
+                            ),
+                    ).requireResponse()
+                    .lists
+                    .map {
+                        it.render(account.accountKey)
+                    }
+            while (true) {
+                val response =
+                    service
+                        .listRecords(
+                            params =
+                                ListRecordsQueryParams(
+                                    repo = Did(did = account.accountKey.id),
+                                    collection = Nsid("app.bsky.graph.listitem"),
+                                    limit = 100,
+                                    cursor = cursor,
+                                ),
+                        ).requireResponse()
+                lists.addAll(
+                    response.records
+                        .filter {
+                            val item: Listitem = it.value.bskyJson()
+                            item.subject.did == userKey.id
+                        }.mapNotNull {
+                            val item: Listitem = it.value.bskyJson()
+                            allLists.firstOrNull { it.id == item.list.atUri }
+                        },
+                )
+                cursor = response.cursor
+                if (cursor == null) {
+                    break
+                }
+            }
+            lists.toImmutableList()
+        }
 }
 
 internal inline fun <reified T, reified R> T.bskyJson(): R = bskyJson.decodeFromJsonElement(bskyJson.encodeToJsonElement(this))

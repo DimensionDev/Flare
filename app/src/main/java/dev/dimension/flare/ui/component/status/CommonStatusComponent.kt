@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.component.status
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
@@ -211,8 +212,14 @@ fun CommonStatusComponent(
         }
         item.card?.let { card ->
             if (appearanceSettings.showLinkPreview && item.images.isEmpty() && item.quote.isEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
                 StatusCardComponent(
                     card = card,
+                    modifier =
+                        Modifier
+                            .clickable {
+                                uriHandler.openUri(card.url)
+                            }.fillMaxWidth(),
                 )
             }
         }
@@ -328,8 +335,16 @@ private fun StatusQuoteComponent(
     modifier: Modifier = Modifier,
 ) {
     val uriLauncher = LocalUriHandler.current
-    Card(
-        modifier = modifier,
+    Box(
+        modifier =
+            modifier
+                .border(
+                    1.dp,
+                    color = DividerDefaults.color,
+                    shape = MaterialTheme.shapes.medium,
+                ).clip(
+                    shape = MaterialTheme.shapes.medium,
+                ),
     ) {
         Column {
             quotes.forEachIndexed { index, quote ->
@@ -832,55 +847,48 @@ private fun ExpandedCard(
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
-    val uriHandler = LocalUriHandler.current
     Column(
-        modifier = modifier,
-    ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Card(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        uriHandler.openUri(card.url)
-                    },
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        modifier =
+            modifier
+                .border(
+                    1.dp,
+                    color = DividerDefaults.color,
+                    shape = MaterialTheme.shapes.medium,
+                ).clip(
+                    shape = MaterialTheme.shapes.medium,
                 ),
-        ) {
-            card.media?.let {
-                AdaptiveGrid(
-                    content = {
-                        MediaItem(
-                            media = it,
-                            keepAspectRatio = appearanceSettings.expandMediaSize,
-                            modifier =
-                                Modifier
-                                    .clipToBounds(),
-                        )
-                    },
-                    expandedSize = appearanceSettings.expandMediaSize,
-                    modifier =
-                        Modifier
-                            .clipToBounds(),
-                )
-            }
-            Column(
-                modifier =
-                    Modifier
-                        .padding(8.dp),
-            ) {
-                Text(text = card.title)
-                card.description?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
+    ) {
+        card.media?.let {
+            AdaptiveGrid(
+                content = {
+                    MediaItem(
+                        media = it,
+                        keepAspectRatio = appearanceSettings.expandMediaSize,
                         modifier =
                             Modifier
-                                .alpha(MediumAlpha),
+                                .clipToBounds(),
                     )
-                }
+                },
+                expandedSize = appearanceSettings.expandMediaSize,
+                modifier =
+                    Modifier
+                        .clipToBounds(),
+            )
+        }
+        Column(
+            modifier =
+                Modifier
+                    .padding(8.dp),
+        ) {
+            Text(text = card.title)
+            card.description?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier =
+                        Modifier
+                            .alpha(MediumAlpha),
+                )
             }
         }
     }
@@ -891,55 +899,46 @@ fun CompatCard(
     card: UiCard,
     modifier: Modifier = Modifier,
 ) {
-    val uriHandler = LocalUriHandler.current
-    Column(
-        modifier = modifier,
+    Row(
+        modifier =
+            modifier
+                .border(
+                    1.dp,
+                    color = DividerDefaults.color,
+                    shape = MaterialTheme.shapes.medium,
+                ).clip(
+                    shape = MaterialTheme.shapes.medium,
+                ),
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Card(
+        card.media?.let {
+            MediaItem(
+                media = it,
+                modifier =
+                    Modifier
+                        .size(72.dp)
+                        .clipToBounds(),
+            )
+        }
+        Column(
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        uriHandler.openUri(card.url)
-                    },
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                ),
+                    .padding(8.dp),
         ) {
-            Row {
-                card.media?.let {
-                    MediaItem(
-                        media = it,
-                        modifier =
-                            Modifier
-                                .size(72.dp)
-                                .clipToBounds(),
-                    )
-                }
-                Column(
+            Text(
+                text = card.title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            card.description?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
                     modifier =
                         Modifier
-                            .padding(8.dp),
-                ) {
-                    Text(
-                        text = card.title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    card.description?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier =
-                                Modifier
-                                    .alpha(MediumAlpha),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
+                            .alpha(MediumAlpha),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }

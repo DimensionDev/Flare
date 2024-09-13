@@ -213,7 +213,13 @@ internal fun HomeScreen(
                                             state.tabs.onSuccess {
                                                 val key = it.extraProfileRoute?.tabItem?.key
                                                 if (key != null) {
-                                                    navController.navigate(key)
+                                                    navController.navigate(key) {
+                                                        popUpTo(navController.graph.findStartDestination().id) {
+                                                            saveState = true
+                                                        }
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                    }
                                                     scope.launch {
                                                         drawerState.close()
                                                     }
@@ -349,7 +355,13 @@ internal fun HomeScreen(
                                     state.tabs.onSuccess {
                                         val key = it.extraProfileRoute?.tabItem?.key
                                         if (key != null) {
-                                            navController.navigate(key)
+                                            navController.navigate(key) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
                                             scope.launch {
                                                 drawerState.close()
                                             }

@@ -295,13 +295,8 @@ sealed interface TimelineTabItem : TabItem {
                         ),
                 ),
                 ProfileTabItem(
-                    account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
-                        ),
+                    accountKey = accountKey,
+                    userKey = accountKey,
                 ),
             )
 
@@ -380,13 +375,8 @@ sealed interface TimelineTabItem : TabItem {
                         ),
                 ),
                 ProfileTabItem(
-                    account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
-                        ),
+                    accountKey = accountKey,
+                    userKey = accountKey,
                 ),
             )
 
@@ -441,13 +431,8 @@ sealed interface TimelineTabItem : TabItem {
                         ),
                 ),
                 ProfileTabItem(
-                    account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
-                        ),
+                    accountKey = accountKey,
+                    userKey = accountKey,
                 ),
             )
 
@@ -502,13 +487,8 @@ sealed interface TimelineTabItem : TabItem {
                         ),
                 ),
                 ProfileTabItem(
-                    account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
-                        ),
+                    accountKey = accountKey,
+                    userKey = accountKey,
                 ),
             )
 
@@ -563,13 +543,8 @@ sealed interface TimelineTabItem : TabItem {
                         ),
                 ),
                 ProfileTabItem(
-                    account = AccountType.Specific(accountKey),
-                    userKey = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
-                        ),
+                    accountKey = accountKey,
+                    userKey = accountKey,
                 ),
             )
 
@@ -763,6 +738,19 @@ data class ProfileTabItem(
     val userKey: AccountType,
     override val metaData: TabMetaData,
 ) : TabItem {
+    constructor(
+        accountKey: MicroBlogKey,
+        userKey: MicroBlogKey,
+    ) : this(
+        account = AccountType.Specific(accountKey),
+        userKey = AccountType.Specific(userKey),
+        metaData =
+            TabMetaData(
+                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
+                icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+            ),
+    )
+
     override val key: String = "profile_${account}_$userKey"
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)

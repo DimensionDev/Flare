@@ -18,22 +18,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -44,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -67,6 +73,7 @@ import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDest
 import com.ramcosta.composedestinations.generated.destinations.ListScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TabSplashScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
@@ -109,7 +116,9 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.compose.ComposeRoute
+import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
@@ -134,6 +143,7 @@ data class RootNavController(
 
 @OptIn(
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
+    ExperimentalMaterial3Api::class,
 )
 @Composable
 internal fun HomeScreen(
@@ -189,6 +199,7 @@ internal fun HomeScreen(
 //                                        navController = navController,
                                         showFab = layoutType != NavigationSuiteType.NavigationBar,
                                         toAccoutSwitcher = {
+                                            state.setShowAccountSelection(true)
                                         },
                                         toCompose = {
                                             navController.toDestinationsNavigator().navigate(
@@ -324,6 +335,7 @@ internal fun HomeScreen(
                                 accountTypeState,
                                 currentTab,
                                 toAccoutSwitcher = {
+                                    state.setShowAccountSelection(true)
                                 },
                                 toCompose = {
                                     navController.toDestinationsNavigator().navigate(
@@ -535,19 +547,87 @@ internal fun HomeScreen(
                                     accountType = navArgs.accountType,
                                 )
                             }
+                            composable(ServiceSelectRouteDestination) {
+                                Router(
+                                    modifier = Modifier.fillMaxSize(),
+                                    navGraph = NavGraphs.root,
+                                    direction = TabSplashScreenDestination,
+                                ) {
+                                    dependency(rootNavController)
+                                    dependency(
+                                        SplashScreenArgs(ServiceSelectRouteDestination),
+                                    )
+//                                        dependency(tabState)
+                                    dependency(drawerState)
+                                    dependency(state.navigationState)
+                                }
+                            }
+                        }
+                    }
+                }
+                BackHandler(
+                    enabled = drawerState.isOpen,
+                    onBack = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                )
+
+                if (state.showAccountSelection) {
+                    ModalBottomSheet(
+                        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                        onDismissRequest = {
+                            state.setShowAccountSelection(false)
+                        },
+                    ) {
+                        state.accountSelectionState.accounts.onSuccess {
+                            for (index in 0 until it.size) {
+                                val (accountKey, data) = it[index]
+                                AccountItem(
+                                    userState = data,
+                                    onClick = {
+                                        state.accountSelectionState.setActiveAccount(it)
+                                        state.setShowAccountSelection(false)
+                                    },
+                                    toLogin = {
+                                        navController.toDestinationsNavigator().navigate(ServiceSelectRouteDestination)
+                                    },
+                                    trailingContent = { user ->
+                                        state.accountSelectionState.activeAccount.onSuccess {
+                                            RadioButton(
+                                                selected = it.accountKey == user.key,
+                                                onClick = {
+                                                    state.accountSelectionState.setActiveAccount(user.key)
+                                                    state.setShowAccountSelection(false)
+                                                },
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                        Button(
+                            onClick = {
+                                state.setShowAccountSelection(false)
+                                scope.launch {
+                                    drawerState.close()
+                                }
+                                navController.toDestinationsNavigator().navigate(ServiceSelectRouteDestination)
+                            },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        horizontal = screenHorizontalPadding,
+                                        vertical = 16.dp,
+                                    ),
+                        ) {
+                            Text(text = stringResource(R.string.quick_menu_add_account))
                         }
                     }
                 }
             }
-
-            BackHandler(
-                enabled = drawerState.isOpen,
-                onBack = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                },
-            )
         }.onLoading {
             SplashScreen()
         }
@@ -818,9 +898,22 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                     )
                 }
             }
+        var showAccountSelection by remember {
+            mutableStateOf(false)
+        }
+        val accountSelectionState =
+            remember {
+                AccountsPresenter()
+            }.invoke()
         object {
             val tabs = tabs
             val navigationState = navigationState
+            val showAccountSelection = showAccountSelection
+            val accountSelectionState = accountSelectionState
+
+            fun setShowAccountSelection(value: Boolean) {
+                showAccountSelection = value
+            }
         }
     }
 

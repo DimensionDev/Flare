@@ -2,13 +2,10 @@ package dev.dimension.flare.ui.screen.bluesky
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -122,58 +119,71 @@ private fun BlueskyFeedsScreen(
                         state = state.myFeeds,
                         loadingCount = 5,
                         loadingContent = {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier =
-                                    Modifier
-                                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-                            ) {
-                                Box(
+                            Column {
+                                ListComponent(
+                                    headlineContent = {
+                                        Text(
+                                            text = "Lorem ipsum dolor sit amet",
+                                            modifier = Modifier.placeholder(true),
+                                        )
+                                    },
+                                    leadingContent = {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .placeholder(true)
+                                                    .size(AvatarComponentDefaults.size)
+                                                    .clip(MaterialTheme.shapes.small),
+                                        )
+                                    },
                                     modifier =
                                         Modifier
-                                            .placeholder(true)
-                                            .size(24.dp)
-                                            .clip(MaterialTheme.shapes.small),
+                                            .padding(
+                                                horizontal = screenHorizontalPadding,
+                                                vertical = 8.dp,
+                                            ),
                                 )
-                                Text(
-                                    text = "Lorem ipsum dolor sit amet",
-                                    modifier = Modifier.placeholder(true),
-                                )
+                                HorizontalDivider()
                             }
                         },
                     ) { item ->
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        toFeed.invoke(item)
-                                    }.fillMaxWidth()
-                                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-                        ) {
-                            if (item.avatar != null) {
-                                NetworkImage(
-                                    model = item.avatar,
-                                    contentDescription = item.title,
-                                    modifier =
-                                        Modifier
-                                            .size(24.dp)
-                                            .clip(MaterialTheme.shapes.small),
-                                )
-                            } else {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Rss,
-                                    contentDescription = null,
-                                    modifier =
-                                        Modifier
-                                            .size(24.dp)
-                                            .background(
-                                                color = MaterialTheme.colorScheme.primaryContainer,
-                                                shape = MaterialTheme.shapes.small,
-                                            ),
-                                )
-                            }
-                            Text(text = item.title)
+                        Column {
+                            ListComponent(
+                                headlineContent = {
+                                    Text(text = item.title)
+                                },
+                                leadingContent = {
+                                    if (item.avatar != null) {
+                                        NetworkImage(
+                                            model = item.avatar,
+                                            contentDescription = item.title,
+                                            modifier =
+                                                Modifier
+                                                    .size(AvatarComponentDefaults.size)
+                                                    .clip(MaterialTheme.shapes.medium),
+                                        )
+                                    } else {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Rss,
+                                            contentDescription = null,
+                                            modifier =
+                                                Modifier
+                                                    .size(AvatarComponentDefaults.size)
+                                                    .background(
+                                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                                        shape = MaterialTheme.shapes.medium,
+                                                    ).padding(8.dp),
+                                        )
+                                    }
+                                },
+                                modifier =
+                                    Modifier
+                                        .padding(
+                                            horizontal = screenHorizontalPadding,
+                                            vertical = 8.dp,
+                                        ),
+                            )
+                            HorizontalDivider()
                         }
                     }
 

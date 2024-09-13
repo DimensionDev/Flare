@@ -500,7 +500,7 @@ private fun StatusActions(
             modifier
                 .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+//        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items.forEachIndexed { index, action ->
             if (index == items.lastIndex) {

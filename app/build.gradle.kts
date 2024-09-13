@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
     alias(libs.plugins.compose.compiler)
+    id("kotlin-parcelize")
 }
 
 if (project.file("google-services.json").exists()) {

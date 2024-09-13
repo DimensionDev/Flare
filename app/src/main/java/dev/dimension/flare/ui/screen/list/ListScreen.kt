@@ -231,7 +231,7 @@ private fun ListScreen(
 internal fun LazyListScope.listItemComponent(
     items: PagingState<UiList>,
     onClicked: ((UiList) -> Unit)? = null,
-    trailingContent: @Composable (UiList) -> Unit,
+    trailingContent: @Composable (UiList) -> Unit = {},
 ) {
     items(
         items,
@@ -292,7 +292,7 @@ internal fun LazyListScope.listItemComponent(
                                     onClicked(item)
                                 }
                         }
-                    }.padding(horizontal = screenHorizontalPadding),
+                    },
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             ListComponent(
@@ -319,7 +319,7 @@ internal fun LazyListScope.listItemComponent(
                                     .background(
                                         color = MaterialTheme.colorScheme.primaryContainer,
                                         shape = MaterialTheme.shapes.medium,
-                                    ),
+                                    ).padding(8.dp),
                         )
                     }
                 },
@@ -341,10 +341,12 @@ internal fun LazyListScope.listItemComponent(
                 trailingContent = {
                     trailingContent.invoke(item)
                 },
+                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
             )
             item.description?.takeIf { it.isNotEmpty() }?.let {
                 Text(
                     text = it,
+                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))

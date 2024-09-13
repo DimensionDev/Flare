@@ -343,7 +343,7 @@ private fun LazyListScope.tabItem(
                                     contentDescription = stringResource(id = R.string.tab_settings_remove),
                                     modifier =
                                         Modifier
-                                            .size(24.dp)
+//                                            .size(24.dp)
                                             .align(alignment),
                                     tint = MaterialTheme.colorScheme.onError,
                                 )

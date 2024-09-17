@@ -698,7 +698,7 @@ private fun ColumnScope.DrawerHeader(
                 modifier =
                     Modifier
                         .padding(
-                            horizontal = screenHorizontalPadding,
+                            horizontal = 8.dp,
                         ),
             ) {
                 FAIcon(

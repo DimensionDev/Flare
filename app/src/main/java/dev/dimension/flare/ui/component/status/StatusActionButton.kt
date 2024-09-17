@@ -45,7 +45,7 @@ internal fun StatusActionButton(
     val appearanceSettings = LocalAppearanceSettings.current
     val textMinWidth =
         if (withTextMinWidth) {
-            with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() * 3 }
+            with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() * 3.5f }
         } else {
             0.dp
         }

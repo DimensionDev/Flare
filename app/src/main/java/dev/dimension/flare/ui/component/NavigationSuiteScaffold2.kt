@@ -5,9 +5,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
@@ -61,6 +60,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -70,9 +70,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.ui.theme.DisabledAlpha
 import kotlin.math.roundToInt
 
-private val bottomBarHeight = 64.dp
+private val bottomBarHeight = 60.dp
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { bottomBarHeight }
 
@@ -246,43 +247,54 @@ fun NavigationSuiteScaffold2(
                             .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
                 ) {
                     Surface(
-                        color = navigationSuiteColors.navigationBarContainerColor,
+//                        color = navigationSuiteColors.navigationBarContainerColor,
                         contentColor = navigationSuiteColors.navigationBarContentColor,
                     ) {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .windowInsetsPadding(
-                                        WindowInsets.systemBars.only(
-                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                        Box {
+                            HorizontalDivider(
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopCenter)
+                                        .fillMaxWidth()
+                                        .alpha(DisabledAlpha),
+                            )
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .windowInsetsPadding(
+                                            WindowInsets.systemBars.only(
+                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                            ),
                                         ),
-                                    ),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            scope.itemList.forEach {
-                                IconButton(
-                                    onClick = {
-                                        it.onClick()
-                                    },
-                                    modifier = Modifier.padding(8.dp),
-                                ) {
-                                    val colors = it.colors?.navigationBarItemColors ?: NavigationBarItemDefaults.colors()
-                                    val color =
-                                        with(colors) {
-                                            when {
-                                                !it.enabled -> disabledIconColor
-                                                it.selected -> MaterialTheme.colorScheme.primary
-                                                else -> unselectedIconColor
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                scope.itemList.forEach {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .weight(1f)
+                                                .clickable {
+                                                    it.onClick()
+                                                }.height(bottomBarHeight),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        val colors = it.colors?.navigationBarItemColors ?: NavigationBarItemDefaults.colors()
+                                        val color =
+                                            with(colors) {
+                                                when {
+                                                    !it.enabled -> disabledIconColor
+                                                    it.selected -> MaterialTheme.colorScheme.primary
+                                                    else -> unselectedIconColor
+                                                }
                                             }
+                                        val iconColor by animateColorAsState(
+                                            targetValue = color,
+                                            animationSpec = tween(100),
+                                        )
+                                        CompositionLocalProvider(LocalContentColor provides iconColor) {
+                                            NavigationItemIcon(icon = it.icon, badge = it.badge)
                                         }
-                                    val iconColor by animateColorAsState(
-                                        targetValue = color,
-                                        animationSpec = tween(100),
-                                    )
-                                    CompositionLocalProvider(LocalContentColor provides iconColor) {
-                                        NavigationItemIcon(icon = it.icon, badge = it.badge)
                                     }
                                 }
                             }

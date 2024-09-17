@@ -95,6 +95,7 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
+import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
 
@@ -340,7 +341,7 @@ private fun StatusQuoteComponent(
             modifier
                 .border(
                     1.dp,
-                    color = DividerDefaults.color,
+                    color = DividerDefaults.color.copy(alpha = DisabledAlpha),
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
@@ -852,7 +853,7 @@ private fun ExpandedCard(
             modifier
                 .border(
                     1.dp,
-                    color = DividerDefaults.color,
+                    color = DividerDefaults.color.copy(alpha = DisabledAlpha),
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
@@ -904,7 +905,7 @@ fun CompatCard(
             modifier
                 .border(
                     1.dp,
-                    color = DividerDefaults.color,
+                    color = DividerDefaults.color.copy(alpha = DisabledAlpha),
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,

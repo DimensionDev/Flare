@@ -95,7 +95,6 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
-import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
 
@@ -340,8 +339,8 @@ private fun StatusQuoteComponent(
         modifier =
             modifier
                 .border(
-                    1.dp,
-                    color = DividerDefaults.color.copy(alpha = DisabledAlpha),
+                    FlareDividerDefaults.thickness,
+                    color = FlareDividerDefaults.color,
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
@@ -852,8 +851,8 @@ private fun ExpandedCard(
         modifier =
             modifier
                 .border(
-                    1.dp,
-                    color = DividerDefaults.color.copy(alpha = DisabledAlpha),
+                    FlareDividerDefaults.thickness,
+                    color = FlareDividerDefaults.color,
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
@@ -904,8 +903,8 @@ fun CompatCard(
         modifier =
             modifier
                 .border(
-                    1.dp,
-                    color = DividerDefaults.color.copy(alpha = DisabledAlpha),
+                    FlareDividerDefaults.thickness,
+                    color = FlareDividerDefaults.color,
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
@@ -943,4 +942,12 @@ fun CompatCard(
             }
         }
     }
+}
+
+internal object FlareDividerDefaults {
+    val color: Color
+        @Composable
+        get() = DividerDefaults.color.copy(alpha = 0.87f)
+
+    val thickness = 0.8.dp
 }

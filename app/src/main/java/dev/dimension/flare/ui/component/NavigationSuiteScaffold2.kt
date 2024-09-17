@@ -60,7 +60,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -70,10 +69,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.ui.theme.DisabledAlpha
+import dev.dimension.flare.ui.component.status.FlareDividerDefaults
 import kotlin.math.roundToInt
 
-private val bottomBarHeight = 60.dp
+private val bottomBarHeight = 56.dp
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { bottomBarHeight }
 
@@ -255,8 +254,9 @@ fun NavigationSuiteScaffold2(
                                 modifier =
                                     Modifier
                                         .align(Alignment.TopCenter)
-                                        .fillMaxWidth()
-                                        .alpha(DisabledAlpha),
+                                        .fillMaxWidth(),
+                                color = FlareDividerDefaults.color,
+                                thickness = FlareDividerDefaults.thickness,
                             )
                             Row(
                                 modifier =

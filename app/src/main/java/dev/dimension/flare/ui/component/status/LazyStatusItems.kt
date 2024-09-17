@@ -94,7 +94,8 @@ internal fun LazyStaggeredGridScope.status(
                 )
                 if (it != itemCount - 1) {
                     HorizontalDivider(
-                        modifier = Modifier.alpha(DisabledAlpha),
+                        color = FlareDividerDefaults.color,
+                        thickness = FlareDividerDefaults.thickness,
                     )
                 }
             }

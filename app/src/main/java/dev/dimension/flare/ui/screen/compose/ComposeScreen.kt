@@ -28,14 +28,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.EmojiEmotions
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Poll
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,7 +38,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -87,6 +78,15 @@ import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.FaceSmile
+import compose.icons.fontawesomeicons.solid.Image
+import compose.icons.fontawesomeicons.solid.PaperPlane
+import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
+import compose.icons.fontawesomeicons.solid.TriangleExclamation
+import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.FileItem
@@ -101,6 +101,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
@@ -321,8 +322,8 @@ private fun ComposeScreen(
             },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Xmark,
                         contentDescription = stringResource(id = R.string.navigate_back),
                     )
                 }
@@ -335,7 +336,7 @@ private fun ComposeScreen(
                     },
                     enabled = state.canSend,
                 ) {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null)
+                    FAIcon(imageVector = FontAwesomeIcons.Solid.PaperPlane, contentDescription = null)
                 }
             },
         )
@@ -380,7 +381,7 @@ private fun ComposeScreen(
                                             state.setShowAccountSelectMenu(true)
                                         },
                                         label = {
-                                            Icon(Icons.Default.Add, contentDescription = null)
+                                            FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
                                             DropdownMenu(
                                                 expanded = state.showAccountSelectMenu,
                                                 onDismissRequest = {
@@ -518,8 +519,8 @@ private fun ComposeScreen(
                                                     shape = CircleShape,
                                                 ),
                                     ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Close,
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Xmark,
                                             contentDescription = null,
                                         )
                                     }
@@ -604,8 +605,8 @@ private fun ComposeScreen(
                                 },
                                 enabled = pollState.canAddPollOption,
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Plus,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp),
                                 )
@@ -699,7 +700,7 @@ private fun ComposeScreen(
                             },
                             enabled = state.canMedia,
                         ) {
-                            Icon(imageVector = Icons.Default.Image, contentDescription = null)
+                            FAIcon(imageVector = FontAwesomeIcons.Solid.Image, contentDescription = null)
                         }
                     }
                 }
@@ -710,8 +711,8 @@ private fun ComposeScreen(
                         },
                         enabled = state.canPoll,
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Poll,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.SquarePollHorizontal,
                             contentDescription = null,
                         )
                     }
@@ -770,8 +771,8 @@ private fun ComposeScreen(
                             it.toggle()
                         },
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.TriangleExclamation,
                             contentDescription = null,
                         )
                     }
@@ -783,8 +784,8 @@ private fun ComposeScreen(
                                 state.setShowEmojiMenu(!state.showEmojiMenu)
                             },
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.EmojiEmotions,
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.FaceSmile,
                                 contentDescription = null,
                             )
                             if (state.showEmojiMenu) {
@@ -865,7 +866,7 @@ private fun PollOption(
                 onClick = onRemove,
                 enabled = index > 1,
             ) {
-                Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                FAIcon(imageVector = FontAwesomeIcons.Solid.Xmark, contentDescription = null)
             }
         },
     )

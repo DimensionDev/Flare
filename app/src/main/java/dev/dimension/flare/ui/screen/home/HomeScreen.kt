@@ -5,8 +5,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,26 +18,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -45,7 +49,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
@@ -53,7 +60,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -67,6 +73,7 @@ import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDest
 import com.ramcosta.composedestinations.generated.destinations.ListScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TabSplashScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
@@ -77,6 +84,11 @@ import com.ramcosta.composedestinations.spec.NavHostGraphSpec
 import com.ramcosta.composedestinations.utils.composable
 import com.ramcosta.composedestinations.utils.dialogComposable
 import com.ramcosta.composedestinations.utils.toDestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.EllipsisVertical
+import compose.icons.fontawesomeicons.solid.Gear
+import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
@@ -88,8 +100,11 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -101,6 +116,7 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.compose.ComposeRoute
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.screen.settings.TabIcon
@@ -108,6 +124,8 @@ import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import dev.dimension.flare.ui.screen.splash.SplashScreenArgs
 import dev.dimension.flare.ui.theme.FlareTheme
+import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -125,6 +143,7 @@ data class RootNavController(
 
 @OptIn(
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
+    ExperimentalMaterial3Api::class,
 )
 @Composable
 internal fun HomeScreen(
@@ -170,15 +189,43 @@ internal fun HomeScreen(
                                 Column(
                                     modifier =
                                         Modifier
-                                            .padding(horizontal = 12.dp)
+//                                            .padding(horizontal = 12.dp)
                                             .weight(1f)
                                             .verticalScroll(rememberScrollState()),
                                 ) {
                                     DrawerHeader(
                                         accountTypeState = accountTypeState,
                                         currentTab = currentTab,
-                                        navController = navController,
+//                                        navController = navController,
                                         showFab = layoutType != NavigationSuiteType.NavigationBar,
+                                        toAccoutSwitcher = {
+                                            state.setShowAccountSelection(true)
+                                        },
+                                        toCompose = {
+                                            navController.toDestinationsNavigator().navigate(
+                                                direction =
+                                                    ComposeRouteDestination(
+                                                        it,
+                                                    ),
+                                            )
+                                        },
+                                        toProfile = {
+                                            state.tabs.onSuccess {
+                                                val key = it.extraProfileRoute?.tabItem?.key
+                                                if (key != null) {
+                                                    navController.navigate(key) {
+                                                        popUpTo(navController.graph.findStartDestination().id) {
+                                                            saveState = true
+                                                        }
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                    }
+                                                    scope.launch {
+                                                        drawerState.close()
+                                                    }
+                                                }
+                                            }
+                                        },
                                     )
                                     if (layoutType != NavigationSuiteType.NavigationBar) {
                                         tabs.primary.forEach { (tab, tabState) ->
@@ -254,7 +301,6 @@ internal fun HomeScreen(
                                     }
                                 }
                                 NavigationDrawerItem(
-                                    modifier = Modifier.padding(horizontal = 12.dp),
                                     label = {
                                         Text(stringResource(R.string.settings_title))
                                     },
@@ -273,8 +319,8 @@ internal fun HomeScreen(
                                         }
                                     },
                                     icon = {
-                                        Icon(
-                                            Icons.Default.Settings,
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Gear,
                                             contentDescription = stringResource(R.string.settings_title),
                                         )
                                     },
@@ -291,7 +337,38 @@ internal fun HomeScreen(
                         layoutType = actualLayoutType,
                         modifier = modifier,
                         drawerHeader = {
-                            DrawerHeader(accountTypeState, currentTab, navController)
+                            DrawerHeader(
+                                accountTypeState,
+                                currentTab,
+                                toAccoutSwitcher = {
+                                    state.setShowAccountSelection(true)
+                                },
+                                toCompose = {
+                                    navController.toDestinationsNavigator().navigate(
+                                        direction =
+                                            ComposeRouteDestination(
+                                                it,
+                                            ),
+                                    )
+                                },
+                                toProfile = {
+                                    state.tabs.onSuccess {
+                                        val key = it.extraProfileRoute?.tabItem?.key
+                                        if (key != null) {
+                                            navController.navigate(key) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                            scope.launch {
+                                                drawerState.close()
+                                            }
+                                        }
+                                    }
+                                },
+                            )
                         },
                         railHeader = {
                             accountTypeState.user.onSuccess {
@@ -320,8 +397,8 @@ internal fun HomeScreen(
                                             defaultElevation = 0.dp,
                                         ),
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Pen,
                                         contentDescription = stringResource(id = R.string.compose_title),
                                     )
                                 }
@@ -407,8 +484,8 @@ internal fun HomeScreen(
                                             }
                                     },
                                     icon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Settings,
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Gear,
                                             contentDescription = stringResource(id = R.string.settings_title),
                                         )
                                     },
@@ -482,19 +559,87 @@ internal fun HomeScreen(
                                     accountType = navArgs.accountType,
                                 )
                             }
+                            composable(ServiceSelectRouteDestination) {
+                                Router(
+                                    modifier = Modifier.fillMaxSize(),
+                                    navGraph = NavGraphs.root,
+                                    direction = TabSplashScreenDestination,
+                                ) {
+                                    dependency(rootNavController)
+                                    dependency(
+                                        SplashScreenArgs(ServiceSelectRouteDestination),
+                                    )
+//                                        dependency(tabState)
+                                    dependency(drawerState)
+                                    dependency(state.navigationState)
+                                }
+                            }
+                        }
+                    }
+                }
+                BackHandler(
+                    enabled = drawerState.isOpen,
+                    onBack = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                )
+
+                if (state.showAccountSelection) {
+                    ModalBottomSheet(
+                        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                        onDismissRequest = {
+                            state.setShowAccountSelection(false)
+                        },
+                    ) {
+                        state.accountSelectionState.accounts.onSuccess {
+                            for (index in 0 until it.size) {
+                                val (accountKey, data) = it[index]
+                                AccountItem(
+                                    userState = data,
+                                    onClick = {
+                                        state.accountSelectionState.setActiveAccount(it)
+                                        state.setShowAccountSelection(false)
+                                    },
+                                    toLogin = {
+                                        navController.toDestinationsNavigator().navigate(ServiceSelectRouteDestination)
+                                    },
+                                    trailingContent = { user ->
+                                        state.accountSelectionState.activeAccount.onSuccess {
+                                            RadioButton(
+                                                selected = it.accountKey == user.key,
+                                                onClick = {
+                                                    state.accountSelectionState.setActiveAccount(user.key)
+                                                    state.setShowAccountSelection(false)
+                                                },
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                        Button(
+                            onClick = {
+                                state.setShowAccountSelection(false)
+                                scope.launch {
+                                    drawerState.close()
+                                }
+                                navController.toDestinationsNavigator().navigate(ServiceSelectRouteDestination)
+                            },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        horizontal = screenHorizontalPadding,
+                                        vertical = 16.dp,
+                                    ),
+                        ) {
+                            Text(text = stringResource(R.string.quick_menu_add_account))
                         }
                     }
                 }
             }
-
-            BackHandler(
-                enabled = drawerState.isOpen,
-                onBack = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                },
-            )
         }.onLoading {
             SplashScreen()
         }
@@ -504,38 +649,76 @@ internal fun HomeScreen(
 private fun ColumnScope.DrawerHeader(
     accountTypeState: UserState,
     currentTab: TabItem?,
-    navController: NavHostController,
+//    navController: NavHostController,
+    toCompose: (accountType: AccountType) -> Unit,
+    toProfile: (userKey: MicroBlogKey) -> Unit,
+    toAccoutSwitcher: () -> Unit,
     showFab: Boolean = true,
 ) {
-    if (accountTypeState.user is UiState.Error) {
-        ListItem(
-            headlineContent = {
-                Text(text = stringResource(id = R.string.app_name))
-            },
-        )
-    } else {
-        AccountItem(
-            userState = accountTypeState.user,
-            onClick = {},
-            toLogin = {},
-        )
+    accountTypeState.user.onSuccess { data ->
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        toProfile.invoke(data.key)
+                    },
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .padding(
+                            vertical = 16.dp,
+                            horizontal = screenHorizontalPadding,
+                        ),
+            ) {
+                AvatarComponent(
+                    data = data.avatar,
+                    size = 64.dp,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                HtmlText(
+                    element = data.name.data,
+                    textStyle = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    data.handle,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier =
+                        Modifier
+                            .alpha(MediumAlpha),
+                )
+            }
+            IconButton(
+                onClick = {
+                    toAccoutSwitcher.invoke()
+                },
+                modifier =
+                    Modifier
+                        .padding(
+                            horizontal = 8.dp,
+                        ),
+            ) {
+                FAIcon(
+                    FontAwesomeIcons.Solid.EllipsisVertical,
+                    contentDescription = null,
+                )
+            }
+        }
     }
     if (showFab) {
         accountTypeState.user.onSuccess {
             ExtendedFloatingActionButton(
                 onClick = {
                     currentTab?.let {
-                        navController.toDestinationsNavigator().navigate(
-                            direction =
-                                ComposeRouteDestination(
-                                    it.account,
-                                ),
-                        )
+                        toCompose.invoke(it.account)
                     }
                 },
                 icon = {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Pen,
                         contentDescription = stringResource(id = R.string.compose_title),
                     )
                 },
@@ -664,6 +847,7 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                                         HomeTabItem(it)
                                     }.toImmutableList(),
                             secondary = persistentListOf(),
+                            extraProfileRoute = null,
                             secondaryIconOnly = true,
                         ),
                     )
@@ -684,6 +868,14 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                                         .map {
                                             HomeTabItem(it)
                                         }.toImmutableList(),
+                                extraProfileRoute =
+                                    HomeTabItem(
+                                        tabItem =
+                                            ProfileTabItem(
+                                                accountKey = user.key,
+                                                userKey = user.key,
+                                            ),
+                                    ),
                                 secondaryIconOnly = true,
                             ),
                         )
@@ -705,14 +897,35 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                                     }.map {
                                         HomeTabItem(it)
                                     }.toImmutableList(),
+                            extraProfileRoute =
+                                HomeTabItem(
+                                    tabItem =
+                                        ProfileTabItem(
+                                            accountKey = user.key,
+                                            userKey = user.key,
+                                        ),
+                                ),
                             secondaryIconOnly = tabSettings.secondaryItems == null,
                         ),
                     )
                 }
             }
+        var showAccountSelection by remember {
+            mutableStateOf(false)
+        }
+        val accountSelectionState =
+            remember {
+                AccountsPresenter()
+            }.invoke()
         object {
             val tabs = tabs
             val navigationState = navigationState
+            val showAccountSelection = showAccountSelection
+            val accountSelectionState = accountSelectionState
+
+            fun setShowAccountSelection(value: Boolean) {
+                showAccountSelection = value
+            }
         }
     }
 
@@ -732,10 +945,15 @@ private data class HomeTabItem(
 private data class HomeTabState(
     val primary: ImmutableList<HomeTabItem>,
     val secondary: ImmutableList<HomeTabItem>,
+    val extraProfileRoute: HomeTabItem?,
     val secondaryIconOnly: Boolean = false,
 ) {
     val all: ImmutableList<HomeTabItem>
-        get() = (primary + secondary).toImmutableList()
+        get() =
+            (primary + secondary + extraProfileRoute)
+                .filterNotNull()
+                .distinctBy { it.tabItem.key }
+                .toImmutableList()
 }
 
 private class TabState {

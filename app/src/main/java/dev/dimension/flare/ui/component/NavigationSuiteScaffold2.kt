@@ -1,8 +1,11 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -10,16 +13,20 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationDrawerItem
@@ -53,6 +60,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -62,9 +70,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.ui.theme.DisabledAlpha
 import kotlin.math.roundToInt
 
-val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { 80.dp }
+private val bottomBarHeight = 60.dp
+
+val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { bottomBarHeight }
 
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
@@ -86,7 +97,7 @@ fun NavigationSuiteScaffold2(
         with(LocalDensity.current) {
             val navigationBar = WindowInsets.navigationBars
             remember(navigationBar) {
-                80.0.dp.roundToPx().toFloat() + navigationBar.getBottom(this)
+                bottomBarHeight.roundToPx().toFloat() + navigationBar.getBottom(this)
             }
         }
     var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
@@ -219,7 +230,7 @@ fun NavigationSuiteScaffold2(
                 CompositionLocalProvider(
                     LocalBottomBarHeight provides
                         if (layoutType == NavigationSuiteType.NavigationBar) {
-                            80.dp
+                            bottomBarHeight
                         } else {
                             0.dp
                         },
@@ -235,24 +246,58 @@ fun NavigationSuiteScaffold2(
                             .align(Alignment.BottomCenter)
                             .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
                 ) {
-                    NavigationBar(
-                        containerColor = navigationSuiteColors.navigationBarContainerColor,
+                    Surface(
+//                        color = navigationSuiteColors.navigationBarContainerColor,
                         contentColor = navigationSuiteColors.navigationBarContentColor,
                     ) {
-                        scope.itemList.forEach {
-                            NavigationBarItem(
-                                modifier = it.modifier,
-                                selected = it.selected,
-                                onClick = it.onClick,
-                                icon = { NavigationItemIcon(icon = it.icon, badge = it.badge) },
-                                enabled = it.enabled,
-                                label = it.label,
-                                alwaysShowLabel = it.alwaysShowLabel,
-                                colors =
-                                    it.colors?.navigationBarItemColors
-                                        ?: NavigationBarItemDefaults.colors(),
-                                interactionSource = it.interactionSource,
+                        Box {
+                            HorizontalDivider(
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopCenter)
+                                        .fillMaxWidth()
+                                        .alpha(DisabledAlpha),
                             )
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .windowInsetsPadding(
+                                            WindowInsets.systemBars.only(
+                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                            ),
+                                        ),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                scope.itemList.forEach {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .weight(1f)
+                                                .clickable {
+                                                    it.onClick()
+                                                }.height(bottomBarHeight),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        val colors = it.colors?.navigationBarItemColors ?: NavigationBarItemDefaults.colors()
+                                        val color =
+                                            with(colors) {
+                                                when {
+                                                    !it.enabled -> disabledIconColor
+                                                    it.selected -> MaterialTheme.colorScheme.primary
+                                                    else -> unselectedIconColor
+                                                }
+                                            }
+                                        val iconColor by animateColorAsState(
+                                            targetValue = color,
+                                            animationSpec = tween(100),
+                                        )
+                                        CompositionLocalProvider(LocalContentColor provides iconColor) {
+                                            NavigationItemIcon(icon = it.icon, badge = it.badge)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

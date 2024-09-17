@@ -11,13 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -34,6 +29,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowLeft
+import compose.icons.fontawesomeicons.solid.MagnifyingGlass
+import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onLoading
@@ -132,14 +132,14 @@ private fun SearchContent(
                             IconButton(onClick = {
                                 onBack.invoke()
                             }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.ArrowLeft,
                                     contentDescription = stringResource(id = R.string.navigate_back),
                                 )
                             }
                         } else {
-                            Icon(
-                                imageVector = Icons.Default.Search,
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.MagnifyingGlass,
                                 contentDescription = null,
                             )
                         }
@@ -172,8 +172,8 @@ private fun SearchContent(
                             IconButton(onClick = {
                                 onDelete.invoke(item)
                             }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Xmark,
                                     contentDescription = stringResource(R.string.delete),
                                 )
                             }

@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
     alias(libs.plugins.compose.compiler)
+    id("kotlin-parcelize")
 }
 
 if (project.file("google-services.json").exists()) {
@@ -118,7 +119,6 @@ dependencies {
     ksp(libs.ktorfit.ksp)
     implementation(libs.bundles.coil)
     implementation(libs.bundles.ktor)
-    implementation(libs.material.icons.extended)
     implementation(libs.molecule.runtime)
     implementation(libs.ksoup)
     implementation(libs.bundles.accompanist)

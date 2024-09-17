@@ -19,14 +19,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -58,6 +51,13 @@ import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowLeft
+import compose.icons.fontawesomeicons.solid.Bars
+import compose.icons.fontawesomeicons.solid.Pen
+import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.Bluesky
@@ -73,6 +73,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiProfile
@@ -140,8 +141,8 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                        FAIcon(
+                            FontAwesomeIcons.Solid.ArrowLeft,
                             contentDescription = stringResource(id = R.string.navigate_back),
                         )
                     }
@@ -152,8 +153,8 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                             state.setAddTab(true)
                         },
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Plus,
                             contentDescription = stringResource(id = R.string.tab_settings_add),
                         )
                     }
@@ -337,12 +338,12 @@ private fun LazyListScope.tabItem(
                                         .background(MaterialTheme.colorScheme.error)
                                         .padding(16.dp),
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Trash,
                                     contentDescription = stringResource(id = R.string.tab_settings_remove),
                                     modifier =
                                         Modifier
-                                            .size(24.dp)
+//                                            .size(24.dp)
                                             .align(alignment),
                                     tint = MaterialTheme.colorScheme.onError,
                                 )
@@ -367,8 +368,8 @@ private fun LazyListScope.tabItem(
                                             editTab.invoke(item)
                                         },
                                     ) {
-                                        Icon(
-                                            Icons.Default.Edit,
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Pen,
                                             contentDescription = stringResource(id = R.string.tab_settings_edit),
                                         )
                                     }
@@ -388,8 +389,8 @@ private fun LazyListScope.tabItem(
                                             ),
                                         onClick = {},
                                     ) {
-                                        Icon(
-                                            Icons.Rounded.DragHandle,
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Bars,
                                             contentDescription = stringResource(id = R.string.tab_settings_drag),
                                         )
                                     }
@@ -445,7 +446,7 @@ fun TabIcon(
         }
 
         is IconType.Material -> {
-            Icon(
+            FAIcon(
                 imageVector = icon.icon.toIcon(),
                 contentDescription =
                     when (title) {
@@ -460,7 +461,7 @@ fun TabIcon(
 
         is IconType.Mixed -> {
             if (iconOnly) {
-                Icon(
+                FAIcon(
                     imageVector = icon.icon.toIcon(),
                     contentDescription =
                         when (title) {
@@ -493,7 +494,7 @@ fun TabIcon(
                                 modifier = Modifier.placeholder(true),
                             )
                         }
-                    Icon(
+                    FAIcon(
                         imageVector = icon.icon.toIcon(),
                         contentDescription =
                             when (title) {

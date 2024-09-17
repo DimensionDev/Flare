@@ -14,11 +14,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,11 +36,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CirclePlay
+import compose.icons.fontawesomeicons.solid.EyeSlash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AudioPlayer
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.humanizer.humanize
@@ -166,8 +167,8 @@ internal fun StatusMediaComponent(
                                         .clip(MaterialTheme.shapes.medium)
                                         .background(MaterialTheme.colorScheme.surface),
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.VisibilityOff,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.EyeSlash,
                                     contentDescription = null,
                                 )
                             }
@@ -312,8 +313,8 @@ fun MediaItem(
                                     }
                                 },
                     )
-                    Icon(
-                        Icons.Default.PlayCircle,
+                    FAIcon(
+                        FontAwesomeIcons.Solid.CirclePlay,
                         contentDescription = null,
                         modifier =
                             Modifier

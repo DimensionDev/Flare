@@ -16,10 +16,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -28,6 +26,7 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import dev.dimension.flare.R
+import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
@@ -187,19 +186,16 @@ private val NotificationFilter.title: Int
 private fun notificationPresenter(accountType: AccountType) =
     run {
         val scope = rememberCoroutineScope()
-        var isRefreshing by remember { mutableStateOf(false) }
         val accountState =
             remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
         val state = remember { NotificationPresenter(accountType = accountType) }.invoke()
         object : UserState by accountState {
             val state = state
-            val isRefreshing = isRefreshing
+            val isRefreshing = state.listState.isRefreshing
 
             fun refresh() {
                 scope.launch {
-                    isRefreshing = true
                     state.refresh()
-                    isRefreshing = false
                 }
             }
         }

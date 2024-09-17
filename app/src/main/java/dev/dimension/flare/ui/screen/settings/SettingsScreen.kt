@@ -1,21 +1,14 @@
 package dev.dimension.flare.ui.screen.settings
 
+import android.os.Parcelable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.Tab
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -26,11 +19,8 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
@@ -44,9 +34,18 @@ import com.ramcosta.composedestinations.generated.destinations.StorageRouteDesti
 import com.ramcosta.composedestinations.generated.destinations.TabCustomizeRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
-import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
+import com.ramcosta.composedestinations.spec.Direction
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleInfo
+import compose.icons.fontawesomeicons.solid.CircleUser
+import compose.icons.fontawesomeicons.solid.Database
+import compose.icons.fontawesomeicons.solid.Filter
+import compose.icons.fontawesomeicons.solid.Palette
+import compose.icons.fontawesomeicons.solid.Table
 import dev.dimension.flare.R
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onError
@@ -56,6 +55,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.screen.home.Router
+import kotlinx.parcelize.Parcelize
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Destination<RootGraph>(
@@ -63,22 +63,12 @@ import dev.dimension.flare.ui.screen.home.Router
 )
 @Composable
 internal fun SettingsRoute(navigationState: NavigationState) {
-    val settingsPanelState by producePresenter {
-        settingsPanelPresenter()
-    }
     val scaffoldNavigator =
-        rememberListDetailPaneScaffoldNavigator()
-    LaunchedEffect(settingsPanelState.selectedItem) {
-        if (settingsPanelState.selectedItem != null) {
-            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
-        } else if (scaffoldNavigator.canNavigateBack()) {
-            scaffoldNavigator.navigateBack()
-        }
-    }
+        rememberListDetailPaneScaffoldNavigator<SettingsDetailDestination>()
     BackHandler(
         scaffoldNavigator.canNavigateBack(),
     ) {
-        settingsPanelState.setSelectedItem(null)
+        scaffoldNavigator.navigateBack()
     }
     ListDetailPaneScaffold(
         directive = scaffoldNavigator.scaffoldDirective,
@@ -87,36 +77,36 @@ internal fun SettingsRoute(navigationState: NavigationState) {
             AnimatedPane {
                 SettingsScreen(
                     toAccounts = {
-                        settingsPanelState.setSelectedItem(AccountsRouteDestination)
+                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Accounts)
                     },
                     toAppearance = {
-                        settingsPanelState.setSelectedItem(AppearanceRouteDestination)
+                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Appearance)
                     },
                     toStorage = {
-                        settingsPanelState.setSelectedItem(StorageRouteDestination)
+                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Storage)
                     },
                     toAbout = {
-                        settingsPanelState.setSelectedItem(AboutRouteDestination)
+                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.About)
                     },
                     toTabCustomization = {
-                        settingsPanelState.setSelectedItem(TabCustomizeRouteDestination)
+                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.TabCustomization)
                     },
                     toLocalFilter = {
-                        settingsPanelState.setSelectedItem(LocalFilterRouteDestination)
+                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.LocalFilter)
                     },
                 )
             }
         },
         detailPane = {
             AnimatedPane {
-                settingsPanelState.selectedItem?.let { item ->
-                    Router(navGraph = NavGraphs.root, item) {
+                scaffoldNavigator.currentDestination?.content?.let { item ->
+                    Router(navGraph = NavGraphs.root, item.toDestination()) {
                         dependency(
                             ProxyDestinationsNavigator(
                                 scaffoldNavigator,
                                 destinationsNavigator,
                                 navigateBack = {
-                                    settingsPanelState.setSelectedItem(null)
+                                    scaffoldNavigator.navigateBack()
                                 },
                             ),
                         )
@@ -128,22 +118,30 @@ internal fun SettingsRoute(navigationState: NavigationState) {
     )
 }
 
-@Composable
-private fun settingsPanelPresenter() =
-    run {
-        var selectedItem by remember { mutableStateOf<DirectionDestinationSpec?>(null) }
-        object {
-            val selectedItem = selectedItem
+@Parcelize
+internal enum class SettingsDetailDestination : Parcelable {
+    Accounts,
+    Appearance,
+    Storage,
+    About,
+    TabCustomization,
+    LocalFilter,
+    ;
 
-            fun setSelectedItem(item: DirectionDestinationSpec?) {
-                selectedItem = item
-            }
+    fun toDestination(): Direction =
+        when (this) {
+            Accounts -> AccountsRouteDestination
+            Appearance -> AppearanceRouteDestination
+            Storage -> StorageRouteDestination
+            About -> AboutRouteDestination
+            TabCustomization -> TabCustomizeRouteDestination
+            LocalFilter -> LocalFilterRouteDestination
         }
-    }
+}
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal class ProxyDestinationsNavigator(
-    private val scaffoldNavigator: ThreePaneScaffoldNavigator<Nothing>,
+    private val scaffoldNavigator: ThreePaneScaffoldNavigator<SettingsDetailDestination>,
     private val navigator: DestinationsNavigator,
     private val navigateBack: () -> Unit,
 ) : DestinationsNavigator by navigator {
@@ -219,8 +217,8 @@ internal fun SettingsScreen(
                                     toAccounts.invoke()
                                 },
                         leadingContent = {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.CircleUser,
                                 contentDescription = null,
                             )
                         },
@@ -235,8 +233,8 @@ internal fun SettingsScreen(
                     Text(text = stringResource(id = R.string.settings_appearance_title))
                 },
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Palette,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Palette,
                         contentDescription = null,
                     )
                 },
@@ -254,8 +252,8 @@ internal fun SettingsScreen(
                         Text(text = stringResource(id = R.string.settings_tab_customization))
                     },
                     leadingContent = {
-                        Icon(
-                            imageVector = Icons.Default.Tab,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Table,
                             contentDescription = null,
                         )
                     },
@@ -272,8 +270,8 @@ internal fun SettingsScreen(
                         Text(text = stringResource(id = R.string.settings_local_filter_title))
                     },
                     leadingContent = {
-                        Icon(
-                            imageVector = Icons.Default.FilterAlt,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Filter,
                             contentDescription = null,
                         )
                     },
@@ -291,7 +289,7 @@ internal fun SettingsScreen(
 //                    Text(text = stringResource(id = R.string.settings_notifications_title))
 //                },
 //                leadingContent = {
-//                    Icon(
+//                    FAIcon(
 //                        imageVector = Icons.Default.Notifications,
 //                        contentDescription = null,
 //                    )
@@ -309,8 +307,8 @@ internal fun SettingsScreen(
                     Text(text = stringResource(id = R.string.settings_storage_title))
                 },
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Storage,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Database,
                         contentDescription = null,
                     )
                 },
@@ -327,8 +325,8 @@ internal fun SettingsScreen(
                     Text(text = stringResource(id = R.string.settings_about_title))
                 },
                 leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Info,
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.CircleInfo,
                         contentDescription = null,
                     )
                 },

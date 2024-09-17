@@ -11,14 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,11 +39,17 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.AnglesUp
+import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
+import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -155,8 +157,8 @@ internal fun TimelineScreen(
                     FloatingActionButton(
                         onClick = toCompose,
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Pen,
                             contentDescription = stringResource(id = R.string.compose_title),
                         )
                     }
@@ -197,8 +199,8 @@ internal fun TimelineScreen(
                                 }
                             },
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowUpward,
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.AnglesUp,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
                             )
@@ -216,7 +218,6 @@ internal fun TimelineScreen(
 private fun timelinePresenter(tabItem: TimelineTabItem) =
     run {
         val scope = rememberCoroutineScope()
-        var isRefreshing by remember { mutableStateOf(false) }
         val state = remember(tabItem.account) { tabItem.createPresenter() }.invoke()
         val accountState =
             remember(tabItem.account) {
@@ -244,7 +245,7 @@ private fun timelinePresenter(tabItem: TimelineTabItem) =
         }
         object : UserState by accountState, TimelineState by state {
             val showNewToots = showNewToots
-            val isRefreshing = isRefreshing
+            val isRefreshing = state.listState.isRefreshing
 
             fun onNewTootsShown() {
                 showNewToots = false
@@ -252,9 +253,7 @@ private fun timelinePresenter(tabItem: TimelineTabItem) =
 
             fun refreshSync() {
                 scope.launch {
-                    isRefreshing = true
                     state.refresh()
-                    isRefreshing = false
                 }
             }
         }

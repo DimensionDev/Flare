@@ -12,19 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,6 +40,15 @@ import com.ramcosta.composedestinations.generated.destinations.DeleteListRouteDe
 import com.ramcosta.composedestinations.generated.destinations.EditListRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleExclamation
+import compose.icons.fontawesomeicons.solid.EllipsisVertical
+import compose.icons.fontawesomeicons.solid.List
+import compose.icons.fontawesomeicons.solid.Pen
+import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Rss
+import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.data.model.IconType
@@ -59,6 +59,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
@@ -145,8 +146,8 @@ private fun ListScreen(
                             createList.invoke()
                         },
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Plus,
                             contentDescription = stringResource(id = R.string.list_add),
                         )
                     }
@@ -173,8 +174,8 @@ private fun ListScreen(
                                 mutableStateOf(false)
                             }
                             IconButton(onClick = { showDropdown = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
                                     contentDescription = stringResource(id = R.string.more),
                                 )
                                 DropdownMenu(
@@ -192,8 +193,8 @@ private fun ListScreen(
                                             showDropdown = false
                                         },
                                         leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Edit,
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Pen,
                                                 contentDescription = stringResource(id = R.string.list_edit),
                                             )
                                         },
@@ -210,8 +211,8 @@ private fun ListScreen(
                                             showDropdown = false
                                         },
                                         leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Trash,
                                                 contentDescription = stringResource(id = R.string.list_delete),
                                                 tint = MaterialTheme.colorScheme.error,
                                             )
@@ -230,7 +231,7 @@ private fun ListScreen(
 internal fun LazyListScope.listItemComponent(
     items: PagingState<UiList>,
     onClicked: ((UiList) -> Unit)? = null,
-    trailingContent: @Composable (UiList) -> Unit,
+    trailingContent: @Composable (UiList) -> Unit = {},
 ) {
     items(
         items,
@@ -239,8 +240,8 @@ internal fun LazyListScope.listItemComponent(
                 modifier = Modifier.fillParentMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ListAlt,
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.List,
                     contentDescription = stringResource(id = R.string.list_empty),
                     modifier = Modifier.size(48.dp),
                 )
@@ -267,8 +268,8 @@ internal fun LazyListScope.listItemComponent(
                 modifier = Modifier.fillParentMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = Icons.Default.ErrorOutline,
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.CircleExclamation,
                     contentDescription = stringResource(id = R.string.list_error),
                     modifier = Modifier.size(48.dp),
                 )
@@ -291,7 +292,7 @@ internal fun LazyListScope.listItemComponent(
                                     onClicked(item)
                                 }
                         }
-                    }.padding(horizontal = screenHorizontalPadding),
+                    },
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             ListComponent(
@@ -309,8 +310,8 @@ internal fun LazyListScope.listItemComponent(
                                     .clip(MaterialTheme.shapes.medium),
                         )
                     } else {
-                        Icon(
-                            imageVector = Icons.Default.RssFeed,
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Rss,
                             contentDescription = null,
                             modifier =
                                 Modifier
@@ -318,7 +319,7 @@ internal fun LazyListScope.listItemComponent(
                                     .background(
                                         color = MaterialTheme.colorScheme.primaryContainer,
                                         shape = MaterialTheme.shapes.medium,
-                                    ),
+                                    ).padding(8.dp),
                         )
                     }
                 },
@@ -340,10 +341,12 @@ internal fun LazyListScope.listItemComponent(
                 trailingContent = {
                     trailingContent.invoke(item)
                 },
+                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
             )
             item.description?.takeIf { it.isNotEmpty() }?.let {
                 Text(
                     text = it,
+                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))

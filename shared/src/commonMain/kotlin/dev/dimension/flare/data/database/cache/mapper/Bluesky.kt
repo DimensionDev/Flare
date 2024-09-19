@@ -21,7 +21,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import kotlinx.coroutines.flow.firstOrNull
 
-object Bluesky {
+internal object Bluesky {
     suspend fun saveFeed(
         accountKey: MicroBlogKey,
         pagingKey: String,

@@ -23,7 +23,6 @@ allprojects {
             freeCompilerArgs.set(listOf(
                 "-Xexpect-actual-classes",
                 "-Xconsistent-data-class-copy-visibility",
-                "-opt-in=kotlin.uuid.ExperimentalUuidApi",
             ))
         }
     }

@@ -4,7 +4,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.NativeSQLiteDriver
-import kotlinx.cinterop.UnsafeNumber
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
@@ -24,7 +23,7 @@ internal actual class DriverFactory {
 
     internal fun databaseDirPath(): String = iosDirPath("databases")
 
-    @OptIn(UnsafeNumber::class)
+    @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class, kotlinx.cinterop.UnsafeNumber::class)
     internal fun iosDirPath(folder: String): String {
         val paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, true)
         val documentsDirectory = paths[0] as String

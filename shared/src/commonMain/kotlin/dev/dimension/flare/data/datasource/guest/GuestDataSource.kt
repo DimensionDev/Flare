@@ -4,8 +4,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
@@ -33,11 +31,9 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -75,21 +71,13 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
                     GuestMastodonService
                         .lookupUserByAcct("$name@$host")
                         ?.toDbUser(GuestMastodonService.HOST) ?: throw Exception("User not found")
-                database.dbUserQueries.insert(
-                    user_key = user.user_key,
-                    platform_type = user.platform_type,
-                    name = user.name,
-                    handle = user.handle,
-                    host = user.host,
-                    content = user.content,
-                )
+                database.userDao().insert(user)
             },
             cacheSource = {
-                database.dbUserQueries
+                database
+                    .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Mastodon)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.render(account.accountKey) }
+                    .mapNotNull { it?.render(account.accountKey) }
             },
         )
     }
@@ -99,21 +87,13 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         return Cacheable(
             fetchSource = {
                 val user = GuestMastodonService.lookupUser(id).toDbUser(GuestMastodonService.HOST)
-                database.dbUserQueries.insert(
-                    user_key = user.user_key,
-                    platform_type = user.platform_type,
-                    name = user.name,
-                    handle = user.handle,
-                    host = user.host,
-                    content = user.content,
-                )
+                database.userDao().insert(user)
             },
             cacheSource = {
-                database.dbUserQueries
+                database
+                    .userDao()
                     .findByKey(userKey)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.render(account.accountKey) }
+                    .mapNotNull { it?.render(account.accountKey) }
             },
         )
     }

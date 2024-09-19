@@ -92,7 +92,7 @@ class MisskeyCallbackPresenter(
 }
 
 @OptIn(ExperimentalUuidApi::class)
-fun misskeyLoginUseCase(
+suspend fun misskeyLoginUseCase(
     host: String,
     applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,

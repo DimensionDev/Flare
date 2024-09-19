@@ -1,7 +1,0 @@
-CREATE TABLE IF NOT EXISTS DbKeywordFilter(
-    keyword TEXT NOT NULL PRIMARY KEY,
-    for_timeline INTEGER NOT NULL,
-    for_notification INTEGER NOT NULL,
-    for_search INTEGER NOT NULL,
-    expired_at INTEGER NOT NULL
-);

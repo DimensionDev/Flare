@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Misskey
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.NotesSearchRequest
 import dev.dimension.flare.model.MicroBlogKey
@@ -18,10 +18,10 @@ internal class SearchStatusRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val query: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             val response =
@@ -39,7 +39,7 @@ internal class SearchStatusRemoteMediator(
                                     limit = state.config.pageSize,
                                 ),
                             ).also {
-                                database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
+                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                             }
                     }
 
@@ -53,7 +53,7 @@ internal class SearchStatusRemoteMediator(
                             NotesSearchRequest(
                                 query = query,
                                 limit = state.config.pageSize,
-                                untilId = lastItem.timeline_status_key.id,
+                                untilId = lastItem.timeline.statusKey.id,
                             ),
                         )
                     }

@@ -5,9 +5,9 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import app.bsky.notification.ListNotificationsQueryParams
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -17,12 +17,12 @@ internal class NotificationRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var cursor: String? = null
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             val response =

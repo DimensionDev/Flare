@@ -1,8 +1,9 @@
 package dev.dimension.flare.data.database.cache.mapper
 
-import dev.dimension.flare.data.cache.DbPagingTimeline
-import dev.dimension.flare.data.cache.DbStatus
-import dev.dimension.flare.data.cache.DbUser
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
+import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.network.xqt.model.CursorType
@@ -28,59 +29,19 @@ import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.xqtHost
 
 internal object XQT {
-    fun save(
+    suspend fun save(
         accountKey: MicroBlogKey,
         pagingKey: String,
         database: dev.dimension.flare.data.database.cache.CacheDatabase,
         tweet: List<XQTTimeline>,
         sortIdProvider: (XQTTimeline) -> Long = { it.sortedIndex },
     ) {
-        val timeline = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
-        val status =
-            tweet.flatMap {
-                listOfNotNull(
-                    it.tweets.toDbStatus(accountKey),
-                    it.tweets.tweetResults.result
-                        ?.getRetweet()
-                        ?.toDbStatus(accountKey),
-                    it.tweets.tweetResults.result
-                        ?.getQuoted()
-                        ?.toDbStatus(accountKey),
-                )
-            }
-        val user = tweet.map { it.tweets.toDbUser() }
-        database.transaction {
-            timeline.forEach {
-                database.dbPagingTimelineQueries.insert(
-                    account_key = it.account_key,
-                    status_key = it.status_key,
-                    paging_key = it.paging_key,
-                    sort_id = it.sort_id,
-                )
-            }
-            status.forEach {
-                database.dbStatusQueries.insert(
-                    status_key = it.status_key,
-                    platform_type = it.platform_type,
-                    user_key = it.user_key,
-                    content = it.content,
-                    account_key = it.account_key,
-                )
-            }
-            user.forEach {
-                database.dbUserQueries.insert(
-                    user_key = it.user_key,
-                    platform_type = it.platform_type,
-                    name = it.name,
-                    handle = it.handle,
-                    content = it.content,
-                    host = it.host,
-                )
-            }
-        }
+        val items = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
+        saveToDatabase(database, items)
     }
 }
 
@@ -105,35 +66,41 @@ private fun XQTTimeline.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (XQTTimeline) -> Long = { sortedIndex },
-): DbPagingTimeline {
-    val status = tweets.toDbStatus(accountKey)
-    return DbPagingTimeline(
-        id = 0,
-        account_key = accountKey,
-        paging_key = pagingKey,
-        status_key = status.status_key,
-        sort_id = sortIdProvider(this),
+): DbPagingTimelineWithStatus =
+    createDbPagingTimelineWithStatus(
+        accountKey = accountKey,
+        pagingKey = pagingKey,
+        sortId = sortIdProvider(this),
+        status = tweets.toDbStatusWithUser(accountKey),
+        references =
+            listOfNotNull(
+                tweets.tweetResults.result?.getRetweet()?.toDbStatusWithUser(accountKey)?.let {
+                    ReferenceType.Retweet to it
+                },
+                tweets.tweetResults.result?.getQuoted()?.toDbStatusWithUser(accountKey)?.let {
+                    ReferenceType.Quote to it
+                },
+            ).toMap(),
     )
-}
 
-private fun TimelineTweet.toDbStatus(accountKey: MicroBlogKey): DbStatus =
-    tweetResults.result?.toDbStatus(accountKey)
+private fun TimelineTweet.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser =
+    tweetResults.result?.toDbStatusWithUser(accountKey)
         ?: throw IllegalStateException("Tweet should not be null")
 
-private fun TweetUnion.toDbStatus(accountKey: MicroBlogKey): DbStatus? =
+private fun TweetUnion.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser? =
     when (this) {
-        is Tweet -> toDbStatus(this, accountKey)
+        is Tweet -> toDbStatusWithUser(this, accountKey)
         // You’re unable to view this Post because
         // this account owner limits who can view their Posts. Learn more
         // throw IllegalStateException("Tweet tombstone should not be saved")
         is TweetTombstone -> null
-        is TweetWithVisibilityResults -> toDbStatus(this.tweet, accountKey)
+        is TweetWithVisibilityResults -> toDbStatusWithUser(this.tweet, accountKey)
     }
 
-private fun toDbStatus(
+private fun toDbStatusWithUser(
     tweet: Tweet,
     accountKey: MicroBlogKey,
-): DbStatus {
+): DbStatusWithUser {
     val user =
         tweet.core
             ?.userResults
@@ -141,17 +108,21 @@ private fun toDbStatus(
             ?.let {
                 it as? User
             }?.toDbUser() ?: throw IllegalStateException("Tweet.user should not be null")
-    return DbStatus(
-        id = 0,
-        status_key =
-            MicroBlogKey(
-                id = tweet.restId,
-                host = user.user_key.host,
+    return DbStatusWithUser(
+        data =
+            DbStatus(
+                id = 0,
+                statusKey =
+                    MicroBlogKey(
+                        id = tweet.restId,
+                        host = user.userKey.host,
+                    ),
+                platformType = PlatformType.xQt,
+                content = StatusContent.XQT(tweet),
+                userKey = user.userKey,
+                accountKey = accountKey,
             ),
-        platform_type = PlatformType.xQt,
-        content = StatusContent.XQT(tweet),
-        user_key = user.user_key,
-        account_key = accountKey,
+        user = user,
     )
 }
 
@@ -175,12 +146,12 @@ private fun TimelineTweet.toDbUser(): DbUser {
 
 internal fun User.toDbUser() =
     DbUser(
-        user_key =
+        userKey =
             MicroBlogKey(
                 id = restId,
                 host = xqtHost,
             ),
-        platform_type = PlatformType.xQt,
+        platformType = PlatformType.xQt,
         name = legacy.name,
         handle = legacy.screenName,
         host = xqtHost,

@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -20,7 +20,7 @@ internal class SearchStatusRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val query: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var page = 1
     private val containerId by lazy {
         "100103type=1&q=$query&t="
@@ -28,7 +28,7 @@ internal class SearchStatusRemoteMediator(
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             val config = service.config()
@@ -46,9 +46,7 @@ internal class SearchStatusRemoteMediator(
                                 containerId = containerId,
                                 pageType = "searchall",
                             ).also {
-                                database.transaction {
-                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                                }
+                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                             }
                     }
                     LoadType.PREPEND -> {

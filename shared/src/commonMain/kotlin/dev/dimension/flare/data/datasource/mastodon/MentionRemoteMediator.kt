@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.model.MicroBlogKey
@@ -17,10 +17,10 @@ internal class MentionRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             val response =
@@ -31,16 +31,14 @@ internal class MentionRemoteMediator(
                                 limit = state.config.pageSize,
                                 exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
                             ).also {
-                                database.transaction {
-                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                                }
+                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                             }
                     }
                     LoadType.PREPEND -> {
                         val firstItem = state.firstItemOrNull()
                         service.notification(
                             limit = state.config.pageSize,
-                            min_id = firstItem?.timeline_status_key?.id,
+                            min_id = firstItem?.timeline?.statusKey?.id,
                             exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
                         )
                     }
@@ -53,7 +51,7 @@ internal class MentionRemoteMediator(
                                 )
                         service.notification(
                             limit = state.config.pageSize,
-                            max_id = lastItem.timeline_status_key.id,
+                            max_id = lastItem.timeline.statusKey.id,
                             exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
                         )
                     }

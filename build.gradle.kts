@@ -9,10 +9,10 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ktorfit) apply false
     alias(libs.plugins.ktlint) apply false
-    alias(libs.plugins.sqldelight) apply false
     alias(libs.plugins.skie) apply false
     alias(libs.plugins.ben.manes.versions)
     alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.room) apply false
 }
 
 allprojects {
@@ -23,6 +23,7 @@ allprojects {
             freeCompilerArgs.set(listOf(
                 "-Xexpect-actual-classes",
                 "-Xconsistent-data-class-copy-visibility",
+                "-opt-in=kotlin.uuid.ExperimentalUuidApi",
             ))
         }
     }

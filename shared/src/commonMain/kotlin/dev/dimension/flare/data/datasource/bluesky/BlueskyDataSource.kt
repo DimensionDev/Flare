@@ -31,8 +31,6 @@ import app.bsky.graph.Listitem
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOneNotNull
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
@@ -91,8 +89,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
@@ -184,21 +180,13 @@ class BlueskyDataSource(
                         .getProfile(GetProfileQueryParams(actor = Handle(handle = name)))
                         .requireResponse()
                         .toDbUser(account.accountKey.host)
-                database.dbUserQueries.insert(
-                    user_key = user.user_key,
-                    platform_type = user.platform_type,
-                    name = user.name,
-                    handle = user.handle,
-                    content = user.content,
-                    host = user.host,
-                )
+                database.userDao().insert(user)
             },
             cacheSource = {
-                database.dbUserQueries
+                database
+                    .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Bluesky)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.render(account.accountKey) }
+                    .mapNotNull { it?.render(account.accountKey) }
             },
         )
     }
@@ -212,21 +200,13 @@ class BlueskyDataSource(
                         .getProfile(GetProfileQueryParams(actor = Did(did = id)))
                         .requireResponse()
                         .toDbUser(account.accountKey.host)
-                database.dbUserQueries.insert(
-                    user_key = user.user_key,
-                    platform_type = user.platform_type,
-                    name = user.name,
-                    handle = user.handle,
-                    content = user.content,
-                    host = user.host,
-                )
+                database.userDao().insert(user)
             },
             cacheSource = {
-                database.dbUserQueries
+                database
+                    .userDao()
                     .findByKey(MicroBlogKey(id, account.accountKey.host))
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.render(account.accountKey) }
+                    .mapNotNull { it?.render(account.accountKey) }
             },
         )
 
@@ -321,11 +301,10 @@ class BlueskyDataSource(
                 )
             },
             cacheSource = {
-                database.dbStatusQueries
+                database
+                    .statusDao()
                     .get(statusKey, account.accountKey)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.render(account.accountKey, this) }
+                    .mapNotNull { it?.content?.render(account.accountKey, this) }
             },
         )
     }
@@ -707,13 +686,13 @@ class BlueskyDataSource(
                 ),
             )
             // delete status from cache
-            database.dbStatusQueries.delete(
-                status_key = statusKey,
-                account_key = account.accountKey,
+            database.statusDao().delete(
+                statusKey = statusKey,
+                accountKey = account.accountKey,
             )
-            database.dbPagingTimelineQueries.deleteStatus(
-                account_key = account.accountKey,
-                status_key = statusKey,
+            database.pagingTimelineDao().deleteStatus(
+                accountKey = account.accountKey,
+                statusKey = statusKey,
             )
         }
     }

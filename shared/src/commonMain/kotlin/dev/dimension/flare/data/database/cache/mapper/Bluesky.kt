@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalUuidApi::class)
+
 package dev.dimension.flare.data.database.cache.mapper
 
 import app.bsky.actor.ProfileView
@@ -6,18 +8,23 @@ import app.bsky.actor.ProfileViewDetailed
 import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
+import app.bsky.feed.ReplyRefParentUnion
 import app.bsky.notification.ListNotificationsNotification
-import dev.dimension.flare.data.cache.DbPagingTimeline
-import dev.dimension.flare.data.cache.DbStatus
-import dev.dimension.flare.data.cache.DbUser
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
+import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
+import kotlinx.coroutines.flow.firstOrNull
+import kotlin.uuid.ExperimentalUuidApi
 
 object Bluesky {
-    fun saveFeed(
+    suspend fun saveFeed(
         accountKey: MicroBlogKey,
         pagingKey: String,
         database: CacheDatabase,
@@ -31,83 +38,62 @@ object Bluesky {
             }
         },
     ) {
-        val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
-        val status = data.map { it.toDbStatus(accountKey) }
-        val user = data.map { it.post.author.toDbUser(accountKey.host) }
-        save(database, timeline, status, user)
+        save(database, data.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider))
     }
 
-    fun saveNotification(
+    suspend fun saveNotification(
         accountKey: MicroBlogKey,
         pagingKey: String,
         database: CacheDatabase,
         data: List<ListNotificationsNotification>,
     ) {
-        val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey) }
-        val status = data.map { it.toDbStatus(accountKey) }
-        val user = data.map { it.author.toDbUser(accountKey.host) }
-        save(database, timeline, status, user)
+        save(database, data.toDb(accountKey, pagingKey))
     }
 
-    fun savePost(
+    suspend fun savePost(
         accountKey: MicroBlogKey,
         pagingKey: String,
         database: CacheDatabase,
         data: List<PostView>,
         sortIdProvider: (PostView) -> Long = { it.indexedAt.toEpochMilliseconds() },
     ) {
-        val timeline = data.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
-        val status = data.map { it.toDbStatus(accountKey) }
-        val user = data.map { it.author.toDbUser(accountKey.host) }
-        save(database, timeline, status, user)
+        save(database, data.toDb(accountKey, pagingKey, sortIdProvider))
     }
 
-    private fun save(
+    private suspend fun save(
         database: CacheDatabase,
-        timeline: List<DbPagingTimeline>,
-        status: List<DbStatus>,
-        user: List<DbUser>,
+        timeline: List<DbPagingTimelineWithStatus>,
     ) {
-        database.transaction {
-            timeline.forEach {
-                database.dbPagingTimelineQueries.insert(
-                    account_key = it.account_key,
-                    status_key = it.status_key,
-                    paging_key = it.paging_key,
-                    sort_id = it.sort_id,
-                )
-            }
-            status.forEach {
-                database.dbStatusQueries.insert(
-                    status_key = it.status_key,
-                    platform_type = it.platform_type,
-                    user_key = it.user_key,
-                    content = it.content,
-                    account_key = it.account_key,
-                )
-            }
-
+        (
+            timeline.mapNotNull { it.status.status.user } +
+                timeline
+                    .flatMap { it.status.references }
+                    .mapNotNull { it.status.user }
+        ).let { allUsers ->
             val exsitingUsers =
-                database.dbUserQueries
-                    .findByKeys(user.map { it.user_key })
-                    .executeAsList()
+                database
+                    .userDao()
+                    .findByKeys(allUsers.map { it.userKey })
+                    .firstOrNull()
+                    .orEmpty()
                     .filter {
                         it.content is UserContent.Bluesky
                     }.map {
                         val content = it.content as UserContent.Bluesky
-                        val item =
-                            user.find { user ->
-                                user.user_key == it.user_key
+                        val user =
+                            allUsers.find { user ->
+                                user.userKey == it.userKey
                             }
-                        if (item != null && item.content is UserContent.BlueskyLite) {
+
+                        if (user != null && user.content is UserContent.BlueskyLite) {
                             it.copy(
                                 content =
                                     content.copy(
                                         data =
                                             content.data.copy(
-                                                displayName = item.content.data.displayName,
-                                                handle = item.content.data.handle,
-                                                avatar = item.content.data.avatar,
+                                                handle = user.content.data.handle,
+                                                displayName = user.content.data.displayName,
+                                                avatar = user.content.data.avatar,
                                             ),
                                     ),
                             )
@@ -115,141 +101,176 @@ object Bluesky {
                             it
                         }
                     }
-            val result = (exsitingUsers + user).distinctBy { it.user_key }
-            result.forEach {
-                database.dbUserQueries.insert(
-                    user_key = it.user_key,
-                    platform_type = it.platform_type,
-                    name = it.name,
-                    handle = it.handle,
-                    content = it.content,
-                    host = it.host,
-                )
-            }
+
+            val result = (exsitingUsers + allUsers).distinctBy { it.userKey }
+            database.userDao().insertAll(result)
         }
+        (
+            timeline.map { it.status.status.data } +
+                timeline
+                    .flatMap { it.status.references }
+                    .map { it.status.data }
+        ).let {
+            database.statusDao().insertAll(it)
+        }
+        timeline.flatMap { it.status.references }.map { it.reference }.let {
+            database.statusReferenceDao().insertAll(it)
+        }
+        database.pagingTimelineDao().insertAll(timeline.map { it.timeline })
     }
 }
 
-fun PostView.toDbPagingTimeline(
+private fun List<PostView>.toDb(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (PostView) -> Long = { it.indexedAt.toEpochMilliseconds() },
-): DbPagingTimeline {
-    val sortId = sortIdProvider(this)
-    val status = this.toDbStatus(accountKey)
-    return DbPagingTimeline(
-        id = 0,
-        account_key = accountKey,
-        status_key = status.status_key,
-        paging_key = pagingKey,
-        sort_id = sortId,
-    )
-}
+    sortIdProvider: (PostView) -> Long,
+): List<DbPagingTimelineWithStatus> =
+    this.map {
+        createDbPagingTimelineWithStatus(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            sortId = sortIdProvider(it),
+            status = it.toDbStatusWithUser(accountKey),
+            references = mapOf(),
+        )
+    }
 
-fun ListNotificationsNotification.toDbPagingTimeline(
+internal fun List<ListNotificationsNotification>.toDb(
     accountKey: MicroBlogKey,
     pagingKey: String,
-): DbPagingTimeline {
-    val sortId = this.indexedAt.toEpochMilliseconds()
+): List<DbPagingTimelineWithStatus> =
+    this.map {
+        createDbPagingTimelineWithStatus(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            sortId = it.indexedAt.toEpochMilliseconds(),
+            status = it.toDbStatusWithUser(accountKey),
+            references = mapOf(),
+        )
+    }
+
+private fun ListNotificationsNotification.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser {
+    val user = this.author.toDbUser(accountKey.host)
     val status = this.toDbStatus(accountKey)
-    return DbPagingTimeline(
-        id = 0,
-        account_key = accountKey,
-        status_key = status.status_key,
-        paging_key = pagingKey,
-        sort_id = sortId,
+    return DbStatusWithUser(
+        data = status,
+        user = user,
     )
 }
 
 private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     val user = this.author.toDbUser(accountKey.host)
     return DbStatus(
-        status_key =
+        statusKey =
             MicroBlogKey(
-                uri.atUri + "_" + user.user_key,
+                uri.atUri + "_" + user.userKey,
                 accountKey.host,
             ),
-        platform_type = PlatformType.Bluesky,
-        user_key = user.user_key,
+        platformType = PlatformType.Bluesky,
+        userKey = user.userKey,
         content = StatusContent.BlueskyNotification(this),
-        account_key = accountKey,
-        id = 0,
+        accountKey = accountKey,
     )
 }
 
-fun FeedViewPost.toDbPagingTimeline(
+internal fun List<FeedViewPost>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (FeedViewPost) -> Long = {
-        val data = it.reason
-        if (data is FeedViewPostReasonUnion.ReasonRepost) {
-            data.value.indexedAt.toEpochMilliseconds()
-        } else {
-            it.post.indexedAt.toEpochMilliseconds()
-        }
-    },
-): DbPagingTimeline {
-    val sortId = sortIdProvider(this)
-    val status = this.toDbStatus(accountKey)
-    return DbPagingTimeline(
-        id = 0,
-        account_key = accountKey,
-        status_key = status.status_key,
-        paging_key = pagingKey,
-        sort_id = sortId,
-    )
-}
-
-fun FeedViewPost.toDbStatus(accountKey: MicroBlogKey): DbStatus {
-    when (val data = reason) {
-        is FeedViewPostReasonUnion.ReasonRepost -> {
-            val user = data.value.by.toDbUser(accountKey.host)
-            return DbStatus(
-                status_key =
-                    MicroBlogKey(
-                        post.uri.atUri + "_reblog_${user.user_key}",
-                        accountKey.host,
-                    ),
-                platform_type = PlatformType.Bluesky,
-                user_key = user.user_key,
-                content = StatusContent.Bluesky(post, data),
-                account_key = accountKey,
-                id = 0,
-            )
-        }
-        else -> {
-            // bluesky doesn't have "quote" and "retweet" as the same as the other platforms
-            return with(post) {
-                toDbStatus(accountKey)
+    sortIdProvider: (FeedViewPost) -> Long,
+): List<DbPagingTimelineWithStatus> =
+    this.map {
+        val reply =
+            when (val reply = it.reply?.parent) {
+                is ReplyRefParentUnion.PostView -> reply.value.toDbStatusWithUser(accountKey)
+                else -> null
             }
-        }
+        val status =
+            when (val data = it.reason) {
+                is FeedViewPostReasonUnion.ReasonRepost -> {
+                    val user = data.value.by.toDbUser(accountKey.host)
+                    val reasonStatus =
+                        DbStatusWithUser(
+                            user = user,
+                            data =
+                                DbStatus(
+                                    statusKey =
+                                        MicroBlogKey(
+                                            it.post.uri.atUri + "_reblog_${user.userKey}",
+                                            accountKey.host,
+                                        ),
+                                    platformType = PlatformType.Bluesky,
+                                    userKey =
+                                        data.value.by
+                                            .toDbUser(accountKey.host)
+                                            .userKey,
+                                    content = StatusContent.BlueskyReason(data, it.post),
+                                    accountKey = accountKey,
+                                ),
+                        )
+                    reasonStatus
+                }
+                else -> {
+                    // bluesky doesn't have "quote" and "retweet" as the same as the other platforms
+                    it.post.toDbStatusWithUser(accountKey)
+                }
+            }
+        val references =
+            when (val data = it.reason) {
+                is FeedViewPostReasonUnion.ReasonRepost ->
+                    listOfNotNull(
+                        if (reply != null) {
+                            ReferenceType.Reply to reply
+                        } else {
+                            null
+                        },
+                        ReferenceType.Retweet to status,
+                    ).toMap()
+                else ->
+                    listOfNotNull(
+                        if (reply != null) {
+                            ReferenceType.Reply to reply
+                        } else {
+                            null
+                        },
+                    ).toMap()
+            }
+        createDbPagingTimelineWithStatus(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            sortId = sortIdProvider(it),
+            status = status,
+            references = references,
+        )
     }
-}
 
-private fun PostView.toDbStatus(accountKey: MicroBlogKey): DbStatus {
+private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser {
     val user = author.toDbUser(accountKey.host)
-    return DbStatus(
-        status_key =
-            MicroBlogKey(
-                uri.atUri,
-                host = user.user_key.host,
-            ),
-        platform_type = PlatformType.Bluesky,
-        content = StatusContent.Bluesky(this, null),
-        user_key = user.user_key,
-        account_key = accountKey,
-        id = 0,
+    val status =
+        DbStatus(
+            statusKey =
+                MicroBlogKey(
+                    uri.atUri,
+                    host = user.userKey.host,
+                ),
+            platformType = PlatformType.Bluesky,
+            content = StatusContent.Bluesky(this),
+            userKey = user.userKey,
+            accountKey = accountKey,
+        )
+    return DbStatusWithUser(
+        data = status,
+        user = user,
     )
 }
 
 private fun ProfileView.toDbUser(host: String) =
     DbUser(
-        user_key =
+        userKey =
             MicroBlogKey(
                 id = did.did,
                 host = host,
             ),
-        platform_type = PlatformType.Bluesky,
+        platformType = PlatformType.Bluesky,
         name = displayName.orEmpty(),
         handle = handle.handle,
         host = host,
@@ -266,26 +287,26 @@ private fun ProfileView.toDbUser(host: String) =
 
 private fun ProfileViewBasic.toDbUser(host: String) =
     DbUser(
-        user_key =
+        userKey =
             MicroBlogKey(
                 id = did.did,
                 host = host,
             ),
-        platform_type = PlatformType.Bluesky,
+        platformType = PlatformType.Bluesky,
         name = displayName.orEmpty(),
         handle = handle.handle,
         host = host,
         content = UserContent.BlueskyLite(this),
     )
 
-fun ProfileViewDetailed.toDbUser(host: String) =
+internal fun ProfileViewDetailed.toDbUser(host: String) =
     DbUser(
-        user_key =
+        userKey =
             MicroBlogKey(
                 id = did.did,
                 host = host,
             ),
-        platform_type = PlatformType.Bluesky,
+        platformType = PlatformType.Bluesky,
         name = displayName.orEmpty(),
         handle = handle.handle,
         host = host,

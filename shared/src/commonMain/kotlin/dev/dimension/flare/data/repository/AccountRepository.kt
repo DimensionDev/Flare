@@ -6,11 +6,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOneOrNull
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.datasource.guest.GuestDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
@@ -22,57 +20,57 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.map
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import org.koin.compose.koinInject
 
 class AccountRepository(
     private val appDatabase: AppDatabase,
+    private val coroutineScope: CoroutineScope,
 ) {
     val activeAccount: Flow<UiAccount?> by lazy {
-        appDatabase.dbAccountQueries.activeAccount().asFlow().mapToOneOrNull(Dispatchers.IO).map {
+        appDatabase.accountDao().activeAccount().map {
             it?.toUi()
         }
     }
     val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
-        appDatabase.dbAccountQueries.allAccounts().asFlow().mapToList(Dispatchers.IO).map {
+        appDatabase.accountDao().allAccounts().map {
             it.map { it.toUi() }.toImmutableList()
         }
     }
 
-    fun addAccount(account: UiAccount) {
-        appDatabase.dbAccountQueries.insert(
-            accountKey = account.accountKey,
-            platformType = account.platformType,
-            lastActive = Clock.System.now().toEpochMilliseconds(),
-            credentialJson = account.credential.encodeJson(),
-        )
-    }
+    fun addAccount(account: UiAccount) =
+        coroutineScope.launch {
+            appDatabase.accountDao().insert(
+                DbAccount(
+                    account_key = account.accountKey,
+                    platform_type = account.platformType,
+                    last_active = Clock.System.now().toEpochMilliseconds(),
+                    credential_json = account.credential.encodeJson(),
+                ),
+            )
+        }
 
-    fun setActiveAccount(accountKey: MicroBlogKey) {
-        appDatabase.dbAccountQueries.setLastActive(
-            Clock.System.now().toEpochMilliseconds(),
-            accountKey,
-        )
-    }
+    fun setActiveAccount(accountKey: MicroBlogKey) =
+        coroutineScope.launch {
+            appDatabase.accountDao().setLastActive(
+                accountKey,
+                Clock.System.now().toEpochMilliseconds(),
+            )
+        }
 
-    fun delete(accountKey: MicroBlogKey) {
-        appDatabase.dbAccountQueries.delete(accountKey)
-    }
-
-    fun get(accountKey: MicroBlogKey): UiAccount? =
-        appDatabase.dbAccountQueries
-            .get(accountKey)
-            .executeAsOneOrNull()
-            ?.toUi()
+    fun delete(accountKey: MicroBlogKey) =
+        coroutineScope.launch {
+            appDatabase.accountDao().delete(accountKey)
+        }
 
     fun getFlow(accountKey: MicroBlogKey): Flow<UiAccount?> =
-        appDatabase.dbAccountQueries.get(accountKey).asFlow().mapToOneOrNull(Dispatchers.IO).map {
+        appDatabase.accountDao().get(accountKey).map {
             it?.toUi()
         }
 }

@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Misskey
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.UsersNotesRequest
 import dev.dimension.flare.model.MicroBlogKey
@@ -20,10 +20,10 @@ internal class UserTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val pagingKey: String,
     private val onlyMedia: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             val response =
@@ -62,7 +62,7 @@ internal class UserTimelineRemoteMediator(
                             UsersNotesRequest(
                                 userId = userKey.id,
                                 limit = state.config.pageSize,
-                                untilId = lastItem.timeline_status_key.id,
+                                untilId = lastItem.timeline.statusKey.id,
                             ).let {
                                 if (onlyMedia) {
                                     it.copy(
@@ -81,7 +81,7 @@ internal class UserTimelineRemoteMediator(
                     endOfPaginationReached = true,
                 )
             if (loadType == LoadType.REFRESH) {
-                database.dbPagingTimelineQueries.deletePaging(account.accountKey, pagingKey)
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = account.accountKey)
             }
 
             Misskey.save(

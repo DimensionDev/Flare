@@ -1,41 +1,52 @@
 package dev.dimension.flare.data.repository
 
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.DbApplication
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiApplication.Companion.toUi
+import kotlinx.coroutines.flow.firstOrNull
 
 class ApplicationRepository(
     private val database: AppDatabase,
 ) {
-    fun findByHost(host: String): UiApplication? =
-        database.dbApplicationQueries
+    suspend fun findByHost(host: String): UiApplication? =
+        database
+            .applicationDao()
             .get(host)
-            .executeAsOneOrNull()
+            .firstOrNull()
             ?.toUi()
 
-    fun addApplication(
+    suspend fun addApplication(
         host: String,
         credentialJson: String,
         platformType: PlatformType,
     ) {
-        database.dbApplicationQueries.insert(host, credentialJson, platformType)
+        database.applicationDao().insert(
+            DbApplication(
+                host = host,
+                credential_json = credentialJson,
+                platformType = platformType,
+            ),
+        )
     }
 
-    fun setPendingOAuth(
+    suspend fun setPendingOAuth(
         host: String,
         pendingOAuth: Boolean,
     ) {
-        database.dbApplicationQueries.updatePending(if (pendingOAuth) 1L else 0L, host)
+        database.applicationDao().updatePending(host, if (pendingOAuth) 1L else 0L)
     }
 
-    fun getPendingOAuth(): UiApplication? =
-        database.dbApplicationQueries
+    suspend fun getPendingOAuth(): UiApplication? =
+        database
+            .applicationDao()
             .getPending()
-            .executeAsOneOrNull()
+            .firstOrNull()
+            ?.firstOrNull()
             ?.toUi()
 
-    fun clearPendingOAuth() {
-        database.dbApplicationQueries.clearPending()
+    suspend fun clearPendingOAuth() {
+        database.applicationDao().clearPending()
     }
 }

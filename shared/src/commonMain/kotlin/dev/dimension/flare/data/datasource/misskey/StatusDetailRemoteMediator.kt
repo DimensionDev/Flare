@@ -4,14 +4,17 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Misskey
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
+import kotlinx.coroutines.flow.firstOrNull
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -21,10 +24,10 @@ internal class StatusDetailRemoteMediator(
     private val service: MisskeyService,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             if (loadType == LoadType.PREPEND) {
@@ -32,14 +35,20 @@ internal class StatusDetailRemoteMediator(
                     endOfPaginationReached = true,
                 )
             }
-            if (!database.dbPagingTimelineQueries.existsPaging(account.accountKey, pagingKey).executeAsOne()) {
-                database.dbStatusQueries.get(statusKey, account.accountKey).executeAsOneOrNull()?.let {
-                    database.dbPagingTimelineQueries
-                        .insert(
-                            account_key = account.accountKey,
-                            status_key = statusKey,
-                            paging_key = pagingKey,
-                            sort_id = 0,
+            if (!database.pagingTimelineDao().existsPaging(account.accountKey, pagingKey)) {
+                database.statusDao().get(statusKey, account.accountKey).firstOrNull()?.let {
+                    database
+                        .pagingTimelineDao()
+                        .insertAll(
+                            listOf(
+                                DbPagingTimeline(
+                                    accountKey = account.accountKey,
+                                    statusKey = statusKey,
+                                    pagingKey = pagingKey,
+                                    sortId = 0,
+                                    _id = Uuid.random().toString(),
+                                ),
+                            ),
                         )
                 }
             }
@@ -71,7 +80,7 @@ internal class StatusDetailRemoteMediator(
                             .notesChildren(
                                 NotesChildrenRequest(
                                     noteId = statusKey.id,
-                                    untilId = lastItem.timeline_status_key.id,
+                                    untilId = lastItem.timeline.statusKey.id,
                                     limit = state.config.pageSize,
                                 ),
                             ).body()

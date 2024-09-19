@@ -5,11 +5,12 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -17,9 +18,11 @@ import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -30,24 +33,30 @@ internal class StatusDetailRemoteMediator(
     private val event: StatusEvent.XQT,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var cursor: String? = null
     private var actualId: String? = null
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult =
         try {
             if (loadType == LoadType.REFRESH) {
-                if (!database.dbPagingTimelineQueries.existsPaging(accountKey, pagingKey).executeAsOne()) {
-                    database.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()?.let {
-                        database.dbPagingTimelineQueries
-                            .insert(
-                                account_key = accountKey,
-                                status_key = statusKey,
-                                paging_key = pagingKey,
-                                sort_id = 0,
+                if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+                    database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
+                        database
+                            .pagingTimelineDao()
+                            .insertAll(
+                                listOf(
+                                    DbPagingTimeline(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                        pagingKey = pagingKey,
+                                        sortId = 0,
+                                        _id = Uuid.random().toString(),
+                                    ),
+                                ),
                             )
                     }
                 }
@@ -84,9 +93,10 @@ internal class StatusDetailRemoteMediator(
                 val id =
                     actualId ?: run {
                         val result =
-                            database.dbStatusQueries
+                            database
+                                .statusDao()
                                 .get(statusKey, accountKey)
-                                .executeAsOneOrNull()
+                                .firstOrNull()
                                 ?.content
                                 ?.let { it as? StatusContent.XQT }
                                 ?.data
@@ -184,9 +194,7 @@ internal class StatusDetailRemoteMediator(
 
                 cursor = actualResponse.cursor()
 
-                database.transaction {
-                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                }
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
 
                 XQT.save(
                     accountKey = accountKey,

@@ -4,11 +4,11 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -18,12 +18,12 @@ internal class MentionRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var cursor: String? = null
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             val response =
@@ -34,9 +34,7 @@ internal class MentionRemoteMediator(
                             .getNotificationsMentions(
                                 count = state.config.pageSize,
                             ).also {
-                                database.transaction {
-                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                                }
+                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                             }
                     }
                     LoadType.PREPEND -> {

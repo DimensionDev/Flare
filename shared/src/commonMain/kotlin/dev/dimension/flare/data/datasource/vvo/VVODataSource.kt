@@ -5,8 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
@@ -42,10 +40,7 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -153,21 +148,13 @@ class VVODataSource(
                 val profile = service.profileInfo(uid, st)
                 val user = profile.data?.user?.toDbUser()
                 requireNotNull(user) { "user not found" }
-                database.dbUserQueries.insert(
-                    user_key = user.user_key,
-                    platform_type = user.platform_type,
-                    name = user.name,
-                    handle = user.handle,
-                    host = user.host,
-                    content = user.content,
-                )
+                database.userDao().insert(user)
             },
             cacheSource = {
-                database.dbUserQueries
+                database
+                    .userDao()
                     .findByHandleAndHost(name, host, PlatformType.VVo)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.render(account.accountKey) }
+                    .mapNotNull { it?.render(account.accountKey) }
             },
         )
     }
@@ -182,21 +169,13 @@ class VVODataSource(
                 val profile = service.profileInfo(id, st)
                 val user = profile.data?.user?.toDbUser()
                 requireNotNull(user) { "user not found" }
-                database.dbUserQueries.insert(
-                    user_key = user.user_key,
-                    platform_type = user.platform_type,
-                    name = user.name,
-                    handle = user.handle,
-                    host = user.host,
-                    content = user.content,
-                )
+                database.userDao().insert(user)
             },
             cacheSource = {
-                database.dbUserQueries
+                database
+                    .userDao()
                     .findByKey(userKey)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.render(account.accountKey) }
+                    .mapNotNull { it?.render(account.accountKey) }
             },
         )
     }
@@ -286,11 +265,10 @@ class VVODataSource(
                 }
             },
             cacheSource = {
-                database.dbStatusQueries
+                database
+                    .statusDao()
                     .get(statusKey, account.accountKey)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.render(account.accountKey, this) }
+                    .mapNotNull { it?.content?.render(account.accountKey, this) }
             },
         )
     }
@@ -316,11 +294,10 @@ class VVODataSource(
                 }
             },
             cacheSource = {
-                database.dbStatusQueries
+                database
+                    .statusDao()
                     .get(statusKey, account.accountKey)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.render(account.accountKey, event = this) }
+                    .mapNotNull { it?.content?.render(account.accountKey, event = this) }
             },
         )
     }

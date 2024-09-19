@@ -4,7 +4,7 @@ import com.atproto.server.RefreshSessionResponse
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
-import dev.dimension.flare.data.database.app.DbAccountQueries
+import dev.dimension.flare.data.database.app.dao.AccountDao
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -24,6 +24,7 @@ import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.Url
 import io.ktor.util.AttributeKey
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
@@ -32,7 +33,7 @@ import sh.christian.ozone.api.response.AtpErrorDescription
 internal class BlueskyService(
     private val baseUrl: String,
     private val accountKey: MicroBlogKey? = null,
-    private val accountQueries: DbAccountQueries? = null,
+    private val accountQueries: AccountDao? = null,
 ) : BlueskyApi by XrpcBlueskyApi(
         ktorClient {
             install(DefaultRequest) {
@@ -58,12 +59,12 @@ internal class BlueskyService(
 internal class XrpcAuthPlugin(
     private val json: Json,
     private val accountKey: MicroBlogKey?,
-    private val accountQueries: DbAccountQueries?,
+    private val accountQueries: AccountDao?,
 ) {
     class Config(
         var json: Json = Json { ignoreUnknownKeys = true },
         var accountKey: MicroBlogKey? = null,
-        var accountQueries: DbAccountQueries? = null,
+        var accountQueries: AccountDao? = null,
     )
 
     companion object : HttpClientPlugin<Config, XrpcAuthPlugin> {
@@ -83,7 +84,7 @@ internal class XrpcAuthPlugin(
                     val account =
                         plugin.accountQueries
                             .get(plugin.accountKey)
-                            .executeAsOneOrNull()
+                            .firstOrNull()
                             ?.toUi() as? UiAccount.Bluesky
                     if (account != null) {
                         context.bearerAuth(account.credential.accessToken)
@@ -107,7 +108,7 @@ internal class XrpcAuthPlugin(
                     val account =
                         plugin.accountQueries
                             .get(plugin.accountKey)
-                            .executeAsOneOrNull()
+                            .firstOrNull()
                             ?.toUi() as? UiAccount.Bluesky
                     if (account != null) {
                         val refreshResponse =
@@ -146,5 +147,5 @@ internal fun UiAccount.Bluesky.getService(appDatabase: AppDatabase) =
     BlueskyService(
         baseUrl = credential.baseUrl,
         accountKey = accountKey,
-        accountQueries = appDatabase.dbAccountQueries,
+        accountQueries = appDatabase.accountDao(),
     )

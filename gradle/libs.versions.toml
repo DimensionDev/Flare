@@ -30,7 +30,6 @@ compose-lint-checks = "1.3.1"
 ktlintPlugin = "12.1.1"
 apng-android = "3.0.1"
 ktlint = "1.3.1"
-sqldelight = "2.0.2"
 okio = "3.9.1"
 skie = "0.9.0-RC.3"
 ksoup = "0.1.8"
@@ -46,6 +45,7 @@ google-services = "4.4.2"
 firebase-crashlytics = "3.0.2"
 napier = "2.7.1"
 materialKolor = "1.7.1"
+room = "2.7.0-alpha08"
 
 [libraries]
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
@@ -83,6 +83,10 @@ datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.1
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 androidx-window = { group = "androidx.window", name = "window-core", version = "1.3.0" }
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0-alpha02" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.0-alpha08" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
@@ -141,12 +145,6 @@ compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", ver
 
 compose-placeholder-material3 = { group = "com.eygraber", name = "compose-placeholder-material3", version = "1.0.8" }
 
-sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
-sqldelight-native-driver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
-sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
-sqldelight-androidx-paging3-extensions = { group = "app.cash.sqldelight", name = "androidx-paging3-extensions", version.ref = "sqldelight" }
-sqldelight-jvm-driver = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
-
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
@@ -173,7 +171,6 @@ ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "k
 coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated", "zoomable-image"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
 compose-destinations = ["compose-destinations"]
-sqldelight = ["sqldelight-coroutines-extensions", "sqldelight-androidx-paging3-extensions"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]
@@ -187,9 +184,9 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }
-sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
 ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "versionUpdate" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+room = { id = "androidx.room", version.ref = "room" }

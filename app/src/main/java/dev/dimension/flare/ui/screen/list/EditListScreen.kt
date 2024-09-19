@@ -46,7 +46,6 @@ import com.ramcosta.composedestinations.generated.destinations.EditListMemberRou
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.ArrowLeft
 import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Rss
@@ -63,6 +62,7 @@ import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
@@ -126,14 +126,7 @@ private fun EditListScreen(
                     Text(text = stringResource(id = R.string.list_edit))
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                    ) {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.ArrowLeft,
-                            contentDescription = stringResource(id = R.string.navigate_back),
-                        )
-                    }
+                    BackButton(onBack = onBack)
                 },
                 actions = {
                     IconButton(

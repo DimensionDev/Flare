@@ -24,7 +24,6 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.ArrowLeft
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
@@ -35,6 +34,7 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.molecule.producePresenter
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.OutlinedTextField2
@@ -80,12 +80,7 @@ private fun EditListMemberScreen(
                     Text(stringResource(R.string.edit_list_member_title))
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.ArrowLeft,
-                            contentDescription = stringResource(R.string.navigate_back),
-                        )
-                    }
+                    BackButton(onBack = onBack)
                 },
             )
         },

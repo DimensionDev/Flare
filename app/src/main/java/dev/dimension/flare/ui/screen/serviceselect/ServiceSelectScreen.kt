@@ -48,7 +48,6 @@ import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.ArrowLeft
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Question
@@ -62,6 +61,7 @@ import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
@@ -135,14 +135,7 @@ fun ServiceSelectScreen(
                         title = {
                         },
                         navigationIcon = {
-                            IconButton(
-                                onClick = onBack,
-                            ) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.ArrowLeft,
-                                    contentDescription = stringResource(id = R.string.navigate_back),
-                                )
-                            }
+                            BackButton(onBack = onBack)
                         },
                     )
                 }

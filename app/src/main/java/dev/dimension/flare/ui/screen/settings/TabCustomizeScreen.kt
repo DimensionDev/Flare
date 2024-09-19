@@ -53,7 +53,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.ArrowLeft
 import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
@@ -73,6 +72,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -140,12 +140,7 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                     Text(text = stringResource(id = R.string.settings_tab_customization))
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.ArrowLeft,
-                            contentDescription = stringResource(id = R.string.navigate_back),
-                        )
-                    }
+                    BackButton(onBack = onBack)
                 },
                 actions = {
                     IconButton(

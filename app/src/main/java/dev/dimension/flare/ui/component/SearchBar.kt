@@ -31,7 +31,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.ArrowLeft
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
@@ -129,14 +128,7 @@ private fun SearchContent(
                 leadingIcon = {
                     AnimatedContent(expanded) {
                         if (it) {
-                            IconButton(onClick = {
-                                onBack.invoke()
-                            }) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.ArrowLeft,
-                                    contentDescription = stringResource(id = R.string.navigate_back),
-                                )
-                            }
+                            BackButton(onBack = onBack)
                         } else {
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.MagnifyingGlass,

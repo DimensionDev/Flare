@@ -33,15 +33,14 @@ private fun config(baseUrl: String) =
         }
     }
 
-private val baseUrl = "https://mastodon.social/"
+private const val BASEURL = "https://mastodon.social/"
 
 internal object GuestMastodonService :
-    TrendsResources by config(baseUrl).createTrendsResources(),
-    LookupResources by config(baseUrl).createLookupResources(),
-    TimelineResources by config(baseUrl).createTimelineResources(),
-    SearchResources by config(baseUrl).createSearchResources() {
-    val instance = baseUrl
-    val host = "mastodon.social"
+    TrendsResources by config(BASEURL).createTrendsResources(),
+    LookupResources by config(BASEURL).createLookupResources(),
+    TimelineResources by config(BASEURL).createTimelineResources(),
+    SearchResources by config(BASEURL).createSearchResources() {
+    const val HOST = "mastodon.social"
 
-    val GuestKey = MicroBlogKey("guest", host)
+    val GuestKey = MicroBlogKey("guest", HOST)
 }

@@ -74,7 +74,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
                 val user =
                     GuestMastodonService
                         .lookupUserByAcct("$name@$host")
-                        ?.toDbUser(GuestMastodonService.host) ?: throw Exception("User not found")
+                        ?.toDbUser(GuestMastodonService.HOST) ?: throw Exception("User not found")
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,
@@ -95,10 +95,10 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
     }
 
     override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, GuestMastodonService.host)
+        val userKey = MicroBlogKey(id, GuestMastodonService.HOST)
         return Cacheable(
             fetchSource = {
-                val user = GuestMastodonService.lookupUser(id).toDbUser(GuestMastodonService.host)
+                val user = GuestMastodonService.lookupUser(id).toDbUser(GuestMastodonService.HOST)
                 database.dbUserQueries.insert(
                     user_key = user.user_key,
                     platform_type = user.platform_type,

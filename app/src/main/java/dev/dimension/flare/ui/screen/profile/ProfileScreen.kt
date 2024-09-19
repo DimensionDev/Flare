@@ -82,7 +82,6 @@ import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRoute
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.ArrowLeft
 import compose.icons.fontawesomeicons.solid.Cat
 import compose.icons.fontawesomeicons.solid.CircleCheck
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
@@ -101,6 +100,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.HtmlText
@@ -282,6 +282,7 @@ internal fun MeRoute(
         null,
         navigator,
         accountType,
+        showBackButton = false,
     )
 }
 
@@ -295,12 +296,7 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
                     Text(text = "Error")
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.ArrowLeft,
-                            contentDescription = stringResource(id = R.string.navigate_back),
-                        )
-                    }
+                    BackButton(onBack = onBack)
                 },
             )
         },
@@ -418,12 +414,14 @@ internal fun ProfileRoute(
     userKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
     accountType: AccountType,
+    showBackButton: Boolean = true,
 ) {
     ProfileScreen(
         userKey = userKey,
         onBack = {
             navigator.navigateUp()
         },
+        showBackButton = showBackButton,
         onProfileMediaClick = {
             navigator.navigate(
                 ProfileMediaRouteDestination(
@@ -453,11 +451,11 @@ internal fun ProfileRoute(
 )
 @Composable
 private fun ProfileScreen(
-    // null means current user
     accountType: AccountType,
     toEditAccountList: () -> Unit,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
+    showBackButton: Boolean = true,
     onProfileMediaClick: () -> Unit = {},
     onMediaClick: (url: String) -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -567,11 +565,8 @@ private fun ProfileScreen(
                         },
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.ArrowLeft,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
+                        if (showBackButton) {
+                            BackButton(onBack = onBack)
                         }
                     },
                     actions = {
@@ -716,21 +711,21 @@ private fun ProfileMenu(
     showMoreMenus: Boolean,
     toEditAccountList: () -> Unit,
 ) {
-    profileState.userState.onSuccess { user ->
-        IconButton(onClick = {
-            setShowMoreMenus(true)
-        }) {
-            FAIcon(
-                imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                contentDescription = null,
-            )
-        }
-        DropdownMenu(
-            expanded = showMoreMenus,
-            onDismissRequest = { setShowMoreMenus(false) },
-        ) {
-            profileState.isMe.onSuccess { isMe ->
-                if (!isMe) {
+    profileState.isMe.onSuccess { isMe ->
+        if (!isMe) {
+            profileState.userState.onSuccess { user ->
+                IconButton(onClick = {
+                    setShowMoreMenus(true)
+                }) {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
+                        contentDescription = null,
+                    )
+                }
+                DropdownMenu(
+                    expanded = showMoreMenus,
+                    onDismissRequest = { setShowMoreMenus(false) },
+                ) {
                     profileState.relationState.onSuccess { relation ->
                         if (!profileState.isGuestMode && relation.following) {
                             profileState.userState.onSuccess { user ->

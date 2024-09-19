@@ -97,7 +97,7 @@ internal fun TimelineRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TimelineScreen(
+private fun TimelineScreen(
     tabItem: TimelineTabItem,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,

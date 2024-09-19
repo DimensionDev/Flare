@@ -11,7 +11,7 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -37,14 +37,14 @@ internal fun StatusEvent.timelinePager(
     database: CacheDatabase,
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
-    mediator: RemoteMediator<Int, DbPagingTimelineWithStatus>,
+    mediator: RemoteMediator<Int, DbPagingTimelineView>,
 ): Flow<PagingData<UiTimeline>> {
     val pagerFlow =
         Pager(
             config = PagingConfig(pageSize = pageSize),
             remoteMediator = mediator,
             pagingSourceFactory = {
-                database.pagingTimelineDao().getPagingSource(
+                database.pagingTimelineDao().getDbPagingTimelineView(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                 )

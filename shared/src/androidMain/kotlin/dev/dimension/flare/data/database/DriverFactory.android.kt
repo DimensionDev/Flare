@@ -3,6 +3,8 @@ package dev.dimension.flare.data.database
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.SQLiteDriver
+import androidx.sqlite.driver.AndroidSQLiteDriver
 
 internal actual class DriverFactory(
     private val context: Context,
@@ -19,4 +21,6 @@ internal actual class DriverFactory(
     actual fun deleteDatabase(name: String) {
         context.deleteDatabase(name)
     }
+
+    actual fun createSQLiteDriver(): SQLiteDriver = AndroidSQLiteDriver()
 }

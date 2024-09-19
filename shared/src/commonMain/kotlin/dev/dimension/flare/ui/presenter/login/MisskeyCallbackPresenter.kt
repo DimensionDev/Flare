@@ -19,7 +19,6 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 class MisskeyCallbackPresenter(
@@ -91,7 +90,6 @@ class MisskeyCallbackPresenter(
     }
 }
 
-@OptIn(ExperimentalUuidApi::class)
 suspend fun misskeyLoginUseCase(
     host: String,
     applicationRepository: ApplicationRepository,

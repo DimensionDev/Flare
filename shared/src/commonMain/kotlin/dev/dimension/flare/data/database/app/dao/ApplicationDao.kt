@@ -22,7 +22,7 @@ interface ApplicationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(application: DbApplication)
 
-    @Query("UPDATE DbApplication SET credential_json = :credentialJson, platformType = :platformType WHERE host = :host")
+    @Query("UPDATE DbApplication SET credential_json = :credentialJson, platform_type = :platformType WHERE host = :host")
     suspend fun update(
         host: String,
         credentialJson: String,

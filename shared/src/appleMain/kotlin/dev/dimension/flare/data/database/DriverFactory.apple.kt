@@ -2,6 +2,8 @@ package dev.dimension.flare.data.database
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.SQLiteDriver
+import androidx.sqlite.driver.NativeSQLiteDriver
 import kotlinx.cinterop.UnsafeNumber
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSFileManager
@@ -37,4 +39,6 @@ internal actual class DriverFactory {
 
         return databaseDirectory
     }
+
+    actual fun createSQLiteDriver(): SQLiteDriver = NativeSQLiteDriver()
 }

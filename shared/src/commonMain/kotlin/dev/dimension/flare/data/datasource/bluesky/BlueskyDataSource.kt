@@ -104,7 +104,6 @@ import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.response.AtpResponse
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
@@ -1136,7 +1135,6 @@ class BlueskyDataSource(
         )
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     suspend fun subscribeFeed(data: UiList) {
         MemCacheable.updateWith<ImmutableList<UiList>>(
             key = myFeedsKey,

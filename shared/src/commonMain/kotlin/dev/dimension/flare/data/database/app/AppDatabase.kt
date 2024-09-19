@@ -17,7 +17,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
         dev.dimension.flare.data.database.app.model.DbKeywordFilter::class,
         dev.dimension.flare.data.database.app.model.DbSearchHistory::class,
     ],
-    version = 1,
+    version = 3,
 )
 @TypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,

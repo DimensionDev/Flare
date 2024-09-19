@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalUuidApi::class)
-
 package dev.dimension.flare.data.database.cache.mapper
 
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -14,7 +12,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.vvoHost
-import kotlin.uuid.ExperimentalUuidApi
 
 internal object VVO {
     suspend fun saveStatus(

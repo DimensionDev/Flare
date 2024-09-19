@@ -1,6 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
@@ -8,8 +8,8 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 
-internal fun DbPagingTimelineWithStatus.render(event: StatusEvent): UiTimeline =
-    status.status.data.content.render(
+internal fun DbPagingTimelineView.render(event: StatusEvent): UiTimeline =
+    status_content.render(
         timeline.accountKey,
         event,
     )

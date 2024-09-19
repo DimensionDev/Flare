@@ -8,6 +8,6 @@ import dev.dimension.flare.model.PlatformType
 data class DbApplication(
     @PrimaryKey val host: String,
     val credential_json: String,
-    val platformType: PlatformType,
+    val platform_type: PlatformType,
     val has_pending_oauth_request: Int = 0,
 )

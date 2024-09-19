@@ -6,31 +6,29 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.model.MicroBlogKey
 
 @Dao
 interface PagingTimelineDao {
-    @Transaction
-    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey == :pagingKey AND accountKey == :accountKey ORDER BY sortId DESC")
-    fun getPagingSource(
-        pagingKey: String,
-        accountKey: MicroBlogKey,
-    ): PagingSource<Int, DbPagingTimelineWithStatus>
+//    @Transaction
+//    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
+//    fun getPagingSource(
+//        pagingKey: String,
+//        accountKey: MicroBlogKey,
+//    ): PagingSource<Int, DbPagingTimelineWithStatus>
 
-    @Transaction
-    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey == :pagingKey AND accountKey == :accountKey ORDER BY sortId DESC")
-    fun getPaging(
+    @Query("SELECT * FROM PagingTimelineView WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
+    fun getDbPagingTimelineView(
         pagingKey: String,
         accountKey: MicroBlogKey,
-    ): PagingSource<Int, DbPagingTimeline>
+    ): PagingSource<Int, DbPagingTimelineView>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)
 
-    @Query("SELECT EXISTS(SELECT * FROM DbPagingTimeline WHERE pagingKey == :pagingKey AND accountKey == :accountKey)")
+    @Query("SELECT EXISTS(SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey)")
     suspend fun exists(
         pagingKey: String,
         accountKey: MicroBlogKey,
@@ -39,13 +37,13 @@ interface PagingTimelineDao {
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
 
-    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey == :pagingKey AND accountKey == :accountKey")
+    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey")
     suspend fun delete(
         pagingKey: String,
         accountKey: MicroBlogKey,
     )
 
-    @Query("DELETE FROM DbPagingTimeline WHERE accountKey == :accountKey AND statusKey == :statusKey")
+    @Query("DELETE FROM DbPagingTimeline WHERE accountKey = :accountKey AND statusKey = :statusKey")
     suspend fun deleteStatus(
         accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,

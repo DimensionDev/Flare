@@ -14,7 +14,10 @@ import androidx.room.TypeConverters
         dev.dimension.flare.data.database.cache.model.DbUser::class,
         dev.dimension.flare.data.database.cache.model.DbPagingTimeline::class,
     ],
-    version = 1,
+    views = [
+        dev.dimension.flare.data.database.cache.model.DbPagingTimelineView::class,
+    ],
+    version = 10,
 )
 @TypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,

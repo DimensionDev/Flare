@@ -26,7 +26,7 @@ class ApplicationRepository(
             DbApplication(
                 host = host,
                 credential_json = credentialJson,
-                platformType = platformType,
+                platform_type = platformType,
             ),
         )
     }

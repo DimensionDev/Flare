@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 1,
-    "identityHash": "226acd88681fb922907870dd66f6d573",
+    "version": 10,
+    "identityHash": "da001076f37d321e9fae05eaa53b8fb1",
     "entities": [
       {
         "tableName": "DbEmoji",
@@ -253,9 +253,15 @@
         ]
       }
     ],
+    "views": [
+      {
+        "viewName": "PagingTimelineView",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT\ntimeline.*,\nstatus.content AS status_content,\nuser.*,\nretweetStatus.content AS retweet_status_content,\nquoteStatus.content AS quote_status_content,\nreplyStatus.content AS reply_status_content,\nnotificationStatus.content AS notification_status_content\nFROM DbPagingTimeline AS timeline\nJOIN DbStatus status ON timeline.statusKey = status.statusKey AND timeline.accountKey = status.accountKey\nLEFT JOIN DbUser user ON status.userKey = user.userKey\nLEFT JOIN status_reference retweet ON status.statusKey = retweet.statusKey AND retweet.referenceType = 'Retweet'\nLEFT JOIN DbStatus retweetStatus ON retweet.referenceStatusKey = retweetStatus.statusKey\nLEFT JOIN status_reference reply ON status.statusKey = reply.statusKey AND reply.referenceType = 'Reply'\nLEFT JOIN DbStatus replyStatus ON reply.referenceStatusKey = replyStatus.statusKey\nLEFT JOIN status_reference quote ON status.statusKey = quote.statusKey AND quote.referenceType = 'Quote'\nLEFT JOIN DbStatus quoteStatus ON quote.referenceStatusKey = quoteStatus.statusKey\nLEFT JOIN status_reference notification ON status.statusKey = notification.statusKey AND notification.referenceType = 'Notification'\nLEFT JOIN DbStatus notificationStatus ON notification.referenceStatusKey = notificationStatus.statusKey"
+      }
+    ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '226acd88681fb922907870dd66f6d573')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'da001076f37d321e9fae05eaa53b8fb1')"
     ]
   }
 }

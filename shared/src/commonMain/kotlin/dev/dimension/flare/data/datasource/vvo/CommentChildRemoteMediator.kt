@@ -6,7 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -18,13 +18,13 @@ internal class CommentChildRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val database: CacheDatabase,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     private var maxId: Long? = null
     private var page = 0
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             val config = service.config()

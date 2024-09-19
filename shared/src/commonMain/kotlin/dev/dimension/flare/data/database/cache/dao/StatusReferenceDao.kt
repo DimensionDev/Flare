@@ -12,6 +12,6 @@ interface StatusReferenceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(items: List<DbStatusReference>)
 
-    @Query("DELETE FROM status_reference WHERE statusKey == :key")
+    @Query("DELETE FROM status_reference WHERE statusKey = :key")
     suspend fun delete(key: MicroBlogKey)
 }

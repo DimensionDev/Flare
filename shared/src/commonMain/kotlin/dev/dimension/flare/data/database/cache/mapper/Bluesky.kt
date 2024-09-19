@@ -1,4 +1,3 @@
-@file:OptIn(ExperimentalUuidApi::class)
 
 package dev.dimension.flare.data.database.cache.mapper
 
@@ -21,7 +20,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import kotlinx.coroutines.flow.firstOrNull
-import kotlin.uuid.ExperimentalUuidApi
 
 object Bluesky {
     suspend fun saveFeed(

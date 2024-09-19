@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// https://github.com/cashapp/sqldelight/issues/1333
 @Serializable
 sealed interface StatusContent {
     @Serializable

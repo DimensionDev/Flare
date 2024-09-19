@@ -62,7 +62,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
@@ -382,7 +381,6 @@ class MastodonDataSource(
             },
         )
 
-    @OptIn(ExperimentalUuidApi::class)
     override suspend fun compose(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,

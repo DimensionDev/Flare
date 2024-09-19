@@ -53,7 +53,7 @@ core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
-ksoup = { group = "com.fleeksoft.ksoup", name = "ksoup-ktor2", version.ref = "ksoup" }
+ksoup = { group = "com.fleeksoft.ksoup", name = "ksoup-lite", version.ref = "ksoup" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }

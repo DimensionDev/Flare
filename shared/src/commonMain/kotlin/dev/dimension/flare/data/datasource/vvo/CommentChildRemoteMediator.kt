@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -18,13 +18,13 @@ internal class CommentChildRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val database: CacheDatabase,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     private var maxId: Long? = null
     private var page = 0
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             val config = service.config()
@@ -41,9 +41,7 @@ internal class CommentChildRemoteMediator(
                             .getHotFlowChild(
                                 cid = commentKey.id,
                             ).also {
-                                database.transaction {
-                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                                }
+                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                             }
                     }
                     LoadType.PREPEND -> {

@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -18,10 +18,10 @@ internal class UserTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val pagingKey: String,
     private val onlyMedia: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             val response =
@@ -38,7 +38,7 @@ internal class UserTimelineRemoteMediator(
                         service.userTimeline(
                             user_id = userKey.id,
                             limit = state.config.pageSize,
-                            min_id = firstItem?.timeline_status_key?.id,
+                            min_id = firstItem?.timeline?.statusKey?.id,
                             only_media = onlyMedia,
                         )
                     }
@@ -52,7 +52,7 @@ internal class UserTimelineRemoteMediator(
                         service.userTimeline(
                             user_id = userKey.id,
                             limit = state.config.pageSize,
-                            max_id = lastItem.timeline_status_key.id,
+                            max_id = lastItem.timeline.statusKey.id,
                             only_media = onlyMedia,
                         )
                     }

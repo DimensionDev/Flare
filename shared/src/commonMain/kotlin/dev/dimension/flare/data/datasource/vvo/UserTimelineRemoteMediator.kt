@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -19,13 +19,13 @@ internal class UserTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val mediaOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     private var containerid: String? = null
     var page = 0
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         if (mediaOnly) {
             // Not supported yet
@@ -61,9 +61,7 @@ internal class UserTimelineRemoteMediator(
                                 value = userKey.id,
                                 containerId = containerid,
                             ).also {
-                                database.transaction {
-                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                                }
+                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                             }
                     }
 
@@ -84,7 +82,7 @@ internal class UserTimelineRemoteMediator(
                             type = "uid",
                             value = userKey.id,
                             containerId = containerid,
-                            sinceId = lastItem.timeline_status_key.id,
+                            sinceId = lastItem.timeline.statusKey.id,
                         )
                     }
                 }

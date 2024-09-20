@@ -1,14 +1,12 @@
 package dev.dimension.flare.data.database
 
-import app.cash.sqldelight.db.QueryResult
-import app.cash.sqldelight.db.SqlDriver
-import app.cash.sqldelight.db.SqlSchema
+import androidx.room.RoomDatabase
+import androidx.sqlite.SQLiteDriver
 
 internal expect class DriverFactory {
-    fun createDriver(
-        schema: SqlSchema<QueryResult.Value<Unit>>,
-        name: String,
-    ): SqlDriver
+    inline fun <reified T : RoomDatabase> createBuilder(name: String): RoomDatabase.Builder<T>
+
+    fun createSQLiteDriver(): SQLiteDriver
 
     fun deleteDatabase(name: String)
 }

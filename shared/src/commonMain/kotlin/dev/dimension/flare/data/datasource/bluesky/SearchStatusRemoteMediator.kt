@@ -5,9 +5,9 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import app.bsky.feed.SearchPostsQueryParams
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -18,12 +18,12 @@ internal class SearchStatusRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val query: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     var cursor: String? = null
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             val response =

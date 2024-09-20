@@ -1,16 +1,15 @@
-
-import app.cash.sqldelight.core.capitalize
+import java.util.Locale
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.sqldelight)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.skie)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -22,29 +21,35 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
-        // macosArm64(),
-        // macosX64(),
+        macosArm64(),
+        macosX64(),
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "shared"
             isStatic = true
             embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
+            linkerOpts.add("-lsqlite3")
         }
     }
     targets.forEach { target ->
         target.name.takeIf {
             it != "metadata"
         }?.let {
-            "ksp${it.capitalize()}"
+            "ksp${it.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}"
         }?.let {
             dependencies.add(it, libs.ktorfit.ksp)
+            dependencies.add(it, libs.room.compiler)
         }
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("kotlin.uuid.ExperimentalUuidApi")
+            }
+        }
         val commonMain by getting {
             dependencies {
-                implementation(libs.bundles.sqldelight)
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
@@ -60,6 +65,8 @@ kotlin {
                 implementation(libs.twitter.parser)
                 implementation(libs.molecule.runtime)
                 api(libs.bluesky)
+                implementation(libs.room.runtime)
+                implementation(libs.room.paging)
             }
         }
         val commonTest by getting {
@@ -69,7 +76,6 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation(libs.sqldelight.android.driver)
                 implementation(project.dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.foundation)
             }
@@ -81,7 +87,6 @@ kotlin {
         }
         val nativeMain by getting {
             dependencies {
-                implementation(libs.sqldelight.native.driver)
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
             }
@@ -89,22 +94,8 @@ kotlin {
     }
 }
 
-sqldelight {
-    databases {
-        create("AppDatabase") {
-            packageName.set("dev.dimension.flare.data.database.app")
-            srcDirs("src/commonMain/sqldelight/app")
-        }
-        create("CacheDatabase") {
-            packageName.set("dev.dimension.flare.data.database.cache")
-            srcDirs("src/commonMain/sqldelight/cache")
-        }
-        create("VersionDatabase") {
-            packageName.set("dev.dimension.flare.data.database.version")
-            srcDirs("src/commonMain/sqldelight/version")
-        }
-    }
-    linkSqlite.set(true)
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 android {

@@ -4,10 +4,10 @@ import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// https://github.com/cashapp/sqldelight/issues/1333
 @Serializable
 sealed interface StatusContent {
     @Serializable
@@ -38,7 +38,13 @@ sealed interface StatusContent {
     @SerialName("bluesky")
     data class Bluesky internal constructor(
         val data: PostView,
-        val reason: FeedViewPostReasonUnion?,
+    ) : StatusContent
+
+    @Serializable
+    @SerialName("bluesky-reason")
+    data class BlueskyReason internal constructor(
+        val reason: FeedViewPostReasonUnion,
+        val data: PostView,
     ) : StatusContent
 
     @Serializable
@@ -66,25 +72,32 @@ sealed interface StatusContent {
     ) : StatusContent
 }
 
-internal inline fun <reified T : StatusContent> updateStatusUseCase(
+internal suspend inline fun <reified T : StatusContent> updateStatusUseCase(
     statusKey: MicroBlogKey,
     accountKey: MicroBlogKey,
     cacheDatabase: CacheDatabase,
     update: (content: T) -> T,
 ) {
-    val status = cacheDatabase.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()
+    val status = cacheDatabase.statusDao().get(statusKey, accountKey).firstOrNull()
     if (status != null && status.content is T) {
-        cacheDatabase.dbStatusQueries.update(update(status.content), statusKey, accountKey)
+        cacheDatabase.statusDao().update(
+            statusKey = statusKey,
+            accountKey = accountKey,
+            content = update(status.content),
+        )
     }
 }
 
-internal inline fun <reified T : UserContent> updateUserUseCase(
+internal suspend inline fun <reified T : UserContent> updateUserUseCase(
     userKey: MicroBlogKey,
     cacheDatabase: CacheDatabase,
     update: (content: T) -> T,
 ) {
-    val user = cacheDatabase.dbUserQueries.findByKey(userKey).executeAsOneOrNull()
+    val user = cacheDatabase.userDao().findByKey(userKey).firstOrNull()
     if (user != null && user.content is T) {
-        cacheDatabase.dbUserQueries.update(update(user.content), userKey)
+        cacheDatabase.userDao().update(
+            userKey = userKey,
+            content = update(user.content),
+        )
     }
 }

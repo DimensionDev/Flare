@@ -10,9 +10,8 @@ import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
-import app.cash.sqldelight.paging3.QueryPagingSource
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -38,29 +37,16 @@ internal fun StatusEvent.timelinePager(
     database: CacheDatabase,
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
-    mediator: RemoteMediator<Int, DbPagingTimelineWithStatusView>,
+    mediator: RemoteMediator<Int, DbPagingTimelineView>,
 ): Flow<PagingData<UiTimeline>> {
     val pagerFlow =
         Pager(
             config = PagingConfig(pageSize = pageSize),
             remoteMediator = mediator,
             pagingSourceFactory = {
-                QueryPagingSource(
-                    countQuery =
-                        database.dbPagingTimelineQueries.pageCount(
-                            account_key = accountKey,
-                            paging_key = pagingKey,
-                        ),
-                    transacter = database.dbPagingTimelineQueries,
-                    context = Dispatchers.IO,
-                    queryProvider = { limit, offset ->
-                        database.dbPagingTimelineQueries.getPage(
-                            account_key = accountKey,
-                            paging_key = pagingKey,
-                            offset = offset,
-                            limit = limit,
-                        )
-                    },
+                database.pagingTimelineDao().getDbPagingTimelineView(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
                 )
             },
         ).flow.cachedIn(scope)

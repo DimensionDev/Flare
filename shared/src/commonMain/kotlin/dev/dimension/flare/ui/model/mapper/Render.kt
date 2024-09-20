@@ -1,16 +1,16 @@
 package dev.dimension.flare.ui.model.mapper
 
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
-import dev.dimension.flare.data.cache.DbUser
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
+import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 
-internal fun DbPagingTimelineWithStatusView.render(event: StatusEvent): UiTimeline =
+internal fun DbPagingTimelineView.render(event: StatusEvent): UiTimeline =
     status_content.render(
-        timeline_account_key,
+        timeline.accountKey,
         event,
     )
 
@@ -42,12 +42,15 @@ internal fun StatusContent.render(
             event = event as StatusEvent.Misskey,
         )
 
-    is StatusContent.Bluesky ->
-        reason?.render(
+    is StatusContent.BlueskyReason ->
+        reason.render(
             accountKey = accountKey,
             data = data,
             event = event as StatusEvent.Bluesky,
-        ) ?: data.render(
+        )
+
+    is StatusContent.Bluesky ->
+        data.render(
             accountKey = accountKey,
             event = event as StatusEvent.Bluesky,
         )

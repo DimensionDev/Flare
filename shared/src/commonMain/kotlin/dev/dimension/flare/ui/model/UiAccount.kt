@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.data.database.app.DbAccount
+import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource

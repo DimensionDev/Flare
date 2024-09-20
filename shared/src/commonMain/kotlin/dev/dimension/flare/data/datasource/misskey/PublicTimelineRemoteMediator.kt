@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Misskey
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.NotesGlobalTimelineRequest
 import dev.dimension.flare.ui.model.UiAccount
@@ -17,10 +17,10 @@ internal class PublicTimelineRemoteMediator(
     private val service: MisskeyService,
     private val database: CacheDatabase,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             val response =
@@ -45,7 +45,7 @@ internal class PublicTimelineRemoteMediator(
                         service.notesGlobalTimeline(
                             NotesGlobalTimelineRequest(
                                 limit = state.config.pageSize,
-                                untilId = lastItem.timeline_status_key.id,
+                                untilId = lastItem.timeline.statusKey.id,
                             ),
                         )
                     }
@@ -53,7 +53,7 @@ internal class PublicTimelineRemoteMediator(
                     endOfPaginationReached = true,
                 )
             if (loadType == LoadType.REFRESH) {
-                database.dbPagingTimelineQueries.deletePaging(account.accountKey, pagingKey)
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = account.accountKey)
             }
             Misskey.save(
                 database = database,

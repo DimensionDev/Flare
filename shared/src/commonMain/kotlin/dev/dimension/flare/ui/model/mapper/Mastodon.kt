@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.cache.DbEmoji
+import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.datasource.guest.GuestDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusAction

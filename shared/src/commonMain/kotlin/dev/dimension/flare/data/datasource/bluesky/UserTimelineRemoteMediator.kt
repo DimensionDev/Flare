@@ -6,9 +6,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import app.bsky.feed.GetAuthorFeedFilter
 import app.bsky.feed.GetAuthorFeedQueryParams
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import sh.christian.ozone.api.Did
@@ -21,12 +21,12 @@ internal class UserTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val pagingKey: String,
     private val onlyMedia: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     var cursor: String? = null
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             val response =

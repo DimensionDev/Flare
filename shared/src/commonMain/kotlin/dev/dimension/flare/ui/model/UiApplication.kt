@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.data.database.app.DbApplication
+import dev.dimension.flare.data.database.app.model.DbApplication
 import dev.dimension.flare.data.network.mastodon.api.model.CreateApplicationResponse
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost

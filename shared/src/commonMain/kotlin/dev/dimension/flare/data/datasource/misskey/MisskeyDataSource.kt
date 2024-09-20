@@ -5,8 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOneNotNull
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
@@ -49,10 +47,7 @@ import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -189,21 +184,13 @@ class MisskeyDataSource(
                         .body()
                         ?.toDbUser(account.accountKey.host)
                         ?: throw Exception("User not found")
-                database.dbUserQueries.insert(
-                    user_key = user.user_key,
-                    platform_type = user.platform_type,
-                    name = user.name,
-                    handle = user.handle,
-                    host = user.host,
-                    content = user.content,
-                )
+                database.userDao().insert(user)
             },
             cacheSource = {
-                database.dbUserQueries
+                database
+                    .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Misskey)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.render(account.accountKey) }
+                    .mapNotNull { it?.render(account.accountKey) }
             },
         )
     }
@@ -218,21 +205,13 @@ class MisskeyDataSource(
                         .body()
                         ?.toDbUser(account.accountKey.host)
                         ?: throw Exception("User not found")
-                database.dbUserQueries.insert(
-                    user_key = user.user_key,
-                    platform_type = user.platform_type,
-                    name = user.name,
-                    handle = user.handle,
-                    host = user.host,
-                    content = user.content,
-                )
+                database.userDao().insert(user)
             },
             cacheSource = {
-                database.dbUserQueries
+                database
+                    .userDao()
                     .findByKey(userKey)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.render(account.accountKey) }
+                    .mapNotNull { it?.render(account.accountKey) }
             },
         )
     }
@@ -321,11 +300,10 @@ class MisskeyDataSource(
                 )
             },
             cacheSource = {
-                database.dbStatusQueries
+                database
+                    .statusDao()
                     .get(statusKey, account.accountKey)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .mapNotNull { it.content.render(account.accountKey, this) }
+                    .mapNotNull { it?.content?.render(account.accountKey, this) }
             },
         )
     }
@@ -340,17 +318,15 @@ class MisskeyDataSource(
                         ?.emojis
                         .orEmpty()
                         .toImmutableList()
-                database.dbEmojiQueries.insert(
-                    account.accountKey.host,
-                    emojis.toDb(account.accountKey.host).content,
+                database.emojiDao().insert(
+                    emojis.toDb(account.accountKey.host),
                 )
             },
             cacheSource = {
-                database.dbEmojiQueries
+                database
+                    .emojiDao()
                     .get(account.accountKey.host)
-                    .asFlow()
-                    .mapToOneNotNull(Dispatchers.IO)
-                    .map { it.toUi().toImmutableList() }
+                    .mapNotNull { it?.toUi()?.toImmutableList() }
             },
         )
 
@@ -421,13 +397,13 @@ class MisskeyDataSource(
             )
 
             // delete status from cache
-            database.dbStatusQueries.delete(
-                status_key = statusKey,
-                account_key = account.accountKey,
+            database.statusDao().delete(
+                statusKey = statusKey,
+                accountKey = account.accountKey,
             )
-            database.dbPagingTimelineQueries.deleteStatus(
-                account_key = account.accountKey,
-                status_key = statusKey,
+            database.pagingTimelineDao().deleteStatus(
+                accountKey = account.accountKey,
+                statusKey = statusKey,
             )
         }
     }

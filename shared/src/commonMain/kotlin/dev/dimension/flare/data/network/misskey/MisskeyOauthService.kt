@@ -7,7 +7,6 @@ import dev.dimension.flare.data.network.misskey.api.model.response.MiAuthCheckRe
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.appendPathSegments
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private val defaultPermission =
@@ -39,7 +38,6 @@ private val defaultPermission =
         "read:gallery-likes",
     )
 
-@OptIn(ExperimentalUuidApi::class)
 internal class MisskeyOauthService(
     private val host: String,
     private val name: String? = null,

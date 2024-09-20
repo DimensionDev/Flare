@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS DbSearchHistory (
-    search TEXT NOT NULL PRIMARY KEY,
-    created_at INTEGER NOT NULL
-);

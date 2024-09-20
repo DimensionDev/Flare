@@ -1,25 +1,24 @@
 package dev.dimension.flare.data.repository
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 internal class LocalFilterRepository(
     private val database: AppDatabase,
+    private val coroutineScope: CoroutineScope,
 ) {
     fun getAllFlow() =
-        database.dbKeywordFilterQueries
+        database
+            .keywordFilterDao()
             .selectAll()
-            .asFlow()
-            .mapToList(Dispatchers.IO)
             .map {
                 it
                     .map {
@@ -41,15 +40,14 @@ internal class LocalFilterRepository(
         forTimeline: Boolean = false,
         forNotification: Boolean = false,
         forSearch: Boolean = false,
-    ) = database.dbKeywordFilterQueries
+    ) = database
+        .keywordFilterDao()
         .selectNotExpiredFor(
             currentTime = Clock.System.now().toEpochMilliseconds(),
             forTimeline = if (forTimeline) 1L else 0L,
             forNotification = if (forNotification) 1L else 0L,
             forSearch = if (forSearch) 1L else 0L,
-        ).asFlow()
-        .mapToList(Dispatchers.IO)
-        .map {
+        ).map {
             it.map {
                 it.keyword
             }
@@ -61,13 +59,15 @@ internal class LocalFilterRepository(
         forNotification: Boolean,
         forSearch: Boolean,
         expiredAt: Instant?,
-    ) {
-        database.dbKeywordFilterQueries.insert(
-            keyword = keyword,
-            forTimeline = if (forTimeline) 1L else 0L,
-            forNotification = if (forNotification) 1L else 0L,
-            forSearch = if (forSearch) 1L else 0L,
-            expiredAt = expiredAt?.toEpochMilliseconds() ?: 0L,
+    ) = coroutineScope.launch {
+        database.keywordFilterDao().insert(
+            DbKeywordFilter(
+                keyword = keyword,
+                for_timeline = if (forTimeline) 1L else 0L,
+                for_notification = if (forNotification) 1L else 0L,
+                for_search = if (forSearch) 1L else 0L,
+                expired_at = expiredAt?.toEpochMilliseconds() ?: 0L,
+            ),
         )
     }
 
@@ -77,8 +77,8 @@ internal class LocalFilterRepository(
         forNotification: Boolean,
         forSearch: Boolean,
         expiredAt: Instant?,
-    ) {
-        database.dbKeywordFilterQueries.update(
+    ) = coroutineScope.launch {
+        database.keywordFilterDao().update(
             forTimeline = if (forTimeline) 1L else 0L,
             forNotification = if (forNotification) 1L else 0L,
             forSearch = if (forSearch) 1L else 0L,
@@ -87,11 +87,13 @@ internal class LocalFilterRepository(
         )
     }
 
-    fun delete(filter: String) {
-        database.dbKeywordFilterQueries.deleteByKeyword(filter)
-    }
+    fun delete(filter: String) =
+        coroutineScope.launch {
+            database.keywordFilterDao().deleteByKeyword(filter)
+        }
 
-    fun clear() {
-        database.dbKeywordFilterQueries.deleteAll()
-    }
+    fun clear() =
+        coroutineScope.launch {
+            database.keywordFilterDao().deleteAll()
+        }
 }

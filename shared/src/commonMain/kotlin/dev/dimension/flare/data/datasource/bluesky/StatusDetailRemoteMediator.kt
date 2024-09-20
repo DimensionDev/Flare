@@ -9,13 +9,16 @@ import app.bsky.feed.GetPostThreadResponseThreadUnion
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.ThreadViewPostParentUnion
 import app.bsky.feed.ThreadViewPostReplieUnion
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -25,10 +28,10 @@ internal class StatusDetailRemoteMediator(
     private val database: CacheDatabase,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             if (loadType != LoadType.REFRESH) {
@@ -36,14 +39,20 @@ internal class StatusDetailRemoteMediator(
                     endOfPaginationReached = true,
                 )
             }
-            if (!database.dbPagingTimelineQueries.existsPaging(accountKey, pagingKey).executeAsOne()) {
-                database.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()?.let {
-                    database.dbPagingTimelineQueries
-                        .insert(
-                            account_key = accountKey,
-                            status_key = statusKey,
-                            paging_key = pagingKey,
-                            sort_id = 0,
+            if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+                database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
+                    database
+                        .pagingTimelineDao()
+                        .insertAll(
+                            listOf(
+                                DbPagingTimeline(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                    pagingKey = pagingKey,
+                                    sortId = 0,
+                                    _id = Uuid.random().toString(),
+                                ),
+                            ),
                         )
                 }
             }

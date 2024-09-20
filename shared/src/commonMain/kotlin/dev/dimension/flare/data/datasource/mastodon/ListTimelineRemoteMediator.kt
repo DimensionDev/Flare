@@ -4,9 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -17,10 +17,10 @@ internal class ListTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             val response =
@@ -31,9 +31,7 @@ internal class ListTimelineRemoteMediator(
                                 listId = listId,
                                 limit = state.config.pageSize,
                             ).also {
-                                database.transaction {
-                                    database.dbPagingTimelineQueries.deletePaging(accountKey, pagingKey)
-                                }
+                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                             }
                     }
                     LoadType.PREPEND -> {
@@ -51,7 +49,7 @@ internal class ListTimelineRemoteMediator(
                         service.listTimeline(
                             listId = listId,
                             limit = state.config.pageSize,
-                            max_id = lastItem.timeline_status_key.id,
+                            max_id = lastItem.timeline.statusKey.id,
                         )
                     }
                 }

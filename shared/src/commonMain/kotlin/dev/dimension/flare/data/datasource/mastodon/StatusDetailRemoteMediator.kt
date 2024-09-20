@@ -4,11 +4,14 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import dev.dimension.flare.data.cache.DbPagingTimelineWithStatusView
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.coroutines.flow.firstOrNull
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -18,10 +21,10 @@ internal class StatusDetailRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatusView>() {
+) : RemoteMediator<Int, DbPagingTimelineView>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatusView>,
+        state: PagingState<Int, DbPagingTimelineView>,
     ): MediatorResult {
         return try {
             if (loadType != LoadType.REFRESH) {
@@ -29,14 +32,20 @@ internal class StatusDetailRemoteMediator(
                     endOfPaginationReached = true,
                 )
             }
-            if (!database.dbPagingTimelineQueries.existsPaging(accountKey, pagingKey).executeAsOne()) {
-                database.dbStatusQueries.get(statusKey, accountKey).executeAsOneOrNull()?.let {
-                    database.dbPagingTimelineQueries
-                        .insert(
-                            account_key = accountKey,
-                            status_key = statusKey,
-                            paging_key = pagingKey,
-                            sort_id = 0,
+            if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+                database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
+                    database
+                        .pagingTimelineDao()
+                        .insertAll(
+                            listOf(
+                                DbPagingTimeline(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                    pagingKey = pagingKey,
+                                    sortId = 0,
+                                    _id = Uuid.random().toString(),
+                                ),
+                            ),
                         )
                 }
             }

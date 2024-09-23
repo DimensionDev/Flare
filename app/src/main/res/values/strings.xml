@@ -25,6 +25,7 @@
     <string name="profile_header_button_following">Following</string>
     <string name="profile_header_button_requested">Requested</string>
     <string name="profile_header_button_blocked">Blocked</string>
+    <string name="profile_header_button_is_fans">Follows you</string>
 
     <string name="compose_title">Compose</string>
     <string name="compose_hint">What\'s happening?</string>
@@ -407,4 +408,7 @@
     <string name="feeds_discover_feeds_created_by">Created by %1$s</string>
     <string name="feeds_unsubscribe">Unsubscribe</string>
     <string name="feeds_subscribe">Subscribe</string>
+
+    <string name="profile_tab_timeline">Timeline</string>
+    <string name="profile_tab_media">Media</string>
 </resources>

@@ -14,7 +14,7 @@ internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
 
 internal fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
     driverFactory
-        .createBuilder<CacheDatabase>("cache.db")
+        .createBuilder<CacheDatabase>("cache.db", isCache = true)
         .fallbackToDestructiveMigration(dropAllTables = true)
         .setDriver(driverFactory.createSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)

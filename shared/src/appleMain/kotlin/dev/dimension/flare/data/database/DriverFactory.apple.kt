@@ -10,7 +10,10 @@ import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
 
 internal actual class DriverFactory {
-    actual inline fun <reified T : RoomDatabase> createBuilder(name: String): RoomDatabase.Builder<T> {
+    actual inline fun <reified T : RoomDatabase> createBuilder(
+        name: String,
+        isCache: Boolean,
+    ): RoomDatabase.Builder<T> {
         val dbFilePath = databaseDirPath() + "/$name"
         return Room.databaseBuilder<T>(
             name = dbFilePath,

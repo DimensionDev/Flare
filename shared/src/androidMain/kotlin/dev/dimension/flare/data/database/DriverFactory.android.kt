@@ -5,13 +5,22 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.AndroidSQLiteDriver
+import java.io.File
 
 internal actual class DriverFactory(
     private val context: Context,
 ) {
-    actual inline fun <reified T : RoomDatabase> createBuilder(name: String): RoomDatabase.Builder<T> {
+    actual inline fun <reified T : RoomDatabase> createBuilder(
+        name: String,
+        isCache: Boolean,
+    ): RoomDatabase.Builder<T> {
         val appContext = context.applicationContext
-        val dbFile = appContext.getDatabasePath(name)
+        val dbFile =
+            if (isCache) {
+                File(appContext.cacheDir, name)
+            } else {
+                appContext.getDatabasePath(name)
+            }
         return Room.databaseBuilder<T>(
             context = appContext,
             name = dbFile.absolutePath,

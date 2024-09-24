@@ -323,6 +323,8 @@
   <string name="edit_list_member_search_error">Не удалось найти пользователей</string>
   <string name="edit_list_member_add">Добавить</string>
   <string name="edit_list_member_remove">Удалить</string>
+  <string name="list_create_description">Описание списка</string>
+  <string name="list_create_description_hint">Описание списка</string>
   <string name="user_follow_edit_list">Добавить/Удалить из списка</string>
   <string name="edit_account_list_title">Редактировать список аккаунтов</string>
   <string name="edit_account_list_error">Не удалось загрузить списки</string>
@@ -332,4 +334,6 @@
   <string name="feeds_discover_feeds_created_by">Создано %1$s</string>
   <string name="feeds_unsubscribe">Отписаться</string>
   <string name="feeds_subscribe">Подписаться</string>
+  <string name="profile_tab_timeline">Хронология</string>
+  <string name="profile_tab_media">Медиа</string>
 </resources>

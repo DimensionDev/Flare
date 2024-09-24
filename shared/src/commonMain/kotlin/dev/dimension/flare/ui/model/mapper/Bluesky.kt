@@ -68,6 +68,11 @@ private fun parseBluesky(
     for (facet in facets) {
         val start = facet.index.byteStart.toInt()
         val end = facet.index.byteEnd.toInt()
+        // some facets may have same start
+        // for example: https://bsky.app/profile/technews4869.bsky.social/post/3l4vfqetv7t25
+        if (codePointIndex > start) {
+            continue
+        }
         val beforeFacetText = codePoints.drop(codePointIndex).take(start - codePointIndex).stringify()
         element.appendTextWithBr(beforeFacetText)
         val facetText = codePoints.drop(start).take(end - start).stringify()
@@ -686,6 +691,7 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
         likedCount = likeCount ?: 0,
         liked = viewer?.like?.atUri != null,
         platformType = PlatformType.Bluesky,
+        type = UiList.Type.Feed,
     )
 
 internal fun ListView.render(accountKey: MicroBlogKey) =

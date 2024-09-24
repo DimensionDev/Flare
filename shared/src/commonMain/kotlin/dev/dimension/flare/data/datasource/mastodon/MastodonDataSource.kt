@@ -929,11 +929,7 @@ class MastodonDataSource(
                     .lists()
                     .mapNotNull {
                         it.id?.let { it1 ->
-                            UiList(
-                                id = it1,
-                                title = it.title.orEmpty(),
-                                platformType = PlatformType.Mastodon,
-                            )
+                            it.render()
                         }
                     }.toImmutableList()
             },
@@ -995,13 +991,7 @@ class MastodonDataSource(
         MemCacheable(
             key = "listInfo_$listId",
             fetchSource = {
-                service.getList(listId).let {
-                    UiList(
-                        id = it.id ?: "",
-                        title = it.title.orEmpty(),
-                        platformType = PlatformType.Mastodon,
-                    )
-                }
+                service.getList(listId).render()
             },
         )
 
@@ -1093,12 +1083,7 @@ class MastodonDataSource(
                 MemCacheable.updateWith<List<UiList>>(
                     key = userListsKey(userKey),
                 ) {
-                    it +
-                        UiList(
-                            id = list.id,
-                            title = list.title.orEmpty(),
-                            platformType = PlatformType.Mastodon,
-                        )
+                    it + list.render()
                 }
             }
         }
@@ -1142,12 +1127,8 @@ class MastodonDataSource(
                 .accountLists(userKey.id)
                 .body()
                 ?.mapNotNull {
-                    it.id?.let { it1 ->
-                        UiList(
-                            id = it1,
-                            title = it.title.orEmpty(),
-                            platformType = PlatformType.Mastodon,
-                        )
+                    it.id?.let { _ ->
+                        it.render()
                     }
                 }.orEmpty()
                 .toImmutableList()

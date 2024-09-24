@@ -5,8 +5,12 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,10 +19,13 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,14 +50,17 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
 import compose.icons.fontawesomeicons.solid.Pen
+import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -63,6 +73,7 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.TabTitle
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
@@ -122,30 +133,88 @@ private fun TimelineScreen(
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    TabTitle(title = tabItem.metaData.title)
-                },
-                scrollBehavior = topAppBarScrollBehavior,
-                navigationIcon = {
-                    if (LocalBottomBarHeight.current != 0.dp) {
-                        state.user.onSuccess {
-                            IconButton(
-                                onClick = toQuickMenu,
-                            ) {
-                                AvatarComponent(it.avatar, size = 24.dp)
+            Column {
+                FlareTopAppBar(
+                    title = {
+                        TabTitle(title = tabItem.metaData.title)
+                    },
+                    scrollBehavior = topAppBarScrollBehavior,
+                    navigationIcon = {
+                        if (LocalBottomBarHeight.current != 0.dp) {
+                            state.user.onSuccess {
+                                IconButton(
+                                    onClick = toQuickMenu,
+                                ) {
+                                    AvatarComponent(it.avatar, size = 24.dp)
+                                }
                             }
                         }
-                    }
-                },
-                actions = {
-                    state.user.onError {
-                        TextButton(onClick = toLogin) {
-                            Text(text = stringResource(id = R.string.login_button))
+                    },
+                    actions = {
+                        state.user
+                            .onError {
+                                TextButton(onClick = toLogin) {
+                                    Text(text = stringResource(id = R.string.login_button))
+                                }
+                            }.onSuccess {
+                                if (tabItem is HomeTimelineTabItem) {
+                                    IconButton(
+                                        onClick = {
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Sliders,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                }
+                            }
+                    },
+                )
+                Box(
+                    modifier =
+                        Modifier
+                            .background(MaterialTheme.colorScheme.surface)
+                            .fillMaxWidth(),
+                ) {
+                    if (tabItem is HomeTimelineTabItem) {
+                        SecondaryScrollableTabRow(
+                            selectedTabIndex = 0,
+                            edgePadding = screenHorizontalPadding,
+                            divider = {},
+                        ) {
+                            Tab(
+                                selected = true,
+                                onClick = {},
+                            ) {
+                                Text(
+                                    "Home",
+                                    modifier =
+                                        Modifier
+                                            .padding(8.dp),
+                                )
+                            }
+                            Tab(
+                                selected = false,
+                                onClick = {},
+                            ) {
+                                Text(
+                                    "Home",
+                                    modifier =
+                                        Modifier
+                                            .padding(8.dp),
+                                )
+                            }
                         }
+                        HorizontalDivider(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth(),
+                        )
                     }
-                },
-            )
+                }
+            }
         },
         floatingActionButton = {
             state.user.onSuccess {

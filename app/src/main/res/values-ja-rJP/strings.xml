@@ -325,6 +325,8 @@
   <string name="edit_list_member_search_error">ユーザー検索に失敗しました</string>
   <string name="edit_list_member_add">追加</string>
   <string name="edit_list_member_remove">削除</string>
+  <string name="list_create_description">リストの説明</string>
+  <string name="list_create_description_hint">リストの説明</string>
   <string name="user_follow_edit_list">リストから追加/削除</string>
   <string name="edit_account_list_title">アカウント一覧を編集</string>
   <string name="edit_account_list_error">リストの読み込みに失敗しました</string>
@@ -334,4 +336,6 @@
   <string name="feeds_discover_feeds_created_by">作成者： %1$s</string>
   <string name="feeds_unsubscribe">購読解除</string>
   <string name="feeds_subscribe">購読する</string>
+  <string name="profile_tab_timeline">タイムライン</string>
+  <string name="profile_tab_media">メディア</string>
 </resources>

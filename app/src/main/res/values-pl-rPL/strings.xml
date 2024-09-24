@@ -324,6 +324,8 @@
   <string name="edit_list_member_search_error">Nie udało się wyszukać użytkowników</string>
   <string name="edit_list_member_add">Dodaj</string>
   <string name="edit_list_member_remove">Usuń</string>
+  <string name="list_create_description">Opis listy</string>
+  <string name="list_create_description_hint">Opis listy</string>
   <string name="user_follow_edit_list">Dodaj/Usuń z listy</string>
   <string name="edit_account_list_title">Edytuj listę kont</string>
   <string name="edit_account_list_error">Nie udało się załadować list</string>
@@ -333,4 +335,6 @@
   <string name="feeds_discover_feeds_created_by">Utworzone przez %1$s</string>
   <string name="feeds_unsubscribe">Anuluj subskrypcję</string>
   <string name="feeds_subscribe">Subskrybuj</string>
+  <string name="profile_tab_timeline">Oś czasu</string>
+  <string name="profile_tab_media">Media</string>
 </resources>

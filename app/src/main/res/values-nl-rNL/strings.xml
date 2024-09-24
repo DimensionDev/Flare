@@ -325,6 +325,8 @@
   <string name="edit_list_member_search_error">Zoeken naar gebruikers mislukt</string>
   <string name="edit_list_member_add">Toevoegen</string>
   <string name="edit_list_member_remove">Verwijderen</string>
+  <string name="list_create_description">Omschrijving lijst</string>
+  <string name="list_create_description_hint">Omschrijving lijst</string>
   <string name="user_follow_edit_list">Toevoegen/Verwijderen uit lijst</string>
   <string name="edit_account_list_title">Accountlijst bewerken</string>
   <string name="edit_account_list_error">Laden van lijsten mislukt</string>
@@ -334,4 +336,6 @@
   <string name="feeds_discover_feeds_created_by">Aangemaakt door %1$s</string>
   <string name="feeds_unsubscribe">Afmelden</string>
   <string name="feeds_subscribe">Abonneren</string>
+  <string name="profile_tab_timeline">Tijdlijn</string>
+  <string name="profile_tab_media">Medium</string>
 </resources>

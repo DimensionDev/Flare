@@ -19,6 +19,7 @@
   <string name="profile_header_button_following">正在关注</string>
   <string name="profile_header_button_requested">已申请</string>
   <string name="profile_header_button_blocked">已屏蔽</string>
+  <string name="profile_header_button_is_fans">关注了你</string>
   <string name="compose_title">发帖</string>
   <string name="compose_hint">发生什么事了？</string>
   <string name="compose_poll_option_hint">选项 %1$s</string>
@@ -77,7 +78,7 @@
   <string name="misskey_notification_item_followed_you">关注了你</string>
   <string name="misskey_notification_item_requested_follow">向你发送了关注请求</string>
   <string name="misskey_item_reblogged_status">转了你的帖子</string>
-  <string name="xqt_item_reblogged_status">转发了你的推文</string>
+  <string name="xqt_item_reblogged_status">转发了推文</string>
   <string name="xqt_item_mention_status">提及了您</string>
   <string name="mastodon_visibility_public">公开</string>
   <string name="mastodon_visibility_unlisted">不公开</string>
@@ -326,6 +327,8 @@
   <string name="edit_list_member_search_error">搜索用户失败</string>
   <string name="edit_list_member_add">添加</string>
   <string name="edit_list_member_remove">删除账户</string>
+  <string name="list_create_description">列表描述</string>
+  <string name="list_create_description_hint">列表描述</string>
   <string name="user_follow_edit_list">加入/移出列表</string>
   <string name="edit_account_list_title">编辑帐户列表</string>
   <string name="edit_account_list_error">无法加载列表</string>
@@ -335,4 +338,6 @@
   <string name="feeds_discover_feeds_created_by">由%1$s创建</string>
   <string name="feeds_unsubscribe">取消订阅</string>
   <string name="feeds_subscribe">订阅</string>
+  <string name="profile_tab_timeline">时间线</string>
+  <string name="profile_tab_media">媒体</string>
 </resources>

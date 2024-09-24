@@ -325,6 +325,8 @@
   <string name="edit_list_member_search_error">Căutarea utilizatorilor a eșuat</string>
   <string name="edit_list_member_add">Adăugare</string>
   <string name="edit_list_member_remove">Elimină</string>
+  <string name="list_create_description">Descriere listă</string>
+  <string name="list_create_description_hint">Descriere listă</string>
   <string name="user_follow_edit_list">Adăugare/Eliminare din listă</string>
   <string name="edit_account_list_title">Editare listă de conturi</string>
   <string name="edit_account_list_error">Încărcarea listelor a eșuat</string>
@@ -334,4 +336,6 @@
   <string name="feeds_discover_feeds_created_by">Creat de %1$s</string>
   <string name="feeds_unsubscribe">Dezabonare</string>
   <string name="feeds_subscribe">Abonează-te</string>
+  <string name="profile_tab_timeline">Cronologie</string>
+  <string name="profile_tab_media">Media</string>
 </resources>

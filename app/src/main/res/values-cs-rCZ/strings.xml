@@ -325,6 +325,8 @@
   <string name="edit_list_member_search_error">Nepodařilo se vyhledat uživatele</string>
   <string name="edit_list_member_add">Přidat</string>
   <string name="edit_list_member_remove">Odebrat</string>
+  <string name="list_create_description">Popis seznamu</string>
+  <string name="list_create_description_hint">Popis seznamu</string>
   <string name="user_follow_edit_list">Přidat/Odebrat ze seznamu</string>
   <string name="edit_account_list_title">Upravit seznam účtů</string>
   <string name="edit_account_list_error">Nepodařilo se načíst seznamy</string>
@@ -334,4 +336,6 @@
   <string name="feeds_discover_feeds_created_by">Vytvořil %1$s</string>
   <string name="feeds_unsubscribe">Odhlásit odběr</string>
   <string name="feeds_subscribe">Odebírat</string>
+  <string name="profile_tab_timeline">Časová osa</string>
+  <string name="profile_tab_media">Média</string>
 </resources>

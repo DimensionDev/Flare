@@ -322,6 +322,8 @@
   <string name="edit_list_member_search_error">Помилка пошуку користувачів</string>
   <string name="edit_list_member_add">Додати</string>
   <string name="edit_list_member_remove">Видалити</string>
+  <string name="list_create_description">Список описів</string>
+  <string name="list_create_description_hint">Список описів</string>
   <string name="user_follow_edit_list">Додати/видалити зі списку</string>
   <string name="edit_account_list_title">Редагувати обліковий запис</string>
   <string name="edit_account_list_error">Не вдалося завантажити списки</string>
@@ -331,4 +333,6 @@
   <string name="feeds_discover_feeds_created_by">Створено %1$s</string>
   <string name="feeds_unsubscribe">Відмовитися від підписки</string>
   <string name="feeds_subscribe">Підписатися</string>
+  <string name="profile_tab_timeline">Хронологія</string>
+  <string name="profile_tab_media">Медіа</string>
 </resources>

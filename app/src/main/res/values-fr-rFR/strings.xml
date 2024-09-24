@@ -325,6 +325,8 @@
   <string name="edit_list_member_search_error">Impossible de rechercher des utilisateurs</string>
   <string name="edit_list_member_add">Ajouter</string>
   <string name="edit_list_member_remove">Retirer</string>
+  <string name="list_create_description">Description de la liste</string>
+  <string name="list_create_description_hint">Description de la liste</string>
   <string name="user_follow_edit_list">Ajouter/Retirer de la liste</string>
   <string name="edit_account_list_title">Editer la liste des comptes</string>
   <string name="edit_account_list_error">Impossible de charger les listes</string>
@@ -334,4 +336,6 @@
   <string name="feeds_discover_feeds_created_by">Créé par %1$s</string>
   <string name="feeds_unsubscribe">Se désabonner</string>
   <string name="feeds_subscribe">S\'abonner</string>
+  <string name="profile_tab_timeline">Échéancier</string>
+  <string name="profile_tab_media">Médias</string>
 </resources>

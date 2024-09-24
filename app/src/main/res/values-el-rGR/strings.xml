@@ -320,6 +320,8 @@
   <string name="edit_list_member_search_error">Αποτυχία αναζήτησης χρηστών</string>
   <string name="edit_list_member_add">Προσθήκη</string>
   <string name="edit_list_member_remove">Αφαίρεση</string>
+  <string name="list_create_description">Περιγραφή λίστας</string>
+  <string name="list_create_description_hint">Περιγραφή λίστας</string>
   <string name="user_follow_edit_list">Προσθήκη/αφαίρεση από τη λίστα</string>
   <string name="edit_account_list_title">Επεξεργασία λίστας λογαριασμών</string>
   <string name="edit_account_list_error">Αποτυχία φόρτωσης λιστών</string>
@@ -329,4 +331,6 @@
   <string name="feeds_discover_feeds_created_by">Δημιουργήθηκε από %1$s</string>
   <string name="feeds_unsubscribe">Διαγραφή</string>
   <string name="feeds_subscribe">Εγγραφή</string>
+  <string name="profile_tab_timeline">Χρονοδιάγραμμα</string>
+  <string name="profile_tab_media">Πολυμέσα</string>
 </resources>

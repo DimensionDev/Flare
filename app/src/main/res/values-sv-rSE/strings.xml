@@ -325,6 +325,8 @@
   <string name="edit_list_member_search_error">Misslyckades med att söka användare</string>
   <string name="edit_list_member_add">Lägg till</string>
   <string name="edit_list_member_remove">Radera</string>
+  <string name="list_create_description">Lista beskrivning</string>
+  <string name="list_create_description_hint">Lista beskrivning</string>
   <string name="user_follow_edit_list">Lägg till/ta bort från listan</string>
   <string name="edit_account_list_title">Redigera kontolista</string>
   <string name="edit_account_list_error">Det gick inte att ladda listor</string>
@@ -334,4 +336,6 @@
   <string name="feeds_discover_feeds_created_by">Skapad av %1$s</string>
   <string name="feeds_unsubscribe">Avprenumerera</string>
   <string name="feeds_subscribe">Prenumerera</string>
+  <string name="profile_tab_timeline">Tidslinje</string>
+  <string name="profile_tab_media">Media</string>
 </resources>

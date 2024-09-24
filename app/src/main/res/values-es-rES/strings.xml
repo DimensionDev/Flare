@@ -324,6 +324,8 @@
   <string name="edit_list_member_search_error">Error al buscar usuarios</string>
   <string name="edit_list_member_add">Añadir</string>
   <string name="edit_list_member_remove">Eliminar</string>
+  <string name="list_create_description">Descripción de lista</string>
+  <string name="list_create_description_hint">Descripción de lista</string>
   <string name="user_follow_edit_list">Agregar/Quitar de la lista</string>
   <string name="edit_account_list_title">Editar lista de cuentas</string>
   <string name="edit_account_list_error">Error al cargar las listas</string>
@@ -333,4 +335,6 @@
   <string name="feeds_discover_feeds_created_by">Creado por %1$s</string>
   <string name="feeds_unsubscribe">Darse de baja</string>
   <string name="feeds_subscribe">Suscribirse</string>
+  <string name="profile_tab_timeline">Línea de tiempo</string>
+  <string name="profile_tab_media">Medios</string>
 </resources>

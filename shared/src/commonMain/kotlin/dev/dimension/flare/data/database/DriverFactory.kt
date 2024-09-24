@@ -4,7 +4,10 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.SQLiteDriver
 
 internal expect class DriverFactory {
-    inline fun <reified T : RoomDatabase> createBuilder(name: String): RoomDatabase.Builder<T>
+    inline fun <reified T : RoomDatabase> createBuilder(
+        name: String,
+        isCache: Boolean = false,
+    ): RoomDatabase.Builder<T>
 
     fun createSQLiteDriver(): SQLiteDriver
 

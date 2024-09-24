@@ -701,6 +701,7 @@ private fun ProfileScreen(
                                             LazyStatusVerticalStaggeredGrid(
                                                 state = listState,
                                                 contentPadding = PaddingValues(vertical = 8.dp),
+                                                modifier = Modifier.fillMaxSize(),
                                             ) {
                                                 status(state.state.listState)
                                             }
@@ -710,6 +711,7 @@ private fun ProfileScreen(
                                                 onItemClicked = { statusKey, index, preview ->
                                                     onMediaClick(statusKey, index, preview)
                                                 },
+                                                modifier = Modifier.fillMaxSize(),
                                             )
                                         }
                                     }

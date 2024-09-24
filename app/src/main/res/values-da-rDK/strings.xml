@@ -325,6 +325,8 @@
   <string name="edit_list_member_search_error">Kunne ikke søge brugere</string>
   <string name="edit_list_member_add">Tilføj</string>
   <string name="edit_list_member_remove">Fjern</string>
+  <string name="list_create_description">Liste beskrivelse</string>
+  <string name="list_create_description_hint">Liste beskrivelse</string>
   <string name="user_follow_edit_list">Tilføj/Fjern fra liste</string>
   <string name="edit_account_list_title">Rediger kontoliste</string>
   <string name="edit_account_list_error">Kunne ikke indlæse lister</string>
@@ -334,4 +336,6 @@
   <string name="feeds_discover_feeds_created_by">Oprettet af %1$s</string>
   <string name="feeds_unsubscribe">Afmeld</string>
   <string name="feeds_subscribe">Abonnér</string>
+  <string name="profile_tab_timeline">Tidslinje</string>
+  <string name="profile_tab_media">Medier</string>
 </resources>

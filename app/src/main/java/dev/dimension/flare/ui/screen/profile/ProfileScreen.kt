@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.profile
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -665,33 +664,40 @@ private fun ProfileScreen(
                         },
                         content = {
                             Column {
-                                AnimatedVisibility(state.profileTabs.size > 1) {
-                                    SecondaryScrollableTabRow(
-                                        selectedTabIndex = pagerState.currentPage,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        edgePadding = screenHorizontalPadding,
-                                        divider = {},
-                                    ) {
-                                        state.profileTabs.forEachIndexed { index, profileTab ->
-                                            Tab(
-                                                selected = pagerState.currentPage == index,
-                                                onClick = {
-                                                    scope.launch {
-                                                        pagerState.animateScrollToPage(index)
-                                                    }
-                                                },
-                                            ) {
-                                                Text(
-                                                    profileTab.title,
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(8.dp),
-                                                )
+                                Box {
+                                    if (state.profileTabs.size > 1) {
+                                        SecondaryScrollableTabRow(
+                                            selectedTabIndex = pagerState.currentPage,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            edgePadding = screenHorizontalPadding,
+                                            divider = {},
+                                        ) {
+                                            state.profileTabs.forEachIndexed { index, profileTab ->
+                                                Tab(
+                                                    selected = pagerState.currentPage == index,
+                                                    onClick = {
+                                                        scope.launch {
+                                                            pagerState.animateScrollToPage(index)
+                                                        }
+                                                    },
+                                                ) {
+                                                    Text(
+                                                        profileTab.title,
+                                                        modifier =
+                                                            Modifier
+                                                                .padding(8.dp),
+                                                    )
+                                                }
                                             }
                                         }
                                     }
+                                    HorizontalDivider(
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.BottomCenter)
+                                                .fillMaxWidth(),
+                                    )
                                 }
-                                HorizontalDivider()
                                 HorizontalPager(
                                     state = pagerState,
                                 ) { index ->

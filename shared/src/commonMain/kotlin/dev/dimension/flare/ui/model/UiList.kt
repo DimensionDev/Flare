@@ -14,8 +14,14 @@ data class UiList(
     val likedCount: Long = 0,
     val liked: Boolean = false,
     val platformType: PlatformType,
+    val type: Type = Type.List,
 ) {
     val likedCountHumanized by lazy {
         likedCount.humanize()
+    }
+
+    enum class Type {
+        Feed,
+        List,
     }
 }

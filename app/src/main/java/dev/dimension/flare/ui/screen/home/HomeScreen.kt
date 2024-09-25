@@ -70,6 +70,7 @@ import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.BlueskyFeedsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.HomeTimelineRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ListScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
@@ -93,6 +94,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DiscoverTabItem
+import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.NotificationTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.SettingsTabItem
@@ -746,6 +748,10 @@ private fun getDirection(
             MeRouteDestination(accountType)
         }
 
+        is HomeTimelineTabItem -> {
+            HomeTimelineRouteDestination(accountType)
+        }
+
         is TimelineTabItem -> {
             TimelineRouteDestination(tab)
         }
@@ -1019,7 +1025,7 @@ internal fun RegisterTabCallback(lazyListState: LazyStaggeredGridState) {
                 }
             }
         }
-    DisposableEffect(tabState, callback) {
+    DisposableEffect(tabState, callback, lazyListState) {
         tabState.registerCallback(callback)
         onDispose {
             tabState.unregisterCallback(callback)

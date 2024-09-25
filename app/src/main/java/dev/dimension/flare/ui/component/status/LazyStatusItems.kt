@@ -275,6 +275,7 @@ internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
     ) {
+        Spacer(modifier = Modifier.height(4.dp))
         UserPlaceholder()
         Spacer(modifier = Modifier.height(8.dp))
         Text(

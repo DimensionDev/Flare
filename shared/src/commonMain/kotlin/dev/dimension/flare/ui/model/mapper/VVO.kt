@@ -6,6 +6,7 @@ import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonList
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -13,6 +14,7 @@ import dev.dimension.flare.data.network.vvo.model.User
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
@@ -510,3 +512,10 @@ private fun replaceMentionAndHashtag(
         }
     }
 }
+
+internal fun MastodonList.render(): UiList =
+    UiList(
+        id = id.orEmpty(),
+        title = title.orEmpty(),
+        platformType = PlatformType.Mastodon,
+    )

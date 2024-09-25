@@ -340,4 +340,5 @@
   <string name="feeds_subscribe">订阅</string>
   <string name="profile_tab_timeline">时间线</string>
   <string name="profile_tab_media">媒体</string>
+  <string name="tab_settings_title">标签设置</string>
 </resources>

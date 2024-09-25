@@ -49,6 +49,7 @@ import java.io.OutputStream
 data class TabSettings(
     val items: List<TabItem> = TimelineTabItem.default,
     val secondaryItems: List<TabItem>? = null,
+    val homeTabs: Map<MicroBlogKey, List<TimelineTabItem>> = mapOf(),
 )
 
 @Serializable
@@ -562,6 +563,15 @@ data class HomeTimelineTabItem(
     override fun createPresenter(): TimelinePresenter = HomeTimelinePresenter(account)
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    constructor(accountType: AccountType) :
+        this(
+            account = accountType,
+            metaData =
+                TabMetaData(
+                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
+                    icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                ),
+        )
 }
 
 @Serializable

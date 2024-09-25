@@ -67,6 +67,7 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -75,7 +76,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -230,6 +230,12 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                     state.addTab(it)
                                     state.setAddTab(false)
                                 },
+                        trailingContent = {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.Plus,
+                                contentDescription = stringResource(id = R.string.tab_settings_add),
+                            )
+                        },
                     )
                 }
 
@@ -263,6 +269,12 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                                 state.addTab(tab)
                                                 state.setAddTab(false)
                                             },
+                                    trailingContent = {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Plus,
+                                            contentDescription = stringResource(id = R.string.tab_settings_add),
+                                        )
+                                    },
                                 )
                             }
                         }
@@ -654,8 +666,7 @@ private fun allTabsPresenter(except: ImmutableList<String>) =
                                         }.toImmutableList()
                                 }.flatMap { items ->
                                     userState.flatMap { user ->
-                                        dynamicTabPresenter(profile = user)
-                                            .items
+                                        dynamicTabPresenter(accountKey = user.key)
                                             .map { dynTabs ->
                                                 items + dynTabs
                                             }.map {
@@ -673,60 +684,54 @@ private fun allTabsPresenter(except: ImmutableList<String>) =
     }
 
 @Composable
-private fun dynamicTabPresenter(profile: UiProfile) =
+internal fun dynamicTabPresenter(accountKey: MicroBlogKey) =
     run {
         val state =
-            remember(profile) {
-                PinnableListPresenter(accountType = AccountType.Specific(profile.key))
+            remember(accountKey) {
+                PinnableListPresenter(accountType = AccountType.Specific(accountKey))
             }.invoke()
-        val items =
-            remember(state.items) {
-                state.items
-                    .map {
-                        it.map {
-                            // TODO: get feed out of list
-                            if (it.type == UiList.Type.Feed) {
-                                Bluesky.FeedTabItem(
-                                    account = AccountType.Specific(profile.key),
-                                    uri = it.id,
-                                    metaData =
-                                        TabMetaData(
-                                            title = TitleType.Text(it.title),
-                                            icon =
-                                                IconType.Mixed(
-                                                    icon = IconType.Material.MaterialIcon.List,
-                                                    userKey = profile.key,
-                                                ),
-                                        ),
-                                )
-                            } else {
-                                ListTimelineTabItem(
-                                    account = AccountType.Specific(profile.key),
-                                    listId = it.id,
-                                    metaData =
-                                        TabMetaData(
-                                            title = TitleType.Text(it.title),
-                                            icon =
-                                                IconType.Mixed(
-                                                    icon = IconType.Material.MaterialIcon.List,
-                                                    userKey = profile.key,
-                                                ),
-                                        ),
-                                )
-                            }
+        remember(state.items) {
+            state.items
+                .map {
+                    it.map {
+                        // TODO: get feed out of list
+                        if (it.type == UiList.Type.Feed) {
+                            Bluesky.FeedTabItem(
+                                account = AccountType.Specific(accountKey),
+                                uri = it.id,
+                                metaData =
+                                    TabMetaData(
+                                        title = TitleType.Text(it.title),
+                                        icon =
+                                            IconType.Mixed(
+                                                icon = IconType.Material.MaterialIcon.List,
+                                                userKey = accountKey,
+                                            ),
+                                    ),
+                            )
+                        } else {
+                            ListTimelineTabItem(
+                                account = AccountType.Specific(accountKey),
+                                listId = it.id,
+                                metaData =
+                                    TabMetaData(
+                                        title = TitleType.Text(it.title),
+                                        icon =
+                                            IconType.Mixed(
+                                                icon = IconType.Material.MaterialIcon.List,
+                                                userKey = accountKey,
+                                            ),
+                                    ),
+                            )
                         }
-                    }.flatMap(
-                        onError = {
-                            UiState.Success(persistentListOf())
-                        },
-                    ) {
-                        UiState.Success(it)
                     }
-            }
-
-        object {
-            val items =
-                items.map {
+                }.flatMap(
+                    onError = {
+                        UiState.Success(persistentListOf())
+                    },
+                ) {
+                    UiState.Success(it)
+                }.map {
                     it.toImmutableList()
                 }
         }

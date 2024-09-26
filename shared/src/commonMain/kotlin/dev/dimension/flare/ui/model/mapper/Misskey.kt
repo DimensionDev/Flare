@@ -124,6 +124,7 @@ internal fun Notification.render(
                     launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
                 }
             },
+            statusKey = MicroBlogKey(id, accountKey.host),
         )
     return UiTimeline(
         topMessage = topMessage,
@@ -241,6 +242,8 @@ internal fun Note.render(
 ): UiTimeline {
     val user = user.render(accountKey)
     val renote = (references[ReferenceType.Retweet] as? StatusContent.Misskey)?.data
+    val currentStatus = this.renderStatus(accountKey, event)
+    val actualStatus = renote ?: this
     val topMessage =
         if (renote == null || !text.isNullOrEmpty()) {
             null
@@ -257,10 +260,9 @@ internal fun Note.render(
                         ),
                     )
                 },
+                statusKey = currentStatus.statusKey,
             )
         }
-    val currentStatus = this.renderStatus(accountKey, event)
-    val actualStatus = renote ?: this
     return UiTimeline(
         topMessage = topMessage,
         content =
@@ -273,7 +275,6 @@ internal fun Note.render(
                         ),
                     )
                 },
-                statusKey = currentStatus.statusKey,
             ),
         platformType = PlatformType.Misskey,
     )

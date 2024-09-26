@@ -42,6 +42,7 @@ internal fun Status.render(
                             .Custom(it),
                     onClicked = {
                     },
+                    statusKey = MicroBlogKey(id, vvoHost),
                 )
             },
         content = renderStatus(accountKey, event),
@@ -454,6 +455,7 @@ internal fun Attitude.render(
                         )
                     }
                 },
+                statusKey = MicroBlogKey(id.toString(), vvoHost),
             ),
         content = content,
         platformType = PlatformType.VVo,

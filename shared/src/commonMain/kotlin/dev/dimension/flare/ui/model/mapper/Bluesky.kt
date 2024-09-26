@@ -160,6 +160,7 @@ internal fun FeedViewPostReasonUnion.render(
                             ),
                         )
                     },
+                    statusKey = MicroBlogKey(id = data?.uri?.atUri.orEmpty(), host = accountKey.host),
                 )
             },
         content = data?.renderStatus(accountKey, event),
@@ -198,6 +199,7 @@ internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiT
                 onClicked = {
                     launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
                 },
+                statusKey = MicroBlogKey(id = uri.atUri, host = accountKey.host),
             ),
         content = UiTimeline.ItemContent.User(author.render(accountKey)),
         platformType = PlatformType.Bluesky,

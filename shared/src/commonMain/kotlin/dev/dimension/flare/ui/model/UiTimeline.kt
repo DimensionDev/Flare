@@ -149,6 +149,7 @@ data class UiTimeline internal constructor(
         val icon: Icon,
         val type: MessageType,
         val onClicked: ClickContext.() -> Unit,
+        val statusKey: MicroBlogKey,
     ) {
         val itemKey: String
             get() =
@@ -158,6 +159,7 @@ data class UiTimeline internal constructor(
                     if (user != null) {
                         append(user.key)
                     }
+                    append(statusKey.toString())
                 }
 
         enum class Icon {

@@ -143,6 +143,7 @@ internal fun TopLevel.renderNotifications(
                                     launcher.launch(url)
                                 }
                             },
+                            statusKey = MicroBlogKey(id = notification.id.orEmpty(), host = accountKey.host),
                         ),
                     content = itemContent,
                     platformType = PlatformType.xQt,
@@ -188,6 +189,7 @@ internal fun TopLevel.renderNotifications(
                             onClicked = {
                                 launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = renderedUser.key))
                             },
+                            statusKey = MicroBlogKey(id = notification?.id.orEmpty(), host = accountKey.host),
                         ),
                     content = data,
                     platformType = PlatformType.xQt,
@@ -220,6 +222,7 @@ internal fun Tweet.render(
                 onClicked = {
                     launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
                 },
+                statusKey = currentTweet.statusKey,
             )
         } else {
             null
@@ -235,7 +238,6 @@ internal fun Tweet.render(
                         ),
                     )
                 },
-                statusKey = currentTweet.statusKey,
             ),
         topMessage = topMessage,
         platformType = PlatformType.xQt,

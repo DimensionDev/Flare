@@ -85,6 +85,7 @@ internal fun Notification.render(
                         ),
                     )
                 },
+                statusKey = MicroBlogKey(id ?: "", accountKey.host),
             )
         }
     return UiTimeline(
@@ -107,6 +108,8 @@ internal fun Status.render(
 ): UiTimeline {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey)
+    val currentStatus = this.renderStatus(accountKey, event)
+    val actualStatus = (references[ReferenceType.Retweet] as? StatusContent.Mastodon)?.data ?: this
     val topMessage =
         if (reblog == null) {
             null
@@ -123,10 +126,9 @@ internal fun Status.render(
                         ),
                     )
                 },
+                statusKey = currentStatus.statusKey,
             )
         }
-    val currentStatus = this.renderStatus(accountKey, event)
-    val actualStatus = (references[ReferenceType.Retweet] as? StatusContent.Mastodon)?.data ?: this
     return UiTimeline(
         topMessage = topMessage,
         content =
@@ -139,7 +141,6 @@ internal fun Status.render(
                         ),
                     )
                 },
-                statusKey = currentStatus.statusKey,
             ),
         platformType = PlatformType.Mastodon,
     )

@@ -622,7 +622,7 @@
     <string name="misskey_achievement_clicked_click_here_description">You\'ve clicked here</string>
 
     <string name="misskey_achievement_just_plain_lucky_title">Just Plain Lucky</string>
-    <string name="misskey_achievement_just_plain_lucky_description">Has a chance to be obtained with a probability of 0.005% every 10 seconds</string>
+    <string name="misskey_achievement_just_plain_lucky_description">Has a chance to be obtained with a probability of 0.005\% every 10 seconds</string>
 
     <string name="misskey_achievement_set_name_to_syuilo_title">God Complex</string>
     <string name="misskey_achievement_set_name_to_syuilo_description">Set your name to \"syuilo\"</string>

@@ -16,21 +16,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -112,9 +107,11 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.isSuccess
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
@@ -183,398 +180,264 @@ internal fun HomeScreen(
                 )
             val actualLayoutType = state.navigationState.type ?: layoutType
             FlareTheme {
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
-                        ModalDrawerSheet(
-                            content = {
-                                Column(
-                                    modifier =
-                                        Modifier
-//                                            .padding(horizontal = 12.dp)
-                                            .weight(1f)
-                                            .verticalScroll(rememberScrollState()),
-                                ) {
-                                    DrawerHeader(
-                                        accountTypeState = accountTypeState,
-                                        currentTab = currentTab,
-//                                        navController = navController,
-                                        showFab = layoutType != NavigationSuiteType.NavigationBar,
-                                        toAccoutSwitcher = {
-                                            state.setShowAccountSelection(true)
-                                        },
-                                        toCompose = {
-                                            navController.toDestinationsNavigator().navigate(
-                                                direction =
-                                                    ComposeRouteDestination(
-                                                        it,
-                                                    ),
-                                            )
-                                        },
-                                        toProfile = {
-                                            state.tabs.onSuccess {
-                                                val key = it.extraProfileRoute?.tabItem?.key
-                                                if (key != null) {
-                                                    navController.navigate(key) {
-                                                        popUpTo(navController.graph.findStartDestination().id) {
-                                                            saveState = true
-                                                        }
-                                                        launchSingleTop = true
-                                                        restoreState = true
-                                                    }
-                                                    scope.launch {
-                                                        drawerState.close()
-                                                    }
-                                                }
+                NavigationSuiteScaffold2(
+                    layoutType = actualLayoutType,
+                    modifier = modifier,
+                    drawerHeader = {
+                        DrawerHeader(
+                            accountTypeState,
+                            currentTab,
+                            toAccoutSwitcher = {
+                                state.setShowAccountSelection(true)
+                            },
+                            showFab = actualLayoutType == NavigationSuiteType.NavigationDrawer,
+                            toCompose = {
+                                navController.toDestinationsNavigator().navigate(
+                                    direction =
+                                        ComposeRouteDestination(
+                                            it,
+                                        ),
+                                )
+                            },
+                            toProfile = {
+                                state.tabs.onSuccess {
+                                    val key = it.extraProfileRoute?.tabItem?.key
+                                    if (key != null) {
+                                        navController.navigate(key) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
                                             }
-                                        },
-                                    )
-                                    if (layoutType != NavigationSuiteType.NavigationBar) {
-                                        tabs.primary.forEach { (tab, tabState) ->
-                                            NavigationDrawerItem(
-                                                selected = currentRoute == tab.key,
-                                                onClick = {
-                                                    if (currentRoute == tab.key) {
-                                                        tabState.onClick()
-                                                    } else {
-                                                        navController.navigate(tab.key) {
-                                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                                saveState = true
-                                                            }
-                                                            launchSingleTop = true
-                                                            restoreState = true
-                                                        }
-                                                    }
-                                                    scope.launch {
-                                                        drawerState.close()
-                                                    }
-                                                },
-                                                icon = {
-                                                    TabIcon(
-                                                        accountType = tab.account,
-                                                        icon = tab.metaData.icon,
-                                                        title = tab.metaData.title,
-                                                    )
-                                                },
-                                                label = {
-                                                    TabTitle(
-                                                        title = tab.metaData.title,
-                                                    )
-                                                },
-                                            )
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
-                                    }
-                                    if (tabs.secondary.isNotEmpty()) {
-                                        HorizontalDivider()
-                                    }
-                                    tabs.secondary.forEach { (tab, tabState) ->
-                                        NavigationDrawerItem(
-                                            selected = currentRoute == tab.key,
-                                            onClick = {
-                                                if (currentRoute == tab.key) {
-                                                    tabState.onClick()
-                                                } else {
-                                                    navController.navigate(tab.key) {
-                                                        popUpTo(navController.graph.findStartDestination().id) {
-                                                            saveState = true
-                                                        }
-                                                        launchSingleTop = true
-                                                        restoreState = true
-                                                    }
-                                                }
-                                                scope.launch {
-                                                    drawerState.close()
-                                                }
-                                            },
-                                            icon = {
-                                                TabIcon(
-                                                    accountType = tab.account,
-                                                    icon = tab.metaData.icon,
-                                                    title = tab.metaData.title,
-                                                    iconOnly = tabs.secondaryIconOnly,
-                                                )
-                                            },
-                                            label = {
-                                                TabTitle(
-                                                    title = tab.metaData.title,
-                                                )
-                                            },
-                                        )
-                                    }
-                                }
-                                NavigationDrawerItem(
-                                    label = {
-                                        Text(stringResource(R.string.settings_title))
-                                    },
-                                    selected = currentRoute == SettingsRouteDestination.route,
-                                    onClick = {
-                                        navController
-                                            .navigate(SettingsRouteDestination.route) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
                                         scope.launch {
                                             drawerState.close()
                                         }
-                                    },
-                                    icon = {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Gear,
-                                            contentDescription = stringResource(R.string.settings_title),
-                                        )
-                                    },
-                                )
+                                    }
+                                }
                             },
                         )
                     },
-                    gesturesEnabled =
-                        state.navigationState.drawerEnabled &&
-                            actualLayoutType != NavigationSuiteType.NavigationDrawer &&
-                            accountTypeState.user.isSuccess,
-                ) {
-                    NavigationSuiteScaffold2(
-                        layoutType = actualLayoutType,
-                        modifier = modifier,
-                        drawerHeader = {
-                            DrawerHeader(
-                                accountTypeState,
-                                currentTab,
-                                toAccoutSwitcher = {
-                                    state.setShowAccountSelection(true)
+                    railHeader = {
+                        accountTypeState.user.onSuccess {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
                                 },
-                                toCompose = {
-                                    navController.toDestinationsNavigator().navigate(
-                                        direction =
-                                            ComposeRouteDestination(
-                                                it,
-                                            ),
-                                    )
+                            ) {
+                                AvatarComponent(it.avatar)
+                            }
+                            FloatingActionButton(
+                                onClick = {
+                                    currentTab?.let {
+                                        navController.toDestinationsNavigator().navigate(
+                                            direction =
+                                                ComposeRouteDestination(
+                                                    it.account,
+                                                ),
+                                        )
+                                    }
                                 },
-                                toProfile = {
-                                    state.tabs.onSuccess {
-                                        val key = it.extraProfileRoute?.tabItem?.key
-                                        if (key != null) {
-                                            navController.navigate(key) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
+                                elevation =
+                                    FloatingActionButtonDefaults.elevation(
+                                        defaultElevation = 0.dp,
+                                    ),
+                            ) {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Pen,
+                                    contentDescription = stringResource(id = R.string.compose_title),
+                                )
+                            }
+                        }
+                    },
+                    navigationSuiteItems = {
+                        tabs.primary.forEach { (tab, tabState, badgeState) ->
+                            item(
+                                selected = currentRoute == tab.key,
+                                onClick = {
+                                    if (currentRoute == tab.key) {
+                                        tabState.onClick()
+                                    } else {
+                                        navController.navigate(tab.key) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
                                             }
-                                            scope.launch {
-                                                drawerState.close()
-                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
                                     }
+                                },
+                                icon = {
+                                    TabIcon(
+                                        accountType = tab.account,
+                                        icon = tab.metaData.icon,
+                                        title = tab.metaData.title,
+                                    )
+                                },
+                                label = {
+                                    TabTitle(
+                                        title = tab.metaData.title,
+                                    )
+                                },
+                                badge =
+                                    if (badgeState.isSuccess) {
+                                        {
+                                            badgeState.onSuccess {
+                                                if (it > 0) {
+                                                    Badge {
+                                                        Text(text = it.toString())
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        null
+                                    },
+                            )
+                        }
+                    },
+                    secondaryItems = {
+                        tabs.secondary.forEach { (tab, tabState) ->
+                            item(
+                                selected = currentRoute == tab.key,
+                                onClick = {
+                                    if (currentRoute == tab.key) {
+                                        tabState.onClick()
+                                    } else {
+                                        navController.navigate(tab.key) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                },
+                                icon = {
+                                    TabIcon(
+                                        accountType = tab.account,
+                                        icon = tab.metaData.icon,
+                                        title = tab.metaData.title,
+                                        iconOnly = tabs.secondaryIconOnly,
+                                    )
+                                },
+                                label = {
+                                    TabTitle(
+                                        title = tab.metaData.title,
+                                    )
                                 },
                             )
-                        },
-                        railHeader = {
-                            accountTypeState.user.onSuccess {
-                                IconButton(
-                                    onClick = {
-                                        scope.launch {
-                                            drawerState.open()
+                        }
+                    },
+                    footerItems = {
+                        accountTypeState.user.onSuccess {
+                            item(
+                                selected = currentRoute == SettingsRouteDestination.route,
+                                onClick = {
+                                    navController
+                                        .navigate(SettingsRouteDestination.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
-                                    },
-                                ) {
-                                    AvatarComponent(it.avatar)
-                                }
-                                FloatingActionButton(
-                                    onClick = {
-                                        currentTab?.let {
-                                            navController.toDestinationsNavigator().navigate(
-                                                direction =
-                                                    ComposeRouteDestination(
-                                                        it.account,
-                                                    ),
-                                            )
-                                        }
-                                    },
-                                    elevation =
-                                        FloatingActionButtonDefaults.elevation(
-                                            defaultElevation = 0.dp,
-                                        ),
-                                ) {
+                                },
+                                icon = {
                                     FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.Pen,
-                                        contentDescription = stringResource(id = R.string.compose_title),
+                                        imageVector = FontAwesomeIcons.Solid.Gear,
+                                        contentDescription = stringResource(id = R.string.settings_title),
                                     )
-                                }
-                            }
+                                },
+                                label = {
+                                    Text(text = stringResource(id = R.string.settings_title))
+                                },
+                            )
+                        }
+                    },
+                    drawerGesturesEnabled =
+                        state.navigationState.drawerEnabled &&
+                            accountTypeState.user.isSuccess,
+                    drawerState = drawerState,
+                ) {
+                    val slideDistance = rememberSlideDistance()
+                    NavHost(
+                        navController = navController,
+                        startDestination =
+                            tabs.primary
+                                .first()
+                                .tabItem.key,
+                        enterTransition = {
+                            materialSharedAxisYIn(true, slideDistance)
                         },
-                        navigationSuiteItems = {
-                            tabs.primary.forEach { (tab, tabState) ->
-                                item(
-                                    selected = currentRoute == tab.key,
-                                    onClick = {
-                                        if (currentRoute == tab.key) {
-                                            tabState.onClick()
-                                        } else {
-                                            navController.navigate(tab.key) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                        }
-                                    },
-                                    icon = {
-                                        TabIcon(
-                                            accountType = tab.account,
-                                            icon = tab.metaData.icon,
-                                            title = tab.metaData.title,
-                                        )
-                                    },
-                                    label = {
-                                        TabTitle(
-                                            title = tab.metaData.title,
-                                        )
-                                    },
-                                )
-                            }
+                        exitTransition = {
+                            materialSharedAxisYOut(true, slideDistance)
                         },
-                        secondaryItems = {
-                            tabs.secondary.forEach { (tab, tabState) ->
-                                item(
-                                    selected = currentRoute == tab.key,
-                                    onClick = {
-                                        if (currentRoute == tab.key) {
-                                            tabState.onClick()
-                                        } else {
-                                            navController.navigate(tab.key) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                        }
-                                    },
-                                    icon = {
-                                        TabIcon(
-                                            accountType = tab.account,
-                                            icon = tab.metaData.icon,
-                                            title = tab.metaData.title,
-                                            iconOnly = tabs.secondaryIconOnly,
-                                        )
-                                    },
-                                    label = {
-                                        TabTitle(
-                                            title = tab.metaData.title,
-                                        )
-                                    },
-                                )
-                            }
+                        popEnterTransition = {
+                            materialSharedAxisYIn(true, slideDistance)
                         },
-                        footerItems = {
-                            accountTypeState.user.onSuccess {
-                                item(
-                                    selected = currentRoute == SettingsRouteDestination.route,
-                                    onClick = {
-                                        navController
-                                            .navigate(SettingsRouteDestination.route) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                    },
-                                    icon = {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Gear,
-                                            contentDescription = stringResource(id = R.string.settings_title),
-                                        )
-                                    },
-                                    label = {
-                                        Text(text = stringResource(id = R.string.settings_title))
-                                    },
-                                )
-                            }
+                        popExitTransition = {
+                            materialSharedAxisYOut(true, slideDistance)
                         },
                     ) {
-                        val slideDistance = rememberSlideDistance()
-                        NavHost(
-                            navController = navController,
-                            startDestination =
-                                tabs.primary
-                                    .first()
-                                    .tabItem.key,
-                            enterTransition = {
-                                materialSharedAxisYIn(true, slideDistance)
-                            },
-                            exitTransition = {
-                                materialSharedAxisYOut(true, slideDistance)
-                            },
-                            popEnterTransition = {
-                                materialSharedAxisYIn(true, slideDistance)
-                            },
-                            popExitTransition = {
-                                materialSharedAxisYOut(true, slideDistance)
-                            },
-                        ) {
-                            tabs.all.forEach { (tab, tabState) ->
-                                composable(tab.key) {
-                                    CompositionLocalProvider(
-                                        LocalTabState provides tabState,
+                        tabs.all.forEach { (tab, tabState) ->
+                            composable(tab.key) {
+                                CompositionLocalProvider(
+                                    LocalTabState provides tabState,
+                                ) {
+                                    Router(
+                                        modifier = Modifier.fillMaxSize(),
+                                        navGraph = NavGraphs.root,
+                                        direction = TabSplashScreenDestination,
                                     ) {
-                                        Router(
-                                            modifier = Modifier.fillMaxSize(),
-                                            navGraph = NavGraphs.root,
-                                            direction = TabSplashScreenDestination,
-                                        ) {
-                                            dependency(rootNavController)
-                                            dependency(
-                                                SplashScreenArgs(
-                                                    getDirection(
-                                                        tab,
-                                                        tab.account,
-                                                    ),
+                                        dependency(rootNavController)
+                                        dependency(
+                                            SplashScreenArgs(
+                                                getDirection(
+                                                    tab,
+                                                    tab.account,
                                                 ),
-                                            )
+                                            ),
+                                        )
 //                                        dependency(tabState)
-                                            dependency(drawerState)
-                                            dependency(state.navigationState)
-                                        }
+                                        dependency(drawerState)
+                                        dependency(state.navigationState)
                                     }
                                 }
                             }
-                            composable(SettingsRouteDestination) {
-                                Router(
-                                    modifier = Modifier.fillMaxSize(),
-                                    navGraph = NavGraphs.root,
-                                    direction = SettingsRouteDestination,
-                                ) {
-                                    dependency(rootNavController)
-                                    dependency(drawerState)
-                                    dependency(state.navigationState)
-                                }
+                        }
+                        composable(SettingsRouteDestination) {
+                            Router(
+                                modifier = Modifier.fillMaxSize(),
+                                navGraph = NavGraphs.root,
+                                direction = SettingsRouteDestination,
+                            ) {
+                                dependency(rootNavController)
+                                dependency(drawerState)
+                                dependency(state.navigationState)
                             }
-                            dialogComposable(ComposeRouteDestination) {
-                                ComposeRoute(
-                                    navigator = destinationsNavigator(navController),
-                                    accountType = navArgs.accountType,
+                        }
+                        dialogComposable(ComposeRouteDestination) {
+                            ComposeRoute(
+                                navigator = destinationsNavigator(navController),
+                                accountType = navArgs.accountType,
+                            )
+                        }
+                        composable(ServiceSelectRouteDestination) {
+                            Router(
+                                modifier = Modifier.fillMaxSize(),
+                                navGraph = NavGraphs.root,
+                                direction = TabSplashScreenDestination,
+                            ) {
+                                dependency(rootNavController)
+                                dependency(
+                                    SplashScreenArgs(ServiceSelectRouteDestination),
                                 )
-                            }
-                            composable(ServiceSelectRouteDestination) {
-                                Router(
-                                    modifier = Modifier.fillMaxSize(),
-                                    navGraph = NavGraphs.root,
-                                    direction = TabSplashScreenDestination,
-                                ) {
-                                    dependency(rootNavController)
-                                    dependency(
-                                        SplashScreenArgs(ServiceSelectRouteDestination),
-                                    )
 //                                        dependency(tabState)
-                                    dependency(drawerState)
-                                    dependency(state.navigationState)
-                                }
+                                dependency(drawerState)
+                                dependency(state.navigationState)
                             }
                         }
                     }
@@ -843,35 +706,65 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                 NavigationState()
             }
         val tabs =
-            account.user.flatMap(
-                onError = {
-                    UiState.Success(
-                        HomeTabState(
-                            primary =
-                                TimelineTabItem.guest
-                                    .map {
-                                        HomeTabItem(it)
-                                    }.toImmutableList(),
-                            secondary = persistentListOf(),
-                            extraProfileRoute = null,
-                            secondaryIconOnly = true,
-                        ),
-                    )
-                },
-            ) { user ->
-                settingsRepository.tabSettings.collectAsUiState().value.flatMap(
+            account.user
+                .flatMap(
                     onError = {
                         UiState.Success(
                             HomeTabState(
                                 primary =
-                                    TimelineTabItem.default
+                                    TimelineTabItem.guest
+                                        .map {
+                                            HomeTabItem(it)
+                                        }.toImmutableList(),
+                                secondary = persistentListOf(),
+                                extraProfileRoute = null,
+                                secondaryIconOnly = true,
+                            ),
+                        )
+                    },
+                ) { user ->
+                    settingsRepository.tabSettings.collectAsUiState().value.flatMap(
+                        onError = {
+                            UiState.Success(
+                                HomeTabState(
+                                    primary =
+                                        TimelineTabItem.default
+                                            .map {
+                                                HomeTabItem(it)
+                                            }.toImmutableList(),
+                                    secondary =
+                                        TimelineTabItem
+                                            .defaultSecondary(user)
+                                            .map {
+                                                HomeTabItem(it)
+                                            }.toImmutableList(),
+                                    extraProfileRoute =
+                                        HomeTabItem(
+                                            tabItem =
+                                                ProfileTabItem(
+                                                    accountKey = user.key,
+                                                    userKey = user.key,
+                                                ),
+                                        ),
+                                    secondaryIconOnly = true,
+                                ),
+                            )
+                        },
+                    ) { tabSettings ->
+                        val secondary =
+                            tabSettings.secondaryItems ?: TimelineTabItem.defaultSecondary(user)
+                        UiState.Success(
+                            HomeTabState(
+                                primary =
+                                    tabSettings.items
                                         .map {
                                             HomeTabItem(it)
                                         }.toImmutableList(),
                                 secondary =
-                                    TimelineTabItem
-                                        .defaultSecondary(user)
-                                        .map {
+                                    secondary
+                                        .filter {
+                                            tabSettings.items.none { item -> item.key == it.key }
+                                        }.map {
                                             HomeTabItem(it)
                                         }.toImmutableList(),
                                 extraProfileRoute =
@@ -882,40 +775,25 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                                                 userKey = user.key,
                                             ),
                                     ),
-                                secondaryIconOnly = true,
+                                secondaryIconOnly = tabSettings.secondaryItems == null,
                             ),
                         )
-                    },
-                ) { tabSettings ->
-                    val secondary =
-                        tabSettings.secondaryItems ?: TimelineTabItem.defaultSecondary(user)
-                    UiState.Success(
-                        HomeTabState(
-                            primary =
-                                tabSettings.items
-                                    .map {
-                                        HomeTabItem(it)
-                                    }.toImmutableList(),
-                            secondary =
-                                secondary
-                                    .filter {
-                                        tabSettings.items.none { item -> item.key == it.key }
-                                    }.map {
-                                        HomeTabItem(it)
-                                    }.toImmutableList(),
-                            extraProfileRoute =
-                                HomeTabItem(
-                                    tabItem =
-                                        ProfileTabItem(
-                                            accountKey = user.key,
-                                            userKey = user.key,
-                                        ),
-                                ),
-                            secondaryIconOnly = tabSettings.secondaryItems == null,
-                        ),
+                    }
+                }.map {
+                    it.copy(
+                        primary =
+                            it.primary
+                                .map {
+                                    if (it.tabItem is NotificationTabItem) {
+                                        it.copy(
+                                            badgeCountState = notificationBadgePresenter(it.tabItem.account),
+                                        )
+                                    } else {
+                                        it
+                                    }
+                                }.toImmutableList(),
                     )
                 }
-            }
         var showAccountSelection by remember {
             mutableStateOf(false)
         }
@@ -936,6 +814,15 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
     }
 
 @Composable
+private fun notificationBadgePresenter(accountType: AccountType): UiState<Int> {
+    val presenter =
+        remember(accountType) {
+            NotificationBadgePresenter(accountType)
+        }.invoke()
+    return presenter.count
+}
+
+@Composable
 private fun accountTypePresenter(accountType: AccountType) =
     run {
         remember(accountType) { UserPresenter(accountType, null) }.invoke()
@@ -945,6 +832,7 @@ private fun accountTypePresenter(accountType: AccountType) =
 private data class HomeTabItem(
     val tabItem: TabItem,
     val tabState: TabState = TabState(),
+    val badgeCountState: UiState<Int> = UiState.Success(0),
 )
 
 @Immutable

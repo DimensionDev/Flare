@@ -13,3 +13,29 @@ internal data class Emoji(
     val visibleInPicker: Boolean? = null,
     val category: String? = null,
 )
+
+@Serializable
+data class Marker(
+    val notifications: Notifications? = null,
+)
+
+@Serializable
+data class Notifications(
+    @SerialName("last_read_id")
+    val lastReadID: String? = null,
+    val version: Long? = null,
+    @SerialName("updated_at")
+    val updatedAt: String? = null,
+)
+
+@Serializable
+data class MarkerUpdate(
+    val home: UpdateContent? = null,
+    val notifications: UpdateContent? = null,
+)
+
+@Serializable
+data class UpdateContent(
+    @SerialName("last_read_id")
+    val lastReadID: String? = null,
+)

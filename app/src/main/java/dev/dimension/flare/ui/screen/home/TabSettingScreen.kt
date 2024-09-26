@@ -324,7 +324,7 @@ private fun presenter(
                 it
                     .filterIsInstance<TimelineTabItem>()
                     .filter { tab ->
-                        tab !in cacheTabs
+                        cacheTabs.none { it.key == tab.key }
                     }.toImmutableList()
             }
     var showAddTab by remember { mutableStateOf(false) }

@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.PagingData
 import dev.dimension.flare.common.CacheData
+import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
@@ -12,6 +13,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 interface MicroblogDataSource {
     val account: UiAccount
@@ -92,6 +94,8 @@ interface MicroblogDataSource {
         userKey: MicroBlogKey,
         relation: UiRelation,
     )
+
+    fun notificationBadgeCount(): CacheData<Int> = Cacheable({ }, { flowOf(0) })
 }
 
 data class ComposeProgress(

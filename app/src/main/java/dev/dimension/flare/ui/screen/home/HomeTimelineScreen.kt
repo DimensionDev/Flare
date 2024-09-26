@@ -76,6 +76,7 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
@@ -354,6 +355,10 @@ internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineIt
         remember(timelineTabItem) {
             timelineTabItem.createPresenter()
         }
+    val badge =
+        remember(timelineTabItem) {
+            NotificationBadgePresenter(timelineTabItem.account)
+        }.invoke()
     val scope = rememberCoroutineScope()
     val state = timelinePresenter()
     var showNewToots by remember { mutableStateOf(false) }
@@ -399,6 +404,7 @@ internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineIt
             scope.launch {
                 state.refresh()
             }
+            badge.refresh()
         }
     }
 }

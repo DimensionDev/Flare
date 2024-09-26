@@ -8,6 +8,8 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.data.network.mastodon.api.model.MarkerUpdate
+import dev.dimension.flare.data.network.mastodon.api.model.UpdateContent
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -16,6 +18,7 @@ internal class NotificationRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
+    private val onClearMarker: () -> Unit,
 ) : RemoteMediator<Int, DbPagingTimelineView>() {
     override suspend fun load(
         loadType: LoadType,
@@ -30,6 +33,10 @@ internal class NotificationRemoteMediator(
                                 limit = state.config.pageSize,
                             ).also {
                                 database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+                                it.firstOrNull()?.id?.let { it1 ->
+                                    service.updateMarker(MarkerUpdate(notifications = UpdateContent(it1)))
+                                    onClearMarker.invoke()
+                                }
                             }
                     }
 

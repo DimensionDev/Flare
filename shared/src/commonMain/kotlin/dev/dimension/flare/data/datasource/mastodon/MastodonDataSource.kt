@@ -231,6 +231,9 @@ class MastodonDataSource(
                             database,
                             account.accountKey,
                             pagingKey,
+                            onClearMarker = {
+                                MemCacheable.update(notificationMarkerKey, 0)
+                            },
                         )
 
                     NotificationFilter.Mention ->
@@ -1146,5 +1149,19 @@ class MastodonDataSource(
         metaData: ListMetaData,
     ) {
         updateList(listId, metaData.title)
+    }
+
+    private val notificationMarkerKey: String
+        get() = "notificationBadgeCount_${account.accountKey}"
+
+    override fun notificationBadgeCount(): CacheData<Int> {
+        return MemCacheable(
+            key = notificationMarkerKey,
+            fetchSource = {
+                val marker = service.notificationMarkers().notifications?.lastReadID ?: return@MemCacheable 0
+                val timeline = service.notification(min_id = marker)
+                timeline.size
+            },
+        )
     }
 }

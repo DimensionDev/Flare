@@ -50,7 +50,7 @@ Here're some features we're planning to implement in the future, you can check t
  - [ ] Support for lists
  - [x] Support for feeds
  - [ ] Support DM
- - 
+
 ## Building
 ### Android
  - Make sure you have JDK 17 installed

@@ -14,6 +14,7 @@ import dev.dimension.flare.data.network.vvo.model.User
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
+import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
@@ -496,9 +497,9 @@ private fun replaceMentionAndHashtag(
                     "href",
                     AppDeepLink.Search(accountKey, node.text()),
                 )
-            } else if (href.startsWith("https://weibo.cn/sinaurl?u=")) {
+            } else if (href.startsWith("https://$vvoHostShort/sinaurl?u=")) {
                 val url =
-                    href.removePrefix("https://weibo.cn/sinaurl?u=").decodeURLPart()
+                    href.removePrefix("https://$vvoHostShort/sinaurl?u=").decodeURLPart()
                 if (url.contains("sinaimg.cn/")) {
                     node.attributes().put(
                         "href",

@@ -41,9 +41,21 @@ val xqtHost: String =
         append("LmNvbQ==".decodeBase64String())
     }
 
+val vvo: String =
+    buildString {
+        append("d2Vp".decodeBase64String())
+        append("Ym8=".decodeBase64String())
+    }
+
 val vvoHost: String =
     buildString {
         append("bS53".decodeBase64String())
         append("ZWli".decodeBase64String())
         append("by5jbg==".decodeBase64String())
+    }
+
+val vvoHostShort: String =
+    buildString {
+        append(vvo)
+        append("LmNu".decodeBase64String())
     }

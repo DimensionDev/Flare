@@ -10,6 +10,7 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.vvo
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserTimelineRemoteMediator(
@@ -48,7 +49,7 @@ internal class UserTimelineRemoteMediator(
                         ?.tabsInfo
                         ?.tabs
                         ?.firstOrNull {
-                            it.tabType == "weibo"
+                            it.tabType == vvo
                         }?.containerid
             }
             val response =

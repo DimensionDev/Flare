@@ -49,6 +49,7 @@ import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
@@ -424,7 +425,7 @@ class XQTDataSource(
                             semanticAnnotationIds = emptyList(),
                             attachmentUrl =
                                 data.quoteId?.let {
-                                    "https://twitter.com/${data.quoteUsername}/status/$it"
+                                    "https://$xqtHost/${data.quoteUsername}/status/$it"
                                 },
                         ),
                 ),

@@ -48,6 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
@@ -159,6 +161,7 @@ internal fun HomeScreen(
             navBackStackEntry?.destination?.route
         }
     }
+    val hapticFeedback = LocalHapticFeedback.current
     state.tabs
         .onSuccess { tabs ->
             LaunchedEffect(Unit) {
@@ -291,6 +294,17 @@ internal fun HomeScreen(
                                                     }
                                                 }
                                             }
+                                        }
+                                    } else {
+                                        null
+                                    },
+                                onLongClick =
+                                    if (tab is HomeTimelineTabItem || tab is ProfileTabItem) {
+                                        {
+                                            hapticFeedback.performHapticFeedback(
+                                                HapticFeedbackType.LongPress,
+                                            )
+                                            state.setShowAccountSelection(true)
                                         }
                                     } else {
                                         null

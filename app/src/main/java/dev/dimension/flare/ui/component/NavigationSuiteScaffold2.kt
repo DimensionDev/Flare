@@ -5,7 +5,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -83,6 +85,7 @@ private val bottomBarHeight = 56.dp
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { bottomBarHeight }
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
 fun NavigationSuiteScaffold2(
@@ -263,11 +266,14 @@ fun NavigationSuiteScaffold2(
                                     scope.itemList.forEach {
                                         Box(
                                             modifier =
-                                                Modifier
+                                                it.modifier
                                                     .weight(1f)
-                                                    .clickable {
-                                                        it.onClick()
-                                                    }.height(bottomBarHeight),
+                                                    .combinedClickable(
+                                                        interactionSource = it.interactionSource,
+                                                        onClick = it.onClick,
+                                                        indication = LocalIndication.current,
+                                                        onLongClick = it.onLongClick,
+                                                    ).height(bottomBarHeight),
                                             contentAlignment = Alignment.Center,
                                         ) {
                                             val colors = it.colors?.navigationBarItemColors ?: NavigationBarItemDefaults.colors()
@@ -384,6 +390,7 @@ private class NavigationSuiteItem(
     val badge: (@Composable () -> Unit)?,
     val colors: NavigationSuiteItemColors?,
     val interactionSource: MutableInteractionSource?,
+    val onLongClick: (() -> Unit)? = null,
 )
 
 /** The scope associated with the [NavigationSuiteScope]. */
@@ -426,6 +433,7 @@ interface NavigationSuiteScope2 {
         badge: (@Composable () -> Unit)? = null,
         colors: NavigationSuiteItemColors? = null,
         interactionSource: MutableInteractionSource? = null,
+        onLongClick: (() -> Unit)? = null,
     )
 }
 
@@ -444,6 +452,7 @@ private class NavigationSuiteScopeImpl :
         badge: (@Composable () -> Unit)?,
         colors: NavigationSuiteItemColors?,
         interactionSource: MutableInteractionSource?,
+        onLongClick: (() -> Unit)?,
     ) {
         itemList.add(
             NavigationSuiteItem(
@@ -457,6 +466,7 @@ private class NavigationSuiteScopeImpl :
                 badge = badge,
                 colors = colors,
                 interactionSource = interactionSource,
+                onLongClick = onLongClick,
             ),
         )
     }

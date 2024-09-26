@@ -549,7 +549,7 @@ class MastodonDataSource(
                     accountKey = account.accountKey,
                     cacheDatabase = database,
                     update = {
-                        it.copy(data = result)
+                        result.reblog?.let { StatusContent.Mastodon(it) } ?: it
                     },
                 )
             }

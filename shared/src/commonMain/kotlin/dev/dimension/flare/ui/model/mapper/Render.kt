@@ -6,47 +6,60 @@ import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimeline
 
 internal fun DbPagingTimelineView.render(event: StatusEvent): UiTimeline =
     status_content.render(
         timeline.accountKey,
         event,
+        references =
+            listOfNotNull(
+                retweet_status_content?.let { ReferenceType.Retweet to it },
+                quote_status_content?.let { ReferenceType.Quote to it },
+                reply_status_content?.let { ReferenceType.Reply to it },
+                notification_status_content?.let { ReferenceType.Notification to it },
+            ).toMap(),
     )
 
 internal fun StatusContent.render(
     accountKey: MicroBlogKey,
     event: StatusEvent,
+    references: Map<ReferenceType, StatusContent> = emptyMap(),
 ) = when (this) {
     is StatusContent.Mastodon ->
         data.render(
             accountKey = accountKey,
             event = event as StatusEvent.Mastodon,
+            references = references,
         )
 
     is StatusContent.MastodonNotification ->
         data.render(
             accountKey = accountKey,
             event = event as StatusEvent.Mastodon,
+            references = references,
         )
 
     is StatusContent.Misskey ->
         data.render(
             accountKey = accountKey,
             event = event as StatusEvent.Misskey,
+            references = references,
         )
 
     is StatusContent.MisskeyNotification ->
         data.render(
             accountKey = accountKey,
             event = event as StatusEvent.Misskey,
+            references = references,
         )
 
     is StatusContent.BlueskyReason ->
         reason.render(
             accountKey = accountKey,
-            data = data,
             event = event as StatusEvent.Bluesky,
+            references = references,
         )
 
     is StatusContent.Bluesky ->
@@ -64,6 +77,7 @@ internal fun StatusContent.render(
         data.render(
             accountKey = accountKey,
             event = event as StatusEvent.XQT,
+            references = references,
         )
 
     is StatusContent.VVO ->

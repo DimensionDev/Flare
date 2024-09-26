@@ -5,11 +5,11 @@ import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.humanize
+import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
 
-// TODO: Handling item click event internally
 @Immutable
 data class UiTimeline internal constructor(
     val topMessage: TopMessage?,
@@ -169,6 +169,7 @@ data class UiTimeline internal constructor(
             Edit,
             Info,
             Reply,
+            Quote,
         }
 
         sealed interface MessageType {
@@ -191,27 +192,50 @@ data class UiTimeline internal constructor(
             }
 
             sealed interface Misskey : MessageType {
-                data object Follow : Misskey
+                data class Follow(
+                    val id: String,
+                ) : Misskey
 
-                data object Mention : Misskey
+                data class Mention(
+                    val id: String,
+                ) : Misskey
 
-                data object Reply : Misskey
+                data class Reply(
+                    val id: String,
+                ) : Misskey
 
-                data object Renote : Misskey
+                data class Renote(
+                    val id: String,
+                ) : Misskey
 
-                data object Quote : Misskey
+                data class Quote(
+                    val id: String,
+                ) : Misskey
 
-                data object Reaction : Misskey
+                data class Reaction(
+                    val id: String,
+                ) : Misskey
 
-                data object PollEnded : Misskey
+                data class PollEnded(
+                    val id: String,
+                ) : Misskey
 
-                data object ReceiveFollowRequest : Misskey
+                data class ReceiveFollowRequest(
+                    val id: String,
+                ) : Misskey
 
-                data object FollowRequestAccepted : Misskey
+                data class FollowRequestAccepted(
+                    val id: String,
+                ) : Misskey
 
-                data object AchievementEarned : Misskey
+                data class AchievementEarned(
+                    val id: String,
+                    val achievement: MisskeyAchievement?,
+                ) : Misskey
 
-                data object App : Misskey
+                data class App(
+                    val id: String,
+                ) : Misskey
             }
 
             sealed interface Bluesky : MessageType {

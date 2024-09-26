@@ -17,11 +17,13 @@ import app.bsky.richtext.FacetFeatureUnion
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.bluesky.bskyJson
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
@@ -138,10 +140,11 @@ private fun parseBluesky(
 
 internal fun FeedViewPostReasonUnion.render(
     accountKey: MicroBlogKey,
-    data: PostView,
     event: StatusEvent.Bluesky,
-): UiTimeline =
-    UiTimeline(
+    references: Map<ReferenceType, StatusContent>,
+): UiTimeline {
+    val data = (references[ReferenceType.Retweet] as? StatusContent.Bluesky)?.data
+    return UiTimeline(
         topMessage =
             (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.let {
                 val user = it.render(accountKey)
@@ -159,9 +162,10 @@ internal fun FeedViewPostReasonUnion.render(
                     },
                 )
             },
-        content = data.renderStatus(accountKey, event),
+        content = data?.renderStatus(accountKey, event),
         platformType = PlatformType.Bluesky,
     )
+}
 
 internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiTimeline {
     val user = author.render(accountKey)

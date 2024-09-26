@@ -213,25 +213,18 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                 }
             }
         val references =
-            when (val data = it.reason) {
-                is FeedViewPostReasonUnion.ReasonRepost ->
-                    listOfNotNull(
-                        if (reply != null) {
-                            ReferenceType.Reply to reply
-                        } else {
-                            null
-                        },
-                        ReferenceType.Retweet to status,
-                    ).toMap()
-                else ->
-                    listOfNotNull(
-                        if (reply != null) {
-                            ReferenceType.Reply to reply
-                        } else {
-                            null
-                        },
-                    ).toMap()
-            }
+            listOfNotNull(
+                if (reply != null) {
+                    ReferenceType.Reply to reply
+                } else {
+                    null
+                },
+                if (it.reason is FeedViewPostReasonUnion.ReasonRepost) {
+                    ReferenceType.Retweet to it.post.toDbStatusWithUser(accountKey)
+                } else {
+                    null
+                },
+            ).toMap()
         createDbPagingTimelineWithStatus(
             accountKey = accountKey,
             pagingKey = pagingKey,

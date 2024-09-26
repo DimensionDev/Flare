@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
@@ -11,8 +12,6 @@ import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacy
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacyBindingValueData
-import dev.dimension.flare.data.network.xqt.model.TweetTombstone
-import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
@@ -20,6 +19,7 @@ import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
@@ -110,7 +110,7 @@ internal fun TopLevel.renderNotifications(
                                         ),
                                 ),
                             legacy = it,
-                        ).renderStatus(accountKey, event)
+                        ).renderStatus(accountKey, event, emptyMap())
                     }
                 val itemContent =
                     when {
@@ -178,7 +178,7 @@ internal fun TopLevel.renderNotifications(
                                     ),
                             ),
                         legacy = tweet,
-                    ).renderStatus(accountKey, event)
+                    ).renderStatus(accountKey, event, emptyMap())
                 UiTimeline(
                     topMessage =
                         UiTimeline.TopMessage(
@@ -202,20 +202,15 @@ internal fun TopLevel.renderNotifications(
 internal fun Tweet.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.XQT,
+    references: Map<ReferenceType, StatusContent> = emptyMap(),
 ): UiTimeline {
     val retweet =
-        legacy
-            ?.retweetedStatusResult
-            ?.result
-            ?.let {
-                when (it) {
-                    is Tweet -> it
-                    is TweetTombstone -> null
-                    is TweetWithVisibilityResults -> it.tweet
-                }
-            }
-    val actualTweet = retweet ?: this
-    val user = renderStatus(accountKey, event).user
+        (references[ReferenceType.Retweet] as? StatusContent.XQT)
+            ?.data
+            ?.renderStatus(accountKey = accountKey, event = event, references = emptyMap())
+    val currentTweet = renderStatus(accountKey, event, references)
+    val actualTweet = retweet ?: currentTweet
+    val user = currentTweet.user
     val topMessage =
         if (retweet != null && user != null) {
             UiTimeline.TopMessage(
@@ -229,10 +224,9 @@ internal fun Tweet.render(
         } else {
             null
         }
-    val currentTweet = this.renderStatus(accountKey, event)
     return UiTimeline(
         content =
-            actualTweet.renderStatus(accountKey = accountKey, event = event).copy(
+            actualTweet.copy(
                 onClicked = {
                     launcher.launch(
                         AppDeepLink.StatusDetail(
@@ -251,17 +245,12 @@ internal fun Tweet.render(
 internal fun Tweet.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.XQT,
+    references: Map<ReferenceType, StatusContent>,
 ): UiTimeline.ItemContent.Status {
     val quote =
-        quotedStatusResult
-            ?.result
-            ?.let {
-                when (it) {
-                    is Tweet -> it
-                    is TweetTombstone -> null
-                    is TweetWithVisibilityResults -> it.tweet
-                }
-            }?.renderStatus(accountKey = accountKey, event = event)
+        (references[ReferenceType.Quote] as? StatusContent.XQT)
+            ?.data
+            ?.renderStatus(accountKey = accountKey, event = event, references = emptyMap())
     val user =
         core
             ?.userResults

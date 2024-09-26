@@ -27,7 +27,6 @@ import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.MuteCreateRequest
-import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
@@ -380,11 +379,40 @@ class MisskeyDataSource(
 
     override fun renote(statusKey: MicroBlogKey) {
         coroutineScope.launch {
-            service.notesRenotes(
-                NotesChildrenRequest(
-                    noteId = statusKey.id,
-                ),
+            updateStatusUseCase<StatusContent.Misskey>(
+                statusKey = statusKey,
+                accountKey = account.accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                renoteCount = it.data.renoteCount + 1,
+                            ),
+                    )
+                },
             )
+            runCatching {
+                service.notesCreate(
+                    NotesCreateRequest(
+                        renoteId = statusKey.id,
+                    ),
+                )
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Misskey>(
+                    statusKey = statusKey,
+                    accountKey = account.accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    renoteCount = it.data.renoteCount - 1,
+                                ),
+                        )
+                    },
+                )
+            }
         }
     }
 

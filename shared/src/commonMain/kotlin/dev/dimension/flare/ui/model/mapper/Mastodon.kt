@@ -5,6 +5,7 @@ import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
+import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.guest.GuestDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
@@ -19,6 +20,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
@@ -38,10 +40,14 @@ import kotlinx.datetime.Instant
 internal fun Notification.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Mastodon,
+    references: Map<ReferenceType, StatusContent>,
 ): UiTimeline {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey)
-    val status = status?.renderStatus(accountKey, event)
+    val status =
+        (references[ReferenceType.Notification] as? StatusContent.Mastodon)
+            ?.data
+            ?.renderStatus(accountKey, event)
     val topMessageType =
         when (type) {
             NotificationTypes.Follow -> UiTimeline.TopMessage.MessageType.Mastodon.Follow
@@ -97,6 +103,7 @@ internal fun Notification.render(
 internal fun Status.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Mastodon,
+    references: Map<ReferenceType, StatusContent> = mapOf(),
 ): UiTimeline {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey)
@@ -119,7 +126,7 @@ internal fun Status.render(
             )
         }
     val currentStatus = this.renderStatus(accountKey, event)
-    val actualStatus = reblog ?: this
+    val actualStatus = (references[ReferenceType.Retweet] as? StatusContent.Mastodon)?.data ?: this
     return UiTimeline(
         topMessage = topMessage,
         content =

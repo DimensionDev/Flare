@@ -528,7 +528,7 @@ private fun StatusActions(
                         text = action.displayItem.iconText,
                         color = statusActionItemColor(item = action.displayItem),
                         withTextMinWidth = index != items.lastIndex,
-                    ) {
+                    ) { closeMenu ->
                         action.actions.forEach { subActions ->
                             if (subActions is StatusAction.Item) {
                                 val color = statusActionItemColor(subActions)
@@ -550,6 +550,7 @@ private fun StatusActions(
                                         )
                                     },
                                     onClick = {
+                                        closeMenu.invoke()
                                         if (subActions is StatusAction.Item.Clickable) {
                                             subActions.onClicked.invoke(
                                                 ClickContext(

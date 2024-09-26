@@ -57,6 +57,7 @@ struct StatusItemView: View {
             case .edit: "pencil"
             case .info: "app"
             case .reply: "arrowshape.turn.up.left"
+            case .quote: "quote.bubble.fill"
             }
             let text = switch onEnum(of: topMessage.type) {
             case .bluesky(let data):

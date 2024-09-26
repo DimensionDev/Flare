@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
@@ -15,6 +16,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
@@ -50,27 +52,72 @@ import moe.tlaster.mfm.parser.tree.UrlNode
 internal fun Notification.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
+    references: Map<ReferenceType, StatusContent>,
 ): UiTimeline {
     val user = user?.render(accountKey)
-    val status = note?.renderStatus(accountKey, event)
+    val status =
+        (references[ReferenceType.Notification] as? StatusContent.Misskey)
+            ?.data
+            ?.renderStatus(accountKey, event)
     val topMessageType =
         when (this.type) {
-            NotificationType.Follow -> UiTimeline.TopMessage.MessageType.Misskey.Follow
-            NotificationType.Mention -> UiTimeline.TopMessage.MessageType.Misskey.Mention
-            NotificationType.Reply -> UiTimeline.TopMessage.MessageType.Misskey.Reply
-            NotificationType.Renote -> UiTimeline.TopMessage.MessageType.Misskey.Renote
-            NotificationType.Quote -> UiTimeline.TopMessage.MessageType.Misskey.Quote
-            NotificationType.Reaction -> UiTimeline.TopMessage.MessageType.Misskey.Reaction
-            NotificationType.PollEnded -> UiTimeline.TopMessage.MessageType.Misskey.PollEnded
-            NotificationType.ReceiveFollowRequest -> UiTimeline.TopMessage.MessageType.Misskey.ReceiveFollowRequest
-            NotificationType.FollowRequestAccepted -> UiTimeline.TopMessage.MessageType.Misskey.FollowRequestAccepted
-            NotificationType.AchievementEarned -> UiTimeline.TopMessage.MessageType.Misskey.AchievementEarned
-            NotificationType.App -> UiTimeline.TopMessage.MessageType.Misskey.App
+            NotificationType.Follow ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .Follow(id = id)
+            NotificationType.Mention ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .Mention(id = id)
+            NotificationType.Reply ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .Reply(id = id)
+            NotificationType.Renote ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .Renote(id = id)
+            NotificationType.Quote ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .Quote(id = id)
+            NotificationType.Reaction ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .Reaction(id = id)
+            NotificationType.PollEnded ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .PollEnded(id = id)
+            NotificationType.ReceiveFollowRequest ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .ReceiveFollowRequest(id = id)
+            NotificationType.FollowRequestAccepted ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .FollowRequestAccepted(id = id)
+            NotificationType.AchievementEarned ->
+                UiTimeline.TopMessage.MessageType.Misskey.AchievementEarned(
+                    id = id,
+                    achievement =
+                        achievement?.let {
+                            MisskeyAchievement.fromString(it)
+                        },
+                )
+            NotificationType.App ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .App(id = id)
+        }
+    val icon =
+        when (this.type) {
+            NotificationType.Follow -> UiTimeline.TopMessage.Icon.Follow
+            NotificationType.Mention -> UiTimeline.TopMessage.Icon.Mention
+            NotificationType.Reply -> UiTimeline.TopMessage.Icon.Reply
+            NotificationType.Renote -> UiTimeline.TopMessage.Icon.Retweet
+            NotificationType.Quote -> UiTimeline.TopMessage.Icon.Quote
+            NotificationType.Reaction -> UiTimeline.TopMessage.Icon.Favourite
+            NotificationType.PollEnded -> UiTimeline.TopMessage.Icon.Poll
+            NotificationType.ReceiveFollowRequest -> UiTimeline.TopMessage.Icon.Follow
+            NotificationType.FollowRequestAccepted -> UiTimeline.TopMessage.Icon.Follow
+            NotificationType.AchievementEarned -> UiTimeline.TopMessage.Icon.Info
+            NotificationType.App -> UiTimeline.TopMessage.Icon.Info
         }
     val topMessage =
         UiTimeline.TopMessage(
             user = user,
-            icon = UiTimeline.TopMessage.Icon.Retweet,
+            icon = icon,
             type = topMessageType,
             onClicked = {
                 if (user != null) {
@@ -99,11 +146,101 @@ internal fun Notification.render(
     )
 }
 
+enum class MisskeyAchievement(
+    val id: String,
+) {
+    NOTES1("notes1"),
+    NOTES10("notes10"),
+    NOTES100("notes100"),
+    NOTES500("notes500"),
+    NOTES1000("notes1000"),
+    NOTES5000("notes5000"),
+    NOTES10000("notes10000"),
+    NOTES20000("notes20000"),
+    NOTES30000("notes30000"),
+    NOTES40000("notes40000"),
+    NOTES50000("notes50000"),
+    NOTES60000("notes60000"),
+    NOTES70000("notes70000"),
+    NOTES80000("notes80000"),
+    NOTES90000("notes90000"),
+    NOTES100000("notes100000"),
+    LOGIN3("login3"),
+    LOGIN7("login7"),
+    LOGIN15("login15"),
+    LOGIN30("login30"),
+    LOGIN60("login60"),
+    LOGIN100("login100"),
+    LOGIN200("login200"),
+    LOGIN300("login300"),
+    LOGIN400("login400"),
+    LOGIN500("login500"),
+    LOGIN600("login600"),
+    LOGIN700("login700"),
+    LOGIN800("login800"),
+    LOGIN900("login900"),
+    LOGIN1000("login1000"),
+    NOTE_CLIPPED1("noteClipped1"),
+    NOTE_FAVORITED1("noteFavorited1"),
+    MY_NOTE_FAVORITED1("myNoteFavorited1"),
+    PROFILE_FILLED("profileFilled"),
+    MARKED_AS_CAT("markedAsCat"),
+    FOLLOWING1("following1"),
+    FOLLOWING10("following10"),
+    FOLLOWING50("following50"),
+    FOLLOWING100("following100"),
+    FOLLOWING300("following300"),
+    FOLLOWERS1("followers1"),
+    FOLLOWERS10("followers10"),
+    FOLLOWERS50("followers50"),
+    FOLLOWERS100("followers100"),
+    FOLLOWERS300("followers300"),
+    FOLLOWERS500("followers500"),
+    FOLLOWERS1000("followers1000"),
+    COLLECT_ACHIEVEMENTS30("collectAchievements30"),
+    VIEW_ACHIEVEMENTS3MIN("viewAchievements3min"),
+    I_LOVE_MISSKEY("iLoveMisskey"),
+    FOUND_TREASURE("foundTreasure"),
+    CLIENT30MIN("client30min"),
+    CLIENT60MIN("client60min"),
+    NOTE_DELETED_WITHIN1MIN("noteDeletedWithin1min"),
+    POSTED_AT_LATE_NIGHT("postedAtLateNight"),
+    POSTED_AT_0MIN0SEC("postedAt0min0sec"),
+    SELF_QUOTE("selfQuote"),
+    HTL20NPM("htl20npm"),
+    VIEW_INSTANCE_CHART("viewInstanceChart"),
+    OUTPUT_HELLO_WORLD_ON_SCRATCHPAD("outputHelloWorldOnScratchpad"),
+    OPEN3WINDOWS("open3windows"),
+    DRIVE_FOLDER_CIRCULAR_REFERENCE("driveFolderCircularReference"),
+    REACT_WITHOUT_READ("reactWithoutRead"),
+    CLICKED_CLICK_HERE("clickedClickHere"),
+    JUST_PLAIN_LUCKY("justPlainLucky"),
+    SET_NAME_TO_SYUILO("setNameToSyuilo"),
+    PASSED_SINCE_ACCOUNT_CREATED1("passedSinceAccountCreated1"),
+    PASSED_SINCE_ACCOUNT_CREATED2("passedSinceAccountCreated2"),
+    PASSED_SINCE_ACCOUNT_CREATED3("passedSinceAccountCreated3"),
+    LOGGED_IN_ON_BIRTHDAY("loggedInOnBirthday"),
+    LOGGED_IN_ON_NEW_YEARS_DAY("loggedInOnNewYearsDay"),
+    COOKIE_CLICKED("cookieClicked"),
+    BRAIN_DIVER("brainDiver"),
+    SMASH_TEST_NOTIFICATION_BUTTON("smashTestNotificationButton"),
+    TUTORIAL_COMPLETED("tutorialCompleted"),
+    BUBBLE_GAME_EXPLODING_HEAD("bubbleGameExplodingHead"),
+    BUBBLE_GAME_DOUBLE_EXPLODING_HEAD("bubbleGameDoubleExplodingHead"),
+    ;
+
+    companion object {
+        fun fromString(id: String): MisskeyAchievement? = entries.find { it.id == id }
+    }
+}
+
 internal fun Note.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
+    references: Map<ReferenceType, StatusContent>,
 ): UiTimeline {
     val user = user.render(accountKey)
+    val renote = (references[ReferenceType.Retweet] as? StatusContent.Misskey)?.data
     val topMessage =
         if (renote == null || !text.isNullOrEmpty()) {
             null

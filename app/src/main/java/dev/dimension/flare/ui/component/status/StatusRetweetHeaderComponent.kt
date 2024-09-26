@@ -36,7 +36,7 @@ internal fun StatusRetweetHeaderComponent(
             contentDescription = null,
             modifier =
                 Modifier
-                    .size(16.dp),
+                    .size(12.dp),
         )
         if (user != null) {
             Spacer(modifier = Modifier.width(8.dp))

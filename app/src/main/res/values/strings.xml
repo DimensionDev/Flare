@@ -55,8 +55,8 @@
     <string name="settings_title">Settings</string>
 
     <string name="mastodon_notification_item_followed_you">followed you</string>
-    <string name="mastodon_notification_item_favourited_your_status">favourited your toot</string>
-    <string name="mastodon_notification_item_reblogged_your_status">reblogged your toot</string>
+    <string name="mastodon_notification_item_favourited_your_status">favourited</string>
+    <string name="mastodon_notification_item_reblogged_your_status">reblogged</string>
     <string name="mastodon_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="mastodon_notification_item_mentioned_you">mentioned you</string>
     <string name="mastodon_notification_item_requested_follow">request to follow you</string>
@@ -67,30 +67,30 @@
     <string name="mastodon_item_show_less">Show less</string>
 
     <string name="bluesky_notification_item_followed_you">followed you</string>
-    <string name="bluesky_notification_item_favourited_your_status">favourited your status</string>
-    <string name="bluesky_notification_item_reblogged_your_status">reblogged your status</string>
+    <string name="bluesky_notification_item_favourited_your_status">favourited</string>
+    <string name="bluesky_notification_item_reblogged_your_status">reblogged</string>
     <string name="bluesky_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="bluesky_notification_item_mentioned_you">mentioned you</string>
     <string name="bluesky_item_reblogged_status">boosted a status</string>
     <string name="bluesky_notification_item_replied_to_you">replied to you</string>
-    <string name="bluesky_notification_item_quoted_your_status">quoted your status</string>
+    <string name="bluesky_notification_item_quoted_your_status">quoted</string>
     <string name="bluesky_notification_item_starterpack_joined">Starterpack Joined</string>
     <string name="bluesky_notification_item_unKnown">UnKnown</string>
 
     <string name="misskey_notification_item_mentioned_you">mentioned you</string>
     <string name="misskey_notification_item_replied_to_you">replied to you</string>
-    <string name="misskey_notification_item_reposted_your_status">reposted your status</string>
-    <string name="misskey_notification_item_quoted_your_status">quoted your status</string>
+    <string name="misskey_notification_item_reposted_your_status">reposted</string>
+    <string name="misskey_notification_item_quoted_your_status">quoted</string>
     <string name="misskey_notification_item_reacted_to_your_status">reacted to your status</string>
     <string name="misskey_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="misskey_notification_item_follow_request_accepted">accepted your follow request</string>
-    <string name="misskey_notification_item_achievement_earned">You\'ve earned an achievement</string>
+    <string name="misskey_notification_item_achievement_earned">You\'ve earned an achievement: %1$s\n%2$s</string>
     <string name="misskey_notification_item_app">App</string>
     <string name="misskey_notification_item_followed_you">followed you</string>
     <string name="misskey_notification_item_requested_follow">requested to follow you</string>
     <string name="misskey_item_reblogged_status">reposted a status</string>
 
-    <string name="xqt_item_reblogged_status">retweeted your tweet</string>
+    <string name="xqt_item_reblogged_status">retweeted</string>
     <string name="xqt_item_mention_status">mentions you</string>
 
     <string name="mastodon_visibility_public">Public</string>
@@ -413,4 +413,256 @@
     <string name="profile_tab_media">Media</string>
 
     <string name="tab_settings_title">Tab settings</string>
+
+
+    <string name="misskey_achievement_notes1_title">just setting up my msky</string>
+    <string name="misskey_achievement_notes1_description">Post your first note</string>
+    <string name="misskey_achievement_notes1_flavor">Have a good time with Misskey!</string>
+
+    <string name="misskey_achievement_notes10_title">Some notes</string>
+    <string name="misskey_achievement_notes10_description">Post 10 notes</string>
+
+    <string name="misskey_achievement_notes100_title">A lot of notes</string>
+    <string name="misskey_achievement_notes100_description">Post 100 notes</string>
+
+    <string name="misskey_achievement_notes500_title">Covered in notes</string>
+    <string name="misskey_achievement_notes500_description">Post 500 notes</string>
+
+    <string name="misskey_achievement_notes1000_title">A mountain of notes</string>
+    <string name="misskey_achievement_notes1000_description">Post 1,000 notes</string>
+
+    <string name="misskey_achievement_notes5000_title">Overflowing notes</string>
+    <string name="misskey_achievement_notes5000_description">Post 5,000 notes</string>
+
+    <string name="misskey_achievement_notes10000_title">Supernote</string>
+    <string name="misskey_achievement_notes10000_description">Post 10,000 notes</string>
+
+    <string name="misskey_achievement_notes20000_title">Need... more... notes...</string>
+    <string name="misskey_achievement_notes20000_description">Post 20,000 notes</string>
+
+    <string name="misskey_achievement_notes30000_title">Notes notes notes!</string>
+    <string name="misskey_achievement_notes30000_description">Post 30,000 notes</string>
+
+    <string name="misskey_achievement_notes40000_title">Note factory</string>
+    <string name="misskey_achievement_notes40000_description">Post 40,000 notes</string>
+
+    <string name="misskey_achievement_notes50000_title">Planet of notes</string>
+    <string name="misskey_achievement_notes50000_description">Post 50,000 notes</string>
+
+    <string name="misskey_achievement_notes60000_title">Note quasar</string>
+    <string name="misskey_achievement_notes60000_description">Post 60,000 notes</string>
+
+    <string name="misskey_achievement_notes70000_title">Note black hole</string>
+    <string name="misskey_achievement_notes70000_description">Post 70,000 notes</string>
+
+    <string name="misskey_achievement_notes80000_title">Note galaxy</string>
+    <string name="misskey_achievement_notes80000_description">Post 80,000 notes</string>
+
+    <string name="misskey_achievement_notes90000_title">Note universe</string>
+    <string name="misskey_achievement_notes90000_description">Post 90,000 notes</string>
+
+    <string name="misskey_achievement_notes100000_title">ALL YOUR NOTE ARE BELONG TO US</string>
+    <string name="misskey_achievement_notes100000_description">Post 100,000 notes</string>
+    <string name="misskey_achievement_notes100000_flavor">You sure have a lot to say.</string>
+
+    <string name="misskey_achievement_login3_title">Beginner I</string>
+    <string name="misskey_achievement_login3_description">Log in for a total of 3 days</string>
+    <string name="misskey_achievement_login3_flavor">Starting today, just call me Misskist</string>
+
+    <string name="misskey_achievement_login7_title">Beginner II</string>
+    <string name="misskey_achievement_login7_description">Log in for a total of 7 days</string>
+    <string name="misskey_achievement_login7_flavor">Feel like you\'ve gotten the hang of things yet?</string>
+
+    <string name="misskey_achievement_login15_title">Beginner III</string>
+    <string name="misskey_achievement_login15_description">Log in for a total of 15 days</string>
+
+    <string name="misskey_achievement_login30_title">Misskist I</string>
+    <string name="misskey_achievement_login30_description">Log in for a total of 30 days</string>
+
+    <string name="misskey_achievement_login60_title">Misskist II</string>
+    <string name="misskey_achievement_login60_description">Log in for a total of 60 days</string>
+
+    <string name="misskey_achievement_login100_title">Misskist III</string>
+    <string name="misskey_achievement_login100_description">Log in for a total of 100 days</string>
+    <string name="misskey_achievement_login100_flavor">Violent Misskist</string>
+
+    <string name="misskey_achievement_login200_title">Regular I</string>
+    <string name="misskey_achievement_login200_description">Log in for a total of 200 days</string>
+
+    <string name="misskey_achievement_login300_title">Regular II</string>
+    <string name="misskey_achievement_login300_description">Log in for a total of 300 days</string>
+
+    <string name="misskey_achievement_login400_title">Regular III</string>
+    <string name="misskey_achievement_login400_description">Log in for a total of 400 days</string>
+
+    <string name="misskey_achievement_login500_title">Expert I</string>
+    <string name="misskey_achievement_login500_description">Log in for a total of 500 days</string>
+    <string name="misskey_achievement_login500_flavor">My friends, it has often been said that I like notes</string>
+
+    <string name="misskey_achievement_login600_title">Expert II</string>
+    <string name="misskey_achievement_login600_description">Log in for a total of 600 days</string>
+
+    <string name="misskey_achievement_login700_title">Expert III</string>
+    <string name="misskey_achievement_login700_description">Log in for a total of 700 days</string>
+
+    <string name="misskey_achievement_login800_title">Master of Notes I</string>
+    <string name="misskey_achievement_login800_description">Log in for a total of 800 days</string>
+
+    <string name="misskey_achievement_login900_title">Master of Notes II</string>
+    <string name="misskey_achievement_login900_description">Log in for a total of 900 days</string>
+
+    <string name="misskey_achievement_login1000_title">Master of Notes III</string>
+    <string name="misskey_achievement_login1000_description">Log in for a total of 1,000 days</string>
+    <string name="misskey_achievement_login1000_flavor">Thank you for using Misskey!</string>
+
+    <string name="misskey_achievement_note_clipped1_title">Must... clip...</string>
+    <string name="misskey_achievement_note_clipped1_description">Clip your first note</string>
+
+    <string name="misskey_achievement_note_favorited1_title">Stargazer</string>
+    <string name="misskey_achievement_note_favorited1_description">Favorite your first note</string>
+
+    <string name="misskey_achievement_my_note_favorited1_title">Seeking Stars</string>
+    <string name="misskey_achievement_my_note_favorited1_description">Have somebody else favorite one of your notes</string>
+
+    <string name="misskey_achievement_profile_filled_title">Well-prepared</string>
+    <string name="misskey_achievement_profile_filled_description">Set up your profile</string>
+
+    <string name="misskey_achievement_marked_as_cat_title">I Am a Cat</string>
+    <string name="misskey_achievement_marked_as_cat_description">Mark your account as a cat</string>
+    <string name="misskey_achievement_marked_as_cat_flavor">I\'ll give you a name later.</string>
+
+    <string name="misskey_achievement_following1_title">Following your first user</string>
+    <string name="misskey_achievement_following1_description">Follow a user</string>
+
+    <string name="misskey_achievement_following10_title">Keep up... keep up...</string>
+    <string name="misskey_achievement_following10_description">Follow 10 users</string>
+
+    <string name="misskey_achievement_following50_title">Lots of friends</string>
+    <string name="misskey_achievement_following50_description">Follow 50 accounts</string>
+
+    <string name="misskey_achievement_following100_title">100 Friends</string>
+    <string name="misskey_achievement_following100_description">Follow 100 accounts</string>
+
+    <string name="misskey_achievement_following300_title">Friend overload</string>
+    <string name="misskey_achievement_following300_description">Follow 300 accounts</string>
+
+    <string name="misskey_achievement_followers1_title">First follower</string>
+    <string name="misskey_achievement_followers1_description">Gain 1 follower</string>
+
+    <string name="misskey_achievement_followers10_title">Follow me!</string>
+    <string name="misskey_achievement_followers10_description">Gain 10 followers</string>
+
+    <string name="misskey_achievement_followers50_title">Coming in crowds</string>
+    <string name="misskey_achievement_followers50_description">Gain 50 followers</string>
+
+    <string name="misskey_achievement_followers100_title">Popular</string>
+    <string name="misskey_achievement_followers100_description">Gain 100 followers</string>
+
+    <string name="misskey_achievement_followers300_title">Please form a single line</string>
+    <string name="misskey_achievement_followers300_description">Gain 300 followers</string>
+
+    <string name="misskey_achievement_followers500_title">Radio Tower</string>
+    <string name="misskey_achievement_followers500_description">Gain 500 followers</string>
+
+    <string name="misskey_achievement_followers1000_title">Influencer</string>
+    <string name="misskey_achievement_followers1000_description">Gain 1,000 followers</string>
+
+    <string name="misskey_achievement_collect_achievements30_title">Achievement Collector</string>
+    <string name="misskey_achievement_collect_achievements30_description">Earn 30 achievements</string>
+
+    <string name="misskey_achievement_view_achievements3min_title">Likes Achievements</string>
+    <string name="misskey_achievement_view_achievements3min_description">Look at your list of achievements for at least 3 minutes</string>
+
+    <string name="misskey_achievement_i_love_misskey_title">I Love Misskey</string>
+    <string name="misskey_achievement_i_love_misskey_description">Post \"I ❤ #Misskey\"</string>
+    <string name="misskey_achievement_i_love_misskey_flavor">Misskey\'s development team greatly appreciates your support!</string>
+
+    <string name="misskey_achievement_found_treasure_title">Treasure Hunt</string>
+    <string name="misskey_achievement_found_treasure_description">You\'ve found the hidden treasure</string>
+
+    <string name="misskey_achievement_client30min_title">Short break</string>
+    <string name="misskey_achievement_client30min_description">Keep Misskey opened for at least 30 minutes</string>
+
+    <string name="misskey_achievement_client60min_title">No \"Miss\" in Misskey</string>
+    <string name="misskey_achievement_client60min_description">Keep Misskey opened for at least 60 minutes</string>
+
+    <string name="misskey_achievement_note_deleted_within1min_title">Nevermind</string>
+    <string name="misskey_achievement_note_deleted_within1min_description">Delete a note within a minute of posting it</string>
+
+    <string name="misskey_achievement_posted_at_late_night_title">Nocturnal</string>
+    <string name="misskey_achievement_posted_at_late_night_description">Post a note late at night</string>
+    <string name="misskey_achievement_posted_at_late_night_flavor">It\'s about time to go to bed.</string>
+
+    <string name="misskey_achievement_posted_at_0min0sec_title">Speaking Clock</string>
+    <string name="misskey_achievement_posted_at_0min0sec_description">Post a note at 00:00</string>
+    <string name="misskey_achievement_posted_at_0min0sec_flavor">Click Click Click Claaang</string>
+
+    <string name="misskey_achievement_self_quote_title">Self-Reference</string>
+    <string name="misskey_achievement_self_quote_description">Quote your own note</string>
+
+    <string name="misskey_achievement_htl20npm_title">Flowing Timeline</string>
+    <string name="misskey_achievement_htl20npm_description">Have the speed of your home timeline exceed 20 npm (notes per minute)</string>
+
+    <string name="misskey_achievement_view_instance_chart_title">Analyst</string>
+    <string name="misskey_achievement_view_instance_chart_description">View your instance\'s charts</string>
+
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_title">Hello, world!</string>
+    <string name="misskey_achievement_output_hello_world_on_scratchpad_description">Output \"hello world\" in the Scratchpad</string>
+
+    <string name="misskey_achievement_open3windows_title">Multi-Window</string>
+    <string name="misskey_achievement_open3windows_description">Have at least 3 windows open at the same time</string>
+
+    <string name="misskey_achievement_drive_folder_circular_reference_title">Circular Reference</string>
+    <string name="misskey_achievement_drive_folder_circular_reference_description">Attempt to create a recursively nested folder in Drive</string>
+
+    <string name="misskey_achievement_react_without_read_title">Did you really read that?</string>
+    <string name="misskey_achievement_react_without_read_description">React on a note that\'s over 100 characters long within 3 seconds of it being posted</string>
+
+    <string name="misskey_achievement_clicked_click_here_title">Click here</string>
+    <string name="misskey_achievement_clicked_click_here_description">You\'ve clicked here</string>
+
+    <string name="misskey_achievement_just_plain_lucky_title">Just Plain Lucky</string>
+    <string name="misskey_achievement_just_plain_lucky_description">Has a chance to be obtained with a probability of 0.005\% every 10 seconds</string>
+
+    <string name="misskey_achievement_set_name_to_syuilo_title">God Complex</string>
+    <string name="misskey_achievement_set_name_to_syuilo_description">Set your name to \"syuilo\"</string>
+
+    <string name="misskey_achievement_passed_since_account_created1_title">One Year Anniversary</string>
+    <string name="misskey_achievement_passed_since_account_created1_description">One year has passed since your account was created</string>
+
+    <string name="misskey_achievement_passed_since_account_created2_title">Two Year Anniversary</string>
+    <string name="misskey_achievement_passed_since_account_created2_description">Two years have passed since your account was created</string>
+
+    <string name="misskey_achievement_passed_since_account_created3_title">Three Year Anniversary</string>
+    <string name="misskey_achievement_passed_since_account_created3_description">Three years have passed since your account was created</string>
+
+    <string name="misskey_achievement_logged_in_on_birthday_title">Happy Birthday</string>
+    <string name="misskey_achievement_logged_in_on_birthday_description">Log in on your birthday</string>
+
+    <string name="misskey_achievement_logged_in_on_new_years_day_title">Happy New Year!</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_description">Logged in on the first day of the year</string>
+    <string name="misskey_achievement_logged_in_on_new_years_day_flavor">To another great year on this instance</string>
+
+    <string name="misskey_achievement_cookie_clicked_title">A game in which you click cookies</string>
+    <string name="misskey_achievement_cookie_clicked_description">Clicked the cookie</string>
+    <string name="misskey_achievement_cookie_clicked_flavor">Wait, are you on the correct website?</string>
+
+    <string name="misskey_achievement_brain_diver_title">Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_description">Post the link to Brain Diver</string>
+    <string name="misskey_achievement_brain_diver_flavor">Misskey-Misskey La-Tu-Ma</string>
+
+    <string name="misskey_achievement_smash_test_notification_button_title">Test overflow</string>
+    <string name="misskey_achievement_smash_test_notification_button_description">Trigger the notification test repeatedly within an extremely short time</string>
+
+    <string name="misskey_achievement_tutorial_completed_title">Misskey Elementary Course Diploma</string>
+    <string name="misskey_achievement_tutorial_completed_description">Tutorial completed</string>
+
+    <string name="misskey_achievement_bubble_game_exploding_head_title">🤯</string>
+    <string name="misskey_achievement_bubble_game_exploding_head_description">The biggest object in the bubble game</string>
+
+    <string name="misskey_achievement_bubble_game_double_exploding_head_title">Double🤯</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_description">Two of the biggest objects in the bubble game at the same time</string>
+    <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">You can fill a lunch box like this 🤯 🤯 a bit.</string>
+
+
 </resources>

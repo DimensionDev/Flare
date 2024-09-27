@@ -194,9 +194,7 @@ class ComposePresenter(
             initialTextState = initialTextState,
         ) {
             override fun send(data: ComposeData) {
-                composeUseCase.invoke(data) {
-                    // TODO: show notification
-                }
+                composeUseCase.invoke(data)
             }
 
             override fun selectAccount(account: UiAccount) {

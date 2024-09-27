@@ -14,7 +14,6 @@ class MainActivity : ComponentActivity() {
         installSplashScreen().setKeepOnScreenCondition { keepSplashOnScreen }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        android.webkit.WebView.setWebContentsDebuggingEnabled(true)
         setContent {
             AppContainer(
                 afterInit = {

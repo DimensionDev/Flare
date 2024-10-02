@@ -44,7 +44,7 @@ firebase-bom = "33.3.0"
 google-services = "4.4.2"
 firebase-crashlytics = "3.0.2"
 napier = "2.7.1"
-materialKolor = "1.7.1"
+materialKolor = "2.0.0"
 room = "2.7.0-alpha08"
 
 [libraries]

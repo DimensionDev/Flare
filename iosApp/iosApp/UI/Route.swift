@@ -62,6 +62,7 @@ struct TabItem<Content: View>: View {
 #endif
             }
         }
+#if os(iOS)
         .fullScreenCover(item: $router.fullScreenCover) { route in
             NavigationStack {
                 getView(route: route, onBack: {router.hideFullScreenCover()}, onNavigate: {route in router.navigate(to: route)})
@@ -72,6 +73,7 @@ struct TabItem<Content: View>: View {
             .presentationBackground(.black)
             .environment(\.colorScheme, .dark)
         }
+#endif
         .environment(\.openURL, OpenURLAction { url in
             if let event = AppDeepLinkHelper.shared.parse(url: url.absoluteString) {
                 router.navigate(to: event)

@@ -31,7 +31,9 @@ struct StatusMediaScreen: View {
                                     .tag(index)
                             }
                         }
+#if os(iOS)
                         .tabViewStyle(.page)
+#endif
                     }
                 }
                 VStack {

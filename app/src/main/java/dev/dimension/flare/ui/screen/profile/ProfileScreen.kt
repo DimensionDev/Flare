@@ -634,97 +634,115 @@ private fun ProfileScreen(
                 indicatorPadding = it,
                 content = {
                     val pagerState = rememberPagerState { state.profileTabs.size }
-
-                    VerticalNestedScrollView(
-                        state = nestedScrollState,
-                        contentTopPadding = it.calculateTopPadding(),
-                        header = {
-                            Column {
-                                ProfileHeader(
-                                    state.state.userState,
-                                    state.state.relationState,
-                                    onFollowClick = state.state::follow,
-                                    isMe = state.state.isMe,
-                                    menu = {
-                                        Spacer(modifier = Modifier.width(screenHorizontalPadding))
-                                    },
-                                    expandMatrices = false,
-                                    onAvatarClick = {
-                                        state.state.userState.onSuccess {
-//                                                    onMediaClick(it.avatar)
+                    val content = @Composable {
+                        Column {
+                            Box {
+                                if (state.profileTabs.size > 1) {
+                                    SecondaryScrollableTabRow(
+                                        selectedTabIndex = pagerState.currentPage,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        edgePadding = screenHorizontalPadding,
+                                        divider = {},
+                                    ) {
+                                        state.profileTabs.forEachIndexed { index, profileTab ->
+                                            Tab(
+                                                selected = pagerState.currentPage == index,
+                                                onClick = {
+                                                    scope.launch {
+                                                        pagerState.animateScrollToPage(index)
+                                                    }
+                                                },
+                                            ) {
+                                                Text(
+                                                    profileTab.title,
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(8.dp),
+                                                )
+                                            }
                                         }
-                                    },
-                                    onBannerClick = {
-                                        state.state.userState.onSuccess {
-//                                                    it.banner?.let { it1 -> onMediaClick(it1) }
-                                        }
-                                    },
+                                    }
+                                }
+                                HorizontalDivider(
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .fillMaxWidth(),
                                 )
                             }
-                        },
-                        content = {
-                            Column {
-                                Box {
-                                    if (state.profileTabs.size > 1) {
-                                        SecondaryScrollableTabRow(
-                                            selectedTabIndex = pagerState.currentPage,
-                                            modifier = Modifier.fillMaxWidth(),
-                                            edgePadding = screenHorizontalPadding,
-                                            divider = {},
+                            HorizontalPager(
+                                state = pagerState,
+                            ) { index ->
+                                val type = state.profileTabs[index]
+                                when (type) {
+                                    ProfileTab.Timeline ->
+                                        LazyStatusVerticalStaggeredGrid(
+                                            state = listState,
+                                            contentPadding =
+                                                PaddingValues(
+                                                    top = 8.dp,
+                                                    bottom = 8.dp + it.calculateBottomPadding(),
+                                                ),
+                                            modifier = Modifier.fillMaxSize(),
                                         ) {
-                                            state.profileTabs.forEachIndexed { index, profileTab ->
-                                                Tab(
-                                                    selected = pagerState.currentPage == index,
-                                                    onClick = {
-                                                        scope.launch {
-                                                            pagerState.animateScrollToPage(index)
-                                                        }
-                                                    },
-                                                ) {
-                                                    Text(
-                                                        profileTab.title,
-                                                        modifier =
-                                                            Modifier
-                                                                .padding(8.dp),
-                                                    )
-                                                }
-                                            }
+                                            status(state.state.listState)
                                         }
-                                    }
-                                    HorizontalDivider(
-                                        modifier =
-                                            Modifier
-                                                .align(Alignment.BottomCenter)
-                                                .fillMaxWidth(),
-                                    )
-                                }
-                                HorizontalPager(
-                                    state = pagerState,
-                                ) { index ->
-                                    val type = state.profileTabs[index]
-                                    when (type) {
-                                        ProfileTab.Timeline ->
-                                            LazyStatusVerticalStaggeredGrid(
-                                                state = listState,
-                                                contentPadding = PaddingValues(vertical = 8.dp),
-                                                modifier = Modifier.fillMaxSize(),
-                                            ) {
-                                                status(state.state.listState)
-                                            }
-                                        ProfileTab.Media -> {
-                                            ProfileMediaTab(
-                                                mediaState = state.state.mediaState,
-                                                onItemClicked = { statusKey, index, preview ->
-                                                    onMediaClick(statusKey, index, preview)
-                                                },
-                                                modifier = Modifier.fillMaxSize(),
-                                            )
-                                        }
+                                    ProfileTab.Media -> {
+                                        ProfileMediaTab(
+                                            mediaState = state.state.mediaState,
+                                            onItemClicked = { statusKey, index, preview ->
+                                                onMediaClick(statusKey, index, preview)
+                                            },
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
                                     }
                                 }
                             }
-                        },
-                    )
+                        }
+                    }
+
+                    if (bigScreen) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(
+                                        top = it.calculateTopPadding(),
+                                    ),
+                        ) {
+                            content.invoke()
+                        }
+                    } else {
+                        VerticalNestedScrollView(
+                            state = nestedScrollState,
+                            contentTopPadding = it.calculateTopPadding(),
+                            header = {
+                                Column {
+                                    ProfileHeader(
+                                        state.state.userState,
+                                        state.state.relationState,
+                                        onFollowClick = state.state::follow,
+                                        isMe = state.state.isMe,
+                                        menu = {
+                                            Spacer(modifier = Modifier.width(screenHorizontalPadding))
+                                        },
+                                        expandMatrices = false,
+                                        onAvatarClick = {
+                                            state.state.userState.onSuccess {
+//                                                    onMediaClick(it.avatar)
+                                            }
+                                        },
+                                        onBannerClick = {
+                                            state.state.userState.onSuccess {
+//                                                    it.banner?.let { it1 -> onMediaClick(it1) }
+                                            }
+                                        },
+                                    )
+                                }
+                            },
+                            content = content,
+                        )
+                    }
                 },
             )
         }

@@ -1,64 +1,77 @@
 import SwiftUI
 import shared
+import Awesome
 
 struct HomeScreen: View {
     @State private var presenter = ActiveAccountPresenter()
     @State var showSettings = false
     @State var showLogin = false
     @State var showCompose = false
-
+    
     var body: some View {
         ObservePresenter(presenter: presenter) { userState in
             let accountType: AccountType? = switch onEnum(of: userState.user) {
             case .success(let data): AccountTypeSpecific(accountKey: data.data.key)
-            case .loading: nil
+            case .loading:
+#if os(macOS)
+                AccountTypeGuest()
+#else
+                nil
+#endif
             case .error: AccountTypeGuest()
             }
             if let actualAccountType = accountType {
                 FlareTheme {
-                    AdativeTabView(
-                        items: [
-                            TabModel(
-                                title: String(localized: "home_timeline_title"),
-                                image: "house",
-                                destination: TabItem { router in
-                                    HomeTimelineScreen(
-                                        accountType: actualAccountType,
-                                        toCompose: {
-                                            router.navigate(to: AppleRoute.ComposeNew(accountType: actualAccountType))
-                                        }
-                                    )
-                                    .toolbar {
-                                        #if os(iOS)
-                                        ToolbarItem(placement: accountType is AccountTypeGuest ? .primaryAction : .navigation) {
-                                            Button {
-                                                if accountType is AccountTypeGuest {
-                                                    showLogin = true
-                                                } else {
-                                                    showSettings = true
-                                                }
-                                            } label: {
-                                                switch onEnum(of: userState.user) {
-                                                case .success(let data):
-                                                    UserAvatar(data: data.data.avatar, size: 36)
-                                                case .loading:
-                                                    userAvatarPlaceholder(size: 36)
-                                                case .error:
-                                                    Text("Login")
-                                                }
+                    TabView {
+                        Tab {
+                            TabItem { router in
+                                HomeTimelineScreen(
+                                    accountType: actualAccountType
+                                )
+                                .toolbar {
+                                    ToolbarItem(placement: actualAccountType is AccountTypeGuest ? .primaryAction : .navigation) {
+                                        Button {
+                                            if actualAccountType is AccountTypeGuest {
+                                                showLogin = true
+                                            } else {
+                                                showSettings = true
+                                            }
+                                        } label: {
+                                            switch onEnum(of: userState.user) {
+                                            case .success(let data):
+                                                UserAvatar(data: data.data.avatar, size: 36)
+                                            case .loading:
+                                                userAvatarPlaceholder(size: 36)
+                                            case .error:
+                                                Text("Login")
                                             }
                                         }
-                                        #endif
+                                    }
+                                    if !(actualAccountType is AccountTypeGuest) {
+                                        ToolbarItem(placement: .primaryAction) {
+                                            Button {
+                                                router.navigate(to: AppleRoute.ComposeNew(accountType: actualAccountType))
+                                            } label: {
+                                                Awesome.Classic.Regular.penToSquare.image
+                                                    .foregroundColor(.init(.accentColor))
+                                            }
+                                        }
                                     }
                                 }
-                            ),
-                            !(accountType is AccountTypeGuest) ? TabModel(
-                                title: String(localized: "home_notification_title"),
-                                image: "bell",
-                                destination: TabItem { _ in
+                            }
+                        } label: {
+                            Label {
+                                Text("home_timeline_title")
+                            } icon: {
+                                Awesome.Classic.Solid.house.image
+                            }
+                        }
+                        if !(actualAccountType is AccountTypeGuest) {
+                            Tab {
+                                TabItem { _ in
                                     NotificationScreen(accountType: actualAccountType)
                                         .toolbar {
-                                            #if os(iOS)
+#if os(iOS)
                                             ToolbarItem(placement: .navigation) {
                                                 Button {
                                                     showSettings = true
@@ -70,26 +83,37 @@ struct HomeScreen: View {
                                                     }
                                                 }
                                             }
-                                            #endif
+#endif
                                         }
                                 }
-                            ) : nil,
-                            TabModel(
-                                title: String(localized: "home_discover_title"),
-                                image: "magnifyingglass",
-                                destination: TabItem { router in
-                                    DiscoverScreen(
-                                        accountType: actualAccountType,
-                                        onUserClicked: { user in
-                                            router.navigate(to: AppleRoute.Profile(accountType: actualAccountType, userKey: user.key))
-                                        }
-                                    )
+                            } label: {
+                                Label {
+                                    Text("home_notification_title")
+                                } icon: {
+                                    Awesome.Classic.Solid.bell.image
                                 }
-                            ),
-                            !(accountType is AccountTypeGuest) ? TabModel(
-                                title: String(localized: "home_profile_title"),
-                                image: "person.circle",
-                                destination: TabItem { router in
+                            }
+                        }
+                        Tab(role: .search) {
+                            TabItem { router in
+                                DiscoverScreen(
+                                    accountType: actualAccountType,
+                                    onUserClicked: { user in
+                                        router.navigate(to: AppleRoute.Profile(accountType: actualAccountType, userKey: user.key))
+                                    }
+                                )
+                            }
+                        } label: {
+                            Label {
+                                Text("home_discover_title")
+                            } icon: {
+                                Awesome.Classic.Solid.magnifyingGlass.image
+                            }
+                        }
+                        
+                        if !(actualAccountType is AccountTypeGuest) {
+                            Tab {
+                                TabItem { router in
                                     ProfileScreen(
                                         accountType: actualAccountType,
                                         userKey: nil,
@@ -98,50 +122,16 @@ struct HomeScreen: View {
                                         }
                                     )
                                 }
-                            ) : nil,
-                            accountType is AccountTypeGuest ? TabModel(
-                                title: String(localized: "settings_title"),
-                                image: "gear",
-                                destination: TabItem { _ in
-                                    SettingsScreen()
-                                }
-                            ) : nil
-                        ]
-                        .compactMap {
-                            $0
-                        },
-                        secondaryItems: [
-                        ],
-                        leading: !(accountType is AccountTypeGuest) ? VStack {
-                            Button {
-                                showSettings = true
                             } label: {
-                                AccountItem(userState: userState.user)
-                                Spacer()
-                                Image(systemName: "gear")
-                                    .opacity(0.5)
-                            }
-                            #if os(iOS)
-                            .padding([.horizontal, .top])
-                            #endif
-                            .buttonStyle(.plain)
-                            Button {
-                                showCompose = true
-                            } label: {
-                                Label("compose_title", systemImage: "pencil")
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .buttonStyle(.borderedProminent)
-                            .sheet(isPresented: $showCompose, content: {
-                                NavigationStack {
-                                    ComposeScreen(onBack: { showCompose = false }, accountType: actualAccountType, status: nil)
+                                Label {
+                                    Text("home_profile_title")
+                                } icon: {
+                                    Awesome.Classic.Solid.circleUser.image
                                 }
-                            })
+                            }
                         }
-                        .listRowInsets(EdgeInsets()) : nil
-                    )
+                    }
+                    .tabViewStyle(.sidebarAdaptable)
                 }
             }
         }
@@ -149,14 +139,17 @@ struct HomeScreen: View {
             ServiceSelectScreen(toHome: {
                 showLogin = false
             })
+#if os(macOS)
+            .frame(minWidth: 600, minHeight: 400)
+#endif
         })
         .sheet(isPresented: $showSettings, content: {
             SettingsScreen()
-                #if os(macOS)
+#if os(macOS)
                 .frame(minWidth: 600, minHeight: 400)
-                #endif
+#endif
         })
-
+        
     }
 }
 

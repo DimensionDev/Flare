@@ -2,6 +2,7 @@ import SwiftUI
 import MarkdownUI
 import shared
 import NetworkImage
+import Awesome
 
 struct CommonStatusComponent: View {
     @State private var showMedia: Bool = false
@@ -153,6 +154,9 @@ struct CommonStatusComponent: View {
             if appSettings.appearanceSettings.showActions || isDetail, !data.actions.isEmpty {
                 HStack {
                     ForEach(0..<data.actions.count, id: \.self) { actionIndex in
+                        if actionIndex == data.actions.count - 1 {
+                            Spacer()
+                        }
                         let action = data.actions[actionIndex]
                         switch onEnum(of: action) {
                         case .group(let group): Menu {
@@ -185,24 +189,40 @@ struct CommonStatusComponent: View {
                                         case .retweet(let data): data.retweeted ? LocalizedStringKey("status_action_unretweet") : LocalizedStringKey("status_action_retweet")
                                         case .more: LocalizedStringKey("status_action_more")
                                         }
-                                        let icon = item.getIcon()
-                                        Label(text, systemImage: icon)
+                                        Label {
+                                            Text(text)
+                                        } icon: {
+                                            StatusActionItemIcon(item: item)
+                                        }
                                     })
                                 }
                             }
                         } label: {
                             StatusActionLabel(item: group.displayItem)
-                        }.frame(alignment: .center)
+                        }
+                        .if(actionIndex != data.actions.count - 1) { view in
+                            view
+                                .frame(minWidth: 48.0, alignment: .leading)
+                        }
+                        .if(actionIndex == data.actions.count - 1) { view in
+                            view
+                                .frame(alignment: .center)
+                        }
                         case .item(let item): Button(action: {
                             if let clickable = item as? StatusActionItemClickable {
                                 clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                             }
                         }, label: {
                             StatusActionLabel(item: item)
-                        }).frame(alignment: .center)
+                        })
+                        .if(actionIndex != data.actions.count - 1) { view in
+                            view
+                                .frame(minWidth: 48.0, alignment: .leading)
                         }
-                        if actionIndex != data.actions.count - 1 {
-                            Spacer()
+                        .if(actionIndex == data.actions.count - 1) { view in
+                            view
+                                .frame(alignment: .center)
+                        }
                         }
                     }
                 }
@@ -230,18 +250,46 @@ func dateFormatter(_ date: Date) -> some View {
     }
 }
 
-extension StatusActionItem {
-    func getIcon() -> String {
-        return switch onEnum(of: self) {
-        case .bookmark(let data): data.bookmarked ? "bookmark.slash" : "bookmark"
-        case .delete: "trash"
-        case .like: "star"
-        case .quote: "quote.bubble.fill"
-        case .reaction(let data): data.reacted ? "minus" : "plus"
-        case .reply: "arrowshape.turn.up.left"
-        case .report: "exclamationmark.shield"
-        case .retweet: "arrow.left.arrow.right"
-        case .more: "ellipsis"
+struct StatusActionItemIcon: View {
+    let item: StatusActionItem
+    var body: some View {
+        switch onEnum(of: item) {
+        case .bookmark(let data):
+            if (data.bookmarked) {
+                Awesome.Classic.Solid.bookmark.image
+            } else {
+                Awesome.Classic.Regular.bookmark.image
+            }
+        case .delete(_):
+            Awesome.Classic.Solid.trash.image
+        case .like(let data):
+            if (data.liked) {
+                Awesome.Classic.Solid.heart.image
+                    .foregroundColor(.red)
+            } else {
+                Awesome.Classic.Regular.heart.image
+            }
+        case .more(_):
+            Awesome.Classic.Solid.ellipsis.image
+        case .quote(_):
+            Awesome.Classic.Solid.quoteLeft.image
+        case .reaction(let data):
+            if (data.reacted) {
+                Awesome.Classic.Solid.minus.image
+            } else {
+                Awesome.Classic.Solid.plus.image
+            }
+        case .reply(_):
+            Awesome.Classic.Solid.reply.image
+        case .report(_):
+            Awesome.Classic.Solid.circleInfo.image
+        case .retweet(let data):
+            if (data.retweeted) {
+                Awesome.Classic.Solid.retweet.image
+                    .foregroundColor(.init(.accentColor))
+            } else {
+                Awesome.Classic.Solid.retweet.image
+            }
         }
     }
 }
@@ -257,16 +305,15 @@ struct StatusActionLabel: View {
         case .bookmark(let data): data.humanizedCount
         default: ""
         }
-        let icon = item.getIcon()
         let color = if let colorData = item as? StatusActionItemColorized {
             switch colorData.color {
             case .red: Color.red
             case .primaryColor: Color.accentColor
             case .contentColor:
 #if os(iOS)
-            Color(UIColor.label)
+                Color(UIColor.label)
 #elseif os(macOS)
-            Color(NSColor.labelColor)
+                Color(NSColor.labelColor)
 #endif
             case .error: Color.red
             }
@@ -277,8 +324,12 @@ struct StatusActionLabel: View {
             Color(NSColor.labelColor)
 #endif
         }
-        Label(text, systemImage: icon)
-            .foregroundStyle(color, color)
+        Label {
+            Text(text)
+        } icon: {
+            StatusActionItemIcon(item: item)
+        }
+        .foregroundStyle(color, color)
     }
 }
 
@@ -287,13 +338,13 @@ struct StatusVisibilityComponent: View {
     var body: some View {
         switch visibility {
         case .public:
-            Image(systemName: "globe")
+            Awesome.Classic.Solid.globe.image
         case .home:
-            Image(systemName: "lock.open")
+            Awesome.Classic.Solid.lockOpen.image
         case .followers:
-            Image(systemName: "lock")
+            Awesome.Classic.Solid.lock.image
         case .specified:
-            Image(systemName: "at")
+            Awesome.Classic.Solid.at.image
         }
     }
 }

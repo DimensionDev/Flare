@@ -27,32 +27,14 @@ struct HomeTimelineScreen: View {
     @Environment(\.openURL) private var openURL
     @State private var presenter: HomeTimelinePresenter
     private let accountType: AccountType
-    private let toCompose: () -> Void
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    init(accountType: AccountType, toCompose: @escaping () -> Void) {
+    init(accountType: AccountType) {
         presenter = .init(accountType: accountType)
         self.accountType = accountType
-        self.toCompose = toCompose
     }
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            ZStack(alignment: .bottomTrailing) {
-                TimelineScreen(presenter: presenter)
-                if !(accountType is AccountTypeGuest), horizontalSizeClass == .compact {
-                    Button {
-                        toCompose()
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.title.weight(.semibold))
-                            .padding()
-                            .background(Color.accentColor)
-                            .foregroundColor(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 16.0))
-                            .shadow(radius: 8, x: 4, y: 4)
-                    }
-                    .padding()
-                }
-            }
+            TimelineScreen(presenter: presenter)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #else

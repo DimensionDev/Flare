@@ -67,6 +67,7 @@ kotlin {
                 api(libs.bluesky)
                 implementation(libs.room.runtime)
                 implementation(libs.room.paging)
+                implementation(libs.sqlite.bundled)
             }
         }
         val commonTest by getting {

@@ -79,12 +79,12 @@ internal fun BlueskyFeedRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BlueskyFeedScreen(
+internal fun BlueskyFeedScreen(
     accountType: AccountType,
     uri: String,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter {
+    val state by producePresenter("BlueskyFeedScreen_$accountType-$uri") {
         presenter(
             accountType = accountType,
             uri = uri,

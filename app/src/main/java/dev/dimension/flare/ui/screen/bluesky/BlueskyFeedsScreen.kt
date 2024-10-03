@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.screen.bluesky
 
+import android.os.Parcelable
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,6 +20,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.BlueskyFeedRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -59,7 +65,9 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
@@ -68,13 +76,51 @@ internal fun BlueskyFeedsRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
 ) {
-    BlueskyFeedsScreen(
-        accountType = accountType,
-        toFeed = {
-            navigator.navigate(BlueskyFeedRouteDestination(accountType = accountType, uri = it.id))
+    val scaffoldNavigator =
+        rememberListDetailPaneScaffoldNavigator<BlueskyFeedUri>()
+    BackHandler(
+        scaffoldNavigator.canNavigateBack(),
+    ) {
+        scaffoldNavigator.navigateBack()
+    }
+
+    ListDetailPaneScaffold(
+        directive = scaffoldNavigator.scaffoldDirective,
+        value = scaffoldNavigator.scaffoldValue,
+        listPane = {
+            AnimatedPane {
+                BlueskyFeedsScreen(
+                    accountType = accountType,
+                    toFeed = {
+                        scaffoldNavigator.navigateTo(
+                            ListDetailPaneScaffoldRole.Detail,
+                            BlueskyFeedUri(it.id),
+                        )
+                    },
+                )
+            }
+        },
+        detailPane = {
+            AnimatedPane {
+                scaffoldNavigator.currentDestination?.content?.let {
+                    BlueskyFeedScreen(
+                        accountType = accountType,
+                        uri = it.value,
+                        onBack = {
+                            scaffoldNavigator.navigateBack()
+                        },
+                    )
+                }
+            }
         },
     )
 }
+
+@JvmInline
+@Parcelize
+private value class BlueskyFeedUri(
+    val value: String,
+) : Parcelable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,7 +224,9 @@ private fun BlueskyFeedsScreen(
                                 },
                                 modifier =
                                     Modifier
-                                        .padding(
+                                        .clickable {
+                                            toFeed.invoke(item)
+                                        }.padding(
                                             horizontal = screenHorizontalPadding,
                                             vertical = 8.dp,
                                         ),

@@ -228,15 +228,18 @@ internal fun HomeScreen(
                         },
                         railHeader = {
                             accountTypeState.user.onSuccess {
-                                IconButton(
-                                    onClick = {
-                                        scope.launch {
-                                            drawerState.open()
-                                        }
-                                    },
-                                ) {
-                                    AvatarComponent(it.avatar)
-                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                AvatarComponent(
+                                    it.avatar,
+                                    size = 56.dp,
+                                    modifier =
+                                        Modifier.clickable {
+                                            scope.launch {
+                                                drawerState.open()
+                                            }
+                                        },
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
                                 FloatingActionButton(
                                     onClick = {
                                         currentTab?.let {

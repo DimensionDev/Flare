@@ -15,7 +15,6 @@ import dev.dimension.flare.data.model.LocalAppearanceSettings
 fun AvatarComponent(
     data: String?,
     modifier: Modifier = Modifier,
-    beforeModifier: Modifier = Modifier,
     size: Dp = AvatarComponentDefaults.size,
 ) {
     val appearanceSettings = LocalAppearanceSettings.current
@@ -24,7 +23,6 @@ fun AvatarComponent(
         contentDescription = null,
         modifier =
             Modifier
-                .then(beforeModifier)
                 .size(size)
                 .clip(
                     when (appearanceSettings.avatarShape) {

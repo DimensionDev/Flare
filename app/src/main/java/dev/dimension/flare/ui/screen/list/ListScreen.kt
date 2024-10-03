@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.screen.list
 
+import android.os.Parcelable
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +24,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +46,6 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.CreateListRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DeleteListRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.EditListRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -68,9 +75,12 @@ import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.AllListPresenter
+import dev.dimension.flare.ui.screen.home.TimelineRoute
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.parcelize.Parcelize
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],
 )
@@ -78,47 +88,82 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 internal fun ListScreenRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
+    drawerState: DrawerState,
 ) {
-    ListScreen(
-        accountType = accountType,
-        toList = { item ->
-            navigator.navigate(
-                TimelineRouteDestination(
-                    tabItem =
-                        ListTimelineTabItem(
-                            account = accountType,
-                            listId = item.id,
-                            metaData =
-                                TabMetaData(
-                                    title = TitleType.Text(item.title),
-                                    icon = IconType.Material(IconType.Material.MaterialIcon.List),
-                                ),
-                        ),
-                ),
-            )
-        },
-        createList = {
-            navigator.navigate(CreateListRouteDestination(accountType = accountType))
-        },
-        editList = {
-            navigator.navigate(
-                EditListRouteDestination(
+    val scaffoldNavigator =
+        rememberListDetailPaneScaffoldNavigator<ListDetailPaneNavArgs>()
+    BackHandler(
+        scaffoldNavigator.canNavigateBack(),
+    ) {
+        scaffoldNavigator.navigateBack()
+    }
+    ListDetailPaneScaffold(
+        directive = scaffoldNavigator.scaffoldDirective,
+        value = scaffoldNavigator.scaffoldValue,
+        listPane = {
+            AnimatedPane {
+                ListScreen(
                     accountType = accountType,
-                    listId = it.id,
-                ),
-            )
+                    toList = { item ->
+                        scaffoldNavigator.navigateTo(
+                            ListDetailPaneScaffoldRole.Detail,
+                            ListDetailPaneNavArgs(
+                                id = item.id,
+                                title = item.title,
+                            ),
+                        )
+                    },
+                    createList = {
+                        navigator.navigate(CreateListRouteDestination(accountType = accountType))
+                    },
+                    editList = {
+                        navigator.navigate(
+                            EditListRouteDestination(
+                                accountType = accountType,
+                                listId = it.id,
+                            ),
+                        )
+                    },
+                    deleteList = {
+                        navigator.navigate(
+                            DeleteListRouteDestination(
+                                accountType = accountType,
+                                listId = it.id,
+                                title = it.title,
+                            ),
+                        )
+                    },
+                )
+            }
         },
-        deleteList = {
-            navigator.navigate(
-                DeleteListRouteDestination(
-                    accountType = accountType,
-                    listId = it.id,
-                    title = it.title,
-                ),
-            )
+        detailPane = {
+            AnimatedPane {
+                scaffoldNavigator.currentDestination?.content?.let { args ->
+                    TimelineRoute(
+                        navigator = navigator,
+                        tabItem =
+                            ListTimelineTabItem(
+                                account = accountType,
+                                listId = args.id,
+                                metaData =
+                                    TabMetaData(
+                                        title = TitleType.Text(args.title),
+                                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                                    ),
+                            ),
+                        drawerState = drawerState,
+                    )
+                }
+            }
         },
     )
 }
+
+@Parcelize
+private data class ListDetailPaneNavArgs(
+    val id: String,
+    val title: String,
+) : Parcelable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

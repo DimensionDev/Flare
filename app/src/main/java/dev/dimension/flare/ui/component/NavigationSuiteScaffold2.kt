@@ -61,6 +61,7 @@ import androidx.compose.runtime.collection.MutableVector
 import androidx.compose.runtime.collection.mutableVectorOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -491,11 +492,12 @@ private fun NavigationItemIcon(
     icon: @Composable () -> Unit,
     badge: (@Composable () -> Unit)? = null,
 ) {
+    val iconContent = remember(icon) { movableContentOf(icon) }
     if (badge != null) {
         BadgedBox(badge = { badge.invoke() }) {
-            icon()
+            iconContent.invoke()
         }
     } else {
-        icon()
+        iconContent.invoke()
     }
 }

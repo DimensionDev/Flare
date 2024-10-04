@@ -202,7 +202,7 @@ struct CommonStatusComponent: View {
                         }
                         .if(actionIndex != data.actions.count - 1) { view in
                             view
-                                .frame(minWidth: 48.0, alignment: .leading)
+                                .frame(minWidth: 56.0, alignment: .leading)
                         }
                         .if(actionIndex == data.actions.count - 1) { view in
                             view
@@ -217,7 +217,7 @@ struct CommonStatusComponent: View {
                         })
                         .if(actionIndex != data.actions.count - 1) { view in
                             view
-                                .frame(minWidth: 48.0, alignment: .leading)
+                                .frame(minWidth: 56.0, alignment: .leading)
                         }
                         .if(actionIndex == data.actions.count - 1) { view in
                             view

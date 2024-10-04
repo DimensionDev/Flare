@@ -34,6 +34,7 @@
 		0630F3402C732ED2009631AA /* ObservePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0630F33F2C732ED2009631AA /* ObservePresenter.swift */; };
 		063476792B4FBB9E006B21F1 /* DiscoverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */; };
 		0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */; };
+		064D99C72CAFBEE400915E03 /* HomeContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064D99C62CAFBEE400915E03 /* HomeContent.swift */; };
 		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
 		066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */; };
 		066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0442B3ACDC1006F28F4 /* Collections */; };
@@ -102,6 +103,7 @@
 		0630F33F2C732ED2009631AA /* ObservePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservePresenter.swift; sourceTree = "<group>"; };
 		063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverScreen.swift; sourceTree = "<group>"; };
 		0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
+		064D99C62CAFBEE400915E03 /* HomeContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeContent.swift; sourceTree = "<group>"; };
 		066151202AC540B700CCB945 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonStatusComponent.swift; sourceTree = "<group>"; };
 		066F23042B43BD59004A4A8D /* ProfileMediaListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaListScreen.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 			children = (
 				0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */,
 				066151202AC540B700CCB945 /* HomeScreen.swift */,
+				064D99C62CAFBEE400915E03 /* HomeContent.swift */,
 				060501BD2ACAC4ED00DBCCEB /* NotificationScreen.swift */,
 				063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */,
 				0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */,
@@ -563,6 +566,7 @@
 				061C2D002B4E8B0600249514 /* StatusDetailScreen.swift in Sources */,
 				06DF79D12B4699E200CF21FE /* AppearanceScreen.swift in Sources */,
 				067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */,
+				064D99C72CAFBEE400915E03 /* HomeContent.swift in Sources */,
 				062A3C872C6C9CF800A45E44 /* VVOCommentScreen.swift in Sources */,
 				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
 				06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */,

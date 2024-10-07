@@ -257,38 +257,92 @@ struct StatusActionItemIcon: View {
         case .bookmark(let data):
             if (data.bookmarked) {
                 Awesome.Classic.Solid.bookmark.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
             } else {
                 Awesome.Classic.Regular.bookmark.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
             }
         case .delete(_):
             Awesome.Classic.Solid.trash.image
         case .like(let data):
             if (data.liked) {
                 Awesome.Classic.Solid.heart.image
-                    .foregroundColor(.red)
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
             } else {
                 Awesome.Classic.Regular.heart.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
             }
         case .more(_):
             Awesome.Classic.Solid.ellipsis.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
         case .quote(_):
             Awesome.Classic.Solid.quoteLeft.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
         case .reaction(let data):
             if (data.reacted) {
                 Awesome.Classic.Solid.minus.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
             } else {
                 Awesome.Classic.Solid.plus.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
             }
         case .reply(_):
             Awesome.Classic.Solid.reply.image
+#if os(macOS)
+                .foregroundColor(.labelColor)
+#elseif os(iOS)
+                .foregroundColor(.label)
+#endif
         case .report(_):
             Awesome.Classic.Solid.circleInfo.image
+#if os(macOS)
+                .foregroundColor(.labelColor)
+#elseif os(iOS)
+                .foregroundColor(.label)
+#endif
         case .retweet(let data):
             if (data.retweeted) {
                 Awesome.Classic.Solid.retweet.image
                     .foregroundColor(.init(.accentColor))
             } else {
                 Awesome.Classic.Solid.retweet.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
             }
         }
     }

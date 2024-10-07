@@ -11,13 +11,7 @@ struct HomeContent: View {
     @State var showSettings = false
     @State var showLogin = false
     @State var showCompose = false
-    @State var listPresenter: AllListPresenter
-    init(accountType: AccountType) {
-        self.accountType = accountType
-        listPresenter = .init(accountType: accountType)
-    }
     var body: some View {
-        Observing(listPresenter.models) { listState in
             FlareTheme {
                 TabView(selection: $selectedTab) {
                     Tab(value: .timeline) {
@@ -59,6 +53,7 @@ struct HomeContent: View {
                             Text("home_timeline_title")
                         } icon: {
                             Awesome.Classic.Solid.house.image
+                                .foregroundColor(.init(.accentColor))
                         }
                     }
                     .customizationID(HomeTabs.timeline.customizationID)
@@ -72,6 +67,7 @@ struct HomeContent: View {
                                 Text("home_notification_title")
                             } icon: {
                                 Awesome.Classic.Solid.bell.image
+                                    .foregroundColor(.init(.accentColor))
                             }
                         }
                         .customizationID(HomeTabs.notification.customizationID)
@@ -90,6 +86,7 @@ struct HomeContent: View {
                             Text("home_discover_title")
                         } icon: {
                             Awesome.Classic.Solid.magnifyingGlass.image
+                                .foregroundColor(.init(.accentColor))
                         }
                     }
                     .customizationID(HomeTabs.discover.customizationID)
@@ -109,6 +106,7 @@ struct HomeContent: View {
                                 Text("home_profile_title")
                             } icon: {
                                 Awesome.Classic.Solid.circleUser.image
+                                    .foregroundColor(.init(.accentColor))
                             }
                         }
                         .customizationID(HomeTabs.profile.customizationID)
@@ -146,7 +144,6 @@ struct HomeContent: View {
                     .frame(minWidth: 600, minHeight: 400)
 #endif
             })
-        }
     }
 }
 

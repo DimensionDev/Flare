@@ -59,30 +59,75 @@ struct StatusRetweetHeaderComponent: View {
         HStack(alignment: .center) {
             switch topMessage.icon {
             case .retweet: Awesome.Classic.Solid.retweet.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             case .follow: Awesome.Classic.Solid.userPlus.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             case .favourite: Awesome.Classic.Solid.heart.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             case .mention: Awesome.Classic.Solid.at.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             case .poll: Awesome.Classic.Solid.squarePollHorizontal.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             case .edit: Awesome.Classic.Solid.pen.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             case .info: Awesome.Classic.Solid.circleInfo.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             case .reply: Awesome.Classic.Solid.reply.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             case .quote: Awesome.Classic.Solid.quoteLeft.image
+#if os(macOS)
+                    .foregroundColor(.labelColor)
+#elseif os(iOS)
+                    .foregroundColor(.label)
+#endif
                     .size(14)
                     .frame(alignment: .center)
             }

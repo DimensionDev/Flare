@@ -28,7 +28,6 @@ kotlin {
             baseName = "shared"
             isStatic = true
             embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
-            linkerOpts.add("-lsqlite3")
         }
     }
     targets.forEach { target ->

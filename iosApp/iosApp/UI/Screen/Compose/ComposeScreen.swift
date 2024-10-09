@@ -2,6 +2,7 @@ import SwiftUI
 import shared
 import PhotosUI
 import NetworkImage
+import Awesome
 
 struct ComposeScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -55,8 +56,11 @@ struct ComposeScreen: View {
                                                                 viewModel.mediaViewModel.remove(item: item)
                                                             }
                                                         }, label: {
-                                                            Text("delete")
-                                                            Image(systemName: "trash")
+                                                            Label {
+                                                                Text("delete")
+                                                            } icon: {
+                                                                Awesome.Classic.Solid.trash.image
+                                                            }
                                                         })
                                                     }
 #else
@@ -66,8 +70,11 @@ struct ComposeScreen: View {
                                                             viewModel.mediaViewModel.remove(item: item)
                                                         }
                                                     }, label: {
-                                                        Text("delete")
-                                                        Image(systemName: "trash")
+                                                        Label {
+                                                            Text("delete")
+                                                        } icon: {
+                                                            Awesome.Classic.Solid.trash.image
+                                                        }
                                                     })
                                                 } label: {
                                                     Image(uiImage: image)
@@ -99,7 +106,7 @@ struct ComposeScreen: View {
                                             viewModel.pollViewModel.add()
                                         }
                                     } label: {
-                                        Image(systemName: "plus")
+                                        Awesome.Classic.Solid.plus.image
                                     }.disabled(viewModel.pollViewModel.choices.count >= 4)
                                 }
 #if os(iOS)
@@ -116,7 +123,7 @@ struct ComposeScreen: View {
                                                 viewModel.pollViewModel.remove(choice: choice)
                                             }
                                         } label: {
-                                            Image(systemName: "delete.left")
+                                            Awesome.Classic.Solid.deleteLeft.image
                                         }
                                         .disabled(viewModel.pollViewModel.choices.count <= 2)
                                     }
@@ -164,7 +171,7 @@ struct ComposeScreen: View {
                                     viewModel.mediaViewModel.selectedItems = value
                                     viewModel.mediaViewModel.update()
                                 }), matching: .any(of: [.images, .videos, .livePhotos])) {
-                                    Image(systemName: "photo")
+                                    Awesome.Classic.Solid.image.image
                                         .frame(width: iconSize, height: iconSize)
                                 }
                             }
@@ -176,7 +183,7 @@ struct ComposeScreen: View {
                                         viewModel.togglePoll()
                                     }
                                 }, label: {
-                                    Image(systemName: "list.bullet")
+                                    Awesome.Classic.Solid.squarePollHorizontal.image
                                         .frame(width: iconSize, height: iconSize)
                                 })
                             }
@@ -192,6 +199,7 @@ struct ComposeScreen: View {
                                     }
                                 } label: {
                                     StatusVisibilityComponent(visibility: visibilityState.data.visibility)
+                                        .frame(width: iconSize, height: iconSize)
                                 }
                             }
                             if case .success(let data) = onEnum(of: viewModel.model.composeConfig),
@@ -206,7 +214,7 @@ struct ComposeScreen: View {
                                         }
                                     }
                                 }, label: {
-                                    Image(systemName: "exclamationmark.triangle")
+                                    Awesome.Classic.Solid.circleExclamation.image
                                         .frame(width: iconSize, height: iconSize)
                                 })
                             }
@@ -214,7 +222,7 @@ struct ComposeScreen: View {
                                 Button(action: {
                                     viewModel.showEmojiPanel()
                                 }, label: {
-                                    Image(systemName: "face.smiling")
+                                    Awesome.Classic.Solid.faceSmile.image
                                         .frame(width: iconSize, height: iconSize)
                                 })
                                 .popover(isPresented: $viewModel.showEmoji) {
@@ -261,14 +269,16 @@ struct ComposeScreen: View {
                     viewModel.send()
                     onBack()
                 }, label: {
-                    Image(systemName: "paperplane")
+                    Awesome.Classic.Solid.paperPlane.image
+                        .foregroundColor(.init(.accentColor))
                 })
             }
             ToolbarItem(placement: .cancellationAction) {
                 Button(role: .cancel, action: {
                     onBack()
                 }, label: {
-                    Image(systemName: "xmark")
+                    Awesome.Classic.Solid.xmark.image
+                        .foregroundColor(.init(.accentColor))
                 })
             }
             ToolbarItem(placement: .principal) {

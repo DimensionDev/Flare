@@ -9,7 +9,7 @@ struct FlareApp: SwiftUI.App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     #endif
     init() {
-        KoinHelper.shared.start()
+        KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
     }
 
     var body: some Scene {

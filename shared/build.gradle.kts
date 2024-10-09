@@ -28,7 +28,6 @@ kotlin {
             baseName = "shared"
             isStatic = true
             embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
-            linkerOpts.add("-lsqlite3")
         }
     }
     targets.forEach { target ->
@@ -67,6 +66,7 @@ kotlin {
                 api(libs.bluesky)
                 implementation(libs.room.runtime)
                 implementation(libs.room.paging)
+                implementation(libs.sqlite.bundled)
             }
         }
         val commonTest by getting {

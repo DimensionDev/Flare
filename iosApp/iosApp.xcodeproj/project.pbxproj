@@ -34,6 +34,7 @@
 		0630F3402C732ED2009631AA /* ObservePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0630F33F2C732ED2009631AA /* ObservePresenter.swift */; };
 		063476792B4FBB9E006B21F1 /* DiscoverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */; };
 		0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */; };
+		064D99C72CAFBEE400915E03 /* HomeContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064D99C62CAFBEE400915E03 /* HomeContent.swift */; };
 		066151212AC540B700CCB945 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151202AC540B700CCB945 /* HomeScreen.swift */; };
 		066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */; };
 		066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0442B3ACDC1006F28F4 /* Collections */; };
@@ -43,6 +44,8 @@
 		067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 067D89762AD25C1700F8F932 /* MarkdownUI */; };
 		067D89792AD25DB000F8F932 /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D89782AD25DB000F8F932 /* MarkdownTheme.swift */; };
 		067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067D897D2AD3A2F900F8F932 /* MediaComponent.swift */; };
+		069050782CAE6108007FC957 /* SwitUIInAppNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069050772CAE6100007FC957 /* SwitUIInAppNotification.swift */; };
+		0690507B2CAE634C007FC957 /* Awesome in Frameworks */ = {isa = PBXBuildFile; productRef = 0690507A2CAE634C007FC957 /* Awesome */; };
 		0690CF8D2B5F51A200824A21 /* XQTLoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0690CF8C2B5F51A200824A21 /* XQTLoginScreen.swift */; };
 		06AD156B2AC3F454000DC865 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AD156A2AC3F454000DC865 /* Route.swift */; };
 		06B8514B2B6B228600DFA075 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 06B8514A2B6B228600DFA075 /* FirebaseAnalytics */; };
@@ -55,7 +58,6 @@
 		06C862712B4D0C7A008C902C /* FlareTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862702B4D0C7A008C902C /* FlareTheme.swift */; };
 		06C862732B4D2A14008C902C /* UserInterfaceSizeClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862722B4D2A14008C902C /* UserInterfaceSizeClass.swift */; };
 		06C862762B4D2A55008C902C /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C862752B4D2A55008C902C /* UIImage.swift */; };
-		06C9C5612B34241400AE5284 /* AdativeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C9C5602B34241400AE5284 /* AdativeTabView.swift */; };
 		06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */; };
 		06DF79CF2B465D1D00CF21FE /* AboutScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79CE2B465D1D00CF21FE /* AboutScreen.swift */; };
 		06DF79D12B4699E200CF21FE /* AppearanceScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D02B4699E200CF21FE /* AppearanceScreen.swift */; };
@@ -101,11 +103,13 @@
 		0630F33F2C732ED2009631AA /* ObservePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservePresenter.swift; sourceTree = "<group>"; };
 		063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverScreen.swift; sourceTree = "<group>"; };
 		0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
+		064D99C62CAFBEE400915E03 /* HomeContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeContent.swift; sourceTree = "<group>"; };
 		066151202AC540B700CCB945 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonStatusComponent.swift; sourceTree = "<group>"; };
 		066F23042B43BD59004A4A8D /* ProfileMediaListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaListScreen.swift; sourceTree = "<group>"; };
 		067D89782AD25DB000F8F932 /* MarkdownTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTheme.swift; sourceTree = "<group>"; };
 		067D897D2AD3A2F900F8F932 /* MediaComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaComponent.swift; sourceTree = "<group>"; };
+		069050772CAE6100007FC957 /* SwitUIInAppNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitUIInAppNotification.swift; sourceTree = "<group>"; };
 		0690CF8C2B5F51A200824A21 /* XQTLoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XQTLoginScreen.swift; sourceTree = "<group>"; };
 		06AD156A2AC3F454000DC865 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
 		06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -117,7 +121,6 @@
 		06C862702B4D0C7A008C902C /* FlareTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareTheme.swift; sourceTree = "<group>"; };
 		06C862722B4D2A14008C902C /* UserInterfaceSizeClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceSizeClass.swift; sourceTree = "<group>"; };
 		06C862752B4D2A55008C902C /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
-		06C9C5602B34241400AE5284 /* AdativeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdativeTabView.swift; sourceTree = "<group>"; };
 		06D5C9172AC3BB69007439D5 /* ServiceSelectScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSelectScreen.swift; sourceTree = "<group>"; };
 		06DF79CE2B465D1D00CF21FE /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
 		06DF79D02B4699E200CF21FE /* AppearanceScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceScreen.swift; sourceTree = "<group>"; };
@@ -143,6 +146,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0690507B2CAE634C007FC957 /* Awesome in Frameworks */,
 				066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */,
 				067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */,
 				066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */,
@@ -212,6 +216,7 @@
 			children = (
 				0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */,
 				066151202AC540B700CCB945 /* HomeScreen.swift */,
+				064D99C62CAFBEE400915E03 /* HomeContent.swift */,
 				060501BD2ACAC4ED00DBCCEB /* NotificationScreen.swift */,
 				063476782B4FBB9E006B21F1 /* DiscoverScreen.swift */,
 				0634767A2B4FCFAE006B21F1 /* SearchScreen.swift */,
@@ -234,12 +239,12 @@
 		066151222AC54A8200CCB945 /* Component */ = {
 			isa = PBXGroup;
 			children = (
+				069050772CAE6100007FC957 /* SwitUIInAppNotification.swift */,
 				06C862742B4D2A46008C902C /* Compact */,
 				060501C42ACBF40700DBCCEB /* User */,
 				060501C32ACBF40200DBCCEB /* Status */,
 				060501C72ACD09B800DBCCEB /* UserAvatar.swift */,
 				067D89782AD25DB000F8F932 /* MarkdownTheme.swift */,
-				06C9C5602B34241400AE5284 /* AdativeTabView.swift */,
 				06C862702B4D0C7A008C902C /* FlareTheme.swift */,
 				061C2CFB2B4E77D700249514 /* FullScreenImageViewer.swift */,
 				061C2CFD2B4E82C900249514 /* ImageViewWindow.swift */,
@@ -436,6 +441,7 @@
 				066AD0482B3ACDC1006F28F4 /* OrderedCollections */,
 				06B8514A2B6B228600DFA075 /* FirebaseAnalytics */,
 				06B8514C2B6B228600DFA075 /* FirebaseCrashlytics */,
+				0690507A2CAE634C007FC957 /* Awesome */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -472,6 +478,7 @@
 				0641D85E2B0DFD3800029CA1 /* XCRemoteSwiftPackageReference "RichText" */,
 				066AD0432B3ACDC1006F28F4 /* XCRemoteSwiftPackageReference "swift-collections" */,
 				06B851492B6B228600DFA075 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				069050792CAE634C007FC957 /* XCRemoteSwiftPackageReference "Awesome" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -559,10 +566,12 @@
 				061C2D002B4E8B0600249514 /* StatusDetailScreen.swift in Sources */,
 				06DF79D12B4699E200CF21FE /* AppearanceScreen.swift in Sources */,
 				067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */,
+				064D99C72CAFBEE400915E03 /* HomeContent.swift in Sources */,
 				062A3C872C6C9CF800A45E44 /* VVOCommentScreen.swift in Sources */,
 				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
 				06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */,
 				066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */,
+				069050782CAE6108007FC957 /* SwitUIInAppNotification.swift in Sources */,
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
 				066151212AC540B700CCB945 /* HomeScreen.swift in Sources */,
 				062A3C892C6C9ECD00A45E44 /* VVOLoginScreen.swift in Sources */,
@@ -592,7 +601,6 @@
 				06B8515B2B73930100DFA075 /* Zoomable.swift in Sources */,
 				B62B238878D4BA843A1BB66F /* ViewExt.swift in Sources */,
 				0630F3402C732ED2009631AA /* ObservePresenter.swift in Sources */,
-				06C9C5612B34241400AE5284 /* AdativeTabView.swift in Sources */,
 				B62B27AA5CE37383A67B419B /* CommonProfileHeader.swift in Sources */,
 				B62B206B672982F032F669C3 /* ProfileScreen.swift in Sources */,
 				061C2CFA2B4E6E0100249514 /* ProfileWithUserNameScreen.swift in Sources */,
@@ -753,12 +761,12 @@
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Flare;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 0.0.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -800,12 +808,12 @@
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Flare;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 0.0.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -874,6 +882,14 @@
 				minimumVersion = 2.3.0;
 			};
 		};
+		069050792CAE634C007FC957 /* XCRemoteSwiftPackageReference "Awesome" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Tlaster/Awesome";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		06B851492B6B228600DFA075 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -904,6 +920,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 067D89752AD25C1700F8F932 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		0690507A2CAE634C007FC957 /* Awesome */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 069050792CAE634C007FC957 /* XCRemoteSwiftPackageReference "Awesome" */;
+			productName = Awesome;
 		};
 		06B8514A2B6B228600DFA075 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;

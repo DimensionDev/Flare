@@ -62,13 +62,18 @@ struct TabItem<Content: View>: View {
 #endif
             }
         }
-        #if os(iOS)
+#if os(iOS)
         .fullScreenCover(item: $router.fullScreenCover) { route in
             NavigationStack {
                 getView(route: route, onBack: {router.hideFullScreenCover()}, onNavigate: {route in router.navigate(to: route)})
             }
+            .modifier(SwipeToDismissModifier(onDismiss: {
+                router.hideFullScreenCover()
+            }))
+            .presentationBackground(.black)
+            .environment(\.colorScheme, .dark)
         }
-        #endif
+#endif
         .environment(\.openURL, OpenURLAction { url in
             if let event = AppDeepLinkHelper.shared.parse(url: url.absoluteString) {
                 router.navigate(to: event)
@@ -153,5 +158,33 @@ struct TabItem<Content: View>: View {
             case .statusDetail(let data): VVOStatusDetailScreen(accountType: data.accountType, statusKey: data.statusKey)
             }
         }
+    }
+}
+
+
+struct SwipeToDismissModifier: ViewModifier {
+    var onDismiss: () -> Void
+    @State private var offset: CGSize = .zero
+
+    func body(content: Content) -> some View {
+        content
+            .offset(y: offset.height)
+            .animation(.interactiveSpring(), value: offset)
+            .simultaneousGesture(
+                DragGesture()
+                    .onChanged { gesture in
+                        if gesture.translation.width < 50 {
+                            offset = gesture.translation
+                        }
+                    }
+                    .onEnded { _ in
+                        if abs(offset.height) > 100 {
+                            offset = .zero
+                            onDismiss()
+                        } else {
+                            offset = .zero
+                        }
+                    }
+            )
     }
 }

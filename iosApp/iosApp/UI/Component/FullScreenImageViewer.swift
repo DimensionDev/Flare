@@ -9,7 +9,11 @@ struct FullScreenImageViewer: View {
         ZStack {
             switch onEnum(of: media) {
             case .image(let data):
-                Zoomable(url: data.url)
+                NetworkImage(url: .init(string: data.url)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                }
             case .video(let video):
                 VideoPlayer(player: AVPlayer(url: URL(string: video.url)!))
             case .audio(let audio):

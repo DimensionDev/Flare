@@ -12,7 +12,6 @@ import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.uuid.Uuid
 
@@ -20,7 +19,7 @@ import kotlin.uuid.Uuid
 internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val database: CacheDatabase,
-    private val account: UiAccount.Misskey,
+    private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val pagingKey: String,
     private val statusOnly: Boolean,
@@ -35,14 +34,14 @@ internal class StatusDetailRemoteMediator(
                     endOfPaginationReached = true,
                 )
             }
-            if (!database.pagingTimelineDao().existsPaging(account.accountKey, pagingKey)) {
-                database.statusDao().get(statusKey, account.accountKey).firstOrNull()?.let {
+            if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+                database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
                     database
                         .pagingTimelineDao()
                         .insertAll(
                             listOf(
                                 DbPagingTimeline(
-                                    accountKey = account.accountKey,
+                                    accountKey = accountKey,
                                     statusKey = statusKey,
                                     pagingKey = pagingKey,
                                     sortId = 0,
@@ -90,7 +89,7 @@ internal class StatusDetailRemoteMediator(
                 }.filterNotNull()
             Misskey.save(
                 database = database,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 pagingKey = pagingKey,
                 data = result,
             )

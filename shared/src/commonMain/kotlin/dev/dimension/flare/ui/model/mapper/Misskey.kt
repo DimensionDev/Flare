@@ -464,7 +464,22 @@ internal fun Note.renderStatus(
                 ),
             )
         },
-        accountKey = accountKey,
+        onMediaClicked = { media, index ->
+            launcher.launch(
+                AppDeepLink.StatusMedia(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                    mediaIndex = index,
+                    preview =
+                        when (media) {
+                            is UiMedia.Image -> media.previewUrl
+                            is UiMedia.Video -> media.thumbnailUrl
+                            is UiMedia.Audio -> null
+                            is UiMedia.Gif -> media.previewUrl
+                        },
+                ),
+            )
+        },
     )
 }
 

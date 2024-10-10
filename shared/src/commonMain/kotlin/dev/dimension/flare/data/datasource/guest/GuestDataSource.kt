@@ -9,6 +9,7 @@ import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendsUserPagingSource
@@ -18,11 +19,9 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
@@ -37,10 +36,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodon {
+object GuestDataSource : MicroblogDataSource, KoinComponent {
     private val database: CacheDatabase by inject()
-    override val account: UiAccount
-        get() = UiAccount.Guest
 
     override fun homeTimeline(
         pageSize: Int,
@@ -48,7 +45,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestTimelinePagingSource(event = this)
+            GuestTimelinePagingSource(host = GuestMastodonService.HOST)
         }.flow.cachedIn(scope)
 
     override fun notification(
@@ -77,7 +74,14 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Mastodon)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull {
+                        val content = it?.content
+                        if (content is UserContent.Mastodon) {
+                            content.data.render(null, host = host)
+                        } else {
+                            null
+                        }
+                    }
             },
         )
     }
@@ -93,7 +97,14 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
                 database
                     .userDao()
                     .findByKey(userKey)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull {
+                        val content = it?.content
+                        if (content is UserContent.Mastodon) {
+                            content.data.render(null, host = GuestMastodonService.HOST)
+                        } else {
+                            null
+                        }
+                    }
             },
         )
     }
@@ -108,7 +119,11 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestUserTimelinePagingSource(userKey.id, event = this, onlyMedia = mediaOnly)
+            GuestUserTimelinePagingSource(
+                host = GuestMastodonService.HOST,
+                userId = userKey.id,
+                onlyMedia = mediaOnly,
+            )
         }.flow
 
     override fun context(
@@ -118,7 +133,11 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestStatusDetailPagingSource(statusKey, event = this, statusOnly = false)
+            GuestStatusDetailPagingSource(
+                host = GuestMastodonService.HOST,
+                statusKey = statusKey,
+                statusOnly = false,
+            )
         }.flow.cachedIn(scope)
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
@@ -129,7 +148,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
                 GuestMastodonService
                     .lookupStatus(
                         statusKey.id,
-                    ).render(GuestMastodonService.GuestKey, this)
+                    ).render(GuestMastodonService.HOST, null, null)
             },
         )
     }
@@ -150,7 +169,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestSearchStatusPagingSource(query, event = this)
+            GuestSearchStatusPagingSource(host = GuestMastodonService.HOST, query = query)
         }.flow.cachedIn(scope)
 
     override fun searchUser(
@@ -162,8 +181,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
-                GuestMastodonService,
-                GuestMastodonService.GuestKey,
+                service = GuestMastodonService,
+                host = GuestMastodonService.HOST,
+                accountKey = null,
                 query,
             )
         }.flow.cachedIn(scope)
@@ -173,8 +193,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
-                GuestMastodonService,
-                GuestMastodonService.GuestKey,
+                service = GuestMastodonService,
+                accountKey = null,
+                host = GuestMastodonService.HOST,
             )
         }.flow
 
@@ -184,7 +205,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
         pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestDiscoverStatusPagingSource(event = this)
+            GuestDiscoverStatusPagingSource(host = GuestMastodonService.HOST)
         }.flow.cachedIn(scope)
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
@@ -206,22 +227,4 @@ object GuestDataSource : MicroblogDataSource, KoinComponent, StatusEvent.Mastodo
     }
 
     override fun profileActions(): List<ProfileAction> = emptyList()
-
-    override fun reblog(
-        statusKey: MicroBlogKey,
-        reblogged: Boolean,
-    ) {
-    }
-
-    override fun like(
-        statusKey: MicroBlogKey,
-        liked: Boolean,
-    ) {
-    }
-
-    override fun bookmark(
-        statusKey: MicroBlogKey,
-        bookmarked: Boolean,
-    ) {
-    }
 }

@@ -15,14 +15,13 @@ import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
-import dev.dimension.flare.data.datasource.microblog.VVOComposeData
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -39,6 +38,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
@@ -48,15 +48,16 @@ import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
 class VVODataSource(
-    override val account: UiAccount.VVo,
-) : MicroblogDataSource,
+    override val accountKey: MicroBlogKey,
+    private val credential: UiAccount.VVo.Credential,
+) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.VVO {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
-        VVOService(account.credential.chocolate)
+        VVOService(credential.chocolate)
     }
 
     override fun homeTimeline(
@@ -67,7 +68,7 @@ class VVODataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -75,7 +76,7 @@ class VVODataSource(
                 HomeTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
@@ -92,7 +93,7 @@ class VVODataSource(
                 timelinePager(
                     pageSize = pageSize,
                     pagingKey = pagingKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     database = database,
                     filterFlow = localFilterRepository.getFlow(forTimeline = true),
                     scope = scope,
@@ -100,7 +101,7 @@ class VVODataSource(
                         MentionRemoteMediator(
                             service,
                             database,
-                            account.accountKey,
+                            accountKey,
                             pagingKey,
                         ),
                 )
@@ -111,7 +112,7 @@ class VVODataSource(
                 ) {
                     CommentPagingSource(
                         service = service,
-                        accountKey = account.accountKey,
+                        accountKey = accountKey,
                         event = this,
                     )
                 }.flow.cachedIn(scope)
@@ -122,7 +123,7 @@ class VVODataSource(
                 ) {
                     LikePagingSource(
                         service = service,
-                        accountKey = account.accountKey,
+                        accountKey = accountKey,
                         event = this,
                     )
                 }.flow.cachedIn(scope)
@@ -154,13 +155,13 @@ class VVODataSource(
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.VVo)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull { it?.render(accountKey) }
             },
         )
     }
 
     override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, account.accountKey.host)
+        val userKey = MicroBlogKey(id, accountKey.host)
         return Cacheable(
             fetchSource = {
                 val config = service.config()
@@ -175,7 +176,7 @@ class VVODataSource(
                 database
                     .userDao()
                     .findByKey(userKey)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull { it?.render(accountKey) }
             },
         )
     }
@@ -208,7 +209,7 @@ class VVODataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -217,7 +218,7 @@ class VVODataSource(
                     userKey = userKey,
                     service = service,
                     database = database,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     pagingKey = pagingKey,
                     mediaOnly = mediaOnly,
                 ),
@@ -255,7 +256,7 @@ class VVODataSource(
 
                 if (item != null) {
                     VVO.saveStatus(
-                        accountKey = account.accountKey,
+                        accountKey = accountKey,
                         pagingKey = pagingKey,
                         database = database,
                         statuses = listOf(item),
@@ -267,8 +268,8 @@ class VVODataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, account.accountKey)
-                    .mapNotNull { it?.content?.render(account.accountKey, this) }
+                    .get(statusKey, accountKey)
+                    .mapNotNull { it?.content?.render(accountKey, this) }
             },
         )
     }
@@ -284,7 +285,7 @@ class VVODataSource(
                         ?.firstOrNull()
                 if (item != null) {
                     VVO.saveComment(
-                        accountKey = account.accountKey,
+                        accountKey = accountKey,
                         pagingKey = pagingKey,
                         database = database,
                         statuses = listOf(item),
@@ -296,8 +297,8 @@ class VVODataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, account.accountKey)
-                    .mapNotNull { it?.content?.render(account.accountKey, event = this) }
+                    .get(statusKey, accountKey)
+                    .mapNotNull { it?.content?.render(accountKey, event = this) }
             },
         )
     }
@@ -320,7 +321,6 @@ class VVODataSource(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     ) {
-        require(data is VVOComposeData)
         val maxProgress = data.medias.size + 1
         val config = service.config()
         val st = config.data?.st
@@ -332,24 +332,24 @@ class VVODataSource(
                 }
             }
         val mediaId = mediaIds.joinToString(",")
-        if (data.replyId != null && data.commentId != null) {
+        if (data.referenceStatus != null && data.referenceStatus.composeStatus is ComposeStatus.VVOComment) {
             service.replyComment(
-                id = data.commentId,
-                cid = data.replyId,
+                id = data.referenceStatus.composeStatus.statusKey.id,
+                cid = data.referenceStatus.composeStatus.rootId,
                 content = data.content,
                 st = st,
                 picId = mediaId,
             )
-        } else if (data.commentId != null) {
+        } else if (data.referenceStatus != null && data.referenceStatus.composeStatus is ComposeStatus.Reply) {
             service.commentStatus(
-                id = data.commentId,
+                id = data.referenceStatus.composeStatus.statusKey.id,
                 content = data.content,
                 st = st,
                 picId = mediaId,
             )
-        } else if (data.repostId != null) {
+        } else if (data.referenceStatus != null && data.referenceStatus.composeStatus is ComposeStatus.Quote) {
             service.repostStatus(
-                id = data.repostId,
+                id = data.referenceStatus.composeStatus.statusKey.id,
                 content = data.content,
                 st = st,
                 picId = mediaId,
@@ -382,7 +382,7 @@ class VVODataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
@@ -390,7 +390,7 @@ class VVODataSource(
                 SearchStatusRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                     query,
                 ),
@@ -406,7 +406,7 @@ class VVODataSource(
         ) {
             SearchUserPagingSource(
                 service = service,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 query = query,
             )
         }.flow
@@ -423,7 +423,7 @@ class VVODataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -431,7 +431,7 @@ class VVODataSource(
                 DiscoverStatusRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
@@ -528,14 +528,14 @@ class VVODataSource(
         return timelinePager(
             pageSize = 20,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
                 StatusCommentRemoteMediator(
                     service = service,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     statusKey = statusKey,
                     pagingKey = pagingKey,
                     database = database,
@@ -551,14 +551,14 @@ class VVODataSource(
         return timelinePager(
             pageSize = 20,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
                 StatusRepostRemoteMediator(
                     service = service,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     statusKey = statusKey,
                     pagingKey = pagingKey,
                     database = database,
@@ -574,14 +574,14 @@ class VVODataSource(
         return timelinePager(
             pageSize = 20,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
                 CommentChildRemoteMediator(
                     service = service,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     commentKey = commentKey,
                     pagingKey = pagingKey,
                     database = database,
@@ -607,7 +607,7 @@ class VVODataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.VVO>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -636,7 +636,7 @@ class VVODataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.VVO>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(
@@ -665,7 +665,7 @@ class VVODataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.VVOComment>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -694,7 +694,7 @@ class VVODataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.VVOComment>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(

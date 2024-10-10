@@ -58,7 +58,7 @@ internal fun ProfileMediaRoute(
             navigator.navigate(
                 StatusMediaRouteDestination(
                     statusKey = statusKey,
-                    index = index,
+                    mediaIndex = index,
                     preview = preview,
                     accountType = accountType,
                 ),

@@ -7,6 +7,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.flatMap
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -27,10 +29,17 @@ class ProfileMediaPresenter(
         val mediaState =
             accountServiceState
                 .map { service ->
+                    val actualUserKey =
+                        userKey
+                            ?: if (service is AuthenticatedMicroblogDataSource) {
+                                service.accountKey
+                            } else {
+                                null
+                            } ?: throw NoActiveAccountException
                     remember(service, userKey) {
                         service
                             .userTimeline(
-                                userKey ?: service.account.accountKey,
+                                actualUserKey,
                                 scope = scope,
                                 mediaOnly = true,
                             ).map { data ->

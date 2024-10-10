@@ -70,6 +70,7 @@ import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -322,7 +323,13 @@ private fun timelinePresenter(
     val tabSettings by settingsRepository.tabSettings.collectAsUiState()
     val tabs =
         remember(accountType, accountState, tabSettings) {
-            accountState.user.flatMap { user ->
+            accountState.user.flatMap(
+                onError = {
+                    UiState.Success(
+                        listOf(HomeTimelineTabItem(accountType = AccountType.Guest)),
+                    )
+                },
+            ) { user ->
                 tabSettings.map {
                     it.homeTabs.getOrDefault(
                         user.key,

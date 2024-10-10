@@ -11,8 +11,8 @@ import androidx.compose.runtime.setValue
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -54,9 +54,16 @@ class NotificationPresenter(
                     } else {
                         UiState.Success(
                             remember(service, currentType) {
+                                val pagingKey =
+                                    if (service is AuthenticatedMicroblogDataSource) {
+                                        "notification_${currentType}_${service.accountKey}"
+                                    } else {
+                                        "notification"
+                                    }
                                 service.notification(
                                     type = currentType,
                                     scope = scope,
+                                    pagingKey = pagingKey,
                                 )
                             }.collectAsLazyPagingItems(),
                         )

@@ -90,15 +90,10 @@ import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
-import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
-import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
-import dev.dimension.flare.data.datasource.microblog.VVOComposeData
-import dev.dimension.flare.data.datasource.microblog.XQTComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -108,7 +103,6 @@ import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
@@ -984,161 +978,44 @@ private fun composePresenter(
         fun send() {
             state.selectedAccounts.forEach {
                 val data =
-                    when (it) {
-                        is UiAccount.Mastodon ->
-                            MastodonComposeData(
-                                content = textFieldState.text.toString(),
-                                medias =
-                                    mediaState
-                                        .takeSuccess()
-                                        ?.medias
-                                        ?.map {
-                                            FileItem(context, it)
-                                        }.orEmpty(),
-                                poll =
-                                    pollState.takeSuccess()?.takeIf { it.enabled }?.let {
-                                        MastodonComposeData.Poll(
-                                            multiple = !it.pollSingleChoice,
-                                            expiresIn = it.expiredAt.duration.inWholeSeconds,
-                                            options =
-                                                it.options.map { option ->
-                                                    option.text.toString()
-                                                },
-                                        )
-                                    },
-                                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                                spoilerText =
-                                    contentWarningState
-                                        .takeSuccess()
-                                        ?.textFieldState
-                                        ?.text
-                                        ?.toString(),
-                                visibility =
-                                    state.visibilityState
-                                        .takeSuccess()
-                                        ?.visibility
-                                        ?: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
-                                inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                                account = it,
-                            )
-
-                        is UiAccount.Misskey ->
-                            MisskeyComposeData(
-                                account = it,
-                                medias =
-                                    mediaState
-                                        .takeSuccess()
-                                        ?.medias
-                                        ?.map {
-                                            FileItem(context, it)
-                                        }.orEmpty(),
-                                poll =
-                                    pollState.takeSuccess()?.takeIf { it.enabled }?.let {
-                                        MisskeyComposeData.Poll(
-                                            multiple = !it.pollSingleChoice,
-                                            expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
-                                            options =
-                                                it.options.map { option ->
-                                                    option.text.toString()
-                                                },
-                                        )
-                                    },
-                                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                                spoilerText =
-                                    contentWarningState
-                                        .takeSuccess()
-                                        ?.textFieldState
-                                        ?.text
-                                        ?.toString(),
-                                visibility =
-                                    state.visibilityState
-                                        .takeSuccess()
-                                        ?.visibility
-                                        ?: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
-                                inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                                renoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                                content = textFieldState.text.toString(),
-                                localOnly = false,
-                            )
-
-                        is UiAccount.Bluesky ->
-                            BlueskyComposeData(
-                                account = it,
-                                medias =
-                                    mediaState
-                                        .takeSuccess()
-                                        ?.medias
-                                        ?.map {
-                                            FileItem(context, it)
-                                        }.orEmpty(),
-                                inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                                quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                                content = textFieldState.text.toString(),
-                            )
-
-                        is UiAccount.XQT ->
-                            XQTComposeData(
-                                account = it,
-                                medias =
-                                    mediaState
-                                        .takeSuccess()
-                                        ?.medias
-                                        ?.map {
-                                            FileItem(context, it)
-                                        }.orEmpty(),
-                                inReplyToID = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                                quoteId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                                quoteUsername =
-                                    (status as? ComposeStatus.Quote)?.let {
-                                        if (state.replyState is UiState.Success) {
-                                            (state.replyState as UiState.Success)
-                                                .data
-                                                .let {
-                                                    it.content as? UiTimeline.ItemContent.Status
-                                                }?.user
-                                                ?.handle
-                                                ?.removePrefix("@")
-                                                ?.removeSuffix("@$xqtHost")
-                                        } else {
-                                            null
-                                        }
-                                    },
-                                content = textFieldState.text.toString(),
-                                poll =
-                                    pollState
-                                        .takeSuccess()
-                                        ?.takeIf { it.enabled }
-                                        ?.let { pollState ->
-                                            XQTComposeData.Poll(
-                                                multiple = !pollState.pollSingleChoice,
-                                                expiredAfter = pollState.expiredAt.duration.inWholeMilliseconds,
-                                                options =
-                                                    pollState.options.map { option ->
-                                                        option.text.toString()
-                                                    },
-                                            )
+                    ComposeData(
+                        content = textFieldState.text.toString(),
+                        medias =
+                            mediaState.takeSuccess()?.medias.orEmpty().map {
+                                FileItem(context, it)
+                            },
+                        poll =
+                            pollState.takeSuccess()?.let {
+                                ComposeData.Poll(
+                                    multiple = !it.pollSingleChoice,
+                                    expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
+                                    options =
+                                        it.options.map { option ->
+                                            option.text.toString()
                                         },
-                                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                            )
-
-                        is UiAccount.VVo ->
-                            VVOComposeData(
-                                account = it,
-                                medias =
-                                    mediaState
-                                        .takeSuccess()
-                                        ?.medias
-                                        ?.map {
-                                            FileItem(context, it)
-                                        }.orEmpty(),
-                                content = textFieldState.text.toString(),
-                                repostId = (status as? ComposeStatus.Quote)?.statusKey?.id,
-                                commentId = (status as? ComposeStatus.Reply)?.statusKey?.id,
-                                replyId = (status as? ComposeStatus.VVOComment)?.rootId,
-                            )
-
-                        UiAccount.Guest -> throw IllegalStateException("Guest account cannot compose")
-                    }
+                                )
+                            },
+                        sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
+                        spoilerText =
+                            contentWarningState
+                                .takeSuccess()
+                                ?.textFieldState
+                                ?.text
+                                ?.toString(),
+                        visibility =
+                            state.visibilityState.takeSuccess()?.visibility
+                                ?: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
+                        account = it,
+                        referenceStatus =
+                            status?.let {
+                                state.replyState?.takeSuccess()?.let { item ->
+                                    ComposeData.ReferenceStatus(
+                                        data = item,
+                                        composeStatus = status,
+                                    )
+                                }
+                            },
+                    )
                 state.send(data)
             }
         }

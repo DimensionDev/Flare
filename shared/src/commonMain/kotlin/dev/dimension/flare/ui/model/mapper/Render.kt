@@ -32,6 +32,7 @@ internal fun StatusContent.render(
             accountKey = accountKey,
             event = event as StatusEvent.Mastodon,
             references = references,
+            host = accountKey.host,
         )
 
     is StatusContent.MastodonNotification ->
@@ -97,7 +98,7 @@ internal fun DbUser.render(accountKey: MicroBlogKey) =
     when (content) {
         is UserContent.Bluesky -> content.data.render(accountKey = accountKey)
         is UserContent.BlueskyLite -> content.data.render(accountKey = accountKey)
-        is UserContent.Mastodon -> content.data.render(accountKey = accountKey)
+        is UserContent.Mastodon -> content.data.render(accountKey = accountKey, host = accountKey.host)
         is UserContent.Misskey -> content.data.render(accountKey = accountKey)
         is UserContent.MisskeyLite -> content.data.render(accountKey = accountKey)
         is UserContent.VVO -> content.data.render(accountKey = accountKey)

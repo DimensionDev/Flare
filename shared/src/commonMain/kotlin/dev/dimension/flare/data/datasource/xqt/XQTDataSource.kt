@@ -15,14 +15,13 @@ import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
-import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -60,6 +59,7 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -79,15 +79,16 @@ private const val MAX_ASYNC_UPLOAD_SIZE = 10
 
 @OptIn(ExperimentalPagingApi::class)
 class XQTDataSource(
-    override val account: UiAccount.XQT,
-) : MicroblogDataSource,
+    override val accountKey: MicroBlogKey,
+    private val credential: UiAccount.XQT.Credential,
+) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.XQT {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
-        XQTService(chocolate = account.credential.chocolate)
+        XQTService(chocolate = credential.chocolate)
     }
 
     override fun homeTimeline(
@@ -98,7 +99,7 @@ class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -106,20 +107,20 @@ class XQTDataSource(
                 HomeTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
 
     fun featuredTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "featured_${account.accountKey}",
+        pagingKey: String = "featured_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -127,20 +128,20 @@ class XQTDataSource(
                 FeaturedTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
 
     fun bookmarkTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "bookmark_${account.accountKey}",
+        pagingKey: String = "bookmark_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -148,7 +149,7 @@ class XQTDataSource(
                 BookmarkTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
@@ -166,7 +167,7 @@ class XQTDataSource(
                 NotificationPagingSource(
                     locale = "en",
                     service = service,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     event = this,
                 )
             }.flow.cachedIn(scope)
@@ -174,7 +175,7 @@ class XQTDataSource(
             return timelinePager(
                 pageSize = pageSize,
                 pagingKey = pagingKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 database = database,
                 filterFlow = localFilterRepository.getFlow(forNotification = true),
                 scope = scope,
@@ -182,7 +183,7 @@ class XQTDataSource(
                     MentionRemoteMediator(
                         service,
                         database,
-                        account.accountKey,
+                        accountKey,
                         pagingKey,
                     ),
             )
@@ -215,13 +216,13 @@ class XQTDataSource(
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.xQt)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull { it?.render(accountKey) }
             },
         )
     }
 
     override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, account.accountKey.host)
+        val userKey = MicroBlogKey(id, accountKey.host)
         return Cacheable(
             fetchSource = {
                 val user =
@@ -243,7 +244,7 @@ class XQTDataSource(
                 database
                     .userDao()
                     .findByKey(userKey)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull { it?.render(accountKey) }
             },
         )
     }
@@ -283,7 +284,7 @@ class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -293,7 +294,7 @@ class XQTDataSource(
                         userKey,
                         service,
                         database,
-                        account.accountKey,
+                        accountKey,
                         pagingKey,
                     )
                 } else {
@@ -301,7 +302,7 @@ class XQTDataSource(
                         userKey,
                         service,
                         database,
-                        account.accountKey,
+                        accountKey,
                         pagingKey,
                     )
                 },
@@ -316,7 +317,7 @@ class XQTDataSource(
         timelinePager(
             pageSize = 1,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -325,7 +326,7 @@ class XQTDataSource(
                     statusKey = statusKey,
                     service = service,
                     database = database,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     pagingKey = pagingKey,
                     statusOnly = false,
                     event = this,
@@ -353,7 +354,7 @@ class XQTDataSource(
                 val item = tweet.firstOrNull { it.id == statusKey.id }
                 if (item != null) {
                     XQT.save(
-                        accountKey = account.accountKey,
+                        accountKey = accountKey,
                         pagingKey = pagingKey,
                         database = database,
                         tweet = listOf(item),
@@ -365,8 +366,8 @@ class XQTDataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, account.accountKey)
-                    .mapNotNull { it?.content?.render(account.accountKey, this) }
+                    .get(statusKey, accountKey)
+                    .mapNotNull { it?.content?.render(accountKey, this) }
             },
         )
     }
@@ -375,7 +376,31 @@ class XQTDataSource(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     ) {
-        require(data is XQTComposeData)
+        val inReplyToID =
+            data.referenceStatus
+                ?.composeStatus
+                ?.let {
+                    it as? ComposeStatus.Reply
+                }?.statusKey
+                ?.id
+        val quoteId =
+            data.referenceStatus
+                ?.composeStatus
+                ?.let {
+                    it as? ComposeStatus.Quote
+                }?.statusKey
+                ?.id
+        val quoteUserName =
+            data.referenceStatus
+                ?.composeStatus
+                ?.let {
+                    it as? ComposeStatus.Quote
+                }?.let {
+                    data.referenceStatus.data.content as? UiTimeline.ItemContent.Status
+                }?.user
+                ?.handle
+                ?.removePrefix("@")
+                ?.removeSuffix("@$xqtHost")
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias.mapIndexed { index, item ->
@@ -416,7 +441,7 @@ class XQTDataSource(
                                 ),
                             tweetText = data.content,
                             reply =
-                                data.inReplyToID?.let {
+                                inReplyToID?.let {
                                     PostCreateTweetRequestVariablesReply(
                                         inReplyToTweetId = it,
                                         excludeReplyUserIds = emptyList(),
@@ -424,8 +449,8 @@ class XQTDataSource(
                                 },
                             semanticAnnotationIds = emptyList(),
                             attachmentUrl =
-                                data.quoteId?.let {
-                                    "https://$xqtHost/${data.quoteUsername}/status/$it"
+                                quoteId?.let {
+                                    "https://$xqtHost/$quoteUserName/status/$it"
                                 },
                         ),
                 ),
@@ -522,10 +547,10 @@ class XQTDataSource(
             // delete status from cache
             database.statusDao().delete(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
             )
             database.pagingTimelineDao().deleteStatus(
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 statusKey = statusKey,
             )
         }
@@ -540,7 +565,7 @@ class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
@@ -548,7 +573,7 @@ class XQTDataSource(
                 SearchStatusPagingSource(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                     query,
                 ),
@@ -564,7 +589,7 @@ class XQTDataSource(
         ) {
             SearchUserPagingSource(
                 service = service,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 query = query,
             )
         }.flow
@@ -575,7 +600,7 @@ class XQTDataSource(
         ) {
             TrendsUserPagingSource(
                 service,
-                account.accountKey,
+                accountKey,
             )
         }.flow
 
@@ -658,7 +683,7 @@ class XQTDataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.XQT>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -703,7 +728,7 @@ class XQTDataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.XQT>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(
@@ -747,7 +772,7 @@ class XQTDataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.XQT>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -793,7 +818,7 @@ class XQTDataSource(
                 it.printStackTrace()
                 updateStatusUseCase<StatusContent.XQT>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(
@@ -837,7 +862,7 @@ class XQTDataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.XQT>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -877,7 +902,7 @@ class XQTDataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.XQT>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(

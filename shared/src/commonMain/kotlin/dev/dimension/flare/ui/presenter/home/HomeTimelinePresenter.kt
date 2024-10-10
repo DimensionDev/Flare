@@ -6,6 +6,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimeline
@@ -21,7 +22,13 @@ class HomeTimelinePresenter(
         return serviceState
             .map { service ->
                 remember(service) {
-                    service.homeTimeline(scope = scope)
+                    val pagingKey =
+                        if (service is AuthenticatedMicroblogDataSource) {
+                            "home_${service.accountKey}"
+                        } else {
+                            "home"
+                        }
+                    service.homeTimeline(scope = scope, pagingKey = pagingKey)
                 }.collectAsLazyPagingItems()
             }.toPagingState()
     }

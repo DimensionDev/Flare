@@ -2,16 +2,11 @@ package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
-import dev.dimension.flare.data.datasource.microblog.BlueskyComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
-import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
-import dev.dimension.flare.data.datasource.microblog.VVOComposeData
-import dev.dimension.flare.data.datasource.microblog.XQTComposeData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class ComposeUseCase(
+internal class ComposeUseCase(
     private val scope: CoroutineScope,
     private val inAppNotification: InAppNotification,
 ) {
@@ -35,44 +30,12 @@ class ComposeUseCase(
         scope.launch {
             runCatching {
                 progress.invoke(ComposeProgressState.Progress(0, 1))
-                when (data) {
-                    is MastodonComposeData ->
-                        data.account.dataSource.compose(
-                            data = data,
-                            progress = {
-                                progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
-                            },
-                        )
-                    is MisskeyComposeData ->
-                        data.account.dataSource.compose(
-                            data = data,
-                            progress = {
-                                progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
-                            },
-                        )
-
-                    is BlueskyComposeData ->
-                        data.account.dataSource.compose(
-                            data = data,
-                            progress = {
-                                progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
-                            },
-                        )
-                    is XQTComposeData ->
-                        data.account.dataSource.compose(
-                            data = data,
-                            progress = {
-                                progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
-                            },
-                        )
-                    is VVOComposeData ->
-                        data.account.dataSource.compose(
-                            data = data,
-                            progress = {
-                                progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
-                            },
-                        )
-                }
+                data.account.dataSource.compose(
+                    data = data,
+                    progress = {
+                        progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
+                    },
+                )
             }.onSuccess {
                 progress.invoke(ComposeProgressState.Success)
             }.onFailure {

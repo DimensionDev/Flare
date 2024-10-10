@@ -73,6 +73,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FloppyDisk
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -130,12 +131,44 @@ internal object StatusMediaTransitions : DestinationStyle.Animated() {
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
+        DeepLink(
+            uriPattern = AppDeepLink.StatusMedia.ROUTE,
+        ),
+    ],
+    style = StatusMediaTransitions::class,
+)
+internal fun StatusMediaDeeplinkRoute(
+    accountKey: MicroBlogKey?,
+    statusKey: MicroBlogKey,
+    mediaIndex: Int,
+    preview: String?,
+    navigator: DestinationsNavigator,
+    navigationState: NavigationState,
+) {
+    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+    StatusMediaRoute(
+        statusKey = statusKey,
+        mediaIndex = mediaIndex,
+        preview = preview,
+        navigator = navigator,
+        accountType = accountType,
+        navigationState = navigationState,
+    )
+}
+
+@Composable
+@Destination<RootGraph>(
+//    style = FullScreenDialogStyle::class,
+    deepLinks = [
+        DeepLink(
+            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
     ],
     style = StatusMediaTransitions::class,
 )
 internal fun StatusMediaRoute(
     statusKey: MicroBlogKey,
-    index: Int,
+    mediaIndex: Int,
     preview: String?,
     navigator: DestinationsNavigator,
     accountType: AccountType,
@@ -155,7 +188,7 @@ internal fun StatusMediaRoute(
     StatusMediaScreen(
         statusKey = statusKey,
         accountType = accountType,
-        index = index,
+        index = mediaIndex,
         preview = preview,
         toStatus = {
             navigator.navigate(StatusRouteDestination(statusKey, accountType))

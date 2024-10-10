@@ -128,7 +128,7 @@ fun createSampleStatus(user: UiUserV2) =
                 topEndContent = null,
                 aboveTextContent = null,
                 onClicked = {},
-                accountKey = user.key,
+                onMediaClicked = { _, _ -> },
             ),
         platformType = user.platformType,
     )

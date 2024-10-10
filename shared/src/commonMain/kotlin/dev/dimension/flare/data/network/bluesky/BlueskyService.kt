@@ -3,7 +3,6 @@ package dev.dimension.flare.data.network.bluesky
 import com.atproto.server.RefreshSessionResponse
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.dao.AccountDao
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.model.MicroBlogKey
@@ -143,9 +142,9 @@ internal class XrpcAuthPlugin(
     }
 }
 
-internal fun UiAccount.Bluesky.getService(appDatabase: AppDatabase) =
-    BlueskyService(
-        baseUrl = credential.baseUrl,
-        accountKey = accountKey,
-        accountQueries = appDatabase.accountDao(),
-    )
+// internal fun UiAccount.Bluesky.getService(appDatabase: AppDatabase) =
+//    BlueskyService(
+//        baseUrl = credential.baseUrl,
+//        accountKey = accountKey,
+//        accountQueries = appDatabase.accountDao(),
+//    )

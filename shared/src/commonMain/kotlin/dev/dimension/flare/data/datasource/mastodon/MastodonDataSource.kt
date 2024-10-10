@@ -17,15 +17,14 @@ import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
-import dev.dimension.flare.data.datasource.microblog.MastodonComposeData
 import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
@@ -53,6 +52,7 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -66,8 +66,10 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 class MastodonDataSource(
-    override val account: UiAccount.Mastodon,
-) : MicroblogDataSource,
+//    override val account: UiAccount.Mastodon,
+    override val accountKey: MicroBlogKey,
+    val credential: UiAccount.Mastodon.Credential,
+) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.Mastodon,
     ListDataSource {
@@ -76,8 +78,8 @@ class MastodonDataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         MastodonService(
-            baseUrl = "https://${account.credential.instance}/",
-            accessToken = account.credential.accessToken,
+            baseUrl = "https://${credential.instance}/",
+            accessToken = credential.accessToken,
         )
     }
 
@@ -89,7 +91,7 @@ class MastodonDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -97,20 +99,20 @@ class MastodonDataSource(
                 HomeTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
 
     fun localTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "local_${account.accountKey}",
+        pagingKey: String = "local_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -118,7 +120,7 @@ class MastodonDataSource(
                 PublicTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                     local = true,
                 ),
@@ -126,13 +128,13 @@ class MastodonDataSource(
 
     fun bookmarkTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "bookmarked_${account.accountKey}",
+        pagingKey: String = "bookmarked_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -140,20 +142,20 @@ class MastodonDataSource(
                 BookmarkTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
 
     fun favouriteTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "favourite_${account.accountKey}",
+        pagingKey: String = "favourite_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -161,7 +163,7 @@ class MastodonDataSource(
                 FavouriteTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
@@ -173,8 +175,8 @@ class MastodonDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = "list_${account.accountKey}_$listId",
-            accountKey = account.accountKey,
+            pagingKey = "list_${accountKey}_$listId",
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -183,20 +185,20 @@ class MastodonDataSource(
                     listId,
                     service,
                     database,
-                    account.accountKey,
-                    "list_${account.accountKey}_$listId",
+                    accountKey,
+                    "list_${accountKey}_$listId",
                 ),
         )
 
     fun publicTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "public_${account.accountKey}",
+        pagingKey: String = "public_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -204,7 +206,7 @@ class MastodonDataSource(
                 PublicTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                     local = false,
                 ),
@@ -219,7 +221,7 @@ class MastodonDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
             scope = scope,
@@ -229,7 +231,7 @@ class MastodonDataSource(
                         NotificationRemoteMediator(
                             service,
                             database,
-                            account.accountKey,
+                            accountKey,
                             pagingKey,
                             onClearMarker = {
                                 MemCacheable.update(notificationMarkerKey, 0)
@@ -240,7 +242,7 @@ class MastodonDataSource(
                         MentionRemoteMediator(
                             service,
                             database,
-                            account.accountKey,
+                            accountKey,
                             pagingKey,
                         )
 
@@ -262,30 +264,30 @@ class MastodonDataSource(
                 val user =
                     service
                         .lookupUserByAcct("$name@$host")
-                        ?.toDbUser(account.accountKey.host) ?: throw Exception("User not found")
+                        ?.toDbUser(accountKey.host) ?: throw Exception("User not found")
                 database.userDao().insert(user)
             },
             cacheSource = {
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Mastodon)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull { it?.render(accountKey) }
             },
         )
     }
 
     override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, account.accountKey.host)
+        val userKey = MicroBlogKey(id, accountKey.host)
         return Cacheable(
             fetchSource = {
-                val user = service.lookupUser(id).toDbUser(account.accountKey.host)
+                val user = service.lookupUser(id).toDbUser(accountKey.host)
                 database.userDao().insert(user)
             },
             cacheSource = {
                 database
                     .userDao()
                     .findByKey(userKey)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull { it?.render(accountKey) }
             },
         )
     }
@@ -307,7 +309,7 @@ class MastodonDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -315,7 +317,7 @@ class MastodonDataSource(
                 UserTimelineRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     userKey,
                     pagingKey,
                     onlyMedia = mediaOnly,
@@ -331,7 +333,7 @@ class MastodonDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -340,7 +342,7 @@ class MastodonDataSource(
                     statusKey,
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                     statusOnly = false,
                 ),
@@ -356,7 +358,7 @@ class MastodonDataSource(
                     )
                 Mastodon.save(
                     database = database,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     pagingKey = pagingKey,
                     data = listOf(result),
                 )
@@ -364,8 +366,8 @@ class MastodonDataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, account.accountKey)
-                    .mapNotNull { it?.content?.render(account.accountKey, this) }
+                    .get(statusKey, accountKey)
+                    .mapNotNull { it?.content?.render(accountKey, this) }
             },
         )
     }
@@ -374,12 +376,12 @@ class MastodonDataSource(
         Cacheable(
             fetchSource = {
                 val emojis = service.emojis()
-                database.emojiDao().insert(emojis.toDb(account.accountKey.host))
+                database.emojiDao().insert(emojis.toDb(accountKey.host))
             },
             cacheSource = {
                 database
                     .emojiDao()
-                    .get(account.accountKey.host)
+                    .get(accountKey.host)
                     .mapNotNull { it?.toUi()?.toImmutableList() }
             },
         )
@@ -388,7 +390,13 @@ class MastodonDataSource(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     ) {
-        require(data is MastodonComposeData)
+        val inReplyToID =
+            data.referenceStatus
+                ?.composeStatus
+                ?.let {
+                    it as? ComposeStatus.Reply
+                }?.statusKey
+                ?.id
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
@@ -414,7 +422,7 @@ class MastodonDataSource(
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> Visibility.Private
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> Visibility.Direct
                     },
-                inReplyToID = data.inReplyToID,
+                inReplyToID = inReplyToID,
                 mediaIDS = mediaIds.takeIf { it.isNotEmpty() },
                 sensitive = data.sensitive.takeIf { mediaIds.isNotEmpty() },
                 spoilerText = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
@@ -422,7 +430,7 @@ class MastodonDataSource(
                     data.poll?.let { poll ->
                         PostPoll(
                             options = poll.options,
-                            expiresIn = poll.expiresIn,
+                            expiresIn = poll.expiredAfter,
                             multiple = poll.multiple,
                         )
                     },
@@ -438,7 +446,7 @@ class MastodonDataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -465,7 +473,7 @@ class MastodonDataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.Mastodon>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(
@@ -485,7 +493,7 @@ class MastodonDataSource(
             }.onSuccess { result ->
                 updateStatusUseCase<StatusContent.Mastodon>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(data = result)
@@ -502,7 +510,7 @@ class MastodonDataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -529,7 +537,7 @@ class MastodonDataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.Mastodon>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(
@@ -549,7 +557,7 @@ class MastodonDataSource(
             }.onSuccess { result ->
                 updateStatusUseCase<StatusContent.Mastodon>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         result.reblog?.let { StatusContent.Mastodon(it) } ?: it
@@ -565,10 +573,10 @@ class MastodonDataSource(
             // delete status from cache
             database.statusDao().delete(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
             )
             database.pagingTimelineDao().deleteStatus(
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 statusKey = statusKey,
             )
         }
@@ -581,7 +589,7 @@ class MastodonDataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.Mastodon>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -602,7 +610,7 @@ class MastodonDataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.Mastodon>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(
@@ -616,7 +624,7 @@ class MastodonDataSource(
             }.onSuccess { result ->
                 updateStatusUseCase<StatusContent.Mastodon>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(data = result)
@@ -777,8 +785,9 @@ class MastodonDataSource(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
-                service,
-                account.accountKey,
+                service = service,
+                accountKey = accountKey,
+                host = accountKey.host,
             )
         }.flow
 
@@ -790,7 +799,7 @@ class MastodonDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -798,7 +807,7 @@ class MastodonDataSource(
                 DiscoverStatusRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
@@ -821,7 +830,7 @@ class MastodonDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
@@ -829,7 +838,7 @@ class MastodonDataSource(
                 SearchStatusPagingSource(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                     query,
                 ),
@@ -844,9 +853,10 @@ class MastodonDataSource(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
-                service,
-                account.accountKey,
-                query,
+                service = service,
+                accountKey = accountKey,
+                query = query,
+                host = accountKey.host,
             )
         }.flow.cachedIn(scope)
 
@@ -859,9 +869,10 @@ class MastodonDataSource(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
-                service,
-                account.accountKey,
-                query,
+                service = service,
+                accountKey = accountKey,
+                query = query,
+                host = accountKey.host,
                 following = true,
                 resolve = false,
             )
@@ -872,7 +883,7 @@ class MastodonDataSource(
             text = ComposeConfig.Text(500),
             media = ComposeConfig.Media(4, true),
             poll = ComposeConfig.Poll(4),
-            emoji = ComposeConfig.Emoji(emoji(), mergeTag = "mastodon@${account.accountKey.host}"),
+            emoji = ComposeConfig.Emoji(emoji(), mergeTag = "mastodon@${accountKey.host}"),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
         )
@@ -922,7 +933,7 @@ class MastodonDataSource(
         )
 
     private val listKey: String
-        get() = "allLists_${account.accountKey}"
+        get() = "allLists_$accountKey"
 
     override val myList: CacheData<ImmutableList<UiList>> =
         MemCacheable(
@@ -1034,7 +1045,7 @@ class MastodonDataSource(
                                     .listMembers(listId, limit = pageSize, max_id = key)
                                     .body()
                                     ?.map {
-                                        it.toDbUser(account.accountKey.host).render(account.accountKey)
+                                        it.toDbUser(accountKey.host).render(accountKey)
                                     } ?: emptyList()
 
                             if (loadType == LoadType.REFRESH) {
@@ -1071,8 +1082,8 @@ class MastodonDataSource(
             val user =
                 service
                     .lookupUser(userKey.id)
-                    .toDbUser(account.accountKey.host)
-                    .render(account.accountKey)
+                    .toDbUser(accountKey.host)
+                    .render(accountKey)
             MemoryPagingSource.updateWith(
                 key = listMemberKey(listId),
             ) {
@@ -1152,7 +1163,7 @@ class MastodonDataSource(
     }
 
     private val notificationMarkerKey: String
-        get() = "notificationBadgeCount_${account.accountKey}"
+        get() = "notificationBadgeCount_$accountKey"
 
     override fun notificationBadgeCount(): CacheData<Int> {
         return MemCacheable(

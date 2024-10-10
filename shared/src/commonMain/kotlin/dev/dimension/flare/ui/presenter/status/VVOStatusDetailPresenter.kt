@@ -52,6 +52,7 @@ class VVOStatusDetailPresenter(
         val actualStatus =
             status.flatMap { item ->
                 service.map { service ->
+                    require(service is VVODataSource)
                     when (extendedText) {
                         is UiState.Error -> item
                         is UiState.Loading -> item
@@ -64,7 +65,7 @@ class VVOStatusDetailPresenter(
                                             content =
                                                 renderVVOText(
                                                     extendedText.data,
-                                                    service.account.accountKey,
+                                                    service.accountKey,
                                                 ).toUi(),
                                         ),
                                 )

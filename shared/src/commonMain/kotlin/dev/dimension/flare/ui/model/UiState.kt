@@ -55,7 +55,12 @@ inline fun <T : Any, R : Any> UiState<T>.flatMap(
     transform: (T) -> UiState<R>,
 ): UiState<R> =
     when (this) {
-        is UiState.Success -> transform(data)
+        is UiState.Success ->
+            try {
+                transform(data)
+            } catch (e: Throwable) {
+                onError(e)
+            }
         is UiState.Error -> onError(throwable)
         is UiState.Loading -> UiState.Loading()
     }

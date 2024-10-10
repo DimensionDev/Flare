@@ -6,7 +6,6 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.datasource.guest.GuestDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
@@ -43,11 +42,15 @@ internal fun Notification.render(
     references: Map<ReferenceType, StatusContent>,
 ): UiTimeline {
     requireNotNull(account) { "account is null" }
-    val user = account.render(accountKey)
+    val user = account.render(accountKey, host = accountKey.host)
     val status =
         (references[ReferenceType.Notification] as? StatusContent.Mastodon)
             ?.data
-            ?.renderStatus(accountKey, event)
+            ?.renderStatus(
+                host = accountKey.host,
+                accountKey = accountKey,
+                dataSource = event,
+            )
     val topMessageType =
         when (type) {
             NotificationTypes.Follow -> UiTimeline.TopMessage.MessageType.Mastodon.Follow
@@ -102,13 +105,14 @@ internal fun Notification.render(
 }
 
 internal fun Status.render(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.Mastodon,
+    host: String,
+    accountKey: MicroBlogKey?,
+    event: StatusEvent.Mastodon?,
     references: Map<ReferenceType, StatusContent> = mapOf(),
 ): UiTimeline {
     requireNotNull(account) { "account is null" }
-    val user = account.render(accountKey)
-    val currentStatus = this.renderStatus(accountKey, event)
+    val user = account.render(accountKey, host)
+    val currentStatus = this.renderStatus(host, accountKey, event)
     val actualStatus = (references[ReferenceType.Retweet] as? StatusContent.Mastodon)?.data ?: this
     val topMessage =
         if (reblog == null) {
@@ -132,7 +136,7 @@ internal fun Status.render(
     return UiTimeline(
         topMessage = topMessage,
         content =
-            actualStatus.renderStatus(accountKey, event).copy(
+            actualStatus.renderStatus(host, accountKey, event).copy(
                 onClicked = {
                     launcher.launch(
                         AppDeepLink.StatusDetail(
@@ -147,11 +151,12 @@ internal fun Status.render(
 }
 
 private fun Status.renderStatus(
-    accountKey: MicroBlogKey,
-    dataSource: StatusEvent.Mastodon,
+    host: String,
+    accountKey: MicroBlogKey?,
+    dataSource: StatusEvent.Mastodon?,
 ): UiTimeline.ItemContent.Status {
     requireNotNull(account) { "actualStatus.account is null" }
-    val actualUser = account.render(accountKey)
+    val actualUser = account.render(accountKey, host)
     val isFromMe = actualUser.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted)
     val statusKey =
@@ -176,7 +181,7 @@ private fun Status.renderStatus(
         contentWarning = spoilerText,
         user = actualUser,
         quote = persistentListOf(),
-        content = parseContent(this, accountKey).toUi(),
+        content = parseContent(this, accountKey, host).toUi(),
         card =
             card?.url?.let { url ->
                 UiCard(
@@ -197,7 +202,7 @@ private fun Status.renderStatus(
                 )
             },
         actions =
-            if (dataSource !is GuestDataSource) {
+            if (dataSource != null && accountKey != null) {
                 listOfNotNull(
                     StatusAction.Item.Reply(
                         count = repliesCount ?: 0,
@@ -312,7 +317,22 @@ private fun Status.renderStatus(
                 ),
             )
         },
-        accountKey = accountKey,
+        onMediaClicked = { media, index ->
+            launcher.launch(
+                AppDeepLink.StatusMedia(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                    mediaIndex = index,
+                    preview =
+                        when (media) {
+                            is UiMedia.Image -> media.previewUrl
+                            is UiMedia.Video -> media.thumbnailUrl
+                            is UiMedia.Audio -> null
+                            is UiMedia.Gif -> media.previewUrl
+                        },
+                ),
+            )
+        },
     )
 }
 
@@ -356,8 +376,10 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
         else -> null
     }
 
-internal fun Account.render(accountKey: MicroBlogKey): UiProfile {
-    val host = accountKey.host
+internal fun Account.render(
+    accountKey: MicroBlogKey?,
+    host: String,
+): UiProfile {
     val remoteHost =
         if (acct != null && acct.contains('@')) {
             acct.substring(acct.indexOf('@') + 1)
@@ -479,7 +501,8 @@ private fun parseName(status: Account): Element {
 private fun parseContent(
     status: Status,
 //    text: String,
-    accountKey: MicroBlogKey,
+    accountKey: MicroBlogKey?,
+    host: String,
 ): Element {
     val emoji = status.emojis.orEmpty()
     val mentions = status.mentions.orEmpty()
@@ -493,7 +516,7 @@ private fun parseContent(
     }
     val body = parseHtml(content)
     body.childNodes().forEach {
-        replaceMentionAndHashtag(mentions, it, accountKey)
+        replaceMentionAndHashtag(mentions, it, accountKey, host)
     }
     return body
 }
@@ -501,7 +524,8 @@ private fun parseContent(
 private fun replaceMentionAndHashtag(
     mentions: List<Mention>,
     node: Node,
-    accountKey: MicroBlogKey,
+    accountKey: MicroBlogKey?,
+    host: String,
 ) {
     if (node is Element) {
         val href = node.attribute("href")?.value
@@ -514,7 +538,7 @@ private fun replaceMentionAndHashtag(
                     "href",
                     AppDeepLink.Profile(
                         accountKey = accountKey,
-                        userKey = MicroBlogKey(id, accountKey.host),
+                        userKey = MicroBlogKey(id, host),
                     ),
                 )
             }
@@ -535,6 +559,6 @@ private fun replaceMentionAndHashtag(
                 )
             }
         }
-        node.childNodes().forEach { replaceMentionAndHashtag(mentions, it, accountKey) }
+        node.childNodes().forEach { replaceMentionAndHashtag(mentions, it, accountKey, host) }
     }
 }

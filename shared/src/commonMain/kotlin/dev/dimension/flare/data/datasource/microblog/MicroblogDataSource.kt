@@ -4,7 +4,6 @@ import androidx.paging.PagingData
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
@@ -16,18 +15,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 interface MicroblogDataSource {
-    val account: UiAccount
+//    val account: UiAccount
 
     fun homeTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "home_${account.accountKey}",
+        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>>
 
     fun notification(
         type: NotificationFilter = NotificationFilter.All,
         pageSize: Int = 20,
-        pagingKey: String = "notification_${type}_${account.accountKey}",
+        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>>
 
@@ -81,7 +80,7 @@ interface MicroblogDataSource {
     fun discoverStatuses(
         pageSize: Int = 20,
         scope: CoroutineScope,
-        pagingKey: String = "discover_status_${account.accountKey}",
+        pagingKey: String,
     ): Flow<PagingData<UiTimeline>>
 
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
@@ -96,6 +95,10 @@ interface MicroblogDataSource {
     )
 
     fun notificationBadgeCount(): CacheData<Int> = Cacheable({ }, { flowOf(0) })
+}
+
+interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
+    val accountKey: MicroBlogKey
 }
 
 data class ComposeProgress(
@@ -113,4 +116,4 @@ enum class NotificationFilter {
     Like,
 }
 
-fun MicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:${account.accountKey}:$userKey"
+fun AuthenticatedMicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:$accountKey:$userKey"

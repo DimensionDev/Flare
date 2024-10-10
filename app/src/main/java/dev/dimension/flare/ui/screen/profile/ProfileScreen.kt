@@ -151,13 +151,14 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     userName: String,
     host: String,
     navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey,
+    accountKey: MicroBlogKey?,
 ) {
+    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
     val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
         profileWithUserNameAndHostPresenter(
             userName = userName,
             host = host,
-            accountType = AccountType.Specific(accountKey),
+            accountType = accountType,
         )
     }
     state
@@ -171,7 +172,7 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                     navigator.navigate(
                         ProfileMediaRouteDestination(
                             it.key,
-                            accountType = AccountType.Specific(accountKey),
+                            accountType = accountType,
                         ),
                     )
                 },
@@ -179,19 +180,17 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                     navigator.navigate(
                         StatusMediaRouteDestination(
                             statusKey = statusKey,
-                            index = index,
+                            mediaIndex = index,
                             preview = preview,
-                            accountType = AccountType.Specific(accountKey),
+                            accountType = accountType,
                         ),
                     )
                 },
-                accountType = AccountType.Specific(accountKey),
+                accountType = accountType,
                 toEditAccountList = {
                     navigator.navigate(
                         EditAccountListRouteDestination(
-                            AccountType.Specific(
-                                accountKey,
-                            ),
+                            accountType,
                             it.key,
                         ),
                     )
@@ -253,7 +252,7 @@ internal fun ProfileWithUserNameAndHostRoute(
                     navigator.navigate(
                         StatusMediaRouteDestination(
                             statusKey = statusKey,
-                            index = index,
+                            mediaIndex = index,
                             preview = preview,
                             accountType = accountType,
                         ),
@@ -372,10 +371,11 @@ private fun profileWithUserNameAndHostPresenter(
     wrappers = [ThemeWrapper::class],
 )
 internal fun ProfileDeeplinkRoute(
-    userKey: MicroBlogKey?,
+    userKey: MicroBlogKey,
     navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey,
+    accountKey: MicroBlogKey?,
 ) {
+    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
     ProfileScreen(
         userKey = userKey,
         onBack = {
@@ -385,7 +385,7 @@ internal fun ProfileDeeplinkRoute(
             navigator.navigate(
                 ProfileMediaRouteDestination(
                     userKey,
-                    accountType = AccountType.Specific(accountKey),
+                    accountType = accountType,
                 ),
             )
         },
@@ -393,22 +393,20 @@ internal fun ProfileDeeplinkRoute(
             navigator.navigate(
                 StatusMediaRouteDestination(
                     statusKey = statusKey,
-                    index = index,
+                    mediaIndex = index,
                     preview = preview,
-                    accountType = AccountType.Specific(accountKey),
+                    accountType = accountType,
                 ),
             )
         },
-        accountType = AccountType.Specific(accountKey),
+        accountType = accountType,
         toEditAccountList = {
-            if (userKey != null) {
-                navigator.navigate(
-                    EditAccountListRouteDestination(
-                        AccountType.Specific(accountKey),
-                        userKey,
-                    ),
-                )
-            }
+            navigator.navigate(
+                EditAccountListRouteDestination(
+                    accountType,
+                    userKey,
+                ),
+            )
         },
     )
 }
@@ -446,7 +444,7 @@ internal fun ProfileRoute(
             navigator.navigate(
                 StatusMediaRouteDestination(
                     statusKey = statusKey,
-                    index = index,
+                    mediaIndex = index,
                     preview = preview,
                     accountType = accountType,
                 ),

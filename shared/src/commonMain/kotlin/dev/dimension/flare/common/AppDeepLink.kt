@@ -2,6 +2,7 @@ package dev.dimension.flare.common
 
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.encodeURLPathPart
+import io.ktor.http.encodeURLQueryComponent
 
 const val APPSCHEMA = "flare"
 
@@ -12,41 +13,48 @@ object AppDeepLink {
     }
 
     object Search {
-        const val ROUTE = "$APPSCHEMA://Search/{accountKey}/{keyword}"
+        const val ROUTE = "$APPSCHEMA://Search/{keyword}?accountKey={accountKey}"
 
         operator fun invoke(
-            accountKey: MicroBlogKey,
+            accountKey: MicroBlogKey?,
             keyword: String,
-        ) = "$APPSCHEMA://Search/${accountKey.toString().encodeURLPathPart()}/${keyword.encodeURLPathPart()}"
+        ) = "$APPSCHEMA://Search/${keyword.encodeURLPathPart()}${accountKey?.let {
+            "?accountKey=${it.toString().encodeURLQueryComponent()}"
+        } ?: ""}"
     }
 
     object Profile {
-        const val ROUTE = "$APPSCHEMA://Profile/{accountKey}/{userKey}"
+        const val ROUTE = "$APPSCHEMA://Profile/{userKey}?accountKey={accountKey}"
 
         operator fun invoke(
-            accountKey: MicroBlogKey,
+            accountKey: MicroBlogKey?,
             userKey: MicroBlogKey,
-        ) = "$APPSCHEMA://Profile/${accountKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
+        ) = "$APPSCHEMA://Profile/${userKey.toString().encodeURLPathPart()}${accountKey?.let {
+            "?accountKey=${it.toString().encodeURLQueryComponent()}"
+        } ?: ""}"
     }
 
     object ProfileWithNameAndHost {
-        const val ROUTE = "$APPSCHEMA://ProfileWithNameAndHost/{accountKey}/{userName}/{host}"
+        const val ROUTE = "$APPSCHEMA://ProfileWithNameAndHost/{userName}/{host}?accountKey={accountKey}"
 
         operator fun invoke(
-            accountKey: MicroBlogKey,
+            accountKey: MicroBlogKey?,
             userName: String,
             host: String,
-        ) =
-            "$APPSCHEMA://ProfileWithNameAndHost/${accountKey.toString().encodeURLPathPart()}/${userName.encodeURLPathPart()}/${host.encodeURLPathPart()}"
+        ) = "$APPSCHEMA://ProfileWithNameAndHost/${userName.encodeURLPathPart()}/${host.encodeURLPathPart()}${accountKey?.let {
+            "?accountKey=${it.toString().encodeURLQueryComponent()}"
+        } ?: ""}"
     }
 
     object StatusDetail {
-        const val ROUTE = "$APPSCHEMA://StatusDetail/{accountKey}/{statusKey}"
+        const val ROUTE = "$APPSCHEMA://StatusDetail/{statusKey}?accountKey={accountKey}"
 
         operator fun invoke(
-            accountKey: MicroBlogKey,
+            accountKey: MicroBlogKey?,
             statusKey: MicroBlogKey,
-        ) = "$APPSCHEMA://StatusDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+        ) = "$APPSCHEMA://StatusDetail/${statusKey.toString().encodeURLPathPart()}${accountKey?.let {
+            "?accountKey=${it.toString().encodeURLQueryComponent()}"
+        } ?: ""}"
     }
 
     object VVO {
@@ -168,12 +176,20 @@ object AppDeepLink {
     }
 
     object StatusMedia {
-        const val ROUTE = "$APPSCHEMA://StatusMedia/{accountKey}/{statusKey}/{mediaIndex}"
+        const val ROUTE = "$APPSCHEMA://StatusMedia/{statusKey}/{mediaIndex}?accountKey={accountKey}&preview={preview}"
 
         operator fun invoke(
-            accountKey: MicroBlogKey,
+            accountKey: MicroBlogKey?,
             statusKey: MicroBlogKey,
             mediaIndex: Int,
-        ) = "$APPSCHEMA://StatusMedia/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/$mediaIndex"
+            preview: String?,
+        ): String {
+            val query =
+                listOfNotNull(
+                    accountKey?.let { "accountKey=${it.toString().encodeURLQueryComponent()}" },
+                    preview?.let { "preview=${it.encodeURLQueryComponent()}" },
+                ).joinToString(separator = "&")
+            return "$APPSCHEMA://StatusMedia/${statusKey.toString().encodeURLPathPart()}/$mediaIndex?$query"
+        }
     }
 }

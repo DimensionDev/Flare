@@ -20,28 +20,32 @@ object AppDeepLinkHelper {
                 }
 
             "Search" -> {
-                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                 val keyword = data.pathSegments.getOrNull(2) ?: return null
-                AppleRoute.Search(AccountType.Specific(accountKey), keyword)
+                val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                AppleRoute.Search(accountType, keyword)
             }
 
             "Profile" -> {
-                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                 val userKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
-                AppleRoute.Profile(AccountType.Specific(accountKey), userKey)
+                val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                AppleRoute.Profile(accountType, userKey)
             }
 
             "ProfileWithNameAndHost" -> {
-                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                 val userName = data.pathSegments.getOrNull(2) ?: return null
                 val host = data.pathSegments.getOrNull(3) ?: return null
-                AppleRoute.ProfileWithNameAndHost(AccountType.Specific(accountKey), userName, host)
+                val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                AppleRoute.ProfileWithNameAndHost(accountType, userName, host)
             }
 
             "StatusDetail" -> {
-                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                 val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
-                AppleRoute.StatusDetail(AccountType.Specific(accountKey), statusKey)
+                val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                AppleRoute.StatusDetail(accountType, statusKey)
             }
 
             "Compose" ->
@@ -133,10 +137,11 @@ object AppDeepLinkHelper {
                 }
 
             "StatusMedia" -> {
-                val accountKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(1) ?: return null)
+                val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                 val statusKey = MicroBlogKey.valueOf(data.pathSegments.getOrNull(2) ?: return null)
                 val index = data.pathSegments.getOrNull(3)?.toIntOrNull() ?: return null
-                AppleRoute.StatusMedia(AccountType.Specific(accountKey), statusKey, index)
+                val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                AppleRoute.StatusMedia(accountType, statusKey, index)
             }
 
             else -> null

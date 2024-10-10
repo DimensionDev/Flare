@@ -49,13 +49,13 @@ import kotlinx.coroutines.launch
 )
 fun StatusDeeplinkRoute(
     statusKey: MicroBlogKey,
-    accountKey: MicroBlogKey,
+    accountKey: MicroBlogKey?,
     navigator: DestinationsNavigator,
 ) {
     StatusScreen(
         statusKey,
         onBack = navigator::navigateUp,
-        accountType = AccountType.Specific(accountKey),
+        accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest,
     )
 }
 

@@ -985,7 +985,7 @@ private fun composePresenter(
                                 FileItem(context, it)
                             },
                         poll =
-                            pollState.takeSuccess()?.let {
+                            pollState.takeSuccess()?.takeIf { it.enabled }?.let {
                                 ComposeData.Poll(
                                     multiple = !it.pollSingleChoice,
                                     expiredAfter = it.expiredAt.duration.inWholeMilliseconds,

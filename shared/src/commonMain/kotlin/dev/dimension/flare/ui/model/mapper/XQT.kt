@@ -228,17 +228,7 @@ internal fun Tweet.render(
             null
         }
     return UiTimeline(
-        content =
-            actualTweet.copy(
-                onClicked = {
-                    launcher.launch(
-                        AppDeepLink.StatusDetail(
-                            accountKey = accountKey,
-                            statusKey = currentTweet.statusKey,
-                        ),
-                    )
-                },
-            ),
+        content = actualTweet,
         topMessage = topMessage,
         platformType = PlatformType.xQt,
     )

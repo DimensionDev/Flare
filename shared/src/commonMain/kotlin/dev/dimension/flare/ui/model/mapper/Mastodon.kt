@@ -135,17 +135,7 @@ internal fun Status.render(
         }
     return UiTimeline(
         topMessage = topMessage,
-        content =
-            actualStatus.renderStatus(host, accountKey, event).copy(
-                onClicked = {
-                    launcher.launch(
-                        AppDeepLink.StatusDetail(
-                            accountKey = accountKey,
-                            statusKey = currentStatus.statusKey,
-                        ),
-                    )
-                },
-            ),
+        content = actualStatus.renderStatus(host, accountKey, event),
         platformType = PlatformType.Mastodon,
     )
 }

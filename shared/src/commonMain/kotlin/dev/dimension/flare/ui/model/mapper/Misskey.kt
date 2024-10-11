@@ -265,17 +265,7 @@ internal fun Note.render(
         }
     return UiTimeline(
         topMessage = topMessage,
-        content =
-            actualStatus.renderStatus(accountKey, event).copy(
-                onClicked = {
-                    launcher.launch(
-                        AppDeepLink.StatusDetail(
-                            accountKey = accountKey,
-                            statusKey = currentStatus.statusKey,
-                        ),
-                    )
-                },
-            ),
+        content = actualStatus.renderStatus(accountKey, event),
         platformType = PlatformType.Misskey,
     )
 }

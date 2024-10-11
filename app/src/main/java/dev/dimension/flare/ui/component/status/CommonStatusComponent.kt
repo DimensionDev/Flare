@@ -287,20 +287,6 @@ private fun StatusMediasComponent(
                     media,
                     item.images.indexOf(media),
                 )
-//                uriLauncher.openUri(
-//                    StatusMediaRouteDestination(
-//                        statusKey = item.statusKey,
-//                        index = item.images.indexOf(it),
-//                        preview =
-//                            when (it) {
-//                                is UiMedia.Image -> it.previewUrl
-//                                is UiMedia.Video -> it.thumbnailUrl
-//                                is UiMedia.Gif -> it.previewUrl
-//                                else -> null
-//                            },
-//                        accountType = AccountType.Specific(item.accountKey),
-//                    ).deeplink(),
-//                )
             },
             sensitive = item.sensitive,
         )

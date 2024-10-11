@@ -624,9 +624,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                     Element("a")
                                         .apply {
                                             addChildren(TextNode(displayUrl))
-//                                            attributes["href"] = url
                                             attributes().put("href", url)
-//                                            attributes().put("href", url)
                                         }.toUi()
                             } else {
                                 null

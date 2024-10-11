@@ -129,22 +129,6 @@ sealed interface UiAccount {
         }
     }
 
-//    @Immutable
-//    data object Guest : UiAccount {
-//        override val accountKey: MicroBlogKey
-//            get() = GuestMastodonService.GuestKey
-//        override val platformType: PlatformType
-//            get() = PlatformType.Mastodon
-//
-//        override val credential = Credential
-//
-//        data object Credential : UiAccount.Credential
-//
-//        override val dataSource by lazy {
-//            GuestDataSource
-//        }
-//    }
-
     companion object {
         fun DbAccount.toUi(): UiAccount =
             when (platform_type) {

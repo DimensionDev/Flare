@@ -290,17 +290,6 @@ private fun ComposeScreen(
                 focusRequester.requestFocus()
             }
     }
-
-//    val permissionState =
-//        rememberPermissionState(
-//            Manifest.permission.POST_NOTIFICATIONS,
-//            onPermissionResult = {
-//                if (it) {
-//                    state.send()
-//                    onBack.invoke()
-//                }
-//            },
-//        )
     Column(
         modifier =
             modifier
@@ -335,9 +324,6 @@ private fun ComposeScreen(
             },
         )
         Column(
-//            modifier =
-//                Modifier
-//                    .padding(it),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             state.state.enableCrossPost.onSuccess { enableCrossPost ->
@@ -974,7 +960,6 @@ private fun composePresenter(
             showAccountSelectMenu = value
         }
 
-        //        @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
         fun send() {
             state.selectedAccounts.forEach {
                 val data =

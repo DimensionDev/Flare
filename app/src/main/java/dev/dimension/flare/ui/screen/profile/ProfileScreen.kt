@@ -928,21 +928,6 @@ private fun ProfileHeader(
     expandMatrices: Boolean,
     modifier: Modifier = Modifier,
 ) {
-//    AnimatedContent(
-//        targetState = userState,
-//        modifier = modifier.animateContentSize(),
-//        label = "ProfileHeader",
-//        transitionSpec = {
-//            fadeIn() togetherWith fadeOut()
-//        },
-//        contentKey = {
-//            when (it) {
-//                is UiState.Success -> it.data.key
-//                else -> it
-//            }
-//        }
-//    ) { state ->
-//    }
     when (userState) {
         is UiState.Loading -> {
             ProfileHeaderLoading(modifier = modifier, withStatusBarHeight = true)

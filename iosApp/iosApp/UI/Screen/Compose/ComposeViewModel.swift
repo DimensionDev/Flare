@@ -41,146 +41,46 @@ class ComposeViewModel: MoleculeViewModelProto {
     func send() {
         Task {
             if case .success(let account) = onEnum(of: self.model.account) {
-                let data: ComposeData_? = switch onEnum(of: account.data) {
-                case .bluesky(let bluesky):
-                    BlueskyComposeData(
-                        account: bluesky,
-                        content: text,
-                        inReplyToID: getReplyId(),
-                        quoteId: getQuoteId(),
-                        language: ["en"],
-                        medias: getMedia()
-                    ) as ComposeData_
-                case .mastodon(let mastodon):
-                    MastodonComposeData(
-                        account: mastodon,
-                        content: text,
-                        visibility: getMastodonVisibility(),
-                        inReplyToID: getReplyId(),
-                        medias: getMedia(),
-                        sensitive: mediaViewModel.sensitive,
-                        spoilerText: contentWarning,
-                        poll: getMastodonPoll()
-                    ) as ComposeData_
-                case .misskey(let misskey):
-                    MisskeyComposeData(
-                        account: misskey,
-                        content: text,
-                        visibility: getMisskeyVisibility(),
-                        inReplyToID: getReplyId(),
-                        renoteId: getQuoteId(),
-                        medias: getMedia(),
-                        sensitive: mediaViewModel.sensitive,
-                        spoilerText: contentWarning,
-                        poll: getMisskeyPoll(),
-                        localOnly: false
-                    ) as ComposeData_
-                case .xQT(let xqt):
-                    XQTComposeData(
-                        account: xqt,
-                        content: text,
-                        inReplyToID: getReplyId(),
-                        quoteId: getQuoteId(),
-                        quoteUsername: getXQTUserName(),
-                        medias: getMedia(),
-                        sensitive: mediaViewModel.sensitive,
-                        poll: getXQTPoll()
-                    ) as ComposeData_
-                case .vVo(let vvo):
-                    VVOComposeData(
-                        account: vvo,
-                        content: text,
-                        repostId: getQuoteId(),
-                        commentId: nil,
-                        replyId: getReplyId(),
-                        medias: getMedia()
-                    ) as ComposeData_
-                case .guest: nil
-                }
-                if let data = data {
-                    model.send(data: data)
-                }
+                let data: ComposeData_ = .init(
+                    account: account.data,
+                    content: text,
+                    visibility: getVisibility(),
+                    language: ["en"],
+                    medias: getMedia(),
+                    sensitive: mediaViewModel.sensitive,
+                    spoilerText: contentWarning,
+                    poll: getPoll(),
+                    localOnly: false,
+                    referenceStatus: getReferenceStatus()
+                )
+                model.send(data: data)
             }
         }
     }
     private func getMedia() -> [FileItem] {
-        return mediaViewModel.items.map { item in
-            FileItem(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!))
-        }
-    }
-    private func getQuoteId() -> String? {
-        return if let data = status, case .quote(let quote) = onEnum(of: data) {
-            quote.statusKey.id
+           return mediaViewModel.items.map { item in
+               FileItem(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!))
+           }
+       }
+    private func getReferenceStatus() -> ComposeData_.ReferenceStatus? {
+        return if let data = status, let replyState = self.model.replyState, case .success(let timeline) = onEnum(of: replyState) {
+            ComposeData_.ReferenceStatus(data: timeline.data, composeStatus: data)
         } else {
             nil
         }
     }
-    private func getReplyId() -> String? {
-        return if let data = status, case .reply(let reply) = onEnum(of: data) {
-            reply.statusKey.id
+    private func getPoll() -> ComposeData_.Poll? {
+        return if pollViewModel.enabled {
+            ComposeData_.Poll(options: pollViewModel.choices.map { item in item.text }, expiredAfter: pollViewModel.expired.inWholeMilliseconds, multiple: pollViewModel.pollType == ComposePollType.multiple)
         } else {
             nil
         }
     }
-    private func getMastodonVisibility() -> UiTimelineItemContentStatusTopEndContentVisibility.Type_ {
+    private func getVisibility() -> UiTimelineItemContentStatusTopEndContentVisibility.Type_ {
         return if case .success(let data) = onEnum(of: model.visibilityState) {
             data.data.visibility
         } else {
             UiTimelineItemContentStatusTopEndContentVisibility.Type_.public
-        }
-    }
-    private func getMastodonPoll() -> MastodonComposeData.Poll? {
-        if pollViewModel.enabled {
-            MastodonComposeData.Poll(
-                options: pollViewModel.choices.map { item in
-                    item.text
-                },
-                expiresIn: pollViewModel.expired.inWholeMilliseconds,
-                multiple: pollViewModel.pollType == ComposePollType.multiple
-            )
-        } else {
-            nil
-        }
-    }
-    private func getMisskeyVisibility() -> UiTimelineItemContentStatusTopEndContentVisibility.Type_ {
-        return if case .success(let data) = onEnum(of: model.visibilityState) {
-            data.data.visibility
-        } else {
-            UiTimelineItemContentStatusTopEndContentVisibility.Type_.public
-        }
-    }
-    private func getMisskeyPoll() -> MisskeyComposeData.Poll? {
-        if pollViewModel.enabled {
-            MisskeyComposeData.Poll(
-                options: pollViewModel.choices.map { item in
-                    item.text
-                },
-                expiredAfter: pollViewModel.expired.inWholeMilliseconds,
-                multiple: pollViewModel.pollType == ComposePollType.multiple
-            )
-        } else {
-            nil
-        }
-    }
-    private func getXQTPoll() -> XQTComposeData.Poll? {
-        if pollViewModel.enabled {
-            XQTComposeData.Poll(
-                options: pollViewModel.choices.map { item in
-                    item.text
-                },
-                expiredAfter: pollViewModel.expired.inWholeMilliseconds,
-                multiple: pollViewModel.pollType == ComposePollType.multiple
-            )
-        } else {
-            nil
-        }
-    }
-    private func getXQTUserName() -> String? {
-        if case .success(let data) = onEnum(of: self.model.replyState),
-           let status = data.data.content as? UiTimelineItemContentStatus {
-            status.user?.handle // TODO: remove prefix and suffix
-        } else {
-            nil
         }
     }
 }

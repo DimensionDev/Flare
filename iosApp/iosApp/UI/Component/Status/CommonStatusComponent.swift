@@ -10,7 +10,7 @@ struct CommonStatusComponent: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     let data: UiTimelineItemContentStatus
-    let onMediaClick: (Int, String?) -> Void
+    let onMediaClick: (Int, UiMedia) -> Void
     let isDetail: Bool
     var body: some View {
         VStack(alignment: .leading) {

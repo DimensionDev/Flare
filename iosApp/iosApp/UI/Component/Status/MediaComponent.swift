@@ -6,7 +6,7 @@ import AVKit
 struct MediaComponent: View {
     @State var hideSensitive: Bool
     let medias: [UiMedia]
-    let onMediaClick: (Int, String?) -> Void
+    let onMediaClick: (Int, UiMedia) -> Void
     let sensitive: Bool
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
@@ -35,7 +35,7 @@ struct MediaComponent: View {
                     if let index = medias.firstIndex(where: { it in
                         it === item
                     }) {
-                        onMediaClick(index - 1, nil)
+                        onMediaClick(index - 1, item)
                     }
                 }, label: {
                     MediaItemComponent(media: item)

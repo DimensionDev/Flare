@@ -29,7 +29,6 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
     when (this) {
         is CashTagToken ->
             Element("a").apply {
-//                attributes["href"] = AppDeepLink.Search(accountKey, value)
                 attributes().put("href", AppDeepLink.Search(accountKey, value))
                 addChildren(TextNode(value))
             }
@@ -37,7 +36,6 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
         is EmojiToken -> TextNode(value)
         is HashTagToken ->
             Element("a").apply {
-//                attributes["href"] = AppDeepLink.Search(accountKey, value)
                 attributes().put("href", AppDeepLink.Search(accountKey, value))
                 addChildren(TextNode(value))
             }
@@ -55,15 +53,12 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
             }
         is UrlToken ->
             Element("a").apply {
-//                attributes["href"] = value
                 attributes().put("href", value)
                 addChildren(TextNode(value.trimUrl()))
             }
 
         is UserNameToken ->
             Element("a").apply {
-//                attributes["href"] =
-//                    AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host)
                 attributes().put("href", AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host))
                 addChildren(TextNode(value))
             }
@@ -128,7 +123,7 @@ fun createSampleStatus(user: UiUserV2) =
                 topEndContent = null,
                 aboveTextContent = null,
                 onClicked = {},
-                accountKey = user.key,
+                onMediaClicked = { _, _ -> },
             ),
         platformType = user.platformType,
     )

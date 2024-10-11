@@ -9,7 +9,8 @@ import dev.dimension.flare.ui.model.mapper.render
 
 internal class SearchUserPagingSource(
     private val service: SearchResources,
-    private val accountKey: MicroBlogKey,
+    private val host: String,
+    private val accountKey: MicroBlogKey?,
     private val query: String,
     private val following: Boolean = false,
     private val resolve: Boolean? = null,
@@ -29,7 +30,7 @@ internal class SearchUserPagingSource(
                 ).accounts
                 ?.let {
                     return LoadResult.Page(
-                        data = it.map { it.render(accountKey) },
+                        data = it.map { it.render(accountKey = accountKey, host = host) },
                         prevKey = null,
                         nextKey = it.lastOrNull()?.id?.takeIf { it != params.key },
                     )

@@ -11,7 +11,6 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.datasource.guest.GuestDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
@@ -103,13 +102,8 @@ internal fun accountProvider(
     ) {
         when (accountType) {
             AccountType.Active -> repository.activeAccount
-            is AccountType.Specific ->
-                if (accountType.accountKey == GuestMastodonService.GuestKey) {
-                    flowOf(UiAccount.Guest)
-                } else {
-                    repository.getFlow(accountKey = accountType.accountKey)
-                }
-            AccountType.Guest -> flowOf(UiAccount.Guest)
+            is AccountType.Specific -> repository.getFlow(accountKey = accountType.accountKey)
+            AccountType.Guest -> flowOf(null)
         }.distinctUntilChanged()
             .map {
                 if (it == null) {
@@ -124,32 +118,13 @@ internal fun accountProvider(
 
 @Composable
 internal fun accountServiceProvider(accountType: AccountType): UiState<MicroblogDataSource> {
+    if (accountType is AccountType.Guest) {
+        return UiState.Success(GuestDataSource)
+    }
     val account by accountProvider(accountType = accountType)
     return account.map {
         remember(it) {
-            when (it) {
-                is UiAccount.Mastodon -> {
-                    it.dataSource
-                }
-
-                is UiAccount.Misskey -> {
-                    it.dataSource
-                }
-
-                is UiAccount.Bluesky -> {
-                    it.dataSource
-                }
-
-                is UiAccount.XQT -> {
-                    it.dataSource
-                }
-
-                is UiAccount.VVo -> {
-                    it.dataSource
-                }
-
-                UiAccount.Guest -> GuestDataSource
-            }
+            it.dataSource
         }
     }
 }

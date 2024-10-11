@@ -7,7 +7,7 @@ struct QuotedStatus: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     let data: UiTimelineItemContentStatus
-    let onMediaClick: (Int, String?) -> Void
+    let onMediaClick: (Int, UiMedia) -> Void
     var body: some View {
         Button(action: {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))

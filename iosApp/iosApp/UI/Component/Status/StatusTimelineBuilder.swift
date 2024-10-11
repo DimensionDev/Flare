@@ -64,8 +64,8 @@ struct StatusItemView: View {
             }, label: {
                 CommonStatusComponent(
                     data: data,
-                    onMediaClick: { index, _ in
-                        openURL(URL(string: AppDeepLink.StatusMedia.shared.invoke(accountKey: data.accountKey, statusKey: data.statusKey, mediaIndex: Int32(index)))!)
+                    onMediaClick: { index, media in
+                        data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))
                     },
                     isDetail: detailKey == data.statusKey
                 )

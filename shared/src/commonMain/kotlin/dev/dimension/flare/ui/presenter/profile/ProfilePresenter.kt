@@ -8,8 +8,10 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -40,17 +42,35 @@ class ProfilePresenter(
         val accountServiceState = accountServiceProvider(accountType = accountType)
         val userState =
             accountServiceState.map { service ->
-                remember(service, userKey) {
-                    service.userById(userKey?.id ?: service.account.accountKey.id)
-                }.collectAsState()
+                val userId =
+                    userKey?.id
+                        ?: if (service is AuthenticatedMicroblogDataSource) {
+                            service.accountKey.id
+                        } else {
+                            null
+                        }
+                if (userId == null) {
+                    throw NoActiveAccountException
+                } else {
+                    remember(service, userKey) {
+                        service.userById(userId)
+                    }.collectAsState()
+                }
             }
 
         val listState =
             accountServiceState
                 .map { service ->
+                    val actualUserKey =
+                        userKey
+                            ?: if (service is AuthenticatedMicroblogDataSource) {
+                                service.accountKey
+                            } else {
+                                null
+                            } ?: throw NoActiveAccountException
                     remember(service, userKey) {
                         service.userTimeline(
-                            userKey ?: service.account.accountKey,
+                            actualUserKey,
                             scope = scope,
                         )
                     }.collectAsLazyPagingItems()
@@ -61,15 +81,26 @@ class ProfilePresenter(
             }.body().mediaState
         val relationState =
             accountServiceState.flatMap { service ->
+                val actualUserKey =
+                    userKey
+                        ?: if (service is AuthenticatedMicroblogDataSource) {
+                            service.accountKey
+                        } else {
+                            null
+                        } ?: throw NoActiveAccountException
                 remember(service, userKey) {
-                    service.relation(userKey ?: service.account.accountKey)
+                    service.relation(actualUserKey)
                 }.collectAsUiState().value.flatMap { it }
             }
 
 //        val scope = koinInject<CoroutineScope>()
         val isMe =
             accountServiceState.map {
-                it.account.accountKey == userKey || userKey == null
+                if (it is AuthenticatedMicroblogDataSource) {
+                    it.accountKey == userKey || userKey == null
+                } else {
+                    false
+                }
             }
         val actions =
             accountServiceState.map { service ->

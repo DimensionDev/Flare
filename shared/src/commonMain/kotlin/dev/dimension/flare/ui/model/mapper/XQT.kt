@@ -523,7 +523,22 @@ internal fun Tweet.renderStatus(
         onClicked = {
             launcher.launch(AppDeepLink.StatusDetail(accountKey = accountKey, statusKey = statusKey))
         },
-        accountKey = accountKey,
+        onMediaClicked = { media, index ->
+            launcher.launch(
+                AppDeepLink.StatusMedia(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                    mediaIndex = index,
+                    preview =
+                        when (media) {
+                            is UiMedia.Image -> media.previewUrl
+                            is UiMedia.Video -> media.thumbnailUrl
+                            is UiMedia.Audio -> null
+                            is UiMedia.Gif -> media.previewUrl
+                        },
+                ),
+            )
+        },
     )
 }
 
@@ -609,9 +624,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                     Element("a")
                                         .apply {
                                             addChildren(TextNode(displayUrl))
-//                                            attributes["href"] = url
                                             attributes().put("href", url)
-//                                            attributes().put("href", url)
                                         }.toUi()
                             } else {
                                 null

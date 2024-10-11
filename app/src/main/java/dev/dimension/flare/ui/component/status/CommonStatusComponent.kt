@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
 import com.fleeksoft.ksoup.nodes.Element
-import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
@@ -73,11 +72,9 @@ import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AdaptiveGrid
@@ -86,7 +83,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
-import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.localizedFullTime
@@ -281,20 +277,15 @@ private fun StatusMediasComponent(
     if (appearanceSettings.showMedia || showMedia) {
         StatusMediaComponent(
             data = item.images,
-            onMediaClick = {
-                uriLauncher.openUri(
-                    StatusMediaRouteDestination(
-                        statusKey = item.statusKey,
-                        index = item.images.indexOf(it),
-                        preview =
-                            when (it) {
-                                is UiMedia.Image -> it.previewUrl
-                                is UiMedia.Video -> it.thumbnailUrl
-                                is UiMedia.Gif -> it.previewUrl
-                                else -> null
-                            },
-                        accountType = AccountType.Specific(item.accountKey),
-                    ).deeplink(),
+            onMediaClick = { media ->
+                item.onMediaClicked.invoke(
+                    ClickContext(
+                        launcher = {
+                            uriLauncher.openUri(it)
+                        },
+                    ),
+                    media,
+                    item.images.indexOf(media),
                 )
             },
             sensitive = item.sensitive,
@@ -350,20 +341,15 @@ private fun StatusQuoteComponent(
             quotes.forEachIndexed { index, quote ->
                 QuotedStatus(
                     data = quote,
-                    onMediaClick = {
-                        uriLauncher.openUri(
-                            StatusMediaRouteDestination(
-                                statusKey = quote.statusKey,
-                                index = quote.images.indexOf(it),
-                                preview =
-                                    when (it) {
-                                        is UiMedia.Image -> it.previewUrl
-                                        is UiMedia.Video -> it.thumbnailUrl
-                                        is UiMedia.Gif -> it.previewUrl
-                                        else -> null
-                                    },
-                                accountType = AccountType.Specific(quote.accountKey),
-                            ).deeplink(),
+                    onMediaClick = { media ->
+                        quote.onMediaClicked.invoke(
+                            ClickContext(
+                                launcher = {
+                                    uriLauncher.openUri(it)
+                                },
+                            ),
+                            media,
+                            quote.images.indexOf(media),
                         )
                     },
                 )

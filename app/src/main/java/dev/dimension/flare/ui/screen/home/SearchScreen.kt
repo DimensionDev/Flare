@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 )
 @Composable
 internal fun SearchDeepLink(
-    accountKey: MicroBlogKey,
+    accountKey: MicroBlogKey?,
     keyword: String,
     navigator: DestinationsNavigator,
     drawerState: DrawerState,
@@ -55,7 +55,7 @@ internal fun SearchDeepLink(
     SearchRoute(
         keyword = keyword,
         navigator = navigator,
-        accountType = AccountType.Specific(accountKey),
+        accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest,
         drawerState = drawerState,
     )
 }

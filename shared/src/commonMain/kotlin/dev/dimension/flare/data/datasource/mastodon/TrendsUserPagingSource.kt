@@ -9,7 +9,8 @@ import dev.dimension.flare.ui.model.mapper.render
 
 internal class TrendsUserPagingSource(
     private val service: TrendsResources,
-    private val accountKey: MicroBlogKey,
+    private val accountKey: MicroBlogKey?,
+    private val host: String,
 ) : PagingSource<Int, UiUserV2>() {
     override fun getRefreshKey(state: PagingState<Int, UiUserV2>): Int? = null
 
@@ -18,7 +19,7 @@ internal class TrendsUserPagingSource(
             service
                 .suggestionsUsers()
                 .mapNotNull {
-                    it.account?.render(accountKey)
+                    it.account?.render(accountKey = accountKey, host = host)
                 }.let {
                     return LoadResult.Page(
                         data = it,

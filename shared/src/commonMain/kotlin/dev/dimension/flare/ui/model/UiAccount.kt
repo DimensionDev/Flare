@@ -5,10 +5,10 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
-import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
@@ -19,6 +19,7 @@ sealed interface UiAccount {
     val accountKey: MicroBlogKey
     val platformType: PlatformType
     val credential: Credential
+    val dataSource: AuthenticatedMicroblogDataSource
 
     @Immutable
     @Serializable
@@ -40,8 +41,8 @@ sealed interface UiAccount {
             val accessToken: String,
         ) : UiAccount.Credential
 
-        val dataSource by lazy {
-            MastodonDataSource(this)
+        override val dataSource by lazy {
+            MastodonDataSource(accountKey = accountKey, credential = credential)
         }
     }
 
@@ -61,8 +62,8 @@ sealed interface UiAccount {
             val accessToken: String,
         ) : UiAccount.Credential
 
-        val dataSource by lazy {
-            MisskeyDataSource(this)
+        override val dataSource by lazy {
+            MisskeyDataSource(accountKey = accountKey, credential = credential)
         }
     }
 
@@ -83,8 +84,8 @@ sealed interface UiAccount {
             val refreshToken: String,
         ) : UiAccount.Credential
 
-        val dataSource by lazy {
-            BlueskyDataSource(this)
+        override val dataSource by lazy {
+            BlueskyDataSource(accountKey = accountKey, credential = credential)
         }
     }
 
@@ -103,8 +104,8 @@ sealed interface UiAccount {
             val chocolate: String,
         ) : UiAccount.Credential
 
-        val dataSource by lazy {
-            XQTDataSource(this)
+        override val dataSource by lazy {
+            XQTDataSource(accountKey = accountKey, credential = credential)
         }
     }
 
@@ -123,21 +124,9 @@ sealed interface UiAccount {
             val chocolate: String,
         ) : UiAccount.Credential
 
-        val dataSource by lazy {
-            VVODataSource(this)
+        override val dataSource by lazy {
+            VVODataSource(accountKey = accountKey, credential = credential)
         }
-    }
-
-    @Immutable
-    data object Guest : UiAccount {
-        override val accountKey: MicroBlogKey
-            get() = GuestMastodonService.GuestKey
-        override val platformType: PlatformType
-            get() = PlatformType.Mastodon
-
-        override val credential = Credential
-
-        data object Credential : UiAccount.Credential
     }
 
     companion object {

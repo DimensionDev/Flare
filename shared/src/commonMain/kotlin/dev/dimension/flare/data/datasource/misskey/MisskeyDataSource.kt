@@ -14,11 +14,10 @@ import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
-import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.MisskeyComposeData
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
@@ -44,6 +43,7 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -54,8 +54,9 @@ import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
 class MisskeyDataSource(
-    override val account: UiAccount.Misskey,
-) : MicroblogDataSource,
+    override val accountKey: MicroBlogKey,
+    val credential: UiAccount.Misskey.Credential,
+) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.Misskey {
     private val database: CacheDatabase by inject()
@@ -63,8 +64,8 @@ class MisskeyDataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
-            baseUrl = "https://${account.credential.host}/api/",
-            token = account.credential.accessToken,
+            baseUrl = "https://${credential.host}/api/",
+            token = credential.accessToken,
         )
     }
 
@@ -76,13 +77,13 @@ class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
                 HomeTimelineRemoteMediator(
-                    account,
+                    accountKey,
                     service,
                     database,
                     pagingKey,
@@ -91,19 +92,19 @@ class MisskeyDataSource(
 
     fun localTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "local_${account.accountKey}",
+        pagingKey: String = "local_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
                 LocalTimelineRemoteMediator(
-                    account,
+                    accountKey,
                     service,
                     database,
                     pagingKey,
@@ -112,19 +113,19 @@ class MisskeyDataSource(
 
     fun publicTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "public_${account.accountKey}",
+        pagingKey: String = "public_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
                 PublicTimelineRemoteMediator(
-                    account,
+                    accountKey,
                     service,
                     database,
                     pagingKey,
@@ -140,7 +141,7 @@ class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
             scope = scope,
@@ -148,7 +149,7 @@ class MisskeyDataSource(
                 when (type) {
                     NotificationFilter.All ->
                         NotificationRemoteMediator(
-                            account,
+                            accountKey,
                             service,
                             database,
                             pagingKey,
@@ -156,7 +157,7 @@ class MisskeyDataSource(
 
                     NotificationFilter.Mention ->
                         MentionTimelineRemoteMediator(
-                            account,
+                            accountKey,
                             service,
                             database,
                             pagingKey,
@@ -181,7 +182,7 @@ class MisskeyDataSource(
                     service
                         .usersShow(UsersShowRequest(username = name, host = host))
                         .body()
-                        ?.toDbUser(account.accountKey.host)
+                        ?.toDbUser(accountKey.host)
                         ?: throw Exception("User not found")
                 database.userDao().insert(user)
             },
@@ -189,20 +190,20 @@ class MisskeyDataSource(
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Misskey)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull { it?.render(accountKey) }
             },
         )
     }
 
     override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, account.accountKey.host)
+        val userKey = MicroBlogKey(id, accountKey.host)
         return Cacheable(
             fetchSource = {
                 val user =
                     service
                         .usersShow(UsersShowRequest(userId = id))
                         .body()
-                        ?.toDbUser(account.accountKey.host)
+                        ?.toDbUser(accountKey.host)
                         ?: throw Exception("User not found")
                 database.userDao().insert(user)
             },
@@ -210,7 +211,7 @@ class MisskeyDataSource(
                 database
                     .userDao()
                     .findByKey(userKey)
-                    .mapNotNull { it?.render(account.accountKey) }
+                    .mapNotNull { it?.render(accountKey) }
             },
         )
     }
@@ -243,13 +244,13 @@ class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
             mediator =
                 UserTimelineRemoteMediator(
-                    account,
+                    accountKey,
                     service,
                     userKey,
                     database,
@@ -267,7 +268,7 @@ class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -275,7 +276,7 @@ class MisskeyDataSource(
                 StatusDetailRemoteMediator(
                     statusKey,
                     database,
-                    account,
+                    accountKey,
                     service,
                     pagingKey,
                     statusOnly = false,
@@ -293,7 +294,7 @@ class MisskeyDataSource(
                         ).body()
                 Misskey.save(
                     database = database,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     pagingKey = pagingKey,
                     data = listOfNotNull(result),
                 )
@@ -301,8 +302,8 @@ class MisskeyDataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, account.accountKey)
-                    .mapNotNull { it?.content?.render(account.accountKey, this) }
+                    .get(statusKey, accountKey)
+                    .mapNotNull { it?.content?.render(accountKey, this) }
             },
         )
     }
@@ -318,13 +319,13 @@ class MisskeyDataSource(
                         .orEmpty()
                         .toImmutableList()
                 database.emojiDao().insert(
-                    emojis.toDb(account.accountKey.host),
+                    emojis.toDb(accountKey.host),
                 )
             },
             cacheSource = {
                 database
                     .emojiDao()
-                    .get(account.accountKey.host)
+                    .get(accountKey.host)
                     .mapNotNull { it?.toUi()?.toImmutableList() }
             },
         )
@@ -333,7 +334,20 @@ class MisskeyDataSource(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     ) {
-        require(data is MisskeyComposeData)
+        val renoteId =
+            data.referenceStatus
+                ?.composeStatus
+                ?.let {
+                    it as? ComposeStatus.Quote
+                }?.statusKey
+                ?.id
+        val inReplyToID =
+            data.referenceStatus
+                ?.composeStatus
+                ?.let {
+                    it as? ComposeStatus.Reply
+                }?.statusKey
+                ?.id
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
@@ -359,8 +373,8 @@ class MisskeyDataSource(
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> "followers"
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> "specified"
                     },
-                renoteId = data.renoteId,
-                replyId = data.inReplyToID,
+                renoteId = renoteId,
+                replyId = inReplyToID,
                 fileIds = mediaIds.takeIf { it.isNotEmpty() },
                 cw = data.spoilerText.takeIf { it?.isNotEmpty() == true && it.isNotBlank() },
                 poll =
@@ -381,7 +395,7 @@ class MisskeyDataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.Misskey>(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 cacheDatabase = database,
                 update = {
                     it.copy(
@@ -401,7 +415,7 @@ class MisskeyDataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.Misskey>(
                     statusKey = statusKey,
-                    accountKey = account.accountKey,
+                    accountKey = accountKey,
                     cacheDatabase = database,
                     update = {
                         it.copy(
@@ -427,10 +441,10 @@ class MisskeyDataSource(
             // delete status from cache
             database.statusDao().delete(
                 statusKey = statusKey,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
             )
             database.pagingTimelineDao().deleteStatus(
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 statusKey = statusKey,
             )
         }
@@ -444,7 +458,7 @@ class MisskeyDataSource(
         coroutineScope.launch {
             updateStatusUseCase<StatusContent.Misskey>(
                 statusKey,
-                account.accountKey,
+                accountKey,
                 database,
             ) {
                 it.copy(
@@ -480,7 +494,7 @@ class MisskeyDataSource(
             }.onFailure {
                 updateStatusUseCase<StatusContent.Misskey>(
                     statusKey,
-                    account.accountKey,
+                    accountKey,
                     database,
                 ) {
                     it.copy(
@@ -671,7 +685,7 @@ class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
@@ -679,7 +693,7 @@ class MisskeyDataSource(
                 SearchStatusRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                     query,
                 ),
@@ -695,7 +709,7 @@ class MisskeyDataSource(
         ) {
             SearchUserPagingSource(
                 service,
-                account.accountKey,
+                accountKey,
                 query,
             )
         }.flow.cachedIn(scope)
@@ -706,7 +720,7 @@ class MisskeyDataSource(
         ) {
             TrendsUserPagingSource(
                 service,
-                account.accountKey,
+                accountKey,
             )
         }.flow
 
@@ -718,7 +732,7 @@ class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = account.accountKey,
+            accountKey = accountKey,
             database = database,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
@@ -726,7 +740,7 @@ class MisskeyDataSource(
                 DiscoverStatusRemoteMediator(
                     service,
                     database,
-                    account.accountKey,
+                    accountKey,
                     pagingKey,
                 ),
         )
@@ -745,7 +759,7 @@ class MisskeyDataSource(
             text = ComposeConfig.Text(500),
             media = ComposeConfig.Media(4, true),
             poll = ComposeConfig.Poll(4),
-            emoji = ComposeConfig.Emoji(emoji(), "misskey@${account.accountKey.host}"),
+            emoji = ComposeConfig.Emoji(emoji(), "misskey@${accountKey.host}"),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
         )

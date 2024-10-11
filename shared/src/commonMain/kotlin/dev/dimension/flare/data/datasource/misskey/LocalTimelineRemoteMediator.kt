@@ -9,11 +9,11 @@ import dev.dimension.flare.data.database.cache.mapper.Misskey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.NotesLocalTimelineRequest
-import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
 internal class LocalTimelineRemoteMediator(
-    private val account: UiAccount.Misskey,
+    private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val database: CacheDatabase,
     private val pagingKey: String,
@@ -53,11 +53,11 @@ internal class LocalTimelineRemoteMediator(
                     endOfPaginationReached = true,
                 )
             if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = account.accountKey)
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
             }
             Misskey.save(
                 database = database,
-                accountKey = account.accountKey,
+                accountKey = accountKey,
                 pagingKey = pagingKey,
                 data = response,
             )

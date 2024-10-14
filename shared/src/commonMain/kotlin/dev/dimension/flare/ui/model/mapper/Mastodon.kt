@@ -294,7 +294,7 @@ private fun Status.renderStatus(
                             dataSource.vote(statusKey, it.id, options)
                         }
                     },
-                    enabled = dataSource != null,
+                    enabled = dataSource != null && !isFromMe,
                 )
             },
         statusKey = statusKey,

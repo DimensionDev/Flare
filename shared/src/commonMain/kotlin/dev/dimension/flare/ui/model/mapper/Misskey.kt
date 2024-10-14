@@ -440,6 +440,7 @@ internal fun Note.renderStatus(
                             options = options,
                         )
                     },
+                    enabled = !isFromMe
                 )
             },
         statusKey = statusKey,

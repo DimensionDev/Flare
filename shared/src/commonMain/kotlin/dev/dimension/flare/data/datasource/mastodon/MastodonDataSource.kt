@@ -37,6 +37,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostList
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
+import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
@@ -1174,5 +1175,83 @@ class MastodonDataSource(
                 timeline.size
             },
         )
+    }
+
+    override fun vote(
+        statusKey: MicroBlogKey,
+        id: String,
+        options: List<Int>,
+    ) {
+        coroutineScope.launch {
+            updateStatusUseCase<StatusContent.Mastodon>(
+                statusKey = statusKey,
+                accountKey = accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                poll =
+                                    it.data.poll?.copy(
+                                        voted = true,
+                                        ownVotes = options,
+                                        options =
+                                            it.data.poll.options?.mapIndexed { index, option ->
+                                                if (options.contains(index)) {
+                                                    option.copy(votesCount = option.votesCount?.plus(1))
+                                                } else {
+                                                    option
+                                                }
+                                            } ?: emptyList(),
+                                    ),
+                            ),
+                    )
+                },
+            )
+
+            runCatching {
+                service.vote(id = id, data = PostVote(choices = options.map { it.toString() }))
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    poll =
+                                        it.data.poll?.copy(
+                                            voted = false,
+                                            ownVotes = null,
+                                            options =
+                                                it.data.poll.options?.mapIndexed { index, option ->
+                                                    if (options.contains(index)) {
+                                                        option.copy(votesCount = option.votesCount?.minus(1))
+                                                    } else {
+                                                        option
+                                                    }
+                                                } ?: emptyList(),
+                                        ),
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess { result ->
+                updateStatusUseCase<StatusContent.Mastodon>(
+                    statusKey = statusKey,
+                    accountKey = accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    poll = result,
+                                ),
+                        )
+                    },
+                )
+            }
+        }
     }
 }

@@ -1,13 +1,18 @@
 package dev.dimension.flare.ui.component.status
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,22 +20,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -93,6 +100,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun CommonStatusComponent(
@@ -772,39 +780,159 @@ private fun StatusPollComponent(
     poll: UiPoll,
     modifier: Modifier = Modifier,
 ) {
+    val selectedOptions =
+        remember {
+            mutableStateListOf(*poll.ownVotes.toTypedArray())
+        }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        poll.options.forEach { option ->
-            Column {
-                Row {
-                    Box {
-                        Text(
-                            text = option.humanizedPercentage,
-                        )
-                        Text(
-                            text = "100%",
-                            modifier = Modifier.alpha(0f),
-                        )
+        poll.options.forEachIndexed { index, option ->
+            PollOption(
+                option = option,
+                modifier = Modifier.fillMaxWidth(),
+                canVote = poll.canVote,
+                multiple = poll.multiple,
+                selected = selectedOptions.contains(index),
+                onClick = {
+                    if (poll.multiple) {
+                        if (selectedOptions.contains(index)) {
+                            selectedOptions.remove(index)
+                        } else {
+                            selectedOptions.add(index)
+                        }
+                    } else {
+                        selectedOptions.clear()
+                        selectedOptions.add(index)
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = option.title,
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                LinearProgressIndicator(
-                    progress = { option.percentage },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clip(CircleShape),
+                },
+            )
+        }
+        if (poll.expired) {
+            Text(
+                text = stringResource(id = R.string.poll_expired),
+                modifier =
+                    Modifier
+                        .align(Alignment.End)
+                        .alpha(MediumAlpha),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        } else {
+            Text(
+                text =
+                    stringResource(
+                        id = R.string.poll_expired_at,
+                        poll.expiresAt.localizedFullTime,
+                    ),
+                modifier =
+                    Modifier
+                        .align(Alignment.End)
+                        .alpha(MediumAlpha),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        if (poll.canVote) {
+            FilledTonalButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    poll.onVote.invoke(selectedOptions.toImmutableList())
+                },
+            ) {
+                Text(
+                    text = stringResource(id = R.string.vote),
                 )
             }
         }
-        Text(
-            text = poll.expiresAt.localizedFullTime,
+    }
+}
+
+@Composable
+private fun PollOption(
+    canVote: Boolean,
+    multiple: Boolean,
+    option: UiPoll.Option,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .height(IntrinsicSize.Min)
+                .border(
+                    width = FlareDividerDefaults.thickness,
+                    color = FlareDividerDefaults.color,
+                    shape = MaterialTheme.shapes.small,
+                )
+//            .background(
+//                color = MaterialTheme.colorScheme.secondaryContainer,
+//                shape = MaterialTheme.shapes.small,
+//            )
+                .clip(
+                    shape = MaterialTheme.shapes.small,
+                ),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(option.percentage)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = MaterialTheme.shapes.small,
+                    ),
+        )
+        val mutableInteractionSource =
+            remember {
+                MutableInteractionSource()
+            }
+        ListComponent(
+            modifier =
+                Modifier.clickable(
+                    onClick = onClick,
+                    interactionSource = mutableInteractionSource,
+                    indication = LocalIndication.current,
+                    enabled = canVote,
+                ),
+            headlineContent = {
+                Text(
+                    text = option.title,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier =
+                        Modifier
+                            .padding(8.dp),
+                )
+            },
+            trailingContent = {
+                if (canVote || selected) {
+                    if (multiple) {
+                        Checkbox(
+                            checked = selected,
+                            onCheckedChange = {
+                                onClick.invoke()
+                            },
+                            interactionSource = mutableInteractionSource,
+                            enabled = canVote,
+                        )
+                    } else {
+                        RadioButton(
+                            selected = selected,
+                            onClick = onClick,
+                            interactionSource = mutableInteractionSource,
+                            enabled = canVote,
+                        )
+                    }
+                } else {
+                    // keep the height consist
+                    RadioButton(
+                        selected = false,
+                        onClick = {},
+                        enabled = false,
+                        modifier = Modifier.alpha(0f),
+                    )
+                }
+            },
         )
     }
 }

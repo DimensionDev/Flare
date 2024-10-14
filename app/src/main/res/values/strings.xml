@@ -664,5 +664,9 @@
     <string name="misskey_achievement_bubble_game_double_exploding_head_description">Two of the biggest objects in the bubble game at the same time</string>
     <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">You can fill a lunch box like this 🤯 🤯 a bit.</string>
 
+    <string name="vote">Vote</string>
+    <string name="poll_expired">Poll expired</string>
+    <string name="poll_voted">Voted</string>
+    <string name="poll_expired_at">Expired at %1$s</string>
 
 </resources>

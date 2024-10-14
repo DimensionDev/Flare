@@ -18,6 +18,12 @@ sealed interface StatusEvent {
             statusKey: MicroBlogKey,
             bookmarked: Boolean,
         )
+
+        fun vote(
+            statusKey: MicroBlogKey,
+            id: String,
+            options: List<Int>,
+        )
     }
 
     interface Misskey : StatusEvent {
@@ -28,6 +34,11 @@ sealed interface StatusEvent {
         )
 
         fun renote(statusKey: MicroBlogKey)
+
+        fun vote(
+            statusKey: MicroBlogKey,
+            options: List<Int>,
+        )
     }
 
     interface Bluesky : StatusEvent {

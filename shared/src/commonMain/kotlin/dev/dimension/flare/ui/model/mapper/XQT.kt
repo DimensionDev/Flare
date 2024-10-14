@@ -316,6 +316,8 @@ internal fun Tweet.renderStatus(
                     expiresAt =
                         cardLegacy.get("end_datetime_utc")?.stringValue?.let { parseCustomDateTime(it) }
                             ?: Clock.System.now(),
+                    onVote = { options -> },
+                    enabled = false,
                 )
             } else {
                 null

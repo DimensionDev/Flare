@@ -7,15 +7,19 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
 @Immutable
-data class UiPoll(
+data class UiPoll internal constructor(
     val id: String,
     val options: ImmutableList<Option>,
     val expiresAt: Instant,
     val multiple: Boolean,
     val ownVotes: ImmutableList<Int>,
+    val onVote: (options: ImmutableList<Int>) -> Unit,
+    private val enabled: Boolean = true,
 ) {
     val expired by lazy { expiresAt < Clock.System.now() }
     val voted by lazy { ownVotes.isNotEmpty() }
+
+    val canVote by lazy { !expired && !voted && enabled }
 
     @Immutable
     data class Option(

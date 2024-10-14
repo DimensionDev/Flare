@@ -169,6 +169,9 @@ class XQTDataSource(
                     service = service,
                     accountKey = accountKey,
                     event = this,
+                    onClearMarker = {
+                        MemCacheable.update(notificationMarkerKey, 0)
+                    },
                 )
             }.flow.cachedIn(scope)
         } else {
@@ -1052,4 +1055,15 @@ class XQTDataSource(
             }
         }
     }
+
+    private val notificationMarkerKey: String
+        get() = "notificationBadgeCount_$accountKey"
+
+    override fun notificationBadgeCount(): CacheData<Int> =
+        MemCacheable(
+            key = notificationMarkerKey,
+            fetchSource = {
+                service.getBadgeCount().ntabUnreadCount?.toInt() ?: 0
+            },
+        )
 }

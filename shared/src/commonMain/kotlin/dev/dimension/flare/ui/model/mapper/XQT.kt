@@ -77,8 +77,8 @@ internal fun TopLevel.renderNotifications(
                             }?.render(accountKey)
                     }
                 val notificationTweet =
-                    data?.template?.aggregateUserActionsV1?.targetObjects?.mapNotNull {
-                        globalObjects?.tweets?.get(it.tweet?.id)
+                    notification.targetTweets?.mapNotNull {
+                        globalObjects?.tweets?.get(it)
                     }
                 val createdAt =
                     data?.timestampMS?.toLongOrNull()?.let {
@@ -92,7 +92,7 @@ internal fun TopLevel.renderNotifications(
                         else -> UiTimeline.TopMessage.Icon.Info
                     }
                 val tweet =
-                    notificationTweet?.firstOrNull()?.let {
+                    notificationTweet?.lastOrNull()?.let {
                         Tweet(
                             restId = it.idStr,
                             core =
@@ -133,7 +133,7 @@ internal fun TopLevel.renderNotifications(
                 UiTimeline(
                     topMessage =
                         UiTimeline.TopMessage(
-                            user = users?.firstOrNull(),
+                            user = null, // users?.firstOrNull(),
                             icon = icon,
                             type =
                                 UiTimeline.TopMessage.MessageType.XQT

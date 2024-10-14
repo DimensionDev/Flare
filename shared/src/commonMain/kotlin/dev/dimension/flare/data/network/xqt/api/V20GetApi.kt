@@ -1,9 +1,13 @@
 package dev.dimension.flare.data.network.xqt.api
 
 import de.jensklingenberg.ktorfit.Response
+import de.jensklingenberg.ktorfit.http.Field
+import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Header
+import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Query
+import dev.dimension.flare.data.network.xqt.model.legacy.BadgeCount
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 
 internal interface V20GetApi {
@@ -218,4 +222,15 @@ internal interface V20GetApi {
                 "superFollowMetadata,unmentionInfo,editControl,article",
         @Header("X-Twitter-Client-Language") xTwitterClientLanguage: String = "en",
     ): TopLevel
+
+    @GET("2/badge_count/badge_count.json")
+    suspend fun getBadgeCount(
+        @Query("supports_ntab_urt") supportsNtabUrt: Int = 1,
+    ): BadgeCount
+
+    @POST("2/notifications/all/last_seen_cursor.json")
+    @FormUrlEncoded
+    suspend fun postNotificationsAllLastSeenCursor(
+        @Field("cursor") cursor: String,
+    ): Unit
 }

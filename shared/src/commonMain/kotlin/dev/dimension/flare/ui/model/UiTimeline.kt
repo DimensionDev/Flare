@@ -134,12 +134,16 @@ data class UiTimeline internal constructor(
 
         data class UserList(
             val users: ImmutableList<UiUserV2>,
+            val status: Status? = null,
         ) : ItemContent {
             override val itemKey: String
                 get() =
                     buildString {
                         append("UserList")
                         append(users.hashCode())
+                        if (status != null) {
+                            append(status.itemKey)
+                        }
                     }
         }
     }

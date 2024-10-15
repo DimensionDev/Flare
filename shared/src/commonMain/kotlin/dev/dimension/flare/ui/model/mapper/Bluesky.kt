@@ -11,7 +11,6 @@ import app.bsky.feed.Post
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.graph.ListView
-import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsReason
 import app.bsky.richtext.FacetFeatureUnion
 import com.fleeksoft.ksoup.nodes.Element
@@ -168,43 +167,96 @@ internal fun FeedViewPostReasonUnion.render(
     )
 }
 
-internal fun ListNotificationsNotification.render(accountKey: MicroBlogKey): UiTimeline {
-    val user = author.render(accountKey)
-    return UiTimeline(
-        topMessage =
-            UiTimeline.TopMessage(
-                user = user,
-                icon =
-                    when (reason) {
-                        ListNotificationsReason.LIKE -> UiTimeline.TopMessage.Icon.Favourite
-                        ListNotificationsReason.REPOST -> UiTimeline.TopMessage.Icon.Retweet
-                        ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.Icon.Follow
-                        ListNotificationsReason.MENTION -> UiTimeline.TopMessage.Icon.Mention
-                        ListNotificationsReason.REPLY -> UiTimeline.TopMessage.Icon.Reply
-                        ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.Icon.Reply
-                        ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.Icon.Info
-                        ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.Icon.Info
+internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
+    accountKey: MicroBlogKey,
+    event: StatusEvent.Bluesky,
+    references: Map<ReferenceType, StatusContent> = emptyMap(),
+): UiTimeline {
+    return when (this) {
+        is StatusContent.BlueskyNotification.Normal -> {
+            val user = data.author.render(accountKey = accountKey)
+            val topMessage =
+                UiTimeline.TopMessage(
+                    user = user,
+                    icon = data.reason.icon,
+                    type = data.reason.type,
+                    onClicked = {
+                        launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
                     },
-                type =
-                    when (reason) {
-                        ListNotificationsReason.LIKE -> UiTimeline.TopMessage.MessageType.Bluesky.Like
-                        ListNotificationsReason.REPOST -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
-                        ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
-                        ListNotificationsReason.MENTION -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
-                        ListNotificationsReason.REPLY -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
-                        ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
-                        ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-                        ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
+                    statusKey = MicroBlogKey(id = data.uri.atUri, host = accountKey.host),
+                )
+            val content =
+                UiTimeline.ItemContent.User(
+                    value = user,
+                )
+            UiTimeline(
+                topMessage = topMessage,
+                content = content,
+                platformType = PlatformType.Bluesky,
+            )
+        }
+        is StatusContent.BlueskyNotification.Post ->
+            references[ReferenceType.Notification]?.render(accountKey, event) ?: post.render(accountKey, event = event)
+        is StatusContent.BlueskyNotification.UserList -> {
+            val reason = this.data.firstOrNull()?.reason ?: ListNotificationsReason.UNKNOWN
+            val uri =
+                this.data
+                    .firstOrNull()
+                    ?.uri
+                    ?.atUri ?: ""
+            val topMessage =
+                UiTimeline.TopMessage(
+                    user = null,
+                    icon = reason.icon,
+                    type = reason.type,
+                    onClicked = {
+//                        launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
                     },
-                onClicked = {
-                    launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
-                },
-                statusKey = MicroBlogKey(id = uri.atUri, host = accountKey.host),
-            ),
-        content = UiTimeline.ItemContent.User(author.render(accountKey)),
-        platformType = PlatformType.Bluesky,
-    )
+                    statusKey = MicroBlogKey(id = uri, host = accountKey.host),
+                )
+            val content =
+                UiTimeline.ItemContent.UserList(
+                    users = this.data.map { it.author.render(accountKey = accountKey) }.toImmutableList(),
+                    status =
+                        references[ReferenceType.Notification]?.let { it as? StatusContent.Bluesky }?.data?.renderStatus(
+                            accountKey,
+                            event,
+                        ),
+                )
+            return UiTimeline(
+                topMessage = topMessage,
+                content = content,
+                platformType = PlatformType.Bluesky,
+            )
+        }
+    }
 }
+
+private val ListNotificationsReason.icon: UiTimeline.TopMessage.Icon
+    get() =
+        when (this) {
+            ListNotificationsReason.LIKE -> UiTimeline.TopMessage.Icon.Favourite
+            ListNotificationsReason.REPOST -> UiTimeline.TopMessage.Icon.Retweet
+            ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.Icon.Follow
+            ListNotificationsReason.MENTION -> UiTimeline.TopMessage.Icon.Mention
+            ListNotificationsReason.REPLY -> UiTimeline.TopMessage.Icon.Reply
+            ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.Icon.Reply
+            ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.Icon.Info
+        }
+
+private val ListNotificationsReason.type: UiTimeline.TopMessage.MessageType
+    get() =
+        when (this) {
+            ListNotificationsReason.LIKE -> UiTimeline.TopMessage.MessageType.Bluesky.Like
+            ListNotificationsReason.REPOST -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
+            ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
+            ListNotificationsReason.MENTION -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
+            ListNotificationsReason.REPLY -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
+            ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
+            ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
+        }
 
 internal fun PostView.render(
     accountKey: MicroBlogKey,
@@ -226,6 +278,7 @@ internal fun PostView.renderStatus(
             id = uri.atUri,
             host = accountKey.host,
         )
+
     return UiTimeline.ItemContent.Status(
         user = user,
         images = findMedias(this),
@@ -474,9 +527,8 @@ private fun findCard(postView: PostView): UiCard? =
     }
 
 private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
-    when (postView.embed) {
+    when (val embed = postView.embed) {
         is PostViewEmbedUnion.ImagesView -> {
-            val embed = postView.embed as PostViewEmbedUnion.ImagesView
             embed.value.images
                 .map {
                     UiMedia.Image(
@@ -491,7 +543,6 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
         }
 
         is PostViewEmbedUnion.VideoView -> {
-            val embed = postView.embed as PostViewEmbedUnion.VideoView
             persistentListOf(
                 UiMedia.Video(
                     url = embed.value.playlist.uri,

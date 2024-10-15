@@ -30,6 +30,7 @@ import app.bsky.graph.GetListsQueryParams
 import app.bsky.graph.Listitem
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
+import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
@@ -168,6 +169,9 @@ class BlueskyDataSource(
                             accountKey,
                             database,
                             pagingKey,
+                            onClearMarker = {
+                                MemCacheable.update(notificationMarkerKey, 0)
+                            },
                         )
 
                     else -> throw IllegalArgumentException("Unsupported notification filter")
@@ -1725,6 +1729,23 @@ class BlueskyDataSource(
             }
             lists.toImmutableList()
         }
+
+    private val notificationMarkerKey: String
+        get() = "notificationBadgeCount_$accountKey"
+
+    override fun notificationBadgeCount(): CacheData<Int> =
+        MemCacheable(
+            key = notificationMarkerKey,
+            fetchSource = {
+                val notifications =
+                    service
+                        .listNotifications(
+                            params = ListNotificationsQueryParams(limit = 40),
+                        ).requireResponse()
+                        .notifications
+                notifications.count { !it.isRead }
+            },
+        )
 }
 
 internal inline fun <reified T, reified R> T.bskyJson(): R = bskyJson.decodeFromJsonElement(bskyJson.encodeToJsonElement(this))

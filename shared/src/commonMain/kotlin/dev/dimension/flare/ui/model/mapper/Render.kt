@@ -70,8 +70,10 @@ internal fun StatusContent.render(
         )
 
     is StatusContent.BlueskyNotification ->
-        data.render(
+        renderBlueskyNotification(
             accountKey = accountKey,
+            event = event as StatusEvent.Bluesky,
+            references = references,
         )
 
     is StatusContent.XQT ->

@@ -18,6 +18,7 @@ import androidx.room.TypeConverters
         dev.dimension.flare.data.database.cache.model.DbPagingTimelineView::class,
     ],
     version = 10,
+    exportSchema = false,
 )
 @TypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,

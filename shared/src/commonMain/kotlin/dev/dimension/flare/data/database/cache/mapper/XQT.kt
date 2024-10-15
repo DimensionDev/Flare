@@ -345,7 +345,7 @@ internal fun List<InstructionUnion>.users(): List<User> =
         }
     }
 
-internal fun TopLevel.cursor(): String? =
+internal fun TopLevel.cursor(type: CursorType = CursorType.bottom): String? =
     timeline
         ?.instructions
         ?.asSequence()
@@ -354,7 +354,7 @@ internal fun TopLevel.cursor(): String? =
         }?.mapNotNull {
             it.content?.operation?.cursor
         }?.filter {
-            it.cursorType == CursorType.bottom
+            it.cursorType == type
         }?.map {
             it.value
         }?.firstOrNull()

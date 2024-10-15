@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.xqt.model.legacy
 
-import dev.dimension.flare.data.network.mastodon.api.model.Trend
 import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.TweetLegacy
 import dev.dimension.flare.data.network.xqt.model.UserLegacy
@@ -82,6 +81,8 @@ internal data class TopLevel(
     data class NotificationClass(
         val id: String? = null,
         val url: NotificationURL? = null,
+        val fromUsers: List<String>? = null,
+        val targetTweets: List<String>? = null,
     )
 
     @Serializable

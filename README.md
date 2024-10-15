@@ -38,16 +38,16 @@ Here're some features we're planning to implement in the future, you can check t
  - [ ] Quick reply
 
 ### Mastodon
- - [ ] Support for polls
+ - [x] Support for polls
  - [x] Support global/local timelines
  - [x] Support for lists
  - [x] Support for bookmarks/faovrites timelines
 
 ### Misskey
- - [ ] Support for polls
+ - [x] Support for polls
 
 ### Bluesky
- - [ ] Support for lists
+ - [x] Support for lists
  - [x] Support for feeds
  - [ ] Support DM
 

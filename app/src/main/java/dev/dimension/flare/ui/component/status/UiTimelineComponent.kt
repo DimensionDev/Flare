@@ -98,21 +98,32 @@ private fun UserListContent(
     data: UiTimeline.ItemContent.UserList,
     modifier: Modifier = Modifier,
 ) {
-    LazyRow(
+    Column(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(data.users.size) {
-            val user = data.users[it]
-            Card(
-                modifier = Modifier.width(256.dp),
-            ) {
-                CommonStatusHeaderComponent(
-                    data = user,
-                    onUserClick = {},
-                    modifier = Modifier.padding(8.dp),
-                )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(data.users.size) {
+                val user = data.users[it]
+                Card(
+                    modifier = Modifier.width(256.dp),
+                ) {
+                    CommonStatusHeaderComponent(
+                        data = user,
+                        onUserClick = {},
+                        modifier = Modifier.padding(8.dp),
+                    )
+                }
             }
+        }
+        val status = data.status
+        if (status != null) {
+            StatusContent(
+                data = status,
+                detailStatusKey = null,
+            )
         }
     }
 }

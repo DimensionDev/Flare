@@ -48,10 +48,26 @@ sealed interface StatusContent {
     ) : StatusContent
 
     @Serializable
-    @SerialName("bluesky-notification")
-    data class BlueskyNotification internal constructor(
-        val data: app.bsky.notification.ListNotificationsNotification,
-    ) : StatusContent
+    sealed interface BlueskyNotification : StatusContent {
+        @Serializable
+        @SerialName("bluesky-notification-user-list")
+        data class UserList internal constructor(
+            val data: List<app.bsky.notification.ListNotificationsNotification>,
+            val post: PostView?,
+        ) : BlueskyNotification
+
+        @Serializable
+        @SerialName("bluesky-notification-post")
+        data class Post internal constructor(
+            val post: PostView,
+        ) : BlueskyNotification
+
+        @Serializable
+        @SerialName("bluesky-notification-normal")
+        data class Normal internal constructor(
+            val data: app.bsky.notification.ListNotificationsNotification,
+        ) : BlueskyNotification
+    }
 
     @Serializable
     @SerialName("XQT")

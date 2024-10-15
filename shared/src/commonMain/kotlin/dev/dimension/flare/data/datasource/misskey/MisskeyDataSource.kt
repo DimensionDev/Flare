@@ -28,6 +28,7 @@ import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.MuteCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
+import dev.dimension.flare.data.network.misskey.api.model.NotesPollsVoteRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.data.repository.LocalFilterRepository
@@ -807,4 +808,68 @@ class MisskeyDataSource(
                 override fun relationState(relation: UiRelation): Boolean = relation.blocking
             },
         )
+
+    override fun vote(
+        statusKey: MicroBlogKey,
+        options: List<Int>,
+    ) {
+        coroutineScope.launch {
+            updateStatusUseCase<StatusContent.Misskey>(
+                statusKey,
+                accountKey,
+                database,
+            ) {
+                it.copy(
+                    data =
+                        it.data.copy(
+                            poll =
+                                it.data.poll?.copy(
+                                    choices =
+                                        it.data.poll.choices.mapIndexed { index, choice ->
+                                            if (options.contains(index)) {
+                                                choice.copy(votes = choice.votes + 1, isVoted = true)
+                                            } else {
+                                                choice
+                                            }
+                                        },
+                                ),
+                        ),
+                )
+            }
+            runCatching {
+                options.forEach {
+                    service.notesPollsVote(
+                        notesPollsVoteRequest =
+                            NotesPollsVoteRequest(
+                                noteId = statusKey.id,
+                                choice = it,
+                            ),
+                    )
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.Misskey>(
+                    statusKey,
+                    accountKey,
+                    database,
+                ) {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                poll =
+                                    it.data.poll?.copy(
+                                        choices =
+                                            it.data.poll.choices.mapIndexed { index, choice ->
+                                                if (options.contains(index)) {
+                                                    choice.copy(votes = choice.votes - 1, isVoted = false)
+                                                } else {
+                                                    choice
+                                                }
+                                            },
+                                    ),
+                            ),
+                    )
+                }
+            }
+        }
+    }
 }

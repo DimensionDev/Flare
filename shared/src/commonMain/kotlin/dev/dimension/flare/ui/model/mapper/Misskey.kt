@@ -434,6 +434,13 @@ internal fun Note.renderStatus(
                     expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
                     multiple = poll.multiple,
                     ownVotes = List(poll.choices.filter { it.isVoted }.size) { index -> index }.toPersistentList(),
+                    onVote = { options ->
+                        event.vote(
+                            statusKey = statusKey,
+                            options = options,
+                        )
+                    },
+                    enabled = !isFromMe,
                 )
             },
         statusKey = statusKey,

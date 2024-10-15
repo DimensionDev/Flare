@@ -86,5 +86,6 @@ internal interface StatusResources {
     suspend fun vote(
         @Path("id") id: String,
         @Body data: PostVote,
+        @Header("Content-Type") contentType: String = "application/json",
     ): Poll
 }

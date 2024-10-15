@@ -289,6 +289,12 @@ private fun Status.renderStatus(
                     expiresAt = it.expiresAt ?: Instant.DISTANT_PAST,
                     multiple = it.multiple ?: false,
                     ownVotes = it.ownVotes?.toPersistentList() ?: persistentListOf(),
+                    onVote = { options ->
+                        if (it.id != null && dataSource != null) {
+                            dataSource.vote(statusKey, it.id, options)
+                        }
+                    },
+                    enabled = dataSource != null && !isFromMe,
                 )
             },
         statusKey = statusKey,

@@ -74,7 +74,6 @@ import com.ramcosta.composedestinations.generated.destinations.MeRouteDestinatio
 import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.TabSplashScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
 import com.ramcosta.composedestinations.navigation.dependency
@@ -125,7 +124,6 @@ import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
-import dev.dimension.flare.ui.screen.splash.SplashScreenArgs
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -412,18 +410,13 @@ internal fun HomeScreen(
                                         Router(
                                             modifier = Modifier.fillMaxSize(),
                                             navGraph = NavGraphs.root,
-                                            direction = TabSplashScreenDestination,
+                                            direction =
+                                                getDirection(
+                                                    tab,
+                                                    tab.account,
+                                                ),
                                         ) {
                                             dependency(rootNavController)
-                                            dependency(
-                                                SplashScreenArgs(
-                                                    getDirection(
-                                                        tab,
-                                                        tab.account,
-                                                    ),
-                                                ),
-                                            )
-//                                        dependency(tabState)
                                             dependency(drawerState)
                                             dependency(state.navigationState)
                                         }
@@ -451,13 +444,9 @@ internal fun HomeScreen(
                                 Router(
                                     modifier = Modifier.fillMaxSize(),
                                     navGraph = NavGraphs.root,
-                                    direction = TabSplashScreenDestination,
+                                    direction = ServiceSelectRouteDestination,
                                 ) {
                                     dependency(rootNavController)
-                                    dependency(
-                                        SplashScreenArgs(ServiceSelectRouteDestination),
-                                    )
-//                                        dependency(tabState)
                                     dependency(drawerState)
                                     dependency(state.navigationState)
                                 }

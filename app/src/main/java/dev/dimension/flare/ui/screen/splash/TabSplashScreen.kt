@@ -28,6 +28,6 @@ internal fun TabSplashScreen(
     SplashScreen()
 }
 
-data class SplashScreenArgs(
+internal data class SplashScreenArgs(
     val direction: Direction,
 )

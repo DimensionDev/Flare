@@ -102,16 +102,14 @@ internal fun DMScreenRoute(
                     )
                 }
             }
-        }
+        },
     )
 }
-
 
 @Parcelize
 private data class DMPaneNavArgs(
     val id: String,
 ) : Parcelable
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,8 +132,8 @@ private fun DMListScreen(
     ) { contentPadding ->
         RefreshContainer(
             modifier =
-            Modifier
-                .fillMaxSize(),
+                Modifier
+                    .fillMaxSize(),
             indicatorPadding = contentPadding,
             isRefreshing = state.isRefreshing,
             onRefresh = state::refresh,
@@ -164,9 +162,9 @@ private fun DMListScreen(
                         loadingContent = {
                             Column(
                                 modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 ItemPlaceHolder()
@@ -192,10 +190,10 @@ private fun DMListScreen(
                         itemContent = { item ->
                             Column(
                                 modifier =
-                                Modifier
-                                    .clickable {
-                                        onItemClicked.invoke(item)
-                                    },
+                                    Modifier
+                                        .clickable {
+                                            onItemClicked.invoke(item)
+                                        },
                             ) {
                                 ListComponent(
                                     headlineContent = {
@@ -217,8 +215,8 @@ private fun DMListScreen(
                                                     text = item.user.handle,
                                                     style = MaterialTheme.typography.bodySmall,
                                                     modifier =
-                                                    Modifier
-                                                        .alpha(MediumAlpha),
+                                                        Modifier
+                                                            .alpha(MediumAlpha),
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis,
                                                 )
@@ -227,8 +225,8 @@ private fun DMListScreen(
                                                 text = item.lastMessage.timestamp.shortTime.localizedShortTime,
                                                 style = MaterialTheme.typography.bodySmall,
                                                 modifier =
-                                                Modifier
-                                                    .alpha(MediumAlpha),
+                                                    Modifier
+                                                        .alpha(MediumAlpha),
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis,
                                             )
@@ -246,11 +244,11 @@ private fun DMListScreen(
                                         )
                                     },
                                     modifier =
-                                    Modifier
-                                        .padding(
-                                            horizontal = screenHorizontalPadding,
-                                            vertical = 8.dp,
-                                        ),
+                                        Modifier
+                                            .padding(
+                                                horizontal = screenHorizontalPadding,
+                                                vertical = 8.dp,
+                                            ),
                                 )
                                 HorizontalDivider()
                             }

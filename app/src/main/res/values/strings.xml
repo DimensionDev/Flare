@@ -669,4 +669,11 @@
     <string name="poll_voted">Voted</string>
     <string name="poll_expired_at">Expired at %1$s</string>
 
+    <string name="dm_list_title">Direct Messages</string>
+    <string name="dm_list_empty">No direct messages</string>
+    <string name="dm_list_error">Failed to load direct messages</string>
+    <string name="send">Send</string>
+    <string name="dm_send_placeholder">Send a message</string>
+
+
 </resources>

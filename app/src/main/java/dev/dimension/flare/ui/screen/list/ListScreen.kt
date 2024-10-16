@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.eygraber.compose.placeholder.material3.placeholder
@@ -179,6 +180,7 @@ private fun ListScreen(
     }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(
+        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = {
@@ -401,7 +403,7 @@ internal fun LazyListScope.listItemComponent(
 }
 
 @Composable
-private fun ItemPlaceHolder(modifier: Modifier = Modifier) {
+internal fun ItemPlaceHolder(modifier: Modifier = Modifier) {
     ListComponent(
         modifier = modifier,
         headlineContent = {

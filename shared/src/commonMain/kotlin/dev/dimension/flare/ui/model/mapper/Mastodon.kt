@@ -543,7 +543,7 @@ private fun replaceMentionAndHashtag(
         } else if (!href.isNullOrEmpty() && c != null && c.contains("mention")) {
             val url = Url(href)
             val host = url.host
-            val name = url.pathSegments.getOrNull(1)?.removePrefix("@")
+            val name = url.segments.getOrNull(1)?.removePrefix("@")
             if (!name.isNullOrEmpty() && host.isNotEmpty()) {
                 node.attributes().put(
                     "href",

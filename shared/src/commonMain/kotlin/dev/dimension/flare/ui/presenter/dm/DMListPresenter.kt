@@ -1,9 +1,16 @@
 package dev.dimension.flare.ui.presenter.dm
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
+import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiDMList
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 class DMListPresenter(
@@ -11,7 +18,26 @@ class DMListPresenter(
 ) : PresenterBase<DMListState>() {
     @Composable
     override fun body(): DMListState {
-        TODO()
+        val serviceState = accountServiceProvider(accountType = accountType)
+        val items =
+            serviceState
+                .map { service ->
+                    require(service is DirectMessageDataSource)
+                    remember(service) {
+                        service.directMessageList()
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
+        return object : DMListState {
+            override val items = items
+
+            override val isRefreshing = false
+
+            override suspend fun refreshSuspend() {
+                items.onSuccess {
+                    refreshSuspend()
+                }
+            }
+        }
     }
 }
 
@@ -19,5 +45,5 @@ interface DMListState {
     val items: PagingState<UiDMList>
     val isRefreshing: Boolean
 
-    fun refresh()
+    suspend fun refreshSuspend()
 }

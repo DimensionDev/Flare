@@ -24,6 +24,7 @@ import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -53,10 +54,12 @@ import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.model.UiDMList
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
+import dev.dimension.flare.ui.presenter.dm.DMListState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.list.ItemPlaceHolder
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -263,7 +266,16 @@ private fun DMListScreen(
 @Composable
 private fun presenter(accountType: AccountType) =
     run {
-        remember(accountType) {
-            DMListPresenter(accountType)
-        }.invoke()
+        val scope = rememberCoroutineScope()
+        val state =
+            remember(accountType) {
+                DMListPresenter(accountType)
+            }.invoke()
+        object : DMListState by state {
+            fun refresh() {
+                scope.launch {
+                    state.refreshSuspend()
+                }
+            }
+        }
     }

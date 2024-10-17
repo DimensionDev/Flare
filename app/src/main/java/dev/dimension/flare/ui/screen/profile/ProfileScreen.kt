@@ -98,6 +98,7 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -916,8 +917,15 @@ private fun ProfileMenu(
                                                     },
                                                     onClick = {
                                                         setShowMoreMenus(false)
+                                                        val actualHandle =
+                                                            if (accountData.platformType == PlatformType.Bluesky) {
+                                                                user.handleWithoutAtAndHost
+                                                                    .replace("_", "")
+                                                            } else {
+                                                                user.handleWithoutAtAndHost
+                                                            }
                                                         toSearchUserUsingAccount(
-                                                            user.handleWithoutAtAndHost,
+                                                            actualHandle,
                                                             accountData.key,
                                                         )
                                                     },

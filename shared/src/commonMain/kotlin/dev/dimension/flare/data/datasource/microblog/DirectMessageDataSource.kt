@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.PagingData
+import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMList
 import kotlinx.coroutines.flow.Flow
@@ -15,5 +16,7 @@ internal interface DirectMessageDataSource {
         message: String,
     )
 
-    fun getDirectMessageConversationInfo(id: String): Flow<UiDMList>
+    fun getDirectMessageConversationInfo(id: String): CacheData<UiDMList>
+
+    suspend fun fetchNewDirectMessageForConversation(id: String)
 }

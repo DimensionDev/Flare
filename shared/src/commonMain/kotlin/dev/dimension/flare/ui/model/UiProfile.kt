@@ -37,6 +37,13 @@ data class UiProfile internal constructor(
         val statusesCountHumanized = statusesCount.humanize()
     }
 
+    val handleWithoutAt = handle.substringAfter("@")
+
+    val handleWithoutAtAndHost =
+        handle
+            .substringBeforeLast("@")
+            .substringAfter("@")
+
     sealed interface BottomContent {
         data class Fields(
             val fields: ImmutableMap<String, UiRichText>,

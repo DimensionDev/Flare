@@ -669,4 +669,6 @@
     <string name="poll_voted">Voted</string>
     <string name="poll_expired_at">Expired at %1$s</string>
 
+    <string name="profile_search_user_using_account">Find %1$s in %2$s using %3$s</string>
+
 </resources>

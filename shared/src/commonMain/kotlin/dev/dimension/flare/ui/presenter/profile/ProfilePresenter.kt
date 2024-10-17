@@ -23,6 +23,7 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -106,6 +107,14 @@ class ProfilePresenter(
             accountServiceState.map { service ->
                 service.profileActions().toImmutableList().toImmutableListWrapper()
             }
+        val myAccountKey =
+            accountServiceState.mapNotNull {
+                if (it is AuthenticatedMicroblogDataSource) {
+                    it.accountKey
+                } else {
+                    null
+                }
+            }
         return object : ProfileState(
             userState = userState.flatMap { it.toUi() },
             listState = listState,
@@ -118,6 +127,7 @@ class ProfilePresenter(
                 accountServiceState.map {
                     it is ListDataSource
                 },
+            myAccountKey = myAccountKey,
         ) {
             override suspend fun refresh() {
                 userState.onSuccess {
@@ -186,6 +196,7 @@ abstract class ProfileState(
     val actions: UiState<ImmutableListWrapper<ProfileAction>>,
     val isGuestMode: Boolean,
     val isListDataSource: UiState<Boolean>,
+    val myAccountKey: UiState<MicroBlogKey>,
 ) {
     abstract suspend fun refresh()
 

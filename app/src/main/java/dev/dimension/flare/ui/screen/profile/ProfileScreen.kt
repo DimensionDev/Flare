@@ -76,6 +76,7 @@ import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.generated.destinations.EditAccountListRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.SearchRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
@@ -126,6 +127,8 @@ import dev.dimension.flare.ui.presenter.profile.ProfileMedia
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
+import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import dev.dimension.flare.ui.presenter.settings.AccountsState
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -195,6 +198,14 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                         ),
                     )
                 },
+                toSearchUserUsingAccount = { handle, accountKey ->
+                    navigator.navigate(
+                        SearchRouteDestination(
+                            handle,
+                            AccountType.Specific(accountKey),
+                        ),
+                    )
+                },
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -261,6 +272,14 @@ internal fun ProfileWithUserNameAndHostRoute(
                 accountType = accountType,
                 toEditAccountList = {
                     navigator.navigate(EditAccountListRouteDestination(accountType, it.key))
+                },
+                toSearchUserUsingAccount = { handle, accountKey ->
+                    navigator.navigate(
+                        SearchRouteDestination(
+                            handle,
+                            AccountType.Specific(accountKey),
+                        ),
+                    )
                 },
             )
         }.onLoading {
@@ -408,6 +427,14 @@ internal fun ProfileDeeplinkRoute(
                 ),
             )
         },
+        toSearchUserUsingAccount = { handle, accountKey ->
+            navigator.navigate(
+                SearchRouteDestination(
+                    handle,
+                    AccountType.Specific(accountKey),
+                ),
+            )
+        },
     )
 }
 
@@ -456,6 +483,14 @@ internal fun ProfileRoute(
                 navigator.navigate(EditAccountListRouteDestination(accountType, userKey))
             }
         },
+        toSearchUserUsingAccount = { handle, accountKey ->
+            navigator.navigate(
+                SearchRouteDestination(
+                    handle,
+                    AccountType.Specific(accountKey),
+                ),
+            )
+        },
     )
 }
 
@@ -466,6 +501,7 @@ internal fun ProfileRoute(
 private fun ProfileScreen(
     accountType: AccountType,
     toEditAccountList: () -> Unit,
+    toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     showBackButton: Boolean = true,
@@ -574,6 +610,8 @@ private fun ProfileScreen(
                                 setShowMoreMenus = state::setShowMoreMenus,
                                 showMoreMenus = state.showMoreMenus,
                                 toEditAccountList = toEditAccountList,
+                                accountsState = state.allAccountsState,
+                                toSearchUserUsingAccount = toSearchUserUsingAccount,
                             )
                         }
                     },
@@ -608,6 +646,8 @@ private fun ProfileScreen(
                                     setShowMoreMenus = state::setShowMoreMenus,
                                     showMoreMenus = state.showMoreMenus,
                                     toEditAccountList = toEditAccountList,
+                                    accountsState = state.allAccountsState,
+                                    toSearchUserUsingAccount = toSearchUserUsingAccount,
                                 )
                             },
                             expandMatrices = true,
@@ -621,6 +661,7 @@ private fun ProfileScreen(
 //                                    it.banner?.let { it1 -> onMediaClick(it1) }
                                 }
                             },
+                            isBigScreen = bigScreen,
                         )
                     }
                 }
@@ -735,6 +776,7 @@ private fun ProfileScreen(
 //                                                    it.banner?.let { it1 -> onMediaClick(it1) }
                                             }
                                         },
+                                        isBigScreen = bigScreen,
                                     )
                                 }
                             },
@@ -806,9 +848,11 @@ private fun ProfileMediaTab(
 @Composable
 private fun ProfileMenu(
     profileState: ProfileState,
+    accountsState: AccountsState,
     setShowMoreMenus: (Boolean) -> Unit,
     showMoreMenus: Boolean,
     toEditAccountList: () -> Unit,
+    toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
 ) {
     profileState.isMe.onSuccess { isMe ->
         if (!isMe) {
@@ -844,6 +888,42 @@ private fun ProfileMenu(
                                                 toEditAccountList.invoke()
                                             },
                                         )
+                                    }
+                                }
+                            }
+                        }
+                        accountsState.accounts.onSuccess { accounts ->
+                            profileState.myAccountKey.onSuccess { myKey ->
+                                if (accounts.size > 1) {
+                                    for (i in 0 until accounts.size) {
+                                        val account = accounts[i]
+                                        account.second.onSuccess { accountData ->
+                                            if (accountData.key != user.key &&
+                                                accountData.key != myKey &&
+                                                accountData.platformType != user.platformType
+                                            ) {
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            text =
+                                                                stringResource(
+                                                                    id = R.string.profile_search_user_using_account,
+                                                                    user.handleWithoutAtAndHost,
+                                                                    accountData.platformType.name,
+                                                                    accountData.handleWithoutAt,
+                                                                ),
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                        setShowMoreMenus(false)
+                                                        toSearchUserUsingAccount(
+                                                            user.handleWithoutAtAndHost,
+                                                            accountData.key,
+                                                        )
+                                                    },
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -926,6 +1006,7 @@ private fun ProfileHeader(
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
     expandMatrices: Boolean,
+    isBigScreen: Boolean,
     modifier: Modifier = Modifier,
 ) {
     when (userState) {
@@ -948,6 +1029,7 @@ private fun ProfileHeader(
                 expandMatrices = expandMatrices,
                 onAvatarClick = onAvatarClick,
                 onBannerClick = onBannerClick,
+                isBigScreen = isBigScreen,
             )
         }
     }
@@ -962,6 +1044,7 @@ private fun ProfileHeaderSuccess(
     onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
+    isBigScreen: Boolean,
     modifier: Modifier = Modifier,
     expandMatrices: Boolean = false,
 ) {
@@ -972,6 +1055,7 @@ private fun ProfileHeaderSuccess(
         displayName = user.name.data,
         userKey = user.key,
         handle = user.handle,
+        isBigScreen = isBigScreen,
         headerTrailing = {
             isMe.onSuccess {
                 if (!it) {
@@ -1144,6 +1228,7 @@ internal fun CommonProfileHeader(
     displayName: Element,
     userKey: MicroBlogKey,
     handle: String,
+    isBigScreen: Boolean,
     modifier: Modifier = Modifier,
     onAvatarClick: (() -> Unit)? = null,
     onBannerClick: (() -> Unit)? = null,
@@ -1251,11 +1336,60 @@ internal fun CommonProfileHeader(
                                 },
                     )
                 }
+                if (!isBigScreen) {
+                    Column(
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .padding(top = actualBannerHeight),
+                    ) {
+                        HtmlText(
+                            element = displayName,
+                            textStyle = MaterialTheme.typography.titleMedium,
+//                        modifier =
+//                            Modifier
+//                                .sharedElement(
+//                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
+//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                                ),
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = handle,
+                                style = MaterialTheme.typography.bodySmall,
+//                            modifier =
+//                                Modifier
+//                                    .sharedElement(
+//                                        rememberSharedContentState(key = "profile-handle-$userKey"),
+//                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
+//                                    ),
+                            )
+                            handleTrailing.invoke(this)
+                        }
+                    }
+                } else {
+                    Spacer(
+                        modifier =
+                            Modifier
+                                .weight(1f),
+                    )
+                }
+                Row(
+                    modifier =
+                        Modifier
+                            .padding(top = actualBannerHeight),
+                ) {
+                    headerTrailing()
+                }
+            }
+            if (isBigScreen) {
                 Column(
                     modifier =
                         Modifier
-                            .weight(1f)
-                            .padding(top = actualBannerHeight),
+                            .padding(horizontal = screenHorizontalPadding),
                 ) {
                     HtmlText(
                         element = displayName,
@@ -1283,13 +1417,6 @@ internal fun CommonProfileHeader(
                         )
                         handleTrailing.invoke(this)
                     }
-                }
-                Row(
-                    modifier =
-                        Modifier
-                            .padding(top = actualBannerHeight),
-                ) {
-                    headerTrailing()
                 }
             }
             // content
@@ -1387,7 +1514,10 @@ internal fun ProfileHeaderLoading(
             }
             Text(
                 text = "Lorem Ipsum is simply dummy text",
-                modifier = Modifier.placeholder(true),
+                modifier =
+                    Modifier
+                        .placeholder(true)
+                        .padding(horizontal = screenHorizontalPadding),
             )
         }
     }
@@ -1421,8 +1551,13 @@ private fun profilePresenter(
                 null
             },
         )
+    val allAccounts =
+        remember {
+            AccountsPresenter()
+        }.invoke()
     object {
         val state = state
+        val allAccountsState = allAccounts
         val showMoreMenus = showMoreMenus
         val isRefreshing = isRefreshing
         val profileTabs = profileTabs

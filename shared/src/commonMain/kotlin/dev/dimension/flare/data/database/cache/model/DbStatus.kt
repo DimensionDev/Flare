@@ -13,13 +13,13 @@ import dev.dimension.flare.model.PlatformType
     indices = [Index(value = ["statusKey", "accountKey"], unique = true)],
 )
 data class DbStatus(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
     val statusKey: MicroBlogKey,
     val accountKey: MicroBlogKey,
     val userKey: MicroBlogKey?,
     val platformType: PlatformType,
     val content: StatusContent,
+    @PrimaryKey
+    val id: String = "${accountKey}_$statusKey",
 )
 
 class StatusContentConverters {

@@ -321,26 +321,24 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
             when (val data = it.reason) {
                 is FeedViewPostReasonUnion.ReasonRepost -> {
                     val user = data.value.by.toDbUser(accountKey.host)
-                    val reasonStatus =
-                        DbStatusWithUser(
-                            user = user,
-                            data =
-                                DbStatus(
-                                    statusKey =
-                                        MicroBlogKey(
-                                            it.post.uri.atUri + "_reblog_${user.userKey}",
-                                            accountKey.host,
-                                        ),
-                                    platformType = PlatformType.Bluesky,
-                                    userKey =
-                                        data.value.by
-                                            .toDbUser(accountKey.host)
-                                            .userKey,
-                                    content = StatusContent.BlueskyReason(data, it.post),
-                                    accountKey = accountKey,
-                                ),
-                        )
-                    reasonStatus
+                    DbStatusWithUser(
+                        user = user,
+                        data =
+                            DbStatus(
+                                statusKey =
+                                    MicroBlogKey(
+                                        it.post.uri.atUri + "_reblog_${user.userKey}",
+                                        accountKey.host,
+                                    ),
+                                platformType = PlatformType.Bluesky,
+                                userKey =
+                                    data.value.by
+                                        .toDbUser(accountKey.host)
+                                        .userKey,
+                                content = StatusContent.BlueskyReason(data),
+                                accountKey = accountKey,
+                            ),
+                    )
                 }
 
                 else -> {

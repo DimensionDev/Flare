@@ -44,7 +44,6 @@ sealed interface StatusContent {
     @SerialName("bluesky-reason")
     data class BlueskyReason internal constructor(
         val reason: FeedViewPostReasonUnion,
-        val data: PostView,
     ) : StatusContent
 
     @Serializable

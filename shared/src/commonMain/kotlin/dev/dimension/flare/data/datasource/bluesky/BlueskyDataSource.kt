@@ -104,7 +104,6 @@ import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
-import sh.christian.ozone.api.response.AtpResponse
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
@@ -286,7 +285,7 @@ class BlueskyDataSource(
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
-        val service = service
+
         return Cacheable(
             fetchSource = {
                 val result =
@@ -422,7 +421,6 @@ class BlueskyDataSource(
         reason: BlueskyReportStatusState.ReportReason,
     ) {
         runCatching {
-            val service = service
             val post =
                 service
                     .getPosts(GetPostsQueryParams(persistentListOf(AtUri(statusKey.id))))
@@ -493,7 +491,6 @@ class BlueskyDataSource(
                 )
             }
             runCatching {
-                val service = service
                 if (repostUri != null) {
                     service.deleteRecord(
                         DeleteRecordRequest(
@@ -662,7 +659,6 @@ class BlueskyDataSource(
         cid: String,
         uri: String,
     ): CreateRecordResponse {
-        val service = service
         val result =
             service
                 .createRecord(
@@ -684,20 +680,17 @@ class BlueskyDataSource(
         return result
     }
 
-    private suspend fun deleteLikeRecord(likedUri: String): AtpResponse<Unit> {
-        val service = service
-        return service.deleteRecord(
+    private suspend fun deleteLikeRecord(likedUri: String) =
+        service.deleteRecord(
             DeleteRecordRequest(
                 repo = Did(did = accountKey.id),
                 collection = Nsid("app.bsky.feed.like"),
                 rkey = likedUri.substringAfterLast('/'),
             ),
         )
-    }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
         runCatching {
-            val service = service
             service.deleteRecord(
                 DeleteRecordRequest(
                     repo = Did(did = accountKey.id),
@@ -727,7 +720,6 @@ class BlueskyDataSource(
             )
         }
         runCatching {
-            val service = service
             val user =
                 service
                     .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -764,7 +756,6 @@ class BlueskyDataSource(
             )
         }
         runCatching {
-            val service = service
             service.createRecord(
                 CreateRecordRequest(
                     repo = Did(did = accountKey.id),
@@ -798,7 +789,6 @@ class BlueskyDataSource(
             )
         }
         runCatching {
-            val service = service
             service.createRecord(
                 CreateRecordRequest(
                     repo = Did(did = accountKey.id),
@@ -832,7 +822,6 @@ class BlueskyDataSource(
             )
         }
         runCatching {
-            val service = service
             val user =
                 service
                     .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -869,7 +858,6 @@ class BlueskyDataSource(
             )
         }
         runCatching {
-            val service = service
             service.muteActor(MuteActorRequest(actor = Did(did = userKey.id)))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -892,7 +880,6 @@ class BlueskyDataSource(
             )
         }
         runCatching {
-            val service = service
             service.unmuteActor(UnmuteActorRequest(actor = Did(did = userKey.id)))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -910,9 +897,8 @@ class BlueskyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> {
-        val service = service
-        return timelinePager(
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
             accountKey = accountKey,
@@ -928,15 +914,13 @@ class BlueskyDataSource(
                     query,
                 ),
         )
-    }
 
     override fun searchUser(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> {
-        val service = service
-        return Pager(
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
@@ -945,11 +929,9 @@ class BlueskyDataSource(
                 query,
             )
         }.flow.cachedIn(scope)
-    }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> {
-        val service = service
-        return Pager(
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
@@ -957,7 +939,6 @@ class BlueskyDataSource(
                 accountKey,
             )
         }.flow
-    }
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         throw UnsupportedOperationException("Bluesky does not support discover hashtags")
@@ -1021,7 +1002,7 @@ class BlueskyDataSource(
         MemCacheable(
             key = "preferences_$accountKey",
         ) {
-            val service = service
+
             service
                 .getPreferences()
                 .maybeResponse()
@@ -1036,7 +1017,7 @@ class BlueskyDataSource(
         MemCacheable(
             key = myFeedsKey,
         ) {
-            val service = service
+
             val preferences =
                 service
                     .getPreferences()
@@ -1080,7 +1061,6 @@ class BlueskyDataSource(
                 override fun getRefreshKey(state: PagingState<String, UiList>): String? = null
 
                 override suspend fun load(params: LoadParams<String>): LoadResult<String, UiList> {
-                    val service = service
                     val result =
                         service
                             .getPopularFeedGenerators(
@@ -1121,7 +1101,6 @@ class BlueskyDataSource(
         MemCacheable(
             key = feedInfoKey(uri),
         ) {
-            val service = service
             service
                 .getFeedGenerator(
                     GetFeedGeneratorQueryParams(
@@ -1163,7 +1142,6 @@ class BlueskyDataSource(
             (it + data).toImmutableList()
         }
         runCatching {
-            val service = service
             val currentPreferences = service.getPreferences().requireResponse()
             val feedInfo =
                 service
@@ -1223,7 +1201,6 @@ class BlueskyDataSource(
             it.filterNot { item -> item.id == data.id }.toImmutableList()
         }
         runCatching {
-            val service = service
             val currentPreferences = service.getPreferences().requireResponse()
             val feedInfo =
                 service
@@ -1283,7 +1260,7 @@ class BlueskyDataSource(
                     liked = !data.liked,
                 ),
         )
-        val service = service
+
         runCatching {
             val feedInfo =
                 service
@@ -1315,7 +1292,7 @@ class BlueskyDataSource(
         MemCacheable(
             key = myListKey,
         ) {
-            val service = service
+
             service
                 .getLists(
                     params = GetListsQueryParams(actor = Did(did = accountKey.id)),
@@ -1333,7 +1310,6 @@ class BlueskyDataSource(
         MemCacheable(
             key = listInfoKey(listId),
         ) {
-            val service = service
             service
                 .getList(
                     GetListQueryParams(
@@ -1374,7 +1350,6 @@ class BlueskyDataSource(
         icon: FileItem?,
     ) {
         runCatching {
-            val service = service
             val iconInfo =
                 if (icon != null) {
                     service.uploadBlob(icon.readBytes()).maybeResponse()
@@ -1403,7 +1378,6 @@ class BlueskyDataSource(
 
     override suspend fun deleteList(listId: String) {
         runCatching {
-            val service = service
             val id = listId.substringAfterLast('/')
             service.applyWrites(
                 request =
@@ -1432,7 +1406,6 @@ class BlueskyDataSource(
         icon: FileItem?,
     ) {
         runCatching {
-            val service = service
             val currentInfo: app.bsky.graph.List =
                 service
                     .getRecord(
@@ -1495,7 +1468,6 @@ class BlueskyDataSource(
                         loadType: LoadType,
                         state: PagingState<Int, UiUserV2>,
                     ): MediatorResult {
-                        val service = service
                         try {
                             if (loadType == LoadType.PREPEND) {
                                 return MediatorResult.Success(endOfPaginationReached = true)
@@ -1548,7 +1520,6 @@ class BlueskyDataSource(
         userKey: MicroBlogKey,
     ) {
         runCatching {
-            val service = service
             val user =
                 service
                     .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -1597,7 +1568,6 @@ class BlueskyDataSource(
         userKey: MicroBlogKey,
     ) {
         runCatching {
-            val service = service
             MemoryPagingSource.updateWith<UiUserV2>(
                 key = listMemberKey(listId),
             ) {
@@ -1684,7 +1654,6 @@ class BlueskyDataSource(
         MemCacheable(
             key = userListsKey(userKey),
         ) {
-            val service = service
             var cursor: String? = null
             val lists = mutableListOf<UiList>()
             val allLists =

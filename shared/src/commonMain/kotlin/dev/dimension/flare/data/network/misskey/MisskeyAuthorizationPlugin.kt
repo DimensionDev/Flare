@@ -7,7 +7,7 @@ import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.TextContent
 import io.ktor.util.AttributeKey
-import io.ktor.util.KtorDsl
+import io.ktor.utils.io.KtorDsl
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive

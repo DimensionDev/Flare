@@ -17,7 +17,7 @@ import androidx.room.TypeConverters
     views = [
         dev.dimension.flare.data.database.cache.model.DbPagingTimelineView::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = false,
 )
 @TypeConverters(

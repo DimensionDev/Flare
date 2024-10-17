@@ -16,6 +16,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 internal data object NodeInfoService {
     private val supportedSchemas =
@@ -71,28 +74,41 @@ internal data object NodeInfoService {
             }.first()
     }
 
-    suspend fun detectPlatformType(host: String): PlatformType {
-        if (host.equals(xqtHost, ignoreCase = true) || host.equals("x.social", ignoreCase = true)) {
-            return PlatformType.xQt
-        }
-        val vvo = listOf(vvoHost, vvo, vvoHostShort, "vvo.social")
-        if (vvo.any { it.equals(host, ignoreCase = true) }) {
-            return PlatformType.VVo
-        }
-        return try {
-            val nodeInfo = fetchNodeInfo(host)
-            when {
-                nodeInfo.contains("Mastodon", ignoreCase = true) -> PlatformType.Mastodon
-                nodeInfo.contains("Misskey", ignoreCase = true) -> PlatformType.Misskey
-                else -> throw IllegalArgumentException("Unsupported platform: $nodeInfo")
+    suspend fun detectPlatformType(host: String): PlatformType =
+        coroutineScope {
+            if (host.equals(xqtHost, ignoreCase = true) || host.equals("x.social", ignoreCase = true)) {
+                return@coroutineScope PlatformType.xQt
             }
-        } catch (e1: Exception) {
-            try {
-                BlueskyService("https://$host").describeServer().requireResponse()
-                PlatformType.Bluesky
-            } catch (e2: Exception) {
-                throw IllegalArgumentException("Unsupported platform: $e2")
+            val vvo = listOf(vvoHost, vvo, vvoHostShort, "vvo.social")
+            if (vvo.any { it.equals(host, ignoreCase = true) }) {
+                return@coroutineScope PlatformType.VVo
             }
+            val nodeInfo =
+                async {
+                    runCatching {
+                        val nodeInfo = fetchNodeInfo(host)
+                        when {
+                            nodeInfo.contains("Mastodon", ignoreCase = true) -> PlatformType.Mastodon
+                            nodeInfo.contains("Misskey", ignoreCase = true) -> PlatformType.Misskey
+                            else -> throw IllegalArgumentException("Unsupported platform: $nodeInfo")
+                        }
+                    }.getOrNull()
+                }
+
+            val bluesky =
+                async {
+                    runCatching {
+                        BlueskyService("https://$host").describeServer().requireResponse()
+                        PlatformType.Bluesky
+                    }.onFailure {
+                        it.printStackTrace()
+                    }.getOrNull()
+                }
+
+            listOf(
+                nodeInfo,
+                bluesky,
+            ).awaitAll().firstOrNull { it != null }
+                ?: throw IllegalArgumentException("Unsupported platform: $host")
         }
-    }
 }

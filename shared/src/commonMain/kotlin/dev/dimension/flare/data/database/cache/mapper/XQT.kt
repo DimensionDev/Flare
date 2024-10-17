@@ -111,7 +111,6 @@ private fun toDbStatusWithUser(
     return DbStatusWithUser(
         data =
             DbStatus(
-                id = 0,
                 statusKey =
                     MicroBlogKey(
                         id = tweet.restId,

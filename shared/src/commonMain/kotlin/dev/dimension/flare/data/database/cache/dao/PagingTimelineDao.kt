@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
+import dev.dimension.flare.data.database.cache.model.PAGING_TIMELINE_VIEW
 import dev.dimension.flare.model.MicroBlogKey
 
 @Dao
@@ -19,7 +20,7 @@ interface PagingTimelineDao {
 //        accountKey: MicroBlogKey,
 //    ): PagingSource<Int, DbPagingTimelineWithStatus>
 
-    @Query("SELECT * FROM PagingTimelineView WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
+    @Query("SELECT * FROM $PAGING_TIMELINE_VIEW WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
     fun getDbPagingTimelineView(
         pagingKey: String,
         accountKey: MicroBlogKey,

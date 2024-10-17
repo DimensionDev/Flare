@@ -3,8 +3,10 @@ package dev.dimension.flare.data.database.cache.model
 import androidx.room.DatabaseView
 import androidx.room.Embedded
 
+const val PAGING_TIMELINE_VIEW = "PagingTimelineView11"
+
 @DatabaseView(
-    viewName = "PagingTimelineView",
+    viewName = PAGING_TIMELINE_VIEW,
     value = """
 SELECT
 timeline.*,
@@ -25,6 +27,7 @@ LEFT JOIN status_reference quote ON status.statusKey = quote.statusKey AND quote
 LEFT JOIN DbStatus quoteStatus ON quote.referenceStatusKey = quoteStatus.statusKey
 LEFT JOIN status_reference notification ON status.statusKey = notification.statusKey AND notification.referenceType = 'Notification'
 LEFT JOIN DbStatus notificationStatus ON notification.referenceStatusKey = notificationStatus.statusKey
+GROUP BY timeline._id
 """,
 )
 data class DbPagingTimelineView(

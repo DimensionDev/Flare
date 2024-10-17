@@ -48,7 +48,8 @@ class ActiveAccountPresenter : PresenterBase<UserState>() {
                 LaunchedEffect(it) {
                     if (it !is NoActiveAccountException) {
                         // auth expired
-                        accountRepository.delete(uiAccount.accountKey)
+//                        accountRepository.delete(uiAccount.accountKey)
+                        // better to show a dialog to ask user to re-login
                     }
                 }
             }

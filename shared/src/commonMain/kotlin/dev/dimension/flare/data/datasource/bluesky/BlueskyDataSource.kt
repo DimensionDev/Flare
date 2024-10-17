@@ -32,6 +32,8 @@ import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
 import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
+import chat.bsky.convo.MessageInput
+import chat.bsky.convo.SendMessageRequest
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
@@ -59,6 +61,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
@@ -74,6 +77,8 @@ import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiDMList
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
@@ -113,7 +118,8 @@ class BlueskyDataSource(
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.Bluesky,
-    ListDataSource {
+    ListDataSource,
+    DirectMessageDataSource {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
@@ -1715,6 +1721,37 @@ class BlueskyDataSource(
                 notifications.count { !it.isRead }
             },
         )
+
+    override fun directMessageList(): Flow<PagingData<UiDMList>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun directMessageConversation(id: String): Flow<PagingData<UiDMItem>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getDirectMessageConversationInfo(id: String): CacheData<UiDMList> {
+        TODO("Not yet implemented")
+    }
+
+    override fun sendDirectMessage(
+        id: String,
+        message: String,
+    ) {
+        coroutineScope.launch {
+            service.sendMessage(
+                request =
+                    SendMessageRequest(
+                        convoId = id,
+                        message = MessageInput(message),
+                    ),
+            )
+        }
+    }
+
+    override suspend fun fetchNewDirectMessageForConversation(id: String) {
+        TODO("Not yet implemented")
+    }
 }
 
 internal inline fun <reified T, reified R> T.bskyJson(): R = bskyJson.decodeFromJsonElement(bskyJson.encodeToJsonElement(this))
